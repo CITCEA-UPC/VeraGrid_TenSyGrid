@@ -31,3 +31,4 @@ demo_5_node.json
 .idea/dictionaries/*.xml
 .DS_Store
 /src/tests/data/output/raw_to_cgmes_export_results/
+/__pycache_jit__/
