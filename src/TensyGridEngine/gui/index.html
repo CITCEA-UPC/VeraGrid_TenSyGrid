@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/resources/tensygrid_icon.png">
+<title>TenSyGrid — Stability Monitor</title>
+<style>
+:root {
+  --bg: #EEF2F5;
+  --panel: #ffffff;
+  --border: #D6E2EA;
+  --text: #1C3F52;
+  --muted: #A6BBC8;
+  --green: #179C7D;
+  --yellow: #B2D235;
+  --red: #E3001A;
+  --blue: #008598;
+  --blue-dark: #005B7F;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+header .meta { color: var(--muted); font-size: 13px; }
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  padding: 0 32px;
+  gap: 2px;
+  overflow-x: auto;
+}
+.tab {
+  padding: 14px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.15s;
+  color: var(--text);
+  opacity: 0.7;
+}
+.tab:hover { color: var(--text); opacity: 0.9; background: rgba(0,133,152,0.04); }
+.tab.active { border-bottom-color: var(--blue); color: var(--blue); opacity: 1; }
+.content { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+@media (max-width: 900px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  header { padding: 0 16px; }
+  .tabs { padding: 0 16px; }
+  .content { padding: 16px; }
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.semaphore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.semaphore-light {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--border);
+  opacity: 0.15;
+  transition: all 0.3s;
+}
+.semaphore-light.active {
+  opacity: 1;
+  box-shadow: 0 0 24px currentColor;
+}
+.semaphore-light.green { background: #10b981; color: #10b981; }
+.semaphore-light.yellow { background: #f59e0b; color: #f59e0b; }
+.semaphore-light.red { background: #ef4444; color: #ef4444; }
+.status-text {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.status-text.stable { color: #10b981; }
+.status-text.marginal { color: #f59e0b; }
+.status-text.unstable { color: #ef4444; }
+.metric {
+  text-align: center;
+  padding: 14px 8px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.metric-value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+.metric-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 6px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg);
+}
+th:first-child { border-radius: 6px 0 0 0; }
+th:last-child { border-radius: 0 6px 0 0; }
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover { background: rgba(0,133,152,0.03); }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge.green { background: rgba(16,185,129,0.12); color: #059669; }
+.badge.yellow { background: rgba(245,158,11,0.12); color: #d97706; }
+.badge.red { background: rgba(239,68,68,0.12); color: #dc2626; }
+.badge.blue { background: rgba(0,133,152,0.12); color: var(--blue); }
+canvas {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.forecast-chart { height: 300px; }
+.rms-chart { height: 250px; }
+.legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid;
+}
+.tooltip {
+  position: absolute;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  pointer-events: none;
+  z-index: 100;
+  max-width: 220px;
+}
+.tooltip-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; }
+.tooltip-row { color: var(--muted); margin-top: 2px; }
+
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  cursor: pointer;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: all 0.15s;
+  line-height: 1;
+  padding: 0;
+}
+.info-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(0,133,152,0.08);
+}
+
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28,63,82,0.4);
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.info-overlay.visible {
+  display: flex;
+}
+.info-modal {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 540px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.info-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.info-modal-body {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.info-modal-body p { margin-bottom: 10px; }
+.info-modal-body ul { margin: 6px 0 10px 20px; }
+.info-modal-body li { margin-bottom: 4px; }
+.info-modal-body strong { color: var(--text); }
+.info-modal-body .legend-line {
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.info-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+}
+.info-modal-close:hover { color: var(--text); }
+
+.selector-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.selector-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.selector-row select {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.selector-row select:focus { border-color: var(--blue); }
+.btn {
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--blue);
+  color: white;
+}
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-danger {
+  background: var(--red);
+  color: white;
+}
+.btn-danger:hover { opacity: 0.88; }
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.results-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.result-item:hover {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,133,152,0.08);
+}
+.result-item.selected {
+  border-color: var(--blue);
+  background: rgba(0,133,152,0.04);
+}
+.result-info {
+  flex: 1;
+}
+.result-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.result-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.status-indicator.running {
+  background: rgba(0,133,152,0.1);
+  color: var(--blue);
+}
+.status-indicator.idle {
+  background: rgba(166,187,200,0.1);
+  color: var(--muted);
+}
+.status-indicator.completed {
+  background: rgba(23,156,125,0.1);
+  color: var(--green);
+}
+.status-indicator.failed {
+  background: rgba(227,0,26,0.1);
+  color: var(--red);
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-state-icon {
+  font-size: 44px;
+  margin-bottom: 14px;
+  opacity: 0.4;
+}
+.empty-state-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.empty-state-hint {
+  font-size: 13px;
+}
+
+.log-output {
+  background: #1C3F52;
+  color: #A6BBC8;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.7;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:8px;min-width:280px">
+    <img src="/resources/tensygrid_logo_cropped.jpg" alt="TenSyGrid" style="height:36px">
+    <span style="color:var(--muted);font-weight:400;font-size:18px; padding-top: 10px">/ Stability Monitor</span>
+  </div>
+  <div class="meta">
+    <span id="grid-name">—</span>
+    <span id="timestamp" style="margin-left:16px">—</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="run">Run Simulation</div>
+  <div class="tab" data-tab="status">Status & Forecast</div>
+  <div class="tab" data-tab="eigenvalues">Eigenvalues</div>
+  <div class="tab" data-tab="modes">Critical Modes</div>
+  <div class="tab" data-tab="voltages">Bus Voltages</div>
+  <div class="tab" data-tab="contingencies">Contingencies</div>
+</div>
+
+<div class="content">
+  <!-- TAB 1: Run Simulation -->
+  <div id="tab-run" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Select Grid and Run Simulation</div>
+      <div class="selector-panel">
+        <div class="selector-row">
+          <select id="grid-select">
+            <option value="">Loading grids...</option>
+          </select>
+          <button id="run-btn" class="btn btn-primary" onclick="runSimulation()">Run Simulation</button>
+          <button id="cancel-btn" class="btn btn-danger" onclick="cancelSimulation()" style="display:none">Stop</button>
+        </div>
+        <div style="margin-top:16px">
+          <span id="sim-status" class="status-indicator idle">
+            <span>Idle</span>
+          </span>
+          <span id="sim-timer" style="display:none;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);margin-left:10px;white-space:nowrap"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Precomputed Results</div>
+      <div id="results-list" class="results-list">
+        <div class="empty-state">
+          <div class="empty-state-text">Loading results...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="log-card" class="card" style="display:none">
+      <div class="card-title">Simulation Output</div>
+      <div id="log-output" class="log-output"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Status & Forecast -->
+  <div id="tab-status" class="tab-content">
+    <div id="no-results-status" class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <div class="empty-state-text">No results loaded</div>
+        <div class="empty-state-hint">Select a result from the "Run Simulation" tab</div>
+      </div>
+    </div>
+    <div id="results-content" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;align-items:start">
+
+        <!-- Left column: semaphore + grid info + key metrics -->
+        <div>
+          <div class="card">
+            <div class="card-title">System Status</div>
+            <div class="semaphore">
+              <div id="light-green" class="semaphore-light green"></div>
+              <div id="light-yellow" class="semaphore-light yellow"></div>
+              <div id="light-red" class="semaphore-light red"></div>
+            </div>
+            <div style="text-align:center;margin-top:16px">
+              <div id="status-text" class="status-text stable">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Grid Information</div>
+            <div id="grid-info-container" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Key Metrics</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="metric">
+                <div id="margin-value" class="metric-value" style="color:#10b981">—</div>
+                <div class="metric-label">Stability Margin</div>
+              </div>
+              <div class="metric">
+                <div id="n-critical" class="metric-value" style="color:var(--green)">—</div>
+                <div class="metric-label">Critical Modes</div>
+              </div>
+              <div class="metric">
+                <div id="n-eigs" class="metric-value">—</div>
+                <div class="metric-label">Eigenvalues</div>
+              </div>
+              <div class="metric">
+                <div id="n-states" class="metric-value">—</div>
+                <div class="metric-label">State Variables</div>
+              </div>
+              <div class="metric">
+                <div id="elapsed-time" class="metric-value">—</div>
+                <div class="metric-label">Computation Time</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right two-thirds: eigenvalue plot + stability assessment -->
+        <div>
+          <div class="card">
+            <div class="card-title">Complex Plane — Eigenvalues <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">· scroll to zoom</span><button class="info-btn" onclick="showInfo('complex-plane')" title="What is this?">i</button></div>
+            <canvas id="eig-canvas" style="height:380px"></canvas>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="border-color:var(--blue)"></div>Stable</div>
+              <div class="legend-item"><div class="legend-dot" style="border-color:var(--red)"></div>Unstable</div>
+              <div class="legend-item" style="color:var(--muted)">— ζ = 0.05, 0.1, 0.2</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Stability Assessment</div>
+            <div id="stability-assessment" style="padding:4px"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Eigenvalues -->
+  <div id="tab-eigenvalues" class="tab-content">
+    <div id="no-results-eig" class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">📈</div>
+        <div class="empty-state-text">No results loaded</div>
+        <div class="empty-state-hint">Select a result from the "Run Simulation" tab</div>
+      </div>
+    </div>
+    <div id="eig-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Complex Plane — Eigenvalues <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">· scroll to zoom</span><button class="info-btn" onclick="showInfo('complex-plane')" title="What is this?">i</button></div>
+        <canvas id="eig-canvas-full" class="forecast-chart"></canvas>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="border-color:var(--blue)"></div>Stable</div>
+          <div class="legend-item"><div class="legend-dot" style="border-color:var(--red)"></div>Unstable</div>
+          <div class="legend-item" style="color:var(--muted)">— ζ = 0.05, 0.1, 0.2</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Damping vs Frequency <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">· scroll to zoom</span><button class="info-btn" onclick="showInfo('damping-freq')" title="What is this?">i</button></div>
+        <canvas id="damping-freq-canvas" style="height:320px"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-title">All Eigenvalues<button class="info-btn" onclick="showInfo('eig-table')" title="What is this?">i</button></div>
+        <table>
+          <thead><tr><th>#</th><th>Re(λ)</th><th>Im(λ)</th><th>ζ</th><th>f (Hz)</th></tr></thead>
+          <tbody id="eig-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: Critical Modes -->
+  <div id="tab-modes" class="tab-content">
+    <div id="no-results-modes" class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">⚡</div>
+        <div class="empty-state-text">No results loaded</div>
+        <div class="empty-state-hint">Select a result from the "Run Simulation" tab</div>
+      </div>
+    </div>
+    <div id="modes-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Critical Modes (lowest damping)</div>
+        <table>
+          <thead><tr><th>Mode</th><th>Re(λ)</th><th>Im(λ)</th><th>ζ</th><th>f (Hz)</th><th>Participation Factors</th></tr></thead>
+          <tbody id="modes-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: Bus Voltages -->
+  <div id="tab-voltages" class="tab-content">
+    <div id="no-results-voltages" class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">🔌</div>
+        <div class="empty-state-text">No results loaded</div>
+        <div class="empty-state-hint">Select a result from the "Run Simulation" tab</div>
+      </div>
+    </div>
+    <div id="voltages-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Bus Voltages (Power Flow)</div>
+        <table>
+          <thead><tr><th>Bus</th><th>ID</th><th>Type</th><th>|V| (pu)</th><th>θ (°)</th><th>Status</th></tr></thead>
+          <tbody id="voltage-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: Contingencies -->
+  <div id="tab-contingencies" class="tab-content">
+    <div id="no-results-contingencies" class="card">
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <div class="empty-state-text">No results loaded</div>
+        <div class="empty-state-hint">Select a result from the "Run Simulation" tab first</div>
+      </div>
+    </div>
+    <div id="contingencies-content" style="display:none">
+
+      <!-- Selector panel -->
+      <div class="card">
+        <div class="card-title">Contingency Analysis</div>
+        <div class="selector-panel">
+          <div class="selector-row" style="margin-bottom:14px">
+            <select id="contingency-type" style="flex:0.3">
+              <option value="generator">Generator</option>
+              <option value="line">Line</option>
+              <option value="transformer">Transformer</option>
+            </select>
+            <select id="contingency-element" style="flex:0.5">
+              <option value="">-- Select element --</option>
+            </select>
+            <button id="run-contingency-btn" class="btn btn-primary" onclick="runContingency()">Simulate Contingency</button>
+            <button id="cancel-contingency-btn" class="btn btn-danger" onclick="cancelContingency()" style="display:none">Stop</button>
+          </div>
+          <div id="contingency-status" class="status-indicator idle">
+            <span>Ready</span>
+          </div>
+          <span id="contingency-timer" style="display:none;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);margin-left:10px;white-space:nowrap"></span>
+        </div>
+      </div>
+
+      <!-- Results: shown after tab opens with precomputed data -->
+      <div id="contingency-before-panel" style="display:none">
+        <div class="grid-2">
+
+          <!-- Base Case card -->
+          <div class="card">
+            <div class="card-title">Base Case
+              <span id="before-grid-label" style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px"></span>
+            </div>
+            <div id="before-status"></div>
+            <div style="margin-top:16px">
+              <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Eigenvalues</div>
+              <canvas id="eig-canvas-before" style="height:280px"></canvas>
+            </div>
+          </div>
+
+          <!-- After Contingency card -->
+          <div class="card" id="after-contingency-card" style="display:none">
+            <div class="card-title">After Contingency
+              <span id="after-element-label" style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px"></span>
+            </div>
+            <div id="after-status"></div>
+            <div style="margin-top:16px">
+              <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Eigenvalues</div>
+              <canvas id="eig-canvas-after" style="height:280px"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card" id="contingency-recommendations-card" style="display:none">
+          <div class="card-title">Recommendations</div>
+          <div id="contingency-recommendations"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#008598','#179C7D','#B2D235','#E3001A','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316'];
+let currentData = null;
+let eigZoom = { level: 1 };
+let eigZoomFull = { level: 1 };
+let dampingZoom = { level: 1 };
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (currentData) {
+      setTimeout(() => {
+        if (tab.dataset.tab === 'status') {
+          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas', eigZoom);
+        } else if (tab.dataset.tab === 'eigenvalues') {
+          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-full', eigZoomFull);
+          renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level);
+        } else if (tab.dataset.tab === 'contingencies') {
+          loadContingencyElements();
+        }
+      }, 50);
+    }
+  });
+});
+
+async function loadGrids() {
+  try {
+    const res = await fetch('/api/grids');
+    const grids = await res.json();
+    const select = document.getElementById('grid-select');
+    select.innerHTML = '<option value="">-- Select a grid --</option>' +
+      grids.map(g => `<option value="${g.filename}">${g.name} (${g.size_kb} KB)</option>`).join('');
+  } catch (e) {
+    console.error('Error loading grids:', e);
+  }
+}
+
+async function loadResults() {
+  try {
+    const res = await fetch('/api/results');
+    const results = await res.json();
+    const container = document.getElementById('results-list');
+    
+    if (results.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📁</div>
+          <div class="empty-state-text">No precomputed results</div>
+          <div class="empty-state-hint">Run a simulation to generate results</div>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = results.map(r => {
+      const statusBadge = r.error ? '<span class="badge red">ERROR</span>' :
+                         r.stable ? '<span class="badge green">STABLE</span>' :
+                         r.margin < 0.001 ? '<span class="badge yellow">MARGINAL</span>' :
+                         '<span class="badge red">UNSTABLE</span>';
+      const date = new Date(r.modified * 1000).toLocaleString();
+      const elapsed = r.elapsed_seconds != null 
+        ? (r.elapsed_seconds >= 60 
+            ? `${Math.floor(r.elapsed_seconds/60)}m ${Math.round(r.elapsed_seconds%60)}s` 
+            : `${r.elapsed_seconds.toFixed(1)}s`)
+        : '';
+      const elapsedPart = elapsed ? ` · ${elapsed}` : '';
+      return `
+        <div class="result-item" onclick="loadResult('${r.filename}', event)">
+          <div class="result-info">
+            <div class="result-name">${r.grid_name}</div>
+            <div class="result-meta">
+              ${r.n_eigenvalues || 0} eigenvalues · Margin: ${r.margin?.toExponential(2) || 'N/A'}${elapsedPart} · ${date}
+            </div>
+          </div>
+          <div class="result-actions">
+            ${statusBadge}
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteResult('${r.filename}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('Error loading results:', e);
+  }
+}
+
+async function loadResult(filename, event) {
+  try {
+    const res = await fetch(`/api/results/${filename}`);
+    const data = await res.json();
+    currentData = data;
+    displayResults(data);
+    
+    document.querySelectorAll('.result-item').forEach(el => el.classList.remove('selected'));
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add('selected');
+    }
+    
+    document.querySelector('[data-tab="status"]').click();
+    
+    stopContingencyTimer();
+    stopSimulationTimer();
+    document.getElementById('contingency-timer').style.display = 'none';
+    document.getElementById('contingency-timer').textContent = '';
+    document.getElementById('sim-timer').style.display = 'none';
+    document.getElementById('sim-timer').textContent = '';
+    contingencyTimerStart = 0;
+    simTimerStart = 0;
+    
+    document.getElementById('after-contingency-card').style.display = 'none';
+    document.getElementById('contingency-recommendations-card').style.display = 'none';
+    document.getElementById('after-element-label').textContent = '';
+  } catch (e) {
+    console.error('Error loading result:', e);
+    alert('Error loading result: ' + e.message);
+  }
+}
+
+async function deleteResult(filename) {
+  if (!confirm(`Delete ${filename}?`)) return;
+  
+  try {
+    await fetch(`/api/results/${filename}`, { method: 'DELETE' });
+    loadResults();
+  } catch (e) {
+    console.error('Error deleting result:', e);
+  }
+}
+
+async function runSimulation() {
+  const gridFilename = document.getElementById('grid-select').value;
+  if (!gridFilename) {
+    alert('Please select a grid first');
+    return;
+  }
+  
+  const btn = document.getElementById('run-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const statusEl = document.getElementById('sim-status');
+  
+  btn.disabled = true;
+  cancelBtn.style.display = 'inline-flex';
+  statusEl.className = 'status-indicator running';
+  statusEl.innerHTML = '<span class="spinner"></span><span>Running simulation...</span>';
+  startSimulationTimer();
+  
+  document.getElementById('log-card').style.display = 'block';
+  document.getElementById('log-output').textContent = 'Starting simulation...\n';
+  
+  try {
+    const res = await fetch('/api/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grid_filename: gridFilename }),
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to start simulation');
+    }
+    
+    pollStatus();
+  } catch (e) {
+    stopSimulationTimer();
+    statusEl.className = 'status-indicator failed';
+    statusEl.innerHTML = '<span>Failed: ' + e.message + '</span>';
+    btn.disabled = false;
+    cancelBtn.style.display = 'none';
+  }
+}
+
+async function cancelSimulation() {
+  try {
+    await fetch('/api/cancel', { method: 'POST' });
+  } catch (e) {
+    console.error('Cancel error:', e);
+  }
+  const btn = document.getElementById('run-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const statusEl = document.getElementById('sim-status');
+  btn.disabled = false;
+  cancelBtn.style.display = 'none';
+  statusEl.className = 'status-indicator idle';
+  statusEl.innerHTML = '<span>Cancelled</span>';
+  stopSimulationTimer();
+}
+
+async function pollStatus() {
+  const btn = document.getElementById('run-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const statusEl = document.getElementById('sim-status');
+  const logOutput = document.getElementById('log-output');
+  
+  try {
+    const res = await fetch('/api/status');
+    const status = await res.json();
+    
+    if (status.status === 'running') {
+      setTimeout(pollStatus, 1000);
+    } else if (status.status === 'completed') {
+      stopSimulationTimer();
+      statusEl.className = 'status-indicator completed';
+      statusEl.innerHTML = '<span>Completed</span>';
+      btn.disabled = false;
+      cancelBtn.style.display = 'none';
+      
+      if (status.stdout) {
+        logOutput.textContent += '\n' + status.stdout;
+      }
+      
+      await loadResults();
+      
+      const gridName = status.grid;
+      const results = await (await fetch('/api/results')).json();
+      const latestResult = results.find(r => r.grid_name === gridName);
+      if (latestResult) {
+        await loadResult(latestResult.filename, null);
+      }
+    } else if (status.status === 'failed') {
+      stopSimulationTimer();
+      statusEl.className = 'status-indicator failed';
+      statusEl.innerHTML = '<span>Failed: ' + (status.stderr || 'Unknown error') + '</span>';
+      btn.disabled = false;
+      cancelBtn.style.display = 'none';
+      
+      if (status.stderr) {
+        logOutput.textContent += '\nERROR:\n' + status.stderr;
+      }
+    }
+  } catch (e) {
+    console.error('Error polling status:', e);
+    setTimeout(pollStatus, 2000);
+  }
+}
+
+function displayResults(data) {
+  document.getElementById('grid-name').textContent = data.grid_name;
+  document.getElementById('timestamp').textContent = new Date(data.timestamp * 1000).toLocaleString();
+  
+  document.getElementById('no-results-status').style.display = 'none';
+  document.getElementById('results-content').style.display = 'block';
+  document.getElementById('no-results-eig').style.display = 'none';
+  document.getElementById('eig-content').style.display = 'block';
+  document.getElementById('no-results-modes').style.display = 'none';
+  document.getElementById('modes-content').style.display = 'block';
+  document.getElementById('no-results-voltages').style.display = 'none';
+  document.getElementById('voltages-content').style.display = 'block';
+  
+  setTimeout(() => {
+    renderAllCharts(data);
+  }, 50);
+  
+  const statusText = document.getElementById('status-text');
+  statusText.textContent = data.status;
+  statusText.className = 'status-text ' + data.status.toLowerCase();
+  
+  document.getElementById('light-green').classList.toggle('active', data.status === 'STABLE');
+  document.getElementById('light-yellow').classList.toggle('active', data.status === 'MARGINAL');
+  document.getElementById('light-red').classList.toggle('active', data.status === 'UNSTABLE');
+  
+  const mv = document.getElementById('margin-value');
+  mv.textContent = data.margin.toExponential(4);
+  mv.style.color = data.margin < -0.001 ? '#10b981' : data.margin < 0.001 ? '#f59e0b' : '#ef4444';
+  
+  const critCount = (data.critical_modes || []).filter(m => m.critical).length;
+  document.getElementById('n-critical').textContent = critCount;
+  document.getElementById('n-critical').style.color = critCount > 0 ? '#ef4444' : '#10b981';
+  
+  document.getElementById('n-eigs').textContent = data.n_eigenvalues;
+  document.getElementById('n-states').textContent = data.n_state_vars;
+  
+  const elapsedEl = document.getElementById('elapsed-time');
+  if (data.elapsed_seconds != null) {
+    const s = data.elapsed_seconds;
+    elapsedEl.textContent = s >= 60 ? `${Math.floor(s/60)}m ${Math.round(s%60)}s` : `${s.toFixed(1)}s`;
+  } else {
+    elapsedEl.textContent = '—';
+  }
+  
+  const infoContainer = document.getElementById('grid-info-container');
+  const info = data.grid_info || {};
+  infoContainer.innerHTML = `
+    <div class="metric"><div class="metric-value">⚡ ${info.n_buses || 0}</div><div class="metric-label">Buses</div></div>
+    <div class="metric"><div class="metric-value">⚙️ ${info.n_generators || 0}</div><div class="metric-label">Generators</div></div>
+    <div class="metric"><div class="metric-value">🔗 ${info.n_lines || 0}</div><div class="metric-label">Lines</div></div>
+    <div class="metric"><div class="metric-value">💡 ${info.n_loads || 0}</div><div class="metric-label">Loads</div></div>
+    <div class="metric"><div class="metric-value">🔄 ${info.n_transformers || 0}</div><div class="metric-label">Transformers</div></div>
+  `;
+  
+  const assessmentDiv = document.getElementById('stability-assessment');
+  const unstableCount = (data.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const stableCount = (data.eigenvalues || []).length - unstableCount;
+  
+  let assessmentHTML = `
+    <div style="margin-bottom:16px">
+      <strong>Stability Status:</strong> 
+      <span class="badge ${data.status === 'STABLE' ? 'green' : data.status === 'MARGINAL' ? 'yellow' : 'red'}">${data.status}</span>
+    </div>
+    <div style="margin-bottom:16px">
+      <strong>Eigenvalue Summary:</strong><br>
+      <span style="color:var(--blue)">●</span> Stable: ${stableCount} modes<br>
+      <span style="color:var(--red)">●</span> Unstable: ${unstableCount} modes
+    </div>
+  `;
+  
+  if (unstableCount > 0) {
+    assessmentHTML += `
+      <div style="padding:12px;background:rgba(227,0,26,0.1);border-radius:6px;border-left:4px solid var(--red)">
+        <strong style="color:var(--red)">⚠ Warning:</strong> ${unstableCount} eigenvalue(s) have positive real parts, indicating potential instability.
+      </div>
+    `;
+  } else if (critCount > 0) {
+    assessmentHTML += `
+      <div style="padding:12px;background:rgba(178,210,53,0.1);border-radius:6px;border-left:4px solid var(--yellow)">
+        <strong style="color:var(--yellow)">⚠ Caution:</strong> ${critCount} mode(s) have low damping (ζ < 0.05).
+      </div>
+    `;
+  } else {
+    assessmentHTML += `
+      <div style="padding:12px;background:rgba(23,156,125,0.1);border-radius:6px;border-left:4px solid var(--green)">
+        <strong style="color:var(--green)">✓ Good:</strong> All modes are stable with adequate damping.
+      </div>
+    `;
+  }
+  
+  assessmentDiv.innerHTML = assessmentHTML;
+  
+  renderModes(data.critical_modes || []);
+  renderVoltages(data.bus_voltages || []);
+}
+
+function renderAllCharts(data) {
+  renderEigenvalues(data.eigenvalues || [], 'eig-canvas', eigZoom);
+  renderEigenvalues(data.eigenvalues || [], 'eig-canvas-full', eigZoomFull);
+  renderDampingFreq(data.eigenvalues || [], dampingZoom.level);
+  renderEigenvalueTable(data.eigenvalues || []);
+}
+
+function _damping(re, im) {
+  const mag = Math.sqrt(re * re + im * im);
+  return mag > 1e-12 ? -re / mag : 0;
+}
+
+function _freqHz(im) {
+  return Math.abs(im) / (2 * Math.PI);
+}
+
+function renderEigenvalues(eigs, canvasId, zoomState) {
+  const canvas = document.getElementById(canvasId);
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  if (eigs.length === 0) return;
+  
+  const reMax = Math.max(5, ...eigs.map(e => Math.abs(e.re))) * 1.2 / zoomState.level;
+  const imMax = Math.max(10, ...eigs.map(e => Math.abs(e.im))) * 1.2 / zoomState.level;
+  const cx = W / 2, cy = H / 2;
+  const sx = (W - 60) / (2 * reMax), sy = (H - 60) / (2 * imMax);
+  
+  ctx.strokeStyle = '#D6E2EA';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+  
+  ctx.fillStyle = '#A6BBC8';
+  ctx.font = '10px sans-serif';
+  const reStep = Math.ceil(reMax / 5);
+  for (let i = -Math.floor(reMax); i <= Math.floor(reMax); i += reStep) {
+    if (i === 0) continue;
+    const x = cx + i * sx;
+    ctx.beginPath(); ctx.moveTo(x, cy - 3); ctx.lineTo(x, cy + 3); ctx.stroke();
+    ctx.fillText(i.toString(), x - 5, cy + 15);
+  }
+  const imStep = Math.ceil(imMax / 5);
+  for (let i = -Math.floor(imMax); i <= Math.floor(imMax); i += imStep) {
+    if (i === 0) continue;
+    const y = cy - i * sy;
+    ctx.beginPath(); ctx.moveTo(cx - 3, y); ctx.lineTo(cx + 3, y); ctx.stroke();
+    ctx.fillText(i.toString(), cx + 8, y + 3);
+  }
+  
+  ctx.strokeStyle = 'rgba(227,0,26,0.4)';
+  ctx.setLineDash([6, 6]);
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+  ctx.setLineDash([]);
+  
+  const dampingRatios = [0.05, 0.1, 0.2];
+  ctx.strokeStyle = 'rgba(166,187,200,0.3)';
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1.5;
+  dampingRatios.forEach(zeta => {
+    const theta = Math.acos(zeta);
+    const maxDist = Math.max(reMax, imMax) * 2;
+    const dx = Math.cos(theta) * maxDist;
+    const dy = Math.sin(theta) * maxDist;
+    ctx.beginPath();
+    ctx.moveTo(cx - dx * sx, cy - dy * sy);
+    ctx.lineTo(cx, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - dx * sx, cy + dy * sy);
+    ctx.lineTo(cx, cy);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(166,187,200,0.6)';
+    ctx.font = '10px sans-serif';
+    const labelX = cx - Math.min(dx * sx, W / 2 - 30);
+    const labelY = cy - Math.min(dy * sy, H / 2 - 20);
+    ctx.fillText(`ζ=${zeta}`, labelX + 5, labelY + 15);
+  });
+  ctx.setLineDash([]);
+  
+  ctx.fillStyle = '#A6BBC8';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Re', W - 25, cy - 8);
+  ctx.fillText('Im', cx + 8, 18);
+  ctx.fillText('0', cx + 6, cy + 16);
+  
+  eigs.forEach(e => {
+    const x = cx + e.re * sx;
+    const y = cy - e.im * sy;
+    const unstable = e.re > 0.001;
+    
+    ctx.fillStyle = unstable ? '#E3001A' : '#008598';
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    if (unstable) {
+      ctx.strokeStyle = 'rgba(227,0,26,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 11, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  });
+  
+  canvas._eigData = { eigs, cx, cy, sx, sy };
+}
+
+function renderDampingFreq(eigs, zoomLevel = 1) {
+  const canvas = document.getElementById('damping-freq-canvas');
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  const modes = eigs.filter(e => Math.abs(e.im) > 0.1).map(e => {
+    const damping = _damping(e.re, e.im);
+    return {
+      freq: Math.abs(e.im) / (2 * Math.PI),
+      damping: damping,
+      re: e.re,
+      im: e.im
+    };
+  });
+  
+  if (modes.length === 0) return;
+  
+  const freqMax = Math.max(10, ...modes.map(m => m.freq)) * 1.1 / zoomLevel;
+  const dampMin = Math.min(-0.5, ...modes.map(m => m.damping)) - 0.1;
+  const dampMax = Math.max(0.5, ...modes.map(m => m.damping)) + 0.1;
+  const dampRange = (dampMax - dampMin) / zoomLevel;
+  const dampCenter = (dampMax + dampMin) / 2;
+  const dampMinZ = dampCenter - dampRange / 2;
+  const dampMaxZ = dampCenter + dampRange / 2;
+  
+  const ox = 55, oy = 25;
+  const plotW = W - 70, plotH = H - 50;
+  const sx = plotW / freqMax;
+  const sy = plotH / (dampMaxZ - dampMinZ);
+  
+  ctx.strokeStyle = '#D6E2EA';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, H - 25); ctx.lineTo(W - 15, H - 25); ctx.stroke();
+  
+  ctx.fillStyle = '#A6BBC8';
+  ctx.font = '10px sans-serif';
+  const freqStep = Math.ceil(freqMax / 8);
+  for (let f = 0; f <= freqMax; f += freqStep) {
+    const x = ox + f * sx;
+    ctx.beginPath(); ctx.moveTo(x, H - 25); ctx.lineTo(x, H - 20); ctx.stroke();
+    ctx.fillText(f.toFixed(0), x - 5, H - 8);
+  }
+  const dampStep = 0.1;
+  for (let d = dampMinZ; d <= dampMaxZ; d += dampStep) {
+    const y = oy + (dampMaxZ - d) * sy;
+    ctx.beginPath(); ctx.moveTo(ox - 3, y); ctx.lineTo(ox, y); ctx.stroke();
+    ctx.fillText(d.toFixed(1), 5, y + 3);
+  }
+  
+  ctx.font = '11px sans-serif';
+  ctx.fillText('Damping ζ', 5, oy + 10);
+  ctx.fillText('Frequency (Hz)', W / 2 - 30, H - 1);
+  
+  const zeroY = oy + (dampMaxZ - 0) * sy;
+  if (zeroY > oy && zeroY < H - 25) {
+    ctx.strokeStyle = 'rgba(227,0,26,0.4)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ox, zeroY); ctx.lineTo(W - 15, zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  
+  const criticalY = oy + (dampMaxZ - 0.05) * sy;
+  if (criticalY > oy && criticalY < H - 25) {
+    ctx.strokeStyle = 'rgba(178,210,53,0.4)';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(ox, criticalY); ctx.lineTo(W - 15, criticalY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(178,210,53,0.6)';
+    ctx.fillText('ζ=0.05', W - 50, criticalY - 5);
+  }
+  
+  modes.forEach(m => {
+    const x = ox + m.freq * sx;
+    const y = oy + (dampMaxZ - m.damping) * sy;
+    const unstable = m.damping < 0;
+    const critical = m.damping >= 0 && m.damping < 0.05;
+    
+    ctx.fillStyle = unstable ? '#E3001A' : critical ? '#B2D235' : '#179C7D';
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    if (unstable || critical) {
+      ctx.strokeStyle = unstable ? 'rgba(227,0,26,0.5)' : 'rgba(178,210,53,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 9, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  });
+  
+  canvas._dampData = { modes, ox, oy, sx, sy, dampMax: dampMaxZ };
+}
+
+function renderEigenvalueTable(eigs) {
+  const tbody = document.getElementById('eig-body');
+  tbody.innerHTML = eigs.map((e, i) => {
+    const damping = _damping(e.re, e.im);
+    const freq = _freqHz(e.im);
+    const unstable = e.re > 0.001;
+    const critical = Math.abs(damping) < 0.05;
+    const rowStyle = unstable ? 'background:rgba(227,0,26,0.05)' : critical ? 'background:rgba(178,210,53,0.05)' : '';
+    const dampColor = unstable ? 'color:var(--red);font-weight:700' : critical ? 'color:var(--yellow);font-weight:700' : '';
+    return `<tr style="${rowStyle}">
+      <td>${i + 1}</td>
+      <td>${e.re.toFixed(4)}</td>
+      <td>${e.im.toFixed(4)}</td>
+      <td style="${dampColor}">${damping.toFixed(4)}</td>
+      <td>${freq.toFixed(3)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderModes(modes) {
+  const tbody = document.getElementById('modes-body');
+  if (modes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No oscillatory modes found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = modes.map((m, idx) => {
+    const unstable = m.re > 0.001;
+    const critical = m.damping >= 0 && m.damping < 0.05;
+    const rowStyle = unstable ? 'background:rgba(227,0,26,0.05)' : critical ? 'background:rgba(178,210,53,0.05)' : '';
+    const dampColor = unstable ? 'color:var(--red);font-weight:700' : critical ? 'color:var(--yellow);font-weight:700' : '';
+    const pf = m.participation_factors || {};
+    const pfEntries = Object.entries(pf);
+    const hasParticipation = pfEntries.length > 0;
+    
+    const pfRowsHtml = hasParticipation 
+      ? `<tr class="pf-row" id="pf-row-${idx}" style="display:none">
+           <td colspan="6" style="padding:0">
+             <div style="padding:16px 24px 16px 60px;background:#EEF2F5;border-left:4px solid var(--blue)">
+               <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">
+                 Participation Factors
+               </div>
+               <table style="font-size:14px;width:100%">
+                 <thead>
+                   <tr>
+                     <th style="padding:6px 16px;font-size:12px">State Variable</th>
+                     <th style="padding:6px 16px;font-size:12px">Value</th>
+                     <th style="padding:6px 16px;font-size:12px">Magnitude</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   ${pfEntries.map(([k,v]) => `
+                     <tr>
+                       <td style="padding:6px 16px;font-family:monospace;font-size:13px">${k}</td>
+                       <td style="padding:6px 16px">${v.toFixed(4)}</td>
+                       <td style="padding:6px 16px">
+                         <div style="display:flex;align-items:center;gap:10px">
+                           <div style="width:160px;height:8px;background:#D6E2EA;border-radius:4px;overflow:hidden">
+                             <div style="width:${Math.abs(v) * 100}%;height:100%;background:var(--blue);border-radius:4px"></div>
+                           </div>
+                           <span style="font-size:12px;color:var(--muted);min-width:36px">${(Math.abs(v) * 100).toFixed(1)}%</span>
+                         </div>
+                       </td>
+                     </tr>
+                   `).join('')}
+                 </tbody>
+               </table>
+             </div>
+           </td>
+         </tr>`
+      : '';
+    
+    const expandIcon = hasParticipation 
+      ? `<span class="expand-icon" id="expand-icon-${idx}" style="cursor:pointer;display:inline-block;width:20px;transition:transform 0.2s;color:var(--blue)">▶</span>`
+      : '<span style="display:inline-block;width:20px"></span>';
+    
+    return `<tr class="mode-row" style="${rowStyle}${hasParticipation ? ';cursor:pointer' : ''}" ${hasParticipation ? `onclick="toggleParticipationFactors(${idx})"` : ''}>
+      <td>${expandIcon}${m.mode}</td>
+      <td>${m.re.toFixed(4)}</td>
+      <td>${m.im.toFixed(4)}</td>
+      <td style="${dampColor}">${m.damping.toFixed(4)}</td>
+      <td>${m.freq_hz.toFixed(3)}</td>
+      <td>${hasParticipation ? '<span style="color:var(--muted);font-size:12px">Click to expand</span>' : '<span style="color:var(--muted)">N/A</span>'}</td>
+    </tr>${pfRowsHtml}`;
+  }).join('');
+}
+
+function toggleParticipationFactors(idx) {
+  const pfRow = document.getElementById(`pf-row-${idx}`);
+  const expandIcon = document.getElementById(`expand-icon-${idx}`);
+  
+  if (pfRow.style.display === 'none') {
+    pfRow.style.display = 'table-row';
+    expandIcon.style.transform = 'rotate(90deg)';
+  } else {
+    pfRow.style.display = 'none';
+    expandIcon.style.transform = 'rotate(0deg)';
+  }
+}
+
+function renderVoltages(buses) {
+  const tbody = document.getElementById('voltage-body');
+  if (buses.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No bus data available</td></tr>';
+    return;
+  }
+  tbody.innerHTML = buses.map(b => {
+    const ok = b.vm_pu > 0.9 && b.vm_pu < 1.1;
+    const badge = ok ? '<span class="badge green">OK</span>' : '<span class="badge yellow">WARNING</span>';
+    return `<tr>
+      <td>${b.name}</td>
+      <td>${b.id}</td>
+      <td>${b.type}</td>
+      <td>${b.vm_pu.toFixed(4)}</td>
+      <td>${b.theta_deg.toFixed(2)}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+}
+
+['eig-canvas', 'eig-canvas-full'].forEach(canvasId => {
+  const canvas = document.getElementById(canvasId);
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  tooltip.style.display = 'none';
+  canvas.parentElement.appendChild(tooltip);
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!canvas._eigData) return;
+    const canvasRect = canvas.getBoundingClientRect();
+    const cardRect = canvas.parentElement.getBoundingClientRect();
+    const x = e.clientX - canvasRect.left;
+    const y = e.clientY - canvasRect.top;
+    const { eigs, cx, cy, sx, sy } = canvas._eigData;
+
+    let closest = null;
+    let minDist = 20;
+    eigs.forEach(eig => {
+      const ex = cx + eig.re * sx;
+      const ey = cy - eig.im * sy;
+      const dist = Math.sqrt((x - ex) ** 2 + (y - ey) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = eig;
+      }
+    });
+
+    if (closest) {
+      const damping = _damping(closest.re, closest.im);
+      const freq = _freqHz(closest.im);
+      tooltip.innerHTML = `
+        <div class="tooltip-title">Eigenvalue</div>
+        <div class="tooltip-row">Re(λ): ${closest.re.toFixed(2)}</div>
+        <div class="tooltip-row">Im(λ): ${closest.im.toFixed(2)}</div>
+        <div class="tooltip-row">Damping: ${damping.toFixed(4)}</div>
+        <div class="tooltip-row">Freq: ${freq.toFixed(2)} Hz</div>
+      `;
+      tooltip.style.left = (e.clientX - cardRect.left + 15) + 'px';
+      tooltip.style.top = (e.clientY - cardRect.top + 15) + 'px';
+      tooltip.style.display = 'block';
+    } else {
+      tooltip.style.display = 'none';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+  });
+
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    const zoomState = canvasId === 'eig-canvas' ? eigZoom : eigZoomFull;
+    zoomState.level = Math.max(0.5, Math.min(5, zoomState.level * factor));
+    if (currentData) {
+      renderEigenvalues(currentData.eigenvalues || [], canvasId, zoomState);
+    }
+  });
+});
+
+let contingencyBeforeData = null;
+let contingencyAfterData = null;
+let contingencyTimerInterval = null;
+let contingencyTimerStart = 0;
+let simTimerInterval = null;
+let simTimerStart = 0;
+
+function loadContingencyElements() {
+  if (!currentData) return;
+  
+  document.getElementById('no-results-contingencies').style.display = 'none';
+  document.getElementById('contingencies-content').style.display = 'block';
+  
+  const typeSelect = document.getElementById('contingency-type');
+  const elementSelect = document.getElementById('contingency-element');
+  
+  typeSelect.onchange = () => updateElementList();
+  updateElementList();
+
+  // Show base case (precomputed) result immediately
+  contingencyBeforeData = currentData;
+  document.getElementById('contingency-before-panel').style.display = 'block';
+  document.getElementById('before-grid-label').textContent = currentData.grid_name || '';
+  document.getElementById('before-status').innerHTML = renderStatusCard(currentData);
+  setTimeout(() => {
+    renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-before', { level: 1 });
+  }, 50);
+}
+
+function updateElementList() {
+  const type = document.getElementById('contingency-type').value;
+  const elementSelect = document.getElementById('contingency-element');
+  
+  // Hide After panel when element selection changes
+  document.getElementById('after-contingency-card').style.display = 'none';
+  document.getElementById('contingency-recommendations-card').style.display = 'none';
+  document.getElementById('after-element-label').textContent = '';
+
+  let elements = [];
+  if (type === 'generator') {
+    const n = currentData.grid_info?.n_generators || 0;
+    for (let i = 0; i < n; i++) {
+      elements.push({ value: `gen_${i}`, label: `Generator ${i}` });
+    }
+  } else if (type === 'line') {
+    const n = currentData.grid_info?.n_lines || 0;
+    for (let i = 0; i < n; i++) {
+      elements.push({ value: `line_${i}`, label: `Line ${i}` });
+    }
+  } else if (type === 'transformer') {
+    const n = currentData.grid_info?.n_transformers || 0;
+    for (let i = 0; i < n; i++) {
+      elements.push({ value: `transformer_${i}`, label: `Transformer ${i}` });
+    }
+  }
+  
+  elementSelect.innerHTML = '<option value="">-- Select element --</option>' +
+    elements.map(e => `<option value="${e.value}">${e.label}</option>`).join('');
+}
+
+function formatElapsed(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  const frac = Math.floor((ms % 1000) / 100);
+  return m > 0 ? `${m}:${String(sec).padStart(2,'0')}.${frac}` : `${sec}.${frac}s`;
+}
+
+function startContingencyTimer() {
+  stopContingencyTimer();
+  const el = document.getElementById('contingency-timer');
+  contingencyTimerStart = Date.now();
+  el.style.display = 'inline';
+  el.textContent = formatElapsed(0);
+  contingencyTimerInterval = setInterval(() => {
+    el.textContent = formatElapsed(Date.now() - contingencyTimerStart);
+  }, 100);
+}
+
+function stopContingencyTimer() {
+  if (contingencyTimerInterval) {
+    clearInterval(contingencyTimerInterval);
+    contingencyTimerInterval = null;
+  }
+  const el = document.getElementById('contingency-timer');
+  if (el && contingencyTimerStart) {
+    el.textContent = formatElapsed(Date.now() - contingencyTimerStart);
+  }
+}
+
+function startSimulationTimer() {
+  stopSimulationTimer();
+  const el = document.getElementById('sim-timer');
+  simTimerStart = Date.now();
+  el.style.display = 'inline';
+  el.textContent = formatElapsed(0);
+  simTimerInterval = setInterval(() => {
+    el.textContent = formatElapsed(Date.now() - simTimerStart);
+  }, 100);
+}
+
+function stopSimulationTimer() {
+  if (simTimerInterval) {
+    clearInterval(simTimerInterval);
+    simTimerInterval = null;
+  }
+  const el = document.getElementById('sim-timer');
+  if (el && simTimerStart) {
+    el.textContent = formatElapsed(Date.now() - simTimerStart);
+  }
+}
+
+async function runContingency() {
+  const type = document.getElementById('contingency-type').value;
+  const element = document.getElementById('contingency-element').value;
+  
+  if (!element) {
+    alert('Please select an element');
+    return;
+  }
+  
+  if (!currentData) {
+    alert('No baseline data available');
+    return;
+  }
+  
+  const btn = document.getElementById('run-contingency-btn');
+  const cancelBtn = document.getElementById('cancel-contingency-btn');
+  const statusEl = document.getElementById('contingency-status');
+  
+  btn.disabled = true;
+  cancelBtn.style.display = 'inline-flex';
+  statusEl.className = 'status-indicator running';
+  statusEl.innerHTML = '<span class="spinner"></span><span>Starting contingency simulation...</span>';
+  startContingencyTimer();
+  
+  contingencyBeforeData = currentData;
+  
+  try {
+    const res = await fetch('/api/run-contingency', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grid_filename: currentData.grid_name,
+        contingency_type: type,
+        contingency_element: element,
+      }),
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to start contingency');
+    }
+    
+    pollContingencyStatus();
+  } catch (e) {
+    console.error('Contingency error:', e);
+    statusEl.className = 'status-indicator failed';
+    statusEl.innerHTML = '<span>Failed: ' + e.message + '</span>';
+    btn.disabled = false;
+    cancelBtn.style.display = 'none';
+  }
+}
+
+async function cancelContingency() {
+  try {
+    await fetch('/api/cancel-contingency', { method: 'POST' });
+  } catch (e) {
+    console.error('Cancel contingency error:', e);
+  }
+  const btn = document.getElementById('run-contingency-btn');
+  const cancelBtn = document.getElementById('cancel-contingency-btn');
+  const statusEl = document.getElementById('contingency-status');
+  btn.disabled = false;
+  cancelBtn.style.display = 'none';
+  statusEl.className = 'status-indicator idle';
+  statusEl.innerHTML = '<span>Cancelled</span>';
+  stopContingencyTimer();
+}
+
+async function pollContingencyStatus() {
+  const btn = document.getElementById('run-contingency-btn');
+  const cancelBtn = document.getElementById('cancel-contingency-btn');
+  const statusEl = document.getElementById('contingency-status');
+  
+  try {
+    const res = await fetch('/api/contingency-status');
+    const status = await res.json();
+    
+    if (status.status === 'running') {
+      statusEl.innerHTML = '<span class="spinner"></span><span>Running contingency simulation...</span>';
+      setTimeout(pollContingencyStatus, 1000);
+    } else if (status.status === 'completed') {
+      stopContingencyTimer();
+      contingencyAfterData = status.data;
+      displayContingencyResults();
+      statusEl.className = 'status-indicator completed';
+      statusEl.innerHTML = '<span>Completed</span>';
+      btn.disabled = false;
+      cancelBtn.style.display = 'none';
+    } else if (status.status === 'failed') {
+      stopContingencyTimer();
+      statusEl.className = 'status-indicator failed';
+      statusEl.innerHTML = '<span>Failed: ' + (status.stderr || 'Unknown error') + '</span>';
+      btn.disabled = false;
+      cancelBtn.style.display = 'none';
+    } else if (status.status === 'idle') {
+      stopContingencyTimer();
+      btn.disabled = false;
+      cancelBtn.style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Error polling contingency status:', e);
+    setTimeout(pollContingencyStatus, 2000);
+  }
+}
+
+function displayContingencyResults() {
+  const before = contingencyBeforeData;
+  const after = contingencyAfterData;
+
+  // Update Before panel (already visible, but refresh in case currentData changed)
+  document.getElementById('before-status').innerHTML = renderStatusCard(before);
+
+  // Show After panel
+  const afterCard = document.getElementById('after-contingency-card');
+  afterCard.style.display = 'block';
+  const type = document.getElementById('contingency-type').value;
+  const element = document.getElementById('contingency-element').value;
+  document.getElementById('after-element-label').textContent = `${type} ${element}`;
+  document.getElementById('after-status').innerHTML = renderStatusCard(after);
+
+  // Render eigenvalue canvases
+  setTimeout(() => {
+    renderEigenvalues(before.eigenvalues || [], 'eig-canvas-before', { level: 1 });
+    renderEigenvalues(after.eigenvalues || [], 'eig-canvas-after', { level: 1 });
+  }, 50);
+
+  // Show recommendations
+  const recsCard = document.getElementById('contingency-recommendations-card');
+  recsCard.style.display = 'block';
+  document.getElementById('contingency-recommendations').innerHTML = generateRecommendations(before, after);
+}
+
+function renderStatusCard(data) {
+  const statusColor = data.status === 'STABLE' ? '#10b981' :
+                      data.status === 'MARGINAL' ? '#f59e0b' : '#ef4444';
+  const statusBadge = data.status === 'STABLE' ? 'green' :
+                      data.status === 'MARGINAL' ? 'yellow' : 'red';
+  const unstableCount = (data.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const criticalCount = (data.critical_modes || []).filter(m => m.critical).length;
+
+  return `
+    <div class="semaphore" style="margin-bottom:16px">
+      <div class="semaphore-light green ${data.status === 'STABLE' ? 'active' : ''}"></div>
+      <div class="semaphore-light yellow ${data.status === 'MARGINAL' ? 'active' : ''}"></div>
+      <div class="semaphore-light red ${data.status === 'UNSTABLE' ? 'active' : ''}"></div>
+    </div>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="badge ${statusBadge}" style="font-size:14px;padding:6px 16px">${data.status}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="metric">
+        <div class="metric-value" style="color:${statusColor};font-size:22px">${data.margin.toExponential(2)}</div>
+        <div class="metric-label">Margin</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="font-size:22px">${data.n_eigenvalues}</div>
+        <div class="metric-label">Eigenvalues</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:${unstableCount > 0 ? '#ef4444' : '#10b981'};font-size:22px">${unstableCount}</div>
+        <div class="metric-label">Unstable</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:${criticalCount > 0 ? '#f59e0b' : '#10b981'};font-size:22px">${criticalCount}</div>
+        <div class="metric-label">Critical</div>
+      </div>
+    </div>
+  `;
+}
+
+function generateRecommendations(before, after) {
+  const beforeUnstable = (before.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const afterUnstable = (after.eigenvalues || []).filter(e => e.re > 0.001).length;
+  
+  const beforeCritical = (before.critical_modes || []).filter(m => m.critical).length;
+  const afterCritical = (after.critical_modes || []).filter(m => m.critical).length;
+  
+  let html = '';
+  
+  if (after.status === 'UNSTABLE' && before.status !== 'UNSTABLE') {
+    html += `
+      <div style="padding:16px;background:rgba(239,68,68,0.1);border-radius:6px;border-left:4px solid #ef4444;margin-bottom:16px">
+        <strong style="color:#ef4444">⚠ System became UNSTABLE</strong>
+        <p style="margin-top:8px;color:var(--text)">This contingency causes the system to lose stability.</p>
+        <div style="margin-top:12px">
+          <strong>Recommended actions:</strong>
+          <ul style="margin-top:8px;margin-left:20px">
+            <li>Do not apply this contingency in current operating conditions</li>
+            <li>Consider adding reactive power support (SVC/STATCOM)</li>
+            <li>Implement emergency load shedding schemes</li>
+            <li>Review protection coordination</li>
+          </ul>
+        </div>
+      </div>
+    `;
+  } else if (afterCritical > beforeCritical) {
+    html += `
+      <div style="padding:16px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:4px solid #f59e0b;margin-bottom:16px">
+        <strong style="color:#f59e0b">⚠ Damping degraded</strong>
+        <p style="margin-top:8px;color:var(--text)">Critical modes increased from ${beforeCritical} to ${afterCritical}.</p>
+        <div style="margin-top:12px">
+          <strong>Recommended actions:</strong>
+          <ul style="margin-top:8px;margin-left:20px">
+            <li>Install or retune Power System Stabilizers (PSS)</li>
+            <li>Consider FACTS devices for oscillation damping</li>
+            <li>Review generator excitation system settings</li>
+            <li>Implement wide-area monitoring and control</li>
+          </ul>
+        </div>
+      </div>
+    `;
+  } else if (after.status === 'STABLE' && before.status === 'STABLE') {
+    const marginChange = after.margin - before.margin;
+    if (marginChange < -0.1) {
+      html += `
+        <div style="padding:16px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:4px solid #f59e0b;margin-bottom:16px">
+          <strong style="color:#f59e0b">⚠ Stability margin reduced</strong>
+          <p style="margin-top:8px;color:var(--text)">Margin decreased by ${Math.abs(marginChange).toExponential(2)}.</p>
+          <div style="margin-top:12px">
+            <strong>Recommended actions:</strong>
+            <ul style="margin-top:8px;margin-left:20px">
+              <li>Monitor system closely after applying this contingency</li>
+              <li>Ensure adequate reactive power reserves</li>
+              <li>Consider preventive redispatch if margin is critical</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div style="padding:16px;background:rgba(16,185,129,0.1);border-radius:6px;border-left:4px solid #10b981;margin-bottom:16px">
+          <strong style="color:#10b981">✓ System remains stable</strong>
+          <p style="margin-top:8px;color:var(--text)">This contingency does not significantly affect system stability.</p>
+        </div>
+      `;
+    }
+  }
+  
+  html += `
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Summary</div>
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Status</td>
+            <td><span class="badge ${before.status === 'STABLE' ? 'green' : before.status === 'MARGINAL' ? 'yellow' : 'red'}">${before.status}</span></td>
+            <td><span class="badge ${after.status === 'STABLE' ? 'green' : after.status === 'MARGINAL' ? 'yellow' : 'red'}">${after.status}</span></td>
+            <td>${after.status === before.status ? '—' : (after.status === 'STABLE' ? '✓' : '⚠')}</td>
+          </tr>
+          <tr>
+            <td>Stability Margin</td>
+            <td>${before.margin.toExponential(3)}</td>
+            <td>${after.margin.toExponential(3)}</td>
+            <td style="color:${(after.margin - before.margin) < 0 ? 'var(--red)' : 'var(--green)'}">
+              ${(after.margin - before.margin).toExponential(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>Unstable Modes</td>
+            <td>${beforeUnstable}</td>
+            <td>${afterUnstable}</td>
+            <td style="color:${afterUnstable > beforeUnstable ? 'var(--red)' : 'var(--green)'}">
+              ${afterUnstable - beforeUnstable > 0 ? '+' : ''}${afterUnstable - beforeUnstable}
+            </td>
+          </tr>
+          <tr>
+            <td>Critical Modes</td>
+            <td>${beforeCritical}</td>
+            <td>${afterCritical}</td>
+            <td style="color:${afterCritical > beforeCritical ? 'var(--red)' : 'var(--green)'}">
+              ${afterCritical - beforeCritical > 0 ? '+' : ''}${afterCritical - beforeCritical}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  return html;
+}
+
+const dampCanvas = document.getElementById('damping-freq-canvas');
+const dampTooltip = document.createElement('div');
+dampTooltip.className = 'tooltip';
+dampTooltip.style.display = 'none';
+dampCanvas.parentElement.appendChild(dampTooltip);
+
+dampCanvas.addEventListener('mousemove', (e) => {
+  if (!dampCanvas._dampData) return;
+  const canvasRect = dampCanvas.getBoundingClientRect();
+  const cardRect = dampCanvas.parentElement.getBoundingClientRect();
+  const x = e.clientX - canvasRect.left;
+  const y = e.clientY - canvasRect.top;
+  const { modes, ox, oy, sx, sy, dampMax } = dampCanvas._dampData;
+
+  let closest = null;
+  let minDist = 20;
+  modes.forEach(m => {
+    const mx = ox + m.freq * sx;
+    const my = oy + (dampMax - m.damping) * sy;
+    const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+    if (dist < minDist) { minDist = dist; closest = m; }
+  });
+
+  if (closest) {
+    dampTooltip.innerHTML = `
+      <div class="tooltip-title">Mode</div>
+      <div class="tooltip-row">Frequency: ${closest.freq.toFixed(2)} Hz</div>
+      <div class="tooltip-row">Damping ζ: ${closest.damping.toFixed(4)}</div>
+      <div class="tooltip-row">Re(λ): ${closest.re.toFixed(2)}</div>
+      <div class="tooltip-row">Im(λ): ${closest.im.toFixed(2)}</div>
+    `;
+    dampTooltip.style.left = (e.clientX - cardRect.left + 15) + 'px';
+    dampTooltip.style.top = (e.clientY - cardRect.top + 15) + 'px';
+    dampTooltip.style.display = 'block';
+  } else {
+    dampTooltip.style.display = 'none';
+  }
+});
+dampCanvas.addEventListener('mouseleave', () => { dampTooltip.style.display = 'none'; });
+dampCanvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  dampingZoom.level = Math.max(0.5, Math.min(5, dampingZoom.level * factor));
+  if (currentData) {
+    renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level);
+  }
+});
+
+loadGrids();
+loadResults();
+
+// On page load, check if a simulation or contingency was already running
+// (e.g. after a page refresh) and resume the UI state accordingly.
+async function checkInitialState() {
+  try {
+    const [simRes, contRes] = await Promise.all([
+      fetch('/api/status'),
+      fetch('/api/contingency-status'),
+    ]);
+    const simStatus = await simRes.json();
+    const contStatus = await contRes.json();
+
+    if (simStatus.status === 'running') {
+      const btn = document.getElementById('run-btn');
+      const cancelBtn = document.getElementById('cancel-btn');
+      const statusEl = document.getElementById('sim-status');
+      btn.disabled = true;
+      cancelBtn.style.display = 'inline-flex';
+      statusEl.className = 'status-indicator running';
+      statusEl.innerHTML = `<span class="spinner"></span><span>Running — ${simStatus.grid || ''}</span>`;
+      document.getElementById('log-card').style.display = 'block';
+      document.getElementById('log-output').textContent = 'Simulation in progress (resumed after page reload)...\n';
+      pollStatus();
+    }
+
+    if (contStatus.status === 'running') {
+      const btn = document.getElementById('run-contingency-btn');
+      const cancelBtn = document.getElementById('cancel-contingency-btn');
+      const statusEl = document.getElementById('contingency-status');
+      btn.disabled = true;
+      cancelBtn.style.display = 'inline-flex';
+      statusEl.className = 'status-indicator running';
+      statusEl.innerHTML = `<span class="spinner"></span><span>Running — ${contStatus.info || ''}</span>`;
+      pollContingencyStatus();
+    }
+  } catch (e) {
+    console.error('Error checking initial state:', e);
+  }
+}
+checkInitialState();
+
+const INFO_CONTENT = {
+  'complex-plane': {
+    title: 'Complex Plane — Eigenvalues',
+    body: `
+      <p>This plot shows the <strong>eigenvalues</strong> of the linearised power-system state matrix plotted in the complex plane: the horizontal axis is the <strong>real part</strong> Re(λ) and the vertical axis is the <strong>imaginary part</strong> Im(λ).</p>
+      <p><strong>How to read it:</strong></p>
+      <ul>
+        <li><span style="color:var(--red);font-weight:700">Red dashed line (Re = 0)</span> — the stability boundary. Any eigenvalue to the <em>right</em> of this line (Re &gt; 0) is <strong>unstable</strong>.</li>
+        <li><span style="color:var(--blue);font-weight:700">Blue dots</span> — stable eigenvalues (Re &lt; 0). The further left they are, the more damped the mode.</li>
+        <li><span style="color:var(--red);font-weight:700">Red dots with halo</span> — unstable eigenvalues (Re &gt; 0). These indicate growing oscillations.</li>
+        <li><span style="color:var(--muted)">Dashed wedge lines (ζ = 0.05, 0.1, 0.2)</span> — constant damping-ratio contours. Eigenvalues between the ζ = 0.05 lines have less than 5 % damping and are considered <strong>poorly damped</strong>.</li>
+      </ul>
+      <p><strong>Why it matters:</strong> The location of eigenvalues determines small-signal stability. A system is stable only when <em>all</em> eigenvalues lie in the left half-plane. The distance from the imaginary axis indicates how quickly oscillations decay.</p>
+    `
+  },
+  'damping-freq': {
+    title: 'Damping Ratio vs Oscillation Frequency',
+    body: `
+      <p>This scatter plot shows each <strong>oscillatory mode</strong> (eigenvalues with a non-zero imaginary part) with its <strong>oscillation frequency</strong> on the x-axis (Hz) and its <strong>damping ratio ζ</strong> on the y-axis.</p>
+      <p><strong>How to read it:</strong></p>
+      <ul>
+        <li><span style="color:var(--red);font-weight:700">Red dashed line (ζ = 0)</span> — stability boundary. Modes below this line have <strong>negative damping</strong> and are unstable (oscillations grow).</li>
+        <li><span style="color:var(--yellow);font-weight:700">Yellow dashed line (ζ = 0.05)</span> — the 5 % damping threshold commonly used in grid codes. Modes between ζ = 0 and ζ = 0.05 are <strong>critically damped</strong> and may cause concern.</li>
+        <li><span style="color:var(--green);font-weight:700">Green dots</span> — well-damped modes (ζ ≥ 0.05).</li>
+        <li><span style="color:var(--yellow);font-weight:700">Yellow dots</span> — critically damped modes (0 ≤ ζ &lt; 0.05).</li>
+        <li><span style="color:var(--red);font-weight:700">Red dots</span> — unstable modes (ζ &lt; 0).</li>
+      </ul>
+      <p><strong>Why it matters:</strong> This view quickly identifies which <em>frequency bands</em> contain poorly damped or unstable oscillations, helping operators target PSS tuning or FACTS placement at the right modes.</p>
+    `
+  },
+  'eig-table': {
+    title: 'Eigenvalue Table',
+    body: `
+      <p>This table lists every computed <strong>eigenvalue λ</strong> of the system's state matrix together with key derived quantities.</p>
+      <p><strong>Columns:</strong></p>
+      <ul>
+        <li><strong>Re(λ)</strong> — real part. Determines growth/decay: negative = stable, positive = unstable.</li>
+        <li><strong>Im(λ)</strong> — imaginary part. Related to the oscillation frequency: f = |Im(λ)| / 2π.</li>
+        <li><strong>ζ (damping ratio)</strong> — defined as −Re(λ) / |λ|. Positive values indicate a stable (decaying) mode; values below 0.05 flag poorly damped modes.</li>
+        <li><strong>f (Hz)</strong> — oscillation frequency in Hertz.</li>
+      </ul>
+      <p><strong>Colour coding:</strong></p>
+      <ul>
+        <li><span style="background:rgba(227,0,26,0.12);padding:2px 8px;border-radius:4px;color:var(--red);font-weight:700">Red row</span> — unstable eigenvalue (Re &gt; 0).</li>
+        <li><span style="background:rgba(178,210,53,0.12);padding:2px 8px;border-radius:4px;color:var(--yellow);font-weight:700">Yellow row</span> — critically low damping (|ζ| &lt; 0.05).</li>
+      </ul>
+      <p><strong>Why it matters:</strong> The table gives exact numerical values for every mode, complementing the graphical views and enabling precise reporting or comparison between operating points.</p>
+    `
+  }
+};
+
+function showInfo(key) {
+  const info = INFO_CONTENT[key];
+  if (!info) return;
+  document.getElementById('info-modal-title').innerHTML = info.title;
+  document.getElementById('info-modal-body').innerHTML = info.body;
+  document.getElementById('info-overlay').classList.add('visible');
+}
+
+function closeInfo() {
+  document.getElementById('info-overlay').classList.remove('visible');
+}
+</script>
+
+<div id="info-overlay" class="info-overlay" onclick="if(event.target===this)closeInfo()">
+  <div class="info-modal">
+    <button class="info-modal-close" onclick="closeInfo()">&times;</button>
+    <div id="info-modal-title" class="info-modal-title"></div>
+    <div id="info-modal-body" class="info-modal-body"></div>
+  </div>
+</div>
+
+</body>
+</html>
