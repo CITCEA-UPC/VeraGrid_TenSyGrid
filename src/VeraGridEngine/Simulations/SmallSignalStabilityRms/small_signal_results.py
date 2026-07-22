@@ -87,7 +87,8 @@ class SmallSignalStabilityRmsResults(ResultsTemplate):
                  conjugate_frequencies: Vec,
                  state_matrix: Mat,
                  stat_vars: List[Var],
-                 algebraic_vars: List[Var])-> None:
+                 algebraic_vars: List[Var],
+                 var_to_device: dict[int, str] | None = None) -> None:
         """
         Small-signal Analysis results
         :param eigenvalues:
@@ -97,6 +98,7 @@ class SmallSignalStabilityRmsResults(ResultsTemplate):
         :param state_matrix:
         :param stat_vars:
         :param algebraic_vars:
+        :param var_to_device: optional mapping from Var.uid to device name
         """
 
         available_list: list = list([

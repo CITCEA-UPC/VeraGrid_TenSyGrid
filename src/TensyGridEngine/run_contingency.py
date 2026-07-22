@@ -73,9 +73,16 @@ def main():
             for ev in eigenvalues
         ]
 
+        problem = results["problem"]
+        var_to_device: dict[int, str] = {}
+        for dev, var_list in problem.get_device_vars_dict().items():
+            dev_name = dev.name if hasattr(dev, "name") else type(dev).__name__
+            for var in var_list:
+                var_to_device[var.uid] = dev_name
+
         state_var_names = [
             str(v.name) if hasattr(v, "name") else f"state_{i}"
-            for i, v in enumerate(results["problem"].state_and_algebraic_vars)
+            for i, v in enumerate(problem.state_and_algebraic_vars)
         ]
 
         critical_modes = []
@@ -85,16 +92,19 @@ def main():
                 continue
             damping = float(_damping(re, im))
 
-            participation = {}
+            participation = []
             if pf_matrix is not None and pf_matrix.ndim == 2:
                 pf_col = pf_matrix[:, i]
                 for j, var_name in enumerate(state_var_names):
                     if j < len(pf_col):
-                        participation[str(var_name)] = float(pf_col[j])
+                        v = problem.state_and_algebraic_vars[j]
+                        participation.append({
+                            "variable": str(var_name),
+                            "device": var_to_device.get(v.uid, ""),
+                            "value": float(pf_col[j]),
+                        })
 
-            top_participation = dict(
-                sorted(participation.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
-            )
+            top_participation = sorted(participation, key=lambda x: abs(x["value"]), reverse=True)[:5]
 
             critical_modes.append({
                 "mode": i,
