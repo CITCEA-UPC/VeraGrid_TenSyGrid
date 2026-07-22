@@ -160,7 +160,7 @@ def compute_participation_factors_generalized(v: np.ndarray,
     else:
         Etw = E_arr.T @ w_c
 
-    PF = np.abs(v_c * Etw)
+    PF = np.abs(v_c * w_c)
 
     col_sum = np.sum(PF, axis=0)
     PF_norm = PF.copy()
@@ -726,6 +726,14 @@ class SmallSignalStabilityRmsDriver(DriverTemplate):
 
         state_vars = self.problem.state_vars
         algebraic_vars = self.problem.algebraic_vars
+
+        var_to_device: dict[int, str] = {}
+        vars_info = self.problem.get_device_vars_dict()
+        for dev, var_list in vars_info.items():
+            dev_name = dev.name if hasattr(dev, "name") else type(dev).__name__
+            for var in var_list:
+                var_to_device[var.uid] = dev_name
+
         self.results: SmallSignalStabilityRmsResults = SmallSignalStabilityRmsResults(
             eigenvalues=eigenvalues,
             participation_factors=participation_factors,
@@ -733,7 +741,8 @@ class SmallSignalStabilityRmsDriver(DriverTemplate):
             conjugate_frequencies=conjugate_frequencies,
             state_matrix=state_matrix,
             stat_vars=state_vars,
-            algebraic_vars= algebraic_vars
+            algebraic_vars=algebraic_vars,
+            var_to_device=var_to_device,
         )
 
         self.toc()
