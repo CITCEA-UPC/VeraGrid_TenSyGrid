@@ -1363,7 +1363,7 @@ function renderModes(modes) {
                    ${pfEntries.map(([k,v]) => `
                      <tr>
                        <td style="padding:6px 16px;font-family:monospace;font-size:13px">${k}</td>
-                       <td style="padding:6px 16px">${v.toFixed(4)}</td>
+                       <td style="padding:6px 16px">${!isNaN(Number(v)) && v !== null ? Number(v).toFixed(4) : '-'}</td>
                        <td style="padding:6px 16px">
                          <div style="display:flex;align-items:center;gap:10px">
                            <div style="width:160px;height:8px;background:#D6E2EA;border-radius:4px;overflow:hidden">
