@@ -44,7 +44,8 @@ bus = vge.Bus(name="Bus", Vnom=Vnom)
 grid.add_bus(bus)
 eg = vge.ExternalGrid(name="Slack", Vm=1.0, Va=0.0, mode=vge.ExternalGridMode.VD)
 grid.add_external_grid(bus=bus, api_obj=eg)
-grid.add_load(bus=bus, api_obj=vge.Load(P=0.3, Q=0.0))
+load1 = vge.Load(P=0.3, Q=0.0)
+grid.add_load(bus=bus, api_obj=load1)
 
 problem, pf_res, rms_opt = build_problems(grid_filename=None, grid=grid)
 print("Power flow:")
@@ -152,10 +153,11 @@ blk_trig = Block(
 # ---------------------------------------------------------------------------
 # Register blocks in the multilinear problem
 # ---------------------------------------------------------------------------
+Block_pll = Block()
 for blk in [blk_pd, blk_pi, blk_vco, blk_trig]:
     problem.add_variables_to_compilation_dicts(elm=bus, mdl=blk)
-    problem.sys_block.add(blk)
-
+    Block_pll.add(blk)
+load1._rms_model = Block_pll
 # Resize variable_parameters_values for event_dict params
 n_new = len(problem._variable_parameters) - len(problem._variable_parameters_values)
 if n_new > 0:
