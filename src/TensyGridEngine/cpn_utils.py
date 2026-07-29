@@ -32,6 +32,49 @@ from VeraGridEngine.Utils.Symbolic.symbolic import Const
 
 project_base = Path(__file__).resolve().parents[2]
 
+
+def stable_rank(A, method='svd'):
+    """Compute the numerical rank of a matrix using a stable method.
+
+    Two methods are available:
+        - 'svd': SVD-based, equivalent to MATLAB's ``rank(A)``.
+          Tolerance = max(m,n) * eps * sigma_max.
+        - 'qr': Rank-Revealing QR (RRQR) with column pivoting.
+          Faster for large sparse matrices. Uses the same tolerance formula
+          applied to the diagonal of R.
+
+    Args:
+        A: Input matrix (dense or sparse).
+        method: 'svd' (default) or 'qr'.
+
+    Returns:
+        Numerical rank (int).
+    """
+    import scipy.sparse as sp
+
+    if sp.issparse(A):
+        A_dense = A.toarray()
+    else:
+        A_dense = np.asarray(A, dtype=float)
+
+    m, n = A_dense.shape
+    tol_default = max(m, n) * np.finfo(float).eps
+
+    if method == 'svd':
+        s = np.linalg.svd(A_dense, compute_uv=False)
+        tol = tol_default * s[0] if s.size > 0 and s[0] > 0 else tol_default
+        return int(np.sum(s > tol))
+
+    elif method == 'qr':
+        from scipy.linalg import qr
+        _, R, _ = qr(A_dense, pivoting=True)
+        r_diag = np.abs(np.diag(R))
+        tol = tol_default * r_diag[0] if r_diag.size > 0 and r_diag[0] > 0 else tol_default
+        return int(np.sum(r_diag > tol))
+
+    else:
+        raise ValueError(f"Unknown method '{method}'. Use 'svd' or 'qr'.")
+
 import VeraGridEngine.api as vge
 from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
 
@@ -56,6 +99,50 @@ def ensure_unique_device_names(grid) -> None:
     _rename(list(grid.shunts), "shunt")
 
 
+def _ideal_vsource_phasor_template(vfactory, name="IdealVSource"):
+    """Ideal AC voltage source in phasor coordinates (Vr, Vi), no dynamics.
+
+    Uses the bus Vr/Vi directly (no own algebraic vars) to avoid duplicate
+    registration in the multilinear problem.
+    """
+    from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
+    from VeraGridEngine.Utils.Symbolic.block import Block
+    templ = RmsModelTemplate()
+    templ.tpe = vge.DeviceType.ExternalGridDevice
+    Vr = vfactory.add_var("Vr_src", vge.VarPowerFlowReferenceType.Vr)
+    Vi = vfactory.add_var("Vi_src", vge.VarPowerFlowReferenceType.Vi)
+    templ.block = Block(
+        algebraic_eqs=[Vr - 1.0, Vi - 0.0],
+        algebraic_vars=[],
+    )
+    templ.block.in_vars = [Vr, Vi]
+    templ.block.name = name
+    templ.block.external_mapping = {
+        vge.VarPowerFlowReferenceType.Vr: Vr,
+        vge.VarPowerFlowReferenceType.Vi: Vi,
+    }
+    return templ
+
+
+def _ideal_vsource_dc_template(vfactory, name="IdealDCSource"):
+    """Ideal DC voltage source, no dynamics. Imposes Vdc = 1.0."""
+    from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
+    from VeraGridEngine.Utils.Symbolic.block import Block
+    templ = RmsModelTemplate()
+    templ.tpe = vge.DeviceType.ExternalGridDevice
+    Vdc = vfactory.add_var("Vdc_src", vge.VarPowerFlowReferenceType.Vdc)
+    templ.block = Block(
+        algebraic_eqs=[Vdc - 1.0],
+        algebraic_vars=[],
+    )
+    templ.block.in_vars = [Vdc]
+    templ.block.name = name
+    templ.block.external_mapping = {
+        vge.VarPowerFlowReferenceType.Vdc: Vdc,
+    }
+    return templ
+
+
 def build_problems(grid_filename: str, grid=None):
     """Load grid, initialize RMS models, run power flow, and build the multilinear problem."""
     if grid is None:
@@ -71,6 +158,12 @@ def build_problems(grid_filename: str, grid=None):
         if not gen.active:
             continue
         if not gen.rms_model.empty():
+            continue
+        if gen.bus.is_dc:
+            from VeraGridEngine.Templates.Rms.dc_voltage_source import DCVoltageSource
+            gen_mdl = DCVoltageSource(grid.var_factory, Vdc=gen.bus.rms_model.out_vars[0], name=gen.name).block
+            gen_mdl = vge.to_implicit(gen_mdl, grid.var_factory)
+            set_rms_model(device=gen, model=gen_mdl, var_factory=grid.var_factory)
             continue
         gen_mdl = vge.get_complete_generator_template_phasor(grid.var_factory, name=f"Gen{igen}").block
         grid.var_factory.add_connections([gen_mdl.in_vars[0]], [gen.bus.rms_model.out_vars[0]])
@@ -125,9 +218,29 @@ def build_problems(grid_filename: str, grid=None):
         shunt_mdl = vge.to_implicit(shunt_mdl, grid.var_factory)
         set_rms_model(device=shunt, model=shunt_mdl, var_factory=grid.var_factory)
 
-    pf_results = vge.power_flow(grid, vge.PowerFlowOptions(tolerance=1e-5))
+    for eg in grid.external_grids:
+        if not eg.active:
+            continue
+        if not eg.rms_model.empty():
+            continue
+        if eg.bus.is_dc:
+            eg_mdl = _ideal_vsource_dc_template(grid.var_factory, name=eg.name).block
+            grid.var_factory.add_connections([eg_mdl.in_vars[0]], [eg.bus.rms_model.out_vars[0]])
+        else:
+            eg_mdl = _ideal_vsource_phasor_template(grid.var_factory, name=eg.name).block
+            grid.var_factory.add_connections([eg_mdl.in_vars[0]], [eg.bus.rms_model.out_vars[0]])
+            grid.var_factory.add_connections([eg_mdl.in_vars[1]], [eg.bus.rms_model.out_vars[1]])
+        eg_mdl = vge.to_implicit(eg_mdl, grid.var_factory)
+        set_rms_model(device=eg, model=eg_mdl, var_factory=grid.var_factory)
+
+    pf_results = vge.power_flow(grid, vge.PowerFlowOptions(solver_type=vge.SolverType.NR, tolerance=1e-5, max_iter=30))
     if not pf_results.converged:
         raise RuntimeError("Power flow did not converge")
+
+    # Fix DC bus voltages: PF gives Vm=0 for DC buses, but we need Vdc=1.0
+    for i, bus in enumerate(grid.buses):
+        if bus.is_dc:
+            pf_results.voltage[i] = 1.0 + 0.0j
 
     rms_options_ml = vge.RmsOptions(
         time_step=0.01,
@@ -212,32 +325,78 @@ def build_eqs_list(all_raw_eqs, uid_to_name, deduplicate=True):
                 keep_eq_mask[i] = False
                 continue
             eq_sig_seen.add(sig)
-            eq_str = _replace_var_names(str(eq), eq_vars, uid_to_name)
+            eq_str = _rename_vars_in_expr(eq, uid_to_name)
             eqs_list.append(eq_str)
     else:
         for eq in all_raw_eqs:
-            eq_str = _replace_var_names(str(eq), eq.get_vars(), uid_to_name)
+            eq_str = _rename_vars_in_expr(eq, uid_to_name)
             eqs_list.append(eq_str)
 
     return eqs_list, keep_eq_mask
 
 
-def _replace_var_names(eq_str, eq_vars, uid_to_name):
-    """Replace variable names in equation string with unique names.
+def _rename_vars_in_expr(eq, uid_to_name: dict[int, str]) -> str:
+    """Rename variables in an expression tree to unique names and return the string.
 
-    Uses regex word-boundary assertions so that replacing ``u_plus1``
-    does not corrupt ``u_plus1_min_365...``.
+    Uses the expression tree's :meth:`subs` to avoid string-level ambiguity when
+    multiple variables share the same ``str(v)`` (e.g. two buses both named ``Vr``).
     """
-    import re
-    for v in sorted(eq_vars, key=lambda v: len(str(v)), reverse=True):
-        orig = str(v)
-        repl = uid_to_name.get(v.uid, orig)
-        if orig != repl:
-            eq_str = re.sub(
-                r'(?<![A-Za-z0-9_])' + re.escape(orig) + r'(?![A-Za-z0-9_])',
-                repl, eq_str
-            )
-    return eq_str
+    from VeraGridEngine.Utils.Symbolic.symbolic import Var
+    mapping = {}
+    for v in eq.get_vars():
+        new_name = uid_to_name.get(v.uid)
+        if new_name is not None and new_name != v.name:
+            mapping[v] = Var(name=new_name, reference=v.ref, uid=v.uid)
+    if mapping:
+        eq = eq.subs(mapping)
+    return str(eq)
+
+
+def regenerate_eqs_list(S, Phi, vars_list):
+    """Rebuild equation strings from S, Phi, and vars_list.
+
+    After the pipeline drops or substitutes variables, the original eqs_list
+    strings can reference variables that no longer exist in S. This function
+    reconstructs each equation as a sum of monomial terms directly from the
+    sparse matrices, guaranteeing consistency with S and Phi.
+    """
+    S_csc = S.tocsc() if S.shape[1] > 0 else S.tocsc()
+    n_eqs = Phi.shape[0]
+    n_mon = S.shape[1]
+    eqs = []
+
+    for i in range(n_eqs):
+        terms = []
+        phi_row = Phi.getrow(i)
+        mon_cols = phi_row.nonzero()[1]
+
+        for j in mon_cols:
+            phi_coeff = float(Phi[i, j])
+            col_j = S_csc.getcol(j)
+            var_rows = col_j.nonzero()[0]
+
+            if len(var_rows) == 0:
+                terms.append(f"({phi_coeff})")
+                continue
+
+            factors = []
+            for vr in var_rows:
+                vname = vars_list[int(vr)]
+                exp = col_j[vr, 0]
+                if exp == 1.0:
+                    factors.append(f"({vname})")
+                else:
+                    factors.append(f"({vname}**{exp})")
+
+            mono_str = " * ".join(factors)
+            if len(factors) == 1:
+                terms.append(f"({phi_coeff}) * {mono_str}")
+            else:
+                terms.append(f"({phi_coeff}) * {mono_str}")
+
+        eqs.append(" + ".join(terms) if terms else "0")
+
+    return eqs
 
 
 def cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
@@ -251,6 +410,8 @@ def cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
     """
     while True:
         changed = False
+        S.eliminate_zeros()
+        Phi.eliminate_zeros()
 
         empty_phi_cols = np.asarray(Phi.getnnz(axis=0)).flatten() == 0
         if np.any(empty_phi_cols):
@@ -259,9 +420,9 @@ def cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
             Phi = Phi[:, keep]
             changed = True
 
-        empty_s_cols = np.asarray(S.getnnz(axis=0)).flatten() == 0
-        if np.any(empty_s_cols):
-            keep = np.where(~empty_s_cols)[0]
+        empty_s_cols_no_phi = (np.asarray(S.getnnz(axis=0)).flatten() == 0) & (np.asarray(Phi.getnnz(axis=0)).flatten() == 0)
+        if np.any(empty_s_cols_no_phi):
+            keep = np.where(~empty_s_cols_no_phi)[0]
             S = S[:, keep]
             Phi = Phi[:, keep]
             changed = True
@@ -628,8 +789,7 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
         Phi = problem_ml.Phi[:, keep_cols]
         Phi.eliminate_zeros()
 
-        print(f"[CPN] Step 1 - deriv-filter: S={S.shape}, Phi={Phi.shape}, keep_cols={len(keep_cols)}/{problem_ml.S.shape[1]}")
-        print(f"[CPN]   n_sa={n_sa}, n_eqs_total={problem_ml.Phi.shape[0]}, n_diff={problem_ml.S.shape[0] - n_sa}")
+        print(f"  deriv-filter: S={S.shape} Phi={Phi.shape} keep={len(keep_cols)}/{problem_ml.S.shape[1]}  n_sa={n_sa} n_eqs={problem_ml.Phi.shape[0]} n_diff={problem_ml.S.shape[0] - n_sa}")
 
         subs_map = {dvar: Const(0.0) for dvar in problem_ml._diff_vars}
         if hasattr(problem_ml, '_variable_parameters') and hasattr(problem_ml, '_variable_parameters_values'):
@@ -642,6 +802,14 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
     else:
         S = problem_ml.S
         Phi = problem_ml.Phi
+        # Also include diff_vars in the variable list so S rows match
+        diff_vars = list(problem_ml._diff_vars) if hasattr(problem_ml, '_diff_vars') else []
+        for dv in diff_vars:
+            name = str(dv)
+            if name not in vars_list:
+                vars_list.append(name)
+                uid_to_name[dv.uid] = name
+            orig_keep_idx = np.append(orig_keep_idx, -1)
         subs_map = {}
         if hasattr(problem_ml, '_variable_parameters') and hasattr(problem_ml, '_variable_parameters_values'):
             for p, val in zip(problem_ml._variable_parameters, problem_ml._variable_parameters_values):
@@ -654,7 +822,9 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
     eqs_list, keep_eq_mask = build_eqs_list(all_raw_eqs, uid_to_name, deduplicate=jaume_flag)
 
     n_dropped_eqs = np.sum(~keep_eq_mask)
-    print(f"[CPN] Step 2 - dedup: {len(eqs_list)} eqs from {len(all_raw_eqs)} raw (dropped {n_dropped_eqs} duplicates)")
+    print(f"  dedup: {len(eqs_list)} eqs from {len(all_raw_eqs)} raw (dropped {n_dropped_eqs} duplicates)")
+
+    pre_const_mask = (np.asarray(S.getnnz(axis=0)).flatten() == 0) & (np.asarray(Phi.getnnz(axis=0)).flatten() > 0)
 
     if jaume_flag and not np.all(keep_eq_mask):
         keep_eq_idx = np.where(keep_eq_mask)[0]
@@ -662,10 +832,16 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
         S = S[keep_eq_idx, :]
         vars_list = [vars_list[i] for i in keep_eq_idx]
         orig_keep_idx = orig_keep_idx[keep_eq_idx]
-        print(f"[CPN]   After dedup filter: S={S.shape}, Phi={Phi.shape}")
+
+        post_const_mask = (np.asarray(S.getnnz(axis=0)).flatten() == 0) & (np.asarray(Phi.getnnz(axis=0)).flatten() > 0)
+        phantom = post_const_mask & ~pre_const_mask
+        if np.any(phantom):
+            keep = np.where(~phantom)[0]
+            S = S[:, keep]
+            Phi = Phi[:, keep]
+        print(f"  dedup-filter: S={S.shape} Phi={Phi.shape}")
 
     if jaume_flag:
-        print(f"[CPN] Step 3 - fixpoint loop:")
         for iteration in range(100):
             n_eqs_before = Phi.shape[0]
             n_vars_before = S.shape[0]
@@ -686,30 +862,34 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
             changed = (n_eqs_before != n_eqs_after or
                        n_vars_before != n_vars_after or
                        n_mon_before != n_mon_after)
-            print(f"[CPN]   iter {iteration}: S={n_vars_before}->{n_vars_after}, "
-                  f"Phi={n_eqs_before}->{n_eqs_after}, Mon={n_mon_before}->{n_mon_after}"
+            print(f"  fixpoint iter {iteration}: S={n_vars_before}->{n_vars_after} "
+                  f"Phi={n_eqs_before}->{n_eqs_after} Mon={n_mon_before}->{n_mon_after}"
                   f"{' [converged]' if not changed else ''}")
 
             if not changed:
                 break
 
-        print(f"[CPN] Step 4 - handle free variables:")
         S, Phi, vars_list, eqs_list, orig_keep_idx = handle_free_variables(
             S, Phi, vars_list, eqs_list, orig_keep_idx, x0
         )
-        print(f"[CPN]   After handle_free_variables: S={S.shape}, Phi={Phi.shape}")
+        print(f"  free-vars: S={S.shape} Phi={Phi.shape}")
 
-        print(f"[CPN] Step 5 - rank reduction:")
         S, Phi, vars_list, eqs_list, orig_keep_idx = reduce_rank_qr(
             S, Phi, vars_list, eqs_list, orig_keep_idx, x0
         )
-        print(f"[CPN]   After reduce_rank_qr: S={S.shape}, Phi={Phi.shape}")
+        print(f"  rank-reduce: S={S.shape} Phi={Phi.shape}")
 
-        print(f"[CPN] Step 6 - pin vars without trivial monomials:")
         S, Phi, vars_list, eqs_list, orig_keep_idx = pin_vars_without_trivial_monomials(
             S, Phi, vars_list, eqs_list, orig_keep_idx, x0
         )
-        print(f"[CPN]   After pin_vars_without_trivial_monomials: S={S.shape}, Phi={Phi.shape}")
+        print(f"  pin-orphans: S={S.shape} Phi={Phi.shape}")
+
+    S, Phi, vars_list, eqs_list, orig_keep_idx = cleanup_system(
+        S, Phi, vars_list, eqs_list, orig_keep_idx
+    )
+    print(f"  cleanup: S={S.shape} Phi={Phi.shape}")
+
+    eqs_list = regenerate_eqs_list(S, Phi, vars_list)
 
     return CpnSystem(S=S, Phi=Phi, vars_list=vars_list, eqs_list=eqs_list,
                      orig_keep_idx=orig_keep_idx, x0=x0)

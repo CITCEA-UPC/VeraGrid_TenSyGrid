@@ -57,6 +57,27 @@ def residual(S: sparse.csc_matrix, Phi: sparse.csr_matrix, v: np.ndarray) -> np.
     return Phi @ varphi
 
 
+def equilibrate_rows_csr(Phi: sparse.csr_matrix) -> sparse.csr_matrix:
+    """Equilibra las filas de Phi dividiendo cada fila por su elemento de máximo valor absoluto."""
+    Phi = Phi.tocsr().copy()
+    n_rows = Phi.shape[0]
+    row_max = np.zeros(n_rows, dtype=np.float64)
+
+    # Extracción directa del valor máximo por fila usando la estructura CSR
+    for i in range(n_rows):
+        start = Phi.indptr[i]
+        end = Phi.indptr[i + 1]
+        if start < end:
+            row_max[i] = np.max(np.abs(Phi.data[start:end]))
+
+    # Evitar división por cero en filas completamente vacías/nulas
+    row_max[row_max == 0.0] = 1.0
+
+    # Aplicar el escalado mediante multiplicación por matriz diagonal dispersa
+    inv_max = 1.0 / row_max
+    D = sparse.diags(inv_max)
+    return D @ Phi
+
 def jacobian_dense(S: sparse.spmatrix, Phi: sparse.spmatrix, v: np.ndarray) -> np.ndarray:
     """Compute the dense system Jacobian J = Phi @ F^T.
 
@@ -98,6 +119,7 @@ def newton_direct(
         v: Converged or final solution vector.
     """
     v = x0.copy()
+    Phi = equilibrate_rows_csr(Phi)
     f = residual(S, Phi, v)
     err = np.linalg.norm(f)
     n_eqs, n_vars = Phi.shape[0], S.shape[0]
@@ -141,6 +163,10 @@ def newton_direct(
                 v_candidate = v - alpha * dx
                 f_candidate = residual(S, Phi, v_candidate)
                 err_candidate = np.linalg.norm(f_candidate)
+
+        if err_candidate >= err:
+            print(f"iter {k}: no descent direction found (||f|| = {err:.6e}), stopping.")
+            break
 
         v_new = v_candidate
         f_new = f_candidate
