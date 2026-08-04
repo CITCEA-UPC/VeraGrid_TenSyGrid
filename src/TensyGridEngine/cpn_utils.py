@@ -499,7 +499,6 @@ def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
     if zero_var_rows:
         keep = np.array([i for i in range(S.shape[0]) if i not in zero_var_rows])
         S = S[keep, :]
-        Phi = Phi[keep, :]
         vars_list = [vars_list[i] for i in keep]
         orig_keep_idx = orig_keep_idx[keep]
 
@@ -659,9 +658,6 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
     if jaume_flag and not np.all(keep_eq_mask):
         keep_eq_idx = np.where(keep_eq_mask)[0]
         Phi = Phi[keep_eq_idx, :]
-        S = S[keep_eq_idx, :]
-        vars_list = [vars_list[i] for i in keep_eq_idx]
-        orig_keep_idx = orig_keep_idx[keep_eq_idx]
         print(f"[CPN]   After dedup filter: S={S.shape}, Phi={Phi.shape}")
 
     if jaume_flag:

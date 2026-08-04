@@ -128,16 +128,16 @@ def build_converter_problem() -> tuple[StandaloneEmtProblem, dict[str, Var], tup
     converter.event_dict[v_c] = Const(vpk) * sym.sin(Const(omega) * t + Const(2.0 * np.pi / 3.0)) + sym.rand(t)
     converter.event_dict[v_dc] = Const(vdc_bus) + sym.rand(t)
 
-    set_event_value(converter, f"sbase_{name}", 1.0)
-    set_event_value(converter, f"P0_{name}", 0.40)
-    set_event_value(converter, f"control1_{name}", _converter_control_type_code(ConverterControlType.Pac))
-    set_event_value(converter, f"control2_{name}", _converter_control_type_code(ConverterControlType.Qac))
-    set_event_value(converter, f"control1_val_{name}", 0.40)
-    set_event_value(converter, f"control2_val_{name}", 0.05)
-    set_event_value(converter, f"omega_base_{name}", omega)
-    set_event_value(converter, f"phi_v_{name}", 0.0)
-    set_event_value(converter, f"Vpk_{name}", vpk)
-    set_event_value(converter, f"Vdc_nom_{name}", vdc_bus)
+    set_event_value(converter, "sbase", 1.0)
+    set_event_value(converter, "P0", 0.40)
+    set_event_value(converter, "control1", _converter_control_type_code(ConverterControlType.Pac))
+    set_event_value(converter, "control2", _converter_control_type_code(ConverterControlType.Qac))
+    set_event_value(converter, "control1_val", 0.40)
+    set_event_value(converter, "control2_val", 0.05)
+    set_event_value(converter, "omega_base", omega)
+    set_event_value(converter, "phi_v", 0.0)
+    set_event_value(converter, "Vpk", vpk)
+    set_event_value(converter, "Vdc_nom", vdc_bus)
 
     root = Block(name="StandalonePseudoEmtConverter", children=[converter])
     root.unify_blocks()
@@ -150,7 +150,7 @@ def build_converter_problem() -> tuple[StandaloneEmtProblem, dict[str, Var], tup
     seed_initial_guess(problem)
 
     tracked = {
-        key: find_name_in_block(f"{key}_{name}", problem.sys_block)
+        key: find_name_in_block(key, problem.sys_block)
         for key in ("i_A", "i_B", "i_C", "i_dc", "P", "Q", "v_dc", "theta_pll", "v_cmd_d", "v_cmd_q")
     }
     missing = [key for key, var in tracked.items() if var is None]

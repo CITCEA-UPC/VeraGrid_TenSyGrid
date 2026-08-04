@@ -5,13 +5,10 @@
 
 from __future__ import annotations
 
-import os
 import sys
-import hashlib
 from pathlib import Path
 
 import scipy
-from matplotlib import pyplot as plt
 import numpy as np
 
 project_base = Path(__file__).resolve().parents[2]
@@ -40,6 +37,7 @@ def run_small_signal_from_driver(problem, pf_results, rms_options):
 
 
 def main() -> None:
+    """Export the processed CPN1 matrices to a MATLAB file."""
     JAUME_FLAG = True
     grid_filename = sys.argv[1] if len(sys.argv) > 1 else "IEEE 9 Bus.gridcal"
     problem_ml, pf_results, rms_options_ml = build_problems(grid_filename=grid_filename)
@@ -61,14 +59,17 @@ def main() -> None:
 
     eqs_array = np.array(cpn.eqs_list, dtype=object)
     vars_array = np.array(cpn.vars_list, dtype=object)
-    scipy.io.savemat(f'CPN1_computations/CPN1_{problem_ml.grid}.mat', {
+    output_dir: Path = Path(__file__).resolve().parent / "CPN1_computations"
+    output_dir.mkdir(exist_ok=True)
+    output_path: Path = output_dir / f"CPN1_{problem_ml.grid}.mat"
+    scipy.io.savemat(str(output_path), {
         'S': cpn.S,
         'Phi': cpn.Phi,
         'eqs': eqs_array,
         'var': vars_array
     })
 
-    print("CPN1 file saved!")
+    print(f"CPN1 file saved: {output_path}")
 
 
 if __name__ == "__main__":
