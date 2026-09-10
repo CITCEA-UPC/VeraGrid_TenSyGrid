@@ -35,6 +35,7 @@ class EmtOptions(OptionsTemplate):
         GCProp(key="init_ptc_dtau_max", tpe=float),
         GCProp(key="init_ptc_max_iter", tpe=int),
         GCProp(key="init_allow_state_equilibrium", tpe=bool),
+        GCProp(key="init_fix_pf_bus_voltages", tpe=bool),
         GCProp(key="newton_compute_dense_cond", tpe=bool),
         GCProp(key="newton_enable_fallback", tpe=bool),
         GCProp(key="newton_enable_index1_check", tpe=bool),
@@ -53,6 +54,7 @@ class EmtOptions(OptionsTemplate):
         GCProp(key="external_sparse_solver_directory", tpe=str),
         GCProp(key="external_sparse_solver_plugin_name", tpe=str),
         GCProp(key="allow_internal_sparse_fallback", tpe=bool),
+        GCProp(key="conventional_three_phase_base", tpe=bool),
     )
 
     def __init__(self,
@@ -73,6 +75,7 @@ class EmtOptions(OptionsTemplate):
                  init_ptc_dtau_max: float = 1e1,
                  init_ptc_max_iter: int = 60,
                  init_allow_state_equilibrium: bool = True,
+                 init_fix_pf_bus_voltages: bool = False,
                  newton_compute_dense_cond: bool = False,
                  newton_enable_fallback: bool = False,
                  newton_enable_index1_check: bool = False,
@@ -90,7 +93,8 @@ class EmtOptions(OptionsTemplate):
                  sparse_solver: SparseSolver = SparseSolver.SuperLU,
                  external_sparse_solver_directory: str = "",
                  external_sparse_solver_plugin_name: str = "",
-                 allow_internal_sparse_fallback: bool = True):
+                 allow_internal_sparse_fallback: bool = True,
+                 conventional_three_phase_base: bool = False):
         """
         EmtOptions
         :param time_step: time step of the simulations (s)
@@ -118,6 +122,7 @@ class EmtOptions(OptionsTemplate):
         self.init_ptc_dtau_max: float = init_ptc_dtau_max
         self.init_ptc_max_iter: int = init_ptc_max_iter
         self.init_allow_state_equilibrium: bool = init_allow_state_equilibrium
+        self.init_fix_pf_bus_voltages: bool = init_fix_pf_bus_voltages
         self.newton_compute_dense_cond = newton_compute_dense_cond
         self.newton_enable_fallback = newton_enable_fallback
         self.newton_enable_index1_check = newton_enable_index1_check
@@ -136,5 +141,5 @@ class EmtOptions(OptionsTemplate):
         self.external_sparse_solver_directory: str = external_sparse_solver_directory
         self.external_sparse_solver_plugin_name: str = external_sparse_solver_plugin_name
         self.allow_internal_sparse_fallback: bool = allow_internal_sparse_fallback
-
-
+        # Opt-in while legacy EMT templates are migrated and regression-tested.
+        self.conventional_three_phase_base: bool = conventional_three_phase_base

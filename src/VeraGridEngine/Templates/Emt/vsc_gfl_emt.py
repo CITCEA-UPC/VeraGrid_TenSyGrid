@@ -9,11 +9,137 @@ import math
 
 from VeraGridEngine.enumerations import DeviceType
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
-from VeraGridEngine.Utils.Symbolic.block import (Block, Var, VarPowerFlowReferenceType)
+from VeraGridEngine.Utils.Symbolic.block import (Block, Var, VarPowerFlowReferenceType, find_name_in_block)
 from VeraGridEngine.Utils.Symbolic.block_helpers import tf_to_block
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
+import VeraGridEngine.Utils.Symbolic.symbolic_ml as symbolic_ml
 from VeraGridEngine.enumerations import ConverterControlType
+
+
+def _find_model_var(block: Block, logical_name: str) -> Var | None:
+    """Find an exact or combined-model variable by its logical name."""
+    variable = find_name_in_block(logical_name, block)
+    if variable is not None:
+        return variable
+    return next(
+        (item for item in block.get_all_vars()
+         if item.name.startswith(f"{logical_name}_")),
+        None,
+    )
+
+
+def _find_model_parameter(block: Block, logical_name: str) -> Var | None:
+    """Find an event/constant parameter, including combined-model suffixes."""
+    for owner in block.get_all_blocks():
+        for variable in (*owner.event_dict.keys(), *owner.parameters.keys()):
+            if (variable.name == logical_name
+                    or variable.name.startswith(f"{logical_name}_")):
+                return variable
+    return _find_model_var(block, logical_name)
+
+
+def install_gfl_generator_initialization(
+        block: Block,
+        vfactory: VarFactory,
+        frequency_hz: float,
+) -> None:
+    """Install the complete symbolic periodic initialization of a GFL generator.
+
+    The equations depend only on PF-mapped symbolic parameters and model
+    parameters.  No simulation script needs to calculate or write numerical
+    state/algebraic guesses.
+    """
+    for owner in block.get_all_blocks():
+        owner.init_eqs = {
+            variable: equation for variable, equation in owner.init_eqs.items()
+            if getattr(variable, "name", None) not in {"vc_d", "vc_q"}
+        }
+
+    get = lambda name: _find_model_var(block, name)
+    p, q = get("P"), get("Q")
+    pt_vsc, qt_vsc = get("Pt_vsc"), get("Qt_vsc")
+    p_ref = _find_model_parameter(block, "P_ref")
+    q_ref = _find_model_parameter(block, "Q_ref")
+    vpk_ref = _find_model_parameter(block, "Vpk_ref")
+    phi_ref = _find_model_parameter(block, "phi_v_ref")
+    theta, omega = get("theta"), get("omega")
+    vgd, vgq = get("vg_d"), get("vg_q")
+    id_line, iq_line = get("i_line_d"), get("i_line_q")
+    id_ref, iq_ref = get("i_d_ref"), get("i_q_ref")
+    vdc, vdc_cap = get("Vdc_"), get("Vdc_cap")
+    vd_c, vq_c = get("v_d_c"), get("v_q_c")
+    yvd, yvq = get("y_vd_hat"), get("y_vq_hat")
+    resistance = _find_model_parameter(block, "R_filter")
+    reactance = _find_model_parameter(block, "L")
+    filter_i = [get(f"i_filter_{phase}") for phase in "ABC"]
+    injection_i = [get(f"i_gfl_inj_{phase}") for phase in "ABC"]
+    converter_v = [get(name) for name in ("va_v", "vb_v", "vc_v")]
+    bus_v = [
+        get(name) or block.external_mapping.get(reference)
+        for name, reference in zip(
+            ("vg_A", "vg_B", "vg_C"),
+            (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.v_B,
+             VarPowerFlowReferenceType.v_C),
+        )
+    ]
+    required = [p, q, pt_vsc, qt_vsc, p_ref, q_ref, vpk_ref, phi_ref,
+                theta, omega, vgd, vgq, id_line, iq_line, id_ref, iq_ref,
+                vdc, vdc_cap, vd_c, vq_c, yvd, yvq, resistance, reactance,
+                *filter_i, *injection_i, *converter_v, *bus_v]
+    if any(item is None for item in required):
+        raise RuntimeError("Incomplete GFL generator initialization interface")
+
+    p_pf = vfactory.add_var("P_gfl_generator_pf")
+    q_pf = vfactory.add_var("Q_gfl_generator_pf")
+    block.event_dict[p_pf] = vfactory.add_const(None)
+    block.event_dict[q_pf] = vfactory.add_const(None)
+    block.external_mapping[VarPowerFlowReferenceType.P] = p_pf
+    block.external_mapping[VarPowerFlowReferenceType.Q] = q_pf
+
+    zero = vfactory.add_const(0.0)
+    one = vfactory.add_const(1.0)
+    two = vfactory.add_const(2.0)
+    half = vfactory.add_const(0.5)
+    sqrt3half = vfactory.add_const(np.sqrt(3.0) / 2.0)
+    cosine, sine = sym.cos(theta), sym.sin(theta)
+    id0 = two * q_pf / vpk_ref
+    iq0 = -two * p_pf / vpk_ref
+    ia0 = id0 * cosine + iq0 * sine
+    ib0 = id0 * (-half * cosine + sqrt3half * sine) + iq0 * (-half * sine - sqrt3half * cosine)
+    ic0 = id0 * (-half * cosine - sqrt3half * sine) + iq0 * (-half * sine + sqrt3half * cosine)
+    vd0 = -resistance * id0 - reactance * omega * iq0
+    vq0 = vpk_ref - resistance * iq0 + reactance * omega * id0
+    va0 = vd0 * cosine + vq0 * sine
+    vb0 = vd0 * (-half * cosine + sqrt3half * sine) + vq0 * (-half * sine - sqrt3half * cosine)
+    vc0 = vd0 * (-half * cosine - sqrt3half * sine) + vq0 * (-half * sine + sqrt3half * cosine)
+
+    block.init_eqs.update({
+        p: -p_pf, q: -q_pf, pt_vsc: p_pf, qt_vsc: q_pf,
+        p_ref: -p_pf, q_ref: -q_pf,
+        theta: phi_ref, omega: one, vgd: zero, vgq: vpk_ref,
+        id_line: id0, iq_line: iq0, id_ref: id0, iq_ref: iq0,
+        yvd: zero, yvq: zero, vd_c: vd0, vq_c: vq0,
+        converter_v[0]: va0, converter_v[1]: vb0, converter_v[2]: vc0,
+        filter_i[0]: ia0, filter_i[1]: ib0, filter_i[2]: ic0,
+        injection_i[0]: -ia0, injection_i[1]: -ib0, injection_i[2]: -ic0,
+        vdc: vfactory.add_const(1.03), vdc_cap: vdc,
+    })
+
+    omega_base = vfactory.add_const(2.0 * np.pi * frequency_hz)
+    if theta.diff_var is not None:
+        block.diff_init_eqs[theta.diff_var] = omega_base
+    for current, voltage_bus, voltage_converter in zip(filter_i, bus_v, converter_v):
+        if current.diff_var is not None:
+            block.diff_init_eqs[current.diff_var] = omega_base * (
+                voltage_bus - voltage_converter - resistance * current
+            ) / reactance
+    for name in ("dt_1_i_q_ref", "dt_1_i_d_ref", "dt_1_u_Pac_ctrl",
+                 "dt_1_u_Qac_ctrl", "dt_1_y_vd_hat", "dt_1_y_vq_hat",
+                 "dt_1_u_vd_hat", "dt_1_u_vq_hat"):
+        variable = get(name)
+        if variable is not None:
+            block.diff_init_eqs[variable] = zero
 
 
 def inverse_park_transform_block(vfactory: VarFactory, v_dq: list[Var], theta: Var, aux_vars = None, multilinear: bool = False, name:str =''):
@@ -48,6 +174,18 @@ def inverse_park_transform_block(vfactory: VarFactory, v_dq: list[Var], theta: V
         algebraic_vars = [va_c, vb_c, vc_c]
         trig_block = Block()
         aux_vars = None
+    else:
+        trig_block, u_cos, u_sin = symbolic_ml.trig_transform(vfactory, theta, type="usual")
+        algebraic_eqs = [
+            va_c - (v_d_c * u_cos + v_q_c * u_sin),
+            vb_c - ((-vfactory.add_const(0.5) * v_d_c - (sqrt3 / vfactory.add_const(2)) * v_q_c) * u_cos
+                    + ((sqrt3 / vfactory.add_const(2)) * v_d_c - vfactory.add_const(0.5) * v_q_c) * u_sin),
+            vc_c - ((-vfactory.add_const(0.5) * v_d_c + (sqrt3 / vfactory.add_const(2)) * v_q_c) * u_cos
+                    + ((-sqrt3 / vfactory.add_const(2)) * v_d_c - vfactory.add_const(0.5) * v_q_c) * u_sin),
+        ]
+        algebraic_vars = [va_c, vb_c, vc_c]
+        reformulated_vars = [u_sin, u_cos]
+        aux_vars = (u_cos, u_sin)
 
     inv_park_block = Block(
         algebraic_eqs=algebraic_eqs,
@@ -85,19 +223,33 @@ def park_transform_block(vfactory: VarFactory, v_abc: list[Var], theta: Var, mul
             # dq voltages
             x_d - (vfactory.add_const(1/3) * (
                 (vfactory.add_const(2) * sym.cos(theta) * v_a)
-                + (-sym.cos(theta) - vfactory.add_const(np.sqrt(3)) * sym.sin(theta)) * v_b
-                + (-sym.cos(theta) + vfactory.add_const(np.sqrt(3)) * sym.sin(theta)) * v_c
+                + (-sym.cos(theta) + vfactory.add_const(np.sqrt(3)) * sym.sin(theta)) * v_b
+                + (-sym.cos(theta) - vfactory.add_const(np.sqrt(3)) * sym.sin(theta)) * v_c
             )),
 
             x_q - (vfactory.add_const(1/3) * (
                 (vfactory.add_const(2) * sym.sin(theta) * v_a)
-                + (-sym.sin(theta) + vfactory.add_const(np.sqrt(3)) * sym.cos(theta)) * v_b
-                + (-sym.sin(theta) - vfactory.add_const(np.sqrt(3)) * sym.cos(theta)) * v_c
+                + (-sym.sin(theta) - vfactory.add_const(np.sqrt(3)) * sym.cos(theta)) * v_b
+                + (-sym.sin(theta) + vfactory.add_const(np.sqrt(3)) * sym.cos(theta)) * v_c
             )),
         ]
         algebraic_vars = [x_d, x_q]
         trig_block = Block()
         aux_vars = None
+    else:
+        trig_block, u_cos, u_sin = symbolic_ml.trig_transform(vfactory, theta, type="usual")
+        sqrt3 = vfactory.add_const(np.sqrt(3.0))
+        third = vfactory.add_const(1.0 / 3.0)
+        algebraic_eqs = [
+            x_d - third * (vfactory.add_const(2.0) * u_cos * v_a
+                           + (-u_cos + sqrt3 * u_sin) * v_b
+                           + (-u_cos - sqrt3 * u_sin) * v_c),
+            x_q - third * (vfactory.add_const(2.0) * u_sin * v_a
+                           + (-u_sin - sqrt3 * u_cos) * v_b
+                           + (-u_sin + sqrt3 * u_cos) * v_c),
+        ]
+        algebraic_vars = [x_d, x_q]
+        aux_vars = (u_cos, u_sin)
 
 
     park_block = Block(
@@ -118,7 +270,7 @@ def pll_transform(vfactory: VarFactory, v_abc, multilinear:bool = False, name:st
     Kp_pll = vfactory.add_var('Kp_pll')      # proportional gain
     Ki_pll = vfactory.add_var('Ki_pll')      # integral gain
 
-    park_theta = vfactory.add_const(0.0) - theta
+    park_theta = theta
     park_block, v_dq, aux_vars = park_transform_block(vfactory, v_abc, park_theta, multilinear=multilinear, name = name) 
     v_d, v_q = v_dq
     res_block = Block()
@@ -129,7 +281,7 @@ def pll_transform(vfactory: VarFactory, v_abc, multilinear:bool = False, name:st
     d_xi_pll = vfactory.add_diff_var(name='dt_1_xi_PLL', base_var=xi_pll)
     integrator = Block(
         algebraic_eqs=[
-            pll_error + v_d,
+            pll_error - v_d,
             omega - (one + Kp_pll * pll_error + Ki_pll * xi_pll),
         ],
         algebraic_vars=[pll_error, omega],
@@ -137,7 +289,7 @@ def pll_transform(vfactory: VarFactory, v_abc, multilinear:bool = False, name:st
         state_vars=[theta, xi_pll],
         diff_vars=[d_theta, d_xi_pll],
         init_eqs={
-            pll_error: vfactory.add_const(0.0) - v_d,
+            pll_error: v_d,
             xi_pll: vfactory.add_const(0.0),
             omega: one,
         },
@@ -206,7 +358,7 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     pll_block, v_dq, omega, theta, aux_vars = pll_transform(vfactory, vg_abc, multilinear=multilinear, name = 'vg')
     v_d_g = v_dq[0]
     v_q_g = v_dq[1]
-    park_theta = vfactory.add_const(0.0) - theta
+    park_theta = theta
     i_park_block, i_dq, _ = park_transform_block(vfactory, i_abc, park_theta, multilinear=multilinear, name='i_line')
     i_d_line = i_dq[0]
     i_q_line = i_dq[1]
@@ -244,15 +396,15 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     v_q_c_ref = vfactory.add_var('v_q_c_ref')
 
     event_dict = {
-        Kp_icl: vfactory.add_const(0.05),
-        Ki_icl: vfactory.add_const(1.0),
-        Kp_pol: vfactory.add_const(0.05),
-        Ki_pol: vfactory.add_const(1.0),
+        Kp_icl: vfactory.add_const(1.0),
+        Ki_icl: vfactory.add_const(20.0),
+        Kp_pol: vfactory.add_const(0.5),
+        Ki_pol: vfactory.add_const(10.0),
         Kp_vac: vfactory.add_const(0.1),
         Ki_vac: vfactory.add_const(2.0),
         L: vfactory.add_const(0.1),
-        P_ref: vfactory.add_const(0.0),
-        Q_ref: vfactory.add_const(0.0),
+        P_ref: vfactory.add_const(None),
+        Q_ref: vfactory.add_const(None),
         Vm_ac_ref: vfactory.add_const(1.0),
     }
     if frozen_voltage_source:
@@ -261,7 +413,7 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
 
     # P and Q at the grid-side point of common coupling.
     algebraic_eqs.append(P - vfactory.add_const(1/2)*(v_q_g*i_q + v_d_g*i_d))
-    algebraic_eqs.append(Q - vfactory.add_const(1/2)*(v_q_g*i_d - v_d_g*i_q))
+    algebraic_eqs.append(Q - vfactory.add_const(1/2)*(v_d_g*i_q - v_q_g*i_d))
     algebraic_vars.append(P)
     algebraic_vars.append(Q)
 
@@ -307,15 +459,18 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
         control_block_2, _ = tf_to_block(vfactory,
             num=[Ki_pol, Kp_pol],
             den=[0, 1],
-            x= Q_ref - Q,
+            x= Q - Q_ref,
             y = i_d_ref,
             name='Qac_ctrl'
         )
         control_blocks.append(control_block_2)
         
 
-    # Physical Current Limits, TODO add AntiWindup
-    I_max = vfactory.add_const(1.2)
+    # Physical current limit in instantaneous peak-current p.u.  Keep it as a
+    # runtime parameter because a system-base model must scale the limit with
+    # the converter rating; 1.2 is retained as the legacy default.
+    I_max = vfactory.add_var('I_max')
+    event_dict[I_max] = vfactory.add_const(1.2)
     operation = 'normal'
     if operation == 'normal':
         id_max = sym.sqrt(sym.max(I_max**2 - sym.max(i_q, i_q_ref)**2, vfactory.add_const(1e-5)))     
@@ -365,18 +520,16 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     # from power-flow results via external mapping; making them depend on the
     # currents here creates a P <-> i_q and Q <-> i_d explicit-init cycle.
     init_eqs = {
-        theta: phi_v_ref - vfactory.add_const(np.pi),
+        theta: phi_v_ref,
         omega: vfactory.add_const(1),
         v_d_g: vfactory.add_const(0),
         v_q_g: Vpk_ref,
         i_q: vfactory.add_const(2.0) * P / v_q_g,
-        i_d: vfactory.add_const(2.0) * Q / v_q_g,
+        i_d: -vfactory.add_const(2.0) * Q / v_q_g,
         i_q_ref: i_q,
         i_d_ref: i_d,
         v_d_c: vc_d_init,
         v_q_c: vc_q_init,
-        vc_d: vc_d_init,
-        vc_q: vc_q_init,
         vd_hat: v_d_c - (v_d_g - L*(omega)*i_q),
         vq_hat: v_q_c - (v_q_g + L*(omega)*i_d),
     }
@@ -390,7 +543,7 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     elif control2 == ConverterControlType.Vm_ac:
         init_eqs[Vm_ac_ref] = v_q_g
         # For AC voltage control, initialize i_d_ref based on initial reactive power
-        init_eqs[i_d_ref] = vfactory.add_const(2.0) * Q / v_q_g
+        init_eqs[i_d_ref] = -vfactory.add_const(2.0) * Q / v_q_g
 
     gfl_block_aux = Block(
         algebraic_eqs=algebraic_eqs,
@@ -420,7 +573,8 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
 def VscGflEmtBuild(vfactory: VarFactory, name: str = "",
                    control1: ConverterControlType = ConverterControlType.Pac,
                    control2: ConverterControlType = ConverterControlType.Qac,
-                   frozen_voltage_source: bool = False) -> EmtModelTemplate:
+                   frozen_voltage_source: bool = False,
+                   multilinear: bool = False) -> EmtModelTemplate:
     """
     VSC GFL (Grid Following) EMT model
     with from side the DC bus and to side the AC bus
@@ -480,6 +634,7 @@ def VscGflEmtBuild(vfactory: VarFactory, name: str = "",
         inputs=[*inputs, Pt_vsc, Qt_vsc, Vpk_ref, phi_v_ref],
         control1=control1,
         control2=control2,
+        multilinear=multilinear,
         frozen_voltage_source=frozen_voltage_source
     )
 

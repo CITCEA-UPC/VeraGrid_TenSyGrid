@@ -1452,6 +1452,36 @@ class EmtProblemDae(EmtProblemTemplate):
         # 1) PF guesses
         self.init_guess.update(self._temp_init_guess)
         self.diff_init_guess.update(self._temp_diff_init_guess)
+        # PF seeding can rewrite runtime source equations for wrapper-owned EMT
+        # event parameters such as ZIP-load voltage derivatives. Refresh the
+        # canonical runtime-equation source from the current block hierarchy before
+        # explicit initialization so the explicit solver does not consume stale
+        # ``Const(None)`` placeholders captured earlier during template build.
+        self.refresh_runtime_equations_from_hierarchy()
+        for uid, value in self._temp_init_guess.items():
+            runtime_idx_promote: int | None = self.uid2idx_event_params.get(uid, None)
+            if runtime_idx_promote is None:
+                pass
+            else:
+                # Promote the PF seed into both the runtime value and its
+                # canonical source equation.  Updating only the flat value is
+                # insufficient because explicit initialization evaluates the
+                # event graph and would immediately restore the old model
+                # default (commonly Vnom=1.0) before resolving dependants.
+                self._set_runtime_parameter_value_by_uid(uid=uid, value=float(value))
+                self.event_params_init_dict[uid] = float(value)
+
+        # PF seeding may change a runtime parameter that is itself an input to
+        # another runtime expression.  A common example is an impedance load:
+        # ``Vnom`` is seeded from the solved bus voltage and ``R``/``L`` are
+        # derived from ``Vnom`` and the scheduled P/Q.  Resolve that dependency
+        # chain before evaluating model init equations; otherwise state seeds
+        # such as an inductor's periodic current are computed with the old
+        # default impedance while the simulation starts with the refreshed one.
+        self._event_params_values = self._initialize_runtime_parameter_values(
+            0.0,
+            seed_values=self._event_params_values,
+        )
         if self.progress_signal is not None:
             self.progress_signal.emit(5)
 
@@ -1502,6 +1532,12 @@ class EmtProblemDae(EmtProblemTemplate):
         # piecewise expressions before that would preserve the undefined default
         # and break the initial runtime-parameter evaluation.
         self.set_events_group(None)
+        self._seed_all_switch_models()
+        # Runtime references must be finalized before missing derivatives are
+        # evaluated.  Otherwise dx0 is computed from stale controller inputs
+        # and the first trapezoidal step starts from an inconsistent history.
+        self._reconcile_exciter_voltage_references()
+        self.rebuild_runtime_param_vectors()
         if self.initialization_report is None:
             pass
         else:
@@ -1722,6 +1758,7 @@ class EmtProblemDae(EmtProblemTemplate):
                         uid2idx_event_params=self.uid2idx_event_params,
                         params_array=params_array,
                         compile_single_equation=compile_single_equation,
+                        event_params_array_seed=self._event_params_values,
                         verbose=bool(self.options.verbose > 0),
                     )
 
@@ -4435,6 +4472,14 @@ class EmtProblemDae(EmtProblemTemplate):
             else:
                 voltage_vector = self._get_bus_voltage_vector_3ph(bus_index)
 
+            if self.options.conventional_three_phase_base:
+                self.set_if_exists(
+                    mdl=mdl,
+                    key=VarPowerFlowReferenceType.Vm,
+                    value=float(np.abs(voltage_vector[1])),
+                    persist_after_native_init=True,
+                )
+
             if injection.device_type == DeviceType.GeneratorDevice and generator_count_same_bus <= 1:
                 preserve_generator_current_seed = False
             else:
@@ -4468,7 +4513,8 @@ class EmtProblemDae(EmtProblemTemplate):
                 phase_complex_power: complex = complex(phase_power[phase_index])
 
                 if abs(phase_voltage) > 1.0e-12:
-                    phase_current: complex = np.conj(phase_complex_power / phase_voltage)
+                    phase_current_scale = 3.0 if self.options.conventional_three_phase_base else 1.0
+                    phase_current: complex = phase_current_scale * np.conj(phase_complex_power / phase_voltage)
                 else:
                     phase_current = 0.0 + 0.0j
 
@@ -4535,15 +4581,25 @@ class EmtProblemDae(EmtProblemTemplate):
             # The Thevenin generator templates reconstruct an internal balanced emf
             # from the PF seed. Those internal variables are not externally mapped,
             # so they must be preserved explicitly across the later native-init pass.
-            # Multi-generator buses and balanced-PF Thevenin slack sources need
-            # preserved internal seeds so the later native-init pass does not
-            # disturb the PF-consistent operating point.
+            # Every Thevenin generator needs its internal emf, phase currents,
+            # and current derivatives preserved from the same PF phasors.  This
+            # is equally necessary for the common single-generator, three-phase
+            # PF slack case; excluding it creates a first-step source transient.
             if (
                     injection.device_type == DeviceType.GeneratorDevice
-                    and (generator_count_same_bus > 1 or self.power_flow_results_3ph is None)
                     and self._is_thevenin_generator_model(mdl=mdl)
             ):
                 self._seed_thevenin_internal_emf_from_pf(
+                    injection=injection,
+                    mdl=mdl,
+                    phase_power=phase_power,
+                    voltage_vector=voltage_vector,
+                )
+            else:
+                pass
+
+            if injection.device_type == DeviceType.GeneratorDevice:
+                self._preseed_complete_generator_child_blocks(
                     injection=injection,
                     mdl=mdl,
                     phase_power=phase_power,
@@ -4626,17 +4682,18 @@ class EmtProblemDae(EmtProblemTemplate):
         current_c: complex
 
         if abs(phase_a) > 1.0e-12:
-            current_a = np.conj(power_a / phase_a)
+            current_scale = 3.0 if self.options.conventional_three_phase_base else 1.0
+            current_a = current_scale * np.conj(power_a / phase_a)
         else:
             current_a = 0.0 + 0.0j
 
         if abs(phase_b) > 1.0e-12:
-            current_b = np.conj(power_b / phase_b)
+            current_b = current_scale * np.conj(power_b / phase_b)
         else:
             current_b = 0.0 + 0.0j
 
         if abs(phase_c) > 1.0e-12:
-            current_c = np.conj(power_c / phase_c)
+            current_c = current_scale * np.conj(power_c / phase_c)
         else:
             current_c = 0.0 + 0.0j
 
@@ -4764,6 +4821,112 @@ class EmtProblemDae(EmtProblemTemplate):
             self._temp_post_diff_init_guess[theta_var.diff_var.uid] = omega_base
         else:
             pass
+
+    def _reconcile_exciter_voltage_references(self) -> None:
+        """Set each AVR reference to its initialized equilibrium value."""
+        parameters = [parameter for parameter in self.get_variable_parameters()
+                      if parameter.name == "UsRefPu"]
+        y1_states = [state for state in self.get_state_vars() if state.name == "y_exciter1"]
+        y2_states = [state for state in self.get_state_vars() if state.name == "y_exciter2"]
+        y3_states = [state for state in self.get_state_vars() if state.name == "y_exciter3"]
+        count = min(len(parameters), len(y1_states), len(y2_states), len(y3_states))
+        for device_index in range(count):
+            parameter = parameters[device_index]
+            values = (
+                self.init_guess.get(y1_states[device_index].uid),
+                self.init_guess.get(y2_states[device_index].uid),
+                self.init_guess.get(y3_states[device_index].uid),
+            )
+            if any(value is None or not np.isfinite(value) for value in values):
+                continue
+            reference = float(values[0] + values[1] + values[2])
+            runtime_parameters = self.__dict__.get("_runtime_all_parameters_source", None)
+            runtime_equations = self.__dict__.get("_runtime_all_eqs_source", None)
+            if isinstance(runtime_parameters, list) and isinstance(runtime_equations, list):
+                for index, runtime_parameter in enumerate(runtime_parameters):
+                    if isinstance(runtime_parameter, Var) and runtime_parameter.uid == parameter.uid:
+                        runtime_equations[index] = Const(reference)
+            self._set_runtime_parameter_value_by_uid(parameter.uid, reference)
+
+        # Explicit initialization evaluated these controller RHS expressions
+        # before the equilibrium reference above was known.  Replace those
+        # stale derivative seeds; _compute_missing_dx0 intentionally preserves
+        # existing entries and therefore would not correct them by itself.
+        exciter_state_names = {"Vf", "y_exciter1", "y_exciter2", "y_exciter3", "y_exciter4"}
+        for state in self.get_state_vars():
+            if state.name not in exciter_state_names:
+                continue
+            differential = next(
+                (candidate for candidate in self.get_diff_vars()
+                 if candidate.base_var is not None and candidate.base_var.uid == state.uid),
+                None,
+            )
+            if differential is not None:
+                self.diff_init_guess[differential.uid] = 0.0
+
+    def _preseed_complete_generator_child_blocks(
+            self,
+            injection: Any,
+            mdl: Block,
+            phase_power: np.ndarray,
+            voltage_vector: np.ndarray,
+    ) -> None:
+        """
+        Preseed sibling outputs in complete generator wrappers before explicit init.
+
+        :param injection: Generator supplying the stator resistance.
+        :param mdl: Unified complete generator block.
+        :param phase_power: Complex power seed in NABC order.
+        :param voltage_vector: Complex voltage seed in NABC order.
+        :return: None.
+        """
+        phase_a: complex = complex(voltage_vector[1])
+        phase_b: complex = complex(voltage_vector[2])
+        phase_c: complex = complex(voltage_vector[3])
+        power_a: complex = complex(phase_power[1])
+        power_b: complex = complex(phase_power[2])
+        power_c: complex = complex(phase_power[3])
+        current_a: complex
+        current_b: complex
+        current_c: complex
+
+        if abs(phase_a) > 1.0e-12:
+            current_a = 3.0 * np.conj(power_a / phase_a)
+        else:
+            current_a = 0.0 + 0.0j
+        if abs(phase_b) > 1.0e-12:
+            current_b = 3.0 * np.conj(power_b / phase_b)
+        else:
+            current_b = 0.0 + 0.0j
+        if abs(phase_c) > 1.0e-12:
+            current_c = 3.0 * np.conj(power_c / phase_c)
+        else:
+            current_c = 0.0 + 0.0j
+
+        a_operator: complex = np.exp(1j * 2.0 * np.pi / 3.0)
+        current_positive_sequence: complex = (current_a + a_operator * current_b + (a_operator * a_operator) * current_c) / 3.0
+        vm_value: float = float(np.sqrt(
+            (2.0 / 3.0) * (
+                np.real(phase_a) ** 2
+                + np.real(phase_b) ** 2
+                + np.real(phase_c) ** 2
+            )
+        ))
+        irpu_value: float = float(np.sqrt(2.0) * np.abs(current_positive_sequence))
+        p_total: float = float(np.real(np.sum(phase_power)))
+        mechanical_torque: float = float(
+            p_total + 0.5 * float(injection.R1) * irpu_value * irpu_value
+        )
+
+        self.set_internal_init_if_exists(mdl, "V_pss", 0.0)
+        self.set_internal_runtime_if_exists(mdl, "V_pss", 0.0)
+        self.set_internal_init_if_exists(mdl, "Vf", irpu_value)
+        self.set_internal_runtime_if_exists(mdl, "Vf", irpu_value)
+        self.set_internal_init_if_exists(mdl, "Vm", vm_value)
+        self.set_internal_init_if_exists(mdl, "Tm", mechanical_torque)
+        self.set_internal_init_if_exists(mdl, "Pm_ref", mechanical_torque)
+        self.set_internal_runtime_if_exists(mdl, "Pm_ref", mechanical_torque)
+        self.set_internal_runtime_if_exists(mdl, "Pref", mechanical_torque)
 
 
 
@@ -4949,7 +5112,8 @@ class EmtProblemDae(EmtProblemTemplate):
                                       VC: complex,
                                       IA: complex,
                                       IB: complex,
-                                      IC: complex) -> None:
+                                      IC: complex,
+                                      delivered_power_convention: bool = False) -> None:
         """
         Populate positive-sequence PF-derived quantities used by VSC templates
         when they expose them in the external mapping.
@@ -4963,12 +5127,15 @@ class EmtProblemDae(EmtProblemTemplate):
         phi_V = float(np.angle(V1))
         phi_I = float(np.angle(I1))
 
-        # VSC EMT templates interpret ``phi`` in the converter-delivered-power
+        # VSC branch templates interpret ``phi`` in the converter-delivered-power
         # convention while the PF branch current uses the network branch
-        # convention. Shifting by ``pi`` preserves the seeded current states and
-        # branch/KCL signs while making the analytical VSC power initialization
-        # consistent with positive converter export.
-        ang = phi_I - phi_V + np.pi
+        # convention. Ordinary generator injections (Thevenin and synchronous
+        # machines) use the PF injection-current convention directly. Applying
+        # the VSC-only pi shift to those machines reconstructs their internal emf
+        # from the opposite current phasor and reverses the initialized current
+        # derivative relative to the passive network.
+        angle_shift: float = np.pi if delivered_power_convention else 0.0
+        ang = phi_I - phi_V + angle_shift
         phi = float(np.arctan2(np.sin(ang), np.cos(ang)))
 
         external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping(mdl)
@@ -5172,6 +5339,7 @@ class EmtProblemDae(EmtProblemTemplate):
             IA=IA,
             IB=IB,
             IC=IC,
+            delivered_power_convention=True,
         )
 
         if self.power_flow_results is not None:
@@ -5379,6 +5547,7 @@ class EmtProblemDae(EmtProblemTemplate):
             IA=IA,
             IB=IB,
             IC=IC,
+            delivered_power_convention=True,
         )
 
         v_dc = float(np.abs(pf_results.voltage[dc_bus_idx]))
@@ -5699,7 +5868,8 @@ class EmtProblemDae(EmtProblemTemplate):
                         i_f = 0.0 + 0.0j
                     else:
                         sf_ph = sf_ph_value / sbase
-                        i_f = np.conj(sf_ph / vf_ph)
+                        current_scale = 3.0 if self.options.conventional_three_phase_base else 1.0
+                        i_f = current_scale * np.conj(sf_ph / vf_ph)
 
                 if st_array is None or voltage_to_array is None:
                     i_t = 0.0 + 0.0j
@@ -5710,7 +5880,8 @@ class EmtProblemDae(EmtProblemTemplate):
                         i_t = 0.0 + 0.0j
                     else:
                         st_ph = st_ph_value / sbase
-                        i_t = np.conj(st_ph / vt_ph)
+                        current_scale = 3.0 if self.options.conventional_three_phase_base else 1.0
+                        i_t = current_scale * np.conj(st_ph / vt_ph)
 
                 i_f0: float = np.sqrt(2.0) * np.imag(i_f)
                 i_t0: float = np.sqrt(2.0) * np.imag(i_t)
@@ -6027,7 +6198,7 @@ class EmtProblemDae(EmtProblemTemplate):
                     if abs(vt_ph) <= 1e-12:
                         i_t = 0.0 + 0.0j
                     else:
-                        i_t = np.conj(st_phase_total / vt_ph)
+                        i_t = 3.0 * np.conj(st_phase_total / vt_ph)
                 else:
                     if abs(z_series) > 1.0e-15:
                         i_ser = (vf_ph - vt_ph) / z_series
@@ -6040,12 +6211,12 @@ class EmtProblemDae(EmtProblemTemplate):
                         if abs(vf_ph) <= 1e-12:
                             i_f = 0.0 + 0.0j
                         else:
-                            i_f = np.conj(sf_phase_total / vf_ph)
+                            i_f = 3.0 * np.conj(sf_phase_total / vf_ph)
 
                         if abs(vt_ph) <= 1e-12:
                             i_t = 0.0 + 0.0j
                         else:
-                            i_t = np.conj(st_phase_total / vt_ph)
+                            i_t = 3.0 * np.conj(st_phase_total / vt_ph)
 
                 i_f0: float = np.sqrt(2.0) * np.imag(i_f)
                 i_t0: float = np.sqrt(2.0) * np.imag(i_t)
@@ -7603,6 +7774,31 @@ class EmtProblemDae(EmtProblemTemplate):
             df = df.sort_values(["type", "idx"], ascending=[False, True])
 
         return df
+
+    def _set_runtime_parameter_value_by_uid(self, uid: int, value: float) -> None:
+        """Update one runtime parameter in every active runtime-equation store."""
+        if not all(name in self.__dict__ for name in (
+                "_uid2idx_event_params", "_event_params_values", "_event_parameters_eqs")):
+            return
+
+        runtime_idx = self._uid2idx_event_params.get(uid)
+        if runtime_idx is None:
+            return
+
+        constant = Const(float(value))
+        self._event_params_values[runtime_idx] = float(value)
+        self._event_parameters_eqs[runtime_idx] = constant
+
+        runtime_eqs0 = self.__dict__.get("_runtime_parameter_eqs0")
+        if isinstance(runtime_eqs0, list) and runtime_idx < len(runtime_eqs0):
+            runtime_eqs0[runtime_idx] = constant
+
+        source_parameters = self.__dict__.get("_runtime_all_parameters_source")
+        source_equations = self.__dict__.get("_runtime_all_eqs_source")
+        if isinstance(source_parameters, list) and isinstance(source_equations, list):
+            for source_index, parameter in enumerate(source_parameters):
+                if isinstance(parameter, Var) and parameter.uid == uid:
+                    source_equations[source_index] = constant
 
     def _assign_generator_sharing_targets_from_seed(
             self,

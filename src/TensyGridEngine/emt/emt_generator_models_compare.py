@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,7 @@ import VeraGridEngine.api as vg
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDae
 from VeraGridEngine.Simulations.EMT.solvers.jit_symbolic_solver import JitSymbolicSolver
 from VeraGridEngine.Utils.Symbolic.bus_emt_template import get_bus_emt_template
+from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_emt_model
 from VeraGridEngine.Templates.Emt.simple_generator_emt_template import get_simple_generator_emt_template as get_simple_generator_reference_template
 from VeraGridEngine.Templates.Emt.simple_generator_emt_trig_template import get_simple_generator_emt_template_trig_transform
 
@@ -46,11 +48,11 @@ def build_pf_options() -> vg.PowerFlowOptions:
 def build_emt_options() -> vg.EmtOptions:
     opts = vg.EmtOptions(
         time_step=5e-6,
-        simulation_time=0.04,
+        simulation_time=0.5,
         tolerance=1e-6,
         solver_type=vg.EmtSolverTypes.Symbolic,
         integration_method=vg.DynamicIntegrationMethod.DaeTrapezoidal,
-        verbose=1,
+        verbose=0,
     )
     if not hasattr(opts, "newton_max_iter"):
         opts.newton_max_iter = 20
@@ -69,6 +71,23 @@ def _find_y_by_prefix(vars_by_uid, uid2idx, y: np.ndarray, prefix: str) -> np.nd
         if var.name.startswith(prefix):
             return y[:, uid2idx[var.uid]]
     return None
+
+
+def _require_y_by_prefix(vars_by_uid, uid2idx, y: np.ndarray, prefix: str) -> np.ndarray:
+    values = _find_y_by_prefix(vars_by_uid, uid2idx, y, prefix)
+    if values is None:
+        available = ", ".join(sorted(var.name for var in vars_by_uid))
+        raise KeyError(f"No variable starts with '{prefix}'. Available variables: {available}")
+    return values
+
+
+def _error_metrics(reference: np.ndarray, candidate: np.ndarray) -> tuple[float, float]:
+    difference = np.asarray(reference) - np.asarray(candidate)
+    maximum = float(np.max(np.abs(difference)))
+    if maximum == 0.0:
+        return 0.0, 0.0
+    rmse = maximum * float(np.sqrt(np.mean((difference / maximum) ** 2)))
+    return rmse, maximum
 
 
 def run_case(generator_builder, case_name: str) -> dict[str, np.ndarray]:
@@ -114,10 +133,13 @@ def run_case(generator_builder, case_name: str) -> dict[str, np.ndarray]:
     line_mdl = vg.get_pi_line_emt_template(vf=grid.var_factory, phN=False, phA=True, phB=True, phC=True).block
     load_mdl = vg.get_shunt_r_emt_template(vf=grid.var_factory, phA=True, phB=True, phC=True).block
     gen_mdl = generator_builder(vf=grid.var_factory).block
+    gen_mdl.external_mapping[vg.VarPowerFlowReferenceType.v_A] = gen_mdl.in_vars[0]
+    gen_mdl.external_mapping[vg.VarPowerFlowReferenceType.v_B] = gen_mdl.in_vars[1]
+    gen_mdl.external_mapping[vg.VarPowerFlowReferenceType.v_C] = gen_mdl.in_vars[2]
 
-    vg.set_emt_model(device=line, model=line_mdl, var_factory=grid.var_factory)
-    vg.set_emt_model(device=load, model=load_mdl, var_factory=grid.var_factory)
-    vg.set_emt_model(device=gen, model=gen_mdl, var_factory=grid.var_factory)
+    set_emt_model(device=line, model=line_mdl, var_factory=grid.var_factory)
+    set_emt_model(device=load, model=load_mdl, var_factory=grid.var_factory)
+    set_emt_model(device=gen, model=gen_mdl, var_factory=grid.var_factory)
 
     grid.add_emt_events_group(vg.EmtEventsGroup(name=f"{case_name}_group"))
 
@@ -139,40 +161,60 @@ def run_case(generator_builder, case_name: str) -> dict[str, np.ndarray]:
         dense_threshold=0,
         verbose=False,
     )
-    t, y, _, _, _ = solver.simulate(boundary_updater=problem)
+    t, y, _, well_initialized, converged = solver.simulate(boundary_updater=problem)
 
     vars_by_uid = problem.get_device_vars_dict()[gen]
     bus_vars_by_uid = problem.get_device_vars_dict()[bus1]
     uid2idx = problem.uid2idx_vars
 
-    i_a_var = next(v for v in vars_by_uid if v.name.startswith("i_A_"))
-    omega_var = next(v for v in vars_by_uid if v.name.startswith("omega_"))
-    va_var = next(v for v in bus_vars_by_uid if v.name.startswith("v_A_"))
-
-    i_a = y[:, uid2idx[i_a_var.uid]]
-    omega = y[:, uid2idx[omega_var.uid]]
-    bus1_va = y[:, uid2idx[va_var.uid]]
+    i_a = _require_y_by_prefix(vars_by_uid, uid2idx, y, "i_A")
+    omega = _require_y_by_prefix(vars_by_uid, uid2idx, y, "omega")
+    bus1_va = _require_y_by_prefix(bus_vars_by_uid, uid2idx, y, "v_A")
     theta = _find_y_by_prefix(vars_by_uid, uid2idx, y, "theta_")
     u_cos = _find_y_by_prefix(vars_by_uid, uid2idx, y, "u_cos")
 
-    return {
+    result = {
         "t": np.asarray(t, dtype=float),
         "i_a": i_a,
         "omega": omega,
         "v_a_bus1": bus1_va,
         "theta": theta,
         "u_cos": u_cos,
+        "well_initialized": bool(well_initialized),
+        "converged": bool(converged),
     }
+    for signal_name, prefix in (
+        ("psi_d", "psi_d"),
+        ("psi_q", "psi_q"),
+        ("psi_f", "psi_f"),
+        ("i_f", "i_f"),
+        ("te", "Te"),
+        ("pe", "Pe"),
+        ("qe", "Qe"),
+        ("tm", "Tm"),
+        ("v_f", "v_f"),
+    ):
+        result[signal_name] = _find_y_by_prefix(vars_by_uid, uid2idx, y, prefix)
+    return result
 
 
 def main() -> None:
     show_plots = os.environ.get("VERAGRID_SHOW_PLOTS", "0").strip().lower() in ("1", "true", "yes")
+    output_dir = Path(__file__).resolve().parent
 
     print("Running classic simple generator EMT model...")
     classic = run_case(get_simple_generator_reference_template, "classic_simple")
 
     print("Running trig-transform simple generator EMT model...")
     trig = run_case(get_simple_generator_emt_template_trig_transform, "trig_simple")
+    print(
+        f"Classic status: initialized={classic['well_initialized']}, "
+        f"converged={classic['converged']}"
+    )
+    print(
+        f"Trig-transform status: initialized={trig['well_initialized']}, "
+        f"converged={trig['converged']}"
+    )
 
     fig, axes = plt.subplots(3, 1, figsize=(11, 9), sharex=True)
 
@@ -195,6 +237,38 @@ def main() -> None:
 
     axes[0].set_title("EMT comparison: classic vs trig-transform simple generator")
     fig.tight_layout()
+    comparison_plot = output_dir / "emt_generator_models_compare.png"
+    fig.savefig(comparison_plot, dpi=180)
+
+    fig_trig, trig_axes = plt.subplots(3, 1, figsize=(11, 9), sharex=True)
+    trig_axes[0].plot(trig["t"], trig["i_a"], color="tab:orange")
+    trig_axes[0].set_ylabel("Gen i_A [p.u.]")
+    trig_axes[1].plot(trig["t"], trig["omega"], color="tab:orange")
+    trig_axes[1].set_ylabel("Gen omega [p.u.]")
+    trig_axes[2].plot(trig["t"], trig["v_a_bus1"], color="tab:orange")
+    trig_axes[2].set_ylabel("Bus1 v_A [p.u.]")
+    trig_axes[2].set_xlabel("Time [s]")
+    for axis in trig_axes:
+        axis.grid(True, alpha=0.35)
+    trig_axes[0].set_title("Trig-transform EMT generator")
+    fig_trig.tight_layout()
+    trig_model_plot = output_dir / "emt_generator_trig_model.png"
+    fig_trig.savefig(trig_model_plot, dpi=180)
+
+    fig_error, error_axes = plt.subplots(3, 1, figsize=(11, 9), sharex=True)
+    error_axes[0].plot(classic["t"], trig["i_a"] - classic["i_a"])
+    error_axes[0].set_ylabel("Delta i_A [p.u.]")
+    error_axes[1].plot(classic["t"], trig["omega"] - classic["omega"])
+    error_axes[1].set_ylabel("Delta omega [p.u.]")
+    error_axes[2].plot(classic["t"], trig["v_a_bus1"] - classic["v_a_bus1"])
+    error_axes[2].set_ylabel("Delta v_A [p.u.]")
+    error_axes[2].set_xlabel("Time [s]")
+    for axis in error_axes:
+        axis.grid(True, alpha=0.35)
+    error_axes[0].set_title("Trig-transform minus classic generator")
+    fig_error.tight_layout()
+    error_plot = output_dir / "emt_generator_models_divergence.png"
+    fig_error.savefig(error_plot, dpi=180)
 
     if trig["theta"] is not None and trig["u_cos"] is not None:
         fig2, ax2 = plt.subplots(figsize=(11, 4))
@@ -211,14 +285,61 @@ def main() -> None:
         max_ucos = float(np.max(np.abs(mismatch)))
         print(f"RMSE(u_cos - cos(theta)): {rmse_ucos:.6e}")
         print(f"MAX |u_cos - cos(theta)|: {max_ucos:.6e}")
+        trig_plot = output_dir / "emt_generator_trig_state_compare.png"
+        fig2.savefig(trig_plot, dpi=180)
 
-    diff_i = classic["i_a"] - trig["i_a"]
-    rmse_i = float(np.sqrt(np.mean(diff_i ** 2)))
-    max_i = float(np.max(np.abs(diff_i)))
+    rmse_i, max_i = _error_metrics(classic["i_a"], trig["i_a"])
+    rmse_omega, max_omega = _error_metrics(classic["omega"], trig["omega"])
+    rmse_voltage, max_voltage = _error_metrics(classic["v_a_bus1"], trig["v_a_bus1"])
     print(f"RMSE(Delta i_A): {rmse_i:.6e}")
     print(f"MAX |Delta i_A|: {max_i:.6e}")
+    print(f"RMSE(Delta omega): {rmse_omega:.6e}")
+    print(f"MAX |Delta omega|: {max_omega:.6e}")
+    print(f"RMSE(Delta v_A): {rmse_voltage:.6e}")
+    print(f"MAX |Delta v_A|: {max_voltage:.6e}")
+    comparison_tolerance = 1.0e-4
+    equivalent = max(max_i, max_omega, max_voltage) <= comparison_tolerance
+    print(f"Equivalent within {comparison_tolerance:.1e}: {equivalent}")
+    print(f"Comparison plot: {comparison_plot}")
+    print(f"Trig-transform model plot: {trig_model_plot}")
+    print(f"Divergence plot: {error_plot}")
 
-    plt.show()
+    print("Internal-state differences (trig-transform minus classic):")
+    for signal_name in ("psi_d", "psi_q", "psi_f", "i_f", "te", "pe", "qe", "tm", "v_f"):
+        classic_signal = classic[signal_name]
+        trig_signal = trig[signal_name]
+        if classic_signal is None or trig_signal is None:
+            print(f"  {signal_name}: unavailable")
+            continue
+        rmse, maximum = _error_metrics(classic_signal, trig_signal)
+        final_error = float(trig_signal[-1] - classic_signal[-1])
+        print(f"  {signal_name}: RMSE={rmse:.6e}, MAX={maximum:.6e}, final_delta={final_error:.6e}")
+
+    voltage_error = np.abs(trig["v_a_bus1"] - classic["v_a_bus1"])
+    for threshold in (1.0e-3, 1.0e-2, 5.0e-2, 1.0e-1):
+        crossings = np.flatnonzero(voltage_error > threshold)
+        crossing_time = float(classic["t"][crossings[0]]) if crossings.size else float("nan")
+        print(f"First |Delta v_A| > {threshold:.1e}: {crossing_time:.6e} s")
+
+    print("Per-model voltage growth:")
+    for model_name, result in (("classic", classic), ("trig-transform", trig)):
+        voltage_magnitude = np.abs(result["v_a_bus1"])
+        print(
+            f"  {model_name}: max|v_A|={np.max(voltage_magnitude):.6e}, "
+            f"final v_A={result['v_a_bus1'][-1]:.6e}, final omega={result['omega'][-1]:.6e}"
+        )
+        for threshold in (2.0, 10.0, 1.0e3, 1.0e6):
+            crossings = np.flatnonzero(voltage_magnitude > threshold)
+            crossing_time = float(result["t"][crossings[0]]) if crossings.size else float("nan")
+            print(f"    first |v_A| > {threshold:.1e}: {crossing_time:.6e} s")
+
+    if not np.all(np.isfinite(trig["v_a_bus1"])):
+        raise RuntimeError("The trig-transform simulation produced non-finite voltages")
+
+    if show_plots:
+        plt.show()
+    else:
+        plt.close("all")
 
 
 if __name__ == "__main__":

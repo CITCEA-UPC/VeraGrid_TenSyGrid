@@ -123,6 +123,7 @@ def get_load_ZIP_emt_template(
     phC: bool = True,
     connection_type: ShuntConnectionType | None = None,
     name: str = "ZIP_Load_EMT_3ph",
+    conventional_three_phase_base: bool = False,
 ) -> EmtModelTemplate:
     """Build the phase-selective EMT ZIP-load template.
 
@@ -136,6 +137,9 @@ def get_load_ZIP_emt_template(
     :param phC: True when phase C is active.
     :param connection_type: Optional explicit star connection topology.
     :param name: Symbolic block name.
+    :param conventional_three_phase_base: Convert per-phase powers stored on
+        total three-phase Sbase to currents on the conventional three-phase
+        current base.
     :return: Configured EMT template.
     """
     bus_active_phases: List[str] = _get_active_phases(phA=phA, phB=phB, phC=phC)
@@ -168,6 +172,7 @@ def get_load_ZIP_emt_template(
     # Shared constants are reused by every active phase and keep the original ZIP
     # formulation numerically identical when all three phases are enabled.
     c2: Expr = vf.add_const(2.0)
+    current_base_scale: Expr = vf.add_const(3.0 if conventional_three_phase_base else 1.0)
     c05: Expr = vf.add_const(0.5)
 
     # ZIP coefficients remain device-wide EMT parameters because the existing load
@@ -305,7 +310,11 @@ def get_load_ZIP_emt_template(
         # The injected current is also evaluated with the guaranteed non-negative squared
         # magnitude to prevent sign-inconsistent or undefined denominators during Newton.
         algebraic_eqs.append(
-            current_var + (c2 * (u_var * (-p_var) + q_var * (-q_load_var)) / (u_var ** 2 + q_var ** 2 + eps))
+            current_var + (
+                current_base_scale * c2
+                * (u_var * (-p_var) + q_var * (-q_load_var))
+                / (u_var ** 2 + q_var ** 2 + eps)
+            )
         )
 
         # The initializer keeps the same seeds as the legacy ZIP template so the
@@ -318,7 +327,9 @@ def get_load_ZIP_emt_template(
         init_eqs[p_var] = -(p0_var * (a1 * ratio_var ** 2 + a2 * ratio_var + a3))
         init_eqs[q_load_var] = -(q0_var * (a4 * ratio_var ** 2 + a5 * ratio_var + a6))
         init_eqs[current_var] = -(
-            c2 * (u_var * (-p_var) + q_var * (-q_load_var)) / (u_var ** 2 + q_var ** 2 + eps)
+            current_base_scale * c2
+            * (u_var * (-p_var) + q_var * (-q_load_var))
+            / (u_var ** 2 + q_var ** 2 + eps)
         )
 
         diff_init_eqs[d_u_var] = voltage_derivative_var

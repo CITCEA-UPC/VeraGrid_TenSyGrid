@@ -43,7 +43,8 @@ def get_pi_line_emt_template(vf: VarFactory,
                              phA: bool = True,
                              phB: bool = True,
                              phC: bool = True,
-                             name: str = "Pi") -> EmtModelTemplate:
+                             name: str = "Pi",
+                             numerical_damping_conductance: float = 1.0e-5) -> EmtModelTemplate:
     """
     Build the EMT pi-line template with explicit API-mapped parameters.
 
@@ -58,6 +59,9 @@ def get_pi_line_emt_template(vf: VarFactory,
     :param phB: Bool. True if the line has phase B, else False.
     :param phC: Bool. True if the line has phase C, else False.
     :param name: Symbolic model name.
+    :param numerical_damping_conductance: Optional terminal shunt conductance
+        used for numerical damping. Set to zero when exact agreement with a
+        power-flow line model without that shunt is required.
     :return: EMT pi-line model template.
     :raises ValueError: If the line has no active phases.
     """
@@ -302,10 +306,13 @@ def get_pi_line_emt_template(vf: VarFactory,
             rhs_q = rhs_q + C_ab * vt_vars[b]
         alg_eqs.append(q_t[a] - rhs_q)
 
-    G_damp = 1e-5
+    G_damp = float(numerical_damping_conductance)
     for a in range(m):
-        alg_eqs.append(if_act[a] - (i_ser[a] + i_cap_f[a] + G_damp * vf_vars[a]))
-        alg_eqs.append(it_act[a] - (-i_ser[a] + i_cap_t[a] + G_damp * vt_vars[a]))
+        # The static PI-line power-flow model has no extra terminal conductance.
+        # Adding numerical shunt damping here changes the operating point and
+        # makes the PF-seeded EMT state non-periodic even with exact R/X/B data.
+        alg_eqs.append(if_act[a] - (i_ser[a] + i_cap_f[a]))
+        alg_eqs.append(it_act[a] - (-i_ser[a] + i_cap_t[a]))
 
     templ.block.algebraic_eqs = alg_eqs
     templ.block.out_vars = if_act + it_act
@@ -356,8 +363,8 @@ def get_pi_line_emt_template(vf: VarFactory,
         init_eqs[q_t[a]] = rhs_t
 
     for a in range(m):
-        i_ser_from = if_act[a] - i_cap_f[a] - G_damp * vf_vars[a]
-        i_ser_to = -it_act[a] + i_cap_t[a] + G_damp * vt_vars[a]
+        i_ser_from = if_act[a] - i_cap_f[a]
+        i_ser_to = -it_act[a] + i_cap_t[a]
         init_eqs[i_ser[a]] = 0.5 * (i_ser_from + i_ser_to)
 
     templ.block.init_eqs = init_eqs

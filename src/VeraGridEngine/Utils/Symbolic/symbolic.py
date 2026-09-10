@@ -1315,6 +1315,16 @@ class Func(Expr):
             return mapping[self]
         return Func(self.arg.subs(mapping), self.op)
 
+    def simplify(self) -> "Expr":
+        """Simplify the argument and fold unary functions of constants."""
+        arg_s = self.arg.simplify()
+        if isinstance(arg_s, Const) and arg_s.value is not None:
+            try:
+                return Const(_evaluate_unary_function(self.op, arg_s.value))
+            except (TypeError, ValueError, OverflowError, ZeroDivisionError):
+                pass
+        return Func(arg_s, self.op)
+
     def contains_var(self, var: Var) -> bool:
         return self.arg.contains_var(var)
 

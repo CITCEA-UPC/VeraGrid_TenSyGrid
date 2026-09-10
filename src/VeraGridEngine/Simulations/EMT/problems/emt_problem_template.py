@@ -40,6 +40,24 @@ def _get_external_mapping(mdl: Block) -> Optional[Dict[Any, Var]]:
         return external_mapping
 
 
+def _collect_hierarchical_runtime_equations(root_block: Block) -> Dict[int, Any]:
+    """Collect runtime equations from a complete symbolic block hierarchy."""
+    runtime_equations: Dict[int, Any] = {}
+    pending: List[Block] = [root_block]
+
+    while pending:
+        block = pending.pop()
+        runtime_equations.update(
+            (var.uid, expression) for var, expression in block.event_dict.items()
+        )
+        runtime_equations.update(
+            (var.uid, expression) for var, expression in block.mode_dict.items()
+        )
+        pending.extend(block.children)
+
+    return runtime_equations
+
+
 class EmtBoundaryUpdateProtocol(Protocol):
     """
     Structural protocol implemented by EMT boundary update providers.
@@ -601,6 +619,26 @@ class EmtProblemTemplate(ABC):
         self._runtime_continuous_slice = slice(0, n_continuous)
         self._runtime_mode_slice = slice(n_continuous, n_continuous + n_mode)
 
+    def refresh_runtime_equations_from_hierarchy(self) -> None:
+        """Refresh canonical runtime equations after PF-driven model seeding."""
+        equation_by_uid = _collect_hierarchical_runtime_equations(self.sys_block)
+        refreshed_equations: List[Any] = []
+
+        for parameter in self._runtime_all_parameters_source:
+            equation = equation_by_uid.get(parameter.uid)
+            if equation is not None:
+                refreshed_equations.append(equation)
+                continue
+
+            runtime_idx = self.uid2idx_event_params.get(parameter.uid)
+            if runtime_idx is None or runtime_idx >= len(self._event_parameters_eqs):
+                refreshed_equations.append(Const(None))
+            else:
+                refreshed_equations.append(self._event_parameters_eqs[runtime_idx])
+
+        self._runtime_all_eqs_source = refreshed_equations
+        self._rebuild_runtime_parameter_partition()
+
     def set_runtime_mode_parameters(self, mode_parameters: List[Var]) -> None:
         """
         Classify a subset of runtime parameters as retained discrete mode parameters.
@@ -631,7 +669,7 @@ class EmtProblemTemplate(ABC):
         self._finalize_order_and_maps()
         self._build_runtime_param_vectors()
 
-    def _initialize_runtime_parameter_values(self, tm: float) -> Vec:
+    def _initialize_runtime_parameter_values(self, tm: float, seed_values: Optional[Vec] = None) -> Vec:
         """
         Initialize the flat runtime parameter vector at a given time.
 
@@ -645,13 +683,41 @@ class EmtProblemTemplate(ABC):
         n_runtime: int = len(self._variable_parameters)
         out: Vec = np.zeros(n_runtime, dtype=np.float64)
 
+        if seed_values is not None:
+            n_seed = min(len(seed_values), n_runtime)
+            out[:n_seed] = seed_values[:n_seed]
+
         i: int = 0
         while i < n_runtime:
             expression: Any = self._event_parameters_eqs[i]
-            out[i] = self._evaluate_runtime_expression(expression, out, tm)
+            if isinstance(expression, Const) and expression.value is None:
+                out[i] = float(out[i])
+            elif isinstance(expression, Expr) and not self._runtime_expression_dependencies_available(expression):
+                out[i] = float(out[i])
+            else:
+                out[i] = self._evaluate_runtime_expression(expression, out, tm)
             i += 1
 
         return out
+
+    def _runtime_expression_dependencies_available(self, expression: Expr) -> bool:
+        """Return whether every referenced runtime dependency has an initialized value."""
+        for variable in expression.get_vars():
+            if variable.uid == self._glob_time.uid or variable.name in {"time", self.TIME_NAME}:
+                continue
+            if variable.uid in self._uid2idx_event_params or variable.uid in self._uid2idx_params:
+                continue
+            if variable.uid in self._uid2idx_vars:
+                if self.init_guess.get(variable.uid) is None:
+                    return False
+                continue
+            if variable.uid in self._uid2idx_diff:
+                if self.diff_init_guess.get(variable.uid) is None:
+                    return False
+                continue
+            return False
+
+        return True
 
     def _evaluate_runtime_expression(self, expression: Any, runtime_params: Vec, tm: float) -> float:
         """
@@ -1123,6 +1189,4 @@ class EmtProblemTemplate(ABC):
     @property
     def event_parameters_eqs(self) -> List[Any]:
         return self._event_parameters_eqs
-
-
 

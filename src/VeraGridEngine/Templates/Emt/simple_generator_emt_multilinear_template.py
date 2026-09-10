@@ -109,7 +109,6 @@ def get_simple_generator_emt_multilinear_template(
         q_c=q_C,
         omega_base=omega_base,
     )
-
     cos_theta = vf.add_var(name=f"u_cos")
     sin_theta = vf.add_var(name=f"u_sin")
     d_cos_theta = vf.add_diff_var(name=f"d_u_cos", base_var=cos_theta)

@@ -6,6 +6,7 @@
 """Phase-selective EMT templates for shunt R/L/C devices."""
 
 import uuid
+import numpy as np
 
 from typing import Dict, List, Tuple
 
@@ -1109,6 +1110,7 @@ def get_shunt_r_emt_template(
     phB: bool = True,
     phC: bool = True,
     name: str = "R_shunt",
+    conventional_three_phase_base: bool = False,
 ) -> EmtModelTemplate:
     """Build a phase-selective shunt resistor EMT template.
 
@@ -1167,7 +1169,8 @@ def get_shunt_r_emt_template(
 
         # The event dictionary holds the algebraic resistance definition so EMT
         # events can still alter the effective resistor without core changes.
-        templ.block.event_dict[resistance_var] = vnom_var ** 2 / pl0_var
+        phase_power_scale = 3.0 if conventional_three_phase_base else 1.0
+        templ.block.event_dict[resistance_var] = vnom_var ** 2 / (phase_power_scale * pl0_var)
 
         current_var: Var = vf.add_var(
             name=f"i_{phase_label}",
@@ -1183,6 +1186,11 @@ def get_shunt_r_emt_template(
     templ.block.algebraic_eqs = algebraic_eqs
     templ.block.out_vars = list(current_vars[phase_label] for phase_label in active_phases)
     templ.block.external_mapping = _build_external_mapping(voltage_vars=voltage_vars, current_vars=current_vars)
+    if conventional_three_phase_base:
+        # Use the PF operating voltage when turning the scheduled constant
+        # power into an equivalent fixed resistance, so its t=0 current agrees
+        # with the PF current rather than only at exactly 1 pu voltage.
+        templ.block.external_mapping[VarPowerFlowReferenceType.Vm] = vnom_var
     templ.block.api_obj_mapping = _build_resistor_api_mapping(pl0_vars=pl0_vars)
 
     return templ
@@ -1480,6 +1488,8 @@ def get_shunt_rlc_combo_emt_template(
     active_phases: List[str] = _get_active_phases(phA=phA, phB=phB, phC=phC)
     phase_voltage_vars: Dict[str, Var] = dict()
     total_current_vars: Dict[str, Var] = dict()
+    inductive_current_vars: Dict[str, Var] = dict()
+    inductance_vars: Dict[str, Var] = dict()
     in_vars: List[Var] = list()
     out_vars: List[Var] = list()
     algebraic_vars: List[Var] = list()
@@ -1612,7 +1622,9 @@ def get_shunt_rlc_combo_emt_template(
                     raise ValueError("Missing nominal-voltage variable for EMT RLC resistor initialization")
                 else:
                     pass
-                templ.block.event_dict[resistance_var] = vnom_var ** 2 / pl0_var
+                # Pl0_* is one-third of total power on the system three-phase
+                # Sbase.  Convert it to the conventional phase-current base.
+                templ.block.event_dict[resistance_var] = vnom_var ** 2 / (vf.add_const(3.0) * pl0_var)
             else:
                 templ.block.event_dict[resistance_var] = vf.add_const(float(direct_r_value), name=resistance_var.name)
 
@@ -1629,15 +1641,17 @@ def get_shunt_rlc_combo_emt_template(
                     raise ValueError("Missing base variables for EMT RLC inductive initialization")
                 else:
                     pass
-                templ.block.event_dict[inductance_var] = vnom_var ** 2 / (ql0_var * omega_base_var)
+                templ.block.event_dict[inductance_var] = vnom_var ** 2 / (
+                    vf.add_const(3.0) * ql0_var * omega_base_var)
             else:
                 templ.block.event_dict[inductance_var] = vf.add_const(float(direct_l_value), name=inductance_var.name)
 
             inductive_current_var: Var = vf.add_var(f"iL_{phase_label}")
             inductive_diff_var: Var = vf.add_diff_var(name=f"d_iL_{phase_label}", base_var=inductive_current_var)
             state_vars.append(inductive_current_var)
+            inductive_current_vars[phase_label] = inductive_current_var
+            inductance_vars[phase_label] = inductance_var
             diff_vars.append(inductive_diff_var)
-            templ.block.diff_init_eqs[inductive_diff_var] = vf.add_const(0.0)
             state_eqs.append(-voltage_drop / inductance_var)
             phase_current_expr = phase_current_expr - inductive_current_var
         else:
@@ -1652,7 +1666,9 @@ def get_shunt_rlc_combo_emt_template(
                     raise ValueError("Missing base variables for EMT RLC capacitive initialization")
                 else:
                     pass
-                templ.block.event_dict[capacitance_var] = ql0_var / (vnom_var ** 2 * omega_base_var)
+                templ.block.event_dict[capacitance_var] = (
+                    vf.add_const(3.0) * ql0_var
+                    / (vnom_var ** 2 * omega_base_var))
             else:
                 templ.block.event_dict[capacitance_var] = vf.add_const(float(direct_c_value), name=capacitance_var.name)
 
@@ -1670,6 +1686,28 @@ def get_shunt_rlc_combo_emt_template(
             pass
 
         algebraic_eqs.append(phase_current_expr)
+
+    if (
+            include_l
+            and connection_type == ShuntConnectionType.FloatingStar
+            and set(active_phases) == {"A", "B", "C"}
+    ):
+        if omega_base_var is None:
+            raise ValueError("Floating-star EMT inductor initialization requires omega_base")
+        sqrt_three = vf.add_const(np.sqrt(3.0))
+        rotating_voltage = {
+            "A": phase_voltage_vars["C"] - phase_voltage_vars["B"],
+            "B": phase_voltage_vars["A"] - phase_voltage_vars["C"],
+            "C": phase_voltage_vars["B"] - phase_voltage_vars["A"],
+        }
+        for phase_label in active_phases:
+            templ.block.init_eqs[inductive_current_vars[phase_label]] = (
+                rotating_voltage[phase_label]
+                / (sqrt_three * omega_base_var * inductance_vars[phase_label])
+            )
+    elif include_l:
+        for phase_label in active_phases:
+            templ.block.init_eqs[inductive_current_vars[phase_label]] = vf.add_const(0.0)
 
     if connection_type == ShuntConnectionType.FloatingStar:
         neutral_kcl: Expr = vf.add_const(0.0)
@@ -1715,6 +1753,8 @@ def get_shunt_rlc_combo_emt_template(
         neutral_voltage_var=neutral_voltage_var if connection_type in {ShuntConnectionType.NeutralStar, ShuntConnectionType.GroundedStar} else None,
         neutral_current_var=neutral_current_var,
     )
+    if vnom_var is not None:
+        templ.block.external_mapping[VarPowerFlowReferenceType.Vm] = vnom_var
     _attach_combo_editor_diagram(
         root_block=templ.block,
         input_vars=in_vars,
@@ -1724,4 +1764,3 @@ def get_shunt_rlc_combo_emt_template(
         grounding_link_block=grounding_link_block,
     )
     return templ
-

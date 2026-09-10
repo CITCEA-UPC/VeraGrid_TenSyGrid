@@ -822,12 +822,20 @@ class RmsProblemMultilinear(RmsProblemPhasor):
             a_expr = f_reduced.subs({s: Const(0)}).simplify()
             b_val = self._expr_to_float(b_expr)
             a_val = self._expr_to_float(a_expr)
-            scale = abs(a_val) + abs(b_val)
-            if scale == 0.0:
-                scale = 1.0
+            # S encodes one affine factor as
+            #     gain_factor * (s*x + 1 - |s|).
+            # Choose the branch from the signs of the intercept and slope so
+            # this equals a_val + b_val*x exactly.  The previous absolute-sum
+            # scaling changed (x-c) into (x+c), corrupting shifted factors.
+            if a_val * b_val >= 0.0:
+                gain_factor = a_val + b_val
+            else:
+                gain_factor = a_val - b_val
+            if abs(gain_factor) <= 1e-15:
+                return None, gain
 
-            sparse_weights[idx] = b_val / scale
-            gain *= scale
+            sparse_weights[idx] = b_val / gain_factor
+            gain *= gain_factor
 
         monom_tuple = tuple(sorted(sparse_weights.items()))
         return monom_tuple, gain

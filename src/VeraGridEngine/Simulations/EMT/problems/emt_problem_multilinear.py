@@ -72,11 +72,42 @@ class EmtProblemMultilinear(EmtProblemDae):
         monom_to_idx: dict[tuple[tuple[int, float], ...], int] = {}
         phi_rows: list[dict[int, float]] = []
 
-        for eq in all_eqs:
+        for equation_index, eq in enumerate(all_eqs):
             eq_row: dict[int, float] = {}
             mono_terms = self._collect_monomials(eq.simplify())
 
             for mono in mono_terms:
+                seen_state_uids: set[int] = set()
+                for factor in get_expr_factors(mono):
+                    reduced = factor.subs(subs_map).simplify()
+                    state_vars = [v for v in reduced.get_vars() if v.uid in uid_to_idx]
+                    unique_state_vars = {v.uid: v for v in state_vars}
+                    if len(unique_state_vars) > 1:
+                        raise ValueError(
+                            "EMT equation is not multilinear: one unresolved factor contains "
+                            f"multiple state variables (equation {equation_index}: {reduced})"
+                        )
+                    if len(unique_state_vars) == 1:
+                        state_var = next(iter(unique_state_vars.values()))
+                        if state_var.uid in seen_state_uids:
+                            raise ValueError(
+                                "EMT equation is not multi-affine: a variable occurs more than "
+                                f"once in one monomial (equation {equation_index}: {mono})"
+                            )
+                        seen_state_uids.add(state_var.uid)
+                        try:
+                            second = reduced.diff(state_var).diff(state_var).simplify()
+                            second_value = self._expr_to_float(second)
+                        except (TypeError, ValueError, NotImplementedError) as exc:
+                            raise ValueError(
+                                "EMT equation contains a state-dependent nonlinear function that "
+                                f"cannot be represented by S/Phi (equation {equation_index}: {reduced})"
+                            ) from exc
+                        if abs(second_value) > 1e-12:
+                            raise ValueError(
+                                "EMT equation is nonlinear in one variable and cannot be represented "
+                                f"by multi-affine S/Phi (equation {equation_index}: {reduced})"
+                            )
                 monom_tuple, gain = self._term_to_monomial(
                     factors=get_expr_factors(mono),
                     base_gain=1.0,
@@ -137,7 +168,13 @@ class EmtProblemMultilinear(EmtProblemDae):
         Jacobian for the current integration method.
         """
         self._ensure_multilinear_index_cache()
-        S, Phi = self.build_multilinear_matrices()
+        try:
+            S, Phi = self.build_multilinear_matrices()
+        except ValueError as exc:
+            if default_jacobian_evaluator is None:
+                raise
+            self._multilinear_fallback_reason = str(exc)
+            return default_jacobian_evaluator
 
         n_state_alg = len(self._state_vars) + len(self._algebraic_vars)
         n_states = len(self._state_vars)
