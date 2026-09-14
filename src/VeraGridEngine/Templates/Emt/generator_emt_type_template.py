@@ -1862,10 +1862,21 @@ def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = F
                                      VfeMaxPu_submodel)
         field_voltage_ref = sym.hard_sat(y4, min_const, field_ceiling)
         voltage_measurement_equations = [Vm - measured_vm]
-    vf_init = parameters['Kfd'].value * inputs[0]
-    field_feedback_init = parameters['Ke'].value * vf_init + AEx * sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) * (
-        sym.exp(BEx * (sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)) - vf.add_const(1.0)
-    ) * sym.heaviside(sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)
+    # The connected Sauer--Pai machine exposes ``IRPu`` as the field-voltage
+    # requirement in d(e'_q)/dt = (-IRPu + Vf) / Td0p.  Therefore its steady
+    # exciter output is IRPu itself; applying Kfd here initializes the AVR and
+    # machine to two different field voltages.
+    vf_init = inputs[0]
+    if multilinear:
+        # Use the very same lifted exponential and suffixed runtime parameters
+        # as the algebraic/state equations. Reconstructing the exponential a
+        # second time in init_eqs can bind pre-unification parameter UIDs and
+        # initialize u_aux/Efe to a different value than field_feedback.
+        field_feedback_init = field_feedback
+    else:
+        field_feedback_init = parameters['Ke'].value * vf_init + AEx * sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) * (
+            sym.exp(BEx * (sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)) - vf.add_const(1.0)
+        ) * sym.heaviside(sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)
     templ.block = Block(
         state_eqs=[
             (Vm - y1) / parameters["tR"].value,

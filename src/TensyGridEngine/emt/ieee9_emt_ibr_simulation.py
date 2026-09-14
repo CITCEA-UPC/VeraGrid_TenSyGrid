@@ -12,7 +12,7 @@ import importlib.util
 import os
 import sys
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,6 +30,10 @@ from VeraGridEngine.Templates.Emt.vsc_gfl_emt import (
 )
 from VeraGridEngine.Templates.Emt.vsc_gfl_internal_filter_multilinear import (
     add_gfl_internal_filter_multilinear,
+)
+from VeraGridEngine.Templates.Emt.vsc_gfl_internal_filter import (
+    add_gfl_internal_filter,
+    connect_gfl_internal_filter_ports,
 )
 from VeraGridEngine.Templates.Emt.emt_gfm_converter_multilinear import (
     make_gfm_trigonometry_multilinear,
@@ -97,8 +101,19 @@ def _load_deliverable_models():
         variable = find_name_in_block(name, block)
         if variable is not None:
             return variable
-        return next(
+        variable = next(
             (var for var in block.get_all_vars() if var.name.startswith(f"{name}_")),
+            None,
+        )
+        if variable is not None:
+            return variable
+        return next(
+            (
+                var
+                for owner in block.get_all_blocks()
+                for var in (*owner.event_dict.keys(), *owner.parameters.keys())
+                if var.name == name or var.name.startswith(f"{name}_")
+            ),
             None,
         )
 
@@ -195,60 +210,6 @@ def _adapt_gfl_as_generator(block: Block, vf) -> None:
     block.external_mapping.pop(VarPowerFlowReferenceType.Idc, None)
 
 
-def _correct_gfl_filter_rotation_convention(block: Block) -> None:
-    """Make the filter dq resistance signs consistent with its abc state RHS."""
-    variables = {
-        name: (
-            _find_combined_parameter(block, name)
-            if name in {"R_filter", "L"}
-            else _find_combined_variable(block, name)
-        )
-        for name in (
-            "v_d_c", "v_q_c", "y_vd_hat", "y_vq_hat", "vg_d", "vg_q",
-            "va_v", "vb_v", "vc_v", "theta",
-            "R_filter", "L", "omega", "i_line_d", "i_line_q",
-        )
-    }
-    missing = [name for name, variable in variables.items() if variable is None]
-    if missing:
-        raise RuntimeError(f"Cannot correct GFL filter convention; missing {missing}")
-    vd_c, vq_c = variables["v_d_c"], variables["v_q_c"]
-    va_v, vb_v, vc_v = variables["va_v"], variables["vb_v"], variables["vc_v"]
-    theta = variables["theta"]
-    yvd, yvq = variables["y_vd_hat"], variables["y_vq_hat"]
-    vgd, vgq = variables["vg_d"], variables["vg_q"]
-    resistance, reactance = variables["R_filter"], variables["L"]
-    omega = variables["omega"]
-    current_d, current_q = variables["i_line_d"], variables["i_line_q"]
-    c, s = sym.cos(theta), sym.sin(theta)
-    half = 0.5
-    root3half = np.sqrt(3.0) / 2.0
-    for owner in block.get_all_blocks():
-        corrected = []
-        for equation in owner.algebraic_eqs:
-            equation_text = str(equation)
-            if equation_text.startswith("(v_d_c) - ((((y_vd_hat)"):
-                equation = vd_c - (yvd + vgd - resistance * current_d
-                                     - reactance * omega * current_q)
-            elif equation_text.startswith("(v_q_c) - ((((y_vq_hat)"):
-                equation = vq_c - (yvq + vgq - resistance * current_q
-                                     + reactance * omega * current_d)
-            elif equation_text.startswith("(va_v) -"):
-                equation = va_v - (vd_c * c + vq_c * s)
-            elif equation_text.startswith("(vb_v) -"):
-                equation = vb_v - (
-                    vd_c * (-half * c + root3half * s)
-                    + vq_c * (-half * s - root3half * c)
-                )
-            elif equation_text.startswith("(vc_v) -"):
-                equation = vc_v - (
-                    vd_c * (-half * c - root3half * s)
-                    + vq_c * (-half * s + root3half * c)
-                )
-            corrected.append(equation)
-        owner.algebraic_eqs = corrected
-
-
 def _gfm_filter_voltage_reference(p_pu: float, q_pu: float, v_peak: float) -> float:
     """Return the steady LCL-capacitor voltage magnitude used by GFM control."""
     rc = 0.01
@@ -326,10 +287,9 @@ def build_ibr_grid(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
         if multilinear_inverters:
             add_gfl_internal_filter_multilinear(vf, grid.fBase, block)
         else:
-            gfl_validation.add_internal_filter_block(grid, block)
+            add_gfl_internal_filter(vf, grid.fBase, block)
         gfl_validation.set_event_value_in_block(vf, "R_filter", block, 0.01)
-        _correct_gfl_filter_rotation_convention(block)
-        gfl_validation.connect_internal_filter_ports(grid, block)
+        connect_gfl_internal_filter_ports(vf, block)
         _adapt_gfl_as_generator(block, vf)
         set_emt_model(device=generator, model=block, var_factory=vf)
         # Port connection/substitution performed by set_emt_model may replace
@@ -343,7 +303,9 @@ def build_ibr_grid(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
         bus_name = generator.bus.name
         vf = grid.var_factory
         block = gfm_models.build_emt_gfm_aggregated_model(
-            vf=vf, name=f"emt_gfm_{replacement_index}_{bus_name}"
+            vf=vf,
+            name=f"emt_gfm_{replacement_index}_{bus_name}",
+            multilinear=multilinear_inverters,
         )
         if multilinear_inverters:
             make_gfm_trigonometry_multilinear(block, vf)
@@ -424,7 +386,7 @@ def _seed_gfl_internal_filter(problem, grid, pf_results, entry, helper) -> None:
         "Pt_vsc": -p_meas, "Qt_vsc": -q_meas,
         "i_a_f": ia_filter, "i_b_f": ib_filter, "i_c_f": ic_filter,
         "i_filter_A": ia_filter, "i_filter_B": ib_filter, "i_filter_C": ic_filter,
-        "i_dc": p_conv / vdc0, "P_conv": p_conv,
+        "i_dc": p_conv / vdc0, "i_conv_dc": p_conv / vdc0, "P_conv": p_conv,
         "theta": -theta_ref, "omega": 1.0, "xi_PLL": 0.0,
         "vg_d": vd_g, "vg_q": vq_g, "vc_d": vd_c, "vc_q": vq_c,
         "i_line_d": id_filter, "i_line_q": iq_filter,
@@ -480,15 +442,77 @@ def _synchronize_gfm_multilinear_trig(problem, block: Block, frequency_hz: float
     cos0, sin0 = float(np.cos(theta0)), float(np.sin(theta0))
     problem.init_guess[u_cos.uid] = cos0
     problem.init_guess[u_sin.uid] = sin0
-    theta_rate = -2.0 * np.pi * frequency_hz * omega0
+    theta_rate = 2.0 * np.pi * frequency_hz * omega0
     if u_cos.diff_var is not None:
         problem.diff_init_guess[u_cos.diff_var.uid] = -theta_rate * sin0
     if u_sin.diff_var is not None:
         problem.diff_init_guess[u_sin.diff_var.uid] = theta_rate * cos0
 
 
+def _synchronize_gfl_multilinear_trig(problem, block: Block, helper, frequency_hz: float) -> None:
+    """Propagate finalized PLL/auxiliary angles through every GFL trig lift."""
+    # Initial equations are evaluated during generic assembly before the custom
+    # PF seed overwrites theta. Re-evaluate angle and trigonometric auxiliaries
+    # in dependency order at the finalized operating point.
+    for _ in range(3):
+        bindings = helper.uid_bindings_from_problem(problem)
+        for owner in block.get_all_blocks():
+            for variable, expression in owner.init_eqs.items():
+                if variable.name.startswith(("theta_aux", "u_cos", "u_sin")):
+                    problem.init_guess[variable.uid] = float(expression.eval_uid(bindings))
 
-def run_case(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
+    # This lift mirrors the production filter and therefore uses theta itself.
+    # Seed this uniquely named lift explicitly: the combined GFL contains
+    # several generic ``u_cos``/``u_sin`` lifts and name-based traversal can
+    # otherwise leave this one holding the value of a different Park block.
+    theta = _find_combined_variable(block, "theta")
+    inverse_angle = _find_combined_variable(block, "theta_aux_filter_inv")
+    inverse_cosine = _find_combined_variable(block, "u_cos_filter_inv")
+    inverse_sine = _find_combined_variable(block, "u_sin_filter_inv")
+    if all(item is not None for item in (theta, inverse_angle, inverse_cosine, inverse_sine)):
+        inverse_angle_value = float(problem.init_guess[theta.uid])
+        problem.init_guess[inverse_angle.uid] = inverse_angle_value
+        problem.init_guess[inverse_cosine.uid] = float(np.cos(inverse_angle_value))
+        problem.init_guess[inverse_sine.uid] = float(np.sin(inverse_angle_value))
+        if os.environ.get("VERAGRID_IEEE9_IBR_DIAGNOSTICS", "0") == "1":
+            print(
+                "GFL inverse-Park seed: "
+                f"theta={problem.init_guess[theta.uid]:.9e}, "
+                f"angle={inverse_angle_value:.9e}, "
+                f"cos={problem.init_guess[inverse_cosine.uid]:.9e}, "
+                f"sin={problem.init_guess[inverse_sine.uid]:.9e}"
+            )
+
+    # symbolic_ml.trig_transform expresses these as algebraic equations in the
+    # differential variables, so it has no diff_init_eqs of its own.
+    for owner in block.get_all_blocks():
+        d_cosines = [v for v in owner.diff_vars if v.name == "d_u_cos"]
+        d_sines = [v for v in owner.diff_vars if v.name == "d_u_sin"]
+        d_angles = [v for v in owner.diff_vars if v.name == "d_delta"]
+        theta = _find_combined_variable(block, "theta")
+        omega = _find_combined_variable(block, "omega")
+        pll_rate = 2.0 * np.pi * frequency_hz * (
+            float(problem.init_guess[omega.uid]) if omega is not None else 1.0
+        )
+        for d_cos, d_sin, d_angle in zip(d_cosines, d_sines, d_angles):
+            cos_var, sin_var = d_cos.base_var, d_sin.base_var
+            if cos_var is None or sin_var is None:
+                continue
+            angle_rate = pll_rate
+            problem.diff_init_guess[d_angle.uid] = angle_rate
+            cos_value = float(problem.init_guess[cos_var.uid])
+            sin_value = float(problem.init_guess[sin_var.uid])
+            problem.diff_init_guess[d_cos.uid] = -angle_rate * sin_value
+            problem.diff_init_guess[d_sin.uid] = angle_rate * cos_value
+
+
+
+def run_case(
+    n_gfl: int,
+    n_gfm: int,
+    multilinear_inverters: bool = False,
+    configure_events: Callable[[Any, list, list], None] | None = None,
+):
     grid, gfl_devices, gfl_bus_names, gfm_bus_names, gfm_blocks, gfm_validation = build_ibr_grid(
         n_gfl, n_gfm, multilinear_inverters=multilinear_inverters
     )
@@ -508,10 +532,13 @@ def run_case(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
     options.solver_type = EmtSolverTypes.StructuralAD
     options.time_step = TIME_STEP
     options.simulation_time = SIMULATION_TIME
-    options.problem_type = (
-        EmtProblemTypes.Multilinear
-        if multilinear_inverters else EmtProblemTypes.CurrentBalance
-    )
+    # The IEEE9 network remains a mixed formulation: only the selected inverter
+    # trig products are multilinearized, while lines, loads and any remaining
+    # machines still use the current-balance DAE contract.  Selecting the global
+    # Multilinear problem compiler for this hybrid grid drops/reshapes equations
+    # and produces a spurious first-step jump.  Both inverter formulations must
+    # therefore be compared through the same CurrentBalance assembly.
+    options.problem_type = EmtProblemTypes.CurrentBalance
     buses_by_name = {bus.name: bus for bus in grid.buses}
     # Materialize the GFM controller references before EmtProblemDae clones
     # and compiles the device blocks.  Updating the original event_dict after
@@ -529,6 +556,8 @@ def run_case(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
             _set_combined_event_value(
                 gfm_block, grid.var_factory, logical_name, value
             )
+    if configure_events is not None:
+        configure_events(grid, gfl_devices, gfm_blocks)
     problem = build_emt_problem(
         grid=grid,
         options=options,
@@ -569,15 +598,62 @@ def run_case(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
         if theta is not None and theta.diff_var is not None:
             problem.diff_init_guess[theta.diff_var.uid] = -2.0 * np.pi * grid.fBase
         _synchronize_gfm_state_derivatives(problem, gfm_block, gfm_validation)
+    if os.environ.get("VERAGRID_IEEE9_IBR_DIAGNOSTICS", "0") == "1":
+        bindings = gfm_validation.uid_bindings_from_problem(problem)
+        print("Machine/exciter assembled initial values:")
+        diagnostic_prefixes = ("Vf", "IRPu", "u_aux", "exp_", "AEx", "BEx", "Se_threshold", "y_exciter4")
+        for variable in problem.get_state_vars() + problem.get_algebraic_vars() + problem.get_variable_parameters():
+            if variable.name.startswith(diagnostic_prefixes) and variable.uid in bindings:
+                print(f"  {variable.name}: {float(bindings[variable.uid]): .9e}")
+        print("Machine/exciter surviving init equations:")
+        variable_by_uid = {
+            variable.uid: variable
+            for variable in problem.get_state_vars() + problem.get_algebraic_vars()
+        }
+        for variable, expression in problem.sys_block.init_eqs.items():
+            if variable.name.startswith(("Vf", "IRPu", "exp_", "y_exciter4", "u_aux")):
+                target = variable_by_uid.get(variable.uid, variable)
+                try:
+                    evaluated = float(expression.eval_uid(bindings))
+                except (KeyError, ValueError):
+                    evaluated = float("nan")
+                print(
+                    f"  {target.name}[{target.uid}] = {expression}; "
+                    f"eval={evaluated:.9e}"
+                )
     if gfm_blocks:
         gfm_validation.seed_bus_algebraic_predictors(problem, grid, pf.results)
         if os.environ.get("VERAGRID_IEEE9_IBR_DIAGNOSTICS", "0") == "1":
             for _bus_name, gfm_block in gfm_blocks:
+                for diagnostic_name in (
+                    "id_ref", "id_c", "iq_ref", "iq_c", "z_id_loop", "z_iq_loop",
+                    "vd_ctrl_out", "vq_ctrl_out", "Kp_icl", "Ki_icl",
+                ):
+                    diagnostic_var = gfm_validation.find_name_in_block(
+                        diagnostic_name, gfm_block
+                    )
+                    if diagnostic_var is None:
+                        continue
+                    if diagnostic_var.uid in problem.uid2idx_vars:
+                        diagnostic_value = problem.init_guess[diagnostic_var.uid]
+                    elif diagnostic_var.uid in problem.uid2idx_event_params:
+                        diagnostic_value = problem.event_params_values[
+                            problem.uid2idx_event_params[diagnostic_var.uid]
+                        ]
+                    else:
+                        continue
+                    print(f"GFM init {diagnostic_name}={diagnostic_value:.9e}")
                 gfm_validation.print_gfm_algebraic_residuals(problem, gfm_block)
                 gfm_validation.print_gfm_state_residuals(problem, gfm_block)
             gfm_validation.print_global_state_residuals(problem)
             gfm_validation.print_bus_kcl_residuals(problem, grid)
+    if multilinear_inverters:
+        for _generator, _bus, gfl_block, _target in gfl_devices:
+            _synchronize_gfl_multilinear_trig(
+                problem, gfl_block, gfm_validation, grid.fBase
+            )
     if gfl_devices:
+        # GFL internal states are initialized by the model's symbolic init_eqs.
         # The IEEE9 machine/network seed is already a periodic EMT operating
         # point. A global algebraic Newton pass moves that orbit while resolving
         # unrelated exciter auxiliary variables, so keep it opt-in.

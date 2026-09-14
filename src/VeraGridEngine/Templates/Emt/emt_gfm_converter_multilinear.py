@@ -66,8 +66,8 @@ def make_gfm_trigonometry_multilinear(block: Block, vf: VarFactory) -> Block:
     if replaced == 0:
         raise RuntimeError("GFM multilinear reformulation found no runtime theta trigonometry")
 
-    # The validated aggregated GFM convention is theta_dot=-omega_b*omega.
-    theta_rate = -omega_base * omega
+    # Mirror the production GFM state equation theta_dot=+omega_b*omega.
+    theta_rate = omega_base * omega
     block.state_vars.extend([u_cos, u_sin])
     block.diff_vars.extend([d_cos, d_sin])
     block.state_eqs.extend([-theta_rate * u_sin, theta_rate * u_cos])
@@ -75,4 +75,3 @@ def make_gfm_trigonometry_multilinear(block: Block, vf: VarFactory) -> Block:
     block.diff_init_eqs.update({d_cos: -theta_rate * u_sin, d_sin: theta_rate * u_cos})
     block.reformulated_vars.extend([u_cos, u_sin])
     return block
-

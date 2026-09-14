@@ -1,13 +1,13 @@
-"""Exact multilinear lift of the production EMT GFL internal filter."""
+"""Reusable phase-domain RL filter for the EMT grid-following converter."""
 
 from __future__ import annotations
 
 import math
 import numpy as np
 
+import VeraGridEngine.Utils.Symbolic.symbolic as sym
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Utils.Symbolic.block import Block, Var, VarPowerFlowReferenceType, find_name_in_block
-import VeraGridEngine.Utils.Symbolic.symbolic_ml as symbolic_ml
 
 
 def _find(model: Block, name: str) -> Var | None:
@@ -27,51 +27,13 @@ def _find(model: Block, name: str) -> Var | None:
     return None
 
 
-def _inverse_park_trig_block(vf: VarFactory, theta: Var) -> tuple[Block, Var, Var]:
-    """Lift the production filter's cos(theta), sin(theta) terms."""
-    angle = vf.add_var("theta_aux_filter_inv")
-    angle_block = Block(
-        algebraic_vars=[angle],
-        algebraic_eqs=[angle - theta],
-        init_eqs={angle: theta},
-        name="filter_inverse_park_angle_aux",
-    )
-    trig, u_cos, u_sin = symbolic_ml.trig_transform(vf, angle, type="usual")
-    trig.name = "filter_inverse_park_trig_transform"
-    u_cos.name = "u_cos_filter_inv"
-    u_sin.name = "u_sin_filter_inv"
-    # Keep the trigonometric evolution equations differential. Moving them to
-    # the algebraic set, as the standalone validation adapter did, makes the
-    # assembled network Jacobian rectangular once the bus/device derivative
-    # aliases are included.
-    if angle.diff_var is not None and theta.diff_var is not None:
-        d_cos = _find(trig, "d_u_cos")
-        d_sin = _find(trig, "d_u_sin")
-        raw_cos = _find(trig, "u_cos")
-        raw_sin = _find(trig, "u_sin")
-        raw_cos = u_cos if raw_cos is None else raw_cos
-        raw_sin = u_sin if raw_sin is None else raw_sin
-        if d_cos is not None and d_sin is not None:
-            d_angle = theta.diff_var
-            trig.diff_init_eqs.update({
-                angle.diff_var: d_angle,
-                d_cos: -d_angle * raw_sin,
-                d_sin: d_angle * raw_cos,
-            })
-    trig.add(angle_block)
-    return trig, u_cos, u_sin
+def add_gfl_internal_filter(vf: VarFactory, frequency_hz: float, model: Block) -> None:
+    """Attach the conventional positive-ABC RL filter to a GFL model.
 
-
-def add_gfl_internal_filter_multilinear(
-    vf: VarFactory,
-    frequency_hz: float,
-    model: Block,
-) -> None:
-    """Attach an exact multilinear lift of the production GFL RL filter.
-
-    Everything except the sine/cosine representation is intentionally kept
-    identical to :func:`add_gfl_internal_filter`: ports, signs, scaling,
-    states, controller equations, and current direction are unchanged.
+    Filter current is positive from the grid bus towards the converter.  The
+    Park angle increases with positive frequency, so the steady dq voltage drop
+    is ``vc_d=vg_d-R*i_d-X*omega*i_q`` and
+    ``vc_q=vg_q-R*i_q+X*omega*i_d``.
     """
     theta = _find(model, "theta")
     vd_c, vq_c = _find(model, "v_d_c"), _find(model, "v_q_c")
@@ -134,11 +96,11 @@ def add_gfl_internal_filter_multilinear(
             if variable.name not in {"vc_d", "vc_q"}
         }
 
-    trig, cosine, sine = _inverse_park_trig_block(vf, theta)
     half = vf.add_const(0.5)
     sqrt3 = vf.add_const(np.sqrt(3.0))
     third = vf.add_const(1.0 / 3.0)
     omega_base = vf.add_const(2.0 * math.pi * frequency_hz)
+    cosine, sine = sym.cos(theta), sym.sin(theta)
     va, vb, vc = converter_v
     ia, ib, ic = filter_i
     vga, vgb, vgc = bus_v
@@ -164,8 +126,19 @@ def add_gfl_internal_filter_multilinear(
                   + vq_c * (-half * sine + half * sqrt3 * cosine)),
         ],
         event_dict={resistance: vf.add_const(0.0)},
-        name="internal_vsc_filter_rl_multilinear",
+        name="internal_vsc_filter_rl",
     )
-    filter_block.add(trig)
     model.add(filter_block)
     model.unify_blocks()
+
+
+def connect_gfl_internal_filter_ports(vf: VarFactory, model: Block) -> None:
+    """Connect the converter voltage/current ports to the attached RL filter."""
+    converter_v = [_find(model, name) for name in ("va_v", "vb_v", "vc_v")]
+    filter_i = [_find(model, f"i_filter_{phase}") for phase in "ABC"]
+    converter_ports = [_find(model, f"vc_{phase}") for phase in "ABC"]
+    line_ports = [_find(model, f"i_line_{phase}") for phase in "ABC"]
+    if any(item is None for item in (*converter_v, *filter_i, *converter_ports, *line_ports)):
+        raise RuntimeError("Incomplete GFL filter port interface")
+    vf.add_connections(converter_ports, converter_v)
+    vf.add_connections(line_ports, filter_i)

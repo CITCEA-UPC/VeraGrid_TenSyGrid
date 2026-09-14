@@ -12,6 +12,7 @@ import math
 import numpy as np
 
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
+import VeraGridEngine.Utils.Symbolic.symbolic_ml as symbolic_ml
 from VeraGridEngine.Utils.Symbolic.block import Block, VarPowerFlowReferenceType
 from VeraGridEngine.enumerations import ConverterControlType, ParamPowerFlowReferenceType
 
@@ -79,6 +80,7 @@ def build_emt_gfm_aggregated_model(
     name: str = "gfm_agg_emt",
     control1: ConverterControlType = ConverterControlType.Pac,
     control2: ConverterControlType = ConverterControlType.Qac,
+    multilinear: bool = False,
 ) -> Block:
     _ = control1
     _ = control2
@@ -260,8 +262,35 @@ def build_emt_gfm_aggregated_model(
         qt + q,
     ]
 
-    im = sym.sqrt(id_c ** 2 + iq_c ** 2 + vf.add_const(1e-5))
-    p_loss = a0 + a1 * im + a2 * im ** 2
+    loss_lift_blocks = []
+    if multilinear:
+        id_c_aux = vf.add_var(f"id_c_loss_aux_{name}")
+        iq_c_aux = vf.add_var(f"iq_c_loss_aux_{name}")
+        im_sq = vf.add_var(f"im_sq_{name}")
+        magnitude_square_block = Block(
+            algebraic_eqs=[
+                id_c_aux - id_c,
+                iq_c_aux - iq_c,
+                im_sq - (
+                    id_c * id_c_aux + iq_c * iq_c_aux + vf.add_const(1e-5)
+                ),
+            ],
+            algebraic_vars=[id_c_aux, iq_c_aux, im_sq],
+            init_eqs={
+                id_c_aux: id_c,
+                iq_c_aux: iq_c,
+                im_sq: id_c * id_c_aux + iq_c * iq_c_aux + vf.add_const(1e-5),
+            },
+            name=f"gfm_current_magnitude_square_lift_{name}",
+        )
+        magnitude_root_block, im = symbolic_ml.ml_smooth_sqrt(
+            vf, im_sq, name=f"gfm_current_magnitude_{name}"
+        )
+        p_loss = a0 + a1 * im + a2 * im_sq
+        loss_lift_blocks.extend([magnitude_square_block, magnitude_root_block])
+    else:
+        im = sym.sqrt(id_c ** 2 + iq_c ** 2 + vf.add_const(1e-5))
+        p_loss = a0 + a1 * im + a2 * im ** 2
     p_conv = vf.add_const(0.5) * (vq_c * iq_c + vd_c * id_c)
     sqrt3 = vf.add_const(np.sqrt(3.0))
     eqs += [
@@ -455,5 +484,7 @@ def build_emt_gfm_aggregated_model(
     model.add(park_ic_block)
     model.add(park_vf_block)
     model.add(inv_vc_block)
+    for loss_lift_block in loss_lift_blocks:
+        model.add(loss_lift_block)
     model.unify_blocks()
     return model

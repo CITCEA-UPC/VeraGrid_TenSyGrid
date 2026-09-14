@@ -1513,8 +1513,28 @@ class EmtProblemDae(EmtProblemTemplate):
             self.initialization_report = run_emt_native_initialization(problem=self, options=self.options)
         self._seed_all_switched_vsc_models()
         self._seed_all_switch_models()
-        self.init_guess.update(self._temp_post_init_guess)
-        self.diff_init_guess.update(self._temp_post_diff_init_guess)
+        # ``_temp_post_*`` contains PF projections collected while connecting
+        # the EMT device to the network.  They are useful only where a model
+        # has no symbolic initialization equation.  Applying them unconditionally
+        # here overwrites the just-resolved coupled device seed (notably
+        # ``Vf = IRPu`` in the machine/exciter interface) with the older PF
+        # predictor and creates a first-step electromagnetic transient.
+        explicitly_initialized_uids: Set[int] = {
+            variable.uid for variable in self.sys_block.init_eqs
+        }
+        explicitly_initialized_diff_uids: Set[int] = {
+            variable.uid for variable in self.sys_block.diff_init_eqs
+        }
+        self.init_guess.update({
+            uid: value
+            for uid, value in self._temp_post_init_guess.items()
+            if uid not in explicitly_initialized_uids
+        })
+        self.diff_init_guess.update({
+            uid: value
+            for uid, value in self._temp_post_diff_init_guess.items()
+            if uid not in explicitly_initialized_diff_uids
+        })
         # for diff_uid, diff_value in self._temp_post_diff_init_guess.items():
         #     if diff_uid in self.diff_init_guess:
         #         pass

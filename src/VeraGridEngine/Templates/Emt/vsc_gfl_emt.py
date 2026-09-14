@@ -472,10 +472,101 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     I_max = vfactory.add_var('I_max')
     event_dict[I_max] = vfactory.add_const(1.2)
     operation = 'normal'
+    limiter_blocks = []
     if operation == 'normal':
-        id_max = sym.sqrt(sym.max(I_max**2 - sym.max(i_q, i_q_ref)**2, vfactory.add_const(1e-5)))     
-        i_d_ref_sat = sym.hard_sat(i_d_ref, -id_max, id_max)
-        i_q_ref_sat = sym.hard_sat(i_q_ref, -I_max, I_max)
+        if multilinear:
+            # Smooth multilinear lift of the circular current limiter. Exact
+            # complementarity is singular at i_q == i_q_ref, so a tiny squared-
+            # current smoothing regularizes that switching surface. Runtime
+            # equations remain linear/bilinear; roots occur only in init_eqs.
+            eps_current_sq = vfactory.add_const(1e-5)
+            limiter_smoothing = vfactory.add_const(1e-10)
+            half = vfactory.add_const(0.5)
+
+            iq_delta = vfactory.add_var("i_q_headroom_delta")
+            iq_delta_aux = vfactory.add_var("i_q_headroom_delta_aux")
+            iq_delta_sq = vfactory.add_var("i_q_headroom_delta_sq")
+            iq_delta_block = Block(
+                algebraic_eqs=[
+                    iq_delta - (i_q - i_q_ref),
+                    iq_delta_aux - iq_delta,
+                    iq_delta_sq - iq_delta * iq_delta_aux - limiter_smoothing,
+                ],
+                algebraic_vars=[iq_delta, iq_delta_aux, iq_delta_sq],
+                init_eqs={
+                    iq_delta: i_q - i_q_ref,
+                    iq_delta_aux: iq_delta,
+                    iq_delta_sq: iq_delta * iq_delta_aux + limiter_smoothing,
+                },
+                name="gfl_iq_headroom_difference_lift",
+            )
+            iq_root_block, iq_delta_abs = symbolic_ml.ml_smooth_sqrt(
+                vfactory, iq_delta_sq, name="gfl_iq_headroom"
+            )
+            iq_limit_axis = vfactory.add_var("i_q_limit_axis")
+            iq_limit_axis_aux = vfactory.add_var("i_q_limit_axis_aux")
+            iq_alias_block = Block(
+                algebraic_eqs=[
+                    iq_limit_axis - half * (i_q + i_q_ref + iq_delta_abs),
+                    iq_limit_axis_aux - iq_limit_axis,
+                ],
+                algebraic_vars=[iq_limit_axis, iq_limit_axis_aux],
+                init_eqs={
+                    iq_limit_axis: half * (i_q + i_q_ref + sym.sqrt(iq_delta_sq)),
+                    iq_limit_axis_aux: iq_limit_axis,
+                },
+                name="gfl_iq_limit_axis_lift",
+            )
+
+            id_headroom_raw = I_max * I_max - iq_limit_axis * iq_limit_axis_aux
+            floor_delta = vfactory.add_var("i_d_headroom_floor_delta")
+            floor_delta_aux = vfactory.add_var("i_d_headroom_floor_delta_aux")
+            floor_delta_sq = vfactory.add_var("i_d_headroom_floor_delta_sq")
+            floor_delta_block = Block(
+                algebraic_eqs=[
+                    floor_delta - (id_headroom_raw - eps_current_sq),
+                    floor_delta_aux - floor_delta,
+                    floor_delta_sq - floor_delta * floor_delta_aux - limiter_smoothing,
+                ],
+                algebraic_vars=[floor_delta, floor_delta_aux, floor_delta_sq],
+                init_eqs={
+                    floor_delta: id_headroom_raw - eps_current_sq,
+                    floor_delta_aux: floor_delta,
+                    floor_delta_sq: floor_delta * floor_delta_aux + limiter_smoothing,
+                },
+                name="gfl_id_headroom_floor_difference_lift",
+            )
+            floor_root_block, floor_delta_abs = symbolic_ml.ml_smooth_sqrt(
+                vfactory, floor_delta_sq, name="gfl_id_headroom_floor"
+            )
+            id_headroom_sq = half * (
+                id_headroom_raw + eps_current_sq + floor_delta_abs
+            )
+            sqrt_block, id_max = symbolic_ml.ml_smooth_sqrt(
+                vfactory, id_headroom_sq, name="gfl_id_max"
+            )
+            id_sat_block, i_d_ref_sat = symbolic_ml.ml_smooth_hard_sat(
+                vfactory, i_d_ref, -id_max, id_max,
+                lam=1e-10, name="gfl_id_ref",
+            )
+            iq_sat_block, i_q_ref_sat = symbolic_ml.ml_smooth_hard_sat(
+                vfactory, i_q_ref, -I_max, I_max,
+                lam=1e-10, name="gfl_iq_ref",
+            )
+            limiter_blocks.extend([
+                iq_delta_block,
+                iq_root_block,
+                iq_alias_block,
+                floor_delta_block,
+                floor_root_block,
+                sqrt_block,
+                id_sat_block,
+                iq_sat_block,
+            ])
+        else:
+            id_max = sym.sqrt(sym.max(I_max**2 - sym.max(i_q, i_q_ref)**2, vfactory.add_const(1e-5)))
+            i_d_ref_sat = sym.hard_sat(i_d_ref, -id_max, id_max)
+            i_q_ref_sat = sym.hard_sat(i_q_ref, -I_max, I_max)
 
     # Voltage Control Loop (Inner Current Loop)
     control_block_iq , vq_hat = tf_to_block(vfactory,
@@ -560,6 +651,8 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     # Add all control blocks
     for ctrl_block in control_blocks:
         gfl_block.add(ctrl_block)
+    for limiter_block in limiter_blocks:
+        gfl_block.add(limiter_block)
     gfl_block.add(control_block_id)
     gfl_block.add(control_block_iq)
 
@@ -616,6 +709,7 @@ def VscGflEmtBuild(vfactory: VarFactory, name: str = "",
     i_c_t = vfactory.add_var('i_c_f')
     i_dc = vfactory.add_var('i_dc')
     P_conv = vfactory.add_var('P_conv')
+    i_conv_dc = vfactory.add_var('i_conv_dc') if multilinear else None
     v_dc_cap = vfactory.add_var('Vdc_cap')
     d_v_dc_cap = vfactory.add_diff_var(name='dt_1_Vdc_cap', base_var=v_dc_cap)
 
@@ -653,23 +747,37 @@ def VscGflEmtBuild(vfactory: VarFactory, name: str = "",
     # EMT model outputs three-phase currents
     p_conv_init = -(inputs[0] * i_a_t + inputs[1] * i_b_t + inputs[2] * i_c_t) / vfactory.add_const(3.0)
     eps_vdc = vfactory.add_const(1.0e-10)
-    vsc_block = Block(
-        algebraic_eqs=[
+    algebraic_eqs = [
             Pt_vsc + P,
             Qt_vsc + Q,
             P_conv + (inputs[0] * i_a_t + inputs[1] * i_b_t + inputs[2] * i_c_t) / vfactory.add_const(3.0),
             v_dc_cap - inputs[9],
-        ],
-        algebraic_vars=[Pt_vsc, Qt_vsc, i_a_t, i_b_t, i_c_t, i_dc, P_conv],
-        state_eqs=[(i_dc - P_conv / (v_dc_cap + eps_vdc)) / Cdc],
+        ]
+    algebraic_vars = [Pt_vsc, Qt_vsc, i_a_t, i_b_t, i_c_t, i_dc, P_conv]
+    init_eqs = {
+        v_dc_cap: inputs[9],
+        P_conv: p_conv_init,
+        i_dc: p_conv_init / inputs[9],
+    }
+    if multilinear:
+        # Exact lifting of i_conv_dc = P_conv / Vdc.  Keeping the quotient in
+        # the differential equation prevents construction of exact Phi/S
+        # matrices even though the residual/Jacobian evaluator can simulate it.
+        algebraic_eqs.append(i_conv_dc * (v_dc_cap + eps_vdc) - P_conv)
+        algebraic_vars.append(i_conv_dc)
+        init_eqs[i_conv_dc] = p_conv_init / inputs[9]
+        dc_cap_rhs = (i_dc - i_conv_dc) / Cdc
+    else:
+        dc_cap_rhs = (i_dc - P_conv / (v_dc_cap + eps_vdc)) / Cdc
+
+    vsc_block = Block(
+        algebraic_eqs=algebraic_eqs,
+        algebraic_vars=algebraic_vars,
+        state_eqs=[dc_cap_rhs],
         state_vars=[v_dc_cap],
         diff_vars=[d_v_dc_cap],
         event_dict= event_dict,
-        init_eqs={
-            v_dc_cap: inputs[9],
-            P_conv: p_conv_init,
-            i_dc: p_conv_init / inputs[9],
-        },
+        init_eqs=init_eqs,
         diff_init_eqs={
             d_v_dc_cap: vfactory.add_const(0.0),
         },
