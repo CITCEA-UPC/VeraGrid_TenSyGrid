@@ -21,6 +21,7 @@ from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
 from VeraGrid.Gui.messages import yes_no_question, info_msg
 from VeraGrid.Gui.general_dialogues import InputNumberDialogue, CheckListDialogue
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.object_model import ObjectsModel
 from VeraGrid.Gui.Diagrams.MapWidget.Substation.voltage_level_graphic_item import VoltageLevelGraphicItem
 from VeraGrid.Gui.Diagrams.SchematicWidget import schematic_widget
@@ -158,7 +159,7 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def merge(self, se: "SubstationGraphicItem"):
@@ -561,8 +562,10 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
         Removes the substation from the schematic only. The substation will remain in the database.
         """
         ok = yes_no_question(
-            f"Remove substation {self.api_object.name} from the schematic only? It will remain in the database.",
-            "Remove substation from schematic")
+            self.tr(
+                "Remove substation {substation_name} from the schematic only? It will remain in the database."
+            ).format(substation_name=self.api_object.name),
+            self.tr("Remove substation from schematic"))
 
         if ok:
             self.editor.remove_substation(api_object=self.api_object, delete_from_db=False, substation_buses=[],
@@ -609,8 +612,11 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
                                                voltage_levels=voltage_levels, dialog_title=title)
 
         ok = yes_no_question(
-            f"Remove substation {self.api_object.name} from both the schematic and the database? This action cannot be undone.",
-            "Remove substation from schematic and database")
+            self.tr(
+                "Remove substation {substation_name} from both the schematic and the database? "
+                "This action cannot be undone."
+            ).format(substation_name=self.api_object.name),
+            self.tr("Remove substation from schematic and database"))
 
         if ok:
             self.editor.remove_substation(api_object=api_object, substation_buses=substation_buses,
@@ -636,7 +642,7 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
         all_devices = devices + buses + voltage_levels
 
         if not all_devices:
-            info_msg('No devices to disconnect', dialog_title)
+            info_msg(self.tr('No devices to disconnect'), dialog_title)
             return
 
         # Create custom properties for name, type, and ID tag
@@ -665,7 +671,7 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
 
         # Make the dialog modal so the user must acknowledge it before continuing
         dialog.setModal(True)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
 
     def move_to_api_coordinates(self, question: bool = True):
         """
@@ -673,8 +679,12 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
         :return:
         """
         if question:
-            ok = yes_no_question(f"Move substation {self.api_object.name} graphics to it's database coordinates?",
-                                 "Move substation graphics")
+            ok = yes_no_question(
+                self.tr("Move substation {substation_name} graphics to it's database coordinates?").format(
+                    substation_name=self.api_object.name,
+                ),
+                self.tr("Move substation graphics"),
+            )
 
             if ok:
                 x, y = self.move_to(lat=self.api_object.latitude,
@@ -697,7 +707,7 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
         )
 
         dlg.setModal(True)
-        dlg.exec()
+        exec_dialog_safely(dialog=dlg)
 
         if dlg.is_accepted:
             selected_buses = []
@@ -767,7 +777,7 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
                     title=f"Finishing merging proces in substation{self.api_object.name}"
                 )
                 dlg.setModal(True)
-                dlg.exec()
+                exec_dialog_safely(dialog=dlg)
 
                 if dlg.is_accepted:
 
@@ -849,11 +859,11 @@ class SubstationGraphicItem(NodeTemplate, QGraphicsRectItem):
             min_value=0.1,
             max_value=100000.0,
             default_value=self.editor.diagram.default_bus_voltage,
-            title="Add voltage level",
-            text="Voltage (kV)",
+            title=self.tr("Add voltage level"),
+            text=self.tr("Voltage (kV)"),
         )
 
-        inpt.exec()
+        exec_dialog_safely(dialog=inpt)
 
         if inpt.is_accepted:
             kv = inpt.value

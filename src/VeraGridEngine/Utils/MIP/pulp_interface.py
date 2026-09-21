@@ -10,11 +10,19 @@ other solver interface easily
 """
 from __future__ import annotations
 
+from numbers import Real
 from typing import List, Union, Callable, Any
 import subprocess
 import pulp
 from pulp import LpVariable as LpVar, LpConstraint as LpCst, LpAffineExpression as LpExp
-from pulp import HiGHS, CPLEX_CMD, PULP_CBC_CMD
+from pulp import (HiGHS,
+                  CPLEX_CMD, CPLEX_PY,
+                  PULP_CBC_CMD,
+                  COPT, COPT_CMD,
+                  CUOPT,
+                  GUROBI_CMD, GUROBI,
+                  XPRESS_CMD, XPRESS_PY,
+                  SCIP_CMD, SCIP_PY)
 from pulp import LpContinuous, LpInteger
 from VeraGridEngine.enumerations import MIPSolvers
 from VeraGridEngine.basic_structures import Logger
@@ -46,18 +54,56 @@ def get_pulp_available_mip_solvers() -> List[str]:
 
     solvers2 = list()
     for slv in solvers:
-        if slv == 'SCIP_CMD':
+        if slv == 'SCIP_CMD' or slv == 'SCIP_PY':
             solvers2.append(MIPSolvers.SCIP.value)
-        elif slv == 'CPLEX_CMD':
+        elif slv == 'CPLEX_CMD' or slv == "CPLEX_PY":
             solvers2.append(MIPSolvers.CPLEX.value)
-        elif slv == 'GUROBI':
+        elif slv == 'GUROBI_CMD' or slv == 'GUROBI':
             solvers2.append(MIPSolvers.GUROBI.value)
-        elif slv == 'XPRESS':
+        elif slv == 'XPRESS' or slv == "XPRESS_PY":
             solvers2.append(MIPSolvers.XPRESS.value)
         elif slv == 'HiGHS':
             solvers2.append(MIPSolvers.HIGHS.value)
+        elif slv == 'PULP_CBC_CMD':
+            solvers2.append(MIPSolvers.CBC.value)
+        elif slv == 'CUOPT':
+            solvers2.append(MIPSolvers.CUOPT.value)
+        elif slv == 'COPT_CMD' or slv == 'COPT':
+            solvers2.append(MIPSolvers.COPT.value)
+        else:
+            print(f"PuLP solver not recognized {slv}")
 
     return solvers2
+
+
+def add_pulp_variable(
+        model: pulp.LpProblem,
+        name: str,
+        low_bound: float | int,
+        up_bound: float | int,
+        category: str,
+) -> LpVar:
+    """
+    Add one PuLP variable using the newest model-owned API when available.
+
+    :param model: PuLP problem that owns the variable.
+    :param name: Variable name.
+    :param low_bound: Lower variable bound.
+    :param up_bound: Upper variable bound.
+    :param category: PuLP variable category.
+    :return: Created PuLP variable.
+    """
+    try:
+        # PuLP 4 owns variable creation from the problem object, avoiding the
+        # deprecated detached-variable constructor path.
+        variable: LpVar = model.add_variable(name=name, lowBound=low_bound, upBound=up_bound, cat=category)
+    except AttributeError:
+        # PuLP 3 has no add_variable API, so construct the variable and attach
+        # it immediately to keep the same ownership semantics.
+        variable = pulp.LpVariable(name=name, lowBound=low_bound, upBound=up_bound, cat=category)
+        model.addVariable(variable)
+
+    return variable
 
 
 class PulpLpModel(AbstractLpModel):
@@ -120,8 +166,7 @@ class PulpLpModel(AbstractLpModel):
         :param name: name (optional)
         :return: LpVar
         """
-        var = pulp.LpVariable(name=name, lowBound=lb, upBound=ub, cat=pulp.LpInteger)
-        self.model.addVariable(var)
+        var = add_pulp_variable(model=self.model, name=name, low_bound=lb, up_bound=ub, category=pulp.LpInteger)
         return var
 
     def add_bin(self, name: str = "") -> LpVar:
@@ -130,8 +175,7 @@ class PulpLpModel(AbstractLpModel):
         :param name: name (optional)
         :return: LpVar
         """
-        var = pulp.LpVariable(name=name, lowBound=0, upBound=1, cat=pulp.LpInteger)
-        self.model.addVariable(var)
+        var = add_pulp_variable(model=self.model, name=name, low_bound=0, up_bound=1, category=pulp.LpInteger)
         return var
 
     def add_var(self, lb: float, ub: float, name: str = "") -> LpVar:
@@ -142,8 +186,7 @@ class PulpLpModel(AbstractLpModel):
         :param name: name (optional)
         :return: LpVar
         """
-        var = pulp.LpVariable(name=name, lowBound=lb, upBound=ub, cat=pulp.LpContinuous)
-        self.model.addVariable(var)
+        var = add_pulp_variable(model=self.model, name=name, low_bound=lb, up_bound=ub, category=pulp.LpContinuous)
         return var
 
     def add_cst(self, cst: LpCst | bool, name: str = "") -> Union[LpCst, int]:
@@ -168,12 +211,20 @@ class PulpLpModel(AbstractLpModel):
         """
         return pulp.lpSum(cst)
 
-    def minimize(self, obj_function: LpExp):
+    def minimize(self, obj_function: LpExp | Real) -> None:
         """
         Set the objective function with minimization sense
         :param obj_function: expression to minimize
+        :return: None
         """
-        self.model.setObjective(obj=obj_function)
+        if isinstance(obj_function, Real):
+            # Some formulations legitimately collapse to a constant objective
+            # when all modeled costs are zero. PuLP needs an affine expression.
+            objective: LpExp = pulp.LpAffineExpression(obj_function)
+        else:
+            objective = obj_function
+
+        self.model.setObjective(obj=objective)
 
     def get_solver(self, show_logs: bool = False):
         """
@@ -185,20 +236,57 @@ class PulpLpModel(AbstractLpModel):
             return HiGHS(mip=self.model.isMIP(), msg=show_logs)
 
         elif self.solver_type == MIPSolvers.SCIP:
-            return pulp.getSolver('SCIP_CMD')
+
+            solver = SCIP_CMD(mip=self.model.isMIP(), msg=show_logs)
+            if solver.available() is not True:
+                solver = SCIP_PY(mip=self.model.isMIP(), msg=show_logs)
+            else:
+                self.logger.add_error("No version of SCIP (cmd or python package was available)")
+                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return solver
 
         elif self.solver_type == MIPSolvers.CBC:
             # CBC comes with PuLP, so it is always available and needs no extra dependency
             return PULP_CBC_CMD(mip=self.model.isMIP(), msg=show_logs)
 
+        elif self.solver_type == MIPSolvers.CUOPT:
+            return CUOPT(mip=self.model.isMIP(), msg=show_logs)
+
         elif self.solver_type == MIPSolvers.CPLEX:
-            return CPLEX_CMD(mip=self.model.isMIP(), msg=show_logs)
+            solver = CPLEX_CMD(mip=self.model.isMIP(), msg=show_logs)
+            if solver.available() is not True:
+                solver = CPLEX_PY(mip=self.model.isMIP(), msg=show_logs)
+            else:
+                self.logger.add_error("No version of Cplex (cmd or python package was available)")
+                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return solver
 
         elif self.solver_type == MIPSolvers.GUROBI:
-            return pulp.getSolver('GUROBI')
+            solver = GUROBI(mip=self.model.isMIP(), msg=show_logs)
+            if solver.available() is not True:
+                solver = GUROBI_CMD(mip=self.model.isMIP(), msg=show_logs)
+            else:
+                self.logger.add_error("No version of Gurobi (cmd or python package was available)")
+                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return solver
 
         elif self.solver_type == MIPSolvers.XPRESS:
-            return pulp.getSolver('XPRESS')
+            solver = XPRESS_CMD(mip=self.model.isMIP(), msg=show_logs)
+            if solver.available() is not True:
+                solver = XPRESS_PY(mip=self.model.isMIP(), msg=show_logs)
+            else:
+                self.logger.add_error("No version of Xpress (cmd or python package was available)")
+                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return solver
+
+        elif self.solver_type == MIPSolvers.COPT:
+            solver = COPT_CMD(mip=self.model.isMIP(), msg=show_logs)
+            if solver.available() is not True:
+                solver = COPT(mip=self.model.isMIP(), msg=show_logs)
+            else:
+                self.logger.add_error("No version of Copt (cmd or python package was available)")
+                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return solver
 
         else:
             raise Exception('PuLP Unsupported MIP solver ' + self.solver_type.value)
@@ -259,8 +347,13 @@ class PulpLpModel(AbstractLpModel):
                 debugging_f_obj = 0
                 for i, (cst_name, cst) in enumerate(debug_model.constraints.items()):
                     # create a new slack var in the problem
-                    sl = pulp.LpVariable(name=f'Relax_{cst_name}', lowBound=0, upBound=1e20, cat=pulp.LpContinuous)
-                    debug_model.addVariable(sl)
+                    sl = add_pulp_variable(
+                        model=debug_model,
+                        name=f'Relax_{cst_name}',
+                        low_bound=0,
+                        up_bound=1e20,
+                        category=pulp.LpContinuous,
+                    )
 
                     # add the variable to the new objective function
                     debugging_f_obj += sl
@@ -299,11 +392,13 @@ class PulpLpModel(AbstractLpModel):
 
                         if abs(val) > 1e-10:
                             # add the slack in the main model
-                            sl2 = pulp.LpVariable(name=f'Relax_final_{cst_name}',
-                                                  lowBound=0,
-                                                  upBound=1e20,
-                                                  cat=pulp.LpContinuous)
-                            self.model.addVariable(sl2)
+                            sl2 = add_pulp_variable(
+                                model=self.model,
+                                name=f'Relax_final_{cst_name}',
+                                low_bound=0,
+                                up_bound=1e20,
+                                category=pulp.LpContinuous,
+                            )
                             self.relaxed_slacks.append((i, sl2, 0.0))  # the 0.0 value will be read later
 
                             # add the slack to the original objective function

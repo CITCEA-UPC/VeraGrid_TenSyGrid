@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QGraphicsItem, QGraphicsItemGroup, QMenu,
 from VeraGrid.Gui.messages import yes_no_question, error_msg
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.Diagrams.generic_graphics import (GenericDiagramWidget, ACTIVE, DEACTIVATED, OTHER, Square, Circle,
                                                     Polygon, Condenser, InjectionSymbolBase, DraggableLabelItem)
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.route_geometry import (merge_route_with_endpoints,
@@ -579,8 +580,8 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
                 self.set_enable(True)
 
             if self.editor.circuit.has_time_series:
-                ok = yes_no_question('Do you want to update the time series active status accordingly?',
-                                     'Update time series active status')
+                ok = yes_no_question(self.tr('Do you want to update the time series active status accordingly?'),
+                                     self.tr('Update time series active status'))
 
                 if ok:
                     # change the bus state (time series)
@@ -1425,7 +1426,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         circuit = self._editor.circuit
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def mousePressEvent(self, QGraphicsSceneMouseEvent):

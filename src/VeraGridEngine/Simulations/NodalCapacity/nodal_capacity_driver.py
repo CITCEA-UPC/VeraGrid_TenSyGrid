@@ -5,7 +5,7 @@
 import numpy as np
 from typing import Union
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
-from VeraGridEngine.enumerations import EngineType, SimulationTypes, SolverType
+from VeraGridEngine.enumerations import EngineType, SimulationTypes
 from VeraGridEngine.Simulations.NodalCapacity.nodal_capacity_options import NodalCapacityOptions
 from VeraGridEngine.Simulations.NodalCapacity.nodal_capacity_results import NodalCapacityResults
 from VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts import run_linear_opf_ts
@@ -228,16 +228,20 @@ class NodalCapacityDriver(DriverTemplate):
                                          options=vc_options,
                                          inputs=vc_inputs,
                                          pf_options=pf_options)
-        vc.run()
         res = vc.run_at(t_idx=None)
 
-        Sbase = self.grid.Sbase
-        self.results.voltage = res.voltages[-1, :]
-        self.results.Sbus = res.Sbus[-1, :] * Sbase
-        self.results.Sf = res.Sf[-1, :] * Sbase
-        self.results.St = res.St[-1, :] * Sbase
-        self.results.loading = res.loading[-1, :]
-        self.results.converged = res.converged[-1]
+        self.logger += vc.logger
+
+        if len(res.voltages) > 0:
+            Sbase = self.grid.Sbase
+            self.results.voltage = res.voltages[-1, :]
+            self.results.Sbus = res.Sbus[-1, :] * Sbase
+            self.results.Sf = res.Sf[-1, :] * Sbase
+            self.results.St = res.St[-1, :] * Sbase
+            self.results.loading = res.loading[-1, :]
+            self.results.converged = res.converged[-1]
+        else:
+            self.results.converged = False
 
         return self.results
 
@@ -282,6 +286,7 @@ class NodalCapacityDriver(DriverTemplate):
         :return:
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
 
         if self.engine == EngineType.VeraGrid:
             if self.options.method == NodalCapacityMethod.LinearOptimization:
@@ -292,9 +297,6 @@ class NodalCapacityDriver(DriverTemplate):
                 self.cpf()
             else:
                 raise NotImplementedError(f"self.engine {self.engine} is not implemented")
-
-        elif self.engine == EngineType.NewtonPA:
-            self.logger.add_warning("Engine not implemented", value=str(self.engine.value))
 
         else:
             if self.options.method == NodalCapacityMethod.LinearOptimization:

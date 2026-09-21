@@ -19,6 +19,8 @@ from VeraGrid.Gui.Main.SubClasses.Model.data_base import DataBaseTableMain
 from VeraGrid.Gui.FileDialogues.ProfilesInput.models_dialogue import ModelsInputGUI
 from VeraGrid.Gui.FileDialogues.ProfilesInput.profile_dialogue import ProfileInputGUI, GeneratorsProfileOptionsDialogue
 from VeraGrid.Gui.profiles_model import ProfilesModel
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
+from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 
 
 class TimeEventsMain(DataBaseTableMain):
@@ -72,7 +74,7 @@ class TimeEventsMain(DataBaseTableMain):
         :return:
         """
         dlg = NewProfilesStructureDialogue()
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             steps, step_length, step_unit, time_base = dlg.get_values()
 
             self.ui.profiles_tableView.setModel(None)
@@ -94,11 +96,9 @@ class TimeEventsMain(DataBaseTableMain):
 
         if self.circuit.time_profile is not None:
             quit_msg = "Are you sure that you want to delete the profiles?"
-            reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg,
-                                                   QtWidgets.QMessageBox.StandardButton.Yes,
-                                                   QtWidgets.QMessageBox.StandardButton.No)
+            reply: bool = yes_no_question(text=quit_msg, title=self.tr('Message'), parent=self)
 
-            if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
+            if reply:
                 self.circuit.delete_profiles()
                 self.ui.profiles_tableView.setModel(None)
                 self.update_date_dependent_combos()
@@ -106,82 +106,99 @@ class TimeEventsMain(DataBaseTableMain):
             else:
                 pass
         else:
-            warning_msg('There are no profiles', 'Delete profiles')
+            warning_msg(self.tr('There are no profiles'), self.tr('Delete profiles'))
 
     def import_profiles(self):
         """
         Profile importer
         """
-        dev_type_text = self.get_db_object_selected_type()
+        dev_type: DeviceType | None = self.get_db_object_selected_type()
 
-        if dev_type_text is not None:
+        if dev_type is not None:
             idx = self.ui.device_type_magnitude_comboBox.currentIndex()
 
-            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type_text]
-            dev_type = self.circuit.device_type_name_dict[dev_type_text]
+            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type]
             objects: List[ALL_DEV_TYPES] = self.circuit.get_elements_by_type(dev_type)
             magnitude = magnitudes[idx]
 
             if len(objects) > 0 and idx > -1:
-                self.profile_input_dialogue = ProfileInputGUI(parent=self,
-                                                              circuit=self.circuit,
-                                                              dev_type=dev_type,
-                                                              objects=objects,
-                                                              magnitude=magnitude)
+                profile_input_dialogue: ProfileInputGUI = ProfileInputGUI(parent=self,
+                                                                          circuit=self.circuit,
+                                                                          dev_type=dev_type,
+                                                                          objects=objects,
+                                                                          magnitude=magnitude)
 
-                self.profile_input_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
-                self.profile_input_dialogue.exec()  # exec leaves the parent on hold
+                profile_input_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
+                try:
+                    exec_dialog_safely(dialog=profile_input_dialogue)  # exec leaves the parent on hold
 
-                # Note: the ProfileInputGUI will handle the profile assigning
+                    # Note: the ProfileInputGUI will handle the profile assigning
+                    if profile_input_dialogue.was_accepted:
 
-                if self.profile_input_dialogue.was_accepted:
+                        # set up sliders
+                        self.update_date_dependent_combos()
+                        self.display_profiles(proxy_mdl=self.get_current_objects_model_view())
+                        self.show_info_toast("Profiles imported", duration=3000)
 
-                    # set up sliders
-                    self.update_date_dependent_combos()
-                    self.display_profiles(proxy_mdl=self.get_current_objects_model_view())
-                    self.show_info_toast("Profiles imported", duration=3000)
+                        # ask to update active profile when magnitude is P for generators and loads
+                        if len(objects) > 0:
+                            if magnitude == 'P':
+                                if objects[0].device_type == DeviceType.GeneratorDevice:
 
-                    # ask to update active profile when magnitude is P for generators and loads
-                    if len(objects) > 0:
-                        if magnitude == 'P':
-                            if objects[0].device_type == DeviceType.GeneratorDevice:
+                                    dlg: GeneratorsProfileOptionsDialogue = GeneratorsProfileOptionsDialogue()
+                                    try:
+                                        exec_dialog_safely(dialog=dlg)
+                                        correct_active_profile: bool = dlg.correct_active_profile.isChecked()
+                                        set_non_dispatchable: bool = dlg.set_non_dispatchable.isChecked()
+                                    finally:
+                                        delete_dialog_safely(dialog=dlg)
 
-                                dlg = GeneratorsProfileOptionsDialogue()
-                                dlg.exec()
+                                    if correct_active_profile:
+                                        self.fix_generators_active_based_on_the_power(ask_before=False)
+                                        self.show_info_toast("Generators active status set")
+                                    else:
+                                        pass
 
-                                if dlg.correct_active_profile.isChecked():
-                                    self.fix_generators_active_based_on_the_power(ask_before=False)
-                                    self.show_info_toast("Generators active status set")
+                                    if set_non_dispatchable:
+                                        for i, elm in enumerate(objects):
+                                            if profile_input_dialogue.has_profile(i):
+                                                # if there was a profile, we want the generator not dispatchable
+                                                elm.enabled_dispatch = False
+                                                elm.enabled_dispatch_prof.fill(False)
+                                            else:
+                                                elm.enabled_dispatch = True
+                                                elm.enabled_dispatch_prof.fill(True)
 
-                                if dlg.set_non_dispatchable.isChecked():
-                                    for i, elm in enumerate(objects):
-                                        if self.profile_input_dialogue.has_profile(i):
-                                            # if there was a profile, we want the generator not dispatchable
-                                            elm.enabled_dispatch = False
-                                            elm.enabled_dispatch_prof.fill(False)
-                                        else:
-                                            elm.enabled_dispatch = True
-                                            elm.enabled_dispatch_prof.fill(True)
+                                        self.show_info_toast("Generators dispatchable status set")
+                                    else:
+                                        pass
 
-                                    self.show_info_toast("Generators dispatchable status set")
-
-                            elif objects[0].device_type == DeviceType.LoadDevice:
-                                ok1 = yes_no_question("Do you want to correct the loads active profile "
-                                                      "based on the active power profile?",
-                                                      "Match")
-                                if ok1:
-                                    self.fix_loads_active_based_on_the_power(ask_before=False)
-                                    self.show_info_toast("Loads active status set")
-
+                                elif objects[0].device_type == DeviceType.LoadDevice:
+                                    ok1 = yes_no_question(self.tr("Do you want to correct the loads active profile "
+                                                          "based on the active power profile?"),
+                                                          self.tr("Match"))
+                                    if ok1:
+                                        self.fix_loads_active_based_on_the_power(ask_before=False)
+                                        self.show_info_toast("Loads active status set")
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                            else:
+                                pass
+                        else:
+                            # the dialogue was closed
+                            self.show_warning_toast("No profiles imported...")
                     else:
                         # the dialogue was closed
                         self.show_warning_toast("No profiles imported...")
-                else:
-                    # the dialogue was closed
-                    self.show_warning_toast("No profiles imported...")
+                finally:
+                    delete_dialog_safely(dialog=profile_input_dialogue)
 
             else:
                 self.show_error_toast("There are no objects...", duration=3000)
+        else:
+            pass
 
     def crop_profiles(self):
         """
@@ -189,25 +206,33 @@ class TimeEventsMain(DataBaseTableMain):
         """
         if self.circuit.has_time_series:
             if self.circuit.get_time_number() > 0:
-                self.start_end_dialogue_window = StartEndSelectionDialogue(min_value=0,
-                                                                           max_value=len(self.circuit.time_profile),
-                                                                           time_array=self.circuit.time_profile)
+                start_end_dialogue_window: StartEndSelectionDialogue = StartEndSelectionDialogue(
+                    min_value=0,
+                    max_value=len(self.circuit.time_profile),
+                    time_array=self.circuit.time_profile)
 
-                self.start_end_dialogue_window.setModal(True)
-                self.start_end_dialogue_window.exec()
+                start_end_dialogue_window.setModal(True)
+                try:
+                    exec_dialog_safely(dialog=start_end_dialogue_window)
+                    start_end_accepted: bool = start_end_dialogue_window.is_accepted
+                    start_value: int = start_end_dialogue_window.start_value
+                    end_value: int = start_end_dialogue_window.end_value
+                finally:
+                    delete_dialog_safely(dialog=start_end_dialogue_window)
 
-                if self.start_end_dialogue_window.is_accepted:
+                if start_end_accepted:
                     self.circuit.resample_profiles2(
-                        t0=self.start_end_dialogue_window.start_value,
-                        t1=self.start_end_dialogue_window.end_value + 1
+                        t0=start_value,
+                        t1=end_value + 1
                     )
 
-                    self.setup_sim_indices(st=self.start_end_dialogue_window.start_value,
-                                           en=self.start_end_dialogue_window.end_value)
+                    self.setup_sim_indices(st=start_value, en=end_value)
 
                     self.view_objects_data()
 
                     self.show_info_toast("Resampled!")
+                else:
+                    pass
             else:
                 self.show_error_toast("Empty time series :/")
 
@@ -226,16 +251,16 @@ class TimeEventsMain(DataBaseTableMain):
                     n = len(clustering_results.time_indices)
 
                     if n != self.ui.cluster_number_spinBox.value():
-                        error_msg("The number of clusters in the stored results is different from the specified :(\n"
-                                  "Run another clustering analysis.")
+                        error_msg(self.tr("The number of clusters in the stored results is different from the specified :(\n"
+                                  "Run another clustering analysis."))
 
                         return
                     else:
                         # all ok
-                        ok = yes_no_question("Are you sure that you want to crop "
+                        ok = yes_no_question(self.tr("Are you sure that you want to crop "
                                              "the profiles to the clustered results?\n"
                                              "This cannot be undone.\n"
-                                             "Also, the clustering will be removed after this.")
+                                             "Also, the clustering will be removed after this."))
 
                         if ok:
                             self.circuit.resample_profiles(indices=clustering_results.time_indices)
@@ -265,16 +290,14 @@ class TimeEventsMain(DataBaseTableMain):
         """
         value = self.ui.profile_factor_doubleSpinBox.value()
 
-        dev_type_text = self.get_db_object_selected_type()
+        dev_type: DeviceType | None = self.get_db_object_selected_type()
 
-        if dev_type_text is not None:
-            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type_text]
+        if dev_type is not None:
+            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type]
             idx = self.ui.device_type_magnitude_comboBox.currentIndex()
 
             if idx > -1:
                 magnitude = magnitudes[idx]
-
-                dev_type = self.circuit.device_type_name_dict[dev_type_text]
                 objects: List[ALL_DEV_TYPES] = self.circuit.get_elements_by_type(dev_type)
                 # Assign profiles
                 if len(objects) > 0:
@@ -380,9 +403,9 @@ class TimeEventsMain(DataBaseTableMain):
         logger: Logger = Logger()
         # value = self.ui.profile_factor_doubleSpinBox.value()
 
-        dev_type_text = self.get_db_object_selected_type()
-        if dev_type_text is not None:
-            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type_text]
+        dev_type: DeviceType | None = self.get_db_object_selected_type()
+        if dev_type is not None:
+            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type]
             idx_from = self.ui.device_type_magnitude_comboBox.currentIndex()
             magnitude_from = magnitudes[idx_from]
 
@@ -394,13 +417,9 @@ class TimeEventsMain(DataBaseTableMain):
                 msg = "Are you sure that you want to overwrite the values " + magnitude_to + \
                       " with the values of " + magnitude_from + "?"
 
-                reply = QtWidgets.QMessageBox.question(self, 'Message', msg,
-                                                       QtWidgets.QMessageBox.StandardButton.Yes,
-                                                       QtWidgets.QMessageBox.StandardButton.No)
+                reply: bool = yes_no_question(text=msg, title=self.tr('Message'), parent=self)
 
-                if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
-
-                    dev_type = self.circuit.device_type_name_dict[dev_type_text]
+                if reply:
                     objects: List[ALL_DEV_TYPES] = self.circuit.get_elements_by_type(dev_type)
 
                     # Assign profiles
@@ -435,7 +454,7 @@ class TimeEventsMain(DataBaseTableMain):
 
         dlg = TimeReIndexDialogue()
         dlg.setModal(True)
-        dlg.exec()
+        exec_dialog_safely(dialog=dlg)
 
         if dlg.is_accepted:
             self.circuit.re_index_time2(t0=dlg.date_time_editor.dateTime().toPython(),
@@ -448,10 +467,10 @@ class TimeEventsMain(DataBaseTableMain):
         """
         Plot profiles from the time events
         """
-        dev_type_text = self.get_db_object_selected_type()
+        dev_type: DeviceType | None = self.get_db_object_selected_type()
 
-        if dev_type_text is not None:
-            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type_text]
+        if dev_type is not None:
+            magnitudes, mag_types = self.circuit.profile_magnitudes[dev_type]
             idx = self.ui.device_type_magnitude_comboBox.currentIndex()
             magnitude = magnitudes[idx]
 
@@ -461,7 +480,7 @@ class TimeEventsMain(DataBaseTableMain):
             # NOTE: we use the (filtered or not) objects table model
             #       to get the objects for the (filtered or not) time series
             proxy_model: ObjectModelFilterProxy = self.ui.dataStructureTableView.model()
-            objects = proxy_model.objects
+            objects = proxy_model.get_objects_in_display_order()
 
             t = self.circuit.time_profile
 
@@ -497,7 +516,10 @@ class TimeEventsMain(DataBaseTableMain):
 
                 try:
                     df.plot(ax=ax)
-                    plt.show()
+                    show_matplotlib_figure(figure=fig,
+                                           parent=self,
+                                           open_dialogs=self._open_plot_dialogs,
+                                           title=self.tr("Profiles plot"))
                 except TypeError as e:
                     self.show_error_toast(str(e))
 
@@ -507,18 +529,21 @@ class TimeEventsMain(DataBaseTableMain):
         """
 
         if not self.circuit.valid_for_simulation():
-            warning_msg("There are no objects to which to assign a profile. \n"
-                        "You need to load or create a grid!")
+            warning_msg(self.tr("There are no objects to which to assign a profile. \n"
+                        "You need to load or create a grid!"))
             return
 
         if self.circuit.time_profile is None:
-            self.models_input_dialogue = ModelsInputGUI(parent=self, main_grid=self.circuit)
+            models_input_dialogue: ModelsInputGUI = ModelsInputGUI(parent=self, main_grid=self.circuit)
 
-            self.models_input_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
-            result = self.models_input_dialogue.exec()  # exec leaves the parent on hold
+            models_input_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
+            try:
+                result = exec_dialog_safely(dialog=models_input_dialogue)  # exec leaves the parent on hold
+                logger = models_input_dialogue.process_logger
+            finally:
+                delete_dialog_safely(dialog=models_input_dialogue)
 
             if result:
-                logger = self.models_input_dialogue.process_logger
 
                 # set up sliders
                 self.update_date_dependent_combos()
@@ -526,10 +551,14 @@ class TimeEventsMain(DataBaseTableMain):
 
                 if logger.has_logs():
                     self.show_logs(name="Import profiles", logger=logger)
+                else:
+                    pass
+            else:
+                pass
 
         else:
-            warning_msg("The import of profiles from many grid models "
-                        "can only be done if the grid has not profiles :/")
+            warning_msg(self.tr("The import of profiles from many grid models "
+                        "can only be done if the grid has not profiles :/"))
 
     def get_circuit_snapshot_datetime(self):
         """
@@ -549,7 +578,7 @@ class TimeEventsMain(DataBaseTableMain):
             self.get_circuit_snapshot_datetime()
             self.show_info_toast("Profile value set to the snapshot")
         else:
-            info_msg('Select a time series step to copy to the snapshot', 'Set snapshot')
+            info_msg(self.tr('Select a time series step to copy to the snapshot'), self.tr('Set snapshot'))
 
     def copy_profiles(self):
         """
@@ -558,24 +587,23 @@ class TimeEventsMain(DataBaseTableMain):
 
         mdl: ProfilesModel = self.ui.profiles_tableView.model()
 
-        cols = set()
-        if len(self.ui.profiles_tableView.selectedIndexes()) > 0:
-            for index in self.ui.profiles_tableView.selectedIndexes():
-                row_idx = index.row()
-                col_idx = index.column()
-                cols.add(col_idx)
-        else:
-            row_idx = 0
-            col_idx = 0
-
         if mdl is not None:
-            ok = mdl.copy_to_clipboard(cols=list(cols))
+            selected_indexes = self.ui.profiles_tableView.selectedIndexes()
+            total_cells: int = mdl.rowCount() * mdl.columnCount()
+
+            if len(selected_indexes) == 0 or len(selected_indexes) == total_cells:
+                ok = mdl.copy_to_clipboard()
+            else:
+                rows: List[int] = sorted(set(index.row() for index in selected_indexes))
+                cols: List[int] = sorted(set(index.column() for index in selected_indexes))
+                ok = mdl.copy_to_clipboard(cols=cols, rows=rows, include_headers=False)
+
             if ok:
                 self.show_info_toast('Copied!')
             else:
                 self.show_warning_toast('Nothing to copy')
         else:
-            warning_msg('There is no profile displayed, please display one', 'Copy profile to clipboard')
+            warning_msg(self.tr('There is no profile displayed, please display one'), self.tr('Copy profile to clipboard'))
 
     def paste_profiles(self):
         """
@@ -585,14 +613,21 @@ class TimeEventsMain(DataBaseTableMain):
         mdl = self.ui.profiles_tableView.model()
         if mdl is not None:
 
-            if len(self.ui.profiles_tableView.selectedIndexes()) > 0:
-                index = self.ui.profiles_tableView.selectedIndexes()[0]
-                row_idx = index.row()
-                col_idx = index.column()
+            selected_indexes = self.ui.profiles_tableView.selectedIndexes()
+            if len(selected_indexes) > 0:
+                rows: List[int] = sorted(set(index.row() for index in selected_indexes))
+                cols: List[int] = sorted(set(index.column() for index in selected_indexes))
+                row_idx = rows[0]
+                col_idx = cols[0]
             else:
+                rows = list()
+                cols = list()
                 row_idx = 0
                 col_idx = 0
 
-            mdl.paste_from_clipboard(row_idx=row_idx, col_idx=col_idx)
+            mdl.paste_from_clipboard(row_idx=row_idx,
+                                     col_idx=col_idx,
+                                     selected_rows=rows,
+                                     selected_cols=cols)
         else:
-            warning_msg('There is no profile displayed, please display one', 'Paste profile to clipboard')
+            warning_msg(self.tr('There is no profile displayed, please display one'), self.tr('Paste profile to clipboard'))

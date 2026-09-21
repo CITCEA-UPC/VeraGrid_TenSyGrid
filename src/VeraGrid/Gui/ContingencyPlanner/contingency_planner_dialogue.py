@@ -7,6 +7,7 @@ from PySide6 import QtWidgets
 from typing import List
 
 from VeraGrid.Gui.ContingencyPlanner.contingency_planner_gui import Ui_MainWindow
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 import VeraGridEngine.Devices as dev
 from VeraGridEngine.enumerations import DeviceType
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -27,13 +28,14 @@ class ContingencyPlannerGUI(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle('Contingency planner')
+        self.setWindowTitle(self.tr('Contingency planner'))
 
         self.circuit = grid
 
         self.contingency_branch_types = [DeviceType.LineDevice,
                                          DeviceType.DCLineDevice,
                                          DeviceType.Transformer2WDevice,
+                                         DeviceType.WindingDevice,
                                          DeviceType.VscDevice,
                                          DeviceType.UpfcDevice]
 
@@ -67,7 +69,7 @@ class ContingencyPlannerGUI(QtWidgets.QDialog):
         msg.setWindowTitle(title)
         # msg.setDetailedText("The details are as follows:")
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
-        retval = msg.exec()
+        retval = exec_dialog_safely(dialog=msg)
 
     def auto_generate_contingencies(self):
         """

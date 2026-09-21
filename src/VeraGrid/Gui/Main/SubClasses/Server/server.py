@@ -5,6 +5,7 @@
 import os
 import json
 from typing import Dict, Union
+from PySide6 import QtCore
 from VeraGridEngine.IO.file_system import get_create_veragrid_folder
 
 from VeraGrid.Gui.Main.SubClasses.base_gui import BaseMainGui
@@ -27,8 +28,13 @@ class ServerMain(BaseMainGui):
 
         # Server driver
         self.server_driver: ServerDriver = ServerDriver(url="", port=0, pwd="", secure=False)
+        self.server_driver.setParent(self)
         self.server_driver.connected_signal.connect(self.server_connected)
-        self.server_driver.done_signal.connect(self.post_start_stop_server)  # connect the post function
+        self.server_driver.finished.connect(self.post_start_stop_server)
+        self.server_driver.status_signal.connect(self.ui.server_status_label.setText,
+                                                 QtCore.Qt.ConnectionType.QueuedConnection)
+        self.server_driver.jobs_data_signal.connect(self.server_driver.data_model.parse_data,
+                                                    QtCore.Qt.ConnectionType.QueuedConnection)
 
         self.ui.server_tableView.setModel(self.server_driver.data_model)
 
@@ -110,7 +116,7 @@ class ServerMain(BaseMainGui):
                                           port=self.ui.server_port_spinBox.value(),
                                           pwd=self.ui.server_pwd_lineEdit.text().strip(),
                                           secure=self.ui.secureServerConnectionCheckBox.isChecked(),
-                                          status_func=self.ui.server_status_label.setText)
+                                          status_func=None)
 
             # save the last server config
             self.save_server_config()

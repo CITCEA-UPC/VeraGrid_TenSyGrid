@@ -25,9 +25,8 @@ from VeraGridEngine.enumerations import SimulationTypes
 from VeraGridEngine.Simulations.driver_template import TimeSeriesDriverTemplate
 from VeraGridEngine.Simulations.Clustering.clustering_results import ClusteringResults
 from VeraGridEngine.Simulations.ContingencyAnalysis.contingency_analysis_results import ContingencyAnalysisResults
-from VeraGridEngine.Compilers.circuit_to_newton_pa import newton_pa_contingencies, translate_contingency_report, \
-    NEWTON_PA_AVAILABLE
-from VeraGridEngine.Compilers.circuit_to_gslv import (gslv_contingencies_ts, GSLV_AVAILABLE)
+from VeraGridEngine.Compilers.Gslv.activation import GSLV_AVAILABLE
+from VeraGridEngine.Compilers.Gslv.Simulations.contingencies import gslv_contingencies_ts
 from VeraGridEngine.Utils.NumericalMethods.weldorf_online_stddev import WeldorfOnlineStdDevMat
 
 
@@ -398,6 +397,10 @@ class ContingencyAnalysisTimeSeriesDriver(TimeSeriesDriverTemplate):
         )
 
         Pbus_mat = self.grid.get_Pbus_prof()
+        rates_mat = self.grid.get_branch_rates_prof(add_hvdc=False, add_vsc=False, add_switch=True)
+        contingency_rates_mat = self.grid.get_branch_contingency_rates_prof(
+            add_hvdc=False, add_vsc=False, add_switch=True
+        )
 
         std_dev_counter = WeldorfOnlineStdDevMat(nrow=results.nt, ncol=results.nbranch)
 
@@ -413,8 +416,8 @@ class ContingencyAnalysisTimeSeriesDriver(TimeSeriesDriverTemplate):
                 nbr=nc.nbr,
                 n_con_groups=n_con_groups,
                 Pbus=Pbus_mat[t, :],
-                rates=nc.passive_branch_data.rates,
-                con_rates=nc.passive_branch_data.contingency_rates,
+                rates=rates_mat[t, :],
+                con_rates=contingency_rates_mat[t, :],
                 PTDF=lin_t.PTDF,
                 LODF=lin_t.LODF,
                 mon_idx=mon_idx,
@@ -550,6 +553,7 @@ class ContingencyAnalysisTimeSeriesDriver(TimeSeriesDriverTemplate):
         Run contingency analysis time series
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
 
         if self.engine == EngineType.VeraGrid:
 
@@ -564,10 +568,6 @@ class ContingencyAnalysisTimeSeriesDriver(TimeSeriesDriverTemplate):
 
             else:
                 pass
-
-        elif self.engine == EngineType.NewtonPA and NEWTON_PA_AVAILABLE:
-            self.report_text('Running contingencies in newton... ')
-            self.results = self.run_newton_pa()
 
         elif self.engine == EngineType.GSLV and GSLV_AVAILABLE:
             self.report_text('Running contingencies in gslv... ')

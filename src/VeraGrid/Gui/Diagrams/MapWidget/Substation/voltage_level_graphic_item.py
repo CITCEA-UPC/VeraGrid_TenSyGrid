@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QMenu, QGraphicsSceneContextMenuEvent, QGraphicsS
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 from VeraGridEngine.Devices.Substation.voltage_level import VoltageLevel
 from VeraGridEngine.Devices.Substation.bus import Bus
@@ -108,7 +109,7 @@ class VoltageLevelGraphicItem(GenericDiagramWidget, QGraphicsEllipseItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def center_on_substation(self) -> None:

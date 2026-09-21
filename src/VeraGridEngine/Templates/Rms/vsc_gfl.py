@@ -6,6 +6,8 @@
 import numpy as np
 import math
 
+from typing import List
+
 from VeraGridEngine.Templates.template_definition import TemplateDefinition, TemplateProp
 from VeraGridEngine.enumerations import DeviceType, VarPowerFlowReferenceType, ParamPowerFlowReferenceType
 from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
@@ -196,6 +198,7 @@ def get_pll_transform_rms(vfactory: VarFactory, name: str = "Pll_transform_rms")
     templ.block = block
 
 
+    templ.comment = 'VSC phase-locked-loop RMS control block'
     return templ
 
 def pll_transform_rms(vfactory: VarFactory, Vm, Va, name:str = ''):
@@ -274,7 +277,8 @@ def pll_transform(vfactory: VarFactory, v_abc, multilinear:bool = False, name:st
     return res_block, v_dq, omega, theta, aux_vars
 
 
-def build_gfl_converter_model(vfactory: VarFactory, inputs, 
+def build_gfl_converter_model(vfactory: VarFactory,
+                              inputs: List,
                               control1: ConverterControlType = ConverterControlType.Pac, 
                               control2: ConverterControlType = ConverterControlType.Qac,
                               multilinear:bool = False):
@@ -360,10 +364,10 @@ def build_gfl_converter_model(vfactory: VarFactory, inputs,
         Ki_vac: vfactory.add_const(1.0),
         R: vfactory.add_const(0.01),
         L: vfactory.add_const(0.05),
-        P_ref: vfactory.add_const(None),
-        Q_ref: vfactory.add_const(None),
-        Vdc_ref: vfactory.add_const(None),
-        Vm_ac_ref: vfactory.add_const(None),
+        P_ref: P,
+        Q_ref: Q,
+        Vdc_ref: v_dc,
+        Vm_ac_ref: Vm,
     }
 
     # P and Q at the point of common coupling
@@ -524,26 +528,7 @@ def build_gfl_converter_model(vfactory: VarFactory, inputs,
         v_q_c: v_q_g - (-R * i_q - omega * L * i_d),
         vd_hat: v_d_c - (v_d_g - L * omega * i_q),
         vq_hat: v_q_c - (v_q_g + L * omega * i_d),
-        Vdc_ref: v_dc,
-        Vm_ac_ref: Vm,
-        Q_ref: Q,
-        P_ref: P,
     }
-    
-    # Add control-specific initialization
-    if control1 in [ConverterControlType.Pac, ConverterControlType.Pdc]:
-        init_eqs[P_ref] = P
-    elif control1 == ConverterControlType.Vm_dc:
-        init_eqs[Vdc_ref] = v_dc
-        # For DC voltage control, initialize i_q_ref based on initial power flow
-        init_eqs[i_q_ref] = P / v_q_g
-    
-    if control2 == ConverterControlType.Qac:
-        init_eqs[Q_ref] = Q
-    elif control2 == ConverterControlType.Vm_ac:
-        init_eqs[Vm_ac_ref] = Vm
-        # For AC voltage control, initialize i_d_ref based on initial reactive power
-        init_eqs[i_d_ref] = Q / v_q_g
 
     gfl_block_aux = Block(
         algebraic_eqs=algebraic_eqs,
@@ -624,7 +609,7 @@ def trafo_gfl_converter_model(vfactory: VarFactory,
     gfl_block.unify_blocks()
     return gfl_block, i_d, i_q, P, Q, internals
 
-def VscGflBuild(vfactory: VarFactory, name: str = "",
+def VscGflBuild(vfactory: VarFactory, name: str = "Grid-following VSC RMS template",
                 control1: ConverterControlType = ConverterControlType.Pac,
                 control2: ConverterControlType = ConverterControlType.Qac) -> RmsModelTemplate:
     """
@@ -645,6 +630,7 @@ def VscGflBuild(vfactory: VarFactory, name: str = "",
         - Vm_dc + Vm_ac: DC voltage and AC voltage control
     """
     templ = RmsModelTemplate()
+    templ.name = name
     templ.tpe = DeviceType.VscDevice
     # Inputs: Vm, Va, Vdc (Pt_vsc and Qt_vsc come from power flow initialization)
     inputs = [vfactory.add_var("Vm_"), vfactory.add_var("Va_"), vfactory.add_var("Vdc_")]
@@ -724,10 +710,11 @@ def VscGflBuild(vfactory: VarFactory, name: str = "",
     vsc_block.name = 'gfl_block'
 
     templ._block = vsc_block
+    templ.comment = 'VSC grid-following RMS model'
     return templ
 
 
-def TrafoGflBuild(vfactory: VarFactory, name: str = "",
+def TrafoGflBuild(vfactory: VarFactory, name: str = "Grid-following transformer RMS template",
                   control1: ConverterControlType = ConverterControlType.Pac,
                   control2: ConverterControlType = ConverterControlType.Qac) -> RmsModelTemplate:
     """
@@ -735,6 +722,7 @@ def TrafoGflBuild(vfactory: VarFactory, name: str = "",
     and AC-to side is grid bus.
     """
     templ = RmsModelTemplate()
+    templ.name = name
     templ.tpe = DeviceType.VscDevice
 
     Vm_f = vfactory.add_var("Vmf_")
@@ -815,4 +803,5 @@ def TrafoGflBuild(vfactory: VarFactory, name: str = "",
     vsc_block.name = 'trafo_gfl_block'
 
     templ._block = vsc_block
+    templ.comment = 'Grid-following converter transformer RMS block'
     return templ

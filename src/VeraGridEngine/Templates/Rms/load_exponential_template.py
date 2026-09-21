@@ -24,7 +24,8 @@ class ExponentialLoadRmsTemplate(TemplateDefinition):
         return ExponentialLoadBuild(self.vf, self.get_value("name"), self.get_value("Pl0"), self.get_value("Ql0"))
 
 
-def ExponentialLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) -> RmsModelTemplate:
+def ExponentialLoadBuild(vfactory: VarFactory, name: str = "Exponential load RMS template",
+                         Pl0: float = 1.0, Ql0: float = 0.1) -> RmsModelTemplate:
     """
     Builds an RMS model template for an exponential load.
     
@@ -42,16 +43,14 @@ def ExponentialLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1)
     This model is useful for representing loads where power consumption is highly 
     sensitive to voltage changes, such as heating loads or certain electronic devices.
     
-    Args:
-        vfactory: VarFactory instance for creating variables
-        name (str): Name of the load model
-        Pl0 (float): Initial active power at nominal voltage (pu)
-        Ql0 (float): Initial reactive power at nominal voltage (pu)
-    
-    Returns:
-        RmsModelTemplate: Configured RMS model template for exponential load simulation
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :param Pl0: Initial active power at nominal voltage in per unit.
+    :param Ql0: Initial reactive power at nominal voltage in per unit.
+    :return: Configured exponential-load RMS model template.
     """
-    templ = RmsModelTemplate()
+    templ = RmsModelTemplate(name=name)
+    templ.name = name
     templ.tpe = DeviceType.LoadDevice
 
     inputs = [vfactory.add_var("Vm")]
@@ -71,14 +70,10 @@ def ExponentialLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1)
     events_dict = {
         P0: vfactory.add_const(Pl0),
         Q0: vfactory.add_const(Ql0),
-        V0: vfactory.add_const(None),
+        V0: inputs[0],
 
         a: vfactory.add_const(5),
         b: vfactory.add_const(5),
-    }
-
-    init_eqs = {
-        V0: inputs[0],
     }
 
     templ.block = Block(
@@ -88,7 +83,6 @@ def ExponentialLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1)
         ],
         algebraic_vars=[P, Q],
         event_dict=events_dict,
-        init_eqs=init_eqs,
     )
 
     templ.block.external_mapping = {
@@ -99,4 +93,5 @@ def ExponentialLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1)
 
     templ.block.in_vars = inputs
 
+    templ.comment = 'Load RMS exponential voltage-dependent model'
     return templ

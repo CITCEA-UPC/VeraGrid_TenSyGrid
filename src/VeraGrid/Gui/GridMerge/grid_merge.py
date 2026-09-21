@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt
 
 from VeraGrid.Gui.GridMerge.build_diff_tree import populate_tree
 from VeraGrid.Gui.GridMerge.grid_merge_gui import Ui_Dialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import LogsDialogue
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -27,7 +28,7 @@ class GridMergeDialogue(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Grid merges & acquisitions')
+        self.setWindowTitle(self.tr('Grid merges & acquisitions'))
 
         self.ui.treeWidget.setHeaderLabels(
             ["Grid", "Object type", "action", "idtag", "name", "property", "value", "new value"]
@@ -40,8 +41,8 @@ class GridMergeDialogue(QtWidgets.QDialog):
         self.all_elms_base_dict, ok = self._base_grid.get_all_elements_dict(logger=self.logger)
 
         if not ok:
-            dlg = LogsDialogue('The base circuit has duplicated idtags and cannot be merged :(', self.logger)
-            dlg.exec()
+            dlg = LogsDialogue(self.tr('The base circuit has duplicated idtags and cannot be merged :('), self.logger)
+            exec_dialog_safely(dialog=dlg)
             return
 
         self._diff: MultiCircuit = diff
@@ -49,8 +50,8 @@ class GridMergeDialogue(QtWidgets.QDialog):
         self.diff_objects_dict, ok2 = self._diff.get_all_elements_dict(logger=self.logger)
 
         if not ok2:
-            dlg = LogsDialogue('The diff circuit has duplicated idtags and cannot be merged :(', self.logger)
-            dlg.exec()
+            dlg = LogsDialogue(self.tr('The diff circuit has duplicated idtags and cannot be merged :('), self.logger)
+            exec_dialog_safely(dialog=dlg)
             return
 
         self.build_tree()

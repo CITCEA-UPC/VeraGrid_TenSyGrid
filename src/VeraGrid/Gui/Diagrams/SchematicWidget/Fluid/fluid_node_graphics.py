@@ -33,6 +33,7 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.Fluid.fluid_pump_graphics import Flui
 from VeraGrid.Gui.Diagrams.SchematicWidget.Fluid.fluid_p2x_graphics import FluidP2xGraphicItem
 from VeraGrid.Gui.messages import yes_no_question, error_msg
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
     from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.line_graphics_template import LineGraphicTemplateItem
@@ -167,7 +168,7 @@ class FluidNodeGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
@@ -1039,7 +1040,7 @@ class FluidNodeGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         Delete all bus connections
         """
         if ask:
-            ok = yes_no_question('Are you sure that you want to delete this fluid node',
+            ok = yes_no_question(self.tr('Are you sure that you want to delete this fluid node'),
                                  'Remove fluid node from schematic and DB' if delete_from_db else "Remove bus from schematic")
         else:
             ok = True
@@ -1053,8 +1054,8 @@ class FluidNodeGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         @return:
         """
         if ask:
-            ok = yes_no_question('Are you sure that you want to delete this fluid node',
-                                 'Remove fluid node')
+            ok = yes_no_question(self.tr('Are you sure that you want to delete this fluid node'),
+                                 self.tr('Remove fluid node'))
         else:
             ok = True
 
@@ -1078,9 +1079,9 @@ class FluidNodeGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
                 i = self.editor.circuit.fluid_nodes.index(self.api_object)
                 self.editor.plot_bus(i, self.api_object.bus)
             else:
-                error_msg("No electrical bus attached :/")
+                error_msg(self.tr("No electrical bus attached :/"))
         else:
-            error_msg("No DB object attached :/")
+            error_msg(self.tr("No DB object attached :/"))
 
     def plot_fluid_profiles(self):
         """
@@ -1092,7 +1093,7 @@ class FluidNodeGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
             i = self.editor.circuit.fluid_nodes.index(self.api_object)
             self.editor.plot_fluid_node(i, self.api_object)
         else:
-            error_msg("No DB object attached :/")
+            error_msg(self.tr("No DB object attached :/"))
 
     def set_values(self, i: int, Vm: float, Va: float, P: float, Q: float,
                    tpe: str, format_str="{:10.2f}"):

@@ -9,6 +9,10 @@ from scipy.sparse import csc_matrix
 from collections.abc import Callable
 
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import RmsProblemDae
+from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import (
+    project_initial_algebraic_state,
+    solve_rms_newton_correction,
+)
 from VeraGridEngine.Utils.Sparse.csc import pack_4_by_4_scipy
 from VeraGridEngine.basic_structures import Vec, Mat
 
@@ -141,12 +145,38 @@ class BackEulerImplicitIntegration:
         :return:
         """
         converged: bool = False
-        well_initialized: bool = True
 
         x0: Vec = self.problem.get_x0()
 
         # we assume steady state
         dx0: Vec = np.zeros(self.problem.get_diff_var_number(), dtype=float)
+        self.problem.update_variable_params(
+            t=self.t0,
+            x_snapshot=x0,
+            scheduled_t=self.t0,
+        )
+        self.problem.update(
+            self.t0,
+            x0,
+            self.problem._variable_parameters_values,
+        )
+        initial_residual: float
+        x0, well_initialized, initial_residual = project_initial_algebraic_state(
+            problem=self.problem,
+            initial_values=x0,
+            differential_values=dx0,
+            tolerance=self.tol,
+            max_iter=self.max_iter_0,
+        )
+        if well_initialized:
+            pass
+        else:
+            self.problem.logger.add_error(
+                msg="RMS algebraic initial projection did not converge",
+                device="BackEulerImplicitIntegration",
+                value=initial_residual,
+                expected_value=self.tol,
+            )
 
         # timing accumulators
         self._timings = {
@@ -165,10 +195,10 @@ class BackEulerImplicitIntegration:
         timings = self._timings
 
         self.t[0] = self.t0
-        self.y[0, :] = x0.copy()
         dx = dx0.copy()
         dx_last = dx0.copy()
         residual = 0.0
+        self.y[0, :] = x0.copy()
 
         has_fmu_cs = True
         has_fmu_me = True
@@ -191,7 +221,9 @@ class BackEulerImplicitIntegration:
                 self.problem.report_progress2(step_idx, self.steps)
 
                 t_current_macro: float = self.t[step_idx]
-                t_macro_target: float = t_current_macro + self.h
+                # Derive every macro boundary from the integer step index so
+                # floating-point accumulation cannot activate an event early.
+                t_macro_target: float = self.t0 + float(step_idx + 1) * self.h
 
                 x_prev = self.y[step_idx, :].copy()
                 x_new = x_prev.copy()
@@ -217,23 +249,37 @@ class BackEulerImplicitIntegration:
                             f"Invalid local step size h_eff={h_eff} while integrating RMS macro step {step_idx}."
                         )
 
-                    # Historical RMS implicit integration evaluates runtime
-                    # parameters from the previously accepted local time before
-                    # solving the next substep. This keeps event-boundary samples
-                    # on the pre-event branch, matching the stored regressions.
-                    self.problem.update_variable_params(t=t_local_prev,
+                    # Continuous controls use the local target so a step at an
+                    # accepted boundary drives the immediately following
+                    # interval. Scheduled modes retain the previous time view
+                    # because their latches own separate boundary semantics.
+                    self.problem.update_variable_params(t=t_curr,
                                                         x_snapshot=x_new,
                                                         scheduled_t=t_local_prev)
 
                     self.problem.update(t_curr, x_new, self.problem._variable_parameters_values)
 
-                    if has_fmu_cs:
-                        self.problem.advance_fmu_cs_devices(t=t_local_prev, x_snapshot=x_prev, h=h_eff)
                     if has_fmu_me:
                         self.problem.advance_fmu_me_devices(t=t_local_prev, x_snapshot=x_prev, h=h_eff)
+                        state_event_retry_time: float | None = (
+                            self.problem.prepare_fmu_me_state_event_retry()
+                        )
+                    else:
+                        state_event_retry_time = None
+                    co_simulation_advanced: bool = False
+                    if has_fmu_cs and state_event_retry_time is None:
+                        co_simulation_advanced = (
+                            self.problem.advance_fmu_cs_devices(
+                                t=t_local_prev,
+                                x_snapshot=x_prev,
+                                h=h_eff,
+                            )
+                        )
+                    else:
+                        pass
 
                     n_iter = 0
-                    substep_converged = False
+                    substep_converged = state_event_retry_time is not None
                     tol = self.tol
 
                     while not substep_converged and n_iter < self.max_iter_0:
@@ -250,28 +296,6 @@ class BackEulerImplicitIntegration:
                         residual = np.linalg.norm(rhs, np.inf)
                         substep_converged = residual < tol
 
-                        if step_idx == 0 and is_first_local_step:
-                            if substep_converged:
-                                # print("System well initialized.")
-                                # print(f"x is {x_new}")
-                                pass
-                            else:
-                                well_initialized = False
-                                self.problem.logger.add_error(
-                                    msg="RMS simulation required iterative initialization",
-                                    device="BackEulerImplicitIntegration",
-                                    value=residual,
-                                    expected_value=tol,
-                                )
-                                #print(f"Iterative initialization stopped at iter {n_iter} with residual {residual}")
-                                #non_zero_indexes = np.where(np.abs(rhs) > 1e-6)[0]
-                                #all_eq = self.problem._state_eqs + self.problem._algebraic_eqs
-                                #print("eqs are")
-                                #for i in non_zero_indexes:
-                                #    eq = all_eq[i]
-                                #    print(f"eq {eq} with error {rhs[i]}")
-                                #exit()
-
                         if not substep_converged:
                             solved = False
                             jac_start = time.time()
@@ -279,12 +303,24 @@ class BackEulerImplicitIntegration:
                             jac_end = time.time()
                             timings["jacobian_time"] += jac_end - jac_start
                             linear_start = time.time()
-                            delta = sp.linalg.spsolve(Jf, -rhs)
+                            reference_indices: tuple[int, int] | None = (
+                                self.problem.get_small_signal_reference_indices()
+                            )
+                            reference_column: int | None
+                            if reference_indices is not None:
+                                reference_column = reference_indices[1]
+                            else:
+                                reference_column = None
+                            delta: Vec = solve_rms_newton_correction(
+                                jacobian=Jf,
+                                residual=rhs,
+                                reference_column=reference_column,
+                            )
                             linear_end = time.time()
                             timings["linear_solver_time"] += linear_end - linear_start
                             solved = np.all(np.isfinite(delta))
 
-                            if not solved:
+                            if not solved and Jf.shape[0] == Jf.shape[1]:
                                 # Tikhonov-regularized Newton step
                                 lam = 1e-4
                                 while lam <= 1e-1 and not solved:
@@ -301,7 +337,7 @@ class BackEulerImplicitIntegration:
                                 for i in singular_dirs:
                                     v = vh.T[:, i]  # variable-space vector
                                     abs_v = np.abs(v)
-                                    dominant_idx = np.argsort(abs_v)[::-1][:5]  # top 5 vars
+                                    dominant_idx = np.argsort(abs_v, kind="stable")[::-1][:5]  # top 5 vars
                                     print(f"\nSingular direction {i}, σ={s[i]:.3e}")
                                     for j in dominant_idx:
                                         if j < self.problem.get_algebraic_var_number():
@@ -331,14 +367,50 @@ class BackEulerImplicitIntegration:
                             if _dmax > 1.0:
                                 delta = delta * (1.0 / _dmax)
                             x_new += delta
+                            if has_fmu_me:
+                                # Replace the candidate with outputs evaluated
+                                # from the corrected network iterate before the
+                                # next residual is formed.
+                                self.problem.advance_fmu_me_devices(
+                                    t=t_local_prev,
+                                    x_snapshot=x_new,
+                                    h=h_eff,
+                                )
+                                state_event_retry_time = (
+                                    self.problem.prepare_fmu_me_state_event_retry()
+                                )
+                                if state_event_retry_time is not None:
+                                    if co_simulation_advanced:
+                                        raise RuntimeError(
+                                            "RMS FMI ME state event cannot retry after Co-Simulation devices advanced"
+                                        )
+                                    else:
+                                        substep_converged = True
+                                else:
+                                    pass
+                            else:
+                                pass
                             n_iter += 1
 
                     if substep_converged:
-                        dx_last = dx.copy()
-                        x_prev = x_new.copy()
-                        t_local_prev = t_curr
-                        is_first_local_step = False
+                        if state_event_retry_time is None:
+                            if has_fmu_me:
+                                self.problem.resolve_fmu_me_devices(accepted=True)
+                            else:
+                                pass
+                            dx_last = dx.copy()
+                            x_prev = x_new.copy()
+                            t_local_prev = t_curr
+                            is_first_local_step = False
+                        else:
+                            # Keep the accepted network point unchanged; the
+                            # next local iteration targets the localized event.
+                            x_new = x_prev.copy()
                     else:
+                        if has_fmu_me:
+                            self.problem.resolve_fmu_me_devices(accepted=False)
+                        else:
+                            pass
                         print(f"Failed to converge at step {step_idx} and n_iter is {n_iter}")
                         print(f"Residual is {residual}")
                         converged = False

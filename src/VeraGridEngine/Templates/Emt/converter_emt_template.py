@@ -7,7 +7,13 @@ import numpy as np
 from typing import List, Dict, Tuple
 from VeraGridEngine.enumerations import DeviceType, ConverterControlType, ParamPowerFlowReferenceType
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
-from VeraGridEngine.Utils.Symbolic.block import Block, VarPowerFlowReferenceType
+from VeraGridEngine.Utils.Symbolic.block import (
+    Block,
+    EmtTerminalConductor,
+    EmtTerminalCurrentContribution,
+    EmtTerminalSide,
+    VarPowerFlowReferenceType,
+)
 from VeraGridEngine.Utils.Symbolic.symbolic import Var, Const
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
@@ -64,6 +70,7 @@ def _resolve_converter_control_reference_exprs(
     control2_val: Var,
     p0: Var,
     vdc_nom: Var,
+    sbase: Var,
 ) -> Tuple[sym.Expr, sym.Expr, sym.Expr, sym.Expr, sym.Expr, sym.Expr]:
     control1_is_vm_dc = _converter_control_match_expr(control1, ConverterControlType.Vm_dc)
     control2_is_vm_dc = _converter_control_match_expr(control2, ConverterControlType.Vm_dc)
@@ -82,22 +89,31 @@ def _resolve_converter_control_reference_exprs(
         + (Const(1.0) - control1_is_vm_dc)
         * (control2_is_vm_dc * control2_val + (Const(1.0) - control2_is_vm_dc) * vdc_nom)
     )
-    q_ref = (
+    # Converter API power targets are per unit, whereas P_ref/Q_ref use the
+    # system-base power units expected by the PF-to-EMT initialization path.
+    # Convert at this boundary exactly once; voltage targets remain per unit.
+    q_ref_pu = (
         control1_is_qac * control1_val
         + (Const(1.0) - control1_is_qac)
         * (control2_is_qac * control2_val + (Const(1.0) - control2_is_qac) * Const(0.0))
     )
+    q_ref = q_ref_pu * sbase
     # ------------------------------------------------------------------
     # Preserve the power-flow operating point when neither controller is an
     # explicit active-power mode. This is required by the EMT scripting cases
     # that regulate DC voltage and reactive power around a non-zero scheduled
     # active transfer obtained from the solved power-flow state.
     # ------------------------------------------------------------------
-    p_ref = (
+    p_control_ref_pu = (
         (control1_is_pac + control1_is_pdc) * control1_val
         + (Const(1.0) - (control1_is_pac + control1_is_pdc))
-        * ((control2_is_pac + control2_is_pdc) * control2_val + (Const(1.0) - (control2_is_pac + control2_is_pdc)) * p0)
+        * ((control2_is_pac + control2_is_pdc) * control2_val)
     )
+    has_active_control = sym.max(
+        control1_is_pac + control1_is_pdc,
+        control2_is_pac + control2_is_pdc,
+    )
+    p_ref = has_active_control * p_control_ref_pu * sbase + (Const(1.0) - has_active_control) * p0
 
     return p_ref, q_ref, vdc_ref, regulate_vdc, regulate_q, regulate_active
 
@@ -192,6 +208,7 @@ def get_emt_ideal_converter(
         control2_val=control2_val,
         p0=P0,
         vdc_nom=Vdc_nom,
+        sbase=sbase,
     )
 
     eps = vf.add_const(1e-10)
@@ -328,7 +345,33 @@ def get_emt_ideal_converter(
     }
 
     converter_block.name = name
-    templ.block = converter_block
+    templ.block.children.append(converter_block)
+    templ.block.external_mapping = converter_block.external_mapping
+    templ.block.api_obj_mapping = converter_block.api_obj_mapping
+    templ.block.in_vars = inputs
+    templ.block.out_vars = converter_block.out_vars
+    templ.block.dynamic_model_contract.emt_terminal_current_contributions = list((
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.FROM,
+            conductor=EmtTerminalConductor.DC,
+            current_reference=VarPowerFlowReferenceType.Idc,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_A,
+            current_reference=VarPowerFlowReferenceType.i_A,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_B,
+            current_reference=VarPowerFlowReferenceType.i_B,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_C,
+            current_reference=VarPowerFlowReferenceType.i_C,
+        ),
+    ))
 
     return templ
 
@@ -341,61 +384,61 @@ def _build_pseudo_emt_converter_vsc_block(
     name: str,
 ) -> Block:
     """VSC electrical/DC block with converter parameters and power/loss equations."""
-    v_d = vf.add_var(name=f"v_d_in")
-    v_q = vf.add_var(name=f"v_q_in")
-    v_0 = vf.add_var(name=f"v_0_in")
-    i_d = vf.add_var(name=f"i_d_in")
-    i_q = vf.add_var(name=f"i_q_in")
-    i_0 = vf.add_var(name=f"i_0_in")
-    v_dc_bus = vf.add_var(name=f"v_dc_bus_in", reference=VarPowerFlowReferenceType.Vdc)
+    v_d = vf.add_var(name=f"v_d_in", shared_reference="v_d_reference")
+    v_q = vf.add_var(name=f"v_q_in", shared_reference="v_q_reference")
+    v_0 = vf.add_var(name=f"v_0_in", shared_reference="v_0_reference")
+    i_d = vf.add_var(name=f"i_d_in", shared_reference="i_d_reference")
+    i_q = vf.add_var(name=f"i_q_in", shared_reference="i_q_reference")
+    i_0 = vf.add_var(name=f"i_0_in", shared_reference="i_0_reference")
+    v_dc_bus = vf.add_var(name=f"v_dc_bus_in", reference=VarPowerFlowReferenceType.Vdc, shared_reference="v_dc_bus_reference")
 
-    v_dc = vf.add_var(name=f"v_dc")
+    v_dc = vf.add_var(name=f"v_dc", shared_reference="v_dc_reference")
     d_v_dc = vf.add_diff_var(name=f"d_v_dc", base_var=v_dc)
 
-    i_dc = vf.add_var(name=f"i_dc", reference=VarPowerFlowReferenceType.Idc)
-    P = vf.add_var(name=f"P", reference=VarPowerFlowReferenceType.P)
-    Q = vf.add_var(name=f"Q", reference=VarPowerFlowReferenceType.Q)
+    i_dc = vf.add_var(name=f"i_dc", reference=VarPowerFlowReferenceType.Idc, shared_reference="i_dc_reference")
+    P = vf.add_var(name=f"P", reference=VarPowerFlowReferenceType.P, shared_reference="P_reference")
+    Q = vf.add_var(name=f"Q", reference=VarPowerFlowReferenceType.Q, shared_reference="Q_reference")
     i_mag = vf.add_var(name=f"i_mag")
     P_loss = vf.add_var(name=f"P_loss")
-    i_dc_conv = vf.add_var(name=f"i_dc_conv")
+    i_dc_conv = vf.add_var(name=f"i_dc_conv", shared_reference="i_dc_conv_reference")
 
-    sbase = vf.add_var(name=f"sbase")
-    P_ref = vf.add_var(name=f"P_ref")
-    Q_ref = vf.add_var(name=f"Q_ref")
-    Vdc_ref = vf.add_var(name=f"Vdc_ref")
+    sbase = vf.add_var(name=f"sbase", shared_reference="sbase_reference")
+    P_ref = vf.add_var(name=f"P_ref", shared_reference="P_ref_reference")
+    Q_ref = vf.add_var(name=f"Q_ref", shared_reference="Q_ref_reference")
+    Vdc_ref = vf.add_var(name=f"Vdc_ref", shared_reference="Vdc_ref_reference")
     P0_sched = vf.add_var(name=f"P0")
     control1 = vf.add_var(name=f"control1")
     control2 = vf.add_var(name=f"control2")
     control1_val = vf.add_var(name=f"control1_val")
     control2_val = vf.add_var(name=f"control2_val")
-    omega_base = vf.add_var(name=f"omega_base")
-    phi_v = vf.add_var(name=f"phi_v")
-    Vpk = vf.add_var(name=f"Vpk")
-    R_eq = vf.add_var(name=f"R_eq")
-    L_eq = vf.add_var(name=f"L_eq")
-    C_dc = vf.add_var(name=f"C_dc")
-    R_dc = vf.add_var(name=f"R_dc")
-    R_dc_term = vf.add_var(name=f"R_dc_term")
-    pll_kp = vf.add_var(name=f"pll_kp")
-    pll_ki = vf.add_var(name=f"pll_ki")
-    i_kp = vf.add_var(name=f"i_kp")
-    i_ki = vf.add_var(name=f"i_ki")
-    vdc_kp = vf.add_var(name=f"vdc_kp")
-    vdc_ki = vf.add_var(name=f"vdc_ki")
-    q_kp = vf.add_var(name=f"q_kp")
-    q_ki = vf.add_var(name=f"q_ki")
-    i_max = vf.add_var(name=f"i_max")
-    m_max = vf.add_var(name=f"m_max")
-    P_loss0 = vf.add_var(name=f"P_loss0")
-    P_loss_i1 = vf.add_var(name=f"P_loss_i1")
-    P_loss_i2 = vf.add_var(name=f"P_loss_i2")
-    tau_meas = vf.add_var(name=f"tau_meas")
-    aw_gain = vf.add_var(name=f"aw_gain")
-    vdc_floor = vf.add_var(name=f"vdc_floor")
-    Vdc_nom = vf.add_var(name=f"Vdc_nom")
-    regulate_vdc_mode = vf.add_var(name=f"regulate_vdc_mode")
-    regulate_q_mode = vf.add_var(name=f"regulate_q_mode")
-    regulate_active_mode = vf.add_var(name=f"regulate_active_mode")
+    omega_base = vf.add_var(name=f"omega_base", shared_reference="omega_base_reference")
+    phi_v = vf.add_var(name=f"phi_v", shared_reference="phi_v_reference")
+    Vpk = vf.add_var(name=f"Vpk", shared_reference="Vpk_reference")
+    R_eq = vf.add_var(name=f"R_eq", shared_reference="R_eq_reference")
+    L_eq = vf.add_var(name=f"L_eq", shared_reference="L_eq_reference")
+    C_dc = vf.add_var(name=f"C_dc", shared_reference="C_dc_reference")
+    R_dc = vf.add_var(name=f"R_dc", shared_reference="R_dc_reference")
+    R_dc_term = vf.add_var(name=f"R_dc_term", shared_reference="R_dc_term_reference")
+    pll_kp = vf.add_var(name=f"pll_kp", shared_reference="pll_kp_reference")
+    pll_ki = vf.add_var(name=f"pll_ki", shared_reference="pll_ki_reference")
+    i_kp = vf.add_var(name=f"i_kp", shared_reference="i_kp_reference")
+    i_ki = vf.add_var(name=f"i_ki", shared_reference="i_ki_reference")
+    vdc_kp = vf.add_var(name=f"vdc_kp", shared_reference="vdc_kp_reference")
+    vdc_ki = vf.add_var(name=f"vdc_ki", shared_reference="vdc_ki_reference")
+    q_kp = vf.add_var(name=f"q_kp", shared_reference="q_kp_reference")
+    q_ki = vf.add_var(name=f"q_ki", shared_reference="q_ki_reference")
+    i_max = vf.add_var(name=f"i_max", shared_reference="i_max_reference")
+    m_max = vf.add_var(name=f"m_max", shared_reference="m_max_reference")
+    P_loss0 = vf.add_var(name=f"P_loss0", shared_reference="P_loss0_reference")
+    P_loss_i1 = vf.add_var(name=f"P_loss_i1", shared_reference="P_loss_i1_reference")
+    P_loss_i2 = vf.add_var(name=f"P_loss_i2", shared_reference="P_loss_i2_reference")
+    tau_meas = vf.add_var(name=f"tau_meas", shared_reference="tau_meas_reference")
+    aw_gain = vf.add_var(name=f"aw_gain", shared_reference="aw_gain_reference")
+    vdc_floor = vf.add_var(name=f"vdc_floor", shared_reference="vdc_floor_reference")
+    Vdc_nom = vf.add_var(name=f"Vdc_nom", shared_reference="Vdc_nom_reference")
+    regulate_vdc_mode = vf.add_var(name=f"regulate_vdc_mode", shared_reference="regulate_vdc_reference")
+    regulate_q_mode = vf.add_var(name=f"regulate_q_mode", shared_reference="regulate_q_reference")
+    regulate_active_mode = vf.add_var(name=f"regulate_active_mode", shared_reference="regulate_active_reference")
 
     p_ref_expr, q_ref_expr, vdc_ref_expr, regulate_vdc, regulate_q, regulate_active = _resolve_converter_control_reference_exprs(
         control1=control1,
@@ -404,6 +447,7 @@ def _build_pseudo_emt_converter_vsc_block(
         control2_val=control2_val,
         p0=P0_sched,
         vdc_nom=Vdc_nom,
+        sbase=sbase,
     )
 
     eps = vf.add_const(1e-10)
@@ -411,25 +455,47 @@ def _build_pseudo_emt_converter_vsc_block(
     c1 = vf.add_const(1.0)
     c3 = vf.add_const(3.0)
     c32 = vf.add_const(1.5)
+    loss_current_scale = vf.add_const(3.0 / np.sqrt(2.0))
 
     sbase_eff = sym.max(sbase, eps)
     R_dc_eff = sym.max(R_dc, eps)
     R_dc_term_eff = sym.max(R_dc_term, eps)
     C_dc_eff = sym.max(C_dc, eps)
-    P_loss0_pu = P_loss0 / sbase_eff
-    P_loss_i1_pu = P_loss_i1 / sbase_eff
-    P_loss_i2_pu = P_loss_i2 / sbase_eff
+    # VSC alpha1/alpha2/alpha3 are stored on the system per-unit base already.
+    P_loss0_pu = P_loss0
+    P_loss_i1_pu = P_loss_i1
+    P_loss_i2_pu = P_loss_i2
     i_leak = v_dc / R_dc_eff
     v_dc_eff = sym.max(v_dc, vdc_floor)
 
-    i_d0 = (vf.add_const(2.0 / 3.0) * ((P_ref / sbase_eff) + (P_loss0 / sbase_eff))) / (Vpk + eps)
     i_q0 = (vf.add_const(2.0 / 3.0) * (Q_ref / sbase_eff)) / (Vpk + eps)
+    # Fixed explicit predictor passes keep initialization acyclic while making
+    # the nonlinear current-dependent loss and the seeded d-axis current
+    # mutually consistent at the PF operating point.
+    i_d0_seed = (vf.add_const(2.0 / 3.0) * ((P_ref / sbase_eff) + P_loss0_pu)) / (Vpk + eps)
+    i_mag0_seed = sym.sqrt(i_d0_seed * i_d0_seed + i_q0 * i_q0 + eps)
+    loss_current0_seed = loss_current_scale * i_mag0_seed
+    P_loss0_seed = (P_loss0_pu + P_loss_i1_pu * loss_current0_seed
+                    + P_loss_i2_pu * loss_current0_seed * loss_current0_seed)
+    i_d0_predict1 = (vf.add_const(2.0 / 3.0) * ((P_ref / sbase_eff) + P_loss0_seed)) / (Vpk + eps)
+    i_mag0_predict1 = sym.sqrt(i_d0_predict1 * i_d0_predict1 + i_q0 * i_q0 + eps)
+    loss_current0_predict1 = loss_current_scale * i_mag0_predict1
+    P_loss0_predict1 = (P_loss0_pu + P_loss_i1_pu * loss_current0_predict1
+                        + P_loss_i2_pu * loss_current0_predict1 * loss_current0_predict1)
+    i_d0_predict2 = (vf.add_const(2.0 / 3.0) * ((P_ref / sbase_eff) + P_loss0_predict1)) / (Vpk + eps)
+    i_mag0_predict2 = sym.sqrt(i_d0_predict2 * i_d0_predict2 + i_q0 * i_q0 + eps)
+    loss_current0_predict2 = loss_current_scale * i_mag0_predict2
+    P_loss0_predict2 = (P_loss0_pu + P_loss_i1_pu * loss_current0_predict2
+                        + P_loss_i2_pu * loss_current0_predict2 * loss_current0_predict2)
+    i_d0 = (vf.add_const(2.0 / 3.0) * ((P_ref / sbase_eff) + P_loss0_predict2)) / (Vpk + eps)
     i_mag0 = sym.sqrt(i_d0 * i_d0 + i_q0 * i_q0 + eps)
     P0 = c32 * Vpk * i_d0
     Q0 = c32 * Vpk * i_q0
-    P_loss0_expr = P_loss0_pu + P_loss_i1_pu * i_mag0 + P_loss_i2_pu * i_mag0 * i_mag0
-    # DC-side power balance uses the AC transferred power plus converter losses.
-    i_dc_conv0 = -(P0 + P_loss0_expr) / (Vdc_ref + eps)
+    loss_current0 = loss_current_scale * i_mag0
+    P_loss0_expr = P_loss0_pu + P_loss_i1_pu * loss_current0 + P_loss_i2_pu * loss_current0 * loss_current0
+    # Positive AC power includes the power dissipated in the converter. Only
+    # the remainder is exchanged with the DC terminal.
+    i_dc_conv0 = -(P0 - P_loss0_expr) / (Vdc_ref + eps)
     i_dc0 = (i_dc_conv0 + v_dc_bus / R_dc_eff) / (c1 + R_dc_term_eff / R_dc_eff)
     v_dc0 = v_dc_bus - R_dc_term * i_dc0
 
@@ -452,9 +518,11 @@ def _build_pseudo_emt_converter_vsc_block(
             # Converter current magnitude used by the loss model.
             i_mag - sym.sqrt(i_d * i_d + i_q * i_q + c3 * i_0 * i_0 + eps),
             # Current-dependent converter loss model.
-            P_loss - (P_loss0_pu + P_loss_i1_pu * i_mag + P_loss_i2_pu * i_mag * i_mag),
+            P_loss - (P_loss0_pu
+                      + P_loss_i1_pu * loss_current_scale * i_mag
+                      + P_loss_i2_pu * loss_current_scale * loss_current_scale * i_mag * i_mag),
             # AC-to-DC bridge current implied by power transfer and losses.
-            i_dc_conv + (P + P_loss) / v_dc_eff,
+            i_dc_conv + (P - P_loss) / v_dc_eff,
             # Resistive coupling between the DC bus and the internal capacitor node.
             i_dc - (v_dc_bus - v_dc) / R_dc_term_eff,
             # Expose mode-selection flags so outer loops can gate themselves.
@@ -519,7 +587,10 @@ def _build_pseudo_emt_converter_vsc_block(
             R_eq, L_eq, C_dc, R_dc, R_dc_term,
         pll_kp, pll_ki, i_kp, i_ki,
             vdc_kp, vdc_ki, q_kp, q_ki,
-        i_max, m_max, P_loss0, P_loss_i1, P_loss_i2, tau_meas, aw_gain, vdc_floor, Vdc_nom,
+        # Feed the complete operating-point loss to the controller hierarchy;
+        # using only alpha1 leaves its integrators inconsistent when alpha2 or
+        # alpha3 is non-zero.
+        i_max, m_max, P_loss, P_loss_i1, P_loss_i2, tau_meas, aw_gain, vdc_floor, Vdc_nom,
             i_dc_conv,
             regulate_vdc_mode, regulate_q_mode, regulate_active_mode,
         ],
@@ -528,7 +599,9 @@ def _build_pseudo_emt_converter_vsc_block(
     block.api_obj_mapping = {
         ParamPowerFlowReferenceType.Sbase: sbase,
         ParamPowerFlowReferenceType.P0: P0_sched,
-        ParamPowerFlowReferenceType.converter_loss_power_0: P_loss0,
+        ParamPowerFlowReferenceType.alpha1: P_loss0,
+        ParamPowerFlowReferenceType.alpha2: P_loss_i1,
+        ParamPowerFlowReferenceType.alpha3: P_loss_i2,
         ParamPowerFlowReferenceType.omega_base: omega_base,
         ParamPowerFlowReferenceType.converter_control_mode_1: control1,
         ParamPowerFlowReferenceType.converter_control_mode_2: control2,
@@ -538,15 +611,15 @@ def _build_pseudo_emt_converter_vsc_block(
     return block
 def _build_pseudo_emt_converter_pll_block(vf: VarFactory, name: str) -> Block:
     """SRF-PLL aligned with the q-axis voltage error convention used by the converter."""
-    v_q = vf.add_var(name=f"v_q_pll_in")
-    omega_base = vf.add_var(name=f"omega_base_pll_in")
-    pll_kp = vf.add_var(name=f"pll_kp_in")
-    pll_ki = vf.add_var(name=f"pll_ki_in")
-    phi_v = vf.add_var(name=f"phi_v_pll_in")
+    v_q = vf.add_var(name=f"v_q_pll_in", shared_reference="v_q_pll_reference")
+    omega_base = vf.add_var(name=f"omega_base_pll_in", shared_reference="omega_base_reference")
+    pll_kp = vf.add_var(name=f"pll_kp_in", shared_reference="pll_kp_reference")
+    pll_ki = vf.add_var(name=f"pll_ki_in", shared_reference="pll_ki_reference")
+    phi_v = vf.add_var(name=f"phi_v_pll_in", shared_reference="phi_v_reference")
 
     theta_pll = vf.add_var(name=f"theta_pll")
     xi_pll = vf.add_var(name=f"xi_pll")
-    omega_pll = vf.add_var(name=f"omega_pll")
+    omega_pll = vf.add_var(name=f"omega_pll", shared_reference="omega_pll_reference")
 
     d_theta_pll = vf.add_diff_var(name=f"d_theta_pll", base_var=theta_pll)
     d_xi_pll = vf.add_diff_var(name=f"d_xi_pll", base_var=xi_pll)
@@ -576,31 +649,31 @@ def _build_pseudo_emt_converter_pll_block(vf: VarFactory, name: str) -> Block:
 
 def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> Block:
     """Outer control hierarchy: measurements, DC-voltage loop, Q loop, and current limits."""
-    v_d = vf.add_var(name=f"v_d_outer_in")
-    v_q = vf.add_var(name=f"v_q_outer_in")
-    v_0 = vf.add_var(name=f"v_0_outer_in")
-    i_d = vf.add_var(name=f"i_d_outer_in")
-    i_q = vf.add_var(name=f"i_q_outer_in")
-    i_0 = vf.add_var(name=f"i_0_outer_in")
-    v_dc = vf.add_var(name=f"v_dc_outer_in")
-    P = vf.add_var(name=f"P_outer_in")
-    Q = vf.add_var(name=f"Q_outer_in")
-    sbase = vf.add_var(name=f"sbase_outer_in")
-    P_ref = vf.add_var(name=f"P_ref_outer_in")
-    Q_ref = vf.add_var(name=f"Q_ref_outer_in")
-    Vdc_ref = vf.add_var(name=f"Vdc_ref_outer_in")
-    Vpk = vf.add_var(name=f"Vpk_outer_in")
-    P_loss0 = vf.add_var(name=f"P_loss0_outer_in")
-    vdc_kp = vf.add_var(name=f"vdc_kp_outer_in")
-    vdc_ki = vf.add_var(name=f"vdc_ki_outer_in")
-    q_kp = vf.add_var(name=f"q_kp_outer_in")
-    q_ki = vf.add_var(name=f"q_ki_outer_in")
-    i_max = vf.add_var(name=f"i_max_outer_in")
-    tau_meas = vf.add_var(name=f"tau_meas_outer_in")
-    aw_gain = vf.add_var(name=f"aw_gain_outer_in")
-    regulate_vdc_mode = vf.add_var(name=f"regulate_vdc_mode_outer_in")
-    regulate_q_mode = vf.add_var(name=f"regulate_q_mode_outer_in")
-    regulate_active_mode = vf.add_var(name=f"regulate_active_mode_outer_in")
+    v_d = vf.add_var(name=f"v_d_outer_in", shared_reference="v_d_reference")
+    v_q = vf.add_var(name=f"v_q_outer_in", shared_reference="v_q_reference")
+    v_0 = vf.add_var(name=f"v_0_outer_in", shared_reference="v_0_reference")
+    i_d = vf.add_var(name=f"i_d_outer_in", shared_reference="i_d_reference")
+    i_q = vf.add_var(name=f"i_q_outer_in", shared_reference="i_q_reference")
+    i_0 = vf.add_var(name=f"i_0_outer_in", shared_reference="i_0_reference")
+    v_dc = vf.add_var(name=f"v_dc_outer_in", shared_reference="v_dc_reference")
+    P = vf.add_var(name=f"P_outer_in", shared_reference="P_reference")
+    Q = vf.add_var(name=f"Q_outer_in", shared_reference="Q_reference")
+    sbase = vf.add_var(name=f"sbase_outer_in", shared_reference="sbase_reference")
+    P_ref = vf.add_var(name=f"P_ref_outer_in", shared_reference="P_ref_reference")
+    Q_ref = vf.add_var(name=f"Q_ref_outer_in", shared_reference="Q_ref_reference")
+    Vdc_ref = vf.add_var(name=f"Vdc_ref_outer_in", shared_reference="Vdc_ref_reference")
+    Vpk = vf.add_var(name=f"Vpk_outer_in", shared_reference="Vpk_reference")
+    P_loss = vf.add_var(name=f"P_loss_outer_in", shared_reference="P_loss_reference")
+    vdc_kp = vf.add_var(name=f"vdc_kp_outer_in", shared_reference="vdc_kp_reference")
+    vdc_ki = vf.add_var(name=f"vdc_ki_outer_in", shared_reference="vdc_ki_reference")
+    q_kp = vf.add_var(name=f"q_kp_outer_in", shared_reference="q_kp_reference")
+    q_ki = vf.add_var(name=f"q_ki_outer_in", shared_reference="q_ki_reference")
+    i_max = vf.add_var(name=f"i_max_outer_in", shared_reference="i_max_reference")
+    tau_meas = vf.add_var(name=f"tau_meas_outer_in", shared_reference="tau_meas_reference")
+    aw_gain = vf.add_var(name=f"aw_gain_outer_in", shared_reference="aw_gain_reference")
+    regulate_vdc_mode = vf.add_var(name=f"regulate_vdc_mode_outer_in", shared_reference="regulate_vdc_reference")
+    regulate_q_mode = vf.add_var(name=f"regulate_q_mode_outer_in", shared_reference="regulate_q_reference")
+    regulate_active_mode = vf.add_var(name=f"regulate_active_mode_outer_in", shared_reference="regulate_active_reference")
 
     xi_vdc = vf.add_var(name=f"xi_vdc")
     xi_q = vf.add_var(name=f"xi_q")
@@ -618,9 +691,9 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
     i_0_ref_u = vf.add_var(name=f"i_0_ref_u")
     i_d_ref_u = vf.add_var(name=f"i_d_ref_u")
     i_q_ref_u = vf.add_var(name=f"i_q_ref_u")
-    i_0_ref = vf.add_var(name=f"i_0_ref")
-    i_d_ref = vf.add_var(name=f"i_d_ref")
-    i_q_ref = vf.add_var(name=f"i_q_ref")
+    i_0_ref = vf.add_var(name=f"i_0_ref", shared_reference="i_0_ref_reference")
+    i_d_ref = vf.add_var(name=f"i_d_ref", shared_reference="i_d_ref_reference")
+    i_q_ref = vf.add_var(name=f"i_q_ref", shared_reference="i_q_ref_reference")
 
     eps = vf.add_const(1e-10)
     c0 = vf.add_const(0.0)
@@ -632,8 +705,13 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
     tau_meas_eff = sym.max(tau_meas, eps)
     P_ref_pu = P_ref / sbase_eff
     Q_ref_pu = Q_ref / sbase_eff
-    P_ac_ff_pu = P_ref_pu + P_loss0 / sbase_eff
-    active_control_error = regulate_vdc_mode * (Vdc_ref - v_dc) + regulate_active_mode * (P_ref_pu - P_f)
+    P_ac_ff_pu = P_ref_pu + P_loss
+    # Pdc control acts on the DC-transferred power.  The measured AC power
+    # includes converter loss, so subtract the live loss before comparison.
+    active_control_error = (
+        regulate_vdc_mode * (Vdc_ref - v_dc)
+        + regulate_active_mode * (P_ref_pu - (P_f - P_loss))
+    )
 
     i_d0 = c23 * P_ac_ff_pu / (Vpk + eps)
     q_ref_enabled_pu = Q_ref_pu * regulate_q_mode
@@ -698,7 +776,7 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
         diff_init_eqs={d_xi_vdc: c0, d_xi_q: c0, d_P_f: c0, d_Q_f: c0},
         in_vars=[
             v_d, v_q, v_0, i_d, i_q, i_0, v_dc, P, Q,
-            sbase, P_ref, Q_ref, Vdc_ref, Vpk, P_loss0,
+            sbase, P_ref, Q_ref, Vdc_ref, Vpk, P_loss,
             vdc_kp, vdc_ki, q_kp, q_ki, i_max, tau_meas, aw_gain,
             regulate_vdc_mode, regulate_q_mode, regulate_active_mode,
         ],
@@ -709,31 +787,31 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
 
 def _build_pseudo_emt_converter_inner_loop_block(vf: VarFactory, name: str) -> Block:
     """Inner dq0 current controller and modulation-limited voltage command generation."""
-    v_d = vf.add_var(name=f"v_d_inner_in")
-    v_q = vf.add_var(name=f"v_q_inner_in")
-    v_0 = vf.add_var(name=f"v_0_inner_in")
-    i_d = vf.add_var(name=f"i_d_inner_in")
-    i_q = vf.add_var(name=f"i_q_inner_in")
-    i_0 = vf.add_var(name=f"i_0_inner_in")
-    omega_pll = vf.add_var(name=f"omega_pll_inner_in")
-    omega_base = vf.add_var(name=f"omega_base_inner_in")
-    R_eq = vf.add_var(name=f"R_eq_inner_in")
-    L_eq = vf.add_var(name=f"L_eq_inner_in")
-    i_0_ref = vf.add_var(name=f"i_0_ref_inner_in")
-    i_d_ref = vf.add_var(name=f"i_d_ref_inner_in")
-    i_q_ref = vf.add_var(name=f"i_q_ref_inner_in")
-    i_kp = vf.add_var(name=f"i_kp_inner_in")
-    i_ki = vf.add_var(name=f"i_ki_inner_in")
-    aw_gain = vf.add_var(name=f"aw_gain_inner_in")
-    m_max = vf.add_var(name=f"m_max_inner_in")
-    Vdc_ref = vf.add_var(name=f"Vdc_ref_inner_in")
-    v_dc = vf.add_var(name=f"v_dc_inner_in")
-    vdc_floor = vf.add_var(name=f"vdc_floor_inner_in")
-    sbase = vf.add_var(name=f"sbase_inner_in")
-    P_ref = vf.add_var(name=f"P_ref_inner_in")
-    Q_ref = vf.add_var(name=f"Q_ref_inner_in")
-    P_loss0 = vf.add_var(name=f"P_loss0_inner_in")
-    Vpk = vf.add_var(name=f"Vpk_inner_in")
+    v_d = vf.add_var(name=f"v_d_inner_in", shared_reference="v_d_reference")
+    v_q = vf.add_var(name=f"v_q_inner_in", shared_reference="v_q_reference")
+    v_0 = vf.add_var(name=f"v_0_inner_in", shared_reference="v_0_reference")
+    i_d = vf.add_var(name=f"i_d_inner_in", shared_reference="i_d_reference")
+    i_q = vf.add_var(name=f"i_q_inner_in", shared_reference="i_q_reference")
+    i_0 = vf.add_var(name=f"i_0_inner_in", shared_reference="i_0_reference")
+    omega_pll = vf.add_var(name=f"omega_pll_inner_in", shared_reference="omega_pll_reference")
+    omega_base = vf.add_var(name=f"omega_base_inner_in", shared_reference="omega_base_reference")
+    R_eq = vf.add_var(name=f"R_eq_inner_in", shared_reference="R_eq_reference")
+    L_eq = vf.add_var(name=f"L_eq_inner_in", shared_reference="L_eq_reference")
+    i_0_ref = vf.add_var(name=f"i_0_ref_inner_in", shared_reference="i_0_ref_reference")
+    i_d_ref = vf.add_var(name=f"i_d_ref_inner_in", shared_reference="i_d_ref_reference")
+    i_q_ref = vf.add_var(name=f"i_q_ref_inner_in", shared_reference="i_q_ref_reference")
+    i_kp = vf.add_var(name=f"i_kp_inner_in", shared_reference="i_kp_reference")
+    i_ki = vf.add_var(name=f"i_ki_inner_in", shared_reference="i_ki_reference")
+    aw_gain = vf.add_var(name=f"aw_gain_inner_in", shared_reference="aw_gain_reference")
+    m_max = vf.add_var(name=f"m_max_inner_in", shared_reference="m_max_reference")
+    Vdc_ref = vf.add_var(name=f"Vdc_ref_inner_in", shared_reference="Vdc_ref_reference")
+    v_dc = vf.add_var(name=f"v_dc_inner_in", shared_reference="v_dc_reference")
+    vdc_floor = vf.add_var(name=f"vdc_floor_inner_in", shared_reference="vdc_floor_reference")
+    sbase = vf.add_var(name=f"sbase_inner_in", shared_reference="sbase_reference")
+    P_ref = vf.add_var(name=f"P_ref_inner_in", shared_reference="P_ref_reference")
+    Q_ref = vf.add_var(name=f"Q_ref_inner_in", shared_reference="Q_ref_reference")
+    P_loss = vf.add_var(name=f"P_loss_inner_in", shared_reference="P_loss_reference")
+    Vpk = vf.add_var(name=f"Vpk_inner_in", shared_reference="Vpk_reference")
 
     xi_id = vf.add_var(name=f"xi_id")
     xi_iq = vf.add_var(name=f"xi_iq")
@@ -748,21 +826,22 @@ def _build_pseudo_emt_converter_inner_loop_block(vf: VarFactory, name: str) -> B
     v_cmd_d_u = vf.add_var(name=f"v_cmd_d_u")
     v_cmd_q_u = vf.add_var(name=f"v_cmd_q_u")
     v_cmd_0_u = vf.add_var(name=f"v_cmd_0_u")
-    k_v_conv = vf.add_var(name=f"k_v_conv")
+    k_v_conv = vf.add_var(name=f"k_v_conv", shared_reference="k_v_conv_reference")
     v_lim = vf.add_var(name=f"v_lim")
-    v_cmd_d = vf.add_var(name=f"v_cmd_d")
-    v_cmd_q = vf.add_var(name=f"v_cmd_q")
-    v_cmd_0 = vf.add_var(name=f"v_cmd_0")
+    v_cmd_d = vf.add_var(name=f"v_cmd_d", shared_reference="v_cmd_d_reference")
+    v_cmd_q = vf.add_var(name=f"v_cmd_q", shared_reference="v_cmd_q_reference")
+    v_cmd_0 = vf.add_var(name=f"v_cmd_0", shared_reference="v_cmd_0_reference")
 
     eps = vf.add_const(1e-10)
     c0 = vf.add_const(0.0)
     c23 = vf.add_const(2.0 / 3.0)
+    initial_modulation_utilization = vf.add_const(0.90)
     sbase_eff = sym.max(sbase, eps)
     vdc_floor_eff = sym.max(vdc_floor, eps)
     v_dc_eff = sym.max(v_dc, vdc_floor_eff)
     omega_ratio = omega_pll / (omega_base + eps)
 
-    i_d0 = c23 * ((P_ref / sbase_eff) + (P_loss0 / sbase_eff)) / (Vpk + eps)
+    i_d0 = c23 * ((P_ref / sbase_eff) + P_loss) / (Vpk + eps)
     i_q0 = c23 * (Q_ref / sbase_eff) / (Vpk + eps)
     # Match the switched-converter branch-drop convention used by the EMT seed
     # helper so the pseudo model starts from the same commanded dq voltage.
@@ -797,7 +876,8 @@ def _build_pseudo_emt_converter_inner_loop_block(vf: VarFactory, name: str) -> B
             # Unsaturated 0-axis converter voltage command.
             v_cmd_0_u - (v_0 - R_eq * i_0 - v_pi_0_u),
             # Modulation-limit gain based on the nominal operating-point command.
-            k_v_conv - (sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps) / (m_max * (Vdc_ref + eps))),
+            k_v_conv - (sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps)
+                        / (initial_modulation_utilization * m_max * (Vdc_ref + eps))),
             # Available converter voltage magnitude from modulation and DC voltage.
             v_lim - (k_v_conv * m_max * v_dc_eff),
             # Saturated d-axis converter voltage command.
@@ -818,8 +898,8 @@ def _build_pseudo_emt_converter_inner_loop_block(vf: VarFactory, name: str) -> B
             v_cmd_d_u: v_cmd_d0,
             v_cmd_q_u: v_cmd_q0,
             v_cmd_0_u: c0,
-            k_v_conv: sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps) / (m_max * (Vdc_ref + eps)),
-            v_lim: sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps) * v_dc / (Vdc_ref + eps),
+            k_v_conv: sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps) / (initial_modulation_utilization * m_max * (Vdc_ref + eps)),
+            v_lim: sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps) * v_dc / (initial_modulation_utilization * (Vdc_ref + eps)),
             v_cmd_d: v_cmd_d0,
             v_cmd_q: v_cmd_q0,
             v_cmd_0: c0,
@@ -828,7 +908,7 @@ def _build_pseudo_emt_converter_inner_loop_block(vf: VarFactory, name: str) -> B
         in_vars=[
             v_d, v_q, v_0, i_d, i_q, i_0, omega_pll, omega_base, R_eq, L_eq,
             i_0_ref, i_d_ref, i_q_ref, i_kp, i_ki, aw_gain, m_max, Vdc_ref, v_dc, vdc_floor,
-            sbase, P_ref, Q_ref, P_loss0, Vpk,
+            sbase, P_ref, Q_ref, P_loss, Vpk,
         ],
         out_vars=[v_cmd_d, v_cmd_q, v_cmd_0, k_v_conv],
         name=f"{name}_inner_loop",
@@ -840,19 +920,19 @@ def _build_pseudo_emt_converter_transformer_block(vf: VarFactory, name: str) -> 
     v_A = vf.add_var(name=f"v_A_in_tr")
     v_B = vf.add_var(name=f"v_B_in_tr")
     v_C = vf.add_var(name=f"v_C_in_tr")
-    theta_pll = vf.add_var(name=f"theta_pll_in_tr")
-    omega_pll = vf.add_var(name=f"omega_pll_in_tr")
-    omega_base = vf.add_var(name=f"omega_base_in_tr")
-    R_eq = vf.add_var(name=f"R_eq_in_tr")
-    L_eq = vf.add_var(name=f"L_eq_in_tr")
-    v_cmd_d = vf.add_var(name=f"v_cmd_d_in_tr")
-    v_cmd_q = vf.add_var(name=f"v_cmd_q_in_tr")
-    v_cmd_0 = vf.add_var(name=f"v_cmd_0_in_tr")
-    sbase = vf.add_var(name=f"sbase_in_tr")
-    P_ref = vf.add_var(name=f"P_ref_in_tr")
-    Q_ref = vf.add_var(name=f"Q_ref_in_tr")
-    P_loss0 = vf.add_var(name=f"P_loss0_in_tr")
-    Vpk = vf.add_var(name=f"Vpk_in_tr")
+    theta_pll = vf.add_var(name=f"theta_pll_in_tr", shared_reference="theta_pll_reference")
+    omega_pll = vf.add_var(name=f"omega_pll_in_tr", shared_reference="omega_pll_reference")
+    omega_base = vf.add_var(name=f"omega_base_in_tr", shared_reference="omega_base_reference")
+    R_eq = vf.add_var(name=f"R_eq_in_tr", shared_reference="R_eq_reference")
+    L_eq = vf.add_var(name=f"L_eq_in_tr", shared_reference="L_eq_reference")
+    v_cmd_d = vf.add_var(name=f"v_cmd_d_in_tr", shared_reference="v_cmd_d_reference")
+    v_cmd_q = vf.add_var(name=f"v_cmd_q_in_tr", shared_reference="v_cmd_q_reference")
+    v_cmd_0 = vf.add_var(name=f"v_cmd_0_in_tr", shared_reference="v_cmd_0_reference")
+    sbase = vf.add_var(name=f"sbase_in_tr", shared_reference="sbase_reference")
+    P_ref = vf.add_var(name=f"P_ref_in_tr", shared_reference="P_ref_reference")
+    Q_ref = vf.add_var(name=f"Q_ref_in_tr", shared_reference="Q_ref_reference")
+    P_loss = vf.add_var(name=f"P_loss_in_tr", shared_reference="P_loss_reference")
+    Vpk = vf.add_var(name=f"Vpk_in_tr", shared_reference="Vpk_reference")
 
     i_d = vf.add_var(name=f"i_d")
     i_q = vf.add_var(name=f"i_q")
@@ -864,9 +944,9 @@ def _build_pseudo_emt_converter_transformer_block(vf: VarFactory, name: str) -> 
     i_A = vf.add_var(name=f"i_A", reference=VarPowerFlowReferenceType.i_A)
     i_B = vf.add_var(name=f"i_B", reference=VarPowerFlowReferenceType.i_B)
     i_C = vf.add_var(name=f"i_C", reference=VarPowerFlowReferenceType.i_C)
-    v_d = vf.add_var(name=f"v_d")
-    v_q = vf.add_var(name=f"v_q")
-    v_0 = vf.add_var(name=f"v_0")
+    v_d = vf.add_var(name=f"v_d", shared_reference="v_d_reference")
+    v_q = vf.add_var(name=f"v_q", shared_reference="v_q_reference")
+    v_0 = vf.add_var(name=f"v_0", shared_reference="v_0_reference")
 
     eps = vf.add_const(1e-10)
     c0 = vf.add_const(0.0)
@@ -877,7 +957,7 @@ def _build_pseudo_emt_converter_transformer_block(vf: VarFactory, name: str) -> 
     theta_c = theta_pll + shift
     omega_ratio = omega_pll / (omega_base + eps)
 
-    i_d0 = c23 * ((P_ref + P_loss0) / sbase) / (Vpk + eps)
+    i_d0 = c23 * ((P_ref / sbase) + P_loss) / (Vpk + eps)
     i_q0 = c23 * (Q_ref / sbase) / (Vpk + eps)
     i_0_decay = vf.add_const(1.0)
 
@@ -911,7 +991,7 @@ def _build_pseudo_emt_converter_transformer_block(vf: VarFactory, name: str) -> 
         algebraic_vars=[i_A, i_B, i_C, v_d, v_q, v_0],
         init_eqs={i_d: i_d0, i_q: i_q0, i_0: c0, v_d: Vpk, v_q: c0, v_0: c0},
         diff_init_eqs={d_i_d: c0, d_i_q: c0, d_i_0: c0},
-        in_vars=[v_A, v_B, v_C, theta_pll, omega_pll, omega_base, R_eq, L_eq, v_cmd_d, v_cmd_q, v_cmd_0, sbase, P_ref, Q_ref, P_loss0, Vpk],
+        in_vars=[v_A, v_B, v_C, theta_pll, omega_pll, omega_base, R_eq, L_eq, v_cmd_d, v_cmd_q, v_cmd_0, sbase, P_ref, Q_ref, P_loss, Vpk],
         out_vars=[i_A, i_B, i_C, i_d, i_q, i_0, v_d, v_q, v_0],
         name=f"{name}_transformer",
     )
@@ -971,7 +1051,7 @@ def get_full_pseudo_emt_converter(
     vf.add_connections(outer_loop_block.in_vars[9:25], [
         vsc_block.out_vars[4], vsc_block.out_vars[5], vsc_block.out_vars[6], vsc_block.out_vars[7], vsc_block.out_vars[10],
         vsc_block.out_vars[26], vsc_block.out_vars[20], vsc_block.out_vars[21], vsc_block.out_vars[22], vsc_block.out_vars[23],
-        vsc_block.out_vars[24], vsc_block.out_vars[29], vsc_block.out_vars[30], vsc_block.out_vars[33], vsc_block.out_vars[34], vsc_block.out_vars[35],
+        vsc_block.out_vars[24], vsc_block.out_vars[29], vsc_block.out_vars[30], vsc_block.out_vars[34], vsc_block.out_vars[35], vsc_block.out_vars[36],
     ])
     vf.add_connections([inner_loop_block.in_vars[6], inner_loop_block.in_vars[7], inner_loop_block.in_vars[8], inner_loop_block.in_vars[9]], [
         pll_block.out_vars[1], vsc_block.out_vars[8], vsc_block.out_vars[11], vsc_block.out_vars[12],
@@ -1039,6 +1119,27 @@ def get_full_pseudo_emt_converter(
         VarPowerFlowReferenceType.Vpk: vsc_block.out_vars[10],
     }
     templ.block.api_obj_mapping = dict(vsc_block.api_obj_mapping)
-    templ.block.unify_blocks()
+    templ.block.dynamic_model_contract.emt_terminal_current_contributions = list((
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.FROM,
+            conductor=EmtTerminalConductor.DC,
+            current_reference=VarPowerFlowReferenceType.Idc,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_A,
+            current_reference=VarPowerFlowReferenceType.i_A,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_B,
+            current_reference=VarPowerFlowReferenceType.i_B,
+        ),
+        EmtTerminalCurrentContribution(
+            terminal_side=EmtTerminalSide.TO,
+            conductor=EmtTerminalConductor.PHASE_C,
+            current_reference=VarPowerFlowReferenceType.i_C,
+        ),
+    ))
 
     return templ

@@ -19,49 +19,32 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae_vectorized import R
 from VeraGridEngine.Simulations.Rms.numerical.back_euler_fx import BackEulerImplicitIntegration
 from VeraGridEngine.Simulations.Rms.numerical.back_euler_fx_vectorized import BackEulerImplicitIntegrationVec
 from VeraGridEngine.Simulations.Rms.numerical.back_euler_fx_full_vectorized import BackEulerImplicitIntegrationFullVec
+from VeraGridEngine.Simulations.dynamic_parameter_results import collect_declared_dynamic_parameter_values
 from VeraGridEngine.enumerations import EngineType, SimulationTypes, DynamicIntegrationMethod
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowResults
 from VeraGridEngine.basic_structures import Vec, StrVec
-from VeraGridEngine.enumerations import RmsProblemTypes
+from VeraGridEngine.enumerations import PlotSimulationType, RmsProblemTypes
 
 
-def _collect_rms_group_parameter_values(problem: RmsProblemDae) -> Dict[str, float]:
+def _collect_rms_group_parameter_values(problem: RmsProblemDae | RmsProblemDaeVec,
+                                        grid: MultiCircuit) -> Dict[str, float]:
     """
     Export one event-group parameter snapshot from the RMS problem.
 
     :param problem: Solved RMS problem instance.
+    :param grid: Circuit containing the configured RMS model parameters.
     :return: Parameter scalar map keyed by ``device_idtag:param_name``.
     """
-    parameter_values: Dict[str, float] = dict()
+    parameter_values: Dict[str, float] = collect_declared_dynamic_parameter_values(
+        grid=grid,
+        simulation_type=PlotSimulationType.RMS,
+        logger=problem.logger,
+    )
     event_parameter_count: int = len(problem._variable_parameters)
     parameter_index: int
 
-    if problem._variable_parameters_values is not None:
-        for parameter_index in range(event_parameter_count):
-            parameter_var = problem._variable_parameters[parameter_index]
-            device_idtag: str | None = problem._event_parameter_device_idtags.get(parameter_var.uid, None)
-            if device_idtag is not None:
-                parameter_key: str = str(device_idtag) + ":" + str(parameter_var.name)
-                parameter_values[parameter_key] = float(problem._variable_parameters_values[parameter_index])
-            else:
-                pass
-    else:
-        pass
-
-    return parameter_values
-
-
-def _collect_rms_group_initial_parameter_values(problem: RmsProblemDae) -> Dict[str, float]:
-    """
-    Export one event-group initial parameter snapshot from the RMS problem.
-
-    :param problem: RMS problem instance before event evolution.
-    :return: Initial parameter scalar map keyed by ``device_idtag:param_name``.
-    """
-    parameter_values: Dict[str, float] = dict()
-    event_parameter_count: int = len(problem._variable_parameters)
-    parameter_index: int
-
+    # Runtime parameters override a same-name static declaration because these
+    # values are the ones actually consumed by the selected event group.
     if problem._variable_parameters_values is not None:
         for parameter_index in range(event_parameter_count):
             parameter_var = problem._variable_parameters[parameter_index]
@@ -156,6 +139,7 @@ class RmsSimulationDriver(DriverTemplate):
             options=self.options,
             pf_results=self.pf_results,
             progress_signal=self.progress_signal,
+            logger=self.logger,
         )
         self.problem = problem
 
@@ -176,6 +160,7 @@ class RmsSimulationDriver(DriverTemplate):
             uid2idx=problem.uid2idx_vars,
             vars_glob_name2uid=problem.vars_glob_name2uid,
             devices_vars_info=problem.get_device_vars_dict(),
+            initial_parameter_value_maps=[dict() for _ in range(len(rms_events_groups))],
             parameter_value_maps=[dict() for _ in range(len(rms_events_groups))],
             has_event_group_results=has_event_group_results,
         )
@@ -262,7 +247,12 @@ class RmsSimulationDriver(DriverTemplate):
                         )
                 
                 _t_start = time.time()
-                self.results.initial_parameter_value_maps[group_idx] = _collect_rms_group_initial_parameter_values(problem=problem)
+                # Capture the complete scalar state before the solver applies
+                # any step or ramp belonging to this event group.
+                self.results.initial_parameter_value_maps[group_idx] = _collect_rms_group_parameter_values(
+                    problem=problem,
+                    grid=self.grid,
+                )
                 t, y, well_initialized, converged = solver.simulate()
                 _t_end = time.time()
                 # print(f"RMS simulation time: {_t_end - _t_start:.4f} s")
@@ -273,8 +263,12 @@ class RmsSimulationDriver(DriverTemplate):
 
                 self.results.converged[group_idx] = converged
                 self.results.well_initialized[group_idx] = well_initialized
-                self.results.values[:, :, group_idx] = y
-                self.results.parameter_value_maps[group_idx] = _collect_rms_group_parameter_values(problem=problem)
+                sample_count: int = min(self.results.values.shape[0], y.shape[0])
+                self.results.values[:sample_count, :, group_idx] = y[:sample_count, :]
+                self.results.parameter_value_maps[group_idx] = _collect_rms_group_parameter_values(
+                    problem=problem,
+                    grid=self.grid,
+                )
 
                 if not well_initialized:
                     self.logger.add_warning("Not well initialized", device=rms_events_group.name)

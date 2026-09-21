@@ -3,18 +3,19 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 import json
+import zipfile
 try:
-    import orjson
-
-    _HAS_ORJSON = True
+    import msgspec  # optional, faster alternative to read json files
+    _HAS_MSGSPEC = True
 except ImportError:
-    _HAS_ORJSON = False
+    _HAS_MSGSPEC = False
+
 from io import StringIO, TextIOWrapper, BytesIO, BufferedReader
 import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import zipfile
+
 from warnings import warn
 from typing import List, Dict, Union, Callable, Tuple, Any
 from VeraGridEngine.Devices.types import VERAGRID_FILE_TYPE
@@ -81,15 +82,19 @@ def _split_session_entry_path(path: List[str], active_grid_idtag: str | None) ->
         return None
 
 
-def load_json_from_file_pointer(file_pointer) -> dict:
+def load_json_from_file_pointer(file_pointer) -> list | dict:
     """
     Load JSON from a file pointer using orjson if available, falling back to json.
     :param file_pointer: File pointer (from zip file or regular file)
     :return: Parsed JSON as dict
     """
     content = file_pointer.read()
-    if _HAS_ORJSON:
-        return orjson.loads(content)
+    if _HAS_MSGSPEC:
+        try:
+            return msgspec.json.decode(content, type=list)
+        except msgspec.ValidationError as e:
+            return msgspec.json.decode(content, type=dict)
+
     return json.loads(content)
 
 

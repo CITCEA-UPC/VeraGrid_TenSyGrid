@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QMenu
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem, RoundTerminalItem
 from VeraGrid.Gui.DeviceEditors.DcLineEditor.dc_line_device_editor import DcLineDeviceEditorDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.Devices.Branches.dc_line import DcLine
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.line_graphics_template import LineGraphicTemplateItem
 from VeraGridEngine.enumerations import DynamicSimulationMode
@@ -56,7 +57,7 @@ class DcLineGraphicItem(LineGraphicTemplateItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = DcLineDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True

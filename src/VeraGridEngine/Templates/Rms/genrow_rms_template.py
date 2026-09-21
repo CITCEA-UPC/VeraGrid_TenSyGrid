@@ -105,8 +105,6 @@ def get_genrow_rms_template(vfactory: VarFactory, name="Genrow rms template") ->
         te: psid * i_q - psiq * i_d,
         tm: te,
         et: delta / (2 * np.pi * freq),
-        tm0: tm,
-        vf: psid + X1 * i_d
     }
 
     block.in_vars = inputs
@@ -131,4 +129,5 @@ def get_genrow_rms_template(vfactory: VarFactory, name="Genrow rms template") ->
     templ.block.in_vars = inputs
     templ.block.out_vars = [P_g, Q_g]
 
+    templ.comment = 'Generator GENROU/GENROW RMS model'
     return templ

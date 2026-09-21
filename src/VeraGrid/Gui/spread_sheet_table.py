@@ -86,6 +86,7 @@ class SpreadsheetTableView(QtWidgets.QTableView):
         super().__init__(parent)
         self._handle_size: int = 8
         self._handle_margin: int = 1
+        self._fill_handle_visible: bool = True
         self._is_dragging_fill: bool = False
         self._fill_source: QtCore.QModelIndex | None = None
         self._fill_target: QtCore.QModelIndex | None = None
@@ -121,6 +122,24 @@ class SpreadsheetTableView(QtWidgets.QTableView):
 
         self._auto_scroll_timer.setInterval(60)
         self._auto_scroll_timer.timeout.connect(self._perform_auto_scroll_step)
+
+    def set_fill_handle_visible(self, visible: bool) -> None:
+        """Enable or disable the spreadsheet drag-fill handle.
+
+        Disabling the handle also cancels an active drag-fill gesture so the
+        visual affordance and its mouse interaction always share one state.
+
+        :param visible: Whether the drag-fill handle may be drawn and used.
+        :return: None.
+        """
+        if self._fill_handle_visible != visible:
+            # Clear any in-progress gesture before changing the interaction
+            # contract, otherwise a hidden handle could still complete a fill.
+            self._reset_fill_state()
+            self._fill_handle_visible = visible
+            self.viewport().update()
+        else:
+            pass
 
     def setModel(self, model: QtCore.QAbstractItemModel | None) -> None:
         """
@@ -219,6 +238,13 @@ class SpreadsheetTableView(QtWidgets.QTableView):
 
         :return: Handle rectangle or an empty rectangle.
         """
+        # An empty rectangle suppresses both painting and mouse hit-testing,
+        # keeping the visibility setting consistent throughout the widget.
+        if not self._fill_handle_visible:
+            return QtCore.QRect()
+        else:
+            pass
+
         cell_rect: QtCore.QRect = self._current_cell_rect()
         viewport_rect: QtCore.QRect = self.viewport().rect()
         if not cell_rect.isValid() or not viewport_rect.intersects(cell_rect):

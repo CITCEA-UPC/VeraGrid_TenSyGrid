@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from VeraGrid.Gui.Main.SubClasses.Results.dynamics_results_handler import (
+from VeraGrid.Gui.DynamicModelEditor.Plots.dynamic_plots_handler import (
     DynamicResultSeriesKey,
     DynamicPlotCandidate,
     DynamicDeviceEntryCollection,

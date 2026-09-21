@@ -3,6 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 import zipfile
 
+import numpy as np
+import pytest
+from fmpy import simulate_fmu
+
+from VeraGridEngine.enumerations import FmiVersion
+from VeraGridEngine.IO.fmu.exporter.api import export_fmu
+from VeraGridEngine.IO.fmu.exporter.build import host_build_capable
 from VeraGridEngine.IO.fmu.exporter.compat import Block, Const, Var
 from VeraGridEngine.IO.fmu.exporter.config import ExportConfig
 from VeraGridEngine.IO.fmu.exporter.export_ir import build_export_model
@@ -11,6 +18,8 @@ from VeraGridEngine.IO.fmu.exporter.packager import package_fmu, prepare_fmu_sta
 from VeraGridEngine.IO.fmu.exporter.procedural_ir import build_logic_entries
 from VeraGridEngine.IO.fmu.exporter.snapshot import build_model_snapshot, reconstruct_block
 from VeraGridEngine.IO.fmu.exporter.xml_writer import emit_model_description
+from VeraGridEngine.IO.fmu.exporter_me.api import export_fmu_me
+from VeraGridEngine.IO.fmu.exporter_me.config import ExportConfig as MeExportConfig
 
 
 def build_simple_block() -> Block:
@@ -81,3 +90,120 @@ def test_packager_creates_fmu_zip(tmp_path: Path) -> None:
     with zipfile.ZipFile(output) as archive:
         assert "modelDescription.xml" in archive.namelist()
         assert "resources/manifest.json" in archive.namelist()
+
+
+@pytest.mark.skipif(not host_build_capable(), reason="No usable host build toolchain available")
+def test_cs_export_failure_removes_owned_build_root(tmp_path: Path) -> None:
+    """Remove the automatic CS build root when packaging fails.
+
+    :param tmp_path: Isolated exporter output directory supplied by pytest.
+    :return: None.
+    """
+
+    blocked_output_path: Path = tmp_path / "blocked_cs.fmu"
+    blocked_output_path.mkdir()
+    cfg: ExportConfig = ExportConfig(
+        model_name="CleanupCsModel",
+        output_path=blocked_output_path,
+        compile_binary=True,
+        keep_build_dir=False,
+    )
+
+    with pytest.raises(OSError):
+        export_fmu(model=build_simple_block(), cfg=cfg)
+
+    automatic_build_roots: tuple[Path, ...] = tuple(
+        tmp_path.glob("veragrid_fmu_build_*")
+    )
+    assert automatic_build_roots == tuple()
+
+
+@pytest.mark.skipif(not host_build_capable(), reason="No usable host build toolchain available")
+def test_me_export_failure_removes_owned_build_root(tmp_path: Path) -> None:
+    """Remove the automatic ME build root when packaging fails.
+
+    :param tmp_path: Isolated exporter output directory supplied by pytest.
+    :return: None.
+    """
+
+    blocked_output_path: Path = tmp_path / "blocked_me.fmu"
+    blocked_output_path.mkdir()
+    cfg: MeExportConfig = MeExportConfig(
+        model_name="CleanupMeModel",
+        output_path=blocked_output_path,
+        compile_binary=True,
+        keep_build_dir=False,
+    )
+
+    with pytest.raises(OSError):
+        export_fmu_me(model=build_simple_block(), cfg=cfg)
+
+    automatic_build_roots: tuple[Path, ...] = tuple(
+        tmp_path.glob("veragrid_fmu_me_build_*")
+    )
+    assert automatic_build_roots == tuple()
+
+
+@pytest.mark.parametrize(
+    "fmi_version",
+    (
+        FmiVersion.FMI_1_0,
+        FmiVersion.FMI_2_0,
+        FmiVersion.FMI_3_0,
+    ),
+)
+@pytest.mark.skipif(not host_build_capable(), reason="No usable host build toolchain available")
+def test_me_export_accepts_exact_continuous_state_start_values(
+    tmp_path: Path,
+    fmi_version: FmiVersion,
+) -> None:
+    """Apply an exact ME state start through each version's real setter.
+
+    :param tmp_path: Isolated export and simulation directory supplied by pytest.
+    :param fmi_version: FMI standard version selected for the compiled FMU.
+    :return: None.
+    """
+
+    # The declared default is deliberately different from the importer-provided
+    # value so the trajectory proves that the generated setter accepted the write.
+    state: Var = Var("x")
+    derivative: Var = Var("dx", base_var=state)
+    source_block: Block = Block(
+        state_vars=list((state,)),
+        state_eqs=list((Const(1.0),)),
+        diff_vars=list((derivative,)),
+        init_values=dict(((state, Const(0.0)),)),
+        out_vars=list((state,)),
+        name="ExactStateStart",
+    )
+    model_identifier: str = "ExactStateStart" + fmi_version.value.replace(".", "")
+    archive_path: Path = export_fmu_me(
+        model=source_block,
+        cfg=MeExportConfig(
+            model_name=model_identifier,
+            output_path=tmp_path / (model_identifier + ".fmu"),
+            fixed_step=1.0e-3,
+            fmi_version=fmi_version,
+        ),
+    )
+
+    # FMPy follows the same importer sequence observed in Simulink: it writes the
+    # exact state through fmiSetReal/fmi2SetReal/fmi3SetFloat64 before initialize.
+    result: np.ndarray = simulate_fmu(
+        filename=str(archive_path),
+        start_time=0.0,
+        stop_time=2.0e-3,
+        step_size=1.0e-3,
+        output_interval=1.0e-3,
+        output=("x",),
+        start_values=dict(x=2.0),
+    )
+    expected_times: np.ndarray = np.array((0.0, 1.0e-3, 2.0e-3), dtype=float)
+    np.testing.assert_allclose(result["time"], expected_times, rtol=0.0, atol=1.0e-15)
+    np.testing.assert_allclose(result["x"][0], 2.0, rtol=0.0, atol=1.0e-12)
+    np.testing.assert_allclose(
+        result["x"],
+        2.0 + result["time"],
+        rtol=0.0,
+        atol=1.0e-8,
+    )

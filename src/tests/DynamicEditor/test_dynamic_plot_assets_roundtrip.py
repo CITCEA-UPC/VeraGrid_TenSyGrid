@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import List
 
 import numpy as np
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from VeraGrid.Gui.Main.SubClasses.Results.dynamics_results_handler import (
+from VeraGrid.Gui.DynamicModelEditor.Plots.dynamic_plots_handler import (
     DynamicsResultsHandler,
     DynamicPlotCandidate,
     DynamicPlotParameter,
@@ -14,7 +15,7 @@ from VeraGrid.Gui.Main.SubClasses.Results.dynamics_results_handler import (
     collect_dynamic_model_plot_parameters,
     ensure_dynamic_plot_event_group,
 )
-from VeraGrid.Gui.DynamicModelEditor.dynamic_editor_models import initialize_connected_bus_models_for_editor_assignment
+from VeraGrid.Gui.DynamicModelEditor.Editor.dynamic_editor_models import initialize_connected_bus_models_for_editor_assignment
 from VeraGridEngine.Devices.Events.emt_events_group import EmtEventsGroup
 from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
 from VeraGridEngine.Devices.Events.dynamic_plot import DynamicPlot
@@ -640,6 +641,48 @@ def test_pre_simulation_xy_plot_rebinds_roles_after_results_exist() -> None:
     assert y_entry is not None
 
 
+def test_pre_simulation_xy_plot_rejects_duplicate_candidate_without_clearing_slots() -> None:
+    """
+    Verify that assigning one candidate to both axes preserves the valid X-Y pair.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = build_pre_simulation_rms_circuit()
+    handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+    assert handler.create_plot_group(name="Plot XY", mode=DynamicPlotMode.XY) is True
+
+    omega_candidate: DynamicPlotCandidate = handler.series_by_var_uid[1][0]
+    efd_candidate: DynamicPlotCandidate = handler.series_by_var_uid[2][0]
+    assert handler.add_candidate_to_group_with_role(
+        group_name="Plot XY",
+        candidate=omega_candidate,
+        role=DynamicPlotEntryRole.X_AXIS,
+    ) is True
+    assert handler.add_candidate_to_group_with_role(
+        group_name="Plot XY",
+        candidate=efd_candidate,
+        role=DynamicPlotEntryRole.Y_AXIS,
+    ) is True
+
+    duplicate_inserted: bool = handler.add_candidate_to_group_with_role(
+        group_name="Plot XY",
+        candidate=omega_candidate,
+        role=DynamicPlotEntryRole.Y_AXIS,
+    )
+    group = handler.plot_groups.get_group(name="Plot XY")
+
+    assert duplicate_inserted is False
+    assert group is not None
+    assert group.get_entry_for_role(role=DynamicPlotEntryRole.X_AXIS) is not None
+    assert group.get_entry_for_role(role=DynamicPlotEntryRole.Y_AXIS) is not None
+    assert len(circuit.dynamic_plot_entries) == 2
+
+
 def test_post_simulation_xy_plot_accepts_runtime_series_assignment() -> None:
     """
     Verify that a post-simulation XY plot accepts runtime series assignment into X and Y slots.
@@ -804,6 +847,225 @@ def test_pre_simulation_handler_marks_editor_style_emt_diff_variables() -> None:
     assert 22 in handler.series_by_var_uid
     assert handler.series_by_var_uid[21][0]._result_path_kind == "values"
     assert handler.series_by_var_uid[22][0]._result_path_kind == "diff_values"
+
+
+def test_dynamic_editor_variable_resolves_to_device_specific_plot_candidate() -> None:
+    """
+    Verify that a variable selected in the editor resolves through the plot handler.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = build_pre_simulation_editor_style_rms_circuit()
+    generator: Generator = circuit.get_elements_by_type(device_type=DeviceType.GeneratorDevice)[0]
+    selected_variable: Var = generator.rms_model.children[0].state_vars[0]
+    handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+
+    candidates: List[DynamicPlotCandidate] = handler.get_pre_simulation_candidates_for_symbol(
+        device=generator,
+        variable=selected_variable,
+        entry_kind=DynamicPlotEntryKind.VARIABLE,
+        allow_external_device=False,
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].get_variable_name() == "omega"
+    assert candidates[0].get_event_group_idtag() == "rms-group-a"
+
+
+def test_dynamic_editor_arrow_resolves_variable_owned_by_connected_bus() -> None:
+    """
+    Verify that an editor arrow can bind a variable owned by another device.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = MultiCircuit(name="pre-sim-external-arrow-rms")
+    bus: Bus = Bus(name="Bus A", idtag="bus-a")
+    generator: Generator = Generator(name="Generator A", idtag="gen-a")
+    generator.bus = bus
+    bus_voltage: Var = circuit.var_factory.add_var(name="Vdc", uid=31)
+    local_variable: Var = circuit.var_factory.add_var(name="omega", uid=32)
+    bus.rms_model = Block(state_vars=[bus_voltage], name="bus-rms")
+    generator.rms_model = Block(state_vars=[local_variable], name="generator-rms")
+    circuit.add_bus(obj=bus)
+    circuit.set_elements_list_by_type(
+        device_type=DeviceType.GeneratorDevice,
+        devices=[generator],
+    )
+    circuit.add_rms_events_group(obj=RmsEventsGroup(idtag="rms-group-a", name="RMS Group A"))
+    handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+
+    candidates: List[DynamicPlotCandidate] = handler.get_pre_simulation_candidates_for_symbol(
+        device=generator,
+        variable=bus_voltage,
+        entry_kind=DynamicPlotEntryKind.VARIABLE,
+        allow_external_device=True,
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].get_variable_name() == "Vdc"
+    assert candidates[0].get_device_idtag() == bus.idtag
+
+
+def test_dynamic_editor_parameter_resolves_to_parameter_candidate() -> None:
+    """
+    Verify that Block Properties parameters use the existing parameter index.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = build_pre_simulation_rms_circuit()
+    generator: Generator = circuit.get_elements_by_type(device_type=DeviceType.GeneratorDevice)[0]
+    selected_parameter: Var = next(iter(generator.rms_model.parameters.keys()))
+    handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+
+    candidates: List[DynamicPlotCandidate] = handler.get_pre_simulation_candidates_for_symbol(
+        device=generator,
+        variable=selected_parameter,
+        entry_kind=DynamicPlotEntryKind.PARAMETER,
+        allow_external_device=False,
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].get_entry_kind() == DynamicPlotEntryKind.PARAMETER
+    assert candidates[0].get_variable_name() == "omega_ref"
+
+
+def test_dynamic_editor_symbol_keeps_each_event_group_candidate_distinct() -> None:
+    """
+    Verify that editor assignment can ask for an exact event-group source.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = build_pre_simulation_editor_style_rms_circuit()
+    circuit.add_rms_events_group(obj=RmsEventsGroup(idtag="rms-group-b", name="RMS Group B"))
+    generator: Generator = circuit.get_elements_by_type(device_type=DeviceType.GeneratorDevice)[0]
+    selected_variable: Var = generator.rms_model.children[0].state_vars[0]
+    handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+
+    candidates: List[DynamicPlotCandidate] = handler.get_pre_simulation_candidates_for_symbol(
+        device=generator,
+        variable=selected_variable,
+        entry_kind=DynamicPlotEntryKind.VARIABLE,
+        allow_external_device=False,
+    )
+    candidate_group_ids: set[str] = set()
+    candidate: DynamicPlotCandidate
+    for candidate in candidates:
+        candidate_group_ids.add(candidate.get_event_group_idtag())
+
+    assert candidate_group_ids == set(("rms-group-a", "rms-group-b"))
+
+
+def test_existing_rms_results_accept_later_variable_and_parameter_assignments() -> None:
+    """
+    Verify that plot entries added after RMS results retain their selected source.
+
+    The Results projection and the RMS Plots/Dynamic Editor projections coexist
+    over the same circuit assets. Adding a source-specific variable or parameter
+    after results exist must preserve the selected event group instead of
+    redirecting the new entry to the circuit's first group.
+
+    :return: None.
+    """
+    ensure_qt_application()
+    circuit: MultiCircuit = build_pre_simulation_rms_circuit()
+    circuit.add_rms_events_group(obj=RmsEventsGroup(idtag="rms-group-b", name="RMS Group B"))
+    generator: Generator = circuit.get_elements_by_type(device_type=DeviceType.GeneratorDevice)[0]
+    results: RmsResults = build_rms_results_from_generator(
+        generator=generator,
+        variable_name="omega_ref",
+        variable_uid=101,
+    )
+    results_handler: DynamicsResultsHandler = DynamicsResultsHandler(results=results, circuit=circuit)
+    assert results_handler.create_plot_group(name="Plot 1") is True
+
+    # RMS Plots and editor context actions use a declarative handler even while
+    # Results remains open. Select the second event group for both entry kinds.
+    assignment_handler: DynamicsResultsHandler = DynamicsResultsHandler(
+        results=None,
+        circuit=circuit,
+        simulation_type=PlotSimulationType.RMS,
+    )
+    variable_candidates: List[DynamicPlotCandidate] = assignment_handler.series_by_var_uid[1]
+    parameter_candidates: List[DynamicPlotCandidate] = assignment_handler.candidates_by_parameter_name.get(
+        "omega_ref",
+        list(),
+    )
+    selected_variable: DynamicPlotCandidate | None = None
+    selected_parameter: DynamicPlotCandidate | None = None
+    candidate: DynamicPlotCandidate
+    for candidate in variable_candidates:
+        if candidate.get_event_group_idtag() == "rms-group-b":
+            selected_variable = candidate
+        else:
+            pass
+    for candidate in parameter_candidates:
+        if candidate.get_event_group_idtag() == "rms-group-b":
+            selected_parameter = candidate
+        else:
+            pass
+
+    assert selected_variable is not None
+    assert selected_parameter is not None
+
+    # Exercise the same MIME route used when the user drags either leaf from
+    # RMS Plots. Reacquire the group index after the first model rebuild.
+    variable_mime_data: QtCore.QMimeData = QtCore.QMimeData()
+    variable_mime_data.setData(
+        assignment_handler.get_drag_mime_type(),
+        QtCore.QByteArray(selected_variable.to_payload().encode("utf-8")),
+    )
+    plot_group_index: QtCore.QModelIndex = assignment_handler.get_plots_model().index(0, 0)
+    assert assignment_handler.get_plots_model().dropMimeData(
+        data=variable_mime_data,
+        action=QtCore.Qt.DropAction.CopyAction,
+        row=-1,
+        column=-1,
+        parent=plot_group_index,
+    ) is True
+
+    parameter_mime_data: QtCore.QMimeData = QtCore.QMimeData()
+    parameter_mime_data.setData(
+        assignment_handler.get_drag_mime_type(),
+        QtCore.QByteArray(selected_parameter.to_payload().encode("utf-8")),
+    )
+    plot_group_index = assignment_handler.get_plots_model().index(0, 0)
+    assert assignment_handler.get_plots_model().dropMimeData(
+        data=parameter_mime_data,
+        action=QtCore.Qt.DropAction.CopyAction,
+        row=-1,
+        column=-1,
+        parent=plot_group_index,
+    ) is True
+
+    # The live Results handler must be able to reload the additions at any time.
+    results_handler.refresh_plot_definitions()
+    plot_entries: List[DynamicPlotEntry] = list(circuit.dynamic_plot_entries)
+    group = results_handler.plot_groups.get_group(name="Plot 1")
+
+    assert len(plot_entries) == 2
+    assert all(entry.event_group_idtag == "rms-group-b" for entry in plot_entries)
+    assert group is not None
+    assert len(group.get_series()) == 2
 
 
 def test_editor_style_pre_simulation_asset_binds_after_rms_results_exist() -> None:

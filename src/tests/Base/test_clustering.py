@@ -8,6 +8,7 @@ import numpy as np
 
 import VeraGridEngine.api as gce
 from VeraGridEngine.Simulations.Clustering.clustering import kmeans_sampling
+from VeraGridEngine.Simulations.Clustering.clustering_results import ClusteringResults
 
 
 def test_clustering():
@@ -82,3 +83,41 @@ def test_clustering_report():
                                 auto_expand=True)
 
     table = pf_ts_2.mdl(result_type=gce.ResultTypes.SimulationError)
+
+
+def test_clustering_hour_assignments_report() -> None:
+    """Report the actual nonconsecutive membership without changing summary weights.
+
+    :return: None.
+    """
+    times: np.ndarray = np.arange('2030-01-01T00', '2030-01-01T06', dtype='datetime64[h]')
+    results: ClusteringResults = ClusteringResults(
+        time_indices=np.array([1, 4]),
+        sampled_probabilities=np.array([0.5, 0.5]),
+        time_array=times,
+        original_sample_idx=np.array([0, 0, 1, 1, 1, 0])
+    )
+    table = results.mdl(gce.ResultTypes.ClusteringMembershipReport)
+    assert table.r == 6
+    assert table.c == 1
+    assert list(table.cols_c) == ['Representative time']
+    np.testing.assert_array_equal(table.index_c.to_numpy(), times)
+    np.testing.assert_array_equal(np.asarray(table.data_c[:, 0], dtype='datetime64[h]'),
+                                  times[np.array([1, 1, 4, 4, 4, 1])])
+    np.testing.assert_array_equal(results.mdl(gce.ResultTypes.ClusteringReport).data_c[:, 0],
+                                  [0.5, 0.5])
+
+
+def test_clustering_hour_assignments_empty_report() -> None:
+    """An initialized clustering result can display an empty assignment report.
+
+    :return: None.
+    """
+    results: ClusteringResults = ClusteringResults(
+        time_indices=np.empty(0, dtype=int),
+        sampled_probabilities=np.empty(0),
+        time_array=np.empty(0, dtype='datetime64[h]'),
+        original_sample_idx=np.empty(0, dtype=int)
+    )
+    table = results.mdl(gce.ResultTypes.ClusteringMembershipReport)
+    assert table.data_c.shape == (0, 1)

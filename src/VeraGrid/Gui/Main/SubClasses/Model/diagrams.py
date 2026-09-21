@@ -10,6 +10,7 @@ from typing import List, Tuple, Union, Callable, Iterable
 
 import networkx as nx
 import numpy as np
+import shiboken6
 from PySide6 import QtGui, QtWidgets, QtCore
 from matplotlib import pyplot as plt
 from pandas.plotting import register_matplotlib_converters
@@ -17,6 +18,7 @@ from pandas.plotting import register_matplotlib_converters
 import VeraGridEngine.Devices.Diagrams.palettes as palettes
 from VeraGridEngine import ContingencyOperationTypes, MapDiagram
 from VeraGridEngine.Devices.Parents.branch_parent import BranchParent
+from VeraGridEngine.Devices.Parents.editable_device import EditableDevice
 from VeraGridEngine.Devices.Parents.injection_parent import InjectionParent
 from VeraGridEngine.IO.file_system import tiles_path
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
@@ -26,7 +28,7 @@ from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_ts_results_3ph import Po
 from VeraGridEngine.Simulations.StateEstimation.state_estimation_results import StateEstimationResults
 from VeraGridEngine.Utils.progress_bar import print_progress_bar
 from VeraGridEngine.basic_structures import Logger
-from VeraGridEngine.enumerations import (SimulationTypes, Colormaps, DeviceType, DynamicEventTransitionType,
+from VeraGridEngine.enumerations import (SimulationTypes, Colormaps, DeviceType,
                                          MethodShortCircuit, SchematicAutoRouteStyle, DynamicSimulationMode)
 from VeraGridEngine.Devices.Diagrams.schematic_diagram import SchematicDiagram
 
@@ -48,12 +50,11 @@ from VeraGrid.Gui.Main.SubClasses.Model.compiled_arrays import CompiledArraysMai
 from VeraGrid.Gui.Main.object_select_window import ObjectSelectWindow, ListSelectWindow
 from VeraGrid.Gui.Diagrams.MapWidget.Tiles.TileProviders.cartodb import CartoDbTiles
 from VeraGrid.Gui.object_proxy_model import ObjectModelFilterProxy
-from VeraGrid.Gui.dynamic_events_editor_dialog import DynamicEventDialogue, DynamicEventsGroupsDialog
-from VeraGrid.Gui.dynamic_events_editor_dialog import collect_block_runtime_event_parameters
 from VeraGrid.Gui.Diagrams.MapWidget.Substation.substation_graphic_item import SubstationGraphicItem
 from VeraGrid.Gui.ShortCircuitEditor.short_circuit_selector import ShortCircuitSelector
 from VeraGrid.Gui.general_dialogues import (CheckListDialogue, StartEndSelectionDialogue,
                                             InputNumberDialogue)
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
 
 ALL_EDITORS = Union[SchematicWidget, GridMapWidget, BaseDiagramWidget]
 ALL_EDITORS_NONE = Union[None, SchematicWidget, GridMapWidget]
@@ -69,8 +70,8 @@ class VideoExportWorker(QtCore.QThread):
     done_signal = QtCore.Signal()
 
     def __init__(self, filename, diagram: ALL_EDITORS,
-                 fps: int, start_idx: int, end_idx: int, current_study: str,
-                 grid_colour_function: Callable[[ALL_EDITORS, str, int, bool], None], ):
+                 fps: int, start_idx: int, end_idx: int, current_study: SimulationTypes | str,
+                 grid_colour_function: Callable[[ALL_EDITORS, SimulationTypes | str, int, bool], None], ):
         """
 
         :param filename:
@@ -88,8 +89,10 @@ class VideoExportWorker(QtCore.QThread):
         self.fps: int = fps
         self.start_idx: int = start_idx
         self.end_idx: int = end_idx
-        self.current_study = current_study
-        self.grid_colour_function: Callable[[ALL_EDITORS, str, int, bool], None] = grid_colour_function
+        self.current_study: SimulationTypes | str = current_study
+        self.grid_colour_function: Callable[
+            [ALL_EDITORS, SimulationTypes | str, int, bool], None
+        ] = grid_colour_function
 
         self.logger: Logger = Logger()
 
@@ -202,27 +205,31 @@ class DiagramsMain(CompiledArraysMain):
         self.ui.palette_comboBox.setModel(gf.ComboModel(enum_values=palettes_list))
 
         # map tile sources
-        self.tile_sources = [
+        self.tile_sources: List[CartoDbTiles] = [
             CartoDbTiles(
                 name='Carto voyager',
                 tiles_dir=os.path.join(tiles_path(), 'carto_db_voyager'),
-                tile_servers=["https://basemaps.cartocdn.com/rastertiles/voyager/"]
+                tile_servers=["https://basemaps.cartocdn.com/rastertiles/voyager/"],
+                start_workers=False
             ),
             CartoDbTiles(
                 name='Carto positron',
                 tiles_dir=os.path.join(tiles_path(), 'carto_db_positron'),
-                tile_servers=['https://basemaps.cartocdn.com/light_all/']
+                tile_servers=['https://basemaps.cartocdn.com/light_all/'],
+                start_workers=False
             ),
             CartoDbTiles(
                 name='Carto dark matter',
                 tiles_dir=os.path.join(tiles_path(), 'carto_db_dark_matter'),
-                tile_servers=["https://basemaps.cartocdn.com/dark_all/"]
+                tile_servers=["https://basemaps.cartocdn.com/dark_all/"],
+                start_workers=False
             ),
             CartoDbTiles(
                 name='Open Street Map',
                 tiles_dir=os.path.join(tiles_path(), 'osm'),
                 tile_servers=["https://tile.openstreetmap.org"],
-                max_zoom=21
+                max_zoom=21,
+                start_workers=False
             ),
         ]
         self.tile_index_dict = {tile.tile_set_name: i for i, tile in enumerate(self.tile_sources)}
@@ -274,8 +281,6 @@ class DiagramsMain(CompiledArraysMain):
 
         # task watcher for video export
         self.video_thread: VideoExportWorker | None = None
-
-        self.sc_selector_dialogue: ShortCircuitSelector = ShortCircuitSelector()
 
         # --------------------------------------------------------------------------------------------------------------
         self.ui.actionTakePicture.triggered.connect(self.take_picture)
@@ -371,6 +376,44 @@ class DiagramsMain(CompiledArraysMain):
         self.ui.diagramsListView.setContextMenuPolicy(QtGui.Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.diagramsListView.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
 
+    def shutdown_tile_sources(self) -> bool:
+        """
+        Stop the map tile provider workers owned by the diagrams layer.
+
+        :return: ``True`` when every tile worker has stopped.
+        """
+        all_stopped: bool = True
+        diagram_widget: SchematicWidget | GridMapWidget
+        for diagram_widget in self.diagram_widgets_list:
+            if isinstance(diagram_widget, GridMapWidget):
+                stopped: bool = diagram_widget.map.tile_src.shutdown()
+                if stopped:
+                    pass
+                else:
+                    all_stopped = False
+            else:
+                pass
+
+        tile_source: CartoDbTiles
+        for tile_source in self.tile_sources:
+            stopped = tile_source.shutdown()
+            if stopped:
+                pass
+            else:
+                all_stopped = False
+
+        return all_stopped
+
+    def stop_all_threads(self) -> bool:
+        """
+        Stop GUI worker threads, including the tile workers owned by diagrams.
+
+        :return: ``True`` when every known worker has stopped.
+        """
+        tile_sources_stopped: bool = self.shutdown_tile_sources()
+        threads_stopped: bool = CompiledArraysMain.stop_all_threads(self)
+        return tile_sources_stopped and threads_stopped
+
     def get_current_objects_model_view(self) -> ObjectModelFilterProxy | None:
         """
         Get the current ObjectModelFilterProxy from the GUI
@@ -394,9 +437,9 @@ class DiagramsMain(CompiledArraysMain):
                 for idx in sel_idx:
                     unique.add(idx.row())
 
-                return [model.objects[i] for i in unique]
+                return model.get_objects_at_proxy_rows(proxy_rows=sorted(unique))
             else:
-                info_msg('Select some cells')
+                info_msg(self.tr('Select some cells'))
                 return list()
         else:
             return list()
@@ -423,13 +466,13 @@ class DiagramsMain(CompiledArraysMain):
 
                 # if the ask, checkbox is checked, then ask
                 if self.ui.ask_before_appliying_layout_checkBox.isChecked():
-                    reply = QtWidgets.QMessageBox.question(self,
-                                                           self.tr("Message"),
-                                                           self.tr("Are you sure that you want to try an automatic layout?"),
-                                                           QtWidgets.QMessageBox.StandardButton.Yes,
-                                                           QtWidgets.QMessageBox.StandardButton.No)
+                    reply: bool = yes_no_question(
+                        text=self.tr("Are you sure that you want to try an automatic layout?"),
+                        title=self.tr("Message"),
+                        parent=self,
+                    )
 
-                    if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
+                    if reply:
                         do_it = True
                     else:
                         do_it = False
@@ -438,7 +481,7 @@ class DiagramsMain(CompiledArraysMain):
                     diagram_widget.auto_layout(sel=self.ui.automatic_layout_comboBox.currentData())
 
             else:
-                info_msg("The current diagram cannot be automatically layed out")
+                info_msg(self.tr("The current diagram cannot be automatically layed out"))
         else:
             pass  # asked and decided ot to change the layout
 
@@ -555,16 +598,24 @@ class DiagramsMain(CompiledArraysMain):
 
         if self.circuit.has_time_series:
             if self.circuit.get_time_number() > 0:
-                self.start_end_dialogue_window = StartEndSelectionDialogue(min_value=self.simulation_start_index,
-                                                                           max_value=self.simulation_end_index,
-                                                                           time_array=self.circuit.time_profile)
+                start_end_dialogue_window: StartEndSelectionDialogue = StartEndSelectionDialogue(
+                    min_value=self.simulation_start_index,
+                    max_value=self.simulation_end_index,
+                    time_array=self.circuit.time_profile)
 
-                self.start_end_dialogue_window.setModal(True)
-                self.start_end_dialogue_window.exec()
+                start_end_dialogue_window.setModal(True)
+                try:
+                    exec_dialog_safely(dialog=start_end_dialogue_window)
+                    is_accepted: bool = start_end_dialogue_window.is_accepted
+                    start_value: int = start_end_dialogue_window.start_value
+                    end_value: int = start_end_dialogue_window.end_value
+                finally:
+                    delete_dialog_safely(dialog=start_end_dialogue_window)
 
-                if self.start_end_dialogue_window.is_accepted:
-                    self.setup_sim_indices(st=self.start_end_dialogue_window.start_value,
-                                           en=self.start_end_dialogue_window.end_value)
+                if is_accepted:
+                    self.setup_sim_indices(st=start_value, en=end_value)
+                else:
+                    pass
             else:
                 self.show_error_toast("Empty time series :/")
         else:
@@ -1354,6 +1405,10 @@ class DiagramsMain(CompiledArraysMain):
                                              hvdc_Pt=-results.hvdc_Pf[t_idx, :],
                                              hvdc_loading=results.hvdc_loading[t_idx, :],
                                              hvdc_active=hvdc_active,
+                                             vsc_Pf=results.vsc_Pf[t_idx, :],
+                                             vsc_Pt=-results.vsc_Pf[t_idx, :],
+                                             vsc_loading=results.vsc_loading[t_idx, :],
+                                             vsc_active=vsc_active,
                                              use_flow_based_width=use_flow_based_width,
                                              min_branch_width=min_branch_width,
                                              max_branch_width=max_branch_width,
@@ -1710,13 +1765,13 @@ class DiagramsMain(CompiledArraysMain):
 
     def grid_colour_function(self,
                              diagram_widget: ALL_EDITORS,
-                             current_study: str,
+                             current_study: SimulationTypes | str,
                              t_idx: Union[None, int],
                              allow_popups: bool = True) -> None:
         """
         Colour the schematic or the map
         :param diagram_widget: Diagram where the plotting is made
-        :param current_study: current_study name
+        :param current_study: Simulation type enum or its serialized display label.
         :param t_idx: current time step (if None, the snapshot is taken)
         :param allow_popups: if true, messages me pop up
         """
@@ -1727,8 +1782,26 @@ class DiagramsMain(CompiledArraysMain):
         max_bus_width = self.ui.max_node_size_spinBox.value()
 
         cmap = self.ui.palette_comboBox.currentData()
+        normalized_current_study: SimulationTypes | None = None
+        current_study_label: str
+        simulation_type_candidate: SimulationTypes
 
-        if current_study == sim.PowerFlowDriver.tpe.value:
+        # Qt models in the source branch expose the enum value text, while the
+        # target branch passes the enum itself. Normalize both public forms at
+        # this GUI boundary so the dispatch below remains enum-based.
+        if isinstance(current_study, SimulationTypes):
+            normalized_current_study = current_study
+            current_study_label = str(current_study.value)
+        else:
+            current_study_label = current_study
+            for simulation_type_candidate in SimulationTypes:
+                if simulation_type_candidate.value == current_study:
+                    normalized_current_study = simulation_type_candidate
+                    break
+                else:
+                    pass
+
+        if normalized_current_study == sim.PowerFlowDriver.tpe:
             if t_idx is None:
                 results: sim.PowerFlowResults = self.session.get_results(SimulationTypes.PowerFlow_run)
                 self.pf_colouring(diagram_widget=diagram_widget,
@@ -1742,9 +1815,9 @@ class DiagramsMain(CompiledArraysMain):
 
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.PowerFlowDriver3Ph.tpe.value:
+        elif normalized_current_study == sim.PowerFlowDriver3Ph.tpe:
             if t_idx is None:
                 results: sim.PowerFlowResults3Ph = self.session.get_results(SimulationTypes.PowerFlow3ph_run)
                 self.pf_3ph_colouring(diagram_widget=diagram_widget,
@@ -1758,29 +1831,13 @@ class DiagramsMain(CompiledArraysMain):
 
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.PowerFlowTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.PowerFlowTimeSeriesDriver.tpe:
             if t_idx is not None:
                 drv, results = self.session.power_flow_ts
-                self.pf_ts_colouring(t_idx=t_idx,
-                                     diagram_widget=diagram_widget,
-                                     results=results,
-                                     cmap=cmap,
-                                     use_flow_based_width=use_flow_based_width,
-                                     min_branch_width=min_branch_width,
-                                     max_branch_width=max_branch_width,
-                                     min_bus_width=min_bus_width,
-                                     max_bus_width=max_bus_width)
-
-            else:
-                if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
-
-        elif current_study == sim.PowerFlowTimeSeriesDriver3Ph.tpe.value:
-            if t_idx is not None:
-                _, results = self.session.power_flow_3ph_ts
-                self.pf_3ph_ts_colouring(t_idx=t_idx,
+                if results.S.shape[0] > 0:
+                    self.pf_ts_colouring(t_idx=t_idx,
                                          diagram_widget=diagram_widget,
                                          results=results,
                                          cmap=cmap,
@@ -1789,12 +1846,40 @@ class DiagramsMain(CompiledArraysMain):
                                          max_branch_width=max_branch_width,
                                          min_bus_width=min_bus_width,
                                          max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No time series values to show :/"))
+                    else:
+                        pass
 
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
 
-        elif current_study == sim.StateEstimationDriver.tpe.value:
+        elif normalized_current_study == sim.PowerFlowTimeSeriesDriver3Ph.tpe:
+            if t_idx is not None:
+                _, results = self.session.power_flow_3ph_ts
+                if results.Sbus_A.shape[0] > 0:
+                    self.pf_3ph_ts_colouring(t_idx=t_idx,
+                                             diagram_widget=diagram_widget,
+                                             results=results,
+                                             cmap=cmap,
+                                             use_flow_based_width=use_flow_based_width,
+                                             min_branch_width=min_branch_width,
+                                             max_branch_width=max_branch_width,
+                                             min_bus_width=min_bus_width,
+                                             max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No time series values to show :/"))
+                    else:
+                        pass
+
+            else:
+                if allow_popups:
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
+
+        elif normalized_current_study == sim.StateEstimationDriver.tpe:
             if t_idx is None:
                 results: sim.StateEstimationResults = self.session.get_results(SimulationTypes.StateEstimation_run)
                 self.se_colouring(diagram_widget=diagram_widget,
@@ -1808,14 +1893,39 @@ class DiagramsMain(CompiledArraysMain):
 
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.ContinuationPowerFlowDriver.tpe.value:
+        elif normalized_current_study == sim.ContinuationPowerFlowDriver.tpe:
             if t_idx is None:
                 results: sim.ContinuationPowerFlowResults = self.session.get_results(
                     SimulationTypes.ContinuationPowerFlow_run
                 )
-                self.cpf_colouring(diagram_widget=diagram_widget,
+                if results.Sbus.shape[0] > 0:
+                    self.cpf_colouring(diagram_widget=diagram_widget,
+                                       results=results,
+                                       cmap=cmap,
+                                       use_flow_based_width=use_flow_based_width,
+                                       min_branch_width=min_branch_width,
+                                       max_branch_width=max_branch_width,
+                                       min_bus_width=min_bus_width,
+                                       max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No continuation power flow values to show :/"))
+                    else:
+                        pass
+            else:
+                if allow_popups:
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
+
+        elif normalized_current_study == sim.StochasticPowerFlowDriver.tpe:
+
+            # the time is not relevant in this study
+            results: sim.StochasticPowerFlowResults = self.session.get_results(
+                SimulationTypes.StochasticPowerFlow
+            )
+            if results.S_points.shape[0] > 0:
+                self.spf_colouring(diagram_widget=diagram_widget,
                                    results=results,
                                    cmap=cmap,
                                    use_flow_based_width=use_flow_based_width,
@@ -1825,24 +1935,11 @@ class DiagramsMain(CompiledArraysMain):
                                    max_bus_width=max_bus_width)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(self.tr("No stochastic power flow values to show :/"))
+                else:
+                    pass
 
-        elif current_study == sim.StochasticPowerFlowDriver.tpe.value:
-
-            # the time is not relevant in this study
-            results: sim.StochasticPowerFlowResults = self.session.get_results(
-                SimulationTypes.StochasticPowerFlow
-            )
-            self.spf_colouring(diagram_widget=diagram_widget,
-                               results=results,
-                               cmap=cmap,
-                               use_flow_based_width=use_flow_based_width,
-                               min_branch_width=min_branch_width,
-                               max_branch_width=max_branch_width,
-                               min_bus_width=min_bus_width,
-                               max_bus_width=max_bus_width)
-
-        elif current_study == sim.ShortCircuitDriver.tpe.value:
+        elif normalized_current_study == sim.ShortCircuitDriver.tpe:
             if t_idx is None:
                 results: sim.ShortCircuitResults = self.session.get_results(SimulationTypes.ShortCircuit_run)
                 self.sc_colouring(diagram_widget=diagram_widget,
@@ -1855,9 +1952,9 @@ class DiagramsMain(CompiledArraysMain):
                                   max_bus_width=max_bus_width)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr(" only has values for the snapshot"))
 
-        elif current_study == sim.OptimalPowerFlowDriver.tpe.value:
+        elif normalized_current_study == sim.OptimalPowerFlowDriver.tpe:
             if t_idx is None:
                 results: sim.OptimalPowerFlowResults = self.session.get_results(SimulationTypes.OPF_run)
                 self.opf_colouring(diagram_widget=diagram_widget,
@@ -1870,28 +1967,34 @@ class DiagramsMain(CompiledArraysMain):
                                    max_bus_width=max_bus_width)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr(" only has values for the snapshot"))
 
-        elif current_study == sim.OptimalPowerFlowTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.OptimalPowerFlowTimeSeriesDriver.tpe:
 
             if t_idx is not None:
                 results: sim.OptimalPowerFlowTimeSeriesResults = self.session.get_results(
                     SimulationTypes.OPFTimeSeries_run
                 )
-                self.opf_ts_colouring(t_idx=t_idx,
-                                      diagram_widget=diagram_widget,
-                                      results=results,
-                                      cmap=cmap,
-                                      use_flow_based_width=use_flow_based_width,
-                                      min_branch_width=min_branch_width,
-                                      max_branch_width=max_branch_width,
-                                      min_bus_width=min_bus_width,
-                                      max_bus_width=max_bus_width)
+                if results.Sbus.shape[0] > 0:
+                    self.opf_ts_colouring(t_idx=t_idx,
+                                          diagram_widget=diagram_widget,
+                                          results=results,
+                                          cmap=cmap,
+                                          use_flow_based_width=use_flow_based_width,
+                                          min_branch_width=min_branch_width,
+                                          max_branch_width=max_branch_width,
+                                          min_bus_width=min_bus_width,
+                                          max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No OPF time series values to show :/"))
+                    else:
+                        pass
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
 
-        elif current_study == sim.NodalCapacityDriver.tpe.value:
+        elif normalized_current_study == sim.NodalCapacityDriver.tpe:
 
             _, results = self.session.nodal_capacity_optimization
             self.nc_colouring(diagram_widget=diagram_widget,
@@ -1903,20 +2006,26 @@ class DiagramsMain(CompiledArraysMain):
                               min_bus_width=min_bus_width,
                               max_bus_width=max_bus_width)
 
-        elif current_study == sim.NodalCapacityTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.NodalCapacityTimeSeriesDriver.tpe:
 
             _, results = self.session.nodal_capacity_optimization_ts
-            self.nc_ts_colouring(t_idx=t_idx,
-                                 diagram_widget=diagram_widget,
-                                 results=results,
-                                 cmap=cmap,
-                                 use_flow_based_width=use_flow_based_width,
-                                 min_branch_width=min_branch_width,
-                                 max_branch_width=max_branch_width,
-                                 min_bus_width=min_bus_width,
-                                 max_bus_width=max_bus_width)
+            if results.Sbus.shape[0] > 0:
+                self.nc_ts_colouring(t_idx=t_idx,
+                                     diagram_widget=diagram_widget,
+                                     results=results,
+                                     cmap=cmap,
+                                     use_flow_based_width=use_flow_based_width,
+                                     min_branch_width=min_branch_width,
+                                     max_branch_width=max_branch_width,
+                                     min_bus_width=min_bus_width,
+                                     max_bus_width=max_bus_width)
+            else:
+                if allow_popups:
+                    self.show_warning_toast(self.tr("No nodal capacity time series values to show :/"))
+                else:
+                    pass
 
-        elif current_study == sim.LinearAnalysisDriver.tpe.value:
+        elif normalized_current_study == sim.LinearAnalysisDriver.tpe:
             if t_idx is None:
                 results: sim.LinearAnalysisResults = self.session.get_results(SimulationTypes.LinearAnalysis_run)
                 self.linpf_colouring(diagram_widget=diagram_widget,
@@ -1929,64 +2038,82 @@ class DiagramsMain(CompiledArraysMain):
                                      max_bus_width=max_bus_width)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.LinearAnalysisTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.LinearAnalysisTimeSeriesDriver.tpe:
             if t_idx is not None:
                 results: sim.LinearAnalysisTimeSeriesResults = self.session.get_results(
                     SimulationTypes.LinearAnalysis_TS_run
                 )
-                self.linpf_ts_colouring(t_idx=t_idx,
-                                        diagram_widget=diagram_widget,
-                                        results=results,
-                                        cmap=cmap,
-                                        use_flow_based_width=use_flow_based_width,
-                                        min_branch_width=min_branch_width,
-                                        max_branch_width=max_branch_width,
-                                        min_bus_width=min_bus_width,
-                                        max_bus_width=max_bus_width)
+                if results.S.shape[0] > 0:
+                    self.linpf_ts_colouring(t_idx=t_idx,
+                                            diagram_widget=diagram_widget,
+                                            results=results,
+                                            cmap=cmap,
+                                            use_flow_based_width=use_flow_based_width,
+                                            min_branch_width=min_branch_width,
+                                            max_branch_width=max_branch_width,
+                                            min_bus_width=min_bus_width,
+                                            max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No linear analysis time series values to show :/"))
+                    else:
+                        pass
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
 
-        elif current_study == sim.ContingencyAnalysisDriver.tpe.value:
+        elif normalized_current_study == sim.ContingencyAnalysisDriver.tpe:
 
             if t_idx is None:
                 results: sim.ContingencyAnalysisResults = self.session.get_results(
                     SimulationTypes.ContingencyAnalysis_run
                 )
-                self.con_colouring(diagram_widget=diagram_widget,
-                                   results=results,
-                                   cmap=cmap,
-                                   use_flow_based_width=use_flow_based_width,
-                                   min_branch_width=min_branch_width,
-                                   max_branch_width=max_branch_width,
-                                   min_bus_width=min_bus_width,
-                                   max_bus_width=max_bus_width)
+                if results.Sbus.shape[0] > 0:
+                    self.con_colouring(diagram_widget=diagram_widget,
+                                       results=results,
+                                       cmap=cmap,
+                                       use_flow_based_width=use_flow_based_width,
+                                       min_branch_width=min_branch_width,
+                                       max_branch_width=max_branch_width,
+                                       min_bus_width=min_bus_width,
+                                       max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No contingencies to show :/"))
+                    else:
+                        pass
 
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.ContingencyAnalysisTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.ContingencyAnalysisTimeSeriesDriver.tpe:
             if t_idx is not None:
                 results: sim.ContingencyAnalysisTimeSeriesResults = self.session.get_results(
                     SimulationTypes.ContingencyAnalysisTS_run
                 )
-                self.con_ts_colouring(t_idx=t_idx,
-                                      diagram_widget=diagram_widget,
-                                      results=results,
-                                      cmap=cmap,
-                                      use_flow_based_width=use_flow_based_width,
-                                      min_branch_width=min_branch_width,
-                                      max_branch_width=max_branch_width,
-                                      min_bus_width=min_bus_width,
-                                      max_bus_width=max_bus_width)
+                if results.S.shape[0] > 0:
+                    self.con_ts_colouring(t_idx=t_idx,
+                                          diagram_widget=diagram_widget,
+                                          results=results,
+                                          cmap=cmap,
+                                          use_flow_based_width=use_flow_based_width,
+                                          min_branch_width=min_branch_width,
+                                          max_branch_width=max_branch_width,
+                                          min_bus_width=min_bus_width,
+                                          max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No contingency time series values to show :/"))
+                    else:
+                        pass
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
 
-        elif current_study == sim.AvailableTransferCapacityDriver.tpe.value:
+        elif normalized_current_study == sim.AvailableTransferCapacityDriver.tpe:
             self.default_colouring(t_idx=t_idx,
                                    diagram_widget=diagram_widget,
                                    cmap=cmap,
@@ -1996,7 +2123,7 @@ class DiagramsMain(CompiledArraysMain):
                                    min_bus_width=min_bus_width,
                                    max_bus_width=max_bus_width)
 
-        elif current_study == sim.AvailableTransferCapacityTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.AvailableTransferCapacityTimeSeriesDriver.tpe:
             self.default_colouring(t_idx=t_idx,
                                    diagram_widget=diagram_widget,
                                    cmap=cmap,
@@ -2006,7 +2133,7 @@ class DiagramsMain(CompiledArraysMain):
                                    min_bus_width=min_bus_width,
                                    max_bus_width=max_bus_width)
 
-        elif current_study == sim.OptimalNetTransferCapacityDriver.tpe.value:
+        elif normalized_current_study == sim.OptimalNetTransferCapacityDriver.tpe:
             if t_idx is None:
                 results: sim.OptimalNetTransferCapacityResults = self.session.get_results(
                     SimulationTypes.OPF_NTC_run
@@ -2021,38 +2148,33 @@ class DiagramsMain(CompiledArraysMain):
                                    max_bus_width=max_bus_width)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
-        elif current_study == sim.OptimalNetTransferCapacityTimeSeriesDriver.tpe.value:
+        elif normalized_current_study == sim.OptimalNetTransferCapacityTimeSeriesDriver.tpe:
             if t_idx is not None:
                 results: sim.OptimalNetTransferCapacityTimeSeriesResults = self.session.get_results(
                     SimulationTypes.OPF_NTC_TS_run
                 )
-                self.ntc_ts_colouring(t_idx=t_idx,
-                                      diagram_widget=diagram_widget,
-                                      results=results,
-                                      cmap=cmap,
-                                      use_flow_based_width=use_flow_based_width,
-                                      min_branch_width=min_branch_width,
-                                      max_branch_width=max_branch_width,
-                                      min_bus_width=min_bus_width,
-                                      max_bus_width=max_bus_width)
+                if results.Sbus.shape[0] > 0:
+                    self.ntc_ts_colouring(t_idx=t_idx,
+                                          diagram_widget=diagram_widget,
+                                          results=results,
+                                          cmap=cmap,
+                                          use_flow_based_width=use_flow_based_width,
+                                          min_branch_width=min_branch_width,
+                                          max_branch_width=max_branch_width,
+                                          min_bus_width=min_bus_width,
+                                          max_bus_width=max_bus_width)
+                else:
+                    if allow_popups:
+                        self.show_warning_toast(self.tr("No NTC time series values to show :/"))
+                    else:
+                        pass
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} does not have values for the snapshot")
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("does not have values for the snapshot"))
 
-        elif current_study == sim.InputsAnalysisDriver.tpe.value:
-
-            self.default_colouring(t_idx=t_idx,
-                                   diagram_widget=diagram_widget,
-                                   cmap=cmap,
-                                   use_flow_based_width=use_flow_based_width,
-                                   min_branch_width=min_branch_width,
-                                   max_branch_width=max_branch_width,
-                                   min_bus_width=min_bus_width,
-                                   max_bus_width=max_bus_width)
-
-        elif current_study == SimulationTypes.DesignView.value:
+        elif normalized_current_study == sim.InputsAnalysisDriver.tpe:
 
             self.default_colouring(t_idx=t_idx,
                                    diagram_widget=diagram_widget,
@@ -2063,7 +2185,32 @@ class DiagramsMain(CompiledArraysMain):
                                    min_bus_width=min_bus_width,
                                    max_bus_width=max_bus_width)
 
-        elif current_study == SimulationTypes.NodeGrouping_run.value:
+        elif normalized_current_study == SimulationTypes.DesignView:
+
+            self.default_colouring(t_idx=t_idx,
+                                   diagram_widget=diagram_widget,
+                                   cmap=cmap,
+                                   use_flow_based_width=use_flow_based_width,
+                                   min_branch_width=min_branch_width,
+                                   max_branch_width=max_branch_width,
+                                   min_bus_width=min_bus_width,
+                                   max_bus_width=max_bus_width)
+
+        elif normalized_current_study == SimulationTypes.RmsDynamic_run:
+
+            # RMS trajectories expose a typed variable catalogue rather than
+            # one network-flow snapshot. Keep the design colouring until a
+            # user selects a result-specific RMS projection.
+            self.default_colouring(t_idx=t_idx,
+                                   diagram_widget=diagram_widget,
+                                   cmap=cmap,
+                                   use_flow_based_width=use_flow_based_width,
+                                   min_branch_width=min_branch_width,
+                                   max_branch_width=max_branch_width,
+                                   min_bus_width=min_bus_width,
+                                   max_bus_width=max_bus_width)
+
+        elif normalized_current_study == SimulationTypes.NodeGrouping_run:
             if t_idx is None:
                 results: sim.OptimalNetTransferCapacityResults = self.session.get_results(
                     SimulationTypes.NodeGrouping_run
@@ -2072,13 +2219,10 @@ class DiagramsMain(CompiledArraysMain):
                                           results=results)
             else:
                 if allow_popups:
-                    self.show_warning_toast(f"{current_study} only has values for the snapshot")
-
-        elif current_study == 'Transient stability':
-            raise Exception('Not implemented :(')
+                    self.show_warning_toast(f"{current_study_label} " + self.tr("only has values for the snapshot"))
 
         else:
-            print('grid_colour_function: <' + current_study + '> Not implemented :(')
+            print("grid_colour_function: <" + current_study_label + "> Not implemented :(")
 
     def colour_diagrams(self, allow_popups: bool = True) -> None:
         """
@@ -2224,7 +2368,12 @@ class DiagramsMain(CompiledArraysMain):
             idx = indices[0].row()
             return self._ensure_diagram_widget_at_index(index=idx)
         else:
-            return None
+            current_index: QtCore.QModelIndex = self.ui.diagramsListView.currentIndex()
+            if current_index.isValid():
+                idx = current_index.row()
+                return self._ensure_diagram_widget_at_index(index=idx)
+            else:
+                return None
 
     def create_blank_schematic_diagram(self, name: str = "") -> SchematicWidget:
         """
@@ -2412,10 +2561,10 @@ class DiagramsMain(CompiledArraysMain):
 
                 dlg = InputNumberDialogue(min_value=1, max_value=99,
                                           default_value=1, is_int=True,
-                                          title='Vicinity diagram',
-                                          text='Select the expansion level')
+                                          title=self.tr('Vicinity diagram'),
+                                          text=self.tr('Select the expansion level'))
 
-                if dlg.exec():
+                if exec_dialog_safely(dialog=dlg):
                     diagram = make_vicinity_diagram(circuit=self.circuit,
                                                     root_bus=root_bus,
                                                     max_level=dlg.value)
@@ -2444,10 +2593,12 @@ class DiagramsMain(CompiledArraysMain):
         """
         dlg = InputNumberDialogue(min_value=1, max_value=99,
                                   default_value=1, is_int=True,
-                                  title='Vicinity diagram',
-                                  text=f'Set the expansion level from {root_bus.name}')
+                                  title=self.tr('Vicinity diagram'),
+                                  text=self.tr("Set the expansion level from {bus_name}").format(
+                                      bus_name=root_bus.name,
+                                  ))
 
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             diagram = make_vicinity_diagram(circuit=self.circuit,
                                             root_bus=root_bus,
                                             max_level=dlg.value)
@@ -2470,8 +2621,8 @@ class DiagramsMain(CompiledArraysMain):
         """
 
         if len(substations) == 0:
-            info_msg(text="No substations selected. Please select some substations",
-                     title="Substations schematic")
+            info_msg(text=self.tr("No substations selected. Please select some substations"),
+                     title=self.tr("Substations schematic"))
             return
 
         selected_buses = self.circuit.get_buses_from_objects(elements=substations,
@@ -2497,11 +2648,13 @@ class DiagramsMain(CompiledArraysMain):
             self.show_info_toast(f"{diagram.name} added")
         else:
             if len(substations) == 1:
-                info_msg(text=f"No buses were found associated with the substation {substations[0].name}",
-                         title="New schematic from substation")
+                info_msg(text=self.tr(
+                    "No buses were found associated with the substation {substation_name}"
+                ).format(substation_name=substations[0].name),
+                         title=self.tr("New schematic from substation"))
             else:
-                info_msg(text=f"No buses were found associated with the substations",
-                         title="New schematic from substation")
+                info_msg(text=self.tr("No buses were found associated with the substations"),
+                         title=self.tr("New schematic from substation"))
 
     def add_substation_to_current_diagram(self, substations: List[dev.Substation]):
         """
@@ -2509,8 +2662,8 @@ class DiagramsMain(CompiledArraysMain):
         """
 
         if len(substations) == 0:
-            info_msg(text="No substations selected. Please select some substations",
-                     title="Substations schematic")
+            info_msg(text=self.tr("No substations selected. Please select some substations"),
+                     title=self.tr("Substations schematic"))
             return
 
         diagram_widget = self.get_selected_diagram_widget()
@@ -2527,11 +2680,13 @@ class DiagramsMain(CompiledArraysMain):
             self.show_info_toast(f"Substation added")
         else:
             if len(substations) == 1:
-                info_msg(text=f"No buses were found associated with the substation {substations[0].name}",
-                         title="New schematic from substation")
+                info_msg(text=self.tr(
+                    "No buses were found associated with the substation {substation_name}"
+                ).format(substation_name=substations[0].name),
+                         title=self.tr("New schematic from substation"))
             else:
-                info_msg(text=f"No buses were found associated with the substations",
-                         title="New schematic from substation")
+                info_msg(text=self.tr("No buses were found associated with the substations"),
+                         title=self.tr("New schematic from substation"))
 
     def create_circuit_stored_diagrams(self):
         """
@@ -2576,33 +2731,37 @@ class DiagramsMain(CompiledArraysMain):
         if self.circuit.get_substation_number() > 0:
             # showing this menu only makes sense if there is anything there
 
-            self.new_se_dlg = CheckListDialogue(
+            new_se_dlg: CheckListDialogue = CheckListDialogue(
                 objects_list=[e.value for e in tpes]
             )
 
-            self.new_se_dlg.exec()
+            try:
+                exec_dialog_safely(dialog=new_se_dlg)
+                show_substations: bool = new_se_dlg.selected(DeviceType.SubstationDevice.value)
+                show_lines: bool = new_se_dlg.selected(DeviceType.LineDevice.value)
+                show_dc_lines: bool = new_se_dlg.selected(DeviceType.DCLineDevice.value)
+                show_hvdc_lines: bool = new_se_dlg.selected(DeviceType.HVDCLineDevice.value)
+                show_external_grids: bool = new_se_dlg.selected(DeviceType.ExternalGridDevice.value)
+                show_static_generators: bool = new_se_dlg.selected(DeviceType.StaticGeneratorDevice.value)
+                show_loads: bool = new_se_dlg.selected(DeviceType.LoadDevice.value)
+                show_batteries: bool = new_se_dlg.selected(DeviceType.BatteryDevice.value)
+                show_generators: bool = new_se_dlg.selected(DeviceType.GeneratorDevice.value)
+            finally:
+                delete_dialog_safely(dialog=new_se_dlg)
 
             diagram = generate_map_diagram(
-                substations=self.circuit.get_substations() if self.new_se_dlg.selected(
-                    DeviceType.SubstationDevice.value) else list(),
-                voltage_levels=self.circuit.get_voltage_levels() if self.new_se_dlg.selected(
-                    DeviceType.SubstationDevice.value) else list(),
-                lines=self.circuit.get_lines() if self.new_se_dlg.selected(DeviceType.LineDevice.value) else list(),
-                dc_lines=self.circuit.get_dc_lines() if self.new_se_dlg.selected(
-                    DeviceType.DCLineDevice.value) else list(),
-                hvdc_lines=self.circuit.get_hvdc() if self.new_se_dlg.selected(
-                    DeviceType.HVDCLineDevice.value) else list(),
+                substations=self.circuit.get_substations() if show_substations else list(),
+                voltage_levels=self.circuit.get_voltage_levels() if show_substations else list(),
+                lines=self.circuit.get_lines() if show_lines else list(),
+                dc_lines=self.circuit.get_dc_lines() if show_dc_lines else list(),
+                hvdc_lines=self.circuit.get_hvdc() if show_hvdc_lines else list(),
                 fluid_nodes=self.circuit.get_fluid_nodes(),
                 fluid_paths=self.circuit.get_fluid_paths(),
-                external_grids=self.circuit.external_grids if self.new_se_dlg.selected(
-                    DeviceType.ExternalGridDevice.value) else list(),
-                static_generators=self.circuit.static_generators if self.new_se_dlg.selected(
-                    DeviceType.StaticGeneratorDevice.value) else list(),
-                loads=self.circuit.loads if self.new_se_dlg.selected(DeviceType.LoadDevice.value) else list(),
-                batteries=self.circuit.batteries if self.new_se_dlg.selected(
-                    DeviceType.BatteryDevice.value) else list(),
-                generators=self.circuit.generators if self.new_se_dlg.selected(
-                    DeviceType.GeneratorDevice.value) else list(),
+                external_grids=self.circuit.external_grids if show_external_grids else list(),
+                static_generators=self.circuit.static_generators if show_static_generators else list(),
+                loads=self.circuit.loads if show_loads else list(),
+                batteries=self.circuit.batteries if show_batteries else list(),
+                generators=self.circuit.generators if show_generators else list(),
                 prog_func=None,
                 text_func=None,
                 name='Map diagram',
@@ -2670,7 +2829,7 @@ class DiagramsMain(CompiledArraysMain):
         else:
             question = f"Are you sure that you want to delete {len(selected_rows)} selected diagrams?"
 
-        ok = yes_no_question(question, "Remove diagram")
+        ok = yes_no_question(question, self.tr("Remove diagram"))
         if not ok:
             return
 
@@ -2711,7 +2870,7 @@ class DiagramsMain(CompiledArraysMain):
             # refresh the list view
             self.set_diagrams_list_view()
         else:
-            info_msg(text="Select a valid diagram", title="Duplicate diagram")
+            info_msg(text=self.tr("Select a valid diagram"), title=self.tr("Duplicate diagram"))
 
     def remove_all_diagrams(self) -> None:
         """
@@ -2736,7 +2895,10 @@ class DiagramsMain(CompiledArraysMain):
             # delete it from the layout list
             self.ui.schematic_layout.removeWidget(widget_to_remove)
 
-            # delete it from the gui
+            # Hide the widget before detaching it so Qt does not expose it as a top-level window.
+            widget_to_remove.hide()
+
+            # detach it from the gui
             widget_to_remove.setParent(None)
 
     def set_diagram_widget(self, widget: ALL_EDITORS):
@@ -2748,6 +2910,7 @@ class DiagramsMain(CompiledArraysMain):
 
         # add the new diagram
         self.ui.schematic_layout.addWidget(widget)
+        widget.show()
 
         # set the alignment
         self.ui.diagram_selection_splitter.setStretchFactor(0, 10)
@@ -2947,10 +3110,10 @@ class DiagramsMain(CompiledArraysMain):
             if diagram is not None:
                 if isinstance(diagram, SchematicWidget):
 
-                    if yes_no_question("All buses will be positioned to a 2D plane projection of their "
+                    if yes_no_question(self.tr("All buses will be positioned to a 2D plane projection of their "
                                        "latitude and longitude. This updates the current diagram and the "
                                        "stored bus x, y, so diagrams created afterwards use the new positions. "
-                                       "Are you sure of this?"):
+                                       "Are you sure of this?")):
                         diagram.fill_xy_from_lat_lon(destructive=True)
                         diagram.center_nodes()
                 else:
@@ -3033,7 +3196,7 @@ class DiagramsMain(CompiledArraysMain):
             if len(selected_buses) > 0:
                 diagram_widget.try_to_fix_buses_location(buses_selection=selected_buses)
             else:
-                info_msg('Choose some elements from the schematic', 'Fix buses locations')
+                info_msg(self.tr('Choose some elements from the schematic'), self.tr('Fix buses locations'))
 
     def get_selected_devices(self) -> List[ALL_DEV_TYPES]:
         """
@@ -3064,22 +3227,28 @@ class DiagramsMain(CompiledArraysMain):
             if len(selected) > 0:
                 names = [elm.type_name + ": " + elm.name for elm in selected]
                 group_text = "Contingency " + selected[0].name
-                self.contingency_checks_diag = CheckListDialogue(objects_list=names,
-                                                                 title="Add contingency",
-                                                                 ask_for_group_name=True,
-                                                                 group_label="Contingency name",
-                                                                 group_text=group_text)
-                self.contingency_checks_diag.setModal(True)
-                self.contingency_checks_diag.exec()
+                contingency_checks_diag: CheckListDialogue = CheckListDialogue(objects_list=names,
+                                                                               title="Add contingency",
+                                                                               ask_for_group_name=True,
+                                                                               group_label="Contingency name",
+                                                                               group_text=group_text)
+                contingency_checks_diag.setModal(True)
+                try:
+                    exec_dialog_safely(dialog=contingency_checks_diag)
+                    is_accepted: bool = contingency_checks_diag.is_accepted
+                    selected_indices: list[int] = list(contingency_checks_diag.selected_indices)
+                    selected_group_text: str = contingency_checks_diag.get_group_text()
+                finally:
+                    delete_dialog_safely(dialog=contingency_checks_diag)
 
-                if self.contingency_checks_diag.is_accepted:
+                if is_accepted:
 
                     group = dev.ContingencyGroup(idtag=None,
-                                                 name=self.contingency_checks_diag.get_group_text(),
+                                                 name=selected_group_text,
                                                  category="single" if len(selected) == 1 else "multiple")
                     self.circuit.add_contingency_group(group)
 
-                    for i in self.contingency_checks_diag.selected_indices:
+                    for i in selected_indices:
                         elm = selected[i]
                         con = dev.Contingency(device=elm,
                                               code=elm.code,
@@ -3088,8 +3257,10 @@ class DiagramsMain(CompiledArraysMain):
                                               value=0,
                                               group=group)
                         self.circuit.add_contingency(con)
+                else:
+                    pass
             else:
-                info_msg("Select some elements in the schematic first", "Add selected to contingency")
+                info_msg(self.tr("Select some elements in the schematic first"), self.tr("Add selected to contingency"))
 
     def add_selected_to_remedial_action(self):
         """
@@ -3103,22 +3274,28 @@ class DiagramsMain(CompiledArraysMain):
             if len(selected) > 0:
                 names = [elm.type_name + ": " + elm.name for elm in selected]
                 group_text = "RA " + selected[0].name
-                self.ra_checks_diag = CheckListDialogue(objects_list=names,
-                                                        title="Add remedial action",
-                                                        ask_for_group_name=True,
-                                                        group_label="Remedial action name",
-                                                        group_text=group_text)
-                self.ra_checks_diag.setModal(True)
-                self.ra_checks_diag.exec()
+                ra_checks_diag: CheckListDialogue = CheckListDialogue(objects_list=names,
+                                                                      title="Add remedial action",
+                                                                      ask_for_group_name=True,
+                                                                      group_label="Remedial action name",
+                                                                      group_text=group_text)
+                ra_checks_diag.setModal(True)
+                try:
+                    exec_dialog_safely(dialog=ra_checks_diag)
+                    is_accepted: bool = ra_checks_diag.is_accepted
+                    selected_indices: list[int] = list(ra_checks_diag.selected_indices)
+                    selected_group_text: str = ra_checks_diag.get_group_text()
+                finally:
+                    delete_dialog_safely(dialog=ra_checks_diag)
 
-                if self.ra_checks_diag.is_accepted:
+                if is_accepted:
 
                     ra_group = dev.RemedialActionGroup(idtag=None,
-                                                       name=self.ra_checks_diag.get_group_text(),
+                                                       name=selected_group_text,
                                                        category="single" if len(selected) == 1 else "multiple")
                     self.circuit.add_remedial_action_group(ra_group)
 
-                    for i in self.ra_checks_diag.selected_indices:
+                    for i in selected_indices:
                         elm = selected[i]
                         ra = dev.RemedialAction(device=elm,
                                                 code=elm.code,
@@ -3127,8 +3304,10 @@ class DiagramsMain(CompiledArraysMain):
                                                 value=0,
                                                 group=ra_group)
                         self.circuit.add_remedial_action(ra)
+                else:
+                    pass
             else:
-                info_msg("Select some elements in the schematic first", "Add selected to remedial action")
+                info_msg(self.tr("Select some elements in the schematic first"), self.tr("Add selected to remedial action"))
 
     def add_selected_to_investment(self) -> None:
         """
@@ -3145,24 +3324,30 @@ class DiagramsMain(CompiledArraysMain):
 
                 # launch selection dialogue to add/delete from the selection
                 names = [elm.type_name + ": " + elm.name for elm in selected]
-                self.investment_checks_diag = CheckListDialogue(objects_list=names,
-                                                                title="Add investment",
-                                                                ask_for_group_name=True,
-                                                                group_label="Investment name",
-                                                                group_text=group_name)
-                self.investment_checks_diag.setModal(True)
-                self.investment_checks_diag.exec()
+                investment_checks_diag: CheckListDialogue = CheckListDialogue(objects_list=names,
+                                                                              title="Add investment",
+                                                                              ask_for_group_name=True,
+                                                                              group_label="Investment name",
+                                                                              group_text=group_name)
+                investment_checks_diag.setModal(True)
+                try:
+                    exec_dialog_safely(dialog=investment_checks_diag)
+                    is_accepted: bool = investment_checks_diag.is_accepted
+                    selected_indices: list[int] = list(investment_checks_diag.selected_indices)
+                    selected_group_text: str = investment_checks_diag.get_group_text()
+                finally:
+                    delete_dialog_safely(dialog=investment_checks_diag)
 
-                if self.investment_checks_diag.is_accepted:
+                if is_accepted:
 
                     # create a new investments group
                     group = dev.InvestmentsGroup(idtag=None,
-                                                 name=self.investment_checks_diag.get_group_text(),
+                                                 name=selected_group_text,
                                                  category="single" if len(selected) == 1 else "multiple")
                     self.circuit.add_investments_group(group)
 
                     # add the selection as investments to the group
-                    for i in self.investment_checks_diag.selected_indices:
+                    for i in selected_indices:
                         elm = selected[i]
                         con = dev.Investment(device=elm,
                                              code=elm.code,
@@ -3170,153 +3355,42 @@ class DiagramsMain(CompiledArraysMain):
                                              CAPEX=0.0,
                                              group=group)
                         self.circuit.add_investment(con)
+                else:
+                    pass
             else:
-                info_msg("Select some elements in the schematic first", "Add selected to investment")
+                info_msg(self.tr("Select some elements in the schematic first"), self.tr("Add selected to investment"))
 
     def add_rms_event_to_selected(self) -> None:
+        """Open the general dynamic-events workspace preferring RMS events.
+
+        :return: None.
         """
-        Add RMS event to a selected device
-        """
-        mode = DynamicSimulationMode.RMS
-        if self.circuit.valid_for_simulation():
-
-            # get the selected device to apply event to
-            target_devices = self.get_selected_devices()
-
-            if len(target_devices) == 1:
-
-                target_device = target_devices[0]
-                # launch rms event editor dialogue
-
-                events_groups = self.circuit.rms_events_groups
-                if len(events_groups) == 0:
-
-                    QtWidgets.QMessageBox.information(
-                        self,
-                        "No RMS Events Group",
-                        "No RMS Events Group found, please create one before adding an event."
-                    )
-
-                    dialog = DynamicEventsGroupsDialog(mode=mode,
-                                                       parent=self)
-                    if dialog.exec():
-                        name = dialog.get_name()
-                        # build group
-                        if name:
-                            self.circuit.add_rms_events_group(dev.RmsEventsGroup(idtag=None,
-                                                                                 name=name))
-
-
-                else:
-                    pass
-                # after creating a new events group or not, open eitherway the Events dialogue
-                rms_event_parameters, mode_parameter_uids = collect_block_runtime_event_parameters(target_device.rms_model)
-                rms_events_dialog = DynamicEventDialogue(circuit=self.circuit,
-                                                         parameters_list=rms_event_parameters,
-                                                         target_device_name=target_device.type_name + ": " + target_device.name,
-                                                         mode=mode,
-                                                         mode_parameter_uids=mode_parameter_uids)
-
-                if rms_events_dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-
-                    events_data = rms_events_dialog.get_data()
-                    events_list = list()
-                    for i, event in enumerate(events_data["parameters"]):
-                        transition_type = events_data["transition_types"][i]
-                        end_time = events_data["end_times"][i]
-
-                        if transition_type == DynamicEventTransitionType.Ramp and end_time is None:
-                            end_time = float(events_data["target_times"][i])
-                        else:
-                            pass
-
-                        events_list.append(dev.RmsEvent(device=target_device,
-                                                         parameter=events_data["parameters"][i],
-                                                         time=float(events_data["target_times"][i]),
-                                                         end_time=None if end_time is None else float(end_time),
-                                                         value=float(events_data["values"][i]),
-                                                         group=events_data["groups"][i],
-                                                         transition_type=transition_type))
-
-                    for event in events_list:
-                        self.circuit.add_rms_event(event)
-
-            else:
-                print("Selected devices: ", target_devices)
-                self.show_warning_toast(f"Select one and only one device to add event to")
+        self._open_dynamic_events_editor(DynamicSimulationMode.RMS)
 
     def add_emt_event_to_selected(self) -> None:
+        """Open the general dynamic-events workspace preferring EMT events.
+
+        :return: None.
         """
-        Add EMT event to a selected device
+        self._open_dynamic_events_editor(DynamicSimulationMode.EMT)
+
+    def _open_dynamic_events_editor(self, mode: DynamicSimulationMode) -> None:
+        """Open the requested events content in the unified dynamic workspace.
+
+        Events are circuit-wide assets, so the selected diagram elements do not
+        constrain the editor contents or determine its tab identity.
+
+        :param mode: RMS or EMT family preferred by the triggering action.
+        :return: None.
         """
-        mode = DynamicSimulationMode.EMT
-        if self.circuit.valid_for_simulation():
-
-            # get the selected device to apply event to
-            target_devices = self.get_selected_devices()
-
-            if len(target_devices) == 1:
-
-                target_device = target_devices[0]
-                # launch emt event editor dialogue
-
-                events_groups = self.circuit.emt_events_groups
-                if len(events_groups) == 0:
-
-                    QtWidgets.QMessageBox.information(
-                        self,
-                        "No EMT Events Group",
-                        "No EMT Events Group found, please create one before adding an event."
-                    )
-
-                    dialog = DynamicEventsGroupsDialog(parent=self,
-                                                       mode=mode)
-                    if dialog.exec():
-                        name = dialog.get_name()
-                        # build group
-                        if name:
-                            self.circuit.add_emt_events_group(dev.EmtEventsGroup(idtag=None,
-                                                                                 name=name))
-
-
-                else:
-                    pass
-
-                # after creating a new events group or not, open eitherway the Events dialogue
-                emt_event_parameters, mode_parameter_uids = collect_block_runtime_event_parameters(target_device.emt_model)
-                emt_events_dialog = DynamicEventDialogue(circuit=self.circuit,
-                                                         parameters_list=emt_event_parameters,
-                                                         target_device_name=target_device.type_name + ": " + target_device.name,
-                                                         mode=mode,
-                                                         mode_parameter_uids=mode_parameter_uids)
-
-                if emt_events_dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-
-                    events_data = emt_events_dialog.get_data()
-                    events_list = list()
-                    for i, event in enumerate(events_data["parameters"]):
-                        transition_type = events_data["transition_types"][i]
-                        end_time = events_data["end_times"][i]
-
-                        if transition_type == DynamicEventTransitionType.Ramp and end_time is None:
-                            end_time = float(events_data["target_times"][i])
-                        else:
-                            pass
-
-                        events_list.append(dev.EmtEvent(device=target_device,
-                                                        parameter=events_data["parameters"][i],
-                                                        time=float(events_data["target_times"][i]),
-                                                        end_time=None if end_time is None else float(end_time),
-                                                        value=float(events_data["values"][i]),
-                                                        group=events_data["groups"][i],
-                                                        force_step_alignment=bool(events_data["force_step_alignment"][i]),
-                                                        transition_type=transition_type))
-
-                    for event in events_list:
-                        self.circuit.add_emt_event(event)
-
-            else:
-                self.show_warning_toast(f"Select one and only one device to add event to")
+        if not self.circuit.valid_for_simulation():
+            return
+        else:
+            self.open_dynamic_events(
+                circuit=self.circuit,
+                mode=mode,
+                show_tree=False,
+            )
 
     def add_short_circuit_events(self):
         """
@@ -3330,27 +3404,32 @@ class DiagramsMain(CompiledArraysMain):
 
             if len(selected) > 0:
 
-                self.sc_selector_dialogue: ShortCircuitSelector = ShortCircuitSelector()
-                self.sc_selector_dialogue.exec()
+                sc_selector_dialogue: ShortCircuitSelector = ShortCircuitSelector()
+                try:
+                    exec_dialog_safely(dialog=sc_selector_dialogue)
 
-                if self.sc_selector_dialogue.was_accepted:
+                    if sc_selector_dialogue.was_accepted:
 
-                    for _, bus, _ in selected:
-                        z_pu: complex = self.sc_selector_dialogue.get_impedance_pu(Sbase=self.circuit.Sbase,
-                                                                                   Vbase=bus.Vnom)
-                        sc = dev.ShortCircuitEvent(
-                            name=f"{bus.name} {self.sc_selector_dialogue.fault.value}",
-                            device=bus,
-                            fault_type=self.sc_selector_dialogue.fault,
-                            method=self.sc_selector_dialogue.method,
-                            phases=self.sc_selector_dialogue.phases,
-                            r_fault=z_pu.real,
-                            x_fault=z_pu.imag
-                        )
+                        for _, bus, _ in selected:
+                            z_pu: complex = sc_selector_dialogue.get_impedance_pu(Sbase=self.circuit.Sbase,
+                                                                                  Vbase=bus.Vnom)
+                            sc = dev.ShortCircuitEvent(
+                                name=f"{bus.name} {sc_selector_dialogue.fault.value}",
+                                device=bus,
+                                fault_type=sc_selector_dialogue.fault,
+                                method=sc_selector_dialogue.method,
+                                phases=sc_selector_dialogue.phases,
+                                r_fault=z_pu.real,
+                                x_fault=z_pu.imag
+                            )
 
-                        self.circuit.add_short_circuit_event(sc)
+                            self.circuit.add_short_circuit_event(sc)
 
-                    self.show_info_toast(f"{len(selected)} short circuit events added!")
+                        self.show_info_toast(f"{len(selected)} short circuit events added!")
+                    else:
+                        pass
+                finally:
+                    delete_dialog_safely(dialog=sc_selector_dialogue)
             else:
                 self.show_warning_toast("Select some buses in the diagram!")
 
@@ -3360,43 +3439,67 @@ class DiagramsMain(CompiledArraysMain):
         :param prop: area, zone, country
         """
         if prop == 'area':
-            self.object_select_window = ObjectSelectWindow(title='Area',
-                                                           object_list=self.circuit.areas,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window: ObjectSelectWindow = ObjectSelectWindow(title='Area',
+                                                                          object_list=self.circuit.areas,
+                                                                          parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object: object | None = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
 
                 for k, bus, graphic_obj in self.get_current_diagram_buses():
-                    if bus.area == self.object_select_window.selected_object:
+                    if bus.area == selected_object:
                         graphic_obj.setSelected(True)
+                    else:
+                        pass
+            else:
+                pass
 
         elif prop == 'country':
-            self.object_select_window = ObjectSelectWindow(title='country',
-                                                           object_list=self.circuit.countries,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window = ObjectSelectWindow(title='country',
+                                                      object_list=self.circuit.countries,
+                                                      parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
                 for k, bus, graphic_obj in self.get_current_diagram_buses():
-                    if bus.country == self.object_select_window.selected_object:
+                    if bus.country == selected_object:
                         graphic_obj.setSelected(True)
+                    else:
+                        pass
+            else:
+                pass
 
         elif prop == 'zone':
-            self.object_select_window = ObjectSelectWindow(title='Zones',
-                                                           object_list=self.circuit.zones,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window = ObjectSelectWindow(title='Zones',
+                                                      object_list=self.circuit.zones,
+                                                      parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
                 for k, bus, graphic_obj in self.get_current_diagram_buses():
-                    if bus.zone == self.object_select_window.selected_object:
+                    if bus.zone == selected_object:
                         graphic_obj.setSelected(True)
+                    else:
+                        pass
+            else:
+                pass
         else:
-            error_msg('Unrecognized option' + str(prop))
+            error_msg(self.tr("Unrecognized option {option_name}").format(option_name=str(prop)))
             return
 
     def select_buses_by(self):
@@ -3404,14 +3507,20 @@ class DiagramsMain(CompiledArraysMain):
         Select buses by...
         launched a dialogue to select the category, and then another to select the element
         """
-        self.object_select_window = ListSelectWindow(title='Area',
-                                                     elements=["area", "zone", "country"],
-                                                     parent=self)
-        self.object_select_window.setModal(True)
-        self.object_select_window.exec()
+        object_select_window: ListSelectWindow = ListSelectWindow(title='Area',
+                                                                  elements=["area", "zone", "country"],
+                                                                  parent=self)
+        object_select_window.setModal(True)
+        try:
+            exec_dialog_safely(dialog=object_select_window)
+            selected_object: object | None = object_select_window.selected_object
+        finally:
+            delete_dialog_safely(dialog=object_select_window)
 
-        if self.object_select_window.selected_object is not None:
-            self.select_buses_by_property(self.object_select_window.selected_object)
+        if selected_object is not None:
+            self.select_buses_by_property(str(selected_object))
+        else:
+            pass
 
     def set_selected_bus_property(self, prop: str):
         """
@@ -3420,67 +3529,89 @@ class DiagramsMain(CompiledArraysMain):
         :return:
         """
         if prop == 'area':
-            self.object_select_window = ObjectSelectWindow(title='Area',
-                                                           object_list=self.circuit.areas,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window = ObjectSelectWindow(title='Area',
+                                                      object_list=self.circuit.areas,
+                                                      parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
                 for k, bus, graphic_obj in self.get_diagram_selected_buses():
-                    bus.area = self.object_select_window.selected_object
-                    print('Set {0} into bus {1}'.format(self.object_select_window.selected_object.name, bus.name))
+                    bus.area = selected_object
+                    print('Set {0} into bus {1}'.format(selected_object.name, bus.name))
+            else:
+                pass
 
         elif prop == 'country':
-            self.object_select_window = ObjectSelectWindow(title='country',
-                                                           object_list=self.circuit.countries,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window = ObjectSelectWindow(title='country',
+                                                      object_list=self.circuit.countries,
+                                                      parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
                 for k, bus, graphic_obj in self.get_diagram_selected_buses():
-                    bus.country = self.object_select_window.selected_object
-                    print('Set {0} into bus {1}'.format(self.object_select_window.selected_object.name, bus.name))
+                    bus.country = selected_object
+                    print('Set {0} into bus {1}'.format(selected_object.name, bus.name))
+            else:
+                pass
 
         elif prop == 'zone':
-            self.object_select_window = ObjectSelectWindow(title='Zones',
-                                                           object_list=self.circuit.zones,
-                                                           parent=self)
-            self.object_select_window.setModal(True)
-            self.object_select_window.exec()
+            object_select_window = ObjectSelectWindow(title='Zones',
+                                                      object_list=self.circuit.zones,
+                                                      parent=self)
+            object_select_window.setModal(True)
+            try:
+                exec_dialog_safely(dialog=object_select_window)
+                selected_object = object_select_window.selected_object
+            finally:
+                delete_dialog_safely(dialog=object_select_window)
 
-            if self.object_select_window.selected_object is not None:
+            if selected_object is not None:
                 for k, bus, graphic_pbj in self.get_diagram_selected_buses():
-                    bus.zone = self.object_select_window.selected_object
-                    print('Set {0} into bus {1}'.format(self.object_select_window.selected_object.name, bus.name))
+                    bus.zone = selected_object
+                    print('Set {0} into bus {1}'.format(selected_object.name, bus.name))
+            else:
+                pass
         else:
-            error_msg('Unrecognized option' + str(prop))
+            error_msg(self.tr("Unrecognized option {option_name}").format(option_name=str(prop)))
             return
 
     def color_buses_by(self):
         """
         Launch the bus coloring
         """
-        self.object_select_window = ListSelectWindow(title='Select association',
-                                                     elements=["area", "zone", "country", "substation"],
-                                                     parent=self)
-        self.object_select_window.setModal(True)
-        self.object_select_window.exec()
+        object_select_window = ListSelectWindow(title='Select association',
+                                                elements=["area", "zone", "country", "substation"],
+                                                parent=self)
+        object_select_window.setModal(True)
+        try:
+            exec_dialog_safely(dialog=object_select_window)
+            selected_object = object_select_window.selected_object
+        finally:
+            delete_dialog_safely(dialog=object_select_window)
         any_op = False
 
         for k, bus, graphic_obj in self.get_current_diagram_buses():
 
-            if self.object_select_window.selected_object == "area":
+            if selected_object == "area":
                 hex_color = bus.area.color if bus.area is not None else None
 
-            elif self.object_select_window.selected_object == "zone":
+            elif selected_object == "zone":
                 hex_color = bus.zone.color if bus.zone is not None else None
 
-            elif self.object_select_window.selected_object == "country":
+            elif selected_object == "country":
                 hex_color = bus.country.color if bus.country is not None else None
 
-            elif self.object_select_window.selected_object == "substation":
+            elif selected_object == "substation":
                 hex_color = bus.substation.color if bus.substation is not None else None
 
             else:
@@ -3493,46 +3624,52 @@ class DiagramsMain(CompiledArraysMain):
 
         if not any_op:
             self.show_warning_toast(
-                f"Nothing coloured, check the buses {self.object_select_window.selected_object} property."
+                f"Nothing coloured, check the buses {selected_object} property."
             )
+        else:
+            pass
 
     def color_substations_by(self):
         """
         Launch substation coloring
         """
 
-        self.object_select_window = ListSelectWindow(title='Select association',
-                                                     elements=["area", "zone", "country",
-                                                               "community", "region", "municipality",
-                                                               "substation"],
-                                                     parent=self)
-        self.object_select_window.setModal(True)
-        self.object_select_window.exec()
+        object_select_window = ListSelectWindow(title='Select association',
+                                                elements=["area", "zone", "country",
+                                                          "community", "region", "municipality",
+                                                          "substation"],
+                                                parent=self)
+        object_select_window.setModal(True)
+        try:
+            exec_dialog_safely(dialog=object_select_window)
+            selected_object = object_select_window.selected_object
+        finally:
+            delete_dialog_safely(dialog=object_select_window)
 
-        if self.object_select_window.selected_object is not None:
+        if selected_object is not None:
             any_op = False
 
             for k, substation, graphic_obj in self.get_current_diagram_substations():
 
-                if self.object_select_window.selected_object == "area":
+                if selected_object == "area":
                     hex_color = substation.area.color if substation.area is not None else None
 
-                elif self.object_select_window.selected_object == "zone":
+                elif selected_object == "zone":
                     hex_color = substation.zone.color if substation.zone is not None else None
 
-                elif self.object_select_window.selected_object == "country":
+                elif selected_object == "country":
                     hex_color = substation.country.color if substation.country is not None else None
 
-                elif self.object_select_window.selected_object == "community":
+                elif selected_object == "community":
                     hex_color = substation.community.color if substation.community is not None else None
 
-                elif self.object_select_window.selected_object == "region":
+                elif selected_object == "region":
                     hex_color = substation.region.color if substation.region is not None else None
 
-                elif self.object_select_window.selected_object == "municipality":
+                elif selected_object == "municipality":
                     hex_color = substation.municipality.color if substation.municipality is not None else None
 
-                elif self.object_select_window.selected_object == "substation":
+                elif selected_object == "substation":
                     hex_color = substation.color
                 else:
                     hex_color = None
@@ -3549,8 +3686,12 @@ class DiagramsMain(CompiledArraysMain):
 
             if not any_op:
                 self.show_warning_toast(
-                    f"Nothing coloured, check the substations {self.object_select_window.selected_object} property."
+                    f"Nothing coloured, check the substations {selected_object} property."
                 )
+            else:
+                pass
+        else:
+            pass
 
     def default_voltage_change(self):
         """
@@ -3566,7 +3707,7 @@ class DiagramsMain(CompiledArraysMain):
             elif isinstance(diagram, GridMapWidget):
                 pass
 
-    def delete_from_all_diagrams(self, elements: List[ALL_DEV_TYPES]):
+    def delete_from_all_diagrams(self, elements: List[ALL_DEV_TYPES]) -> None:
         """
         Delete elements from all editors
         :param elements: list of devices to delete_with_dialogue from the graphics editors
@@ -3578,6 +3719,54 @@ class DiagramsMain(CompiledArraysMain):
 
             elif isinstance(diagram_widget, GridMapWidget):
                 pass
+
+    def remove_dead_graphics_from_all_diagrams(self) -> None:
+        """
+        Remove diagram graphics whose API object no longer exists in the active circuit.
+
+        :return: None.
+        """
+        for diagram_widget in self.diagram_widgets_list:
+            if isinstance(diagram_widget, (SchematicWidget, GridMapWidget)):
+                self.remove_dead_graphics_from_diagram(diagram_widget=diagram_widget)
+            else:
+                pass
+
+    def remove_dead_graphics_from_diagram(self, diagram_widget: SchematicWidget | GridMapWidget) -> None:
+        """
+        Remove stale graphics from one diagram after an in-place database mutation.
+
+        :param diagram_widget: Diagram to synchronize with the active circuit.
+        :return: None.
+        """
+        for device_tpe, graphics_dict in list(diagram_widget.graphics_manager.graphic_dict.items()):
+            try:
+                live_elements: List[ALL_DEV_TYPES] = list(self.circuit.get_elements_by_type(device_type=device_tpe))
+            except Exception:
+                live_idtags: set[str] | None = None
+            else:
+                live_idtags = {element.idtag for element in live_elements}
+
+            if live_idtags is None:
+                stale_idtags: List[str] = list()
+            else:
+                stale_idtags = [idtag for idtag in list(graphics_dict.keys()) if idtag not in live_idtags]
+
+            for idtag in stale_idtags:
+                graphic_object: object | None = graphics_dict.get(idtag, None)
+
+                if graphic_object is None:
+                    del graphics_dict[idtag]
+                elif shiboken6.isValid(graphic_object):
+                    del graphics_dict[idtag]
+                    try:
+                        diagram_widget._remove_from_scene(graphic_object=graphic_object)
+                    except Exception:
+                        pass
+                    else:
+                        pass
+                else:
+                    del graphics_dict[idtag]
 
     def search_diagram(self):
         """
@@ -3724,9 +3913,9 @@ class DiagramsMain(CompiledArraysMain):
         diagram_widget = self.get_selected_diagram_widget()
 
         if diagram_widget is not None:
-            ok = yes_no_question(text="The diagram coordinates will be saved into the corresponding properties "
-                                      "of the database, overwriting the existing ones. Do you want to do this?",
-                                 title="Consolidate diagram coordinates into the DB")
+            ok = yes_no_question(text=self.tr("The diagram coordinates will be saved into the corresponding properties "
+                                      "of the database, overwriting the existing ones. Do you want to do this?"),
+                                 title=self.tr("Consolidate diagram coordinates into the DB"))
             if ok:
                 diagram_widget.consolidate_coordinates()
 
@@ -3736,15 +3925,19 @@ class DiagramsMain(CompiledArraysMain):
         :param substation:
         :return:
         """
-        self.select_bus_dlg = DiagramBusSelectorDialogue(
+        select_bus_dlg: DiagramBusSelectorDialogue = DiagramBusSelectorDialogue(
             gui=self,
             grid=self.circuit,
             substation=substation
         )
 
-        self.select_bus_dlg.exec()
+        try:
+            exec_dialog_safely(dialog=select_bus_dlg)
+            selected_buses: List[dev.Bus] = select_bus_dlg.get_selected_buses()
+        finally:
+            delete_dialog_safely(dialog=select_bus_dlg)
 
-        return self.select_bus_dlg.get_selected_buses()
+        return selected_buses
 
     def combinations_tree_clicked(self):
         """
@@ -3772,7 +3965,7 @@ class DiagramsMain(CompiledArraysMain):
             if self.ui.available_results_to_color_comboBox.currentIndex() > -1 and sel_idx > -1:
                 current_study = self.ui.available_results_to_color_comboBox.currentData()
 
-                if current_study == sim.ShortCircuitDriver.tpe.value:
+                if current_study == sim.ShortCircuitDriver.tpe:
                     results: sim.ShortCircuitResults = self.session.get_results(SimulationTypes.ShortCircuit_run)
                     self.sc_colouring(diagram_widget=diagram_widget,
                                       results=results,
@@ -3784,11 +3977,11 @@ class DiagramsMain(CompiledArraysMain):
                                       max_bus_width=max_bus_width,
                                       sc_index=sel_idx)
 
-                elif current_study == sim.InvestmentsEvaluationDriver.tpe.value:
+                elif current_study == sim.InvestmentsEvaluationDriver.tpe:
                     # delegate to the dedicated handler so this dispatcher stays small
                     self.apply_investments_combination(clicked_index=indices[0])
 
-                elif current_study == sim.CatalogueOptimizationDriver.tpe.value:
+                elif current_study == sim.CatalogueOptimizationDriver.tpe:
                     # delegate to the dedicated catalogue handler
                     self.apply_catalogue_combination(clicked_index=indices[0])
 
@@ -3867,12 +4060,12 @@ class DiagramsMain(CompiledArraysMain):
         # used when seeding the diagram.
         all_elements_dict, _ = self.circuit.get_all_elements_dict()
         self.circuit.set_investments_status(investments_list=self._investments_all,
-                                            status=False,
+                                            apply_investment=False,
                                             all_elements_dict=all_elements_dict)
 
         # apply the selected combination on top of the now-deactivated state
         self.circuit.set_investments_status(investments_list=inv_list,
-                                            status=True,
+                                            apply_investment=True,
                                             all_elements_dict=all_elements_dict)
 
         # Refresh active/inactive pen styles on every open schematic so toggled
@@ -3991,9 +4184,9 @@ class DiagramsMain(CompiledArraysMain):
         diagram_widget = self.get_selected_diagram_widget()
 
         if diagram_widget is not None:
-            ok = yes_no_question(text="The diagram coordinates will be reset to its database values. "
-                                      "Do you want to do this?",
-                                 title="Reset diagram coordinates using the DB")
+            ok = yes_no_question(text=self.tr("The diagram coordinates will be reset to its database values. "
+                                      "Do you want to do this?"),
+                                 title=self.tr("Reset diagram coordinates using the DB"))
             if ok:
                 diagram_widget.reset_coordinates()
                 self.show_info_toast(message='Coordinates of substations and line '
@@ -4009,10 +4202,10 @@ class DiagramsMain(CompiledArraysMain):
         if diagram_widget is not None:
             dlg = InputNumberDialogue(min_value=-180, max_value=180,
                                       default_value=-90, is_int=False,
-                                      title='Rotate diagram',
-                                      text=f'Rotation angle (degrees)')
+                                      title=self.tr('Rotate diagram'),
+                                      text=self.tr('Rotation angle (degrees)'))
 
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 diagram_widget.rotate(dlg.value)
 
     def preset_1(self):

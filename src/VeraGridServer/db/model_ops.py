@@ -22,6 +22,7 @@ from VeraGridServer.db.database import (
     CursorLike,
     PostgreSqlConnectionSettings,
     build_connection_kwargs,
+    ensure_veragrid_object_table,
     get_veragrid_object_table_names,
     log_database_operation,
     normalize_device_table_name,
@@ -127,27 +128,57 @@ def row_exists(cursor: CursorLike,
         return True
 
 
-def resolve_circuit_idtag(circuit: MultiCircuit) -> str:
+def resolve_circuit_idtag(cursor: CursorLike,
+                          schema_name: str,
+                          file_idtag: str,
+                          circuit: MultiCircuit) -> str:
     """
-    Ensure one circuit has a stable idtag and return it.
+    Ensure one circuit has a stable idtag, scoped to this file, and return it.
 
+    A circuit loaded from disk often already carries an idtag from whenever it (or a
+    template/ancestor it was saved-as from) was first created. Reusing that idtag is
+    correct across re-saves of THIS SAME file - that is the "stable" this function is
+    named for - but the ``Models`` table also enforces ``UNIQUE (idtag)`` regardless of
+    file, because every per-device-type table's foreign key references ``Models(idtag)``
+    directly. Two files derived from a common template carry the identical circuit
+    idtag, so blindly reusing it made the second file's upload fail against that
+    constraint even though the two files are otherwise unrelated. Mint a fresh idtag
+    only when the existing one is blank, or already claimed by a DIFFERENT file;
+    otherwise reuse it exactly as before.
+
+    :param cursor: Open database cursor.
+    :param schema_name: Target schema name.
+    :param file_idtag: File this circuit is being persisted into.
     :param circuit: Circuit to inspect.
-    :return: Stable circuit identifier.
+    :return: Stable circuit identifier, unique across every file in the schema.
     """
     current_idtag: Any = circuit.idtag
+    current_text: str = "" if current_idtag is None else str(current_idtag).strip()
 
-    if current_idtag is None:
+    if len(current_text) == 0:
         resolved_idtag: str = str(uuid4())
-        circuit.idtag = resolved_idtag
     else:
-        current_text: str = str(current_idtag).strip()
-        if len(current_text) == 0:
-            resolved_idtag = str(uuid4())
-            circuit.idtag = resolved_idtag
-        else:
-            resolved_idtag = current_text
-            circuit.idtag = resolved_idtag
+        quoted_schema_name: str = quote_sql_identifier(schema_name)
+        cursor.execute(
+            f'''
+            SELECT file_idtag
+            FROM {quoted_schema_name}."Models"
+            WHERE idtag = %s
+            ''',
+            (current_text,),
+        )
+        owner_row: Any = cursor.fetchone()
 
+        if owner_row is None or str(owner_row[0]) == file_idtag:
+            resolved_idtag = current_text
+        else:
+            log_database_operation(
+                f"Circuit idtag '{current_text}' already belongs to file '{owner_row[0]}' "
+                f"(not '{file_idtag}') - minting a fresh idtag instead of colliding with it."
+            )
+            resolved_idtag = str(uuid4())
+
+    circuit.idtag = resolved_idtag
     return resolved_idtag
 
 
@@ -577,6 +608,121 @@ def delete_file(settings: PostgreSqlConnectionSettings,
         release_database_file_lock(settings=settings, file_idtag=file_idtag)
 
 
+def execute_object_table_statement(cursor: CursorLike,
+                                   schema_name: str,
+                                   table_name: str,
+                                   operation: str,
+                                   parameters: Sequence[Any] | None) -> None:
+    """
+    Execute one object-table statement, creating the table only after PostgreSQL reports it missing.
+
+    :param cursor: Open database cursor.
+    :param schema_name: Target schema name.
+    :param table_name: Object table name.
+    :param operation: SQL statement to execute.
+    :param parameters: Optional positional parameters.
+    :return: None.
+    """
+    savepoint_name: str = "veragrid_lazy_object_table"
+
+    # The failed SQL statement must be isolated because PostgreSQL aborts the
+    # transaction after UndefinedTable until the failure is rolled back.
+    cursor.execute(f"SAVEPOINT {savepoint_name}")
+    try:
+        cursor.execute(operation, parameters)
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+    except psycopg.errors.UndefinedTable:
+        cursor.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+
+        # The schema repair is intentionally lazy: normal queries avoid DDL,
+        # and newly introduced device tables are created only on real demand.
+        ensure_veragrid_object_table(
+            cursor=cursor,
+            schema_name=schema_name,
+            table_name=table_name,
+        )
+        cursor.execute(operation, parameters)
+
+
+def executemany_object_table_statement(cursor: CursorLike,
+                                       schema_name: str,
+                                       table_name: str,
+                                       operation: str,
+                                       parameters_seq: Sequence[Sequence[Any]]) -> None:
+    """
+    Execute one object-table batch, creating the table only after PostgreSQL reports it missing.
+
+    :param cursor: Open database cursor.
+    :param schema_name: Target schema name.
+    :param table_name: Object table name.
+    :param operation: SQL statement to execute.
+    :param parameters_seq: Batched positional parameters.
+    :return: None.
+    """
+    savepoint_name: str = "veragrid_lazy_object_table"
+
+    # Batched inserts need the same transaction isolation as single statements
+    # because a missing typed table otherwise poisons the whole transaction.
+    cursor.execute(f"SAVEPOINT {savepoint_name}")
+    try:
+        cursor.executemany(operation, parameters_seq)
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+    except psycopg.errors.UndefinedTable:
+        cursor.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+
+        # Create exactly the one table that the batch proved is missing, then
+        # retry the original insert without adding work to healthy tables.
+        ensure_veragrid_object_table(
+            cursor=cursor,
+            schema_name=schema_name,
+            table_name=table_name,
+        )
+        cursor.executemany(operation, parameters_seq)
+
+
+def fetchall_object_table_statement(cursor: CursorLike,
+                                    schema_name: str,
+                                    table_name: str,
+                                    operation: str,
+                                    parameters: Sequence[Any]) -> Any:
+    """
+    Execute one object-table query and fetch its rows before releasing the savepoint.
+
+    :param cursor: Open database cursor.
+    :param schema_name: Target schema name.
+    :param table_name: Object table name.
+    :param operation: SQL statement to execute.
+    :param parameters: Positional parameters.
+    :return: Fetched SQL rows.
+    """
+    savepoint_name: str = "veragrid_lazy_object_table"
+
+    # SELECT results must be fetched before releasing the savepoint because
+    # psycopg stores only the latest command result on the cursor.
+    cursor.execute(f"SAVEPOINT {savepoint_name}")
+    try:
+        cursor.execute(operation, parameters)
+        rows: Any = cursor.fetchall()
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+    except psycopg.errors.UndefinedTable:
+        cursor.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+        cursor.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+
+        # Existing databases from older versions may miss new typed tables.
+        # Create only the missing table reported by the query and retry once.
+        ensure_veragrid_object_table(
+            cursor=cursor,
+            schema_name=schema_name,
+            table_name=table_name,
+        )
+        cursor.execute(operation, parameters)
+        rows = cursor.fetchall()
+
+    return rows
+
+
 def delete_model(settings: PostgreSqlConnectionSettings,
                  file_idtag: str,
                  model_idtag: str,
@@ -653,9 +799,12 @@ def delete_existing_model_object_rows(cursor: CursorLike,
         log_database_operation(
             f"Deleting previous rows for model '{model_idtag}' from '{schema_name}.{table_name}' (bucket '{json_key}')."
         )
-        cursor.execute(
-            f"DELETE FROM {quoted_schema_name}.{quoted_table_name} WHERE model_idtag = %s",
-            (model_idtag,),
+        execute_object_table_statement(
+            cursor=cursor,
+            schema_name=schema_name,
+            table_name=table_name,
+            operation=f"DELETE FROM {quoted_schema_name}.{quoted_table_name} WHERE model_idtag = %s",
+            parameters=(model_idtag,),
         )
 
 
@@ -700,15 +849,18 @@ def insert_model_object_rows(cursor: CursorLike,
                 object_idtag: str = str(entry["idtag"])
                 batch_parameters.append((object_idtag, Json(entry), object_index, model_idtag))
 
-            cursor.executemany(
-                f"""
+            executemany_object_table_statement(
+                cursor=cursor,
+                schema_name=schema_name,
+                table_name=table_name,
+                operation=f"""
                 INSERT INTO {quoted_schema_name}.{quoted_table_name} (idtag, data, object_index, model_idtag)
                 VALUES (%s, %s, %s, %s)
                 ON CONFLICT (model_idtag, idtag) DO UPDATE
                 SET data = EXCLUDED.data,
                     object_index = EXCLUDED.object_index
                 """,
-                batch_parameters,
+                parameters_seq=batch_parameters,
             )
         else:
             pass
@@ -732,7 +884,9 @@ def insert_model_metadata_rows(cursor: CursorLike,
     node: ScenarioNode
 
     for node in nodes:
-        model_idtag: str = resolve_circuit_idtag(node.circuit)
+        model_idtag: str = resolve_circuit_idtag(
+            cursor=cursor, schema_name=schema_name, file_idtag=file_idtag, circuit=node.circuit
+        )
         model_name_raw: str | None = node.circuit.name
         model_name: str
         if model_name_raw is None or len(model_name_raw.strip()) == 0:
@@ -744,7 +898,10 @@ def insert_model_metadata_rows(cursor: CursorLike,
         if node.parent is None:
             parent_model_idtag = None
         else:
-            parent_model_idtag = resolve_circuit_idtag(node.parent.circuit)
+            parent_model_idtag = resolve_circuit_idtag(
+                cursor=cursor, schema_name=schema_name, file_idtag=file_idtag,
+                circuit=node.parent.circuit,
+            )
 
         batch_parameters.append((file_idtag, model_idtag, model_name, parent_model_idtag))
 
@@ -917,16 +1074,18 @@ def get_model_json_payload(cursor: CursorLike,
         log_database_operation(
             f"Reading rows from '{schema_name}.{table_name}' for model '{model_idtag}'."
         )
-        cursor.execute(
-            f'''
+        rows: Any = fetchall_object_table_statement(
+            cursor=cursor,
+            schema_name=schema_name,
+            table_name=table_name,
+            operation=f'''
             SELECT data
             FROM {quoted_schema_name}.{quoted_table_name}
             WHERE model_idtag = %s
             ORDER BY object_index
             ''',
-            (model_idtag,),
+            parameters=(model_idtag,),
         )
-        rows: Any = cursor.fetchall()
         model_data[json_key] = [row[0] for row in rows]
 
     return {
@@ -1170,7 +1329,10 @@ def put_multiverse_in_database(settings: PostgreSqlConnectionSettings,
             )
 
             for node in nodes:
-                model_idtag = resolve_circuit_idtag(node.circuit)
+                model_idtag = resolve_circuit_idtag(
+                    cursor=cursor, schema_name=schema_name, file_idtag=file_idtag,
+                    circuit=node.circuit,
+                )
                 packed_model: Dict[str, Any] = gather_model_as_jsons(
                     circuit=node.circuit,
                     project_directory=project_directory,
@@ -1197,6 +1359,64 @@ def put_multiverse_in_database(settings: PostgreSqlConnectionSettings,
             cursor.close()
     finally:
         release_database_file_lock(settings=settings, file_idtag=file_idtag)
+
+
+def _coerce_ints_to_floats(node: Any) -> Any:
+    """
+    Recursively coerce ``int`` leaves to ``float`` inside one JSON value.
+
+    PostgreSQL's ``jsonb`` type normalizes whole-number-valued floats (e.g.
+    ``-5.76e+16``) into bare integer literals on storage/retrieval. Python's
+    ``json`` module then parses those literals back as native ``int``, and a
+    numpy array built from a list mixing ``int`` and ``float`` can silently
+    fall back to ``dtype=object`` once an ``int`` exceeds the exact-integer
+    range of ``int64``. ``VeraGridEngine``'s ``AdmittanceMatrix`` requires a
+    strict complex dtype and raises on that ``object`` array, so any
+    sufficiently large admittance value round-tripped through this database
+    fails to load. This is a database round-trip workaround, not a fix for
+    whatever produced the oversized admittance values in the first place.
+
+    :param node: JSON-decoded value (dict, list, or scalar).
+    :return: Same structure with every non-bool ``int`` leaf converted to ``float``.
+    """
+    if isinstance(node, dict):
+        return {key: _coerce_ints_to_floats(value) for key, value in node.items()}
+    elif isinstance(node, list):
+        return [_coerce_ints_to_floats(value) for value in node]
+    elif isinstance(node, bool):
+        # bool is a subclass of int, and JSON booleans must stay booleans.
+        return node
+    elif isinstance(node, int):
+        return float(node)
+    else:
+        return node
+
+
+def _sanitize_admittance_matrix_payload(packed_payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Defensively coerce ``values_r``/``values_i`` leaves to ``float`` throughout one packed payload.
+
+    See :func:`_coerce_ints_to_floats` for why this is necessary. Scoped to
+    only these two key names so nothing else in the payload (sizes, indices,
+    booleans, enums) is touched.
+
+    :param packed_payload: Packed model JSON dictionary as read from the database.
+    :return: Same structure with every ``values_r``/``values_i`` leaf coerced to ``float``.
+    """
+    if isinstance(packed_payload, dict):
+        sanitized: Dict[str, Any] = dict()
+        key: str
+        value: Any
+        for key, value in packed_payload.items():
+            if key in ("values_r", "values_i"):
+                sanitized[key] = _coerce_ints_to_floats(value)
+            else:
+                sanitized[key] = _sanitize_admittance_matrix_payload(value)
+        return sanitized
+    elif isinstance(packed_payload, list):
+        return [_sanitize_admittance_matrix_payload(item) for item in packed_payload]
+    else:
+        return packed_payload
 
 
 def get_multiverse_from_database(settings: PostgreSqlConnectionSettings,
@@ -1236,6 +1456,7 @@ def get_multiverse_from_database(settings: PostgreSqlConnectionSettings,
                 model_idtag=model_idtag,
                 table_mappings=table_mappings,
             )
+            packed_payload = _sanitize_admittance_matrix_payload(packed_payload)
             # The SQL model row is the stable scenario identity. Some legacy
             # payloads still store a different circuit idtag inside ModelData,
             # so the parsed circuit must be rebound to the model row idtag

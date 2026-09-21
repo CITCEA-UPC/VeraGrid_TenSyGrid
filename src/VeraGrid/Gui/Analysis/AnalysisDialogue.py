@@ -22,6 +22,7 @@ from VeraGrid.Gui.Analysis.object_plot_analysis import (FIXABLE_ERROR_TYPES, Fix
                                                         GridErrorLog, grid_analysis)
 from VeraGrid.Gui.Icons import icons_rc
 from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import Logger, LogsDialogue
 from VeraGrid.Gui.results_model import ResultsModel
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -534,6 +535,17 @@ class GridAnalysisGUI(QtWidgets.QMainWindow):
 
         # Run the first analysis immediately so the dashboard opens populated.
         self.analyze_all()
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Release plot resources when the analysis window closes.
+
+        :param event: Qt close event.
+        :return: None.
+        """
+        self.balancePlotWidget.dispose()
+        self.ui.sigmaPlotWidget.dispose()
+        QtWidgets.QMainWindow.closeEvent(self, event)
 
     def tr(self, source_text: str, disambiguation: str | None = None, n: int = -1) -> str:
         """
@@ -1192,7 +1204,7 @@ QWidget#overviewPage QProgressBar::chunk {{
         aggregation: str = self.get_balance_aggregation(result_type)
         result_table = self.inputs_results.mdl(result_type)
         magnitude: np.ndarray = np.max(np.abs(result_table.data_c), axis=0)
-        ranking: np.ndarray = np.argsort(magnitude)[::-1]
+        ranking: np.ndarray = np.argsort(magnitude, kind="stable")[::-1]
         selected_indices: np.ndarray = ranking[:min(top_n, len(ranking))]
 
         if len(selected_indices) == 0:
@@ -2263,7 +2275,7 @@ QWidget#overviewPage QProgressBar::chunk {{
             if logger.has_logs():
                 dialogue: LogsDialogue = LogsDialogue(self.tr("Fixed issues"), logger)
                 dialogue.setModal(True)
-                dialogue.exec()
+                exec_dialog_safely(dialog=dialogue)
             else:
                 pass
 
@@ -2623,4 +2635,4 @@ QWidget#overviewPage QProgressBar::chunk {{
         message_box.setWindowTitle(title)
         message_box.setText(text)
         message_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
-        message_box.exec()
+        exec_dialog_safely(dialog=message_box)

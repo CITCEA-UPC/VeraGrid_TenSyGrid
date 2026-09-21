@@ -135,6 +135,7 @@ class ReliabilityStudyDriver(DriverTemplate):
         """
         self.report_text("Running reliability study...")
         self.tic()
+        self.report_text("Compiling and configuring...")
 
         if self.reliability_mode == ReliabilityMode.GenerationAdequacy:
             self.run_adequacy_reliability()
@@ -143,8 +144,7 @@ class ReliabilityStudyDriver(DriverTemplate):
             self.run_grid_reliability()
 
         self.toc()
-        self.report_text("Done!")
-        self.done_signal.emit()
+        self.report_done()
 
     def run_adequacy_reliability(self):
         """

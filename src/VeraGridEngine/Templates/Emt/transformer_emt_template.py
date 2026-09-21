@@ -152,7 +152,7 @@ def get_transformer_emt_template(
     templ: EmtModelTemplate = EmtModelTemplate()
     templ.tpe = DeviceType.Transformer2WDevice
     templ.name = name
-    templ.block.name = name
+
 
     if conn_f in {WindingType.GroundedStar, WindingType.NeutralStar}:
         from_has_neutral_port: bool = True
@@ -177,13 +177,16 @@ def get_transformer_emt_template(
     gm: Var = vf.add_var(name=f"trafo_gm")  # kept for compatibility, unused here
     total_voltage_ratio: Var = vf.add_var(name=f"trafo_tap_ratio")
 
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding1_resistance_pu] = r1
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding2_resistance_pu] = r2
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding1_inductance_pu_s] = l1
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding2_inductance_pu_s] = l2
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_mutual_inductance_pu_s] = m12
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_magnetizing_conductance_pu] = gm
-    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_total_voltage_ratio] = total_voltage_ratio
+    block = Block()
+    block.name = name
+
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding1_resistance_pu] = r1
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding2_resistance_pu] = r2
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding1_inductance_pu_s] = l1
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_winding2_inductance_pu_s] = l2
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_mutual_inductance_pu_s] = m12
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_magnetizing_conductance_pu] = gm
+    block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_total_voltage_ratio] = total_voltage_ratio
 
     # ------------------------------------------------------------------
     # Terminal voltages
@@ -218,7 +221,7 @@ def get_transformer_emt_template(
         vf.add_connections(from_grounding_link_template.block.in_vars, [vf_n])
         from_ground_current = from_grounding_link_template.block.out_vars[0]
         from_grounding_link_block = from_grounding_link_template.block
-        templ.block.add(from_grounding_link_block)
+        block.add(from_grounding_link_block)
     else:
         pass
 
@@ -235,7 +238,7 @@ def get_transformer_emt_template(
         vf.add_connections(to_grounding_link_template.block.in_vars, [vt_n])
         to_ground_current = to_grounding_link_template.block.out_vars[0]
         to_grounding_link_block = to_grounding_link_template.block
-        templ.block.add(to_grounding_link_block)
+        block.add(to_grounding_link_block)
     else:
         pass
 
@@ -317,10 +320,10 @@ def get_transformer_emt_template(
     else:
         pass
 
-    templ.block.in_vars = input_vars
-    templ.block.state_vars = i_f + i_t
-    templ.block.diff_vars = di_f + di_t
-    templ.block.algebraic_vars = algebraic_vars
+    block.in_vars = input_vars
+    block.state_vars = i_f + i_t
+    block.diff_vars = di_f + di_t
+    block.algebraic_vars = algebraic_vars
 
     v_f_term: list[Expr] = list()
     v_t_term: list[Expr] = list()
@@ -355,7 +358,7 @@ def get_transformer_emt_template(
         state_eqs_f.append((l2 * primary_rhs - m12 * secondary_rhs) / (det_l + c_eps))
         state_eqs_t.append((l1 * secondary_rhs - m12 * primary_rhs) / (det_l + c_eps))
 
-    templ.block.state_eqs = state_eqs_f + state_eqs_t
+    block.state_eqs = state_eqs_f + state_eqs_t
 
     # ------------------------------------------------------------------
     # Port-current algebraic equations
@@ -392,7 +395,7 @@ def get_transformer_emt_template(
     else:
         pass
 
-    templ.block.algebraic_eqs = alg_eqs
+    block.algebraic_eqs = alg_eqs
     output_vars: list[Var] = list()
     if if_n_act is not None:
         output_vars.append(if_n_act)
@@ -407,12 +410,12 @@ def get_transformer_emt_template(
         pass
 
     output_vars.extend(it_act)
-    templ.block.out_vars = output_vars
+    block.out_vars = output_vars
 
     # ------------------------------------------------------------------
     # External mapping for network stamping / PF seeding
     # ------------------------------------------------------------------
-    templ.block.external_mapping = dict({
+    block.external_mapping = dict({
         VarPowerFlowReferenceType.if_N: if_n_act,
         VarPowerFlowReferenceType.if_A: if_act[0],
         VarPowerFlowReferenceType.if_B: if_act[1],
@@ -422,14 +425,14 @@ def get_transformer_emt_template(
         VarPowerFlowReferenceType.it_B: it_act[1],
         VarPowerFlowReferenceType.it_C: it_act[2],
     })
-    templ.block.external_mapping[VarPowerFlowReferenceType.vf_N] = vf_n
-    templ.block.external_mapping[VarPowerFlowReferenceType.vt_N] = vt_n
-    templ.block.external_mapping[VarPowerFlowReferenceType.vf_A] = vf_vars[0]
-    templ.block.external_mapping[VarPowerFlowReferenceType.vf_B] = vf_vars[1]
-    templ.block.external_mapping[VarPowerFlowReferenceType.vf_C] = vf_vars[2]
-    templ.block.external_mapping[VarPowerFlowReferenceType.vt_A] = vt_vars[0]
-    templ.block.external_mapping[VarPowerFlowReferenceType.vt_B] = vt_vars[1]
-    templ.block.external_mapping[VarPowerFlowReferenceType.vt_C] = vt_vars[2]
+    block.external_mapping[VarPowerFlowReferenceType.vf_N] = vf_n
+    block.external_mapping[VarPowerFlowReferenceType.vt_N] = vt_n
+    block.external_mapping[VarPowerFlowReferenceType.vf_A] = vf_vars[0]
+    block.external_mapping[VarPowerFlowReferenceType.vf_B] = vf_vars[1]
+    block.external_mapping[VarPowerFlowReferenceType.vf_C] = vf_vars[2]
+    block.external_mapping[VarPowerFlowReferenceType.vt_A] = vt_vars[0]
+    block.external_mapping[VarPowerFlowReferenceType.vt_B] = vt_vars[1]
+    block.external_mapping[VarPowerFlowReferenceType.vt_C] = vt_vars[2]
 
     # ------------------------------------------------------------------
     # State initialization
@@ -447,7 +450,7 @@ def get_transformer_emt_template(
         init_eqs[i_f[idx]] = if_act[idx] - gm * v_f_term[idx]
         init_eqs[i_t[idx]] = it_act[idx]
 
-    templ.block.init_eqs = init_eqs
+    block.init_eqs = init_eqs
 
     # ------------------------------------------------------------------
     # Derivative initialization aligned with runtime dynamics
@@ -460,7 +463,7 @@ def get_transformer_emt_template(
         diff_init_eqs[di_f[idx]] = (l2 * primary_rhs - m12 * secondary_rhs) / (det_l + c_eps)
         diff_init_eqs[di_t[idx]] = (l1 * secondary_rhs - m12 * primary_rhs) / (det_l + c_eps)
 
-    templ.block.diff_init_eqs = diff_init_eqs
+    block.diff_init_eqs = diff_init_eqs
 
     grounding_pairs: List[Tuple[Var, Block]] = list()
     if vf_n is not None and from_grounding_link_block is not None:
@@ -474,12 +477,107 @@ def get_transformer_emt_template(
         pass
 
     _attach_transformer_editor_diagram(
-        root_block=templ.block,
+        root_block=block,
         input_vars=input_vars,
         output_vars=output_vars,
         grounding_pairs=grounding_pairs,
     )
 
+    templ.block.children.append(block)
+    templ.block.external_mapping = block.external_mapping
+    templ.block.api_obj_mapping = block.api_obj_mapping
+    templ.block.parameters = block.parameters
+    templ.block.in_vars = block.in_vars
+    templ.block.out_vars = block.out_vars
+
+    return templ
+
+
+def get_series_transformer_emt_template(
+        vf: VarFactory,
+        name: str = "series_transformer_emt_template",
+        r: float | None = None,
+        x: float | None = None,
+        tap_module: float | None = None,
+) -> EmtModelTemplate:
+    """Build a three-wire series R/X transformer on the standard pu base.
+
+    This model is intended for transformers, such as those in the balanced
+    Kundur case, whose static representation contains only series R/X and a
+    fixed tap.  Currents use the conventional three-phase current base and the
+    standard equation ``dV = Zpu * Ipu``; R and X are not rescaled.
+    """
+    templ = EmtModelTemplate()
+    templ.tpe = DeviceType.Transformer2WDevice
+    templ.name = name
+    templ.block.name = name
+    eps = vf.add_const(1.0e-12)
+    r_ser = vf.add_var("trafo_series_r") if r is None else vf.add_const(float(r))
+    x_ser = vf.add_var("trafo_series_x") if x is None else vf.add_const(float(x))
+    omega_base = vf.add_var("trafo_series_omega_base")
+    tap_ratio = vf.add_var("trafo_series_tap_ratio") if tap_module is None else vf.add_const(float(tap_module))
+    if r is None:
+        templ.block.api_obj_mapping[ParamPowerFlowReferenceType.r] = r_ser
+        templ.block.parameters[r_ser] = vf.add_const(0.0)
+    if x is None:
+        templ.block.api_obj_mapping[ParamPowerFlowReferenceType.x] = x_ser
+        templ.block.parameters[x_ser] = vf.add_const(0.0)
+    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.omega_base] = omega_base
+    if tap_module is None:
+        templ.block.api_obj_mapping[ParamPowerFlowReferenceType.tap_module] = tap_ratio
+        templ.block.parameters[tap_ratio] = vf.add_const(1.0)
+    templ.block.parameters[omega_base] = vf.add_const(1.0)
+
+    vf_vars = [vf.add_var(f"vf_{phase}", reference=reference) for phase, reference in zip(
+        "ABC", (VarPowerFlowReferenceType.vf_A, VarPowerFlowReferenceType.vf_B, VarPowerFlowReferenceType.vf_C))]
+    vt_vars = [vf.add_var(f"vt_{phase}", reference=reference) for phase, reference in zip(
+        "ABC", (VarPowerFlowReferenceType.vt_A, VarPowerFlowReferenceType.vt_B, VarPowerFlowReferenceType.vt_C))]
+    currents = [vf.add_var(f"i_ser_{phase}") for phase in "ABC"]
+    derivatives = [vf.add_diff_var(f"di_ser_{phase}", base_var=currents[idx])
+                   for idx, phase in enumerate("ABC")]
+    if_vars = [vf.add_var(f"if_{phase}", reference=reference) for phase, reference in zip(
+        "ABC", (VarPowerFlowReferenceType.if_A, VarPowerFlowReferenceType.if_B, VarPowerFlowReferenceType.if_C))]
+    it_vars = [vf.add_var(f"it_{phase}", reference=reference) for phase, reference in zip(
+        "ABC", (VarPowerFlowReferenceType.it_A, VarPowerFlowReferenceType.it_B, VarPowerFlowReferenceType.it_C))]
+    inductance = x_ser / (omega_base + eps)
+    state_eqs = [
+        (vf_vars[idx] - tap_ratio * vt_vars[idx] - r_ser * currents[idx]) / (inductance + eps)
+        for idx in range(3)
+    ]
+    templ.block.in_vars = vf_vars + vt_vars
+    templ.block.state_vars = currents
+    templ.block.diff_vars = derivatives
+    templ.block.state_eqs = state_eqs
+    templ.block.algebraic_vars = if_vars + it_vars
+    templ.block.algebraic_eqs = (
+        [if_vars[idx] - currents[idx] for idx in range(3)]
+        + [it_vars[idx] + tap_ratio * currents[idx] for idx in range(3)]
+    )
+    templ.block.out_vars = if_vars + it_vars
+    templ.block.external_mapping = {
+        VarPowerFlowReferenceType.vf_N: None,
+        VarPowerFlowReferenceType.vf_A: vf_vars[0],
+        VarPowerFlowReferenceType.vf_B: vf_vars[1],
+        VarPowerFlowReferenceType.vf_C: vf_vars[2],
+        VarPowerFlowReferenceType.vt_N: None,
+        VarPowerFlowReferenceType.vt_A: vt_vars[0],
+        VarPowerFlowReferenceType.vt_B: vt_vars[1],
+        VarPowerFlowReferenceType.vt_C: vt_vars[2],
+        VarPowerFlowReferenceType.if_N: None,
+        VarPowerFlowReferenceType.if_A: if_vars[0],
+        VarPowerFlowReferenceType.if_B: if_vars[1],
+        VarPowerFlowReferenceType.if_C: if_vars[2],
+        VarPowerFlowReferenceType.it_N: None,
+        VarPowerFlowReferenceType.it_A: it_vars[0],
+        VarPowerFlowReferenceType.it_B: it_vars[1],
+        VarPowerFlowReferenceType.it_C: it_vars[2],
+    }
+    templ.block.init_eqs = {
+        currents[idx]: 0.5 * (if_vars[idx] - it_vars[idx] / (tap_ratio + eps))
+        for idx in range(3)
+    }
+    templ.block.diff_init_eqs = {derivatives[idx]: state_eqs[idx] for idx in range(3)}
+    _attach_transformer_editor_diagram(templ.block, templ.block.in_vars, templ.block.out_vars, [])
     return templ
 
 

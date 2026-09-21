@@ -13,12 +13,15 @@ from VeraGridEngine.Utils.Symbolic.block_helpers import tf_to_diffblock_with_ant
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
 
 
-def VSCShuntBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
-    """
-     VSC shunt model
-     with from side the DC bus and to side the AC bus
+def VSCShuntBuild(vfactory: VarFactory, name: str = "VSC shunt RMS template") -> RmsModelTemplate:
+    """Build a shunt VSC with a DC-side source and an AC-side terminal.
+
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :return: Configured shunt VSC RMS model template.
     """
     templ = RmsModelTemplate()
+    templ.name = name
     templ.tpe = DeviceType.VscDevice
     inputs = [vfactory.add_var("Vm"), vfactory.add_var("Va"), vfactory.add_var("Vdc"), vfactory.add_var("Idc")]
     Vm = inputs[0]
@@ -74,15 +77,19 @@ def VSCShuntBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
 
     vsc_block.name = name
     templ.block = vsc_block
+    templ.comment = 'VSC shunt RMS model'
     return templ
 
 
-def VSCShuntBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
-    """
-     VSC shunt model
-     with from side the DC bus and to side the AC bus
+def VSCShuntBuild2(vfactory: VarFactory, name: str = "VSC shunt RMS template 2") -> RmsModelTemplate:
+    """Build the alternate shunt VSC power-balance formulation.
+
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :return: Configured alternate shunt VSC RMS model template.
     """
     templ = RmsModelTemplate()
+    templ.name = name
     templ.tpe = DeviceType.VscDevice
     inputs = [vfactory.add_var("Vm_"), vfactory.add_var("Va_"), vfactory.add_var("Vdc_")]
     Vm = inputs[0]
@@ -137,6 +144,7 @@ def VSCShuntBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
 
     vsc_block.name = name
     templ.block = vsc_block
+    templ.comment = 'VSC shunt RMS model variant 2'
     return templ
 
 
@@ -167,7 +175,7 @@ def PVControlBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
     Km = vfactory.add_var('Km')
     Ts = vfactory.add_var('Ts_controller')
     event_dict = {
-        vref: vfactory.add_const(None),
+        vref: inputs[0],
         Km: vfactory.add_const(10.0),
         Ts: vfactory.add_const(0.01),
         Kp: vfactory.add_const(0.1),
@@ -175,7 +183,7 @@ def PVControlBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
         Temp: vfactory.add_const(300.0),
         G: vfactory.add_const(1000.0),
         Gref: vfactory.add_const(1000.0),
-        Pref: vfactory.add_const(None),
+        Pref: inputs[4],
         Tref: vfactory.add_const(300.0),
         gamma_p: vfactory.add_const(-0.001),
         vdc_ref: vfactory.add_const(1.033),
@@ -183,11 +191,6 @@ def PVControlBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
 
     Ppv = (G / vfactory.add_const(1000.0)) * (Pref * (1 + gamma_p * (Temp - Tref)))
     i_dc_ref = Ppv / vdc_ref
-    init_eqs = {
-        vref: inputs[0],
-        Pref: inputs[4],
-    }
-
     block_vhs_control, _ = tf_to_diffblock_with_antiwindup(
         vfactory,
         x=(Vm - vref),
@@ -208,7 +211,6 @@ def PVControlBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
         ],
         algebraic_vars=[vdc_ref],
         in_vars=inputs,
-        init_eqs=init_eqs,
         # children = [block_vhs_control],
         event_dict=event_dict,
     )
@@ -221,8 +223,15 @@ def PVControlBuild2(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
     return templ
 
 
-def PVControlBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
+def PVControlBuild(vfactory: VarFactory, name: str = "PV control RMS template") -> RmsModelTemplate:
+    """Build a photovoltaic DC-voltage PI control model.
+
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :return: Configured photovoltaic control RMS model template.
+    """
     templ = RmsModelTemplate()
+    templ.name = name
     inputs = [vfactory.add_var("Vdc_"), vfactory.add_var("ahs_")]
     Vdc = inputs[0]
     alpha = inputs[1]
@@ -271,11 +280,19 @@ def PVControlBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
     templ.block = solar_block
     templ.block.event_dict = event_dict
 
+    templ.comment = 'PV converter RMS control block'
     return templ
 
 
-def PVCellBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
+def PVCellBuild(vfactory: VarFactory, name: str = "PV cell RMS template") -> RmsModelTemplate:
+    """Build the algebraic photovoltaic-cell DC source model.
+
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :return: Configured photovoltaic-cell RMS model template.
+    """
     templ = RmsModelTemplate()
+    templ.name = name
     inputs = [vfactory.add_var("Vdc_")]
     Vdc = inputs[0]
 
@@ -318,7 +335,7 @@ def PVCellBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
         rho_e: vfactory.add_const(1.68e-8),
         C_temp: vfactory.add_const(1000.0),
         G: vfactory.add_const(1000.0),
-        iL0: vfactory.add_const(None)
+        iL0: Idc - (-iD - vD / Rsh)
     }
 
     qe = vfactory.add_const(1.60217662e-19)  # Electron charge (C)
@@ -358,7 +375,6 @@ def PVCellBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
             Idc: Pdc / Vdc,
             vD: Vdc + Rse * Idc,
             iD: Is * (sym.exp(vD / (gamma * v_T)) - vfactory.add_const(1)),
-            iL0: Idc - (- iD - vD / Rsh),
             iL: Idc - (- iD - vD / Rsh),
         }
     )
@@ -367,6 +383,7 @@ def PVCellBuild(vfactory: VarFactory, name: str = "") -> RmsModelTemplate:
     solar_block.event_dict = event_dict
     templ.block = solar_block
 
+    templ.comment = 'PV cell RMS source block'
     return templ
 
 

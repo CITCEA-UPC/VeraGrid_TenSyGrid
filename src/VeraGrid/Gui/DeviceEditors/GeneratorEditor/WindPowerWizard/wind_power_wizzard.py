@@ -3,16 +3,19 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import requests
+from matplotlib.axes import Axes
 from matplotlib import pyplot as plt
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.WindPowerWizard.wind_power_wizard_gui import Ui_MainWindow
+from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely
+from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 from VeraGrid.Gui.messages import error_msg
 from VeraGrid.Gui.pandas_model import PandasModel
 
@@ -208,22 +211,44 @@ def build_mapped_wind_time_index(time_index: pd.DatetimeIndex, base_year: int) -
     return pd.DatetimeIndex(pd.to_datetime(mapped_timestamps))
 
 
+def get_longitude_time_offset(longitude: float) -> timedelta:
+    """
+    Get the local solar time offset from longitude.
+
+    :param longitude: Site longitude in degrees.
+    :type longitude: float
+    :return: Offset to add to UTC timestamps to obtain local solar time.
+    :rtype: timedelta
+    """
+    offset_hours: float = float(longitude) / 15.0
+
+    return timedelta(hours=offset_hours)
+
+
 def get_open_meteo_wind_weather_df(time_index: pd.DatetimeIndex,
                                    latitude: float,
-                                   longitude: float) -> Tuple[bool, pd.DataFrame]:
+                                   longitude: float,
+                                   use_local_time: bool = False) -> Tuple[bool, pd.DataFrame]:
     """
     Download hourly wind weather data from the free Open-Meteo historical weather API.
 
     :param time_index: Mapped historical weather time index.
     :param latitude: Site latitude in degrees.
     :param longitude: Site longitude in degrees.
+    :param use_local_time: Interpret circuit timestamps as local solar time at the site.
     :return: Success flag and weather data frame indexed by timestamp.
     """
     url: str = "https://archive-api.open-meteo.com/v1/archive"
+
+    if use_local_time:
+        query_time_index: pd.DatetimeIndex = time_index - get_longitude_time_offset(longitude=longitude)
+    else:
+        query_time_index = time_index
+
     params: dict = dict(latitude=latitude,
                         longitude=longitude,
-                        start_date=time_index[0].strftime("%Y-%m-%d"),
-                        end_date=time_index[-1].strftime("%Y-%m-%d"),
+                        start_date=query_time_index[0].strftime("%Y-%m-%d"),
+                        end_date=query_time_index[-1].strftime("%Y-%m-%d"),
                         hourly="wind_speed_100m,temperature_2m,surface_pressure",
                         wind_speed_unit="ms",
                         timezone="GMT")
@@ -236,17 +261,29 @@ def get_open_meteo_wind_weather_df(time_index: pd.DatetimeIndex,
 
         if isinstance(hourly, dict):
             weather_index: pd.DatetimeIndex = pd.DatetimeIndex(pd.to_datetime(hourly["time"], errors="coerce"))
+
+            if use_local_time:
+                weather_index = weather_index + get_longitude_time_offset(longitude=longitude)
+            else:
+                pass
+
             weather_df: pd.DataFrame = pd.DataFrame(index=weather_index)
             weather_df["wind_speed_100m"] = np.asarray(hourly["wind_speed_100m"], dtype=float)
             weather_df["temperature_2m"] = np.asarray(hourly["temperature_2m"], dtype=float)
             weather_df["surface_pressure"] = np.asarray(hourly["surface_pressure"], dtype=float)
             return True, weather_df
         else:
-            error_msg("Open-Meteo did not return hourly weather data")
+            error_msg(QtCore.QCoreApplication.translate(
+                "MainWindow",
+                "Open-Meteo did not return hourly weather data",
+            ))
             return False, pd.DataFrame()
 
     except (requests.RequestException, KeyError, ValueError, TypeError) as err:
-        error_msg("Open-Meteo weather request failed :(\n" + str(err))
+        error_msg(QtCore.QCoreApplication.translate(
+            "MainWindow",
+            "Open-Meteo weather request failed :(\n{error_text}",
+        ).format(error_text=str(err)))
         return False, pd.DataFrame()
 
 
@@ -293,14 +330,20 @@ def load_windpowerlib_turbine_templates() -> Tuple[bool, pd.DataFrame]:
     try:
         from windpowerlib import data as wt
     except ImportError as err:
-        error_msg("windpowerlib is required to load turbine templates:\n" + str(err))
+        error_msg(QtCore.QCoreApplication.translate(
+            "MainWindow",
+            "windpowerlib is required to load turbine templates:\n{error_text}",
+        ).format(error_text=str(err)))
         return False, pd.DataFrame()
 
     try:
         templates_df: pd.DataFrame = wt.get_turbine_types(print_out=False)
         return True, templates_df
     except (KeyError, ValueError, TypeError) as err:
-        error_msg("windpowerlib turbine template loading failed :(\n" + str(err))
+        error_msg(QtCore.QCoreApplication.translate(
+            "MainWindow",
+            "windpowerlib turbine template loading failed :(\n{error_text}",
+        ).format(error_text=str(err)))
         return False, pd.DataFrame()
 
 
@@ -466,7 +509,10 @@ def calculate_wind_power_with_windpowerlib(weather_df: pd.DataFrame,
     try:
         from windpowerlib import ModelChain
     except ImportError as err:
-        error_msg("windpowerlib is required to generate wind power profiles:\n" + str(err))
+        error_msg(QtCore.QCoreApplication.translate(
+            "MainWindow",
+            "windpowerlib is required to generate wind power profiles:\n{error_text}",
+        ).format(error_text=str(err)))
         return False, pd.Series(dtype=float)
 
     nominal_power_w: float = peak_power * 1e6
@@ -496,7 +542,10 @@ def calculate_wind_power_with_windpowerlib(weather_df: pd.DataFrame,
                                                                                            upper=nominal_power_w)
         return True, power_output
     except (KeyError, ValueError, TypeError) as err:
-        error_msg("windpowerlib wind calculation failed :(\n" + str(err))
+        error_msg(QtCore.QCoreApplication.translate(
+            "MainWindow",
+            "windpowerlib wind calculation failed :(\n{error_text}",
+        ).format(error_text=str(err)))
         return False, pd.Series(dtype=float)
 
 
@@ -506,7 +555,8 @@ def get_wind_power_df(time_array: Sequence[Union[str, datetime, pd.Timestamp]],
                       peak_power: float,
                       hub_height: float,
                       roughness_length: float,
-                      turbine_type: Union[str, None]) -> Tuple[bool, pd.DataFrame]:
+                      turbine_type: Union[str, None],
+                      use_local_time: bool = False) -> Tuple[bool, pd.DataFrame]:
     """
     Download Open-Meteo wind weather data and calculate wind generator active power.
 
@@ -517,6 +567,7 @@ def get_wind_power_df(time_array: Sequence[Union[str, datetime, pd.Timestamp]],
     :param hub_height: Turbine hub height in m.
     :param roughness_length: Surface roughness length in m.
     :param turbine_type: windpowerlib turbine type or None for the generic turbine.
+    :param use_local_time: Interpret circuit timestamps as local solar time at the site.
     :return: Success flag and wind active power data aligned to the requested time profile.
     """
     ok: bool
@@ -564,7 +615,8 @@ def get_wind_power_df(time_array: Sequence[Union[str, datetime, pd.Timestamp]],
                 weather_df: pd.DataFrame
                 weather_ok, weather_df = get_open_meteo_wind_weather_df(time_index=mapped_time_index,
                                                                         latitude=latitude,
-                                                                        longitude=longitude)
+                                                                        longitude=longitude,
+                                                                        use_local_time=use_local_time)
 
                 if weather_ok:
                     power_ok: bool
@@ -612,15 +664,24 @@ def get_wind_power_df(time_array: Sequence[Union[str, datetime, pd.Timestamp]],
                 if valid_longitude:
                     if valid_peak_power:
                         if valid_hub_height:
-                            error_msg("The roughness length must be zero or greater")
+                            error_msg(QtCore.QCoreApplication.translate(
+                                "MainWindow",
+                                "The roughness length must be zero or greater",
+                            ))
                         else:
-                            error_msg("The hub height must be greater than zero")
+                            error_msg(QtCore.QCoreApplication.translate("MainWindow", "The hub height must be greater than zero"))
                     else:
-                        error_msg("The wind generator peak power must be greater than zero")
+                        error_msg(QtCore.QCoreApplication.translate(
+                            "MainWindow",
+                            "The wind generator peak power must be greater than zero",
+                        ))
                 else:
-                    error_msg("The longitude must be between -180 and 180 degrees")
+                    error_msg(QtCore.QCoreApplication.translate(
+                        "MainWindow",
+                        "The longitude must be between -180 and 180 degrees",
+                    ))
             else:
-                error_msg("The latitude must be between -90 and 90 degrees")
+                error_msg(QtCore.QCoreApplication.translate("MainWindow", "The latitude must be between -90 and 90 degrees"))
 
             return False, pd.DataFrame(data=dict(P=np.zeros(len(time_array))))
     else:
@@ -666,10 +727,12 @@ class WindFarmWizard(QtWidgets.QDialog):
         self.ok: bool = False
         self.template_df: pd.DataFrame = pd.DataFrame()
         self.parameter_model: Union[WindTurbineParameterModel, None] = None
+        self._open_plot_dialogs: List[QtWidgets.QDialog] = list()
 
         self.ui.powerSpinBox.setValue(peak_power)
         self.ui.latitudeSpinBox.setValue(latitude)
         self.ui.longitudeSpinBox.setValue(longitude)
+        self.ui.localTimeCheckBox.setChecked(False)
         self.ui.label_3.setText(f"Wind turbine data - Generator {gen_name} / Bus {bus_name}")
 
         self.ui.acceptButton.clicked.connect(self.accept_click)
@@ -851,7 +914,9 @@ class WindFarmWizard(QtWidgets.QDialog):
                                                   turbine_type=self.get_selected_turbine_type())
             return turbine
         except (ImportError, KeyError, ValueError, TypeError) as err:
-            error_msg("The selected wind turbine could not be created:\n" + str(err))
+            error_msg(self.tr("The selected wind turbine could not be created:\n{error_text}").format(
+                error_text=str(err),
+            ))
             return None
 
     def plot_design_curves(self) -> None:
@@ -896,9 +961,12 @@ class WindFarmWizard(QtWidgets.QDialog):
                 power_axis.tick_params(axis="y", labelcolor="tab:red")
                 figure.suptitle("Wind turbine design curves")
                 figure.tight_layout()
-                plt.show()
+                show_matplotlib_figure(figure=figure,
+                                       parent=self,
+                                       open_dialogs=self._open_plot_dialogs,
+                                       title=self.tr("Wind turbine design curves"))
             else:
-                error_msg("The selected turbine has no design curves")
+                error_msg(self.tr("The selected turbine has no design curves"))
         else:
             pass
 
@@ -924,7 +992,8 @@ class WindFarmWizard(QtWidgets.QDialog):
                                              peak_power=self.get_selected_plant_power(),
                                              hub_height=self.get_selected_hub_height(),
                                              roughness_length=self.ui.roughnessLengthSpinBox.value(),
-                                             turbine_type=self.get_selected_turbine_type())
+                                             turbine_type=self.get_selected_turbine_type(),
+                                             use_local_time=self.ui.localTimeCheckBox.isChecked())
         if self.ok:
             self.P = self.df["P"].to_numpy(dtype=float) / 1e6
             self.temperature = self.df["temperature"].to_numpy(dtype=float)
@@ -942,8 +1011,11 @@ class WindFarmWizard(QtWidgets.QDialog):
         :return: Nothing.
         """
         df: pd.DataFrame = pd.DataFrame(data=self.P, index=self.time_array, columns=["P (MW)"])
-        df.plot()
-        plt.show()
+        axis: Axes = df.plot()
+        show_matplotlib_figure(figure=axis.figure,
+                               parent=self,
+                               open_dialogs=self._open_plot_dialogs,
+                               title=self.tr("Wind power profile"))
 
     def accept_click(self) -> None:
         """
@@ -953,6 +1025,26 @@ class WindFarmWizard(QtWidgets.QDialog):
         """
         self.is_accepted = self.ok
         self.accept()
+
+    def done(self, result: int) -> None:
+        """
+        Close retained plot windows before completing the wizard.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.done(self, result)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Close retained plot windows before closing the wizard.
+
+        :param event: Qt close event.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.closeEvent(self, event)
 
 
 if __name__ == "__main__":

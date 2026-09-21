@@ -5,6 +5,7 @@
 import sys
 import pandas as pd
 from PySide6 import QtWidgets
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 from VeraGrid.Gui.FileDialogues.LoadCatalogue.SelectComponents import Ui_MainWindow
 from VeraGridEngine.Devices import TransformerType, UndergroundLineType, SequenceLineType
@@ -22,7 +23,7 @@ class CatalogueGUI(QtWidgets.QDialog):
         self.selected_file = None
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle('Custom Catalogue')
+        self.setWindowTitle(self.tr('Custom Catalogue'))
         self.circuit: MultiCircuit = MultiCircuit()
 
         self.ui.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
@@ -37,7 +38,7 @@ class CatalogueGUI(QtWidgets.QDialog):
             self.accept()
         else:
             quit_msg = "No checkbox was selected for adding the component to the catalogue."
-            QtWidgets.QMessageBox.warning(self, "Can't upload file", quit_msg)
+            QtWidgets.QMessageBox.warning(self, self.tr("Can't upload file"), quit_msg)
             print("No checkbox was selected for adding the component to the catalogue.")
 
     def on_reject(self):
@@ -49,7 +50,7 @@ class CatalogueGUI(QtWidgets.QDialog):
     def open_file_threaded(self, post_function=None, title: str = 'Open file'):
         files_types = "CSV (*.csv)"
         dialogue = QtWidgets.QFileDialog(None, caption=title, filter=f"Formats ({files_types})")
-        if dialogue.exec():
+        if exec_dialog_safely(dialog=dialogue):
             self.selected_file = dialogue.selectedFiles()[0]
             if post_function:
                 post_function()

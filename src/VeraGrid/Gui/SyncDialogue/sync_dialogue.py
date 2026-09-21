@@ -7,6 +7,7 @@ import sys
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 from VeraGrid.Gui.SyncDialogue.sync_gui import Ui_Dialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Session.synchronization_driver import get_issues_tree_view_model, FileSyncThread
 
 
@@ -22,7 +23,7 @@ class SyncDialogueWindow(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Sync conflicts')
+        self.setWindowTitle(self.tr('Sync conflicts'))
 
         self.file_sync_thread = file_sync_thread
 
@@ -49,7 +50,7 @@ class SyncDialogueWindow(QtWidgets.QDialog):
         msg.setWindowTitle(title)
         # msg.setDetailedText("The details are as follows:")
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
-        retval = msg.exec()
+        retval = exec_dialog_safely(dialog=msg)
 
     def closeEvent(self, event):
         self.file_sync_thread.resume()

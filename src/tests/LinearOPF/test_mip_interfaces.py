@@ -3,11 +3,99 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 import os
+from typing import Any
 import numpy as np
 from scipy.sparse import csc_matrix
 import VeraGridEngine.api as vg
+from VeraGridEngine.Utils.MIP.pulp_interface import add_pulp_variable
+from VeraGridEngine.Utils.MIP.pulp_interface import PulpLpModel
 from VeraGridEngine.Utils.MIP.selected_interface import lpDot1D_changes, get_model_instance
 from VeraGridEngine.enumerations import MIPFramework, MIPSolvers
+
+
+class PulpVariableStub:
+    """
+    Minimal stand-in for a PuLP variable returned by a future model API.
+    """
+    __slots__ = ("name",)
+
+    def __init__(self, name: str) -> None:
+        """
+        Store the variable name used by the compatibility test.
+
+        :param name: Variable name.
+        :return: None.
+        """
+        self.name: str = name
+
+
+class PulpFourProblemStub:
+    """
+    Minimal PuLP 4 style problem exposing model-owned variable creation.
+    """
+    __slots__ = ("added_variable",)
+
+    def __init__(self) -> None:
+        """
+        Initialize the captured variable slot.
+
+        :return: None.
+        """
+        self.added_variable: PulpVariableStub | None = None
+
+    def add_variable(self, name: str, lowBound: float | int, upBound: float | int, cat: str) -> PulpVariableStub:
+        """
+        Add one variable through the future PuLP 4 style API.
+
+        :param name: Variable name.
+        :param lowBound: Lower variable bound.
+        :param upBound: Upper variable bound.
+        :param cat: Variable category.
+        :return: Created stub variable.
+        """
+        _low_bound: float | int = lowBound
+        _up_bound: float | int = upBound
+        _category: str = cat
+        self.added_variable = PulpVariableStub(name=name)
+        return self.added_variable
+
+    def addVariable(self, variable: Any) -> None:
+        """
+        Fail if the deprecated compatibility path is used.
+
+        :param variable: Variable that should never arrive here.
+        :return: None.
+        """
+        _variable: Any = variable
+        raise AssertionError("PuLP 4 path must not use addVariable")
+
+
+def test_pulp_variable_helper_prefers_model_owned_api() -> None:
+    """
+    Verify PuLP 4 model-owned variable creation is used when present.
+
+    :return: None.
+    """
+    model: PulpFourProblemStub = PulpFourProblemStub()
+
+    variable: Any = add_pulp_variable(model=model, name="x", low_bound=0, up_bound=1, category="Continuous")
+
+    assert variable is model.added_variable
+    assert variable.name == "x"
+
+
+def test_pulp_model_accepts_constant_objective() -> None:
+    """
+    Verify zero-cost formulations can still set a valid PuLP objective.
+
+    :return: None.
+    """
+    model: PulpLpModel = PulpLpModel(solver_type=MIPSolvers.CBC)
+
+    model.minimize(0.0)
+
+    assert model.model.objective is not None
+    assert model.model.objective.value() == 0.0
 
 
 def test_issue_372_1():

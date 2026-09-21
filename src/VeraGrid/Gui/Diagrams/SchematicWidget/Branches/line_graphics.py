@@ -10,6 +10,7 @@ from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QPen, QBrush
 from PySide6.QtWidgets import QMenu, QGraphicsRectItem, QGraphicsSceneContextMenuEvent
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem, RoundTerminalItem
 from VeraGrid.Gui.DeviceEditors.LineEditor.line_device_editor import LineDeviceEditorDialog
 from VeraGrid.Gui.messages import yes_no_question, warning_msg
@@ -62,7 +63,7 @@ class LineGraphicItem(LineGraphicTemplateItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = LineDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -260,8 +261,8 @@ class LineGraphicItem(LineGraphicTemplateItem):
         """
         Add this to the catalogue
         """
-        ok = yes_no_question(text="A template will be generated using this line values per unit of length",
-                             title="Add sequence line type")
+        ok = yes_no_question(text=self.tr("A template will be generated using this line values per unit of length"),
+                             title=self.tr("Add sequence line type"))
 
         if ok:
             # rate = I
@@ -299,7 +300,7 @@ class LineGraphicItem(LineGraphicTemplateItem):
         Convert this object to transformer
         :return:
         """
-        ok = yes_no_question('Are you sure that you want to convert this line into a transformer?', 'Convert line')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a transformer?'), self.tr('Convert line'))
         if ok:
             self.editor.convert_line_to_transformer(line=self.api_object, line_graphic=self)
 
@@ -308,7 +309,7 @@ class LineGraphicItem(LineGraphicTemplateItem):
         Convert this object to HVDC
         :return:
         """
-        ok = yes_no_question('Are you sure that you want to convert this line into a HVDC line?', 'Convert line')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a HVDC line?'), self.tr('Convert line'))
         if ok:
             self.editor.convert_line_to_hvdc(line=self.api_object, line_graphic=self)
 
@@ -318,20 +319,20 @@ class LineGraphicItem(LineGraphicTemplateItem):
         :return:
         """
         if self.api_object.convertible_to_vsc():
-            ok = yes_no_question('Are you sure that you want to convert this line into a VSC device?',
-                                 'Convert line')
+            ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a VSC device?'),
+                                 self.tr('Convert line'))
             if ok:
                 self.editor.convert_line_to_vsc(line=self.api_object, line_graphic=self)
         else:
-            warning_msg('Unable to convert to VSC. One of the buses must be DC and the other AC.')
+            warning_msg(self.tr('Unable to convert to VSC. One of the buses must be DC and the other AC.'))
 
     def to_upfc(self):
         """
         Convert this object to UPFC
         :return:
         """
-        ok = yes_no_question('Are you sure that you want to convert this line into a UPFC device?',
-                             'Convert line')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a UPFC device?'),
+                             self.tr('Convert line'))
         if ok:
             self.editor.convert_line_to_upfc(line=self.api_object, line_graphic=self)
 
@@ -340,8 +341,8 @@ class LineGraphicItem(LineGraphicTemplateItem):
         Convert this object to series reactance
         :return:
         """
-        ok = yes_no_question('Are you sure that you want to convert this line into a series reactance device?',
-                             'Convert line')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a series reactance device?'),
+                             self.tr('Convert line'))
         if ok:
             self.editor.convert_line_to_series_reactance(line=self.api_object, line_graphic=self)
 
@@ -350,8 +351,8 @@ class LineGraphicItem(LineGraphicTemplateItem):
         Convert this object to switch
         :return:
         """
-        ok = yes_no_question('Are you sure that you want to convert this line into a switch device?',
-                             'Convert line')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this line into a switch device?'),
+                             self.tr('Convert line'))
         if ok:
             self.editor.convert_line_to_switch(line=self.api_object, line_graphic=self)
 

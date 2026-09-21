@@ -16,7 +16,8 @@ from matplotlib import pyplot as plt
 
 from PySide6.QtWidgets import QGraphicsItem, QMessageBox, QDialog, QVBoxLayout, QLabel, QPushButton
 from collections.abc import Callable
-from PySide6.QtCore import (Qt, QMimeData, QIODevice, QByteArray, QDataStream, QModelIndex, QRunnable, QThreadPool)
+from PySide6.QtCore import (Qt, QMimeData, QIODevice, QByteArray, QDataStream, QModelIndex, QRunnable, QThreadPool,
+                            QCoreApplication)
 from PySide6.QtGui import (QIcon, QPixmap, QImage, QStandardItemModel, QStandardItem, QColor, QDropEvent,
                            QWheelEvent, QPainter)
 
@@ -27,6 +28,8 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.Substation.bus_graphics import BusGra
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGrid.Gui.SubstationDesigner.substation_designer import SubstationDesigner
 from VeraGrid.Gui.general_dialogues import InputNumberDialogue
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
+from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 from VeraGridEngine.Devices.Diagrams.map_location import MapLocation
 from VeraGridEngine.Devices.Substation import Bus
 from VeraGridEngine.Devices.Branches.line import Line, accept_line_connection
@@ -99,22 +102,57 @@ class MapLibraryModel(QStandardItemModel):
 
         self.setColumnCount(1)
 
-        self.substation_name = "Substation"
+        self.add(name=QCoreApplication.translate("MapLibraryModel", "Substation"),
+                 device_type=DeviceType.SubstationDevice,
+                 icon_name="substation")
 
-        self.add(name=self.substation_name, icon_name="substation")
-
-    def add(self, name: str, icon_name: str):
+    def add(self, name: str, device_type: DeviceType, icon_name: str) -> None:
         """
         Add element to the library
         :param name: Name of the element
+        :param device_type: Device type to identify the element independently of the translated label.
         :param icon_name: Icon name, the path is taken care of
         :return:
         """
         _icon = QIcon()
         _icon.addPixmap(QPixmap(f":/Icons/icons/{icon_name}.png"))
         _item = QStandardItem(_icon, name)
-        _item.setToolTip(f"Drag & drop {name} into the schematic")
+        _item.setData(device_type, Qt.ItemDataRole.UserRole)
+        _item.setToolTip(QCoreApplication.translate(
+            "MapLibraryModel",
+            "Drag & drop {name} into the schematic",
+        ).format(name=name))
         self.appendRow(_item)
+
+    def retranslate(self) -> None:
+        """
+        Refresh translated item labels without changing the drag/drop device type data.
+
+        :return: None.
+        """
+        row: int
+        item: QStandardItem | None
+        device_type: DeviceType
+        name: str
+
+        for row in range(self.rowCount()):
+            item = self.item(row, 0)
+
+            if item is not None:
+                device_type = item.data(Qt.ItemDataRole.UserRole)
+
+                if device_type == DeviceType.SubstationDevice:
+                    name = QCoreApplication.translate("MapLibraryModel", "Substation")
+                else:
+                    name = item.text()
+
+                item.setText(name)
+                item.setToolTip(QCoreApplication.translate(
+                    "MapLibraryModel",
+                    "Drag & drop {name} into the schematic",
+                ).format(name=name))
+            else:
+                pass
 
     @staticmethod
     def to_bytes_array(val: str) -> QByteArray:
@@ -133,7 +171,7 @@ class MapLibraryModel(QStandardItemModel):
 
         :return:
         """
-        return self.to_bytes_array(self.substation_name)
+        return self.to_bytes_array(DeviceType.SubstationDevice.name)
 
     def mimeTypes(self) -> List[str]:
         """
@@ -151,13 +189,18 @@ class MapLibraryModel(QStandardItemModel):
         mime_data = QMimeData()
         for idx in idxs:
             if idx.isValid():
-                txt = self.data(idx, Qt.ItemDataRole.DisplayRole)
+                device_type = self.data(idx, Qt.ItemDataRole.UserRole)
 
-                data = QByteArray()
-                stream = QDataStream(data, QIODevice.OpenModeFlag.WriteOnly)
-                stream.writeQString(txt)
+                if isinstance(device_type, DeviceType):
+                    data = QByteArray()
+                    stream = QDataStream(data, QIODevice.OpenModeFlag.WriteOnly)
+                    stream.writeQString(device_type.name)
 
-                mime_data.setData('component/name', data)
+                    mime_data.setData('component/name', data)
+                else:
+                    pass
+            else:
+                pass
         return mime_data
 
     def flags(self, index: QModelIndex) -> Qt.ItemFlag:
@@ -379,6 +422,17 @@ class GridMapWidget(BaseDiagramWidget):
                 if line_id not in selected_line_ids:
                     selected_line_ids.add(line_id)
                     selected_lines.append(item.container)
+                else:
+                    pass
+            elif isinstance(item, LineLocationGraphicItem):
+                line_id = id(item.line_container)
+                if line_id not in selected_line_ids:
+                    selected_line_ids.add(line_id)
+                    selected_lines.append(item.line_container)
+                else:
+                    pass
+            else:
+                pass
 
         return selected_lines
 
@@ -452,27 +506,39 @@ class GridMapWidget(BaseDiagramWidget):
                 pass
         return selected_line_locations
 
-    def add_to_scene(self, graphic_object: ALL_MAP_GRAPHICS = None) -> None:
+    def add_to_scene(self, graphic_object: ALL_MAP_GRAPHICS | None = None) -> None:
         """
         Add item to the diagram and the diagram scene
         :param graphic_object: Graphic object associated
         """
+        if graphic_object is None:
+            return
+        else:
+            self.diagram_scene.addItem(graphic_object)
 
-        self.diagram_scene.addItem(graphic_object)
-
-    def _remove_from_scene(self, graphic_object: ALL_MAP_GRAPHICS | GenericDiagramWidget) -> None:
+    def _remove_from_scene(self, graphic_object: ALL_MAP_GRAPHICS | GenericDiagramWidget | None) -> None:
         """
         Remove item from the diagram scene
         :param graphic_object: Graphic object associated
         """
-        if isinstance(graphic_object, GenericDiagramWidget):
-            if graphic_object.api_object is not None:
-                self.graphics_manager.delete_device(graphic_object.api_object)
+        if graphic_object is None:
+            return
+        else:
+            if isinstance(graphic_object, GenericDiagramWidget):
+                if graphic_object.api_object is not None:
+                    self.graphics_manager.delete_device(graphic_object.api_object)
+                else:
+                    pass
             else:
                 pass
-        else:
-            pass
-        self.diagram_scene.removeItem(graphic_object)
+
+            if isinstance(graphic_object, QGraphicsItem):
+                if graphic_object.scene() is not None:
+                    self.diagram_scene.removeItem(graphic_object)
+                else:
+                    pass
+            else:
+                pass
 
     def clear(self) -> None:
         """
@@ -697,18 +763,18 @@ class GridMapWidget(BaseDiagramWidget):
         selected_items = self.get_selected_substations()
 
         if len(selected_items) != 2:
-            error_msg(text="Please select two substations", title="Create new line")
+            error_msg(text=self.tr("Please select two substations"), title=self.tr("Create new line"))
             return None
 
         it1: SubstationGraphicItem = selected_items[0]
         it2: SubstationGraphicItem = selected_items[1]
 
         if it1 == it2:
-            error_msg(text="Somehow the two substations are the same :(", title="Create new line")
+            error_msg(text=self.tr("Somehow the two substations are the same :("), title=self.tr("Create new line"))
             return None
 
         dialog = NewMapLineDialogue(grid=self.circuit, se_from=it1.api_object, se_to=it2.api_object)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         if dialog.is_valid():
             bus1 = dialog.bus_from()
             bus2 = dialog.bus_to()
@@ -718,11 +784,11 @@ class GridMapWidget(BaseDiagramWidget):
                     self.add_api_line(new_line)
                     self.circuit.add_line(new_line)
                 else:
-                    error_msg(text="The nominal voltage of the two connecting substations is not the same :(",
-                              title="Create new line")
+                    error_msg(text=self.tr("The nominal voltage of the two connecting substations is not the same :("),
+                              title=self.tr("Create new line"))
                     return None
             else:
-                error_msg(text="Some of the buses was None :(", title="Create new line")
+                error_msg(text=self.tr("Some of the buses was None :("), title=self.tr("Create new line"))
                 return None
 
     def remove_line_location_graphic(self, node: LineLocationGraphicItem):
@@ -1165,10 +1231,20 @@ class GridMapWidget(BaseDiagramWidget):
                 if elm.substation is not None:
                     # get the substation graphic object
                     substation_graphics = self.graphics_manager.query(elm=elm.substation)
+                    if substation_graphics is None:
+                        substation_graphics = self.add_api_substation(api_object=elm.substation,
+                                                                      lon=elm.substation.longitude,
+                                                                      lat=elm.substation.latitude)
+                    else:
+                        pass
 
                     # draw the voltage level
                     self.add_api_voltage_level(substation_graphics=substation_graphics,
                                                api_object=elm)
+                else:
+                    logger.add_warning("Voltage level has no substation",
+                                       device=elm.name,
+                                       device_class=elm.device_type.value)
 
             elif isinstance(elm, Bus):
 
@@ -1176,10 +1252,16 @@ class GridMapWidget(BaseDiagramWidget):
                     # get the substation graphic object
                     substation_graphics = self.graphics_manager.query(elm=elm.substation)
 
-                    # draw the voltage level
-                    self.add_api_substation(api_object=elm.substation,
-                                            lon=substation_graphics.lon,
-                                            lat=substation_graphics.lat)
+                    if substation_graphics is None:
+                        self.add_api_substation(api_object=elm.substation,
+                                                lon=elm.substation.longitude,
+                                                lat=elm.substation.latitude)
+                    else:
+                        pass
+                else:
+                    logger.add_warning("Bus has no substation",
+                                       device=elm.name,
+                                       device_class=elm.device_type.value)
 
             elif isinstance(elm, Line):
                 line_container = self.add_api_line(elm)
@@ -1237,7 +1319,7 @@ class GridMapWidget(BaseDiagramWidget):
         """
         kv = self.gui.get_default_voltage()
         dlg = SubstationDesigner(grid=self.circuit, default_voltage=kv, lat=lat, lon=lon)
-        dlg.exec()
+        exec_dialog_safely(dialog=dlg)
         if dlg.was_ok():
 
             se_object, voltage_levels = substation_wizards.create_substation(
@@ -1260,8 +1342,8 @@ class GridMapWidget(BaseDiagramWidget):
             substation_graphics.sort_voltage_levels()
 
             # ask to create a se diagram
-            ok = yes_no_question(title="create substation diagram",
-                                 text="Do you want to finalize the editing of the substation in the schematic?")
+            ok = yes_no_question(title=self.tr("create substation diagram"),
+                                 text=self.tr("Do you want to finalize the editing of the substation in the schematic?"))
 
             if ok:
                 self.new_substation_diagram(substation=se_object)
@@ -1420,6 +1502,7 @@ class GridMapWidget(BaseDiagramWidget):
         """
         # Initialize boundaries
         min_lat = min_lon = max_lat = max_lon = None
+        text = search_text.lower()
 
         n = 0
         for key, points_group in self.diagram.data.items():
@@ -1427,15 +1510,15 @@ class GridMapWidget(BaseDiagramWidget):
                 if location.api_object is not None:
 
                     # Check if searchText is in the name, code, or idtag of the api_object
-                    if (search_text in location.api_object.name.lower() or
-                            search_text in location.api_object.code.lower() or
-                            search_text in str(location.api_object.idtag).lower()):
+                    if (text in location.api_object.name.lower() or
+                            text in location.api_object.code.lower() or
+                            text in str(location.api_object.idtag).lower()):
 
-                        # Calculate boundaries (x: latitude, y: longitude)
+                        # Map locations are points, so the search bounds use the stored coordinate directly.
                         left = location.latitude
-                        right = location.latitude + location.w
+                        right = location.latitude
                         top = location.longitude
-                        bottom = location.longitude + location.h
+                        bottom = location.longitude
 
                         if min_lat is None or left < min_lat:
                             min_lat = left
@@ -1461,7 +1544,9 @@ class GridMapWidget(BaseDiagramWidget):
                                                  max_lon=max_lon)
 
             self.map.apply_zoom_level(level=level)
-            # self.map.go_to_position(latitude=lat, longitude=lon)
+            self.map.go_to_position(latitude=lat, longitude=lon)
+        else:
+            pass
 
     def colour_results(self,
                        Sbus: CxVec,
@@ -1787,11 +1872,11 @@ class GridMapWidget(BaseDiagramWidget):
                 gelm.api_object.latitude = gelm.lat
                 gelm.api_object.longitude = gelm.lon
 
-        ok = yes_no_question(title='Update lengths?',
-                             text='Do you want to update lengths of lines? \n'
+        ok = yes_no_question(title=self.tr('Update lengths?'),
+                             text=self.tr('Do you want to update lengths of lines? \n'
                                   'IMPORTANT: This will take into account every movement of substation and line '
                                   'locations. If you are unsure of the effects of this updating, click no and perform '
-                                  'the individual length update in a new map or in the specific line.')
+                                  'the individual length update in a new map or in the specific line.'))
         if ok:
             line_graphics_dict = self.graphics_manager.get_device_type_dict(DeviceType.LineDevice)
 
@@ -1911,7 +1996,10 @@ class GridMapWidget(BaseDiagramWidget):
                 fig.suptitle(api_object.name, fontsize=20)
 
                 # plot the profiles
-                plt.show()
+                show_matplotlib_figure(figure=fig,
+                                       parent=self.gui,
+                                       open_dialogs=self.gui._open_plot_dialogs,
+                                       title=self.tr("{device_name} profiles plot").format(device_name=api_object.name))
         else:
             self.gui.show_error_toast("There are no time series, so nothing to plot :/")
 
@@ -1927,11 +2015,11 @@ class GridMapWidget(BaseDiagramWidget):
                                       'the substation should be created.')
             return
 
-        ok = yes_no_question(title='Transform waypoint to substation?',
-                             text='Do you want to transform to substation the selected '
+        ok = yes_no_question(title=self.tr('Transform waypoint to substation?'),
+                             text=self.tr('Do you want to transform to substation the selected '
                                   'waypoint? This operation will split the line at the '
                                   'selected location, and will connect the new ends to '
-                                  'the new substation.')
+                                  'the new substation.'))
 
         if ok:
 
@@ -2108,7 +2196,7 @@ class GridMapWidget(BaseDiagramWidget):
         ss = selected_substations[0][0]
 
         dialog = BusSelectorDialogue(grid=self.circuit, se=ss)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         if dialog.is_valid():
             bus = dialog.bus()
             if bus is not None:
@@ -2158,12 +2246,12 @@ class GridMapWidget(BaseDiagramWidget):
                 min_value=1,
                 max_value=10,
                 default_value=0,
-                title="Select circuit ID",
-                text="Circuit ID",
+                title=self.tr("Select circuit ID"),
+                text=self.tr("Circuit ID"),
                 is_int=True
             )
 
-            inpt.exec()
+            exec_dialog_safely(dialog=inpt)
 
             if inpt.is_accepted:
                 circ_idx = inpt.value
@@ -2267,9 +2355,9 @@ class GridMapWidget(BaseDiagramWidget):
         self.gui.show_info_toast(message='Line merging successful!')
 
         ok = yes_no_question(
-            text='Do you want to delete the substation where the lines were connecting? This will'
+            text=self.tr('Do you want to delete the substation where the lines were connecting? This will'
                  ' open the substation deletion menu, with the information of the items that would '
-                 'be removed.', title='Remove substation?')
+                 'be removed.'), title=self.tr('Remove substation?'))
         if ok:
             merging_substation = self.graphics_manager.query(elm=joint_bus.substation)
             merging_substation.remove_function_from_schematic_and_db()
@@ -2297,11 +2385,11 @@ class GridMapWidget(BaseDiagramWidget):
             gen.latitude = gen_graphic.lat
             gen.longitude = gen_graphic.lon
 
-        ok = yes_no_question(title='Update lengths?',
-                             text='Do you want to update lengths of lines? \n'
+        ok = yes_no_question(title=self.tr('Update lengths?'),
+                             text=self.tr('Do you want to update lengths of lines? \n'
                                   'IMPORTANT: This will take into account every movement of substation and line '
                                   'locations. If you are unsure of the effects of this updating, click no and perform '
-                                  'the individual length update in a new map or in the specific line.')
+                                  'the individual length update in a new map or in the specific line.'))
         if ok:
 
             for line_graphic in line_graphics_list:
@@ -2332,7 +2420,7 @@ class GridMapWidget(BaseDiagramWidget):
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setText(self.tr("Please select exactly one line and one substation."))
             msg.setWindowTitle(self.tr("Selection Error"))
-            msg.exec()
+            exec_dialog_safely(dialog=msg)
             return
 
         # Get the API objects
@@ -2369,7 +2457,7 @@ class GridMapWidget(BaseDiagramWidget):
                 self.tr("The line cannot be connected. Please ensure the target substation has a bus with a matching nominal voltage.")
             )
             msg.setWindowTitle(self.tr("Connection Error"))
-            msg.exec()
+            exec_dialog_safely(dialog=msg)
             return
 
         # Step 1: Collect all waypoints of the original line
@@ -2937,7 +3025,7 @@ class GridMapWidget(BaseDiagramWidget):
             )
         )
         msg.setWindowTitle(self.tr("Operation Successful"))
-        msg.exec()
+        exec_dialog_safely(dialog=msg)
 
     def change_line_connection(self):
 

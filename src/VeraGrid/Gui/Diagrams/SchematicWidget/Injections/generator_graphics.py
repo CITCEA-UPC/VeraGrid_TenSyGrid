@@ -16,6 +16,7 @@ from VeraGrid.Gui.DeviceEditors.GeneratorEditor.SolarPowerWizard.solar_power_wiz
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.WindPowerWizard.wind_power_wizzard import WindFarmWizard
 from VeraGrid.Gui.profile_wizard_utils import fill_substation_weather_profiles
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.enumerations import DynamicSimulationMode
 
 
@@ -56,7 +57,7 @@ class GeneratorGraphicItem(InjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = GeneratorEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -132,8 +133,8 @@ class GeneratorGraphicItem(InjectionTemplateGraphicItem):
         """
         Convert this generator to a battery
         """
-        ok = yes_no_question('Are you sure that you want to convert this generator into a battery?',
-                             'Convert generator')
+        ok = yes_no_question(self.tr('Are you sure that you want to convert this generator into a battery?'),
+                             self.tr('Convert generator'))
         if ok:
             self._editor.convert_generator_to_battery(gen=self.api_object, graphic_object=self)
 
@@ -169,7 +170,7 @@ class GeneratorGraphicItem(InjectionTemplateGraphicItem):
                                     Pmin=self.api_object.Pmin,
                                     Pmax=self.api_object.Pmax,
                                     Snom=self.api_object.Snom)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             pass
 
         self.api_object.Snom = np.round(dlg.Snom, 1) if dlg.Snom > 1 else dlg.Snom
@@ -200,7 +201,7 @@ class GeneratorGraphicItem(InjectionTemplateGraphicItem):
                                 longitude=self.api_object.bus.longitude,
                                 gen_name=self.api_object.name,
                                 bus_name=self.api_object.bus.name)
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 if dlg.is_accepted:
                     if len(dlg.P) == self.api_object.P_prof.size():
                         self.api_object.P_prof.set(dlg.P)
@@ -230,7 +231,7 @@ class GeneratorGraphicItem(InjectionTemplateGraphicItem):
                                  longitude=self.api_object.bus.longitude,
                                  gen_name=self.api_object.name,
                                  bus_name=self.api_object.bus.name)
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 if dlg.is_accepted:
                     if len(dlg.P) == self.api_object.P_prof.size():
                         self.api_object.P_prof.set(dlg.P)

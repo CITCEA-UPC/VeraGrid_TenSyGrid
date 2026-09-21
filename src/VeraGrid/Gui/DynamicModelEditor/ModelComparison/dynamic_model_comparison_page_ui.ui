@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DynamicModelComparisonPage</class>
+ <widget class="QWidget" name="DynamicModelComparisonPage">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>1000</width><height>600</height></rect>
+  </property>
+  <property name="windowTitle"><string>Dynamic Model Comparison</string></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>0</number></property>
+   <property name="leftMargin"><number>0</number></property>
+   <property name="topMargin"><number>0</number></property>
+   <property name="rightMargin"><number>0</number></property>
+   <property name="bottomMargin"><number>0</number></property>
+   <item>
+    <widget class="QToolBar" name="comparisonToolBar">
+     <property name="movable"><bool>false</bool></property>
+     <property name="iconSize"><size><width>24</width><height>24</height></size></property>
+     <property name="toolButtonStyle"><enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum></property>
+     <property name="floatable"><bool>false</bool></property>
+     <addaction name="actionSave"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="statusLabel">
+     <property name="visible"><bool>false</bool></property>
+     <property name="text"><string/></property>
+     <property name="wordWrap"><bool>true</bool></property>
+     <property name="margin"><number>4</number></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSplitter" name="comparisonSplitter">
+     <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+     <property name="childrenCollapsible"><bool>true</bool></property>
+     <widget class="QFrame" name="modelsFrame">
+      <property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property>
+      <layout class="QVBoxLayout" name="modelsLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>0</number></property>
+       <property name="topMargin"><number>0</number></property>
+       <property name="rightMargin"><number>3</number></property>
+       <property name="bottomMargin"><number>0</number></property>
+       <item>
+        <widget class="QFrame" name="searchFrame">
+         <property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property>
+         <layout class="QHBoxLayout" name="searchLayout">
+          <property name="leftMargin"><number>0</number></property>
+          <property name="topMargin"><number>4</number></property>
+          <property name="rightMargin"><number>0</number></property>
+          <property name="bottomMargin"><number>4</number></property>
+          <item>
+           <widget class="QLineEdit" name="searchLineEdit">
+            <property name="placeholderText"><string>Search device or model types</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="searchButton">
+            <property name="maximumSize"><size><width>32</width><height>16777215</height></size></property>
+            <property name="toolTip"><string>Filter model types</string></property>
+            <property name="text"><string/></property>
+            <property name="icon">
+             <iconset resource="../../Icons/icons.qrc">
+              <normaloff>:/Icons/icons/magnifying_glass.png</normaloff>:/Icons/icons/magnifying_glass.png</iconset>
+            </property>
+            <property name="flat"><bool>true</bool></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeView" name="modelsTreeView">
+         <property name="toolTip"><string>Select a model type to compare its devices</string></property>
+         <property name="editTriggers"><set>QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::EditKeyPressed|QAbstractItemView::EditTrigger::SelectedClicked</set></property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QFrame" name="tableFrame">
+      <property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property>
+      <layout class="QVBoxLayout" name="tableLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>3</number></property>
+       <property name="topMargin"><number>4</number></property>
+       <property name="rightMargin"><number>0</number></property>
+       <property name="bottomMargin"><number>0</number></property>
+       <item>
+        <widget class="SpreadsheetTableView" name="comparisonTableView">
+         <property name="alternatingRowColors"><bool>true</bool></property>
+         <property name="selectionMode"><enum>QAbstractItemView::SelectionMode::ContiguousSelection</enum></property>
+         <property name="selectionBehavior"><enum>QAbstractItemView::SelectionBehavior::SelectItems</enum></property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../../Icons/icons.qrc">
+     <normaloff>:/Icons/icons/savec.png</normaloff>:/Icons/icons/savec.png</iconset>
+   </property>
+   <property name="text"><string>Save</string></property>
+   <property name="toolTip"><string>Save all model comparison changes</string></property>
+   <property name="shortcut"><string>Ctrl+S</string></property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SpreadsheetTableView</class>
+   <extends>QTableView</extends>
+   <header>VeraGrid.Gui.spread_sheet_table</header>
+  </customwidget>
+ </customwidgets>
+ <resources><include location="../../Icons/icons.qrc"/></resources>
+ <connections/>
+</ui>

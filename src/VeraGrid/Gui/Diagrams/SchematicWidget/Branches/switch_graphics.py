@@ -10,6 +10,7 @@ from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor impo
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem, RoundTerminalItem
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.line_graphics_template import LineGraphicTemplateItem
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.Devices.Branches.switch import Switch
 from VeraGridEngine.enumerations import DynamicSimulationMode
 
@@ -53,7 +54,7 @@ class SwitchGraphicItem(LineGraphicTemplateItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def contextMenuEvent(self, event):

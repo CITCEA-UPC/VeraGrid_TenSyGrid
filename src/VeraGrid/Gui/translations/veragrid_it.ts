@@ -14,62 +14,58 @@
         <translation>Di</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="49"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="89"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VeraGrid&lt;/span&gt; has been carefully crafted since 2015 to serve as a platform for research and consultancy. Visit &lt;a href=&quot;https://www.eroots.tech/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;eRoots&lt;/span&gt;&lt;/a&gt; for more details. The source of VeraGrid can be found &lt;a href=&quot;https://github.com/SanPen/VeraGrid&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;here.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VeraGrid&lt;/span&gt;è stato accuratamente realizzato dal 2015 per fungere da piattaforma di ricerca e consulenza. Visita&lt;a href=&quot;https://www.eroots.tech/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;eRoots&lt;/span&gt;&lt;/a&gt;per maggiori dettagli È possibile trovare la fonte di VeraGrid&lt;a href=&quot;https://github.com/SanPen/VeraGrid&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;Qui.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="112"/>
         <source>version</source>
-        <translation>versione</translation>
+        <translation type="vanished">versione</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="128"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="133"/>
         <source>Copyright</source>
         <translation>Copyright</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="164"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="150"/>
         <source>Contributors</source>
         <translation>Collaboratori</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="170"/>
         <source>TextLabel</source>
-        <translation>TextLabel</translation>
+        <translation type="vanished">TextLabel</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="184"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="160"/>
         <source>Libraries</source>
         <translation>Biblioteche</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="190"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="166"/>
         <source>Copy the table</source>
         <translation>Copia la tabella</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="210"/>
         <source>Update VeraGrid. If you are on windows don&apos;t do this.</source>
-        <translation>Aggiorna VeraGrid. Se usi Windows non farlo.</translation>
+        <translation type="vanished">Aggiorna VeraGrid. Se usi Windows non farlo.</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="254"/>
         <source>Optional libraries</source>
-        <translation>Librerie opzionali</translation>
+        <translation type="vanished">Librerie opzionali</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="264"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="197"/>
         <source>License</source>
         <translation>Licenza</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="270"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="203"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;This program comes with absolutelly no warranty. This is free software, and you are welcome to redistribute it under the conditions set by the license. VeraGrid is licensed under the &lt;a href=&quot;https://www.mozilla.org/en-US/MPL/2.0/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;Mozilla Public License V2&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Questo programma non ha assolutamente alcuna garanzia. Questo è software gratuito e sei libero di ridistribuirlo alle condizioni stabilite dalla licenza. VeraGrid è concesso in licenza con il&lt;a href=&quot;https://www.mozilla.org/en-US/MPL/2.0/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#26a269;&quot;&gt;Licenza pubblica Mozilla V2&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../AboutDialogue/about_gui.ui" line="291"/>
+        <location filename="../AboutDialogue/about_gui.ui" line="224"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -113,6 +109,164 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;| networkx     | BSD |&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;+--------------+------------------------------------------+&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
+    <message>
+        <source>Dependencies</source>
+        <translation>Dipendenze</translation>
+    </message>
+    <message>
+        <source>Installation Path</source>
+        <translation>Percorso di installazione</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>Not installed</source>
+        <translation type="vanished">Non installato</translation>
+    </message>
+    <message>
+        <source>Package</source>
+        <translation>Pacchetto</translation>
+    </message>
+    <message>
+        <source>True</source>
+        <translation>Vero</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation>Versione</translation>
+    </message>
+    <message>
+        <source>licensed</source>
+        <translation type="vanished">licenziato</translation>
+    </message>
+    <message>
+        <source>supported version</source>
+        <translation type="vanished">versione supportata</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>Azione</translation>
+    </message>
+    <message>
+        <source>Command output:</source>
+        <translation>Output del comando:</translation>
+    </message>
+    <message>
+        <source>Exit code: {code}</source>
+        <translation>Codice di uscita: {code}</translation>
+    </message>
+    <message>
+        <source>False</source>
+        <translation>Falso</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informazioni</translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation>Installa</translation>
+    </message>
+    <message>
+        <source>Installed</source>
+        <translation>Installato</translation>
+    </message>
+    <message>
+        <source>Installed version</source>
+        <translation>Versione installata</translation>
+    </message>
+    <message>
+        <source>Licensed</source>
+        <translation>Licenziato</translation>
+    </message>
+    <message>
+        <source>Newest version</source>
+        <translation>Versione più recente</translation>
+    </message>
+    <message>
+        <source>Supported version</source>
+        <translation>Versione supportata</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Avvertimento</translation>
+    </message>
+    <message>
+        <source>{name} update failed after {attempts} attempt(s).</source>
+        <translation>L&apos;aggiornamento di {name} è fallito dopo {attempts} tentativo(i).</translation>
+    </message>
+    <message>
+        <source>{name} updated successfully after {attempts} attempt(s)</source>
+        <translation>L&apos;{name}&apos; è stato aggiornato con successo dopo {attempts} tentativo(i).</translation>
+    </message>
+</context>
+<context>
+    <name>AdmittanceMatrixEditorWidget</name>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="19"/>
+        <source>Phases:</source>
+        <translation>Fasi:</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="26"/>
+        <source>N</source>
+        <translation>N</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="33"/>
+        <source>A</source>
+        <translation>A</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="40"/>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="47"/>
+        <source>C</source>
+        <translation>C</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="103"/>
+        <source>Compute from sequence values</source>
+        <translation>Calcola dai valori di sequenza</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="130"/>
+        <source>Accept</source>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="148"/>
+        <source>Admittance matrix</source>
+        <translation>Matrice di admittance</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="158"/>
+        <source>Dense complex admittance matrix.</source>
+        <translation>Matrice di admittance complessa densa.</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="173"/>
+        <source>Shunt admittance</source>
+        <translation>Admittance di shunt</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="185"/>
+        <source>Series admittance</source>
+        <translation>Admittance in serie</translation>
+    </message>
 </context>
 <context>
     <name>AiChatDialog</name>
@@ -127,148 +281,147 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <translation>Dialogo</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="141"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="135"/>
         <source>Ask about the active VeraGrid project, the selected study or the current network model.</source>
         <translation>Chiedi informazioni sul progetto VeraGrid attivo, sullo studio selezionato o sul modello di rete attuale.</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="173"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="167"/>
         <source>Clear chat</source>
         <translation>Chiacchierata chiara</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="186"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="180"/>
         <source>Ready.</source>
         <translation>Pronto.</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="196"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="190"/>
         <source>Send</source>
         <translation>Inviare</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="207"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="201"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="219"/>
-        <source>Local AI</source>
-        <translation>Locale AI</translation>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="213"/>
+        <source>Ollama</source>
+        <translation>Ollama</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="248"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="219"/>
+        <source>Status</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="226"/>
+        <source>Checked automatically when the chat opens.</source>
+        <translation>Verificato automaticamente quando la chat si apre.</translation>
+    </message>
+    <message>
+        <source>Local AI</source>
+        <translation type="vanished">Locale AI</translation>
+    </message>
+    <message>
         <source>/path/to/model.gguf or /path/to/models</source>
-        <translation>/percorso/del/modello.gguf o /percorso/del/models</translation>
+        <translation type="vanished">/percorso/del/modello.gguf o /percorso/del/models</translation>
+    </message>
+    <message>
+        <source>Local AI settings</source>
+        <translation type="vanished">Impostazioni locali AI</translation>
+    </message>
+    <message>
+        <source>Scan</source>
+        <translation type="vanished">Scansione</translation>
+    </message>
+    <message>
+        <source>GGUF model</source>
+        <translation type="vanished">Modello GGUF</translation>
+    </message>
+    <message>
+        <source>Model path</source>
+        <translation type="vanished">Percorso del modello</translation>
     </message>
     <message>
         <location filename="../AiAgent/ai_chat_gui.ui" line="274"/>
-        <source>Local AI settings</source>
-        <translation>Impostazioni locali AI</translation>
-    </message>
-    <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="284"/>
-        <source>Scan</source>
-        <translation>Scansione</translation>
-    </message>
-    <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="291"/>
-        <source>GGUF model</source>
-        <translation>Modello GGUF</translation>
-    </message>
-    <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="298"/>
-        <source>Model path</source>
-        <translation>Percorso del modello</translation>
-    </message>
-    <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="305"/>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="567"/>
         <source>Timeout [s]</source>
         <translation>Timeout [s]</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="312"/>
         <source>Context tokens</source>
-        <translation>Gettoni di contesto</translation>
+        <translation type="vanished">Gettoni di contesto</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="335"/>
         <source>Completion tokens</source>
-        <translation>Gettoni di completamento</translation>
+        <translation type="vanished">Gettoni di completamento</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="358"/>
         <source>GPU layers</source>
-        <translation>Strati GPU</translation>
+        <translation type="vanished">Strati GPU</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="378"/>
         <source>Temperature</source>
-        <translation>Temperatura</translation>
+        <translation type="vanished">Temperatura</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="404"/>
         <source>Top p</source>
-        <translation>In alto pag</translation>
+        <translation type="vanished">In alto pag</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="430"/>
         <source>History messages</source>
-        <translation>Messaggi di storia</translation>
+        <translation type="vanished">Messaggi di storia</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="450"/>
         <source>History chars</source>
-        <translation>Caratteri storici</translation>
+        <translation type="vanished">Caratteri storici</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="473"/>
         <source>Grounding chars</source>
-        <translation>Caratteri di messa a terra</translation>
+        <translation type="vanished">Caratteri di messa a terra</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="505"/>
         <source>Remote AI</source>
-        <translation>Telecomando AI</translation>
+        <translation type="vanished">Telecomando AI</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="511"/>
         <source>API key</source>
-        <translation>Chiave API</translation>
+        <translation type="vanished">Chiave API</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="550"/>
         <source>https://api.example.com/v1</source>
-        <translation>https://api.example.com/v1</translation>
+        <translation type="vanished">https://api.example.com/v1</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="560"/>
         <source>Leave empty for unauthenticated endpoints</source>
-        <translation>Lascia vuoto per gli endpoint non autenticati</translation>
+        <translation type="vanished">Lascia vuoto per gli endpoint non autenticati</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="574"/>
         <source>API provider</source>
-        <translation>Fornitore API</translation>
+        <translation type="vanished">Fornitore API</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="581"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="250"/>
         <source>Model</source>
         <translation>Modello</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="598"/>
         <source>API AI settings</source>
-        <translation>Impostazioni API AI</translation>
+        <translation type="vanished">Impostazioni API AI</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="605"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="236"/>
         <source>Base URL</source>
         <translation>URL di base</translation>
     </message>
     <message>
-        <location filename="../AiAgent/ai_chat_gui.ui" line="615"/>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="243"/>
+        <source>http://localhost:11434/v1</source>
+        <translation>http://localhost:11434/v1</translation>
+    </message>
+    <message>
+        <location filename="../AiAgent/ai_chat_gui.ui" line="267"/>
         <source>Refresh</source>
         <translation>Aggiorna</translation>
     </message>
@@ -277,7 +430,7 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     <name>AiChatDialogue</name>
     <message>
         <source>VeraGrid AI dialogue</source>
-        <translation type="vanished">VeraGrid AI dialogo</translation>
+        <translation>VeraGrid AI dialogo</translation>
     </message>
     <message>
         <source>Pick or type a GGUF file name</source>
@@ -289,7 +442,7 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
     <message>
         <source>VeraGrid AI</source>
-        <translation type="vanished">VeraGrid AI</translation>
+        <translation>VeraGrid AI</translation>
     </message>
     <message>
         <source>Scan the configured path for GGUF files.</source>
@@ -309,92 +462,403 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
     <message>
         <source>Type a message before sending.</source>
-        <translation type="vanished">Digita un messaggio prima di inviarlo.</translation>
+        <translation>Digita un messaggio prima di inviarlo.</translation>
     </message>
     <message>
         <source>Resolve the pending tool approval or clear the chat first.</source>
-        <translation type="vanished">Risolvi prima l&apos;approvazione dello strumento in sospeso o cancella prima la chat.</translation>
+        <translation>Risolvi prima l&apos;approvazione dello strumento in sospeso o cancella prima la chat.</translation>
     </message>
     <message>
         <source>Stopping AI turn...</source>
-        <translation type="vanished">Arresto della rotazione di AI...</translation>
+        <translation>Arresto della rotazione di AI...</translation>
     </message>
     <message>
         <source>There is no running AI turn to stop.</source>
-        <translation type="vanished">Non è possibile arrestare la corsa AI.</translation>
+        <translation>Non è possibile arrestare la corsa AI.</translation>
     </message>
     <message>
         <source>Running simulation and analyzing the results...</source>
-        <translation type="vanished">Esecuzione della simulazione e analisi dei risultati...</translation>
+        <translation>Esecuzione della simulazione e analisi dei risultati...</translation>
     </message>
     <message>
         <source>There is no pending tool call to approve.</source>
-        <translation type="vanished">Non vi è alcuna chiamata di strumento in sospeso da approvare.</translation>
+        <translation>Non vi è alcuna chiamata di strumento in sospeso da approvare.</translation>
     </message>
     <message>
         <source>Wait for the current AI turn to finish.</source>
-        <translation type="vanished">Attendi la fine del turno AI corrente.</translation>
+        <translation>Attendi la fine del turno AI corrente.</translation>
     </message>
     <message>
         <source>Running AI turn...</source>
-        <translation type="vanished">Esecuzione AI girare...</translation>
+        <translation>Esecuzione AI girare...</translation>
     </message>
     <message>
         <source>Generating response</source>
-        <translation type="vanished">Generazione di risposta</translation>
+        <translation>Generazione di risposta</translation>
     </message>
     <message>
         <source>Running AI turn</source>
-        <translation type="vanished">Esecuzione del turno AI</translation>
+        <translation>Esecuzione del turno AI</translation>
     </message>
     <message>
         <source>Stop</source>
-        <translation type="vanished">Fermare</translation>
+        <translation>Fermare</translation>
     </message>
     <message>
         <source>Send</source>
-        <translation type="vanished">Inviare</translation>
+        <translation>Inviare</translation>
     </message>
     <message>
         <source>You</source>
-        <translation type="vanished">Voi</translation>
+        <translation>Voi</translation>
     </message>
     <message>
         <source>Tool</source>
-        <translation type="vanished">Attrezzo</translation>
+        <translation>Attrezzo</translation>
+    </message>
+    <message>
+        <source>AI turn failed: {error_message}</source>
+        <translation>Turno AI fallito: {error_message}</translation>
+    </message>
+    <message>
+        <source>Checking automatically when the chat opens.</source>
+        <translation>Verifica automatica quando la chat si apre.</translation>
+    </message>
+    <message>
+        <source>Could not refresh models: {error_message}</source>
+        <translation>Impossibile aggiornare i modelli: {error_message}</translation>
+    </message>
+    <message>
+        <source>Loaded {model_count} models from the backend.</source>
+        <translation>Caricati {model_count} modelli dal backend.</translation>
+    </message>
+    <message>
+        <source>Not ready. {error_message}</source>
+        <translation>Non pronto. {error_message}</translation>
+    </message>
+    <message>
+        <source>Ollama base URL</source>
+        <translation>URL base Ollama</translation>
+    </message>
+    <message>
+        <source>Ollama did not report models: {error_message}</source>
+        <translation>Ollama non ha segnalato modelli: {error_message}</translation>
+    </message>
+    <message>
+        <source>Ollama is ready.</source>
+        <translation>Ollama è pronto.</translation>
+    </message>
+    <message>
+        <source>Ollama is running, but it reported no installed models.</source>
+        <translation>Ollama è in esecuzione, ma non ha segnalato modelli installati.</translation>
+    </message>
+    <message>
+        <source>Ollama is running. Loaded {model_count} models.</source>
+        <translation>Ollama è in esecuzione. Caricati {model_count} modelli.</translation>
+    </message>
+    <message>
+        <source>Ollama model</source>
+        <translation>Modello Ollama</translation>
+    </message>
+    <message>
+        <source>Ollama reports installed models automatically</source>
+        <translation>Ollama segnala automaticamente i modelli installati</translation>
+    </message>
+    <message>
+        <source>Ollama will be detected and checked automatically when the chat opens.</source>
+        <translation>Ollama verrà rilevato e controllato automaticamente quando la chat si apre.</translation>
+    </message>
+    <message>
+        <source>Pick or type an Ollama model</source>
+        <translation>Seleziona o digita un modello Ollama</translation>
+    </message>
+    <message>
+        <source>Query Ollama for models.</source>
+        <translation>Interrogare Ollama per i modelli.</translation>
+    </message>
+    <message>
+        <source>Refreshing models from Ollama...</source>
+        <translation>Aggiornamento modelli da Ollama...</translation>
+    </message>
+    <message>
+        <source>Refreshing models from the configured backend...</source>
+        <translation>Aggiornamento modelli dal backend configurato...</translation>
+    </message>
+    <message>
+        <source>Reply with one short greeting sentence. Say that VeraGrid AI is ready and Ollama is working with model {model_name}. Do not ask a question.</source>
+        <translation>Rispondi con una breve frase di saluto. Indica che VeraGrid AI è pronto e che Ollama sta lavorando con il modello {model_name}. Non fare domande.</translation>
+    </message>
+    <message>
+        <source>Running, but no installed models were reported.</source>
+        <translation>In esecuzione, ma non sono stati segnalati modelli installati.</translation>
+    </message>
+    <message>
+        <source>Running. Using {model_name}.</source>
+        <translation>In esecuzione. Utilizzo {model_name}.</translation>
+    </message>
+    <message>
+        <source>Running. {model_count} installed models reported.</source>
+        <translation>In esecuzione. Segnalati {model_count} modelli installati.</translation>
+    </message>
+    <message>
+        <source>The Ollama base URL field is empty.</source>
+        <translation>Il campo URL base Ollama è vuoto.</translation>
+    </message>
+    <message>
+        <source>The base URL field is empty.</source>
+        <translation>Il campo URL base è vuoto.</translation>
+    </message>
+    <message>
+        <source>The model field is empty.</source>
+        <translation>Il campo modello è vuoto.</translation>
+    </message>
+    <message>
+        <source>Turn completed.</source>
+        <translation>Turno completato.</translation>
+    </message>
+    <message>
+        <source>VeraGrid checks Ollama automatically and uses the model reported by the local server.</source>
+        <translation>VeraGrid controlla Ollama automaticamente e utilizza il modello segnalato dal server locale.</translation>
+    </message>
+    <message>
+        <source>http://localhost:11434/v1</source>
+        <translation>http://localhost:11434/v1</translation>
+    </message>
+</context>
+<context>
+    <name>ArrayEditor</name>
+    <message>
+        <source>Add</source>
+        <translation>Aggiungere</translation>
+    </message>
+    <message>
+        <source>Array Editor</source>
+        <translation>Editor di Array</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Eliminare</translation>
+    </message>
+</context>
+<context>
+    <name>BaseDiagramWidget</name>
+    <message>
+        <source>No time series results to plot, run some time series results. Even partial results are fine</source>
+        <translation>Nessun risultato di serie temporali da tracciare, esegui alcuni risultati di serie temporali. Anche risultati parziali vanno bene</translation>
+    </message>
+    <message>
+        <source>Overwrite the active profile</source>
+        <translation>Sovrascrivi il profilo attivo</translation>
+    </message>
+    <message>
+        <source>Overwrite the profile</source>
+        <translation>Sovrascrivi il profilo</translation>
+    </message>
+    <message>
+        <source>{device_name} results plot</source>
+        <translation>Grafico dei risultati di {device_name}</translation>
+    </message>
+</context>
+<context>
+    <name>BaseMainGui</name>
+    <message>
+        <source>Are you sure that you want to cancel the simulation?</source>
+        <translation>Sei sicuro di voler annullare la simulazione?</translation>
+    </message>
+    <message>
+        <source>Unlocking the UI may cause crash depending on the conditions. Are you sure?</source>
+        <translation>Sbloccare l&apos;interfaccia utente potrebbe causare un crash a seconda delle condizioni. Sei sicuro?</translation>
     </message>
 </context>
 <context>
     <name>BlockEditorWindow</name>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="14"/>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="14"/>
         <source>BlockEditorWindow</source>
         <translation>BlockEditorWindow</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="116"/>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="116"/>
         <source>Library</source>
         <translation>Biblioteca</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="155"/>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="155"/>
         <source>Search basic blocks</source>
         <translation>Cerca blocchi di base</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="181"/>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="208"/>
+        <source>toolBar</source>
+        <translation>toolBar</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="237"/>
+        <source>CheckModel</source>
+        <translation>CheckModel</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="240"/>
+        <source>Inspect model</source>
+        <translation>Ispezionare il modello</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="252"/>
+        <source>Center</source>
+        <translation>Centro</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="264"/>
+        <source>Zoom in</source>
+        <translation>Ingrandisci</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="276"/>
+        <source>Zoom out</source>
+        <translation>Rimpicciolisci</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="291"/>
+        <source>Delete all</source>
+        <translation>Elimina tutto</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="294"/>
+        <source>Delete all blocks to start from scratch.</source>
+        <translation>Elimina tutti i blocchi per ricominciare da zero.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="306"/>
+        <source>Validate</source>
+        <translation>Convalidare</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="318"/>
+        <source>Save</source>
+        <translation>Salva</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/block_editor.ui" line="321"/>
+        <source>Ctrl+S</source>
+        <translation>CTRL+S</translation>
+    </message>
+    <message>
         <source>Variables</source>
-        <translation>Variabili</translation>
+        <translation type="vanished">Variabili</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="215"/>
         <source>Parameters</source>
-        <translation>Parametri</translation>
+        <translation type="vanished">Parametri</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/block_editor.ui" line="249"/>
         <source>Equations</source>
-        <translation>Equazioni</translation>
+        <translation type="vanished">Equazioni</translation>
+    </message>
+</context>
+<context>
+    <name>BlockParameterDraftModel</name>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>Numeric value. Changes are staged until Apply changes is pressed.</source>
+        <translation>Valore numerico. Le modifiche sono in attesa fino a quando non viene premuto Applica modifiche.</translation>
+    </message>
+    <message>
+        <source>Real value or symbolic initialization expression. Changes are staged until Apply changes is pressed.</source>
+        <translation>Valore reale o espressione di inizializzazione simbolica. Le modifiche sono in attesa fino a quando non viene premuto Applica modifiche.</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valore</translation>
+    </message>
+</context>
+<context>
+    <name>BlockPropertyTreeModel</name>
+    <message>
+        <source>Missing PF mapping</source>
+        <translation>Mappatura PF mancante</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>Output</source>
+        <translation>Output</translation>
+    </message>
+    <message>
+        <source>Power-flow reference; variable mappings are used for initialization.</source>
+        <translation>Riferimento flusso di potenza; le mappature di variabili sono utilizzate per l&apos;inizializzazione.</translation>
+    </message>
+    <message>
+        <source>Template issue: static parameters require api_obj_mapping. An independently editable parameter should be in event_dict. This refactor does not migrate templates automatically.</source>
+        <translation>Problema del template: i parametri statici richiedono api_obj_mapping. Un parametro modificabile in modo indipendente dovrebbe trovarsi in event_dict. Questo refactoring non migra automaticamente i template.</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <source>Value / PF reference</source>
+        <translation>Valore / Riferimento PF</translation>
+    </message>
+</context>
+<context>
+    <name>BlockPropertyValueDelegate</name>
+    <message>
+        <source>None</source>
+        <translation>Nessuno</translation>
+    </message>
+</context>
+<context>
+    <name>BlockSymbolFilterProxyModel</name>
+    <message>
+        <source>Initializes a variable through VarPowerFlowReferenceType and block.external_mapping.</source>
+        <translation type="vanished">Inizializza una variabile tramite VarPowerFlowReferenceType e block.external_mapping.</translation>
+    </message>
+    <message>
+        <source>Maps a static parameter through ParamPowerFlowReferenceType to block.api_obj_mapping. Dynamic parameters are not editable here.</source>
+        <translation type="vanished">Mappa un parametro statico tramite ParamPowerFlowReferenceType a block.api_obj_mapping. I parametri dinamici non sono modificabili qui.</translation>
+    </message>
+    <message>
+        <source>Power-flow derived initialization</source>
+        <translation type="vanished">Inizializzazione derivata dal flusso di potenza</translation>
+    </message>
+    <message>
+        <source>Static parameter mapping</source>
+        <translation type="vanished">Mappatura di parametri statici</translation>
+    </message>
+</context>
+<context>
+    <name>BusGraphicItem</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>No API object available :(</source>
+        <translation>Nessun oggetto API disponibile :(</translation>
+    </message>
+    <message>
+        <source>The api object is none :(</source>
+        <translation>L&apos;oggetto API è nullo :(</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+</context>
+<context>
+    <name>BusSelectorDialogue</name>
+    <message>
+        <source>Bus selection</source>
+        <translation>Selezione bus</translation>
     </message>
 </context>
 <context>
@@ -418,6 +882,17 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <location filename="../CatalogueElementsDialogue/catalogue_elements_gui.ui" line="53"/>
         <source>Select none</source>
         <translation>Seleziona nessuno</translation>
+    </message>
+</context>
+<context>
+    <name>CatalogueGUI</name>
+    <message>
+        <source>Can&apos;t upload file</source>
+        <translation>Impossibile caricare il file</translation>
+    </message>
+    <message>
+        <source>Custom Catalogue</source>
+        <translation>Catalogo personalizzato</translation>
     </message>
 </context>
 <context>
@@ -514,6 +989,17 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>CgmesExportDialogue</name>
+    <message>
+        <source>CGMES export</source>
+        <translation>Esportazione CGMES</translation>
+    </message>
+    <message>
+        <source>Export to CGMES</source>
+        <translation>Esporta in CGMES</translation>
+    </message>
+</context>
+<context>
     <name>CgmesImportDialog</name>
     <message>
         <location filename="../FileDialogues/CGMESDialogue/cgmes_import_gui.ui" line="14"/>
@@ -557,14 +1043,32 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>CgmesImportDialogue</name>
+    <message>
+        <source>CGMES import</source>
+        <translation>Importazione CGMES</translation>
+    </message>
+</context>
+<context>
     <name>CgmesOptionsSelector</name>
     <message>
         <source>CGMES Version:</source>
-        <translation type="vanished">CGMES Versione:</translation>
+        <translation>CGMES Versione:</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation type="vanished">Accettare</translation>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>Select the CGMES options</source>
+        <translation>Seleziona le opzioni CGMES</translation>
+    </message>
+</context>
+<context>
+    <name>CompiledArraysMain</name>
+    <message>
+        <source>Array plot</source>
+        <translation>Grafico dell&apos;array</translation>
     </message>
 </context>
 <context>
@@ -632,6 +1136,13 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     <message>
         <source>Japanese</source>
         <translation>Giapponese</translation>
+    </message>
+</context>
+<context>
+    <name>ConsoleMainWindow</name>
+    <message>
+        <source>PySide6 Python Console</source>
+        <translation>Console Python PySide6</translation>
     </message>
 </context>
 <context>
@@ -1154,6 +1665,27 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>ContingencyPlannerGUI</name>
+    <message>
+        <source>Contingency planner</source>
+        <translation>Pianificatore di emergenza</translation>
+    </message>
+</context>
+<context>
+    <name>ControllableShuntDeviceEditor</name>
+    <message>
+        <source>Controllable shunt editor</source>
+        <translation>Editor di shunt controllabile</translation>
+    </message>
+</context>
+<context>
+    <name>ControllableShuntEditor</name>
+    <message>
+        <source>Controllable shunt editor</source>
+        <translation>Editor di shunt controllabile</translation>
+    </message>
+</context>
+<context>
     <name>ControllableShuntEditorDialog</name>
     <message>
         <location filename="../DeviceEditors/ControllableShuntEditor/controllable_shunt_editor_gui.ui" line="14"/>
@@ -1174,6 +1706,369 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <location filename="../DeviceEditors/ControllableShuntEditor/controllable_shunt_editor_gui.ui" line="52"/>
         <source>Done</source>
         <translation>Fatto</translation>
+    </message>
+</context>
+<context>
+    <name>CoordinatesInputGUI</name>
+    <message>
+        <source>Coordinates import dialogue</source>
+        <translation>Dialogo di importazione coordinate</translation>
+    </message>
+    <message>
+        <source>Duplicated headers</source>
+        <translation>Intestazioni duplicate</translation>
+    </message>
+    <message>
+        <source>Only one file accepted :(</source>
+        <translation>Accettato un solo file :(</translation>
+    </message>
+    <message>
+        <source>Open file</source>
+        <translation>Apri file</translation>
+    </message>
+    <message>
+        <source>The file type {file_extension} is not accepted :(</source>
+        <translation>Il tipo di file {file_extension} non è accettato :(</translation>
+    </message>
+</context>
+<context>
+    <name>CorrectInconsistenciesDialogue</name>
+    <message>
+        <source>Accept</source>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>Correct inconsistencies</source>
+        <translation>Correggere le incoerenze</translation>
+    </message>
+    <message>
+        <source>Maximum generator set point</source>
+        <translation>Setpoint massimo del generatore</translation>
+    </message>
+    <message>
+        <source>Maximum virtual tap difference</source>
+        <translation>Differenza di tap virtuale massima</translation>
+    </message>
+    <message>
+        <source>Minimum generator set point</source>
+        <translation>Setpoint minimo del generatore</translation>
+    </message>
+</context>
+<context>
+    <name>DataBaseTableMain</name>
+    <message>
+        <source>Add</source>
+        <translation>Aggiungere</translation>
+    </message>
+    <message>
+        <source>Add to current diagram</source>
+        <translation>Aggiungi al diagramma corrente</translation>
+    </message>
+    <message>
+        <source>Assign to profile</source>
+        <translation>Assegna al profilo</translation>
+    </message>
+    <message>
+        <source>Colour branches like this</source>
+        <translation>Colora i rami in questo modo</translation>
+    </message>
+    <message>
+        <source>Copy idtag</source>
+        <translation>Copia idtag</translation>
+    </message>
+    <message>
+        <source>Copy table</source>
+        <translation>Copia tabella</translation>
+    </message>
+    <message>
+        <source>Crop model to buses selection</source>
+        <translation>Ritaglia il modello alla selezione dei bus</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Eliminare</translation>
+    </message>
+    <message>
+        <source>Duplicate object</source>
+        <translation>Oggetto duplicato</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Modificare</translation>
+    </message>
+    <message>
+        <source>Grid reduction</source>
+        <translation>Riduzione della griglia</translation>
+    </message>
+    <message>
+        <source>Highlight based on property</source>
+        <translation>Evidenzia in base alla proprietà</translation>
+    </message>
+    <message>
+        <source>Highlight buses selection</source>
+        <translation>Evidenzia la selezione dei bus</translation>
+    </message>
+    <message>
+        <source>Merge</source>
+        <translation>Unisci</translation>
+    </message>
+    <message>
+        <source>New diagram from selection</source>
+        <translation>Nuovo diagramma dalla selezione</translation>
+    </message>
+    <message>
+        <source>New map from selection</source>
+        <translation>Nuova mappa dalla selezione</translation>
+    </message>
+    <message>
+        <source>New vicinity diagram</source>
+        <translation>Nuovo diagramma delle vicinanze</translation>
+    </message>
+    <message>
+        <source>Set value to column</source>
+        <translation>Imposta il valore sulla colonna</translation>
+    </message>
+    <message>
+        <source>Type the object name or a smart filter expression ...</source>
+        <translation>Inserire il nome dell&apos;oggetto o un&apos;espressione di filtro intelligente...</translation>
+    </message>
+    <message>
+        <source>Add selected DB objects to current diagram</source>
+        <translation>Aggiungi gli oggetti DB selezionati al diagramma corrente</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to delete_with_dialogue the selected elements?</source>
+        <translation>Sei sicuro di voler eliminare_with_dialogue gli elementi selezionati?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to duplicate the selected elements?</source>
+        <translation>Sei sicuro di voler duplicare gli elementi selezionati?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to merge the selected substations?</source>
+        <translation>Sei sicuro di voler fondere le sottostazioni selezionate?</translation>
+    </message>
+    <message>
+        <source>Choose an element from the table</source>
+        <translation>Scegli un elemento dalla tabella</translation>
+    </message>
+    <message>
+        <source>Copy profile to clipboard</source>
+        <translation>Copia il profilo negli appunti</translation>
+    </message>
+    <message>
+        <source>Create new diagram</source>
+        <translation>Crea un nuovo diagramma</translation>
+    </message>
+    <message>
+        <source>Crop model to buses selection?</source>
+        <translation>Ritaglia il modello sulla selezione degli autobus?</translation>
+    </message>
+    <message>
+        <source>DB clean</source>
+        <translation>Pulizia DB</translation>
+    </message>
+    <message>
+        <source>DB clean logger</source>
+        <translation>Logger pulizia DB</translation>
+    </message>
+    <message>
+        <source>Delete inconsistencies</source>
+        <translation>Eliminare le incongruenze</translation>
+    </message>
+    <message>
+        <source>Detect facilities</source>
+        <translation>Rileva strutture</translation>
+    </message>
+    <message>
+        <source>Detect substations</source>
+        <translation>Rileva sottostazioni</translation>
+    </message>
+    <message>
+        <source>Do you want to try to detect facilities in the grid model?</source>
+        <translation>Vuoi provare a rilevare le strutture nel modello di rete?</translation>
+    </message>
+    <message>
+        <source>Do you want to try to detect substations and voltage levels in the grid model?</source>
+        <translation>Vuoi provare a rilevare sottostazioni e livelli di tensione nel modello di rete?</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicato</translation>
+    </message>
+    <message>
+        <source>Highlight</source>
+        <translation>Evidenzia</translation>
+    </message>
+    <message>
+        <source>How do you want to represent the merged grid?</source>
+        <translation>Come vuoi rappresentare la griglia unita?</translation>
+    </message>
+    <message>
+        <source>New substation</source>
+        <translation>Nuova sottostazione</translation>
+    </message>
+    <message>
+        <source>No editor available.
+The values can be changed from the table or via context menus in the graphical interface.</source>
+        <translation>Nessun editor disponibile.
+I valori possono essere modificati dalla tabella o tramite i menu contestuali nell&apos;interfaccia grafica.</translation>
+    </message>
+    <message>
+        <source>No object found :(</source>
+        <translation>Nessun oggetto trovato :(</translation>
+    </message>
+    <message>
+        <source>Restore investments</source>
+        <translation>Ripristinare gli investimenti</translation>
+    </message>
+    <message>
+        <source>Select a catalogue element and then a catalogue object</source>
+        <translation>Seleziona un elemento del catalogo e poi un oggetto del catalogo</translation>
+    </message>
+    <message>
+        <source>Select a cell or a column first</source>
+        <translation>Seleziona prima una cella o una colonna</translation>
+    </message>
+    <message>
+        <source>Select a data structure</source>
+        <translation>Seleziona una struttura dati</translation>
+    </message>
+    <message>
+        <source>Select some element to serve as source to copy</source>
+        <translation>Seleziona un elemento da utilizzare come sorgente per la copia</translation>
+    </message>
+    <message>
+        <source>Select some elements to highlight</source>
+        <translation>Seleziona alcuni elementi da evidenziare</translation>
+    </message>
+    <message>
+        <source>Setting the database buses x,y position from their latitude and longitude values will change the buses values but not the current diagrams. New diagrams will use the new values</source>
+        <translation>Impostare la posizione x,y degli autobus nel database dai loro valori di latitudine e longitudine cambierà i valori degli autobus ma non i diagrammi attuali. I nuovi diagrammi utilizzeranno i nuovi valori</translation>
+    </message>
+    <message>
+        <source>The maximum value is 0, so the coloring cannot be applied</source>
+        <translation>Il valore massimo è 0, quindi la colorazione non può essere applicata</translation>
+    </message>
+    <message>
+        <source>The proprty {property_name} cannot be found :(</source>
+        <translation>La proprietà {property_name} non può essere trovata :(</translation>
+    </message>
+    <message>
+        <source>The selected property must be of a numeric type</source>
+        <translation>La proprietà selezionata deve essere di tipo numerico</translation>
+    </message>
+    <message>
+        <source>There is no data displayed, please display one</source>
+        <translation>Non sono visualizzati dati, si prega di visualizzarne</translation>
+    </message>
+    <message>
+        <source>This action may delete_with_dialogue unused objects and references, 
+Are you sure?</source>
+        <translation>Questa azione potrebbe eliminare_with_dialogue oggetti e riferimenti inutilizzati, 
+Sei sicuro?</translation>
+    </message>
+    <message>
+        <source>This action removes all disconnected devices with no active profile and delete all small islands</source>
+        <translation>Questa azione rimuove tutti i dispositivi scollegati senza profilo attivo ed elimina tutte le piccole isole</translation>
+    </message>
+    <message>
+        <source>This action will restore the circuit to the state before the last investment modification. Do you want to proceed?</source>
+        <translation>Questa azione ripristinerà il circuito allo stato precedente all&apos;ultima modifica di investimento. Desideri procedere?</translation>
+    </message>
+    <message>
+        <source>This object does not support table-like addition.
+Use the schematic instead.</source>
+        <translation>Questo oggetto non supporta l&apos;aggiunta tipo tabella.
+Utilizza invece lo schema.</translation>
+    </message>
+    <message>
+        <source>This will delete all buses and their connected elements that were not selected.This cannot be undone and it is dangerous if you don&apos;t knowwhat you are doing. 
+Are you sure?</source>
+        <translation>Questo eliminerà tutti gli autobus e i loro elementi collegati che non sono stati selezionati. Questo non può essere annullato ed è pericoloso se non sai cosa stai facendo. 
+Sei sicuro?</translation>
+    </message>
+    <message>
+        <source>There are no buses to connect this device.</source>
+        <translation>Non ci sono bus per collegare questo dispositivo.</translation>
+    </message>
+    <message>
+        <source>VSC devices need one AC bus and two DC buses.</source>
+        <translation type="vanished">I dispositivi VSC richiedono un bus CA e due bus CC.</translation>
+    </message>
+    <message>
+        <source>There are no devices to target.</source>
+        <translation>Non ci sono dispositivi da selezionare.</translation>
+    </message>
+    <message>
+        <source>There are no supported devices to target.</source>
+        <translation>Non ci sono dispositivi supportati da selezionare.</translation>
+    </message>
+    <message>
+        <source>VSC devices need one AC bus, one DC bus, and an optional DC bus.</source>
+        <translation>I dispositivi VSC richiedono un bus CA, un bus CC e un bus CC opzionale.</translation>
+    </message>
+    <message>
+        <source>Nothing to paste</source>
+        <translation>Niente da incollare</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation type="vanished">Incolla</translation>
+    </message>
+    <message>
+        <source>Paste data</source>
+        <translation>Incolla dati</translation>
+    </message>
+    <message>
+        <source>Pasted!</source>
+        <translation>Incollato!</translation>
+    </message>
+    <message>
+        <source>Paste column</source>
+        <translation>Incolla colonna</translation>
+    </message>
+    <message>
+        <source>Index column width</source>
+        <translation>Larghezza colonna indice</translation>
+    </message>
+    <message>
+        <source>Set index width</source>
+        <translation>Imposta larghezza indice</translation>
+    </message>
+    <message>
+        <source>Width in pixels</source>
+        <translation>Larghezza in pixel</translation>
+    </message>
+    <message>
+        <source>Object histogram</source>
+        <translation>Istogramma oggetti</translation>
+    </message>
+</context>
+<context>
+    <name>DcLineDeviceEditor</name>
+    <message>
+        <source>DC line design widget is not available</source>
+        <translation>Il widget di progettazione linea CC non è disponibile</translation>
+    </message>
+    <message>
+        <source>DC line editor</source>
+        <translation>Editor linea CC</translation>
+    </message>
+</context>
+<context>
+    <name>DcLineEditor</name>
+    <message>
+        <source>Line editor</source>
+        <translation>Redattore di riga</translation>
+    </message>
+    <message>
+        <source>Load template</source>
+        <translation>Carica modello</translation>
+    </message>
+    <message>
+        <source>The template {template_name} contains errors</source>
+        <translation>Il modello {template_name} contiene errori</translation>
     </message>
 </context>
 <context>
@@ -1215,6 +2110,32 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>DeviceSelectorDialogue</name>
+    <message>
+        <source>Device selection</source>
+        <translation>Selezione dispositivo</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="vanished">Nessuno</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation type="vanished">Ricerca</translation>
+    </message>
+</context>
+<context>
+    <name>DeviceSelectorPanel</name>
+    <message>
+        <source>None</source>
+        <translation>Nessuno</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Ricerca</translation>
+    </message>
+</context>
+<context>
     <name>DgsExportDialog</name>
     <message>
         <location filename="../FileDialogues/DgsDialogue/dgs_export_gui.ui" line="14"/>
@@ -1243,6 +2164,17 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>DgsExportDialogue</name>
+    <message>
+        <source>DGS export</source>
+        <translation>Esportazione DGS</translation>
+    </message>
+    <message>
+        <source>Export to Power Factory</source>
+        <translation>Esporta in Power Factory</translation>
+    </message>
+</context>
+<context>
     <name>DgsImportDialog</name>
     <message>
         <location filename="../FileDialogues/DgsDialogue/dgs_import_gui.ui" line="14"/>
@@ -1260,9 +2192,298 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <translation>Utilizza informazioni dinamiche (se disponibili)</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/DgsDialogue/dgs_import_gui.ui" line="53"/>
+        <location filename="../FileDialogues/DgsDialogue/dgs_import_gui.ui" line="40"/>
+        <source>Dynamic simulation mode</source>
+        <translation>Modalità di simulazione dinamica</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/DgsDialogue/dgs_import_gui.ui" line="63"/>
         <source>Import</source>
         <translation>Importare</translation>
+    </message>
+</context>
+<context>
+    <name>DgsImportDialogue</name>
+    <message>
+        <source>DGS import</source>
+        <translation>Importazione DGS</translation>
+    </message>
+    <message>
+        <source>EMT</source>
+        <translation>EMT</translation>
+    </message>
+    <message>
+        <source>RMS</source>
+        <translation>RMS</translation>
+    </message>
+</context>
+<context>
+    <name>DiagramBusSelectorDialogue</name>
+    <message>
+        <source>Bus selection by diagram</source>
+        <translation>Selezione bus dal diagramma</translation>
+    </message>
+    <message>
+        <source>Select</source>
+        <translation>Selezionare</translation>
+    </message>
+</context>
+<context>
+    <name>DiagramScene</name>
+    <message>
+        <source>Block info</source>
+        <translation>Informazioni sul blocco</translation>
+    </message>
+    <message>
+        <source>Edit block</source>
+        <translation type="vanished">Modifica blocco</translation>
+    </message>
+    <message>
+        <source>Change Color</source>
+        <translation>Cambiare colore</translation>
+    </message>
+    <message>
+        <source>Change Name</source>
+        <translation>Cambiare Nome</translation>
+    </message>
+    <message>
+        <source>Change Variable Name</source>
+        <translation>Cambia Nome Variabile</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicato</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Modificare</translation>
+    </message>
+    <message>
+        <source>Open internals</source>
+        <translation>Aprire interni</translation>
+    </message>
+    <message>
+        <source>Properties</source>
+        <translation>Proprietà</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Rimuovere</translation>
+    </message>
+</context>
+<context>
+    <name>DiagramsMain</name>
+    <message>
+        <source>Are you sure that you want to try an automatic layout?</source>
+        <translation>Sei sicuro di voler provare un layout automatico?</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicato</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
+    <message>
+        <source>New map</source>
+        <translation>Nuova mappa</translation>
+    </message>
+    <message>
+        <source>New schematic</source>
+        <translation>Nuovo schema</translation>
+    </message>
+    <message>
+        <source>New schematic from selection</source>
+        <translation>Nuovo schema dalla selezione</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Rimuovere</translation>
+    </message>
+    <message>
+        <source>Save image file</source>
+        <translation>Salva file immagine</translation>
+    </message>
+    <message>
+        <source>Save video file</source>
+        <translation>Salva file video</translation>
+    </message>
+    <message>
+        <source>Type to search in the current diagram</source>
+        <translation>Digitare per cercare nel diagramma corrente</translation>
+    </message>
+    <message>
+        <source>Add selected to contingency</source>
+        <translation>Aggiungi selezionati a contingenza</translation>
+    </message>
+    <message>
+        <source>Add selected to investment</source>
+        <translation>Aggiungi selezionati a investimento</translation>
+    </message>
+    <message>
+        <source>Add selected to remedial action</source>
+        <translation>Aggiungi selezionati ad azione correttiva</translation>
+    </message>
+    <message>
+        <source>All buses will be positioned to a 2D plane projection of their latitude and longitude. This updates the current diagram and the stored bus x, y, so diagrams created afterwards use the new positions. Are you sure of this?</source>
+        <translation>Tutti gli autobus verranno posizionati in una proiezione su piano 2D della loro latitudine e longitudine. Ciò aggiorna il diagramma corrente e le coordinate x, y salvate degli autobus, in modo che i diagrammi creati successivamente utilizzino le nuove posizioni. Sei sicuro di questo?</translation>
+    </message>
+    <message>
+        <source>Choose some elements from the schematic</source>
+        <translation>Scegli alcuni elementi dallo schema</translation>
+    </message>
+    <message>
+        <source>Consolidate diagram coordinates into the DB</source>
+        <translation>Consolidare le coordinate del diagramma nel DB</translation>
+    </message>
+    <message>
+        <source>Duplicate diagram</source>
+        <translation>Duplicare diagramma</translation>
+    </message>
+    <message>
+        <source>Fix buses locations</source>
+        <translation>Fissare le posizioni degli autobus</translation>
+    </message>
+    <message>
+        <source>New schematic from substation</source>
+        <translation>Nuovo schema da sottostazione</translation>
+    </message>
+    <message>
+        <source>No EMT Events Group</source>
+        <translation type="vanished">Nessun gruppo eventi EMT</translation>
+    </message>
+    <message>
+        <source>No EMT Events Group found, please create one before adding an event.</source>
+        <translation type="vanished">Nessun gruppo eventi EMT trovato, si prega di crearne uno prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>No RMS Events Group</source>
+        <translation type="vanished">Nessun gruppo eventi RMS</translation>
+    </message>
+    <message>
+        <source>No RMS Events Group found, please create one before adding an event.</source>
+        <translation type="vanished">Nessun gruppo eventi RMS trovato, si prega di crearne uno prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>No buses were found associated with the substation {substation_name}</source>
+        <translation>Nessun autobus trovato associato alla sottostazione {substation_name}</translation>
+    </message>
+    <message>
+        <source>No buses were found associated with the substations</source>
+        <translation>Nessun autobus trovato associato alle sottostazioni</translation>
+    </message>
+    <message>
+        <source>No substations selected. Please select some substations</source>
+        <translation>Nessuna sottostazione selezionata. Si prega di selezionare alcune sottostazioni</translation>
+    </message>
+    <message>
+        <source>Remove diagram</source>
+        <translation>Rimuovi diagramma</translation>
+    </message>
+    <message>
+        <source>Reset diagram coordinates using the DB</source>
+        <translation>Resettare le coordinate del diagramma utilizzando il DB</translation>
+    </message>
+    <message>
+        <source>Rotate diagram</source>
+        <translation>Ruota diagramma</translation>
+    </message>
+    <message>
+        <source>Rotation angle (degrees)</source>
+        <translation>Angolo di rotazione (gradi)</translation>
+    </message>
+    <message>
+        <source>Select a valid diagram</source>
+        <translation>Seleziona un diagramma valido</translation>
+    </message>
+    <message>
+        <source>Select some cells</source>
+        <translation>Seleziona alcune celle</translation>
+    </message>
+    <message>
+        <source>Select some elements in the schematic first</source>
+        <translation>Seleziona prima alcuni elementi nello schema</translation>
+    </message>
+    <message>
+        <source>Select the expansion level</source>
+        <translation>Seleziona il livello di espansione</translation>
+    </message>
+    <message>
+        <source>Set the expansion level from {bus_name}</source>
+        <translation>Imposta il livello di espansione da {bus_name}</translation>
+    </message>
+    <message>
+        <source>Substations schematic</source>
+        <translation>Schema delle sottostazioni</translation>
+    </message>
+    <message>
+        <source>The current diagram cannot be automatically layed out</source>
+        <translation>Il diagramma corrente non può essere disposto automaticamente</translation>
+    </message>
+    <message>
+        <source>The diagram coordinates will be reset to its database values. Do you want to do this?</source>
+        <translation>Le coordinate del diagramma verranno reimpostate ai valori del database. Desidera farlo?</translation>
+    </message>
+    <message>
+        <source>The diagram coordinates will be saved into the corresponding properties of the database, overwriting the existing ones. Do you want to do this?</source>
+        <translation>Le coordinate del diagramma verranno salvate nelle proprietà corrispondenti del database, sovrascrivendo quelle esistenti. Desidera farlo?</translation>
+    </message>
+    <message>
+        <source>Unrecognized option {option_name}</source>
+        <translation>Opzione non riconosciuta {option_name}</translation>
+    </message>
+    <message>
+        <source>Vicinity diagram</source>
+        <translation>Diagramma di vicinato</translation>
+    </message>
+    <message>
+        <source> only has values for the snapshot</source>
+        <translation>ha valori solo per lo snapshot</translation>
+    </message>
+    <message>
+        <source>No NTC time series values to show :/</source>
+        <translation>Nessun valore serie temporale NTC da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No OPF time series values to show :/</source>
+        <translation>Nessun valore serie temporale OPF da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No contingencies to show :/</source>
+        <translation>Nessuna contingenza da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No contingency time series values to show :/</source>
+        <translation>Nessun valore serie temporale di contingenza da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No continuation power flow values to show :/</source>
+        <translation>Nessun valore di flusso di potenza di continuazione da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No linear analysis time series values to show :/</source>
+        <translation>Nessun valore serie temporale di analisi lineare da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No nodal capacity time series values to show :/</source>
+        <translation>Nessun valore serie temporale di capacità nodale da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No stochastic power flow values to show :/</source>
+        <translation>Nessun valore di flusso di potenza stocastico da mostrare :/</translation>
+    </message>
+    <message>
+        <source>No time series values to show :/</source>
+        <translation>Nessun valore serie temporale da mostrare :/</translation>
+    </message>
+    <message>
+        <source>does not have values for the snapshot</source>
+        <translation>non ha valori per lo snapshot</translation>
+    </message>
+    <message>
+        <source>only has values for the snapshot</source>
+        <translation>ha valori solo per lo snapshot</translation>
     </message>
 </context>
 <context>
@@ -1318,68 +2539,97 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <translation>Definizione per punti dati</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="72"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="131"/>
         <source>Bus longitude</source>
         <translation>Longitudine dell&apos;autobus</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="82"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="206"/>
         <source>Load file</source>
         <translation>Carica file</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="96"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="115"/>
         <location filename="../SubstationDesigner/substation_designer_gui.ui" line="133"/>
         <source>Name</source>
         <translation>Nome</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="116"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="165"/>
         <source>Bus y position</source>
         <translation>Posizione dell&apos;autobus</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="149"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="98"/>
         <location filename="../SubstationDesigner/substation_designer_gui.ui" line="40"/>
         <source>Code</source>
         <translation>Codice</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="156"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="70"/>
+        <source>Buses</source>
+        <translation>Nodi</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="75"/>
+        <source>Substations</source>
+        <translation>Sottostazioni</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="80"/>
+        <source>Injections</source>
+        <translation>Iniezioni</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="108"/>
+        <source>Target</source>
+        <translation>Bersaglio</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="141"/>
+        <source>Also update associated buses latitude and longitude</source>
+        <translation>Aggiorna anche latitudine e longitudine dei nodi associati</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="155"/>
+        <source>Match method:</source>
+        <translation>Metodo di corrispondenza:</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="179"/>
         <source>Bus latitude</source>
         <translation>Latitudine dell&apos;autobus</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="163"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="186"/>
         <source>Bus x position</source>
         <translation>Posizione dell&apos;autobus x</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="170"/>
         <source>Match mathod:</source>
-        <translation>Metodo di abbinamento:</translation>
+        <translation type="vanished">Metodo di abbinamento:</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="184"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="172"/>
         <source>Assigning magnitudes</source>
         <translation>Assegnazione delle grandezze</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="256"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="282"/>
         <location filename="../FileDialogues/ProfilesInput/profiles_from_data_gui.ui" line="390"/>
         <source>Do it!</source>
         <translation>Fallo!</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="262"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="288"/>
         <location filename="../FileDialogues/ProfilesInput/profiles_from_data_gui.ui" line="396"/>
-        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="169"/>
+        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="180"/>
         <location filename="../ProceduralGrid/procedural_grid_ui.ui" line="233"/>
         <source>Accept</source>
         <translation>Accettare</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="273"/>
+        <location filename="../FileDialogues/CoordinatesInput/coordinates_input_gui.ui" line="299"/>
         <source>Match</source>
         <translation>Incontro</translation>
     </message>
@@ -1470,12 +2720,17 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
         <translation>Chiaro</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="159"/>
+        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="69"/>
+        <source>Re-index time</source>
+        <translation>Re-indicizzare il tempo</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="170"/>
         <source>If checked, the objects are match using the code property, otherwise the idtag property is used</source>
         <translation>Se selezionato, gli oggetti vengono abbinati utilizzando la proprietà code, altrimenti viene utilizzata la proprietà idtag</translation>
     </message>
     <message>
-        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="162"/>
+        <location filename="../FileDialogues/ProfilesInput/profiles_from_models_gui.ui" line="173"/>
         <source>Match using code</source>
         <translation>Abbina utilizzando il codice</translation>
     </message>
@@ -1690,101 +2945,1332 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>DynamicBlockEditorGUI</name>
+    <message>
+        <source>Block name already exists</source>
+        <translation>Il nome del blocco esiste già</translation>
+    </message>
+    <message>
+        <source>Block name cannot be empty</source>
+        <translation>Il nome del blocco non può essere vuoto</translation>
+    </message>
+    <message>
+        <source>Block name is invalid</source>
+        <translation>Il nome del blocco non è valido</translation>
+    </message>
+    <message>
+        <source>Change Block Name</source>
+        <translation type="vanished">Cambia Nome Blocco</translation>
+    </message>
+    <message>
+        <source>Change Variable Name</source>
+        <translation>Cambia Nome Variabile</translation>
+    </message>
+    <message>
+        <source>Dynamic Model Editor</source>
+        <translation>Editor Modello Dinamico</translation>
+    </message>
+    <message>
+        <source>Dynamic Model Editor [{mode}]</source>
+        <translation>Editor Modello Dinamico [{mode}]</translation>
+    </message>
+    <message>
+        <source>Library</source>
+        <translation>Biblioteca</translation>
+    </message>
+    <message>
+        <source>Variable name already exists</source>
+        <translation>Il nome della variabile esiste già</translation>
+    </message>
+    <message>
+        <source>Variable name cannot be empty</source>
+        <translation>Il nome della variabile non può essere vuoto</translation>
+    </message>
+    <message>
+        <source>Variable name is invalid</source>
+        <translation>Il nome della variabile non è valido</translation>
+    </message>
+    <message>
+        <source>Delete all</source>
+        <translation type="vanished">Elimina tutto</translation>
+    </message>
+    <message>
+        <source>Inspect Model</source>
+        <translation type="vanished">Ispeziona Modello</translation>
+    </message>
+    <message>
+        <source>There are unapplied changes. Do you want to close without applying them?</source>
+        <translation>Ci sono modifiche non applicate. Desidera chiudere senza applicarle?</translation>
+    </message>
+    <message>
+        <source>Unsaved changes</source>
+        <translation>Modifiche non salvate</translation>
+    </message>
+    <message>
+        <source>You are going to delete the complete model and start from scratch. Are you sure?</source>
+        <translation type="vanished">Stai per eliminare l&apos;intero modello e ricominciare da zero. Sei sicuro?</translation>
+    </message>
+    <message>
+        <source>Block info</source>
+        <translation>Informazioni sul blocco</translation>
+    </message>
+    <message>
+        <source>No online catalogue documentation is available for this custom block.</source>
+        <translation>Non è disponibile documentazione catalogo online per questo blocco personalizzato.</translation>
+    </message>
+    <message>
+        <source>The online block documentation could not be opened.</source>
+        <translation>Non è stato possibile aprire la documentazione online del blocco.</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicBlockPropertiesDialog</name>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="14"/>
+        <source>Block properties</source>
+        <translation>Proprietà blocco</translation>
+    </message>
+    <message>
+        <source>Apply changes</source>
+        <translation type="vanished">Applica modifiche</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Vicino</translation>
+    </message>
+    <message>
+        <source>1 / {count}</source>
+        <translation>1 / {count}</translation>
+    </message>
+    <message>
+        <source>Add symbol</source>
+        <translation type="vanished">Aggiungi simbolo</translation>
+    </message>
+    <message>
+        <source>Add symbol to selected block</source>
+        <translation type="vanished">Aggiungi simbolo al blocco selezionato</translation>
+    </message>
+    <message>
+        <source>Advanced runtime logic</source>
+        <translation type="vanished">Logica di esecuzione avanzata</translation>
+    </message>
+    <message>
+        <source>Apply structural settings separately from DAE-code or symbol-interface changes.</source>
+        <translation>Applica le impostazioni strutturali separatamente dai cambiamenti del codice DAE o dell&apos;interfaccia simbolo.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="405"/>
+        <source>Block / equation group</source>
+        <translation>Gruppo blocco / equazione</translation>
+    </message>
+    <message>
+        <source>Block configuration</source>
+        <translation type="vanished">Configurazione blocco</translation>
+    </message>
+    <message>
+        <source>Block info</source>
+        <translation type="vanished">Info blocco</translation>
+    </message>
+    <message>
+        <source>Block properties - {name}</source>
+        <translation>Proprietà blocco - {name}</translation>
+    </message>
+    <message>
+        <source>Block structure rebuilt with the selected settings.</source>
+        <translation>La struttura del blocco è ricostruita con le impostazioni selezionate.</translation>
+    </message>
+    <message>
+        <source>Catalogue type</source>
+        <translation type="vanished">Tipo catalogo</translation>
+    </message>
+    <message>
+        <source>Changes applied to the editor working copy.</source>
+        <translation>Cambiamenti applicati alla copia di lavoro dell&apos;editor.</translation>
+    </message>
+    <message>
+        <source>Changes applied. Advanced inequalities/discrete/boolean logic was preserved unchanged.</source>
+        <translation>Cambiamenti applicati. Le disuguaglianze/logiche discrete/booleane avanzate sono state preservate senza modifiche.</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation type="vanished">Chiaro</translation>
+    </message>
+    <message>
+        <source>Create derivative variable</source>
+        <translation type="vanished">Crea variabile derivata</translation>
+    </message>
+    <message>
+        <source>DAE and runtime-logic changes applied to the editor working copy.</source>
+        <translation>Cambiamenti DAE e logica di runtime applicati alla copia di lavoro dell&apos;editor.</translation>
+    </message>
+    <message>
+        <source>DAE code is valid.</source>
+        <translation type="vanished">Il codice DAE è valido.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="134"/>
+        <source>DAE model</source>
+        <translation>Modello DAE</translation>
+    </message>
+    <message>
+        <source>DAE validation failed at line {line}: {message}</source>
+        <translation>Validazione DAE fallita alla riga {line}: {message}</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Eliminare</translation>
+    </message>
+    <message>
+        <source>Download rendered PDF</source>
+        <translation type="vanished">Scarica PDF renderizzato</translation>
+    </message>
+    <message>
+        <source>Enter a name</source>
+        <translation type="vanished">Inserisci un nome</translation>
+    </message>
+    <message>
+        <source>Enter a valid Python symbol name.</source>
+        <translation>Inserisci un nome simbolo Python valido.</translation>
+    </message>
+    <message>
+        <source>Equation PDF created: {path}</source>
+        <translation>PDF equazione creato: {path}</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="188"/>
+        <source>Equation owner</source>
+        <translation>Proprietario equazione</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="254"/>
+        <source>&lt;&lt;</source>
+        <translation>&lt;&lt;</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="264"/>
+        <source>&gt;&gt;</source>
+        <translation>&gt;&gt;</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="292"/>
+        <source>LaTeX rendering</source>
+        <translation>Rendering LaTeX</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="333"/>
+        <source>Select None</source>
+        <translation>Nessuna selezione</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="360"/>
+        <source>Save redered PDF</source>
+        <translation>Salva PDF renderizzato</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="389"/>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="410"/>
+        <source>Equations</source>
+        <translation>Equazioni</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="427"/>
+        <source>LaTex source</source>
+        <translation>Sorgente LaTeX</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="529"/>
+        <source>Accept changes</source>
+        <translation>Accetta modifiche</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="40"/>
+        <source>General options</source>
+        <translation>Opzioni generali</translation>
+    </message>
+    <message>
+        <source>Generated structure</source>
+        <translation type="vanished">Struttura generata</translation>
+    </message>
+    <message>
+        <source>Initial numeric value</source>
+        <translation type="vanished">Valore numerico iniziale</translation>
+    </message>
+    <message>
+        <source>Inputs</source>
+        <translation type="vanished">Input</translation>
+    </message>
+    <message>
+        <source>Invalid DAE code.</source>
+        <translation>Codice DAE non valido.</translation>
+    </message>
+    <message>
+        <source>LaTeX</source>
+        <translation type="vanished">LaTeX</translation>
+    </message>
+    <message>
+        <source>LaTeX source</source>
+        <translation type="vanished">Sorgente LaTeX</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="vanished">Nome</translation>
+    </message>
+    <message>
+        <source>New symbol name</source>
+        <translation type="vanished">Nuovo nome simbolo</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation type="vanished">Avanti</translation>
+    </message>
+    <message>
+        <source>No matches</source>
+        <translation>Nessun corrispettivo</translation>
+    </message>
+    <message>
+        <source>No online catalogue documentation is available for this custom block.</source>
+        <translation type="vanished">Nessuna documentazione catalogo online disponibile per questo blocco personalizzato.</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Nessuno</translation>
+    </message>
+    <message>
+        <source>Nothing was applied: {message}</source>
+        <translation>Nessuna cosa è stata applicata: {message}</translation>
+    </message>
+    <message>
+        <source>Online documentation</source>
+        <translation type="vanished">Documentazione in linea</translation>
+    </message>
+    <message>
+        <source>Opens the documentation for the original predefined library block. If this block has been modified in the editor, its current equations, symbols, parameters, or runtime logic may differ from the online documentation.</source>
+        <translation type="vanished">Apri la documentazione del blocco libreria predefinito originale. Se questo blocco è stato modificato nell&apos;editor, le sue equazioni, simboli, parametri o logica di runtime attuali potrebbero differire dalla documentazione online.</translation>
+    </message>
+    <message>
+        <source>Output</source>
+        <translation type="vanished">Output</translation>
+    </message>
+    <message>
+        <source>Outputs</source>
+        <translation type="vanished">Output</translation>
+    </message>
+    <message>
+        <source>Owner block</source>
+        <translation type="vanished">Blocco proprietario</translation>
+    </message>
+    <message>
+        <source>PDF documents (*.pdf)</source>
+        <translation>Documenti PDF (*.pdf)</translation>
+    </message>
+    <message>
+        <source>Parameter whose value may change during the simulation.</source>
+        <translation>Parametro il cui valore può cambiare durante la simulazione.</translation>
+    </message>
+    <message>
+        <source>Parameters</source>
+        <translation type="vanished">Parametri</translation>
+    </message>
+    <message>
+        <source>Power-flow variable</source>
+        <translation type="vanished">Variabile di flusso di potenza</translation>
+    </message>
+    <message>
+        <source>Power-flow variable used to initialize this dynamic variable.</source>
+        <translation type="vanished">Variabile di flusso di potenza utilizzata per inizializzare questa variabile dinamica.</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation type="vanished">Precedente</translation>
+    </message>
+    <message>
+        <source>Python code</source>
+        <translation type="vanished">Codice Python</translation>
+    </message>
+    <message>
+        <source>Rename...</source>
+        <translation type="vanished">Rinomina...</translation>
+    </message>
+    <message>
+        <source>Runtime logic</source>
+        <translation type="vanished">Logica di esecuzione</translation>
+    </message>
+    <message>
+        <source>Save dynamic equations PDF</source>
+        <translation>Salva PDF equazioni dinamiche</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="241"/>
+        <source>Search Python code...</source>
+        <translation>Cerca codice Python...</translation>
+    </message>
+    <message>
+        <source>Search parameters...</source>
+        <translation type="vanished">Cerca parametri...</translation>
+    </message>
+    <message>
+        <source>Search variables...</source>
+        <translation type="vanished">Cerca variabili...</translation>
+    </message>
+    <message>
+        <source>Select a valid owner block.</source>
+        <translation>Seleziona un blocco proprietario valido.</translation>
+    </message>
+    <message>
+        <source>Select a valid symbol type.</source>
+        <translation>Seleziona un tipo di simbolo valido.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="319"/>
+        <source>Select all</source>
+        <translation>Seleziona tutto</translation>
+    </message>
+    <message>
+        <source>Select at least one non-empty equation group.</source>
+        <translation>Seleziona almeno un gruppo di equazioni non vuoto.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="439"/>
+        <source>Select equation groups to generate copyable LaTeX source.</source>
+        <translation>Seleziona i gruppi di equazioni per generare sorgente LaTeX copiabile.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="395"/>
+        <source>Select the equation groups to include. Each internal block and each DAE section can be selected independently.</source>
+        <translation>Seleziona i gruppi di equazioni da includere. Ogni blocco interno e ogni sezione DAE possono essere selezionati indipendentemente.</translation>
+    </message>
+    <message>
+        <source>Special settings</source>
+        <translation type="vanished">Impostazioni speciali</translation>
+    </message>
+    <message>
+        <source>Static device mapping</source>
+        <translation type="vanished">Mappatura dispositivi statici</translation>
+    </message>
+    <message>
+        <source>Symbol category</source>
+        <translation type="vanished">Categoria simbolo</translation>
+    </message>
+    <message>
+        <source>The PDF could not be created: {message}</source>
+        <translation>Impossibile creare il PDF: {message}</translation>
+    </message>
+    <message>
+        <source>The online block documentation could not be opened in the system browser.</source>
+        <translation type="vanished">Non è stato possibile aprire la documentazione del blocco online nel browser di sistema.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="457"/>
+        <source>These settings contain structured data used to regenerate the block. Edit sequences with valid Python tuple/list syntax.</source>
+        <translation>Queste impostazioni contengono dati strutturati utilizzati per rigenerare il blocco. Modifica le sequenze con sintassi valida di tupla/lista Python.</translation>
+    </message>
+    <message>
+        <source>This block has no safe structural rebuild adapter.</source>
+        <translation>Questo blocco non ha un adattatore di ricostruzione strutturale sicuro.</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="vanished">Tipo</translation>
+    </message>
+    <message>
+        <source>Validate all code</source>
+        <translation type="vanished">Valida tutto il codice</translation>
+    </message>
+    <message>
+        <source>Variable renamed to &apos;{name}&apos;.</source>
+        <translation>Variabile rinominata in &apos;{name}&apos;.</translation>
+    </message>
+    <message>
+        <source>Variables</source>
+        <translation type="vanished">Variabili</translation>
+    </message>
+    <message>
+        <source>{active} / {count}</source>
+        <translation>{active} / {count}</translation>
+    </message>
+    <message>
+        <source>+ Add procedural logic</source>
+        <translation type="vanished">+ Aggiungi logica procedurale</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="161"/>
+        <source>Add one procedural behavior to the active equation owner&apos;s Python code.</source>
+        <translation>Aggiungi un comportamento procedurale al codice Python del proprietario dell&apos;equazione attiva.</translation>
+    </message>
+    <message>
+        <source>DAE editor</source>
+        <translation type="vanished">Editor DAE</translation>
+    </message>
+    <message>
+        <source>Documentation</source>
+        <translation type="vanished">Documentazione</translation>
+    </message>
+    <message>
+        <source>Model code is valid.</source>
+        <translation>Il codice del modello è valido.</translation>
+    </message>
+    <message>
+        <source>Model is valid. Warning: {message}</source>
+        <translation>Il modello è valido. Attenzione: {message}</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Rinomina</translation>
+    </message>
+    <message>
+        <source>Retained mode</source>
+        <translation>Modalità mantenuta</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="82"/>
+        <source>Search properties...</source>
+        <translation>Cerca proprietà...</translation>
+    </message>
+    <message>
+        <source>Select a valid procedural logic type.</source>
+        <translation>Seleziona un tipo di logica procedurale valido.</translation>
+    </message>
+    <message>
+        <source>Show or hide Python code and LaTeX rendering tool</source>
+        <translation type="vanished">Mostra o nascondi strumento di rendering codice Python e LaTeX</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="451"/>
+        <source>Special configuration</source>
+        <translation>Configurazione speciale</translation>
+    </message>
+    <message>
+        <source>The retained mode owner has no Python-code buffer.</source>
+        <translation>Il proprietario in modalità mantenuta non ha un buffer codice Python.</translation>
+    </message>
+    <message>
+        <source>The selected owner has no Python-code buffer.</source>
+        <translation>Il proprietario selezionato non ha un buffer codice Python.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="502"/>
+        <source>Validate model</source>
+        <translation>Valida modello</translation>
+    </message>
+    <message>
+        <source>Block Properties contains changes that have not been applied. Discard those changes and close the editor?</source>
+        <translation>Le Proprietà del blocco contengono modifiche che non sono state applicate. Scartare queste modifiche e chiudere l&apos;editor?</translation>
+    </message>
+    <message>
+        <source>Unsaved Block Properties changes</source>
+        <translation>Modifiche alle Proprietà del blocco non salvate</translation>
+    </message>
+    <message>
+        <source>Add parameter...</source>
+        <translation>Aggiungi parametro...</translation>
+    </message>
+    <message>
+        <source>Add retained mode...</source>
+        <translation>Aggiungi modalità mantenuta...</translation>
+    </message>
+    <message>
+        <source>Add variable...</source>
+        <translation>Aggiungi variabile...</translation>
+    </message>
+    <message>
+        <source>Nothing was added: {message}</source>
+        <translation>Nessuna cosa è stata aggiunta: {message}</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicDeviceTreeWidget</name>
+    <message>
+        <source>EMT editor</source>
+        <translation>Editor EMT</translation>
+    </message>
+    <message>
+        <source>EMT events</source>
+        <translation>Eventi EMT</translation>
+    </message>
+    <message>
+        <source>RMS editor</source>
+        <translation>Editor RMS</translation>
+    </message>
+    <message>
+        <source>RMS events</source>
+        <translation>Eventi RMS</translation>
+    </message>
+    <message>
+        <source>Type to search the device</source>
+        <translation>Digitare per cercare il dispositivo</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEditorAddButton</name>
+    <message>
+        <source>Open another Dynamic Editor</source>
+        <translation>Apri un altro Editor Dinamico</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEditorGraphics</name>
+    <message>
+        <source>{direction} {index}: {name}</source>
+        <translation>{direction} {index}: {name}</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEditorPickerDialog</name>
+    <message>
+        <source>Mode</source>
+        <translation>Modalità</translation>
+    </message>
+    <message>
+        <source>Modes</source>
+        <translation>Modalità</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>Apri</translation>
+    </message>
+    <message>
+        <source>Open the current block in the other mode.</source>
+        <translation>Apri il blocco corrente nell&apos;altro modo.</translation>
+    </message>
+    <message>
+        <source>Open the current block in {mode}.</source>
+        <translation>Apri il blocco corrente in {mode}.</translation>
+    </message>
+    <message>
+        <source>Open {mode}</source>
+        <translation>Apri {mode}</translation>
+    </message>
+    <message>
+        <source>Quick Open</source>
+        <translation>Apertura rapida</translation>
+    </message>
+    <message>
+        <source>Search dynamic editors</source>
+        <translation>Cerca editor dinamici</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEditorWorkspaceSession</name>
+    <message>
+        <source>Invalid dynamic events</source>
+        <translation type="vanished">Eventi dinamici non validi</translation>
+    </message>
+    <message>
+        <source>Save the changes before closing the last events tab?</source>
+        <translation type="vanished">Salvare le modifiche prima di chiudere l&apos;ultima scheda eventi?</translation>
+    </message>
+    <message>
+        <source>The dynamic events contain unsaved changes.</source>
+        <translation type="vanished">Gli eventi dinamici contengono modifiche non salvate.</translation>
+    </message>
+    <message>
+        <source>Unsaved dynamic events</source>
+        <translation type="vanished">Eventi dinamici non salvati</translation>
+    </message>
+</context>
+<context>
     <name>DynamicEditorWorkspaceWindow</name>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="14"/>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="14"/>
         <source>Dynamic Editor Workspace</source>
         <translation>Area di lavoro dell&apos;editor dinamico</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="79"/>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="79"/>
         <source>Type to search the device</source>
         <translation>Digitare per cercare il dispositivo</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="126"/>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="126"/>
         <source>toolBar</source>
         <translation>toolBar</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="157"/>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="168"/>
+        <source>RMS Editor</source>
+        <translation>Redattore RMS</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="180"/>
+        <source>EMT Editor</source>
+        <translation>EMT Redattore</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="192"/>
+        <source>RMS Events</source>
+        <translation>Eventi RMS</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="204"/>
+        <source>EMT Events</source>
+        <translation>Eventi EMT</translation>
+    </message>
+    <message>
         <source>CheckModel</source>
-        <translation>CheckModel</translation>
+        <translation type="vanished">CheckModel</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="160"/>
         <source>Inspect model</source>
-        <translation>Ispezionare il modello</translation>
+        <translation type="vanished">Ispezionare il modello</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="172"/>
         <source>Center</source>
-        <translation>Centro</translation>
+        <translation type="vanished">Centro</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="184"/>
         <source>Zoom in</source>
-        <translation>Ingrandisci</translation>
+        <translation type="vanished">Ingrandisci</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="196"/>
         <source>Zoom out</source>
-        <translation>Rimpicciolisci</translation>
+        <translation type="vanished">Rimpicciolisci</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="211"/>
         <source>Delete all</source>
-        <translation>Elimina tutto</translation>
+        <translation type="vanished">Elimina tutto</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="214"/>
         <source>Delete all blocks to start from scratch.</source>
-        <translation>Elimina tutti i blocchi per ricominciare da zero.</translation>
+        <translation type="vanished">Elimina tutti i blocchi per ricominciare da zero.</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="226"/>
         <source>Validate</source>
-        <translation>Convalidare</translation>
+        <translation type="vanished">Convalidare</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/dynamic_editor_workspace.ui" line="238"/>
+        <location filename="../DynamicModelEditor/Workspace/dynamic_editor_workspace.ui" line="156"/>
         <source>view tree</source>
         <translation>visualizzare l&apos;albero</translation>
     </message>
+    <message>
+        <source>Dynamic Editor - {title}</source>
+        <translation>Editor Dinamico - {title}</translation>
+    </message>
+    <message>
+        <source>Open EMT editor</source>
+        <translation type="vanished">Apri l&apos;editor EMT</translation>
+    </message>
+    <message>
+        <source>Open RMS editor</source>
+        <translation type="vanished">Apri l&apos;editor RMS</translation>
+    </message>
 </context>
 <context>
-    <name>DynamicsResultsHandler</name>
+    <name>DynamicEventDialogue</name>
     <message>
-        <source>X-Y plot slot</source>
-        <translation type="vanished">Slot di trama X-Y</translation>
+        <source>Dynamic Event Editor</source>
+        <translation type="vanished">Editor eventi dinamici</translation>
     </message>
     <message>
-        <source>Choose whether to place the dropped signal on the X axis or Y axis.</source>
-        <translation type="vanished">Scegli se posizionare il segnale rilasciato sull&apos;asse X o sull&apos;asse Y.</translation>
+        <source>&lt;b&gt;Target device:&lt;/b&gt;</source>
+        <translation type="vanished">&lt;b&gt;Dispositivo di destinazione:&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>X axis</source>
-        <translation type="vanished">Asse X</translation>
+        <source>➕ New Event Group</source>
+        <translation type="vanished">➕ Nuovo gruppo evento</translation>
     </message>
     <message>
-        <source>Y axis</source>
-        <translation type="vanished">Asse Y</translation>
+        <source>➕ Add New Event</source>
+        <translation type="vanished">➕ Aggiungi nuovo evento</translation>
+    </message>
+    <message>
+        <source>❌ Remove Selected Rows</source>
+        <translation type="vanished">❌ Rimuovi Righe Selezionate</translation>
+    </message>
+    <message>
+        <source>Switch Sequence Wizard</source>
+        <translation type="vanished">Passaggio alla procedura guidata di sequenza</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventEditor</name>
+    <message>
+        <source>&lt;b&gt;Target device:&lt;/b&gt;</source>
+        <translation type="vanished">&lt;b&gt;Dispositivo di destinazione:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Align Step</source>
+        <translation type="vanished">Allinea Step</translation>
     </message>
     <message>
         <source>Cancel</source>
         <translation type="vanished">Cancellare</translation>
     </message>
     <message>
+        <source>Dynamic Event Editor</source>
+        <translation type="vanished">Editor eventi dinamici</translation>
+    </message>
+    <message>
+        <source>EMT Event Editor</source>
+        <translation type="vanished">Editor Eventi EMT</translation>
+    </message>
+    <message>
+        <source>EMT group Created</source>
+        <translation type="vanished">Gruppo EMT creato</translation>
+    </message>
+    <message>
+        <source>End Time</source>
+        <translation type="vanished">Tempo di fine</translation>
+    </message>
+    <message>
+        <source>Group</source>
+        <translation type="vanished">Gruppo</translation>
+    </message>
+    <message>
+        <source>Group: {group_name}</source>
+        <translation type="vanished">Gruppo: {group_name}</translation>
+    </message>
+    <message>
+        <source>Invalid Input</source>
+        <translation type="vanished">Input non valido</translation>
+    </message>
+    <message>
+        <source>Missing fields</source>
+        <translation type="vanished">Campi mancanti</translation>
+    </message>
+    <message>
+        <source>New Value</source>
+        <translation type="vanished">Nuovo valore</translation>
+    </message>
+    <message>
+        <source>New group name</source>
+        <translation type="vanished">Nome gruppo nuovo</translation>
+    </message>
+    <message>
+        <source>New row {row_number}</source>
+        <translation type="vanished">Riga {row_number} nuova</translation>
+    </message>
+    <message>
+        <source>No EMT Events Group</source>
+        <translation>Nessun gruppo eventi EMT</translation>
+    </message>
+    <message>
+        <source>No EMT Events Group found, please create one before adding an event.</source>
+        <translation type="vanished">Nessun gruppo eventi EMT trovato, si prega di crearne uno prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>No Events</source>
+        <translation type="vanished">Nessun evento</translation>
+    </message>
+    <message>
+        <source>No RMS Events Group</source>
+        <translation>Nessun gruppo eventi RMS</translation>
+    </message>
+    <message>
+        <source>No RMS Events Group found, please create one before adding an event.</source>
+        <translation type="vanished">Nessun gruppo eventi RMS trovato, si prega di crearne uno prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>No Rows Selected</source>
+        <translation type="vanished">Nessuna riga selezionata</translation>
+    </message>
+    <message>
+        <source>No switch EMT mode parameter is available in this device.</source>
+        <translation type="vanished">Nessun parametro di modalità EMT switch è disponibile su questo dispositivo.</translation>
+    </message>
+    <message>
+        <source>Overlapping Events</source>
+        <translation type="vanished">Eventi sovrapposti</translation>
+    </message>
+    <message>
+        <source>Parameter</source>
+        <translation type="vanished">Parametro</translation>
+    </message>
+    <message>
+        <source>Please add at least one event before confirming.</source>
+        <translation type="vanished">Si prega di aggiungere almeno un evento prima di confermare.</translation>
+    </message>
+    <message>
+        <source>Please check at least one row to remove.</source>
+        <translation type="vanished">Si prega di selezionare almeno una riga per rimuovere.</translation>
+    </message>
+    <message>
+        <source>RMS Event Editor</source>
+        <translation type="vanished">Editor Eventi RMS</translation>
+    </message>
+    <message>
+        <source>RMS group Created</source>
+        <translation type="vanished">Gruppo RMS creato</translation>
+    </message>
+    <message>
+        <source>Ramp</source>
+        <translation type="vanished">Rampa</translation>
+    </message>
+    <message>
+        <source>Row {row_number}: {message}</source>
+        <translation type="vanished">Riga {row_number}: {message}</translation>
+    </message>
+    <message>
+        <source>Some events are overlapped and cannot be applied.</source>
+        <translation type="vanished">Alcuni eventi sono sovrapposti e non possono essere applicati.</translation>
+    </message>
+    <message>
+        <source>Step</source>
+        <translation type="vanished">Step</translation>
+    </message>
+    <message>
+        <source>Switch Sequence</source>
+        <translation type="vanished">Sequenza di commutazione</translation>
+    </message>
+    <message>
+        <source>Switch Sequence Wizard</source>
+        <translation type="vanished">Passaggio alla procedura guidata di sequenza</translation>
+    </message>
+    <message>
+        <source>Target device:</source>
+        <translation type="vanished">Dispositivo di destinazione:</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation type="vanished">Tempo</translation>
+    </message>
+    <message>
+        <source>Transition</source>
+        <translation type="vanished">Transizione</translation>
+    </message>
+    <message>
+        <source>group has invalid type</source>
+        <translation type="vanished">il gruppo ha un tipo non valido</translation>
+    </message>
+    <message>
+        <source>parameter must be Var</source>
+        <translation type="vanished">il parametro deve essere Var</translation>
+    </message>
+    <message>
+        <source>transition_type must be DynamicEventTransitionType</source>
+        <translation type="vanished">transition_type deve essere DynamicEventTransitionType</translation>
+    </message>
+    <message>
+        <source>{origin}: {transition}, parameter={parameter}, time={time:.4f} s, end_time={end_time:.4f} s, value={value:.6f}</source>
+        <translation type="vanished">{origin}: {transition}, parametro={parameter}, tempo={time:.4f} s, tempo_fine={end_time:.4f} s, valore={value:.6f}</translation>
+    </message>
+    <message>
+        <source>{origin}: {transition}, parameter={parameter}, time={time:.4f} s, value={value:.6f}</source>
+        <translation type="vanished">{origin}: {transition}, parametro={parameter}, tempo={time:.4f} s, valore={value:.6f}</translation>
+    </message>
+    <message>
+        <source>{prefix}: {group_name}</source>
+        <translation>{prefix}: {group_name}</translation>
+    </message>
+    <message>
+        <source>✅ Add Events</source>
+        <translation type="vanished">✅ Aggiungi Eventi</translation>
+    </message>
+    <message>
+        <source>❌ Remove Selected Rows</source>
+        <translation type="vanished">❌ Rimuovi Righe Selezionate</translation>
+    </message>
+    <message>
+        <source>➕ Add New Event</source>
+        <translation type="vanished">➕ Aggiungi nuovo evento</translation>
+    </message>
+    <message>
+        <source>➕ New Event Group</source>
+        <translation type="vanished">➕ Nuovo gruppo evento</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventGroupsTreeModel</name>
+    <message>
+        <source>Event groups</source>
+        <translation>Gruppi eventi</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsDraftSession</name>
+    <message>
+        <source>An event and its events group use different simulation modes.</source>
+        <translation type="vanished">Un evento e il suo gruppo di eventi utilizzano modalità di simulazione diverse.</translation>
+    </message>
+    <message>
+        <source>An event has no target device.</source>
+        <translation type="vanished">Un evento non ha dispositivo di destinazione.</translation>
+    </message>
+    <message>
+        <source>An event in device &apos;{device}&apos; has no valid events group.</source>
+        <translation type="vanished">Un evento nel dispositivo &apos;{device}&apos; non ha un gruppo eventi valido.</translation>
+    </message>
+    <message>
+        <source>An event in device &apos;{device}&apos; has no valid parameter.</source>
+        <translation type="vanished">Un evento nel dispositivo &apos;{device}&apos; non ha un parametro valido.</translation>
+    </message>
+    <message>
+        <source>An events group has an empty name.</source>
+        <translation type="vanished">Un gruppo eventi ha un nome vuoto.</translation>
+    </message>
+    <message>
+        <source>Events for parameter &apos;{parameter}&apos; overlap in group &apos;{group}&apos; and device &apos;{device}&apos;.</source>
+        <translation type="vanished">Gli eventi per il parametro &apos;{parameter}&apos; si sovrappongono nel gruppo &apos;{group}&apos; e nel dispositivo &apos;{device}&apos;.</translation>
+    </message>
+    <message>
+        <source>The events group name &apos;{name}&apos; is duplicated.</source>
+        <translation type="vanished">Il nome del gruppo eventi &apos;{name}&apos; è duplicato.</translation>
+    </message>
+    <message>
+        <source>The ramp event for parameter &apos;{parameter}&apos; has an invalid end time.</source>
+        <translation type="vanished">L&apos;evento di rampa per il parametro &apos;{parameter}&apos; ha un orario di fine non valido.</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsFilterPopup</name>
+    <message>
+        <source>All</source>
+        <translation type="vanished">Tutto</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsGroupsDialog</name>
+    <message>
+        <source>Create EMT Events Group</source>
+        <translation>Crea Gruppo Eventi EMT</translation>
+    </message>
+    <message>
+        <source>Create RMS Events Group</source>
+        <translation>Crea Gruppo Eventi RMS</translation>
+    </message>
+    <message>
+        <source>Enter group name</source>
+        <translation>Inserisci nome gruppo</translation>
+    </message>
+    <message>
+        <source>Invalid name</source>
+        <translation>Nome non valido</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Nome:</translation>
+    </message>
+    <message>
+        <source>The name cannot be empty.</source>
+        <translation>Il nome non può essere vuoto.</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsItemDelegate</name>
+    <message>
+        <source>Ramp</source>
+        <translation type="vanished">Rampa</translation>
+    </message>
+    <message>
+        <source>Step</source>
+        <translation type="vanished">Passo</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsPage</name>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="165"/>
+        <source>Add an event to the selected event group</source>
+        <translation>Aggiungi un evento al gruppo eventi selezionato</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove group &apos;{group}&apos;? This will remove {events} events from {devices} devices.</source>
+        <translation type="vanished">Sei sicuro di voler rimuovere il gruppo &apos;{group}&apos;? Ciò rimuoverà {events} eventi da {devices} dispositivi.</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove the event for &apos;{parameter}&apos; at {time:.4f} s?</source>
+        <translation type="vanished">Sei sicuro di voler rimuovere l&apos;evento per &apos;{parameter}&apos; a {time:.4f} s?</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="14"/>
+        <source>Dynamic Events</source>
+        <translation>Eventi Dinamici</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="124"/>
+        <source>New</source>
+        <translation>Nuovo</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="127"/>
+        <source>Delete all events of this simulation mode from the current device</source>
+        <translation>Elimina tutti gli eventi di questa modalità di simulazione dal dispositivo corrente</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="139"/>
+        <source>Save</source>
+        <translation>Salva</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="142"/>
+        <source>Save event changes</source>
+        <translation>Salva modifiche eventi</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="145"/>
+        <source>Ctrl+S</source>
+        <translation>CTRL+S</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="153"/>
+        <source>Create an EMT switch opening and reclosing event sequence</source>
+        <translation>Creare una sequenza di eventi di apertura e richiusura di un interruttore EMT</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="182"/>
+        <source>Create Event Group</source>
+        <translation>Crea Gruppo Eventi</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="185"/>
+        <source>Create an event group</source>
+        <translation>Crea un gruppo eventi</translation>
+    </message>
+    <message>
+        <source>Add Event</source>
+        <translation type="vanished">Aggiungi Evento</translation>
+    </message>
+    <message>
+        <source>Remove Selected</source>
+        <translation type="vanished">Rimuovi selezionato</translation>
+    </message>
+    <message>
+        <source>Add Event Group</source>
+        <translation>Aggiungi Gruppo Eventi</translation>
+    </message>
+    <message>
+        <source>Create an event group for this simulation mode</source>
+        <translation type="vanished">Creare un gruppo eventi per questa modalità di simulazione</translation>
+    </message>
+    <message>
+        <source>Empty dynamic model</source>
+        <translation type="vanished">Modello dinamico vuoto</translation>
+    </message>
+    <message>
+        <source>Events cannot be added because this dynamic model has no event parameters.</source>
+        <translation type="vanished">Non è possibile aggiungere eventi perché questo modello dinamico non ha parametri evento.</translation>
+    </message>
+    <message>
+        <source>Events saved</source>
+        <translation type="vanished">Eventi salvati</translation>
+    </message>
+    <message>
+        <source>Invalid dynamic events</source>
+        <translation type="vanished">Eventi dinamici non validi</translation>
+    </message>
+    <message>
+        <source>Invalid event group</source>
+        <translation>Gruppo eventi non valido</translation>
+    </message>
+    <message>
+        <source>Invalid parameter</source>
+        <translation type="vanished">Parametro non valido</translation>
+    </message>
+    <message>
+        <source>No events can be added because the dynamic model has no event parameters.</source>
+        <translation type="vanished">Non è possibile aggiungere eventi perché il modello dinamico non ha parametri evento.</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="vanished">Rimuovere</translation>
+    </message>
+    <message>
+        <source>Remove event</source>
+        <translation>Rimuovi evento</translation>
+    </message>
+    <message>
+        <source>Remove events group</source>
+        <translation type="vanished">Rimuovi gruppo eventi</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="177"/>
+        <source>Remove the selected event or event group</source>
+        <translation>Rimuovere l&apos;evento o il gruppo eventi selezionato</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation type="vanished">Rinomina</translation>
+    </message>
+    <message>
+        <source>Save events</source>
+        <translation type="vanished">Salva eventi</translation>
+    </message>
+    <message>
+        <source>Select the event group where you want to add the event.</source>
+        <translation type="vanished">Seleziona il gruppo eventi dove vuoi aggiungere l&apos;evento.</translation>
+    </message>
+    <message>
+        <source>Select the event or event group you want to remove.</source>
+        <translation type="vanished">Seleziona l&apos;evento o il gruppo eventi che vuoi rimuovere.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="150"/>
+        <source>Switch Sequence Wizard</source>
+        <translation>Passaggio alla procedura guidata di sequenza</translation>
+    </message>
+    <message>
+        <source>The event group name must be non-empty and unique in this simulation mode.</source>
+        <translation type="vanished">Il nome del gruppo eventi deve essere non vuoto e univoco in questa modalità di simulazione.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="101"/>
+        <source>This dynamic model is empty. New events cannot be added until the model is built.</source>
+        <translation>Questo modello dinamico è vuoto. Non è possibile aggiungere nuovi eventi finché il modello non è costruito.</translation>
+    </message>
+    <message>
+        <source>➕ New Event Group</source>
+        <translation type="vanished">➕ Nuovo Gruppo Eventi</translation>
+    </message>
+    <message>
+        <source>Add an event and select its event group</source>
+        <translation type="vanished">Aggiungi un evento e seleziona il suo gruppo eventi</translation>
+    </message>
+    <message>
+        <source>Create an event group before adding an event.</source>
+        <translation type="vanished">Crea un gruppo eventi prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>Select the event you want to remove.</source>
+        <translation type="vanished">Seleziona l&apos;evento che vuoi rimuovere.</translation>
+    </message>
+    <message>
+        <source>An event group with this name already exists.</source>
+        <translation>Esiste già un gruppo eventi con questo nome.</translation>
+    </message>
+    <message>
+        <source>Delete all device events</source>
+        <translation>Elimina tutti gli eventi del dispositivo</translation>
+    </message>
+    <message>
+        <source>Delete all events for this device and simulation mode?</source>
+        <translation>Eliminare tutti gli eventi per questo dispositivo e modalità di simulazione?</translation>
+    </message>
+    <message>
+        <source>Group name:</source>
+        <translation>Nome gruppo:</translation>
+    </message>
+    <message>
+        <source>Remove &apos;{name}&apos; and all events in this group?</source>
+        <translation>Rimuovere &apos;{name}&apos; e tutti gli eventi in questo gruppo?</translation>
+    </message>
+    <message>
+        <source>Remove event group</source>
+        <translation>Rimuovi gruppo eventi</translation>
+    </message>
+    <message>
+        <source>Remove the selected event?</source>
+        <translation>Rimuovere l&apos;evento selezionato?</translation>
+    </message>
+    <message>
+        <source>Select an event group before adding an event.</source>
+        <translation>Seleziona un gruppo eventi prima di aggiungere un evento.</translation>
+    </message>
+    <message>
+        <source>Select an event or event group to remove.</source>
+        <translation>Seleziona un evento o un gruppo eventi da rimuovere.</translation>
+    </message>
+    <message>
+        <source>The dynamic model has no event parameters.</source>
+        <translation>Il modello dinamico non ha parametri evento.</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicEventsTreeModel</name>
+    <message>
+        <source>Align Step</source>
+        <translation type="vanished">Allinea passo</translation>
+    </message>
+    <message>
+        <source>End Time</source>
+        <translation type="vanished">Tempo finale</translation>
+    </message>
+    <message>
+        <source>Invalid / Ungrouped Events</source>
+        <translation type="vanished">Eventi non validi / Non raggruppati</translation>
+    </message>
+    <message>
+        <source>Invalid parameter</source>
+        <translation type="vanished">Parametro non valido</translation>
+    </message>
+    <message>
+        <source>New Value</source>
+        <translation type="vanished">Nuovo valore</translation>
+    </message>
+    <message>
+        <source>Parameter</source>
+        <translation type="vanished">Parametro</translation>
+    </message>
+    <message>
+        <source>These persisted events do not reference a valid events group and can only be removed.</source>
+        <translation type="vanished">Questi eventi persistenti non fanno riferimento a un gruppo eventi valido e possono essere rimossi solo.</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation type="vanished">Tempo</translation>
+    </message>
+    <message>
+        <source>Transition</source>
+        <translation type="vanished">Transizione</translation>
+    </message>
+    <message>
+        <source>Event Group</source>
+        <translation type="vanished">Gruppo Eventi</translation>
+    </message>
+    <message>
+        <source>Select Event Group</source>
+        <translation type="vanished">Seleziona Gruppo Eventi</translation>
+    </message>
+</context>
+<context>
+    <name>DynamicsResultsHandler</name>
+    <message>
+        <source>X-Y plot slot</source>
+        <translation>Slot di trama X-Y</translation>
+    </message>
+    <message>
+        <source>Choose whether to place the dropped signal on the X axis or Y axis.</source>
+        <translation>Scegli se posizionare il segnale rilasciato sull&apos;asse X o sull&apos;asse Y.</translation>
+    </message>
+    <message>
+        <source>X axis</source>
+        <translation>Asse X</translation>
+    </message>
+    <message>
+        <source>Y axis</source>
+        <translation>Asse Y</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancellare</translation>
+    </message>
+    <message>
         <source>This X-Y plot already has X and Y signals. Replace X, replace Y, or cancel?</source>
-        <translation type="vanished">Questo grafico X-Y contiene già segnali X e Y. Sostituisci X, sostituisci Y o annulla?</translation>
+        <translation>Questo grafico X-Y contiene già segnali X e Y. Sostituisci X, sostituisci Y o annulla?</translation>
     </message>
     <message>
         <source>Replace X</source>
-        <translation type="vanished">Sostituisci X</translation>
+        <translation>Sostituisci X</translation>
     </message>
     <message>
         <source>Replace Y</source>
-        <translation type="vanished">Sostituisci Y</translation>
+        <translation>Sostituisci Y</translation>
+    </message>
+    <message>
+        <source>Dynamic plots</source>
+        <translation>Grafici dinamici</translation>
+    </message>
+    <message>
+        <source>Dynamics results</source>
+        <translation>Risultati dinamici</translation>
+    </message>
+</context>
+<context>
+    <name>EquationLatexModel</name>
+    <message>
+        <source>Equation</source>
+        <translation type="vanished">Equazione</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="vanished">Tipo</translation>
     </message>
 </context>
 <context>
@@ -1799,68 +4285,244 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     <name>FileTypeSelector</name>
     <message>
         <source>Format:</source>
-        <translation type="vanished">Formato:</translation>
+        <translation>Formato:</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation type="vanished">Accettare</translation>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>Select how to load the file</source>
+        <translation>Seleziona come caricare il file</translation>
+    </message>
+    <message>
+        <source>You&apos;ve passed a generic list of files
+select the expected processing format</source>
+        <translation>Hai fornito un elenco generico di file
+seleziona il formato di elaborazione previsto</translation>
+    </message>
+    <message>
+        <source>You&apos;ve passed a generic of file
+select the expected processing format</source>
+        <translation>Hai fornito un generico di file
+seleziona il formato di elaborazione previsto</translation>
+    </message>
+</context>
+<context>
+    <name>FluidNodeGraphicItem</name>
+    <message>
+        <source>Are you sure that you want to delete this fluid node</source>
+        <translation>Sei sicuro di voler eliminare questo nodo fluido?</translation>
+    </message>
+    <message>
+        <source>No DB object attached :/</source>
+        <translation>Nessun oggetto DB allegato :/</translation>
+    </message>
+    <message>
+        <source>No electrical bus attached :/</source>
+        <translation>Nessun bus elettrico allegato :/</translation>
+    </message>
+    <message>
+        <source>Remove fluid node</source>
+        <translation>Rimuovi nodo fluido</translation>
+    </message>
+</context>
+<context>
+    <name>FluidPathGraphicItem</name>
+    <message>
+        <source>Are you sure that you want to convert this fluid path into a line?</source>
+        <translation>Sei sicuro di voler convertire questo percorso fluido in una linea?</translation>
+    </message>
+    <message>
+        <source>Convert fluid path</source>
+        <translation>Converti percorso fluido</translation>
     </message>
 </context>
 <context>
     <name>FmuTemplateEditorDialog</name>
     <message>
         <source>FMU Template Editor</source>
-        <translation type="vanished">Editor di modelli FMU</translation>
+        <translation>Editor di modelli FMU</translation>
     </message>
     <message>
         <source>Browse...</source>
-        <translation type="vanished">Sfoglia...</translation>
+        <translation>Sfoglia...</translation>
     </message>
     <message>
         <source>Choose an FMU archive to load its metadata and build the visual block.</source>
-        <translation type="vanished">Scegli un archivio FMU per caricarne i metadati e costruire il blocco visivo.</translation>
+        <translation>Scegli un archivio FMU per caricarne i metadati e costruire il blocco visivo.</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="vanished">Nome</translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <source>FMU file</source>
-        <translation type="vanished">File FMU</translation>
+        <translation>File FMU</translation>
     </message>
     <message>
         <source>Device type</source>
-        <translation type="vanished">Tipo di dispositivo</translation>
+        <translation>Tipo di dispositivo</translation>
     </message>
     <message>
         <source>Domain</source>
-        <translation type="vanished">Dominio</translation>
+        <translation>Dominio</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation type="vanished">Modalità</translation>
+        <translation>Modalità</translation>
     </message>
     <message>
         <source>Metadata</source>
-        <translation type="vanished">Metadati</translation>
+        <translation>Metadati</translation>
     </message>
     <message>
         <source>Select FMU file</source>
-        <translation type="vanished">Seleziona il file FMU</translation>
+        <translation>Seleziona il file FMU</translation>
     </message>
     <message>
         <source>FMU files (*.fmu)</source>
-        <translation type="vanished">File FMU (*.fmu)</translation>
+        <translation>File FMU (*.fmu)</translation>
     </message>
     <message>
         <source>FMU file not found:
 {path}</source>
-        <translation type="vanished">File FMU non trovato:
+        <translation>File FMU non trovato:
 {path}</translation>
     </message>
     <message>
         <source>Choose an FMU file first.</source>
-        <translation type="vanished">Scegli prima un file FMU.</translation>
+        <translation>Scegli prima un file FMU.</translation>
+    </message>
+</context>
+<context>
+    <name>Form</name>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="14"/>
+        <source>Add block property</source>
+        <translation>Aggiungi proprietà blocco</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="26"/>
+        <source>Add symbol to selected block</source>
+        <translation>Aggiungi simbolo al blocco selezionato</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="71"/>
+        <source>Output</source>
+        <translation>Output</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="78"/>
+        <source>Create derivative variable</source>
+        <translation>Crea variabile derivata</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="144"/>
+        <source>New symbol name</source>
+        <translation>Nuovo nome simbolo</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="151"/>
+        <source>Symbol category</source>
+        <translation>Categoria simbolo</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="158"/>
+        <source>Owner block</source>
+        <translation>Blocco proprietario</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="165"/>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="172"/>
+        <source>Add symbol</source>
+        <translation>Aggiungi simbolo</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="195"/>
+        <source>Static device mapping</source>
+        <translation>Mappatura dispositivi statici</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="202"/>
+        <source>Power-flow variable used to initialize this dynamic variable.</source>
+        <translation>Variabile di flusso di potenza utilizzata per inizializzare questa variabile dinamica.</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="205"/>
+        <source>Power-flow variable</source>
+        <translation>Variabile di flusso di potenza</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="266"/>
+        <source>Enter a name</source>
+        <translation>Inserisci un nome</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="273"/>
+        <source>Initial numeric value</source>
+        <translation>Valore numerico iniziale</translation>
+    </message>
+</context>
+<context>
+    <name>GeneratorEditor</name>
+    <message>
+        <source>Generate a solar profile first</source>
+        <translation>Genera prima un profilo solare</translation>
+    </message>
+    <message>
+        <source>Generate a wind profile first</source>
+        <translation>Genera prima un profilo eolico</translation>
+    </message>
+    <message>
+        <source>Generator editor</source>
+        <translation>Editor generatore</translation>
+    </message>
+    <message>
+        <source>Solar editor is not available</source>
+        <translation>L&apos;editor solare non è disponibile</translation>
+    </message>
+    <message>
+        <source>Solar profile applied to generator</source>
+        <translation>Profilo solare applicato al generatore</translation>
+    </message>
+    <message>
+        <source>Wind editor is not available</source>
+        <translation>L&apos;editor di vento non è disponibile</translation>
+    </message>
+    <message>
+        <source>Wind profile applied to generator</source>
+        <translation>Profilo di vento applicato al generatore</translation>
+    </message>
+    <message>
+        <source>Wrong solar profile length</source>
+        <translation>Lunghezza profilo solare errata</translation>
+    </message>
+    <message>
+        <source>Wrong wind profile length</source>
+        <translation>Lunghezza profilo vento errata</translation>
+    </message>
+</context>
+<context>
+    <name>GeneratorGraphicItem</name>
+    <message>
+        <source>Are you sure that you want to convert this generator into a battery?</source>
+        <translation>Sei sicuro di voler convertire questo generatore in una batteria?</translation>
+    </message>
+    <message>
+        <source>Convert generator</source>
+        <translation>Converti generatore</translation>
+    </message>
+</context>
+<context>
+    <name>GeneratorQCurveEditor</name>
+    <message>
+        <source>Reactive power curve editor</source>
+        <translation>Editor della curva di potenza reattiva</translation>
     </message>
 </context>
 <context>
@@ -1882,106 +4544,368 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
 </context>
 <context>
+    <name>GeneratorsProfileOptionsDialogue</name>
+    <message>
+        <source>Generator active power options</source>
+        <translation>Opzioni potenza attiva del generatore</translation>
+    </message>
+</context>
+<context>
+    <name>GenericDiagramWidget</name>
+    <message>
+        <source>Device editor</source>
+        <translation>Editor del dispositivo</translation>
+    </message>
+    <message>
+        <source>Editor launch is not implemented for {class_name}</source>
+        <translation>Il lancio dell&apos;editor non è implementato per {class_name}</translation>
+    </message>
+</context>
+<context>
+    <name>GridDiffDialogue</name>
+    <message>
+        <source>Errors while computing the differential :(</source>
+        <translation>Errori nel calcolo del differenziale :(</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>File non trovato</translation>
+    </message>
+    <message>
+        <source>Grid differential</source>
+        <translation>Differenziale di rete</translation>
+    </message>
+    <message>
+        <source>No diff</source>
+        <translation>Nessun differenziale</translation>
+    </message>
+    <message>
+        <source>No differential created :(
+Did you load a base grid to compare?</source>
+        <translation>Nessun differenziale creato :(
+Davi caricato una rete base per confrontare?</translation>
+    </message>
+    <message>
+        <source>Open base grid</source>
+        <translation>Apri rete base</translation>
+    </message>
+    <message>
+        <source>Save file</source>
+        <translation>Salva file</translation>
+    </message>
+    <message>
+        <source>The circuit has duplicated idtags and cannot be differentiated :(</source>
+        <translation>Il circuito ha idtag duplicati e non può essere differenziato :(</translation>
+    </message>
+    <message>
+        <source>VeraGrid diff (*.dveragrid)</source>
+        <translation>VeraGrid diff (*.dveragrid)</translation>
+    </message>
+    <message>
+        <source>Wait for the differential worker to finish before closing this window.</source>
+        <translation>Attendi che il worker differenziale termini prima di chiudere questa finestra.</translation>
+    </message>
+    <message>
+        <source>{file_name} not found :(</source>
+        <translation>{file_name} non trovato :(</translation>
+    </message>
+</context>
+<context>
+    <name>GridGeneratorGUI</name>
+    <message>
+        <source>Grid Generator</source>
+        <translation>Generatore di griglia</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Avvertimento</translation>
+    </message>
+</context>
+<context>
+    <name>GridMapWidget</name>
+    <message>
+        <source>Connection Error</source>
+        <translation>Errore di connessione</translation>
+    </message>
+    <message>
+        <source>No suitable voltage level ({voltage:.2f} kV) found in substation &quot;{substation_name}&quot;.</source>
+        <translation>Nessun livello di tensione adatto ({voltage:.2f} kV) trovato nella sottostazione &quot;{substation_name}&quot;.</translation>
+    </message>
+    <message>
+        <source>Operation Successful</source>
+        <translation>Operazione riuscita</translation>
+    </message>
+    <message>
+        <source>Please select exactly one line and one substation.</source>
+        <translation>Selezionare esattamente una linea e una sottostazione.</translation>
+    </message>
+    <message>
+        <source>Selection Error</source>
+        <translation>Errore di selezione</translation>
+    </message>
+    <message>
+        <source>T-joint connection created between {substation_name} and {line_name}.</source>
+        <translation>Connessione a T creata tra {substation_name} e {line_name}.</translation>
+    </message>
+    <message>
+        <source>The line cannot be connected. Please ensure the target substation has a bus with a matching nominal voltage.</source>
+        <translation>La linea non può essere connessa. Assicurarsi che la sottostazione di destinazione abbia un bus con una tensione nominale corrispondente.</translation>
+    </message>
+    <message>
+        <source>Waypoint replaced with new substation &apos;{substation_name}&apos;.
+Original line split into two segments:
+- {line1_name}: {length1:.2f} km
+- {line2_name}: {length2:.2f} km
+New connection line: {distance:.2f} km</source>
+        <translation>Punto di passaggio sostituito con nuova sottostazione &apos;{substation_name}&apos;.
+La linea originale è stata divisa in due segmenti:
+- {line1_name}: {length1:.2f} km
+- {line2_name}: {length2:.2f} km
+Nuova linea di connessione: {distance:.2f} km</translation>
+    </message>
+    <message>
+        <source>Circuit ID</source>
+        <translation>ID Circuito</translation>
+    </message>
+    <message>
+        <source>Create new line</source>
+        <translation>Crea nuova linea</translation>
+    </message>
+    <message>
+        <source>Do you want to delete the substation where the lines were connecting? This will open the substation deletion menu, with the information of the items that would be removed.</source>
+        <translation>Vuoi eliminare la sottostazione dove le linee erano collegate? Questo aprirà il menu di eliminazione sottostazione, con le informazioni sugli elementi che verrebbero rimossi.</translation>
+    </message>
+    <message>
+        <source>Do you want to finalize the editing of the substation in the schematic?</source>
+        <translation>Vuoi finalizzare la modifica della sottostazione nello schema?</translation>
+    </message>
+    <message>
+        <source>Do you want to transform to substation the selected waypoint? This operation will split the line at the selected location, and will connect the new ends to the new substation.</source>
+        <translation>Vuoi trasformare il punto di passaggio selezionato in sottostazione? Questa operazione dividerà la linea nella posizione selezionata e collegherà le nuove estremità alla nuova sottostazione.</translation>
+    </message>
+    <message>
+        <source>Do you want to update lengths of lines? 
+IMPORTANT: This will take into account every movement of substation and line locations. If you are unsure of the effects of this updating, click no and perform the individual length update in a new map or in the specific line.</source>
+        <translation>Vuoi aggiornare le lunghezze delle linee? 
+IMPORTANTE: Questo terrà conto di ogni movimento delle posizioni delle sottostazioni e delle linee. Se non sei sicuro degli effetti di questo aggiornamento, clicca no ed esegui l&apos;aggiornamento della lunghezza individuale in una nuova mappa o nella linea specifica.</translation>
+    </message>
+    <message>
+        <source>Please select two substations</source>
+        <translation>Selezionare due sottostazioni</translation>
+    </message>
+    <message>
+        <source>Remove substation?</source>
+        <translation>Rimuovere sottostazione?</translation>
+    </message>
+    <message>
+        <source>Select circuit ID</source>
+        <translation>Seleziona ID circuito</translation>
+    </message>
+    <message>
+        <source>Some of the buses was None :(</source>
+        <translation>Alcuni dei bus erano None :(</translation>
+    </message>
+    <message>
+        <source>Somehow the two substations are the same :(</source>
+        <translation>In qualche modo le due sottostazioni sono le stesse :(</translation>
+    </message>
+    <message>
+        <source>The nominal voltage of the two connecting substations is not the same :(</source>
+        <translation>La tensione nominale delle due sottostazioni collegate non è la stessa :(</translation>
+    </message>
+    <message>
+        <source>Transform waypoint to substation?</source>
+        <translation>Trasformare punto di passaggio in sottostazione?</translation>
+    </message>
+    <message>
+        <source>Update lengths?</source>
+        <translation>Aggiornare le lunghezze?</translation>
+    </message>
+    <message>
+        <source>create substation diagram</source>
+        <translation>crea diagramma sottostazione</translation>
+    </message>
+    <message>
+        <source>{device_name} profiles plot</source>
+        <translation>Grafico dei profili di {device_name}</translation>
+    </message>
+</context>
+<context>
+    <name>GridMergeDialogue</name>
+    <message>
+        <source>Grid merges &amp; acquisitions</source>
+        <translation>Fusioni e acquisizioni di rete</translation>
+    </message>
+    <message>
+        <source>The base circuit has duplicated idtags and cannot be merged :(</source>
+        <translation>Il circuito base ha idtag duplicati e non può essere unito :(</translation>
+    </message>
+    <message>
+        <source>The diff circuit has duplicated idtags and cannot be merged :(</source>
+        <translation>Il circuito differenziale ha idtag duplicati e non può essere unito :(</translation>
+    </message>
+</context>
+<context>
+    <name>GridReduceDialogue</name>
+    <message>
+        <source>Grid reduction</source>
+        <translation>Riduzione della griglia</translation>
+    </message>
+    <message>
+        <source>Grid reduction?</source>
+        <translation>Riduzione di rete?</translation>
+    </message>
+    <message>
+        <source>Import profiles</source>
+        <translation type="vanished">Importa profili</translation>
+    </message>
+    <message>
+        <source>No reduction happened</source>
+        <translation>Nessuna riduzione è avvenuta</translation>
+    </message>
+    <message>
+        <source>Run a power flow first! or select another method</source>
+        <translation>Esegui prima un flusso di potenza! o seleziona un altro metodo</translation>
+    </message>
+</context>
+<context>
+    <name>HvdcGraphicItem</name>
+    <message>
+        <source>Change by a VSC system</source>
+        <translation>Cambiare con un sistema VSC</translation>
+    </message>
+    <message>
+        <source>Do you want to change the HvdcLine by 2 VSC converters + 1 DC Line?</source>
+        <translation>Vuoi cambiare la HvdcLine con 2 convertitori VSC + 1 Linea CC?</translation>
+    </message>
+</context>
+<context>
+    <name>InjectionTemplateGraphicItem</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+</context>
+<context>
+    <name>InspectModel</name>
+    <message>
+        <source>Equations</source>
+        <translation type="vanished">Equazioni</translation>
+    </message>
+    <message>
+        <source>Parameters</source>
+        <translation type="vanished">Parametri</translation>
+    </message>
+    <message>
+        <source>Variables</source>
+        <translation type="vanished">Variabili</translation>
+    </message>
+</context>
+<context>
     <name>IoMain</name>
     <message>
         <source>The file type {file_extension} is not accepted :(</source>
-        <translation type="vanished">Il tipo di file {file_extension} non è accettato :(</translation>
+        <translation>Il tipo di file {file_extension} non è accettato :(</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
     <message>
         <source>Are you sure that you want to quit the current grid and open a new one?
  If the process is cancelled the grid will remain.</source>
-        <translation type="vanished">Sei sicuro di voler uscire dalla griglia corrente e aprirne una nuova?
+        <translation>Sei sicuro di voler uscire dalla griglia corrente e aprirne una nuova?
  Se il processo viene annullato, la griglia rimarrà.</translation>
     </message>
     <message>
         <source>Are you sure that you want to quit the current grid and create a new one?</source>
-        <translation type="vanished">Sei sicuro di voler uscire dalla griglia corrente e crearne una nuova?</translation>
+        <translation>Sei sicuro di voler uscire dalla griglia corrente e crearne una nuova?</translation>
     </message>
     <message>
         <source>There is a file being processed now.</source>
-        <translation type="vanished">C&apos;è un file in fase di elaborazione adesso.</translation>
+        <translation>C&apos;è un file in fase di elaborazione adesso.</translation>
     </message>
     <message>
         <source>Formats ({files_types})</source>
-        <translation type="vanished">Formati ({files_types})</translation>
+        <translation>Formati ({files_types})</translation>
     </message>
     <message>
         <source>The file does not exist :( 
  {file_name}</source>
-        <translation type="vanished">Il file non esiste :( 
+        <translation>Il file non esiste :( 
  {file_name}</translation>
     </message>
     <message>
         <source>File opening</source>
-        <translation type="vanished">Apertura del fascicolo</translation>
+        <translation>Apertura del fascicolo</translation>
     </message>
     <message>
         <source>No grid to load :(</source>
-        <translation type="vanished">Nessuna griglia da caricare :(</translation>
+        <translation>Nessuna griglia da caricare :(</translation>
     </message>
     <message>
         <source>Current: {circuit_name}</source>
-        <translation type="vanished">Corrente: {circuit_name}</translation>
+        <translation>Corrente: {circuit_name}</translation>
     </message>
     <message>
         <source>The grid is quite big, no diagram is automatically created</source>
-        <translation type="vanished">La griglia è abbastanza grande, nessun diagramma viene creato automaticamente</translation>
+        <translation>La griglia è abbastanza grande, nessun diagramma viene creato automaticamente</translation>
     </message>
     <message>
         <source>Sessions</source>
-        <translation type="vanished">Sessioni</translation>
+        <translation>Sessioni</translation>
     </message>
     <message>
         <source>Show Rosetta</source>
-        <translation type="vanished">Mostra Rosetta</translation>
+        <translation>Mostra Rosetta</translation>
     </message>
     <message>
         <source>Do you want to open the Rosetta CGMES browser?</source>
-        <translation type="vanished">Vuoi aprire il browser di Rosetta CGMES?</translation>
+        <translation>Vuoi aprire il browser di Rosetta CGMES?</translation>
     </message>
     <message>
         <source>Open CGMES file logger</source>
-        <translation type="vanished">Apri il registratore di file CGMES</translation>
+        <translation>Apri il registratore di file CGMES</translation>
     </message>
     <message>
         <source>Open file logger</source>
-        <translation type="vanished">Apri il registro dei file</translation>
+        <translation>Apri il registro dei file</translation>
     </message>
     <message>
         <source>Error while loading the file(s)</source>
-        <translation type="vanished">Errore durante il caricamento dei file</translation>
+        <translation>Errore durante il caricamento dei file</translation>
     </message>
     <message>
         <source>{name} {version} requires VeraGrid {veragrid_version}</source>
-        <translation type="vanished">{name} {version} richiede VeraGrid {veragrid_version}</translation>
+        <translation>{name} {version} richiede VeraGrid {veragrid_version}</translation>
     </message>
     <message>
         <source>Plugin install</source>
-        <translation type="vanished">Installazione del plugin</translation>
+        <translation>Installazione del plugin</translation>
     </message>
     <message>
         <source>There is already a plugin: {plugin_name} {plugin_version}. The new plugin is {new_version}. Install?</source>
-        <translation type="vanished">Esiste già un plugin: {plugin_name} {plugin_version}. Il nuovo plugin è {new_version}. Installare?</translation>
+        <translation>Esiste già un plugin: {plugin_name} {plugin_version}. Il nuovo plugin è {new_version}. Installare?</translation>
     </message>
     <message>
         <source>{name} {version} installed!</source>
-        <translation type="vanished">{name} {version} installato!</translation>
+        <translation>{name} {version} installato!</translation>
     </message>
     <message>
         <source>There is no manifest :(</source>
-        <translation type="vanished">Non esiste alcun manifesto :(</translation>
+        <translation>Non esiste alcun manifesto :(</translation>
     </message>
     <message>
         <source>Does not seem to be a plugin :/</source>
-        <translation type="vanished">Non sembra essere un plugin :/</translation>
+        <translation>Non sembra essere un plugin :/</translation>
     </message>
     <message>
         <source>CSV (*.csv)</source>
-        <translation type="vanished">CSV (*.csv)</translation>
+        <translation>CSV (*.csv)</translation>
     </message>
     <message>
         <source>Open CSV file</source>
@@ -1989,233 +4913,368 @@ li.checked::marker { content: &quot;\2612&quot;; }&lt;/style&gt;&lt;/head&gt;&lt
     </message>
     <message>
         <source>Grid merge</source>
-        <translation type="vanished">Unione della griglia</translation>
+        <translation>Unione della griglia</translation>
     </message>
     <message>
         <source>How do you want to represent the merged grid?</source>
-        <translation type="vanished">Come vuoi rappresentare la griglia unita?</translation>
+        <translation>Come vuoi rappresentare la griglia unita?</translation>
     </message>
     <message>
         <source>Create new diagram</source>
-        <translation type="vanished">Crea un nuovo diagramma</translation>
+        <translation>Crea un nuovo diagramma</translation>
     </message>
     <message>
         <source>Add to current diagram</source>
-        <translation type="vanished">Aggiungi al diagramma corrente</translation>
+        <translation>Aggiungi al diagramma corrente</translation>
     </message>
     <message>
         <source>No schematic diagram was selected...</source>
-        <translation type="vanished">Nessun diagramma schematico è stato selezionato...</translation>
+        <translation>Nessun diagramma schematico è stato selezionato...</translation>
     </message>
     <message>
         <source>Save file</source>
-        <translation type="vanished">Salva file</translation>
+        <translation>Salva file</translation>
     </message>
     <message>
         <source>VeraGrid zip (*.veragrid)</source>
-        <translation type="vanished">VeraGrid zip (*.veragrid)</translation>
+        <translation>VeraGrid zip (*.veragrid)</translation>
     </message>
     <message>
         <source>There is a saving procedure running.
 Cancel and retry?</source>
-        <translation type="vanished">È in corso una procedura di salvataggio.
+        <translation>È in corso una procedura di salvataggio.
 Annullare e riprovare?</translation>
     </message>
     <message>
         <source>There is a file being processed..</source>
-        <translation type="vanished">C&apos;è un file in fase di elaborazione..</translation>
+        <translation>C&apos;è un file in fase di elaborazione..</translation>
     </message>
     <message>
         <source>Save file logger</source>
-        <translation type="vanished">Salva il registro dei file</translation>
+        <translation>Salva il registro dei file</translation>
     </message>
     <message>
         <source>Are you sure that you want to delete the current grid and replace it?</source>
-        <translation type="vanished">Sei sicuro di voler eliminare la griglia corrente e sostituirla?</translation>
+        <translation>Sei sicuro di voler eliminare la griglia corrente e sostituirla?</translation>
     </message>
     <message>
         <source>Model v. {model_version}</source>
-        <translation type="vanished">Modello v.{model_version}</translation>
+        <translation>Modello v.{model_version}</translation>
     </message>
     <message>
         <source>idtag. {idtag}</source>
-        <translation type="vanished">idtag. {idtag}</translation>
+        <translation>idtag. {idtag}</translation>
     </message>
     <message>
         <source>Random grid {bus_count} buses</source>
-        <translation type="vanished">Bus a griglia casuale {bus_count}</translation>
+        <translation>Bus a griglia casuale {bus_count}</translation>
     </message>
     <message>
         <source>Grid generated randomly using the RPGM algorithm.</source>
-        <translation type="vanished">Griglia generata in modo casuale utilizzando l&apos;algoritmo RPGM.</translation>
+        <translation>Griglia generata in modo casuale utilizzando l&apos;algoritmo RPGM.</translation>
     </message>
     <message>
         <source>Excel file (*.xlsx)</source>
-        <translation type="vanished">File Excel (*.xlsx)</translation>
+        <translation>File Excel (*.xlsx)</translation>
     </message>
     <message>
         <source>profiles of </source>
-        <translation type="vanished">profili di</translation>
+        <translation>profili di</translation>
     </message>
     <message>
         <source>There are no profiles!</source>
-        <translation type="vanished">Non ci sono profili!</translation>
+        <translation>Non ci sono profili!</translation>
     </message>
     <message>
         <source>Export object profiles</source>
-        <translation type="vanished">Esporta profili oggetto</translation>
+        <translation>Esporta profili oggetto</translation>
     </message>
     <message>
         <source>Zip file (*.zip)</source>
-        <translation type="vanished">File zip (*.zip)</translation>
+        <translation>File zip (*.zip)</translation>
     </message>
     <message>
         <source>Results of </source>
-        <translation type="vanished">Risultati di</translation>
+        <translation>Risultati di</translation>
     </message>
     <message>
         <source>There are no results available :/</source>
-        <translation type="vanished">Non ci sono risultati disponibili :/</translation>
+        <translation>Non ci sono risultati disponibili :/</translation>
     </message>
     <message>
         <source>Export all</source>
-        <translation type="vanished">Esporta tutto</translation>
+        <translation>Esporta tutto</translation>
     </message>
     <message>
         <source>Done!</source>
-        <translation type="vanished">Fatto!</translation>
+        <translation>Fatto!</translation>
     </message>
     <message>
         <source>Results parsing</source>
-        <translation type="vanished">Analisi dei risultati</translation>
+        <translation>Analisi dei risultati</translation>
     </message>
     <message>
         <source>Loaded &apos;{study_name}&apos; results from disk</source>
-        <translation type="vanished">Risultati &quot;{study_name}&quot; caricati dal disco</translation>
+        <translation>Risultati &quot;{study_name}&quot; caricati dal disco</translation>
     </message>
     <message>
         <source>No file driver declared :/</source>
-        <translation type="vanished">Nessun driver di file dichiarato :/</translation>
+        <translation>Nessun driver di file dichiarato :/</translation>
     </message>
     <message>
         <source>Select a driver inside a session</source>
-        <translation type="vanished">Seleziona un driver all&apos;interno di una sessione</translation>
+        <translation>Seleziona un driver all&apos;interno di una sessione</translation>
     </message>
     <message>
         <source>Driver load from disk</source>
-        <translation type="vanished">Caricamento del driver dal disco</translation>
+        <translation>Caricamento del driver dal disco</translation>
     </message>
     <message>
         <source>Load results from disk</source>
-        <translation type="vanished">Carica i risultati dal disco</translation>
+        <translation>Carica i risultati dal disco</translation>
     </message>
     <message>
         <source>Formats (*.json)</source>
-        <translation type="vanished">Formati (*.json)</translation>
+        <translation>Formati (*.json)</translation>
     </message>
     <message>
         <source>Open file</source>
-        <translation type="vanished">Apri file</translation>
+        <translation>Apri file</translation>
     </message>
     <message>
         <source>Contingencies import</source>
-        <translation type="vanished">Importazione di imprevisti</translation>
+        <translation>Importazione di imprevisti</translation>
     </message>
     <message>
         <source>JSON file (*.json)</source>
-        <translation type="vanished">Scheda JSON (*.json)</translation>
+        <translation>Scheda JSON (*.json)</translation>
     </message>
     <message>
         <source>Catalogue added!</source>
-        <translation type="vanished">Catalogo aggiunto!</translation>
+        <translation>Catalogo aggiunto!</translation>
     </message>
     <message>
         <source>Load catalogue</source>
-        <translation type="vanished">Carica catalogo</translation>
+        <translation>Carica catalogo</translation>
     </message>
     <message>
         <source>Open catalogue logger</source>
-        <translation type="vanished">Registratore del catalogo aperto</translation>
+        <translation>Registratore del catalogo aperto</translation>
     </message>
     <message>
         <source>Catalogue loaded!</source>
-        <translation type="vanished">Catalogo caricato!</translation>
+        <translation>Catalogo caricato!</translation>
     </message>
     <message>
         <source>Catalogue file (*.xlsx)</source>
-        <translation type="vanished">File catalogo (*.xlsx)</translation>
+        <translation>File catalogo (*.xlsx)</translation>
     </message>
     <message>
         <source>Catalogue Excel file (*.xlsx)</source>
-        <translation type="vanished">File Excel catalogo (*.xlsx)</translation>
+        <translation>File Excel catalogo (*.xlsx)</translation>
     </message>
     <message>
         <source>Save catalogue</source>
-        <translation type="vanished">Salva catalogo</translation>
+        <translation>Salva catalogo</translation>
     </message>
     <message>
         <source>Catalogue saved!</source>
-        <translation type="vanished">Catalogo salvato!</translation>
+        <translation>Catalogo salvato!</translation>
     </message>
     <message>
         <source>CIM (*.xml)</source>
-        <translation type="vanished">CIM (*.xml)</translation>
+        <translation>CIM (*.xml)</translation>
     </message>
     <message>
         <source>Export to CIM</source>
-        <translation type="vanished">Esporta in CIM</translation>
+        <translation>Esporta in CIM</translation>
     </message>
     <message>
         <source>Power Grid Models (*.pgm)</source>
-        <translation type="vanished">Modelli della rete elettrica (*.pgm)</translation>
+        <translation>Modelli della rete elettrica (*.pgm)</translation>
     </message>
     <message>
         <source>Export to Power Grid Models</source>
-        <translation type="vanished">Esporta in modelli di rete elettrica</translation>
+        <translation>Esporta in modelli di rete elettrica</translation>
     </message>
     <message>
         <source>Power Grid Models not installed :/</source>
-        <translation type="vanished">Modelli di rete elettrica non installati :/</translation>
+        <translation>Modelli di rete elettrica non installati :/</translation>
     </message>
     <message>
         <source>Electrical Json V3 (*.ejson3)</source>
-        <translation type="vanished">Elettrico Json V3 (*.ejson3)</translation>
+        <translation>Elettrico Json V3 (*.ejson3)</translation>
     </message>
     <message>
         <source>Export to JSON</source>
-        <translation type="vanished">Esporta in JSON</translation>
+        <translation>Esporta in JSON</translation>
     </message>
     <message>
         <source>VeraGrid HDF5 (*.gch5)</source>
-        <translation type="vanished">VeraGrid HDF5 (*.gch5)</translation>
+        <translation>VeraGrid HDF5 (*.gch5)</translation>
     </message>
     <message>
         <source>Export to VeraGrid HDF5</source>
-        <translation type="vanished">Esporta in VeraGrid HDF5</translation>
+        <translation>Esporta in VeraGrid HDF5</translation>
     </message>
     <message>
         <source>Excel (*.xlsx)</source>
-        <translation type="vanished">Excel (*.xlsx)</translation>
+        <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
         <source>Export to Microsoft Excel</source>
-        <translation type="vanished">Esporta in Microsoft Excel</translation>
+        <translation>Esporta in Microsoft Excel</translation>
     </message>
     <message>
         <source>Sqlite (*.sqlite)</source>
-        <translation type="vanished">Sqlite (*.sqlite)</translation>
+        <translation>Sqlite (*.sqlite)</translation>
     </message>
     <message>
         <source>Export to Sqlite</source>
-        <translation type="vanished">Esporta in SQLite</translation>
+        <translation>Esporta in SQLite</translation>
     </message>
     <message>
         <source>VeraGrid (*.veragrid)</source>
-        <translation type="vanished">VeraGrid (*.veragrid)</translation>
+        <translation>VeraGrid (*.veragrid)</translation>
     </message>
     <message>
         <source>Export VeraGrid scenario</source>
-        <translation type="vanished">Esporta scenario VeraGrid</translation>
+        <translation>Esporta scenario VeraGrid</translation>
+    </message>
+    <message>
+        <source>Server file deleted.</source>
+        <translation>File server eliminato.</translation>
+    </message>
+    <message>
+        <source>Server file saved.</source>
+        <translation>File server salvato.</translation>
+    </message>
+    <message>
+        <source>Server model deleted.</source>
+        <translation>Modello server eliminato.</translation>
+    </message>
+    <message>
+        <source>Server save cancelled.</source>
+        <translation>Salvataggio server annullato.</translation>
+    </message>
+    <message>
+        <source>The file was loaded but the current project was kept because closing a dynamic editor was cancelled.</source>
+        <translation>Il file è stato caricato ma il progetto corrente è stato mantenuto perché la chiusura di un editor dinamico è stata annullata.</translation>
+    </message>
+    <message>
+        <source>Some operations are still stopping. Try again after they finish.</source>
+        <translation>Alcune operazioni sono ancora in corso. Riprovare dopo che sono terminate.</translation>
+    </message>
+    <message>
+        <source>The current save is still finishing. Please retry when it is done.</source>
+        <translation>Il salvataggio corrente è ancora in corso. Si prega di riprovare quando è completato.</translation>
+    </message>
+</context>
+<context>
+    <name>JMartiLineEmtDialog</name>
+    <message>
+        <source>Configure EMT J_Marti Line</source>
+        <translation type="vanished">Configura EMT J_Marti Line</translation>
+    </message>
+    <message>
+        <source>EMT J_Marti line</source>
+        <translation type="vanished">EMT J_Marti line</translation>
+    </message>
+    <message>
+        <source>Enable at least one phase.</source>
+        <translation type="vanished">Abilita almeno una fase.</translation>
+    </message>
+    <message>
+        <source>NumPy archive (*.npz)</source>
+        <translation type="vanished">Archivio NumPy (*.npz)</translation>
+    </message>
+    <message>
+        <source>Open JMARTI Frequency Samples</source>
+        <translation type="vanished">Apri Campioni di Frequenza JMARTI</translation>
+    </message>
+    <message>
+        <source>Select one NPZ file to import frequency samples.</source>
+        <translation type="vanished">Seleziona un file NPZ per importare i campioni di frequenza.</translation>
+    </message>
+    <message>
+        <source>The forced model order must be zero or less than or equal to the maximum model order.</source>
+        <translation type="vanished">L&apos;ordine del modello forzato deve essere zero o minore o uguale all&apos;ordine massimo del modello.</translation>
+    </message>
+    <message>
+        <source>The sweep sample count must be greater than or equal to the minimum frequency sample requirement.</source>
+        <translation type="vanished">Il conteggio dei campioni di sweep deve essere maggiore o uguale al requisito minimo di campioni di frequenza.</translation>
+    </message>
+    <message>
+        <source>The sweep upper frequency must be greater than the lower frequency.</source>
+        <translation type="vanished">La frequenza superiore dello sweep deve essere maggiore della frequenza inferiore.</translation>
+    </message>
+    <message>
+        <source>The {window_name} upper frequency must be greater than the lower frequency.</source>
+        <translation type="vanished">La frequenza superiore di {window_name} deve essere maggiore della frequenza inferiore.</translation>
+    </message>
+    <message>
+        <source>The {window_name} window must stay inside the configured sweep band.</source>
+        <translation type="vanished">La finestra {window_name} deve rimanere all&apos;interno della banda di sweep configurata.</translation>
+    </message>
+</context>
+<context>
+    <name>LineDeviceEditor</name>
+    <message>
+        <source>Line design widget is not available</source>
+        <translation>Il widget di progettazione della linea non è disponibile</translation>
+    </message>
+    <message>
+        <source>Line editor</source>
+        <translation>Redattore di riga</translation>
+    </message>
+</context>
+<context>
+    <name>LineEditor</name>
+    <message>
+        <source>Accept line design values</source>
+        <translation>Accetta i valori di progettazione della linea</translation>
+    </message>
+    <message>
+        <source>Line editor</source>
+        <translation>Redattore di riga</translation>
+    </message>
+    <message>
+        <source>Line editor initialization</source>
+        <translation>Inizializzazione dell&apos;editor di linea</translation>
+    </message>
+    <message>
+        <source>Load template</source>
+        <translation>Carica modello</translation>
+    </message>
+    <message>
+        <source>No Template Selected</source>
+        <translation>Nessun modello selezionato</translation>
+    </message>
+    <message>
+        <source>The length cannot be 0!</source>
+        <translation>La lunghezza non può essere 0!</translation>
+    </message>
+    <message>
+        <source>The template {template_name} contains errors</source>
+        <translation>Il modello {template_name} contiene errori</translation>
+    </message>
+    <message>
+        <source>Vnom in bus {bus_name} is {voltage_from}
+That causes an infinite base admittance.
+The process has been aborted.
+Please correct the data and try again.</source>
+        <translation>Vnom nel bus {bus_name} è {voltage_from}
+Questo causa un&apos;admittanza base infinita.
+Il processo è stato interrotto.
+Si prega di correggere i dati e riprovare.</translation>
+    </message>
+    <message>
+        <source>Warning: You did not load template values. The circuit index will not be updated. Line parameters will be based on the provided values for Length, Max Current, Resistance, Reactance, and Susceptance.
+
+Do you want to continue without a template?</source>
+        <translation>Attenzione: non sono stati caricati i valori del modello. L&apos;indice del circuito non verrà aggiornato. I parametri di linea si baseranno sui valori forniti per Lunghezza, Corrente Max, Resistenza, Reattanza e Suscettanza.
+
+Vuoi continuare senza un modello?</translation>
     </message>
 </context>
 <context>
@@ -2295,6 +5354,298 @@ Annullare e riprovare?</translation>
         <location filename="../DeviceEditors/LineEditor/line_editor_gui.ui" line="235"/>
         <source>Accept</source>
         <translation>Accettare</translation>
+    </message>
+</context>
+<context>
+    <name>LineGraphicItem</name>
+    <message>
+        <source>A template will be generated using this line values per unit of length</source>
+        <translation>Verrà generato un modello utilizzando questi valori di linea per unità di lunghezza</translation>
+    </message>
+    <message>
+        <source>Add sequence line type</source>
+        <translation>Aggiungi tipo di linea sequenziale</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a HVDC line?</source>
+        <translation>Sei sicuro di voler convertire questa linea in una linea HVDC?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a UPFC device?</source>
+        <translation>Sei sicuro di voler convertire questa linea in un dispositivo UPFC?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a VSC device?</source>
+        <translation>Sei sicuro di voler convertire questa linea in un dispositivo VSC?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a series reactance device?</source>
+        <translation>Sei sicuro di voler convertire questa linea in un dispositivo a reattanza in serie?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a switch device?</source>
+        <translation>Sei sicuro di voler convertire questa linea in un dispositivo interruttore?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to convert this line into a transformer?</source>
+        <translation>Sei sicuro di voler convertire questa linea in un trasformatore?</translation>
+    </message>
+    <message>
+        <source>Convert line</source>
+        <translation>Converti linea</translation>
+    </message>
+    <message>
+        <source>Unable to convert to VSC. One of the buses must be DC and the other AC.</source>
+        <translation>Impossibile convertire in VSC. Uno dei nodi deve essere CC e l&apos;altro CA.</translation>
+    </message>
+</context>
+<context>
+    <name>LineGraphicTemplateItem</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+</context>
+<context>
+    <name>LineLocationGraphicItem</name>
+    <message>
+        <source>Move substation graphics</source>
+        <translation>Sposta grafica sottostazione</translation>
+    </message>
+    <message>
+        <source>Move substation {substation_name} graphics to it&apos;s database coordinates?</source>
+        <translation>Spostare la grafica della sottostazione {substation_name} alle sue coordinate nel database?</translation>
+    </message>
+</context>
+<context>
+    <name>LineLocationsEditorWidget</name>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="19"/>
+        <source>Add point</source>
+        <translation>Aggiungi punto</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="33"/>
+        <source>Remove selected</source>
+        <translation>Rimuovi selezionato</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="47"/>
+        <source>Import CSV</source>
+        <translation>Importa CSV</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="61"/>
+        <source>Export CSV</source>
+        <translation>Esporta CSV</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="75"/>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/LineLocationsEditor/line_locations_editor_gui.ui" line="89"/>
+        <source>Paste</source>
+        <translation>Incolla</translation>
+    </message>
+    <message>
+        <source>CSV files (*.csv);;All files (*)</source>
+        <translation>File CSV (*.csv);;Tutti i file (*)</translation>
+    </message>
+    <message>
+        <source>CSV files (*.csv);;Text files (*.txt);;All files (*)</source>
+        <translation>CSV files (*.csv);;Text files (*.txt);;All files (*)</translation>
+    </message>
+    <message>
+        <source>Export coordinates</source>
+        <translation>Export coordinates</translation>
+    </message>
+    <message>
+        <source>Import coordinates</source>
+        <translation>Import coordinates</translation>
+    </message>
+    <message>
+        <source>Locations</source>
+        <translation>Locations</translation>
+    </message>
+</context>
+<context>
+    <name>LoadDesigner</name>
+    <message>
+        <source>Load designer</source>
+        <translation>Progettatore carichi</translation>
+    </message>
+</context>
+<context>
+    <name>LoadDeviceEditor</name>
+    <message>
+        <source>Generate a profile before applying it</source>
+        <translation>Generare un profilo prima di applicarlo</translation>
+    </message>
+    <message>
+        <source>Load designer is not available</source>
+        <translation>Il progettatore carichi non è disponibile</translation>
+    </message>
+    <message>
+        <source>Load editor</source>
+        <translation>Editor carichi</translation>
+    </message>
+    <message>
+        <source>Wrong load profile length</source>
+        <translation>Lunghezza profilo carico errata</translation>
+    </message>
+</context>
+<context>
+    <name>LogsDialogue</name>
+    <message>
+        <source>Accept</source>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>CSV (*.csv);;Excel files (*.xlsx)</source>
+        <translation>CSV (*.csv);;File Excel (*.xlsx)</translation>
+    </message>
+    <message>
+        <source>Class</source>
+        <translation>Classe</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>Dispositivo</translation>
+    </message>
+    <message>
+        <source>Expected value</source>
+        <translation>Valore atteso</translation>
+    </message>
+    <message>
+        <source>Export results</source>
+        <translation>Esporta risultati</translation>
+    </message>
+    <message>
+        <source>Property</source>
+        <translation>Proprietà</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Salva</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valore</translation>
+    </message>
+</context>
+<context>
+    <name>LookupArrayLinearDialog</name>
+    <message>
+        <source>Clipboard is empty.</source>
+        <translation type="vanished">Il clipboard è vuoto.</translation>
+    </message>
+    <message>
+        <source>Configure Lookup Table</source>
+        <translation type="vanished">Configura tabella di ricerca</translation>
+    </message>
+    <message>
+        <source>Lookup Table</source>
+        <translation type="vanished">Tabella di ricerca</translation>
+    </message>
+    <message>
+        <source>Lookup table clipboard data can only have up to two columns.</source>
+        <translation type="vanished">I dati del clipboard della tabella di ricerca possono avere al massimo due colonne.</translation>
+    </message>
+    <message>
+        <source>Lookup table x values must be strictly increasing.</source>
+        <translation type="vanished">I valori x della tabella di ricerca devono essere strettamente crescenti.</translation>
+    </message>
+    <message>
+        <source>Lookup tables require at least two points.</source>
+        <translation type="vanished">Le tabelle di ricerca richiedono almeno due punti.</translation>
+    </message>
+</context>
+<context>
+    <name>LookupMatrixEditorDialog</name>
+    <message>
+        <source>At least two X breakpoints are required.</source>
+        <translation>Sono richiesti almeno due breakpoint X.</translation>
+    </message>
+    <message>
+        <source>At least two Y breakpoints are required.</source>
+        <translation>Sono richiesti almeno due breakpoint Y.</translation>
+    </message>
+    <message>
+        <source>Invalid X breakpoints</source>
+        <translation>Breakpoint X non validi</translation>
+    </message>
+    <message>
+        <source>Invalid Y breakpoints</source>
+        <translation>Breakpoint Y non validi</translation>
+    </message>
+    <message>
+        <source>Invalid number of X points</source>
+        <translation>Numero di punti X non valido</translation>
+    </message>
+    <message>
+        <source>Invalid number of Y points</source>
+        <translation>Numero di punti Y non valido</translation>
+    </message>
+    <message>
+        <source>Lookup matrix editor</source>
+        <translation>Editor matrice di ricerca</translation>
+    </message>
+    <message>
+        <source>X values must be strictly increasing.</source>
+        <translation>I valori X devono essere strettamente crescenti.</translation>
+    </message>
+    <message>
+        <source>Y values must be strictly increasing.</source>
+        <translation>I valori Y devono essere strettamente crescenti.</translation>
+    </message>
+</context>
+<context>
+    <name>LookupMatrixLinearDialog</name>
+    <message>
+        <source>At least two X points are required.</source>
+        <translation type="vanished">Sono richiesti almeno due punti X.</translation>
+    </message>
+    <message>
+        <source>At least two Y points are required.</source>
+        <translation type="vanished">Sono richiesti almeno due punti Y.</translation>
+    </message>
+    <message>
+        <source>Clipboard is empty.</source>
+        <translation type="vanished">Il clipboard è vuoto.</translation>
+    </message>
+    <message>
+        <source>Configure Lookup Matrix</source>
+        <translation type="vanished">Configura matrice di ricerca</translation>
+    </message>
+    <message>
+        <source>Lookup Matrix</source>
+        <translation type="vanished">Matrice di ricerca</translation>
+    </message>
+    <message>
+        <source>Lookup matrix requires at least two X points and two Y points.</source>
+        <translation type="vanished">La matrice di ricerca richiede almeno due punti X e due punti Y.</translation>
+    </message>
+    <message>
+        <source>X axis values must be strictly increasing.</source>
+        <translation type="vanished">I valori dell&apos;asse X devono essere strettamente crescenti.</translation>
+    </message>
+    <message>
+        <source>Y axis values must be strictly increasing.</source>
+        <translation type="vanished">I valori dell&apos;asse Y devono essere strettamente crescenti.</translation>
     </message>
 </context>
 <context>
@@ -2521,7 +5872,7 @@ Annullare e riprovare?</translation>
     </message>
     <message>
         <location filename="../Analysis/analysis_gui.ui" line="1163"/>
-        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="71"/>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="206"/>
         <source>Actions</source>
         <translation>Azioni</translation>
     </message>
@@ -2591,8 +5942,8 @@ Annullare e riprovare?</translation>
     <message>
         <location filename="../ContingencyPlanner/contingency_planner_gui.ui" line="151"/>
         <location filename="../ContingencyPlanner/contingency_planner_gui.ui" line="195"/>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="115"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="169"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="102"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="112"/>
         <location filename="../GridGenerator/grid_generator_gui.ui" line="55"/>
         <source> MW</source>
         <translation>MW</translation>
@@ -2631,26 +5982,24 @@ Annullare e riprovare?</translation>
     </message>
     <message>
         <location filename="../ContingencyPlanner/contingency_planner_gui.ui" line="275"/>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="156"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="77"/>
         <source>Generate</source>
         <translation>Generare</translation>
     </message>
     <message>
         <location filename="../ContingencyPlanner/contingency_planner_gui.ui" line="292"/>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="218"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="296"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="254"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="355"/>
         <location filename="../GridGenerator/grid_generator_gui.ui" line="630"/>
-        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="85"/>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="220"/>
         <source>Copy to clipboard</source>
         <translation>Copia negli appunti</translation>
     </message>
     <message>
         <location filename="../ContingencyPlanner/contingency_planner_gui.ui" line="301"/>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="227"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="305"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="263"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="364"/>
         <location filename="../GridGenerator/grid_generator_gui.ui" line="639"/>
-        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="94"/>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="229"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
@@ -2660,54 +6009,74 @@ Annullare e riprovare?</translation>
         <translation>Mago dell&apos;energia solare</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="49"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="182"/>
         <source>Site data</source>
         <translation>Dati del sito</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="63"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="139"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="72"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="82"/>
         <source>Longitude</source>
         <translation>Longitudine</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="70"/>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="99"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="123"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="146"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="56"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="79"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="66"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="89"/>
         <source> deg</source>
         <translation>grado</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="128"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="116"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="49"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="59"/>
         <source>Latitude</source>
         <translation>Latitudine</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="135"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="162"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="95"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="105"/>
         <source>Power</source>
         <translation>Energia</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="142"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="115"/>
+        <source>Shift PVGIS UTC timestamps by longitude so the generated power matches the circuit timestamps as local solar time.</source>
+        <translation>Sposta i timestamp UTC PVGIS per longitudine in modo che la potenza generata corrisponda ai timestamp del circuito come ora solare locale.</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="118"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="177"/>
+        <source>Use local solar time</source>
+        <translation>Usa l&apos;ora solare locale</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="148"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="197"/>
+        <source>Generate time series</source>
+        <translation>Genera serie temporali</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="162"/>
         <source>Bus</source>
         <translation>Autobus</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="149"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="172"/>
         <source>Generator</source>
         <translation>Generatore</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="173"/>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="202"/>
+        <source>Apply and accept</source>
+        <translation>Applica e accetta</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="232"/>
         <source>Plot data</source>
         <translation>Tracciare i dati</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/SolarPowerWizard/solar_power_wizard_gui.ui" line="200"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="278"/>
         <location filename="../GridGenerator/grid_generator_gui.ui" line="612"/>
         <source>Accept</source>
         <translation>Accettare</translation>
@@ -2718,48 +6087,65 @@ Annullare e riprovare?</translation>
         <translation>Mago dell&apos;energia eolica</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="61"/>
         <source>Turbine library</source>
-        <translation>Biblioteca delle turbine</translation>
+        <translation type="vanished">Biblioteca delle turbine</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="67"/>
         <source>Template</source>
-        <translation>Modello</translation>
+        <translation type="vanished">Modello</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="84"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="308"/>
         <source>Plot design curves</source>
         <translation>Tracciare le curve di progettazione</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="103"/>
         <source>Site and model</source>
-        <translation>Sito e modello</translation>
+        <translation type="vanished">Sito e modello</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="109"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="49"/>
         <source>Wind turbine data</source>
         <translation>Dati sulle turbine eoliche</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="182"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="125"/>
         <source>Hub height</source>
         <translation>Altezza del mozzo</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="189"/>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="212"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="132"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="155"/>
         <source> m</source>
         <translation>M</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="205"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="148"/>
         <source>Roughness</source>
         <translation>Rugosità</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="258"/>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="174"/>
+        <source>Shift Open-Meteo GMT timestamps by longitude so the generated power matches the circuit timestamps as local solar time.</source>
+        <translation>Sposta i timestamp GMT Open-Meteo per longitudine in modo che la potenza generata corrisponda ai timestamp del circuito come ora solare locale.</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="234"/>
+        <source>Accept and apply</source>
+        <translation>Accetta e applica</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="252"/>
+        <source>Time series</source>
+        <translation>Serie temporali</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/WindPowerWizard/wind_power_wizard_gui.ui" line="266"/>
+        <source>Turbine model</source>
+        <translation>Modello turbina</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="169"/>
         <source>Plot</source>
         <translation>Complotto</translation>
     </message>
@@ -2902,6 +6288,769 @@ Annullare e riprovare?</translation>
         <source>Create Grid</source>
         <translation>Crea griglia</translation>
     </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="41"/>
+        <source>Method</source>
+        <translation>Metodo</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="49"/>
+        <source>DPR HELM</source>
+        <translation>DPR HELM</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="54"/>
+        <source>Classical HELM</source>
+        <translation>Classical HELM</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="62"/>
+        <source>DPR start</source>
+        <translation>Avvio DPR</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="70"/>
+        <source>Stored guess</source>
+        <translation>Stima memorizzata</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="75"/>
+        <source>Classical no-load</source>
+        <translation>Senza carico classico</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="83"/>
+        <source>Q limits</source>
+        <translation>Limiti Q</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="90"/>
+        <source>Discrete shunts</source>
+        <translation>Shunt discreti</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="100"/>
+        <source>QV droop</source>
+        <translation>QV droop</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="110"/>
+        <source>Distributed slack</source>
+        <translation>Lasco distribuito</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="130"/>
+        <source>...</source>
+        <translation>...</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="144"/>
+        <source>Re-run</source>
+        <translation>Riprova</translation>
+    </message>
+    <message>
+        <location filename="../SigmaAnalysis/sigma_analysis_gui.ui" line="179"/>
+        <source>Data</source>
+        <translation>Dati</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;{error_count}&lt;/b&gt; errors and &lt;b&gt;{divergence_count}&lt;/b&gt; divergences are blocking the score most strongly.</source>
+        <translation>&lt;b&gt;{error_count}&lt;/b&gt; errori e &lt;b&gt;{divergence_count}&lt;/b&gt; divergenze bloccano maggiormente il punteggio.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;{fixable_count}&lt;/b&gt; findings can be auto-corrected safely from this dashboard.</source>
+        <translation>&lt;b&gt;{fixable_count}&lt;/b&gt; risultati possono essere auto-corretti in sicurezza da questa dashboard.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;{warning_count}&lt;/b&gt; warnings and &lt;b&gt;{information_count}&lt;/b&gt; informational findings still reduce confidence.</source>
+        <translation>&lt;b&gt;{warning_count}&lt;/b&gt; avvisi e &lt;b&gt;{information_count}&lt;/b&gt; risultati informativi riducono ancora la fiducia.</translation>
+    </message>
+    <message>
+        <source>Action Narrative</source>
+        <translation>Narrativa azione</translation>
+    </message>
+    <message>
+        <source>Aggregation</source>
+        <translation>Aggregazione</translation>
+    </message>
+    <message>
+        <source>All object types</source>
+        <translation>Tutti i tipi di oggetto</translation>
+    </message>
+    <message>
+        <source>All severities</source>
+        <translation>Tutte le gravità</translation>
+    </message>
+    <message>
+        <source>Analyzed assets</source>
+        <translation>Asset analizzati</translation>
+    </message>
+    <message>
+        <source>Apply fixes to time series</source>
+        <translation>Applica correzioni alle serie temporali</translation>
+    </message>
+    <message>
+        <source>Area</source>
+        <translation>Area</translation>
+    </message>
+    <message>
+        <source>Auto-fix</source>
+        <translation>Auto-correzione</translation>
+    </message>
+    <message>
+        <source>Auto-fix ready</source>
+        <translation>Pronto per la correzione automatica</translation>
+    </message>
+    <message>
+        <source>Balance Explorer</source>
+        <translation>Esploratore Bilanciamento</translation>
+    </message>
+    <message>
+        <source>Collapse All</source>
+        <translation>Collassa tutto</translation>
+    </message>
+    <message>
+        <source>Community</source>
+        <translation>Comunità</translation>
+    </message>
+    <message>
+        <source>Converged</source>
+        <translation>Convergito</translation>
+    </message>
+    <message>
+        <source>Country</source>
+        <translation>Paese</translation>
+    </message>
+    <message>
+        <source>Critical findings</source>
+        <translation>Riscontri critici</translation>
+    </message>
+    <message>
+        <source>Dashboard refreshed: {issue_count} findings, score {overall_score}/100.</source>
+        <translation>Dashboard aggiornato: {issue_count} riscontri, punteggio {overall_score}/100.</translation>
+    </message>
+    <message>
+        <source>Divergence</source>
+        <translation>Divergenza</translation>
+    </message>
+    <message>
+        <source>Divergences</source>
+        <translation>Divergenze</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>Errors</source>
+        <translation>Errori</translation>
+    </message>
+    <message>
+        <source>Excel (*.xlsx)</source>
+        <translation>Excel (*.xlsx)</translation>
+    </message>
+    <message>
+        <source>Excel (*.xlsx);;HTML (*.html);;PDF (*.pdf)</source>
+        <translation>Excel (*.xlsx);;HTML (*.html);;PDF (*.pdf)</translation>
+    </message>
+    <message>
+        <source>Executive Overview</source>
+        <translation>Panoramica Esecutiva</translation>
+    </message>
+    <message>
+        <source>Expand All</source>
+        <translation>Espandi tutto</translation>
+    </message>
+    <message>
+        <source>Export the full report once the score and findings reflect the scenario you want to share.</source>
+        <translation>Esporta il rapporto completo una volta che punteggio e riscontri riflettono lo scenario che desideri condividere.</translation>
+    </message>
+    <message>
+        <source>Field</source>
+        <translation>Campo</translation>
+    </message>
+    <message>
+        <source>Findings ({count})</source>
+        <translation>Riscontri ({count})</translation>
+    </message>
+    <message>
+        <source>Findings Explorer</source>
+        <translation>Esploratore Riscontri</translation>
+    </message>
+    <message>
+        <source>Findings Explorer ({count})</source>
+        <translation>Esploratore Riscontri ({count})</translation>
+    </message>
+    <message>
+        <source>Fixed issues</source>
+        <translation>Problemi risolti</translation>
+    </message>
+    <message>
+        <source>Full dashboard report exported to {file_name}.</source>
+        <translation>Rapporto completo del dashboard esportato in {file_name}.</translation>
+    </message>
+    <message>
+        <source>Generator Vset max</source>
+        <translation>Vset max Generatore</translation>
+    </message>
+    <message>
+        <source>Generator Vset min</source>
+        <translation>Vset min Generatore</translation>
+    </message>
+    <message>
+        <source>Global</source>
+        <translation>Globale</translation>
+    </message>
+    <message>
+        <source>Grade</source>
+        <translation>Grado</translation>
+    </message>
+    <message>
+        <source>Grade {grade}</source>
+        <translation>Grado {grade}</translation>
+    </message>
+    <message>
+        <source>Grid Health Dashboard Report</source>
+        <translation>Rapporto Dashboard Salute della Rete</translation>
+    </message>
+    <message>
+        <source>Index</source>
+        <translation>Indice</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informazioni</translation>
+    </message>
+    <message>
+        <source>Inputs analysis is unavailable for the current grid.</source>
+        <translation>L&apos;analisi degli input non è disponibile per la rete corrente.</translation>
+    </message>
+    <message>
+        <source>Inputs analysis pending.</source>
+        <translation>Analisi degli input in sospeso.</translation>
+    </message>
+    <message>
+        <source>Inputs analysis unavailable</source>
+        <translation>Analisi degli input non disponibile</translation>
+    </message>
+    <message>
+        <source>Investigate buses with the smallest sigma distances because the current stability margin is tight.</source>
+        <translation>Indagare i bus con le distanze sigma più piccole perché il margine di stabilità attuale è ridotto.</translation>
+    </message>
+    <message>
+        <source>Issue score</source>
+        <translation>Punteggio riscontro</translation>
+    </message>
+    <message>
+        <source>Issue score {issue_score:.1f}/100 • sigma score unavailable.</source>
+        <translation>Punteggio riscontro {issue_score:.1f}/100 • punteggio sigma non disponibile.</translation>
+    </message>
+    <message>
+        <source>Issue score {issue_score:.1f}/100 • sigma score {sigma_score:.1f}/100.</source>
+        <translation>Punteggio riscontro {issue_score:.1f}/100 • punteggio sigma {sigma_score:.1f}/100.</translation>
+    </message>
+    <message>
+        <source>Issues</source>
+        <translation>Problemi</translation>
+    </message>
+    <message>
+        <source>Issues exported to {file_name}.</source>
+        <translation>Problemi esportati in {file_name}.</translation>
+    </message>
+    <message>
+        <source>Item</source>
+        <translation>Elemento</translation>
+    </message>
+    <message>
+        <source>Lower</source>
+        <translation>Inferiore</translation>
+    </message>
+    <message>
+        <source>Make the grid simulation-ready and rerun the dashboard so sigma margin can join the report.</source>
+        <translation>Rendere la rete pronta per la simulazione ed eseguire nuovamente il dashboard in modo che il margine sigma possa essere incluso nel rapporto.</translation>
+    </message>
+    <message>
+        <source>Mean sigma distance</source>
+        <translation>Distanza sigma media</translation>
+    </message>
+    <message>
+        <source>Mean {mean_distance:.3f} p.u.</source>
+        <translation>Media {mean_distance:.3f} p.u.</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
+    <message>
+        <source>Metric</source>
+        <translation>Metrica</translation>
+    </message>
+    <message>
+        <source>Minimum distance {min_distance:.3f} p.u. • mean distance {mean_distance:.3f} p.u.</source>
+        <translation>Distanza minima {min_distance:.3f} p.u. • distanza media {mean_distance:.3f} p.u.</translation>
+    </message>
+    <message>
+        <source>Minimum sigma distance</source>
+        <translation>Distanza sigma minima</translation>
+    </message>
+    <message>
+        <source>Most Repeated Finding</source>
+        <translation>Riscontro più frequente</translation>
+    </message>
+    <message>
+        <source>Most repeated finding</source>
+        <translation>Riscontro più frequente</translation>
+    </message>
+    <message>
+        <source>Most repeated finding count</source>
+        <translation>Conteggio riscontro più frequente</translation>
+    </message>
+    <message>
+        <source>Municipality</source>
+        <translation>Municipalità</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>Net balance (MW)</source>
+        <translation>Bilancio netto (MW)</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <source>No balance series available</source>
+        <translation>Nessuna serie di bilanciamento disponibile</translation>
+    </message>
+    <message>
+        <source>No findings were produced by the current analysis settings.</source>
+        <translation>Nessun risultato è stato prodotto dalle impostazioni di analisi attuali.</translation>
+    </message>
+    <message>
+        <source>No safe automatic fixes were detected, so the next step is a manual review of the highest-severity findings.</source>
+        <translation>Non sono stati rilevati fix automatici sicuri, quindi il passo successivo è una revisione manuale dei risultati di severità più elevata.</translation>
+    </message>
+    <message>
+        <source>No snapshot balances available</source>
+        <translation>Nessun saldo snapshot disponibile</translation>
+    </message>
+    <message>
+        <source>No {aggregation} balances are available to plot.</source>
+        <translation>Non sono disponibili saldi {aggregation} da tracciare.</translation>
+    </message>
+    <message>
+        <source>Object</source>
+        <translation>Oggetto</translation>
+    </message>
+    <message>
+        <source>Overall score</source>
+        <translation>Punteggio complessivo</translation>
+    </message>
+    <message>
+        <source>Prioritize errors and divergences before warnings, especially the rows tagged with severe numerical or connectivity issues.</source>
+        <translation>Dare priorità agli errori e alle divergenze rispetto agli avvisi, specialmente alle righe contrassegnate con gravi problemi numerici o di connettività.</translation>
+    </message>
+    <message>
+        <source>Property</source>
+        <translation>Proprietà</translation>
+    </message>
+    <message>
+        <source>Recommended Next Actions</source>
+        <translation>Azioni successive consigliate</translation>
+    </message>
+    <message>
+        <source>Region</source>
+        <translation>Regione</translation>
+    </message>
+    <message>
+        <source>Safe corrections available</source>
+        <translation>Correzioni sicure disponibili</translation>
+    </message>
+    <message>
+        <source>Score Rationale</source>
+        <translation>Motivazione del punteggio</translation>
+    </message>
+    <message>
+        <source>Severity</source>
+        <translation>Severità</translation>
+    </message>
+    <message>
+        <source>Showing the {count} strongest {aggregation} balance traces. Largest absolute balance: {column_name} at {column_value:.3f} MW.</source>
+        <translation>Visualizzazione delle {count} tracce di saldo {aggregation} più forti. Saldo assoluto più grande: {column_name} a {column_value:.3f} MW.</translation>
+    </message>
+    <message>
+        <source>Sigma</source>
+        <translation>Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma Plot</source>
+        <translation>Grafico Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma Table</source>
+        <translation>Tabella Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma analysis</source>
+        <translation>Analisi Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma analysis converged.</source>
+        <translation>L&apos;analisi Sigma è convergente.</translation>
+    </message>
+    <message>
+        <source>Sigma analysis could not be produced for the current grid state.</source>
+        <translation>Non è possibile produrre l&apos;analisi Sigma per lo stato attuale della rete.</translation>
+    </message>
+    <message>
+        <source>Sigma analysis did not converge</source>
+        <translation>L&apos;analisi Sigma non è convergente</translation>
+    </message>
+    <message>
+        <source>Sigma analysis failed: {exception}</source>
+        <translation>L&apos;analisi Sigma è fallita: {exception}</translation>
+    </message>
+    <message>
+        <source>Sigma analysis returned no results.</source>
+        <translation>L&apos;analisi Sigma non ha restituito risultati.</translation>
+    </message>
+    <message>
+        <source>Sigma analysis unavailable because the grid is not valid for simulation.</source>
+        <translation>L&apos;analisi Sigma non è disponibile perché la rete non è valida per la simulazione.</translation>
+    </message>
+    <message>
+        <source>Sigma available</source>
+        <translation>Sigma disponibile</translation>
+    </message>
+    <message>
+        <source>Sigma coefficients did not fully converge.</source>
+        <translation>I coefficienti Sigma non sono completamente convergenti.</translation>
+    </message>
+    <message>
+        <source>Sigma data unavailable</source>
+        <translation>Dati Sigma non disponibili</translation>
+    </message>
+    <message>
+        <source>Sigma distance</source>
+        <translation>Distanza Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma distance is not available</source>
+        <translation>La distanza Sigma non è disponibile</translation>
+    </message>
+    <message>
+        <source>Sigma margin is acceptable, so focus on structural cleanup before attempting aggressive operational studies.</source>
+        <translation>Il margine Sigma è accettabile, quindi concentrarsi sulla pulizia strutturale prima di tentare studi operativi aggressivi.</translation>
+    </message>
+    <message>
+        <source>Sigma plot</source>
+        <translation>Grafico Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma plot is unavailable for the current grid state.</source>
+        <translation>Il grafico Sigma non è disponibile per lo stato attuale della rete.</translation>
+    </message>
+    <message>
+        <source>Sigma point is outside the stability curve</source>
+        <translation>Il punto Sigma è fuori dalla curva di stabilità</translation>
+    </message>
+    <message>
+        <source>Sigma score</source>
+        <translation>Punteggio Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma stability could not be included in the score because the simulation could not be produced.</source>
+        <translation>La stabilità Sigma non è stata inclusa nel punteggio perché non è stato possibile produrre la simulazione.</translation>
+    </message>
+    <message>
+        <source>Sigma stability margin is available with minimum distance &lt;b&gt;{min_distance:.3f} p.u.&lt;/b&gt; and mean distance &lt;b&gt;{mean_distance:.3f} p.u.&lt;/b&gt;.</source>
+        <translation>Il margine di stabilità Sigma è disponibile con distanza minima &lt;b&gt;{min_distance:.3f} p.u.&lt;/b&gt; e distanza media &lt;b&gt;{mean_distance:.3f} p.u.&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Sigma status</source>
+        <translation>Stato Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma table</source>
+        <translation>Tabella Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma table copied to clipboard.</source>
+        <translation>Tabella Sigma copiata negli appunti.</translation>
+    </message>
+    <message>
+        <source>Snapshot net balances by {aggregation}. Largest exporter: {exporter_name} ({exporter_value:.3f} MW). Largest importer: {importer_name} ({importer_value:.3f} MW).</source>
+        <translation>Bilanci netti snapshot per {aggregation}. Esportatore più grande: {exporter_name} ({exporter_value:.3f} MW). Importatore più grande: {importer_name} ({importer_value:.3f} MW).</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <source>Summary</source>
+        <translation>Riepilogo</translation>
+    </message>
+    <message>
+        <source>The current dashboard state does not expose any safe automatic fixes.</source>
+        <translation>Lo stato attuale del dashboard non espone fix automatici sicuri.</translation>
+    </message>
+    <message>
+        <source>The grid scores &lt;b&gt;{overall_score}/100&lt;/b&gt; (&lt;b&gt;grade {grade}&lt;/b&gt;) across &lt;b&gt;{asset_count}&lt;/b&gt; analyzed assets.</source>
+        <translation>La rete ottiene un punteggio di &lt;b&gt;{overall_score}/100&lt;/b&gt; (&lt;b&gt;grado {grade}&lt;/b&gt;) su &lt;b&gt;{asset_count}&lt;/b&gt; asset analizzati.</translation>
+    </message>
+    <message>
+        <source>There are no critical findings, so the remaining work is mainly quality hardening and model cleanup.</source>
+        <translation>Non ci sono risultati critici, quindi il lavoro rimanente consiste principalmente nell&apos;indurimento della qualità e nella pulizia del modello.</translation>
+    </message>
+    <message>
+        <source>There is no sigma table available to copy.</source>
+        <translation>Non è disponibile alcuna tabella Sigma da copiare.</translation>
+    </message>
+    <message>
+        <source>Threshold</source>
+        <translation>Soglia</translation>
+    </message>
+    <message>
+        <source>Thresholds</source>
+        <translation>Soglie</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <source>Top N</source>
+        <translation>Top N</translation>
+    </message>
+    <message>
+        <source>Top {count} {aggregation} balances over time</source>
+        <translation>Top {count} saldi {aggregation} nel tempo</translation>
+    </message>
+    <message>
+        <source>Top {count} {aggregation} snapshot balances</source>
+        <translation>Top {count} saldi snapshot {aggregation}</translation>
+    </message>
+    <message>
+        <source>Total findings</source>
+        <translation>Risultati totali</translation>
+    </message>
+    <message>
+        <source>Transformer Vcc max (%)</source>
+        <translation>Vcc max del Trasformatore (%)</translation>
+    </message>
+    <message>
+        <source>Transformer Vcc min (%)</source>
+        <translation>Vcc min del Trasformatore (%)</translation>
+    </message>
+    <message>
+        <source>Transformer tap module max</source>
+        <translation>Max modulo di tap del Trasformatore</translation>
+    </message>
+    <message>
+        <source>Transformer tap module min</source>
+        <translation>Min modulo di tap del Trasformatore</translation>
+    </message>
+    <message>
+        <source>Unnamed grid</source>
+        <translation>Rete non nominata</translation>
+    </message>
+    <message>
+        <source>Upper</source>
+        <translation>Superiore</translation>
+    </message>
+    <message>
+        <source>Use &lt;b&gt;Fix Safe Issues&lt;/b&gt; to correct the problems already covered by automatic repairs, then refresh the score.</source>
+        <translation>Usa &lt;b&gt;Fix Safe Issues&lt;/b&gt; per correggere i problemi già coperti dalle riparazioni automatiche, quindi aggiorna il punteggio.</translation>
+    </message>
+    <message>
+        <source>Use the tabs below to review the executive overview, detailed findings, action narrative, sigma stability view and threshold controls.</source>
+        <translation>Utilizza le schede sottostanti per rivedere la panoramica esecutiva, i risultati dettagliati, la narrativa d&apos;azione, la vista di stabilità sigma e i controlli di soglia.</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valore</translation>
+    </message>
+    <message>
+        <source>VoltageLevel</source>
+        <translation>Livello di Tensione</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Avvertimento</translation>
+    </message>
+    <message>
+        <source>Warnings</source>
+        <translation>Avvisi</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Sì</translation>
+    </message>
+    <message>
+        <source>Zone</source>
+        <translation>Zona</translation>
+    </message>
+    <message>
+        <source>{critical_count} critical findings</source>
+        <translation>{critical_count} risultati critici</translation>
+    </message>
+    <message>
+        <source>{grid_name}  •  {bus_count} buses  •  {line_count} lines  •  {transformer_count} transformers</source>
+        <translation>{grid_name} • {bus_count} bus • {line_count} linee • {transformer_count} trasformatori</translation>
+    </message>
+    <message>
+        <source>{status_text} Min distance {min_distance:.3f} p.u. • mean distance {mean_distance:.3f} p.u.</source>
+        <translation>{status_text} Min distanza {min_distance:.3f} p.u. • distanza media {mean_distance:.3f} p.u.</translation>
+    </message>
+    <message>
+        <source>Open-Meteo did not return hourly weather data</source>
+        <translation>Open-Meteo did not return hourly weather data</translation>
+    </message>
+    <message>
+        <source>Open-Meteo weather request failed :(
+{error_text}</source>
+        <translation>Open-Meteo weather request failed :(
+{error_text}</translation>
+    </message>
+    <message>
+        <source>PVGIS did not return photovoltaic power data</source>
+        <translation>PVGIS did not return photovoltaic power data</translation>
+    </message>
+    <message>
+        <source>PVGIS returned data, but it could not be interpolated to the circuit time profile</source>
+        <translation>PVGIS returned data, but it could not be interpolated to the circuit time profile</translation>
+    </message>
+    <message>
+        <source>The hub height must be greater than zero</source>
+        <translation>The hub height must be greater than zero</translation>
+    </message>
+    <message>
+        <source>The latitude must be between -90 and 90 degrees</source>
+        <translation>The latitude must be between -90 and 90 degrees</translation>
+    </message>
+    <message>
+        <source>The longitude must be between -180 and 180 degrees</source>
+        <translation>The longitude must be between -180 and 180 degrees</translation>
+    </message>
+    <message>
+        <source>The photovoltaic peak power must be greater than zero</source>
+        <translation>The photovoltaic peak power must be greater than zero</translation>
+    </message>
+    <message>
+        <source>The roughness length must be zero or greater</source>
+        <translation>The roughness length must be zero or greater</translation>
+    </message>
+    <message>
+        <source>The time span of your profile is {year_span} year(s), Pvlib&apos;s span is 10 years maximum</source>
+        <translation>The time span of your profile is {year_span} year(s), Pvlib&apos;s span is 10 years maximum</translation>
+    </message>
+    <message>
+        <source>The wind generator peak power must be greater than zero</source>
+        <translation>The wind generator peak power must be greater than zero</translation>
+    </message>
+    <message>
+        <source>pvlib&apos;s http request failed :(
+{error_text}</source>
+        <translation>pvlib&apos;s http request failed :(
+{error_text}</translation>
+    </message>
+    <message>
+        <source>windpowerlib is required to generate wind power profiles:
+{error_text}</source>
+        <translation>windpowerlib is required to generate wind power profiles:
+{error_text}</translation>
+    </message>
+    <message>
+        <source>windpowerlib is required to load turbine templates:
+{error_text}</source>
+        <translation>windpowerlib is required to load turbine templates:
+{error_text}</translation>
+    </message>
+    <message>
+        <source>windpowerlib turbine template loading failed :(
+{error_text}</source>
+        <translation>windpowerlib turbine template loading failed :(
+{error_text}</translation>
+    </message>
+    <message>
+        <source>windpowerlib wind calculation failed :(
+{error_text}</source>
+        <translation>windpowerlib wind calculation failed :(
+{error_text}</translation>
+    </message>
+</context>
+<context>
+    <name>MapGeneratorGraphicItem</name>
+    <message>
+        <source>Are you sure that you want to convert this generator into a battery?</source>
+        <translation>Sei sicuro di voler convertire questo generatore in una batteria?</translation>
+    </message>
+    <message>
+        <source>Convert generator</source>
+        <translation>Converti generatore</translation>
+    </message>
+</context>
+<context>
+    <name>MapLibraryModel</name>
+    <message>
+        <source>Drag &amp; drop {name} into the schematic</source>
+        <translation>Trascina e rilascia {name} nello schema</translation>
+    </message>
+    <message>
+        <source>Substation</source>
+        <translation>Sottostazione</translation>
+    </message>
+</context>
+<context>
+    <name>MapLineContainer</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Index out of range or invalid</source>
+        <translation>Indice fuori intervallo o non valido</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+    <message>
+        <source>split line</source>
+        <translation>Dividi linea</translation>
+    </message>
+</context>
+<context>
+    <name>MapLineSegment</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+</context>
+<context>
+    <name>MapView</name>
+    <message>
+        <source>Bottom Left Label</source>
+        <translation>Etichetta in basso a sinistra</translation>
+    </message>
+</context>
+<context>
+    <name>MapWarningDialog</name>
+    <message>
+        <source>Action Required</source>
+        <translation>Azione richiesta</translation>
+    </message>
 </context>
 <context>
     <name>MatpowerExportDialog</name>
@@ -2929,6 +7078,227 @@ Annullare e riprovare?</translation>
         <location filename="../FileDialogues/MatpowerDialogue/matpower_export_gui.ui" line="72"/>
         <source>Export</source>
         <translation>Esportare</translation>
+    </message>
+</context>
+<context>
+    <name>MatpowerExportDialogue</name>
+    <message>
+        <source>Export to MATPOWER</source>
+        <translation>Esporta in MATPOWER</translation>
+    </message>
+    <message>
+        <source>MATPOWER export</source>
+        <translation>Esportazione MATPOWER</translation>
+    </message>
+</context>
+<context>
+    <name>MeasurementsDialog</name>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="14"/>
+        <source>Configure measurement block</source>
+        <translation>Configurare blocco di misura</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="38"/>
+        <source>Bus</source>
+        <translation>Bus</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="69"/>
+        <source>Click to select a bus</source>
+        <translation>Clicca per selezionare un bus</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="78"/>
+        <source>Select bus...</source>
+        <translation>Seleziona bus...</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="123"/>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="128"/>
+        <source>I/O</source>
+        <translation>I/O</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/ElementDialogues/MeasurementsDialog/measurements_dialog_ui.ui" line="133"/>
+        <source>Comment</source>
+        <translation>Commento</translation>
+    </message>
+</context>
+<context>
+    <name>ModelsInputGUI</name>
+    <message>
+        <source>Add files</source>
+        <translation>Aggiungi file</translation>
+    </message>
+    <message>
+        <source>Do you want to clear the import data?</source>
+        <translation>Vuoi cancellare i dati di importazione?</translation>
+    </message>
+    <message>
+        <source>Models import dialogue</source>
+        <translation>Dialogo di importazione modelli</translation>
+    </message>
+    <message>
+        <source>Select file</source>
+        <translation>Seleziona file</translation>
+    </message>
+    <message>
+        <source>There is an import procedure running.
+Cancel it and close the window?</source>
+        <translation>È in corso una procedura di importazione.
+Annullarla e chiudere la finestra?</translation>
+    </message>
+</context>
+<context>
+    <name>NewConnectedDeviceDialogue</name>
+    <message>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>New device</source>
+        <translation>Nuovo dispositivo</translation>
+    </message>
+</context>
+<context>
+    <name>NewMapLineDialogue</name>
+    <message>
+        <source>New line</source>
+        <translation>Nuova linea</translation>
+    </message>
+</context>
+<context>
+    <name>NewProfilesStructureDialogue</name>
+    <message>
+        <source>Accept</source>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>New profiles structure</source>
+        <translation>Nuova struttura dei profili</translation>
+    </message>
+    <message>
+        <source>Number of time steps</source>
+        <translation>Numero di passi temporali</translation>
+    </message>
+    <message>
+        <source>Start date</source>
+        <translation>Data di inizio</translation>
+    </message>
+    <message>
+        <source>Time step length</source>
+        <translation>Lunghezza del passo temporale</translation>
+    </message>
+    <message>
+        <source>Time units</source>
+        <translation>Unità di tempo</translation>
+    </message>
+</context>
+<context>
+    <name>ObjectColumnFilterDialog</name>
+    <message>
+        <source>Apply</source>
+        <translation>Applica</translation>
+    </message>
+    <message>
+        <source>Cancel filter</source>
+        <translation>Annulla filtro</translation>
+    </message>
+    <message>
+        <source>Clear filter</source>
+        <translation>Cancella filtro</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Ricerca</translation>
+    </message>
+    <message>
+        <source>Select all visible</source>
+        <translation>Seleziona tutto visibile</translation>
+    </message>
+    <message>
+        <source>Select no visible</source>
+        <translation>Nessuno visibile</translation>
+    </message>
+    <message>
+        <source>Sort A to Z</source>
+        <translation>Ordina A-Z</translation>
+    </message>
+    <message>
+        <source>Sort Z to A</source>
+        <translation>Ordina Z-A</translation>
+    </message>
+</context>
+<context>
+    <name>PopupResizeGrip</name>
+    <message>
+        <source>Resize</source>
+        <translation>Ridimensiona</translation>
+    </message>
+</context>
+<context>
+    <name>ProceduralGridWindow</name>
+    <message>
+        <source>Procedural grid expansion</source>
+        <translation>Espansione procedurale della griglia</translation>
+    </message>
+    <message>
+        <source>Procedural grid expansion log</source>
+        <translation>Registro di espansione della rete procedurale</translation>
+    </message>
+</context>
+<context>
+    <name>ProfileInputGUI</name>
+    <message>
+        <source>Could not open:
+{file_name}</source>
+        <translation>Impossibile aprire:
+{file_name}</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>File open</source>
+        <translation>Apri file</translation>
+    </message>
+    <message>
+        <source>Import issues</source>
+        <translation>Problemi di importazione</translation>
+    </message>
+    <message>
+        <source>Make sure this is a proper comma-separated-value file.
+ Otherwise use excel.</source>
+        <translation>Assicurati che si tratti di un file di valori separati da virgole valido.
+ Altrimenti usa excel.</translation>
+    </message>
+    <message>
+        <source>No time profile</source>
+        <translation>Nessun profilo temporale</translation>
+    </message>
+    <message>
+        <source>No time profile.
+Consider loading a valid source of data.</source>
+        <translation>Nessun profilo temporale.
+Si consiglia di caricare una fonte di dati valida.</translation>
+    </message>
+    <message>
+        <source>Open file</source>
+        <translation>Apri file</translation>
+    </message>
+    <message>
+        <source>Value error loading CSV file</source>
+        <translation>Errore di valore durante il caricamento del file CSV</translation>
+    </message>
+    <message>
+        <source>Profile plot</source>
+        <translation>Grafico dei profili</translation>
     </message>
 </context>
 <context>
@@ -2980,6 +7350,17 @@ Annullare e riprovare?</translation>
     </message>
 </context>
 <context>
+    <name>PsseExportDialogue</name>
+    <message>
+        <source>Export to PSS/e</source>
+        <translation>Esporta in PSS/e</translation>
+    </message>
+    <message>
+        <source>PSS/e export</source>
+        <translation>Esportazione PSS/e</translation>
+    </message>
+</context>
+<context>
     <name>PsseImportDialog</name>
     <message>
         <location filename="../FileDialogues/PsseDialogue/psse_import_gui.ui" line="14"/>
@@ -3023,6 +7404,13 @@ Annullare e riprovare?</translation>
     </message>
 </context>
 <context>
+    <name>PsseImportDialogue</name>
+    <message>
+        <source>PSS/e import</source>
+        <translation>Importazione PSS/e</translation>
+    </message>
+</context>
+<context>
     <name>ReduceDialog</name>
     <message>
         <location filename="../GridReduce/grid_reduce_gui.ui" line="14"/>
@@ -3059,93 +7447,93 @@ Annullare e riprovare?</translation>
     <name>ResultsMain</name>
     <message>
         <source>Delete driver</source>
-        <translation type="vanished">Elimina autista</translation>
+        <translation>Elimina autista</translation>
     </message>
     <message>
         <source>Rename group</source>
-        <translation type="vanished">Rinominare il gruppo</translation>
+        <translation>Rinominare il gruppo</translation>
     </message>
     <message>
         <source>Rename variable</source>
-        <translation type="vanished">Rinomina variabile</translation>
+        <translation>Rinomina variabile</translation>
     </message>
     <message>
         <source>Rename dynamic plot</source>
-        <translation type="vanished">Rinominare la trama dinamica</translation>
+        <translation>Rinominare la trama dinamica</translation>
     </message>
     <message>
         <source>Plot name</source>
-        <translation type="vanished">Nome della trama</translation>
+        <translation>Nome della trama</translation>
     </message>
     <message>
         <source>The plot group name is empty or already exists.</source>
-        <translation type="vanished">Il nome del gruppo di stampa è vuoto o esiste già.</translation>
+        <translation>Il nome del gruppo di stampa è vuoto o esiste già.</translation>
     </message>
     <message>
         <source>Select a plot group first.</source>
-        <translation type="vanished">Seleziona prima un gruppo di parcelle.</translation>
+        <translation>Seleziona prima un gruppo di parcelle.</translation>
     </message>
     <message>
         <source>There are no RMS dynamics results loaded.</source>
-        <translation type="vanished">Non sono stati caricati risultati di dinamica RMS.</translation>
+        <translation>Non sono stati caricati risultati di dinamica RMS.</translation>
     </message>
     <message>
         <source>Rename dynamic variable</source>
-        <translation type="vanished">Rinominare la variabile dinamica</translation>
+        <translation>Rinominare la variabile dinamica</translation>
     </message>
     <message>
         <source>Variable name</source>
-        <translation type="vanished">Nome della variabile</translation>
+        <translation>Nome della variabile</translation>
     </message>
     <message>
         <source>The variable name is empty or could not be changed.</source>
-        <translation type="vanished">Il nome della variabile è vuoto o non può essere modificato.</translation>
+        <translation>Il nome della variabile è vuoto o non può essere modificato.</translation>
     </message>
     <message>
         <source>New dynamic plot</source>
-        <translation type="vanished">Nuova trama dinamica</translation>
+        <translation>Nuova trama dinamica</translation>
     </message>
     <message>
         <source>Plot mode</source>
-        <translation type="vanished">Modalità tracciato</translation>
+        <translation>Modalità tracciato</translation>
     </message>
     <message>
         <source>Time Series (Y vs Time)</source>
-        <translation type="vanished">Serie temporali (Y rispetto al tempo)</translation>
+        <translation>Serie temporali (Y rispetto al tempo)</translation>
     </message>
     <message>
         <source>X-Y Plot (Y vs X)</source>
-        <translation type="vanished">Grafico X-Y (Y vs X)</translation>
+        <translation>Grafico X-Y (Y vs X)</translation>
     </message>
     <message>
         <source>The selected dynamic plot entry could not be deleted.</source>
-        <translation type="vanished">Impossibile eliminare la voce del grafico dinamico selezionata.</translation>
+        <translation>Impossibile eliminare la voce del grafico dinamico selezionata.</translation>
     </message>
     <message>
         <source>Select a plot group or variable first.</source>
-        <translation type="vanished">Selezionare prima un gruppo di grafici o una variabile.</translation>
+        <translation>Selezionare prima un gruppo di grafici o una variabile.</translation>
     </message>
     <message>
         <source>The selected dynamic plot entry could not be plotted.</source>
-        <translation type="vanished">Non è stato possibile tracciare la voce di stampa dinamica selezionata.</translation>
+        <translation>Non è stato possibile tracciare la voce di stampa dinamica selezionata.</translation>
     </message>
     <message>
         <source>There are {columns} columns, the plot might take a lot to render.
 Are you ok with potentially waiting a lot?</source>
-        <translation type="vanished">Sono presenti colonne {columns}, il rendering della trama potrebbe richiedere molto tempo.
+        <translation>Sono presenti colonne {columns}, il rendering della trama potrebbe richiedere molto tempo.
 Ti va bene di aspettare potenzialmente molto?</translation>
     </message>
     <message>
         <source>Plot</source>
-        <translation type="vanished">Complotto</translation>
+        <translation>Complotto</translation>
     </message>
     <message>
         <source>Export results</source>
-        <translation type="vanished">Esporta risultati</translation>
+        <translation>Esporta risultati</translation>
     </message>
     <message>
         <source>CSV (*.csv);;Excel files (*.xlsx)</source>
-        <translation type="vanished">CSV (*.csv);;File Excel (*.xlsx)</translation>
+        <translation>CSV (*.csv);;File Excel (*.xlsx)</translation>
     </message>
     <message>
         <source> is not valid :(</source>
@@ -3153,55 +7541,132 @@ Ti va bene di aspettare potenzialmente molto?</translation>
     </message>
     <message>
         <source>There is no profile displayed, please display one</source>
-        <translation type="vanished">Non è visualizzato alcun profilo, visualizzane uno</translation>
+        <translation>Non è visualizzato alcun profilo, visualizzane uno</translation>
     </message>
     <message>
         <source>Copy profile to clipboard</source>
-        <translation type="vanished">Copia il profilo negli appunti</translation>
+        <translation>Copia il profilo negli appunti</translation>
     </message>
     <message>
         <source>Copied!</source>
-        <translation type="vanished">Copiato!</translation>
+        <translation>Copiato!</translation>
     </message>
     <message>
         <source>Filter parse</source>
-        <translation type="vanished">Analizza il filtro</translation>
+        <translation>Analizza il filtro</translation>
     </message>
     <message>
         <source>Do you want to delete the results driver {study_name}?</source>
-        <translation type="vanished">Vuoi eliminare il driver dei risultati {study_name}?</translation>
+        <translation>Vuoi eliminare il driver dei risultati {study_name}?</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
     <message>
         <source>Are you sure that you want to overwrite the generation, batteries and load snapshot values with the OPF results?</source>
-        <translation type="vanished">Sei sicuro di voler sovrascrivere i valori di generazione, batterie e caricamento istantanee con i risultati OPF?</translation>
+        <translation>Sei sicuro di voler sovrascrivere i valori di generazione, batterie e caricamento istantanee con i risultati OPF?</translation>
     </message>
     <message>
         <source>Overwrite profiles with OPF results</source>
-        <translation type="vanished">Sovrascrivi i profili con i risultati OPF</translation>
+        <translation>Sovrascrivi i profili con i risultati OPF</translation>
     </message>
     <message>
         <source>P snapshot set from the OPF results</source>
-        <translation type="vanished">Istantanea P impostata dai risultati OPF</translation>
+        <translation>Istantanea P impostata dai risultati OPF</translation>
     </message>
     <message>
         <source>The OPF time series has no results :(</source>
-        <translation type="vanished">La serie temporale OPF non ha risultati :(</translation>
+        <translation>La serie temporale OPF non ha risultati :(</translation>
     </message>
     <message>
         <source>Are you sure that you want to overwrite the generation, batteries and load profiles with the OPF time series results?</source>
-        <translation type="vanished">Sei sicuro di voler sovrascrivere la generazione, le batterie e i profili di carico con i risultati della serie temporale OPF?</translation>
+        <translation>Sei sicuro di voler sovrascrivere la generazione, le batterie e i profili di carico con i risultati della serie temporale OPF?</translation>
     </message>
     <message>
         <source>P profiles set from the OPF results</source>
-        <translation type="vanished">Profili P impostati dai risultati OPF</translation>
+        <translation>Profili P impostati dai risultati OPF</translation>
     </message>
     <message>
         <source>Export logs</source>
-        <translation type="vanished">Esporta registri</translation>
+        <translation>Esporta registri</translation>
+    </message>
+    <message>
+        <source>Plot results</source>
+        <translation>Tracciare i risultati</translation>
+    </message>
+    <message>
+        <source>Select a variable first.</source>
+        <translation>Selezionare prima una variabile.</translation>
+    </message>
+    <message>
+        <source>There are no results available to plot.</source>
+        <translation>Non sono disponibili risultati da tracciare.</translation>
+    </message>
+    <message>
+        <source>{file_name} is not valid :(</source>
+        <translation>{file_name} is not valid :(</translation>
+    </message>
+    <message>
+        <source>Results plot</source>
+        <translation>Grafico dei risultati</translation>
+    </message>
+</context>
+<context>
+    <name>ResultsModel</name>
+    <message>
+        <source>Plotting error</source>
+        <translation>Errore di tracciamento</translation>
+    </message>
+</context>
+<context>
+    <name>RetainedModeDraftTableModel</name>
+    <message>
+        <source>Retained mode</source>
+        <translation>Modalità mantenuta</translation>
+    </message>
+    <message>
+        <source>Select one retained mode.</source>
+        <translation>Seleziona una modalità mantenuta.</translation>
+    </message>
+</context>
+<context>
+    <name>RmsPlotDialog</name>
+    <message>
+        <source>Add</source>
+        <translation>Aggiungere</translation>
+    </message>
+    <message>
+        <source>Device:</source>
+        <translation>Dispositivo:</translation>
+    </message>
+    <message>
+        <source>Plot Variables</source>
+        <translation>Tracciare variabili</translation>
+    </message>
+    <message>
+        <source>Plot Window</source>
+        <translation>Finestra di tracciamento</translation>
+    </message>
+    <message>
+        <source>Remove variable</source>
+        <translation>Rimuovi variabile</translation>
+    </message>
+    <message>
+        <source>Rms Simulation Results</source>
+        <translation>Risultati simulazione RMS</translation>
+    </message>
+    <message>
+        <source>Show in new window</source>
+        <translation>Mostra in nuova finestra</translation>
+    </message>
+    <message>
+        <source>Variable:</source>
+        <translation>Variabile:</translation>
+    </message>
+    <message>
+        <source>time (s)</source>
+        <translation>tempo (s)</translation>
     </message>
 </context>
 <context>
@@ -3261,6 +7726,415 @@ Ti va bene di aspettare potenzialmente molto?</translation>
         <location filename="../FileDialogues/RosetaExplorer/roseta_explorer.ui" line="533"/>
         <source>Save logs</source>
         <translation>Salva i registri</translation>
+    </message>
+</context>
+<context>
+    <name>RosetaExplorerGUI</name>
+    <message>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <source>Copied table to clipboard!</source>
+        <translation>Copied table to clipboard!</translation>
+    </message>
+    <message>
+        <source>Excel files (*.xlsx)</source>
+        <translation>Excel files (*.xlsx)</translation>
+    </message>
+    <message>
+        <source>Export logs</source>
+        <translation>Esporta registri</translation>
+    </message>
+    <message>
+        <source>Logger</source>
+        <translation>Registratore</translation>
+    </message>
+    <message>
+        <source>The documentation could not be found under {index_path}</source>
+        <translation>The documentation could not be found under {index_path}</translation>
+    </message>
+    <message>
+        <source>There no logs :)</source>
+        <translation>Non ci sono log :)</translation>
+    </message>
+    <message>
+        <source>{file_name} is not valid :(</source>
+        <translation>{file_name} is not valid :(</translation>
+    </message>
+</context>
+<context>
+    <name>RuntimeLogicEditorWidget</name>
+    <message>
+        <source>Add entry</source>
+        <translation type="vanished">Aggiungi voce</translation>
+    </message>
+    <message>
+        <source>Add retained mode</source>
+        <translation type="vanished">Aggiungi modalità mantenuta</translation>
+    </message>
+    <message>
+        <source>Configuration</source>
+        <translation type="vanished">Configurazione</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="vanished">Eliminare</translation>
+    </message>
+    <message>
+        <source>Delete retained mode</source>
+        <translation type="vanished">Elimina modalità mantenuta</translation>
+    </message>
+    <message>
+        <source>Documentation</source>
+        <translation type="vanished">Documentazione</translation>
+    </message>
+    <message>
+        <source>Enter a procedural entry name.</source>
+        <translation type="vanished">Inserire un nome voce procedurale.</translation>
+    </message>
+    <message>
+        <source>Enter a valid retained-mode symbol name.</source>
+        <translation type="vanished">Inserire un nome simbolo modalità mantenuta valido.</translation>
+    </message>
+    <message>
+        <source>Enter an initial value or expression.</source>
+        <translation type="vanished">Inserire un valore o espressione iniziale.</translation>
+    </message>
+    <message>
+        <source>Entry name</source>
+        <translation type="vanished">Nome voce</translation>
+    </message>
+    <message>
+        <source>Initial value or expression</source>
+        <translation type="vanished">Valore o espressione iniziale</translation>
+    </message>
+    <message>
+        <source>Mode symbol name</source>
+        <translation type="vanished">Nome simbolo modalità</translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation type="vanished">Muovi giù</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation type="vanished">Muovi su</translation>
+    </message>
+    <message>
+        <source>Owner</source>
+        <translation type="vanished">Proprietario</translation>
+    </message>
+    <message>
+        <source>Procedural entries</source>
+        <translation type="vanished">Voci procedurali</translation>
+    </message>
+    <message>
+        <source>Retained modes</source>
+        <translation type="vanished">Modalità mantenute</translation>
+    </message>
+    <message>
+        <source>Runtime logic is valid.</source>
+        <translation type="vanished">La logica di esecuzione è valida.</translation>
+    </message>
+    <message>
+        <source>Select a valid owner and procedural type.</source>
+        <translation type="vanished">Selezionare un proprietario e un tipo procedurale validi.</translation>
+    </message>
+    <message>
+        <source>Select a valid owner block.</source>
+        <translation type="vanished">Seleziona un blocco proprietario valido.</translation>
+    </message>
+    <message>
+        <source>Select one procedural entry to delete.</source>
+        <translation type="vanished">Selezionare una voce procedurale da eliminare.</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="vanished">Tipo</translation>
+    </message>
+    <message>
+        <source>Valid runtime logic. Warnings: </source>
+        <translation type="vanished">Logica di esecuzione valida. Avvisi:</translation>
+    </message>
+    <message>
+        <source>Validate runtime logic</source>
+        <translation type="vanished">Validare logica di esecuzione</translation>
+    </message>
+</context>
+<context>
+    <name>ScenariosMain</name>
+    <message>
+        <source>Add child scenario</source>
+        <translation>Aggiungi scenario figlio</translation>
+    </message>
+    <message>
+        <source>Commit scenario</source>
+        <translation>Scenario di impegno</translation>
+    </message>
+    <message>
+        <source>Merge children into scenario</source>
+        <translation>Unisci i bambini nello scenario</translation>
+    </message>
+    <message>
+        <source>Remove scenario</source>
+        <translation>Rimuovi scenario</translation>
+    </message>
+    <message>
+        <source>Rename scenario</source>
+        <translation>Rinominare lo scenario</translation>
+    </message>
+    <message>
+        <source>Set as current scenario</source>
+        <translation>Imposta come scenario corrente</translation>
+    </message>
+    <message>
+        <source>Add Child Scenario</source>
+        <translation>Aggiungi Scenario Figlio</translation>
+    </message>
+    <message>
+        <source>Commit Scenario</source>
+        <translation>Conferma Scenario</translation>
+    </message>
+    <message>
+        <source>Enter scenario name:</source>
+        <translation>Inserisci nome scenario:</translation>
+    </message>
+    <message>
+        <source>Failed to merge child scenarios</source>
+        <translation>Impossibile unire i vari scenari figli</translation>
+    </message>
+    <message>
+        <source>Failed to remove scenario</source>
+        <translation>Impossibile rimuovere scenario</translation>
+    </message>
+    <message>
+        <source>Invalid parent scenario selected</source>
+        <translation>Selezionato scenario genitore non valido</translation>
+    </message>
+    <message>
+        <source>Invalid scenario selected</source>
+        <translation>Selezionato scenario non valido</translation>
+    </message>
+    <message>
+        <source>Merge Children</source>
+        <translation>Unisci Figli</translation>
+    </message>
+    <message>
+        <source>Merge {child_count} child scenario(s) into &apos;{scenario_name}&apos;?
+
+This will remove the direct child scenarios after their changes are applied.</source>
+        <translation>Unire {child_count} scenario(i) figlio in &apos;{scenario_name}&apos;?
+
+Ciò rimuoverà i vari scenari figli diretti dopo che i loro cambiamenti saranno stati applicati.</translation>
+    </message>
+    <message>
+        <source>Only the current scenario can be committed. Activate it first.</source>
+        <translation>Solo lo scenario corrente può essere confermato. Attivatelo prima.</translation>
+    </message>
+    <message>
+        <source>Please select a parent scenario first</source>
+        <translation>Si prega di selezionare prima uno scenario genitore</translation>
+    </message>
+    <message>
+        <source>Please select a scenario to commit</source>
+        <translation>Si prega di selezionare uno scenario da confermare</translation>
+    </message>
+    <message>
+        <source>Please select a scenario to merge into</source>
+        <translation>Si prega di selezionare uno scenario in cui unire</translation>
+    </message>
+    <message>
+        <source>Please select a scenario to remove</source>
+        <translation>Si prega di selezionare uno scenario da rimuovere</translation>
+    </message>
+    <message>
+        <source>Please select a scenario to rename</source>
+        <translation>Si prega di selezionare uno scenario da rinominare</translation>
+    </message>
+    <message>
+        <source>Please select a scenario to set as current</source>
+        <translation>Si prega di selezionare uno scenario da impostare come corrente</translation>
+    </message>
+    <message>
+        <source>Remove Scenario</source>
+        <translation>Rimuovi Scenario</translation>
+    </message>
+    <message>
+        <source>Rename Scenario</source>
+        <translation>Rinomina Scenario</translation>
+    </message>
+    <message>
+        <source>Scenario name cannot be empty</source>
+        <translation>Il nome dello scenario non può essere vuoto</translation>
+    </message>
+    <message>
+        <source>Set Current Scenario</source>
+        <translation>Imposta Scenario Corrente</translation>
+    </message>
+    <message>
+        <source>Wait until the running operations finish before changing scenario.</source>
+        <translation>Attendere che le operazioni in corso terminino prima di cambiare scenario.</translation>
+    </message>
+</context>
+<context>
+    <name>SchematicLibraryModel</name>
+    <message>
+        <source>3W-Transformer</source>
+        <translation>Trasformatore 3W</translation>
+    </message>
+    <message>
+        <source>Bus</source>
+        <translation>Bus</translation>
+    </message>
+    <message>
+        <source>Connectivity bus</source>
+        <translation>Bus di connettività</translation>
+    </message>
+    <message>
+        <source>Drag &amp; drop {name} into the schematic</source>
+        <translation>Trascina e rilascia {name} nello schema</translation>
+    </message>
+    <message>
+        <source>Fluid-node</source>
+        <translation>Nodo fluido</translation>
+    </message>
+    <message>
+        <source>NW-Transformer</source>
+        <translation>Trasformatore NW</translation>
+    </message>
+    <message>
+        <source>VSC</source>
+        <translation>VSC</translation>
+    </message>
+</context>
+<context>
+    <name>SchematicWidget</name>
+    <message>
+        <source> %</source>
+        <translation> %</translation>
+    </message>
+    <message>
+        <source> km</source>
+        <translation>km</translation>
+    </message>
+    <message>
+        <source>Add extra buses?</source>
+        <translation>Aggiungere bus extra?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to relocate the bus from {old_bus_name} to {new_bus_name}?</source>
+        <translation>Sei sicuro di voler ricollocare il bus da {old_bus_name} a {new_bus_name}?</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to relocate {device_name} behind a converter?</source>
+        <translation>Sei sicuro di voler ricollocare {device_name} dietro un convertitore?</translation>
+    </message>
+    <message>
+        <source>Branch results length differs from the number of branch results. 
+Did you change the number of devices? If so, re-run the simulation.</source>
+        <translation>La lunghezza dei risultati del ramo differisce dal numero di risultati del ramo. 
+Hai cambiato il numero di dispositivi? In caso affermativo, riesegui la simulazione.</translation>
+    </message>
+    <message>
+        <source>Bus results length differs from the number of Bus results. 
+Did you change the number of devices? If so, re-run the simulation.</source>
+        <translation>La lunghezza dei risultati del bus differisce dal numero di risultati del bus. 
+Hai cambiato il numero di dispositivi? In caso affermativo, riesegui la simulazione.</translation>
+    </message>
+    <message>
+        <source>Change bus</source>
+        <translation>Cambia bus</translation>
+    </message>
+    <message>
+        <source>Distance from the splitting point</source>
+        <translation>Distanza dal punto di divisione</translation>
+    </message>
+    <message>
+        <source>Enter the distance from the beginning of the 
+line as a percentage of the total length</source>
+        <translation>Inserisci la distanza dall&apos;inizio della 
+linea come percentuale della lunghezza totale</translation>
+    </message>
+    <message>
+        <source>HVDC results length differs from the number of HVDC results. 
+Did you change the number of devices? If so, re-run the simulation.</source>
+        <translation>La lunghezza dei risultati HVDC differisce dal numero di risultati HVDC. 
+Hai cambiato il numero di dispositivi? In caso affermativo, riesegui la simulazione.</translation>
+    </message>
+    <message>
+        <source>Incorrect position</source>
+        <translation>Posizione errata</translation>
+    </message>
+    <message>
+        <source>Line split</source>
+        <translation>Divisione linea</translation>
+    </message>
+    <message>
+        <source>Move behind converter</source>
+        <translation>Spostarsi dietro il convertitore</translation>
+    </message>
+    <message>
+        <source>NW transformer</source>
+        <translation>Trasformatore NW</translation>
+    </message>
+    <message>
+        <source>Select the number of windings</source>
+        <translation>Seleziona il numero di avvolgimenti</translation>
+    </message>
+    <message>
+        <source>Set VSC control device 1</source>
+        <translation>Imposta dispositivo di controllo VSC 1</translation>
+    </message>
+    <message>
+        <source>Set regulation bus</source>
+        <translation>Imposta il bus di regolazione</translation>
+    </message>
+    <message>
+        <source>Split line</source>
+        <translation>Linea divisa</translation>
+    </message>
+    <message>
+        <source>The &apos;from&apos; or &apos;to&apos; bus to change has not been selected!</source>
+        <translation>Il bus &apos;da&apos; o &apos;a&apos; da modificare non è stato selezionato!</translation>
+    </message>
+    <message>
+        <source>The bus to change has not been selected!</source>
+        <translation>Il bus da modificare non è stato selezionato!</translation>
+    </message>
+    <message>
+        <source>VSC results length differs from the number of VSC results. 
+Did you change the number of devices? If so, re-run the simulation.</source>
+        <translation>La lunghezza dei risultati VSC differisce dal numero di risultati VSC. 
+Hai cambiato il numero di dispositivi? In caso affermativo, riesegui la simulazione.</translation>
+    </message>
+    <message>
+        <source>You need to select exactly one bus to be set as the VSC control device {control_index}</source>
+        <translation>Devi selezionare esattamente un bus da impostare come dispositivo di controllo VSC {control_index}</translation>
+    </message>
+    <message>
+        <source>You need to select exactly one bus to be set as the generator regulation bus</source>
+        <translation>Devi selezionare esattamente un bus da impostare come bus di regolazione del generatore</translation>
+    </message>
+    <message>
+        <source>you have to select the origin and destination buses!</source>
+        <translation>Devi selezionare i bus di origine e destinazione!</translation>
+    </message>
+    <message>
+        <source>you must select the origin and destination buses!</source>
+        <translation>Devi selezionare i bus di origine e destinazione!</translation>
+    </message>
+    <message>
+        <source>{bus_name} was not found in the diagram</source>
+        <translation>{bus_name} non è stato trovato nel diagramma</translation>
+    </message>
+    <message>
+        <source>{bus_name} was not found in the graphics manager</source>
+        <translation>{bus_name} non è stato trovato nel gestore grafico</translation>
+    </message>
+    <message>
+        <source>{device_name} profiles plot</source>
+        <translation>Grafico dei profili di {device_name}</translation>
     </message>
 </context>
 <context>
@@ -3538,69 +8412,287 @@ Monte Carlo power flow results:</source>
     </message>
     <message>
         <source>Open script</source>
-        <translation type="vanished">Apri la sceneggiatura</translation>
+        <translation>Apri la sceneggiatura</translation>
     </message>
     <message>
         <source>Are you sure you want to clear source code?</source>
-        <translation type="vanished">Sei sicuro di voler cancellare il codice sorgente?</translation>
+        <translation>Sei sicuro di voler cancellare il codice sorgente?</translation>
     </message>
     <message>
         <source>Clear source code</source>
-        <translation type="vanished">Cancella il codice sorgente</translation>
+        <translation>Cancella il codice sorgente</translation>
     </message>
     <message>
         <source>Please enter a name for the script</source>
-        <translation type="vanished">Inserisci un nome per lo script</translation>
+        <translation>Inserisci un nome per lo script</translation>
     </message>
     <message>
         <source>Save script</source>
-        <translation type="vanished">Salva copione</translation>
+        <translation>Salva copione</translation>
     </message>
     <message>
         <source>Do you want to delete {path}?</source>
-        <translation type="vanished">Vuoi eliminare {path}?</translation>
+        <translation>Vuoi eliminare {path}?</translation>
     </message>
     <message>
         <source>Delete source code file</source>
-        <translation type="vanished">Elimina il file del codice sorgente</translation>
+        <translation>Elimina il file del codice sorgente</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="vanished">Eliminare</translation>
+        <translation>Eliminare</translation>
+    </message>
+    <message>
+        <source>{path} does not exist :/</source>
+        <translation>{path} non esiste :/</translation>
+    </message>
+</context>
+<context>
+    <name>SelectionDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancellare</translation>
+    </message>
+    <message>
+        <source>Click on a substation to reconnect branch {branch_name}</source>
+        <translation>Cliccare su una sottostazione per riconnettere il ramo {branch_name}</translation>
+    </message>
+    <message>
+        <source>The substation should have a compatible voltage level ({voltage} kV)</source>
+        <translation>La sottostazione dovrebbe avere un livello di tensione compatibile ({voltage} kV)</translation>
+    </message>
+    <message>
+        <source>Waiting for Selection</source>
+        <translation>In attesa di selezione</translation>
+    </message>
+    <message>
+        <source>Waiting for selection...</source>
+        <translation>In attesa di selezione...</translation>
+    </message>
+</context>
+<context>
+    <name>SequenceEditorDialog</name>
+    <message>
+        <source>Arbitrary source waveform times must be strictly increasing.</source>
+        <translation>I tempi delle forme d&apos;onda sorgente arbitrarie devono essere strettamente crescenti.</translation>
+    </message>
+    <message>
+        <source>At least two points are required.</source>
+        <translation>Sono richiesti almeno due punti.</translation>
+    </message>
+    <message>
+        <source>Invalid number of points</source>
+        <translation>Numero di punti non valido</translation>
+    </message>
+    <message>
+        <source>Invalid points</source>
+        <translation>Punti non validi</translation>
+    </message>
+    <message>
+        <source>Invalid values</source>
+        <translation>Valori non validi</translation>
+    </message>
+    <message>
+        <source>Invalid waveform</source>
+        <translation>Forma d&apos;onda non valida</translation>
+    </message>
+    <message>
+        <source>Non-numeric value in column 0 at row {row_number}.</source>
+        <translation>Valore non numerico nella colonna 0 riga {row_number}.</translation>
+    </message>
+    <message>
+        <source>Sequence editor</source>
+        <translation>Editor di sequenza</translation>
+    </message>
+    <message>
+        <source>y points must be strictly increasing.</source>
+        <translation>I punti y devono essere strettamente crescenti.</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFileDialog</name>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="14"/>
+        <source>Server Files</source>
+        <translation>File del server</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="91"/>
+        <source>Selection</source>
+        <translation>Selezione</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="97"/>
+        <source>Type</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="104"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="121"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="138"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="155"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="172"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="189"/>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="206"/>
+        <source>-</source>
+        <translation>-</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="114"/>
+        <source>File name</source>
+        <translation>Nome file</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="131"/>
+        <source>File idtag</source>
+        <translation>File idtag</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="148"/>
+        <source>Model name</source>
+        <translation>Nome modello</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="165"/>
+        <source>Model idtag</source>
+        <translation>ID modello</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="182"/>
+        <source>Owner user</source>
+        <translation>Utente proprietario</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="199"/>
+        <source>Created at</source>
+        <translation>Creato il</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="219"/>
+        <source>Actions</source>
+        <translation>Azioni</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="225"/>
+        <source>Delete removes the selected file or the selected model branch from the server database after confirmation.</source>
+        <translation>Elimina il file selezionato o il ramo modello selezionato dal database del server dopo la conferma.</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="246"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="249"/>
+        <source>Reload the server file tree</source>
+        <translation>Ricarica l&apos;albero dei file del server</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="258"/>
+        <source>Load File</source>
+        <translation>Carica file</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="261"/>
+        <source>Load the full selected multiverse</source>
+        <translation>Carica il multiverso completo selezionato</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="270"/>
+        <source>Load Base Model</source>
+        <translation>Carica modello base</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="273"/>
+        <source>Load only the selected file base model</source>
+        <translation>Carica solo il modello base del file selezionato</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="282"/>
+        <source>Load Selected Model</source>
+        <translation>Carica modello selezionato</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="285"/>
+        <source>Load the selected scenario branch as one flat circuit</source>
+        <translation>Carica il ramo scenario selezionato come un circuito piatto</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="294"/>
+        <source>Save Current Project</source>
+        <translation>Salva progetto corrente</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="297"/>
+        <source>Upload the current project into the selected server file or model</source>
+        <translation>Carica il progetto corrente nel file o modello server selezionato</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="306"/>
+        <source>Delete Selected</source>
+        <translation>Elimina selezionato</translation>
+    </message>
+    <message>
+        <location filename="../FileDialogues/ServerFileDialog/server_file_dialogue.ui" line="309"/>
+        <source>Delete the selected file or model from the server database</source>
+        <translation>Elimina il file o modello selezionato dal database del server</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFileDialogue</name>
+    <message>
+        <source>Delete server file</source>
+        <translation>Elimina file server</translation>
+    </message>
+    <message>
+        <source>Delete server model</source>
+        <translation>Elimina modello server</translation>
+    </message>
+    <message>
+        <source>Delete the selected file and every model inside it?</source>
+        <translation>Eliminare il file selezionato e ogni modello al suo interno?</translation>
+    </message>
+    <message>
+        <source>Delete the selected model from the server database?</source>
+        <translation>Eliminare il modello selezionato dal database server?</translation>
     </message>
 </context>
 <context>
     <name>ServerMain</name>
     <message>
         <source>Server config file was erroneous, wrote a new one</source>
-        <translation type="vanished">Il file di configurazione del server era errato, ne è stato scritto uno nuovo</translation>
+        <translation>Il file di configurazione del server era errato, ne è stato scritto uno nuovo</translation>
     </message>
     <message>
         <source>The server connection is running, are you sure that you want to stop it?</source>
-        <translation type="vanished">La connessione al server è in esecuzione, sei sicuro di volerla interrompere?</translation>
+        <translation>La connessione al server è in esecuzione, sei sicuro di volerla interrompere?</translation>
     </message>
     <message>
         <source>Stop Server</source>
-        <translation type="vanished">Arresta il server</translation>
+        <translation>Arresta il server</translation>
     </message>
     <message>
         <source>Could not connect to the server :/</source>
-        <translation type="vanished">Impossibile connettersi al server :/</translation>
+        <translation>Impossibile connettersi al server :/</translation>
     </message>
     <message>
         <source>Connected!</source>
-        <translation type="vanished">Collegato!</translation>
+        <translation>Collegato!</translation>
     </message>
     <message>
         <source>Results received!</source>
-        <translation type="vanished">Risultati ricevuti!</translation>
+        <translation>Risultati ricevuti!</translation>
+    </message>
+    <message>
+        <source>Could not connect to the server: {error}</source>
+        <translation>Impossibile connettersi al server: {error}</translation>
     </message>
 </context>
 <context>
     <name>ShortCircuitSelector</name>
     <message>
         <source>Short Circuit Configuration</source>
-        <translation type="vanished">Configurazione di cortocircuito</translation>
+        <translation>Configurazione di cortocircuito</translation>
     </message>
     <message>
         <source>Custom</source>
@@ -3833,18 +8925,848 @@ Monte Carlo power flow results:</source>
     </message>
 </context>
 <context>
+    <name>SigmaAnalysisGUI</name>
+    <message>
+        <source>CSV (*.csv);;Excel files (*.xlsx)</source>
+        <translation>CSV (*.csv);;File Excel (*.xlsx)</translation>
+    </message>
+    <message>
+        <source>Export results</source>
+        <translation>Esporta risultati</translation>
+    </message>
+    <message>
+        <source>HELM-Sigma analysis dialogue</source>
+        <translation>Dialogo analisi HELM-Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma analysis completed</source>
+        <translation>Analisi Sigma completata</translation>
+    </message>
+    <message>
+        <source>Sigma analysis did not return results</source>
+        <translation>L&apos;analisi Sigma non ha restituito risultati</translation>
+    </message>
+    <message>
+        <source>Sigma coefficients did not converge :(</source>
+        <translation>I coefficienti Sigma non hanno convergito :(</translation>
+    </message>
+    <message>
+        <source>Snapshot</source>
+        <translation>Istantanea</translation>
+    </message>
+    <message>
+        <source>This window was opened without a circuit/options rerun context.</source>
+        <translation>Questa finestra è stata aperta senza un contesto di riesecuzione circuito/opzioni.</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Avvertimento</translation>
+    </message>
+</context>
+<context>
+    <name>SimulationsMain</name>
+    <message>
+        <source>Compiling the grid...</source>
+        <translation>Compilazione della rete...</translation>
+    </message>
+    <message>
+        <source>Model v. {model_version}</source>
+        <translation>Modello v.{model_version}</translation>
+    </message>
+    <message>
+        <source>Pareto combination</source>
+        <translation>Combinazione di Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto combination {index}</source>
+        <translation>Combinazione di Pareto {index}</translation>
+    </message>
+    <message>
+        <source>Running power flow...</source>
+        <translation>Esecuzione flusso di potenza...</translation>
+    </message>
+    <message>
+        <source>Short circuits</source>
+        <translation>Cortocircuiti</translation>
+    </message>
+    <message>
+        <source>User: {user_name}</source>
+        <translation>Utente: {user_name}</translation>
+    </message>
+    <message>
+        <source>idtag. {idtag}</source>
+        <translation>idtag. {idtag}</translation>
+    </message>
+    <message>
+        <source>Another PTDF time series is being executed now...</source>
+        <translation>Viene eseguita un&apos;altra serie temporale PTDF...</translation>
+    </message>
+    <message>
+        <source>Another short circuit is being executed now...</source>
+        <translation>Viene eseguito un altro cortocircuito...</translation>
+    </message>
+    <message>
+        <source>Catalogue optimization</source>
+        <translation>Ottimizzazione catalogo</translation>
+    </message>
+    <message>
+        <source>Catalogue optimization requires an active schematic diagram with a selection.</source>
+        <translation>L&apos;ottimizzazione del catalogo richiede uno schema diagrammatico attivo con una selezione.</translation>
+    </message>
+    <message>
+        <source>Clustering</source>
+        <translation>Raggruppamento</translation>
+    </message>
+    <message>
+        <source>Continuation Power Flow</source>
+        <translation>Flusso di Potenza di Continuazione</translation>
+    </message>
+    <message>
+        <source>Emt simulation</source>
+        <translation>Simulazione EMT</translation>
+    </message>
+    <message>
+        <source>For this simulation, you need to select some buses from the interface</source>
+        <translation>Per questa simulazione, è necessario selezionare alcuni bus dall&apos;interfaccia</translation>
+    </message>
+    <message>
+        <source>Fuse devices</source>
+        <translation>Dispositivi con fusibili</translation>
+    </message>
+    <message>
+        <source>No EMT Events Group was added. The EMT simulation can&apos;t run.</source>
+        <translation>Nessun Gruppo Eventi EMT è stato aggiunto. La simulazione EMT non può essere eseguita.</translation>
+    </message>
+    <message>
+        <source>No RMS Events Group was added. The RMS simulation can&apos;t run.</source>
+        <translation>Nessun Gruppo Eventi RMS è stato aggiunto. La simulazione RMS non può essere eseguita.</translation>
+    </message>
+    <message>
+        <source>No problems were detected, therefore no storage is suggested</source>
+        <translation>Non sono stati rilevati problemi, pertanto non viene suggerito alcun salvataggio</translation>
+    </message>
+    <message>
+        <source>Nodal hosting capacity</source>
+        <translation>Capacità di hosting nodale</translation>
+    </message>
+    <message>
+        <source>Power flow</source>
+        <translation>Flusso di potenza</translation>
+    </message>
+    <message>
+        <source>RMS pre simulation check</source>
+        <translation>Controllo pre-simulazione RMS</translation>
+    </message>
+    <message>
+        <source>Rms simulation</source>
+        <translation>Simulazione RMS</translation>
+    </message>
+    <message>
+        <source>Run a power flow simulation first.
+The results are needed to initialize this simulation.</source>
+        <translation>Eseguire prima una simulazione di flusso di potenza.
+I risultati sono necessari per inizializzare questa simulazione.</translation>
+    </message>
+    <message>
+        <source>Select at least one AC line or two-winding transformer in the schematic before running the catalogue optimization.</source>
+        <translation>Selezionare almeno una linea CA o un trasformatore a due avvolgimenti nello schema prima di eseguire l&apos;ottimizzazione del catalogo.</translation>
+    </message>
+    <message>
+        <source>Small-Signal Stability analysis EMT</source>
+        <translation>Analisi di Stabilità a Piccolo Segnale EMT</translation>
+    </message>
+    <message>
+        <source>Small-Signal Stability analysis RMS</source>
+        <translation>Analisi di Stabilità a Piccolo Segnale RMS</translation>
+    </message>
+    <message>
+        <source>Small-signal stability EMT pre simulation check</source>
+        <translation>Controllo pre-simulazione di stabilità a piccolo segnale EMT</translation>
+    </message>
+    <message>
+        <source>Small-signal stability RMS pre simulation check</source>
+        <translation>Controllo pre-simulazione di stabilità a piccolo segnale RMS</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no power short circuit results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati di cortocircuito di potenza.</translation>
+    </message>
+    <message>
+        <source>State estimation</source>
+        <translation>Stima dello Stato</translation>
+    </message>
+    <message>
+        <source>Storage location</source>
+        <translation>Posizione di archiviazione</translation>
+    </message>
+    <message>
+        <source>The &quot;from&quot; aggregation has no buses!</source>
+        <translation>L&apos;aggregazione &quot;da&quot; non ha bus!</translation>
+    </message>
+    <message>
+        <source>The area &quot;from&quot; has no buses!</source>
+        <translation>L&apos;area &quot;da&quot; non ha bus!</translation>
+    </message>
+    <message>
+        <source>The area &quot;to&quot; has no buses!</source>
+        <translation>L&apos;area &quot;a&quot; non ha bus!</translation>
+    </message>
+    <message>
+        <source>The number of clusters in the stored results is different from the specified :(
+Run another clustering analysis.</source>
+        <translation>Il numero di cluster nei risultati salvati è diverso da quello specificato :(
+Eseguire un&apos;altra analisi di clustering.</translation>
+    </message>
+    <message>
+        <source>The simulation time is 0. Change it to a proper time in settings.</source>
+        <translation>Il tempo di simulazione è 0. Modificarlo con un tempo appropriato nelle impostazioni.</translation>
+    </message>
+    <message>
+        <source>There are no OPF results, therefore this operation will not use OPF information.</source>
+        <translation>Non ci sono risultati OPF, pertanto questa operazione non utilizzerà le informazioni OPF.</translation>
+    </message>
+    <message>
+        <source>There are no OPF time series, therefore this operation will not use OPF information.</source>
+        <translation>Non ci sono serie temporali OPF, pertanto questa operazione non utilizzerà le informazioni OPF.</translation>
+    </message>
+    <message>
+        <source>There are no Small-Signal Stability analysis EMT results.</source>
+        <translation>Non ci sono risultati di analisi di stabilità a piccolo segnale EMT.</translation>
+    </message>
+    <message>
+        <source>There are no Small-Signal Stability analysis RMS results.</source>
+        <translation>Non ci sono risultati di analisi di stabilità a piccolo segnale RMS.</translation>
+    </message>
+    <message>
+        <source>There are no compatible areas</source>
+        <translation>Non ci sono aree compatibili</translation>
+    </message>
+    <message>
+        <source>There are no emt simulation results.</source>
+        <translation>Non ci sono risultati di simulazione EMT.</translation>
+    </message>
+    <message>
+        <source>There are no inter-area Branches!</source>
+        <translation>Non ci sono rami inter-area!</translation>
+    </message>
+    <message>
+        <source>There are no investment groups, you need to create some so that VeraGrid can evaluate them ;)</source>
+        <translation>Non ci sono gruppi di investimento, è necessario crearne alcuni in modo che VeraGrid possa valutarli ;)</translation>
+    </message>
+    <message>
+        <source>There are no power flow results.
+Is there any slack bus or generator?</source>
+        <translation>Non ci sono risultati di flusso di potenza.
+C&apos;è un bus di inerzia o un generatore?</translation>
+    </message>
+    <message>
+        <source>There are no rms simulation results.</source>
+        <translation>Non ci sono risultati di simulazione RMS.</translation>
+    </message>
+    <message>
+        <source>There are no state estimation results.
+Is there any slack bus or generator?</source>
+        <translation>Non ci sono risultati di stima dello stato.
+C&apos;è un bus di inerzia o un generatore?</translation>
+    </message>
+    <message>
+        <source>There is no time series simulation.
+ It is needed for this functionality.</source>
+        <translation>Non c&apos;è simulazione di serie temporali.
+ È necessaria per questa funzionalità.</translation>
+    </message>
+    <message>
+        <source>There were no power flow values available. Linear flows will be used.</source>
+        <translation>Non erano disponibili valori di flusso di potenza. Verranno utilizzati flussi lineari.</translation>
+    </message>
+    <message>
+        <source>This action will fuse all the devices per node and per category. Are you sure?</source>
+        <translation>Questa azione fonderà tutti i dispositivi per nodo e per categoria. Ne è sicuro?</translation>
+    </message>
+    <message>
+        <source>You have selected a group of buses with no power injection.
+this will result in an infinite continuation, since the loading variation of buses with zero injection will be infinite.</source>
+        <translation>Hai selezionato un gruppo di bus senza iniezione di potenza.
+Ciò risulterà in una continuazione infinita, poiché la variazione di carico dei bus con zero iniezione sarà infinita.</translation>
+    </message>
+    <message>
+        <source>You need to define short circuits in the Database.
+Add them by right click on a bus and selecting on the context menu.</source>
+        <translation>Devi definire circuiti corti nel Database.
+Aggiungili facendo clic destro su un bus e selezionando dal menu contestuale.</translation>
+    </message>
+    <message>
+        <source>{missing_results}
+The results are needed to initialize this simulation.</source>
+        <translation>{missing_results}
+I risultati sono necessari per inizializzare questa simulazione.</translation>
+    </message>
+    <message>
+        <source>The power flow did not converge.
+Resolve the operating point before running this RMS simulation.</source>
+        <translation>Il flusso di potenza non è convergente.
+Risolvere il punto operativo prima di eseguire questa simulazione RMS.</translation>
+    </message>
+    <message>
+        <source>Adequacy studies need time data...</source>
+        <translation>Gli studi di adeguatezza richiedono dati temporali...</translation>
+    </message>
+    <message>
+        <source>Another ATC time series is being executed now...</source>
+        <translation>Viene eseguita un&apos;altra serie temporale ATC...</translation>
+    </message>
+    <message>
+        <source>Another EMT simulation is running already...</source>
+        <translation>È già in esecuzione un&apos;altra simulazione EMT...</translation>
+    </message>
+    <message>
+        <source>Another LODF is being executed now...</source>
+        <translation>Viene eseguito un altro LODF...</translation>
+    </message>
+    <message>
+        <source>Another Monte Carlo simulation is running...</source>
+        <translation>È in esecuzione un altro simulazione Monte Carlo...</translation>
+    </message>
+    <message>
+        <source>Another OPF is being run...</source>
+        <translation>Viene eseguito un altro OPF...</translation>
+    </message>
+    <message>
+        <source>Another OPF time series is running already...</source>
+        <translation>È già in esecuzione un&apos;altra serie temporale OPF...</translation>
+    </message>
+    <message>
+        <source>Another Optimal NCT time series is being run...</source>
+        <translation>Viene eseguita un&apos;altra serie temporale NCT Ottimale...</translation>
+    </message>
+    <message>
+        <source>Another PTDF is being executed now...</source>
+        <translation>Viene eseguito un altro PTDF...</translation>
+    </message>
+    <message>
+        <source>Another Small-Signal stability analysis EMT simulation is running already...</source>
+        <translation>È già in esecuzione un&apos;altra simulazione EMT di analisi di stabilità a piccolo segnale...</translation>
+    </message>
+    <message>
+        <source>Another Small-Signal stability analysis simulation is running already...</source>
+        <translation>È già in esecuzione un&apos;altra simulazione di analisi di stabilità a piccolo segnale...</translation>
+    </message>
+    <message>
+        <source>Another catalogue optimization is already running...</source>
+        <translation>È già in esecuzione un&apos;altra ottimizzazione del catalogo...</translation>
+    </message>
+    <message>
+        <source>Another clustering is being executed now...</source>
+        <translation>Viene eseguito un altro clustering...</translation>
+    </message>
+    <message>
+        <source>Another contingency analysis is being executed now...</source>
+        <translation>Viene eseguita un&apos;altra analisi di contingenza...</translation>
+    </message>
+    <message>
+        <source>Another inputs analysis is being run...</source>
+        <translation>Viene eseguita un&apos;altra analisi degli input...</translation>
+    </message>
+    <message>
+        <source>Another nodal capacity study is being run...</source>
+        <translation>Viene eseguito uno studio di capacità nodale...</translation>
+    </message>
+    <message>
+        <source>Another reliability study is running already...</source>
+        <translation>È già in esecuzione un altro studio di affidabilità...</translation>
+    </message>
+    <message>
+        <source>Another rms simulation is running already...</source>
+        <translation>È già in esecuzione un&apos;altra simulazione rms...</translation>
+    </message>
+    <message>
+        <source>Another simulation of the same type is running...</source>
+        <translation>È in esecuzione un altro simulazione dello stesso tipo...</translation>
+    </message>
+    <message>
+        <source>Another three-phase time series power flow is being executed now...</source>
+        <translation>Viene eseguito un altro flusso di potenza trifase in serie temporale...</translation>
+    </message>
+    <message>
+        <source>Another time series power flow is being executed now...</source>
+        <translation>Viene eseguito un altro flusso di potenza in serie temporale...</translation>
+    </message>
+    <message>
+        <source>Another voltage collapse simulation is running...</source>
+        <translation>È in esecuzione un altro simulazione di collasso di tensione...</translation>
+    </message>
+    <message>
+        <source>Cannot colour because the PTDF results have zero time steps :/</source>
+        <translation>Impossibile colorare perché i risultati PTDF hanno zero passi temporali :/</translation>
+    </message>
+    <message>
+        <source>Check the selected start and finnish time series indices.</source>
+        <translation>Controllare gli indici di inizio e fine della serie temporale selezionati.</translation>
+    </message>
+    <message>
+        <source>Linear OPF investment studies need time data...</source>
+        <translation>Gli studi di investimento OPF lineare richiedono dati temporali...</translation>
+    </message>
+    <message>
+        <source>No from areas!</source>
+        <translation>Nessuna area di origine!</translation>
+    </message>
+    <message>
+        <source>No results for the three-phase time series simulation.</source>
+        <translation>Nessun risultato per la simulazione trifase in serie temporale.</translation>
+    </message>
+    <message>
+        <source>No results for the time series simulation.</source>
+        <translation>Nessun risultato per la simulazione in serie temporale.</translation>
+    </message>
+    <message>
+        <source>No to areas!</source>
+        <translation>Nessuna area di destinazione!</translation>
+    </message>
+    <message>
+        <source>Nothing to simulate...</source>
+        <translation>Niente da simulare...</translation>
+    </message>
+    <message>
+        <source>Objective not supported yet :/</source>
+        <translation>Obiettivo non ancora supportato :/</translation>
+    </message>
+    <message>
+        <source>Optimal power flow converged :)</source>
+        <translation>Flusso di potenza ottimale convergente :)</translation>
+    </message>
+    <message>
+        <source>Optimal power flow not converged :/
+Check that all Branches have rating and 
+that the generator bounds are ok.
+You may also use the diagnostic tool (F8)</source>
+        <translation>Flusso di potenza ottimale non convergente :/
+Verificare che tutti i Rami abbiano un rating e
+che i limiti del generatore siano corretti.
+Potete anche usare lo strumento diagnostico (F8)</translation>
+    </message>
+    <message>
+        <source>Power flow 3ph converged :)</source>
+        <translation>Flusso di potenza 3f convergente :)</translation>
+    </message>
+    <message>
+        <source>Power flow 3ph not converged :/</source>
+        <translation>Flusso di potenza 3f non convergente :/</translation>
+    </message>
+    <message>
+        <source>Power flow converged :)</source>
+        <translation>Flusso di potenza convergente :)</translation>
+    </message>
+    <message>
+        <source>Power flow not converged :/</source>
+        <translation>Flusso di potenza non convergente :/</translation>
+    </message>
+    <message>
+        <source>Reliability studies need time data...</source>
+        <translation>Gli studi di affidabilità richiedono dati temporali...</translation>
+    </message>
+    <message>
+        <source>Remote results received!</source>
+        <translation>Risultati ricevuti da remoto!</translation>
+    </message>
+    <message>
+        <source>Run a linear analysis to enable filter contingencies by sensitivity</source>
+        <translation>Eseguire un&apos;analisi lineare per abilitare le contingenze del filtro tramite sensibilità</translation>
+    </message>
+    <message>
+        <source>Simulation converged for all active simulation groups :)</source>
+        <translation>Simulazione convergente per tutti i gruppi di simulazione attivi :)</translation>
+    </message>
+    <message>
+        <source>Simulation well initialized for all active simulation groups :)</source>
+        <translation>Simulazione ben inizializzata per tutti i gruppi di simulazione attivi :)</translation>
+    </message>
+    <message>
+        <source>Small-Signal stability analysis EMT has finished correctly!</source>
+        <translation>L&apos;analisi di stabilità a piccolo segnale EMT è terminata correttamente!</translation>
+    </message>
+    <message>
+        <source>Small-signal stability analysis RMS has finished correctly!</source>
+        <translation>L&apos;analisi di stabilità a piccolo segnale RMS è terminata correttamente!</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no ATC results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati ATC.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no ATC time series results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati serie temporali ATC.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no PTDF Time series results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati serie temporali PTDF.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no PTDF results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati PTDF.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no contingency analysis results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati di analisi di contingenza.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no contingency time series results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati di serie temporali di contingenza.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no investments evaluation results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati di valutazione degli investimenti.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, There are no voltage stability results.</source>
+        <translation>Qualcosa è andato storto, non ci sono risultati di stabilità di tensione.</translation>
+    </message>
+    <message>
+        <source>State estimation converged :)</source>
+        <translation>Stima dello stato convergente :)</translation>
+    </message>
+    <message>
+        <source>State estimation not converged :/</source>
+        <translation>Stima dello stato non convergente :/</translation>
+    </message>
+    <message>
+        <source>Stochastic power flow needs at least one time-series sample.</source>
+        <translation>Il flusso di potenza stocastico richiede almeno un campione di serie temporali.</translation>
+    </message>
+    <message>
+        <source>The grid doesn&apos;t have time series :/</source>
+        <translation>La rete non ha serie temporali :/</translation>
+    </message>
+    <message>
+        <source>The voltage stability did not converge.
+Is this case already at the collapse limit?</source>
+        <translation>La stabilità di tensione non è convergente.
+Questo caso è già al limite di collasso?</translation>
+    </message>
+    <message>
+        <source>There are no PTDF results :/</source>
+        <translation>Non ci sono risultati PTDF :/</translation>
+    </message>
+    <message>
+        <source>There are no active RMS event groups to report.</source>
+        <translation>Non ci sono gruppi di eventi RMS attivi da segnalare.</translation>
+    </message>
+    <message>
+        <source>There are no contingency groups declared...</source>
+        <translation>Non sono stati dichiarati gruppi di contingenza...</translation>
+    </message>
+    <message>
+        <source>There are no time series!</source>
+        <translation>Non ci sono serie temporali!</translation>
+    </message>
+    <message>
+        <source>There are no time series.</source>
+        <translation>Non ci sono serie temporali.</translation>
+    </message>
+    <message>
+        <source>There are no time series...</source>
+        <translation>Non ci sono serie temporali...</translation>
+    </message>
+    <message>
+        <source>You cannot find {0} clusters for {1} time steps.
+Modify the number of clusters in the ML settings.</source>
+        <translation>Non è possibile trovare {0} cluster per {1} passi temporali.
+Modificare il numero di cluster nelle impostazioni ML.</translation>
+    </message>
+    <message>
+        <source>An EMT simulation cannot run without an EMT Events Group. Go to Events -&gt; Add EMT event and add a group, even if it contains no events.</source>
+        <translation>Una simulazione EMT non può essere eseguita senza un Gruppo Eventi EMT. Vai a Eventi -&gt; Aggiungi evento EMT e aggiungi un gruppo, anche se non contiene eventi.</translation>
+    </message>
+    <message>
+        <source>An RMS simulation cannot run without an RMS Events Group. Go to Events -&gt; Add RMS event and add a group, even if it contains no events.</source>
+        <translation>Una simulazione RMS non può essere eseguita senza un Gruppo Eventi RMS. Vai a Eventi -&gt; Aggiungi evento RMS e aggiungi un gruppo, anche se non contiene eventi.</translation>
+    </message>
+    <message>
+        <source>Fluid nodes are ignored for nonlinear OPF</source>
+        <translation>I nodi fluidi sono ignorati per l&apos;OPF non lineare</translation>
+    </message>
+    <message>
+        <source>Fluid nodes are ignored for this simulation</source>
+        <translation>I nodi fluidi sono ignorati per questa simulazione</translation>
+    </message>
+    <message>
+        <source>Investments evaluation failed. Check the logs for details.</source>
+        <translation>Valutazione degli investimenti fallita. Controllare i log per i dettagli.</translation>
+    </message>
+    <message>
+        <source>Investments evaluation finished without results.</source>
+        <translation>Valutazione degli investimenti terminata senza risultati.</translation>
+    </message>
+    <message>
+        <source>Nodal capacity failed to start</source>
+        <translation>Impossibile avviare la capacità nodale</translation>
+    </message>
+    <message>
+        <source>Nodal capacity logs</source>
+        <translation>Log della capacità nodale</translation>
+    </message>
+    <message>
+        <source>Nodal capacity time series failed to start</source>
+        <translation>Impossibile avviare la serie temporale della capacità nodale</translation>
+    </message>
+    <message>
+        <source>Nodal capacity time series logs</source>
+        <translation>Log della serie temporale della capacità nodale</translation>
+    </message>
+    <message>
+        <source>OPF time series failed to start</source>
+        <translation>Impossibile avviare la serie temporale OPF</translation>
+    </message>
+    <message>
+        <source>OPF time series logs</source>
+        <translation>Log della serie temporale OPF</translation>
+    </message>
+    <message>
+        <source>Optimal power flow failed to start</source>
+        <translation>Impossibile avviare il flusso di potenza ottimale</translation>
+    </message>
+    <message>
+        <source>Optimal power flow logs</source>
+        <translation>Log del flusso di potenza ottimale</translation>
+    </message>
+    <message>
+        <source>Running OPF time series with only one time step in range</source>
+        <translation>Esecuzione della serie temporale OPF con un solo passo temporale nell&apos;intervallo</translation>
+    </message>
+    <message>
+        <source>Something went wrong, there are no OPF results.</source>
+        <translation>Si è verificato un errore, non ci sono risultati OPF.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, there are no OPF time series results.</source>
+        <translation>Si è verificato un errore, non ci sono risultati serie temporali OPF.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, there are no nodal capacity results.</source>
+        <translation>Si è verificato un errore, non ci sono risultati di capacità nodale.</translation>
+    </message>
+    <message>
+        <source>Something went wrong, there are no nodal capacity time series results.</source>
+        <translation>Si è verificato un errore, non ci sono risultati serie temporali di capacità nodale.</translation>
+    </message>
+    <message>
+        <source>Voltage stability failed to start</source>
+        <translation>Impossibile avviare la stabilità di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage stability logs</source>
+        <translation>Log della stabilità di tensione</translation>
+    </message>
+    <message>
+        <source>Wait until the running simulations finish before clearing results.</source>
+        <translation>Attendere che le simulazioni in corso terminino prima di cancellare i risultati.</translation>
+    </message>
+    <message>
+        <source>Linear OPF and power flow investment studies need time data...</source>
+        <translation>Gli studi di investimento OPF lineare e di flusso di potenza richiedono dati temporali...</translation>
+    </message>
+</context>
+<context>
+    <name>SolarPvWizard</name>
+    <message>
+        <source>Solar power profile</source>
+        <translation>Profilo di potenza solare</translation>
+    </message>
+</context>
+<context>
     <name>SubstationDesigner</name>
     <message>
         <source>Substation maker</source>
-        <translation type="vanished">Produttore di sottostazioni</translation>
+        <translation>Produttore di sottostazioni</translation>
     </message>
     <message>
         <source>Substation {number}</source>
-        <translation type="vanished">Sottostazione {number}</translation>
+        <translation>Sottostazione {number}</translation>
     </message>
     <message>
         <source>There are no voltage levels, so no substation will be created, ok?</source>
-        <translation type="vanished">Non ci sono livelli di tensione, quindi non verrà creata nessuna sottostazione, ok?</translation>
+        <translation>Non ci sono livelli di tensione, quindi non verrà creata nessuna sottostazione, ok?</translation>
+    </message>
+</context>
+<context>
+    <name>SubstationGraphicItem</name>
+    <message>
+        <source>Add voltage level</source>
+        <translation>Aggiungi il livello di tensione</translation>
+    </message>
+    <message>
+        <source>Move substation graphics</source>
+        <translation>Sposta grafica sottostazione</translation>
+    </message>
+    <message>
+        <source>Move substation {substation_name} graphics to it&apos;s database coordinates?</source>
+        <translation>Spostare la grafica della sottostazione {substation_name} alle sue coordinate nel database?</translation>
+    </message>
+    <message>
+        <source>No devices to disconnect</source>
+        <translation>Nessun dispositivo da scollegare</translation>
+    </message>
+    <message>
+        <source>Remove substation from schematic</source>
+        <translation>Rimuovi la sottostazione dallo schema</translation>
+    </message>
+    <message>
+        <source>Remove substation from schematic and database</source>
+        <translation>Rimuovi la sottostazione dallo schema e dal database</translation>
+    </message>
+    <message>
+        <source>Remove substation {substation_name} from both the schematic and the database? This action cannot be undone.</source>
+        <translation>Rimuovere la sottostazione {substation_name} sia dallo schema che dal database? Questa azione non può essere annullata.</translation>
+    </message>
+    <message>
+        <source>Remove substation {substation_name} from the schematic only? It will remain in the database.</source>
+        <translation>Rimuovere la sottostazione {substation_name} solo dallo schema? Rimarrà nel database.</translation>
+    </message>
+    <message>
+        <source>Voltage (kV)</source>
+        <translation>Tensione (kV)</translation>
+    </message>
+</context>
+<context>
+    <name>SwitchSequenceDialog</name>
+    <message>
+        <source>Add Sequence Step</source>
+        <translation>Aggiungi passo di sequenza</translation>
+    </message>
+    <message>
+        <source>Add at least one sequence row.</source>
+        <translation>Aggiungere almeno una riga di sequenza.</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Vicino</translation>
+    </message>
+    <message>
+        <source>Group</source>
+        <translation>Gruppo</translation>
+    </message>
+    <message>
+        <source>Mode Parameter</source>
+        <translation>Parametro di modalità</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>Apri</translation>
+    </message>
+    <message>
+        <source>Please check at least one row to remove.</source>
+        <translation>Si prega di selezionare almeno una riga per rimuovere.</translation>
+    </message>
+    <message>
+        <source>Remove Selected Rows</source>
+        <translation>Rimuovi righe selezionate</translation>
+    </message>
+    <message>
+        <source>Select a mode parameter and an events group.</source>
+        <translation>Seleziona un parametro di modalità e un gruppo di eventi.</translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <source>Switch Sequence</source>
+        <translation>Sequenza di commutazione</translation>
+    </message>
+    <message>
+        <source>Switch Sequence Wizard</source>
+        <translation>Passaggio alla procedura guidata di sequenza</translation>
+    </message>
+    <message>
+        <source>The selected parameter or group is invalid.</source>
+        <translation>Il parametro o gruppo selezionato è non valido.</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+</context>
+<context>
+    <name>SyncDialogueWindow</name>
+    <message>
+        <source>Sync conflicts</source>
+        <translation>Conflitti di sincronizzazione</translation>
+    </message>
+</context>
+<context>
+    <name>SystemScaler</name>
+    <message>
+        <source>Aggregated energy scaling preview</source>
+        <translation>Anteprima scalatura energia aggregata</translation>
+    </message>
+    <message>
+        <source>Aggregated power scaling preview</source>
+        <translation>Anteprima scalatura potenza aggregata</translation>
+    </message>
+    <message>
+        <source>MW</source>
+        <translation>MW</translation>
+    </message>
+    <message>
+        <source>MWh</source>
+        <translation>MWh</translation>
+    </message>
+    <message>
+        <source>Original generation</source>
+        <translation>Generazione originale</translation>
+    </message>
+    <message>
+        <source>Original generation energy</source>
+        <translation>Energia di generazione originale</translation>
+    </message>
+    <message>
+        <source>Original load</source>
+        <translation>Carico originale</translation>
+    </message>
+    <message>
+        <source>Original load energy</source>
+        <translation>Energia di carico originale</translation>
+    </message>
+    <message>
+        <source>Press plot to preview scaling</source>
+        <translation>Premi plot per anteprima scalatura</translation>
+    </message>
+    <message>
+        <source>Scaled generation</source>
+        <translation>Generazione scalata</translation>
+    </message>
+    <message>
+        <source>Scaled generation energy</source>
+        <translation>Energia di generazione scalata</translation>
+    </message>
+    <message>
+        <source>Scaled load</source>
+        <translation>Carico scalato</translation>
+    </message>
+    <message>
+        <source>Scaled load energy</source>
+        <translation>Energia di carico scalata</translation>
+    </message>
+    <message>
+        <source>System scaling</source>
+        <translation>Scalatura di sistema</translation>
+    </message>
+    <message>
+        <source>There is no time series to plot.</source>
+        <translation>Non ci sono serie temporali da tracciare.</translation>
+    </message>
+    <message>
+        <source>This operation will alter the generation and load composition irreversibly
+Are you sure?</source>
+        <translation>Questa operazione altererà irreversibilmente la composizione di generazione e carico
+Sei sicuro?</translation>
+    </message>
+</context>
+<context>
+    <name>TemplateDeviceEditor</name>
+    <message>
+        <source>Device editor</source>
+        <translation>Editor del dispositivo</translation>
     </message>
 </context>
 <context>
@@ -3893,6 +9815,100 @@ Monte Carlo power flow results:</source>
         <location filename="../DeviceEditors/TemplateDeviceEditor/template_device_editor_gui.ui" line="240"/>
         <source>Units</source>
         <translation>Unità</translation>
+    </message>
+</context>
+<context>
+    <name>TimeEventsMain</name>
+    <message>
+        <source>Are you sure that you want to crop the profiles to the clustered results?
+This cannot be undone.
+Also, the clustering will be removed after this.</source>
+        <translation>Sei sicuro di voler ritagliare i profili sui risultati raggruppati?
+Questa azione non può essere annullata.
+Inoltre, il raggruppamento verrà rimosso dopo.</translation>
+    </message>
+    <message>
+        <source>Copy profile to clipboard</source>
+        <translation>Copia il profilo negli appunti</translation>
+    </message>
+    <message>
+        <source>Delete profiles</source>
+        <translation>Eliminare i profili</translation>
+    </message>
+    <message>
+        <source>Do you want to correct the loads active profile based on the active power profile?</source>
+        <translation>Vuoi correggere il profilo attivo dei carichi in base al profilo di potenza attiva?</translation>
+    </message>
+    <message>
+        <source>Match</source>
+        <translation>Incontro</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
+    <message>
+        <source>Paste profile to clipboard</source>
+        <translation>Incolla profilo negli appunti</translation>
+    </message>
+    <message>
+        <source>Select a time series step to copy to the snapshot</source>
+        <translation>Seleziona un passo della serie temporale da copiare nello snapshot</translation>
+    </message>
+    <message>
+        <source>Set snapshot</source>
+        <translation>Imposta snapshot</translation>
+    </message>
+    <message>
+        <source>The import of profiles from many grid models can only be done if the grid has not profiles :/</source>
+        <translation>L&apos;importazione di profili da molti modelli di rete può essere eseguita solo se la rete non ha profili :/</translation>
+    </message>
+    <message>
+        <source>The number of clusters in the stored results is different from the specified :(
+Run another clustering analysis.</source>
+        <translation>Il numero di cluster nei risultati salvati è diverso da quello specificato :(
+Eseguire un&apos;altra analisi di clustering.</translation>
+    </message>
+    <message>
+        <source>There are no objects to which to assign a profile. 
+You need to load or create a grid!</source>
+        <translation>Non ci sono oggetti a cui assegnare un profilo. 
+Devi caricare o creare una rete!</translation>
+    </message>
+    <message>
+        <source>There are no profiles</source>
+        <translation>Non ci sono profili</translation>
+    </message>
+    <message>
+        <source>There is no profile displayed, please display one</source>
+        <translation>Non è visualizzato alcun profilo, visualizzane uno</translation>
+    </message>
+    <message>
+        <source>Profiles plot</source>
+        <translation>Grafico dei profili</translation>
+    </message>
+</context>
+<context>
+    <name>TimeReIndexDialogue</name>
+    <message>
+        <source>Accept</source>
+        <translation>Accettare</translation>
+    </message>
+    <message>
+        <source>Start date</source>
+        <translation>Data di inizio</translation>
+    </message>
+    <message>
+        <source>Time re-index</source>
+        <translation>Rindicizzazione temporale</translation>
+    </message>
+    <message>
+        <source>Time step length</source>
+        <translation>Lunghezza del passo temporale</translation>
+    </message>
+    <message>
+        <source>Time units</source>
+        <translation>Unità di tempo</translation>
     </message>
 </context>
 <context>
@@ -3976,6 +9992,46 @@ Monte Carlo power flow results:</source>
         <location filename="../DeviceEditors/TowerBuilder/tower_builder.ui" line="487"/>
         <source>Accept</source>
         <translation>Accettare</translation>
+    </message>
+</context>
+<context>
+    <name>TowerBuilderGUI</name>
+    <message>
+        <source>Line builder</source>
+        <translation>Costruttore linee</translation>
+    </message>
+    <message>
+        <source>Tower computation</source>
+        <translation>Calcolo torre</translation>
+    </message>
+</context>
+<context>
+    <name>Transformer3WDeviceEditor</name>
+    <message>
+        <source>Transformer 3W design widget is not available</source>
+        <translation>Il widget di progettazione Trasformatore 3W non è disponibile</translation>
+    </message>
+    <message>
+        <source>Transformer 3W editor</source>
+        <translation>Editor Trasformatore 3W</translation>
+    </message>
+</context>
+<context>
+    <name>Transformer3WEditor</name>
+    <message>
+        <source>Transformer editor</source>
+        <translation>Editore di trasformatori</translation>
+    </message>
+</context>
+<context>
+    <name>Transformer3WGraphicItem</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
     </message>
 </context>
 <context>
@@ -4089,6 +10145,24 @@ Monte Carlo power flow results:</source>
     </message>
 </context>
 <context>
+    <name>TransformerDeviceEditor</name>
+    <message>
+        <source>Transformer design widget is not available</source>
+        <translation>Il widget di progettazione trasformatore non è disponibile</translation>
+    </message>
+    <message>
+        <source>Transformer editor</source>
+        <translation>Editore di trasformatori</translation>
+    </message>
+</context>
+<context>
+    <name>TransformerEditor</name>
+    <message>
+        <source>Transformer editor</source>
+        <translation>Editore di trasformatori</translation>
+    </message>
+</context>
+<context>
     <name>TransformerEditorDialog</name>
     <message>
         <location filename="../DeviceEditors/TransformerEditor/transformer_editor_gui.ui" line="14"/>
@@ -4167,6 +10241,28 @@ Monte Carlo power flow results:</source>
     </message>
 </context>
 <context>
+    <name>TransformerGraphicItem</name>
+    <message>
+        <source>A template will be generated using this transformer values</source>
+        <translation>Verrà generato un modello utilizzando questi valori del trasformatore</translation>
+    </message>
+    <message>
+        <source>Add transformer type</source>
+        <translation>Aggiungi tipo trasformatore</translation>
+    </message>
+</context>
+<context>
+    <name>TransformerNWGraphicItem</name>
+    <message>
+        <source>Do you want to update the time series active status accordingly?</source>
+        <translation>Vuoi aggiornare lo stato attivo della serie temporale di conseguenza?</translation>
+    </message>
+    <message>
+        <source>Update time series active status</source>
+        <translation>Aggiorna lo stato attivo della serie temporale</translation>
+    </message>
+</context>
+<context>
     <name>UcteExportDialog</name>
     <message>
         <location filename="../FileDialogues/UcteDialogue/ucte_export_gui.ui" line="14"/>
@@ -4195,22 +10291,2371 @@ Monte Carlo power flow results:</source>
     </message>
 </context>
 <context>
+    <name>UcteExportDialogue</name>
+    <message>
+        <source>Export to UCTE</source>
+        <translation>Esporta in UCTE</translation>
+    </message>
+    <message>
+        <source>UCTE export</source>
+        <translation>Esportazione UCTE</translation>
+    </message>
+</context>
+<context>
+    <name>ValidationSectionDialog</name>
+    <message>
+        <source>Issues found in this section</source>
+        <translation type="vanished">Problemi trovati in questa sezione</translation>
+    </message>
+    <message>
+        <source>Model Consistency Validation</source>
+        <translation type="vanished">Validazione Consistenza Modello</translation>
+    </message>
+    <message>
+        <source>Run an informational validation of the edited model structure, mappings, initialization, and port connectivity. This check reports issues but does not block saving the model.</source>
+        <translation type="vanished">Esegui una validazione informativa della struttura del modello modificato, dei mappaggi, dell&apos;inizializzazione e della connettività dei porti. Questo controllo segnala problemi ma non impedisce di salvare il modello.</translation>
+    </message>
+</context>
+<context>
     <name>VeraGridMainGUI</name>
     <message>
         <source>VeraGrid {version}</source>
-        <translation type="vanished">VeraGrid {version}</translation>
+        <translation>VeraGrid {version}</translation>
     </message>
     <message>
         <source>Are you sure that you want to exit VeraGrid?</source>
-        <translation type="vanished">Sei sicuro di voler uscire da VeraGrid?</translation>
+        <translation>Sei sicuro di voler uscire da VeraGrid?</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="vanished">Vicino</translation>
+        <translation>Vicino</translation>
     </message>
     <message>
         <source>No effect, select diagrams or database</source>
-        <translation type="vanished">Nessun effetto, seleziona diagrammi o database</translation>
+        <translation>Nessun effetto, seleziona diagrammi o database</translation>
+    </message>
+    <message>
+        <source>Removed {count} __pycache__ folders</source>
+        <translation>Eliminate {count} cartelle __pycache__</translation>
+    </message>
+    <message>
+        <source>Some operations are still stopping. Close again after they finish.</source>
+        <translation>Alcune operazioni sono ancora in corso. Chiudere di nuovo dopo che sono terminate.</translation>
+    </message>
+</context>
+<context>
+    <name>VeraGridTreeLabels</name>
+    <message>
+        <source>ATC Report</source>
+        <translation>Rapporto ATC</translation>
+    </message>
+    <message>
+        <source>Active power flow per area</source>
+        <translation>Flusso di potenza attiva per area</translation>
+    </message>
+    <message>
+        <source>Any line template</source>
+        <translation>Modello linea qualsiasi</translation>
+    </message>
+    <message>
+        <source>Area</source>
+        <translation>Area</translation>
+    </message>
+    <message>
+        <source>Area analysis</source>
+        <translation>Analisi area</translation>
+    </message>
+    <message>
+        <source>Area balance analysis</source>
+        <translation>Analisi bilancio area</translation>
+    </message>
+    <message>
+        <source>Area generation analysis</source>
+        <translation>Analisi generazione area</translation>
+    </message>
+    <message>
+        <source>Area load analysis</source>
+        <translation>Analisi carico area</translation>
+    </message>
+    <message>
+        <source>Associations</source>
+        <translation>Associazioni</translation>
+    </message>
+    <message>
+        <source>Available transfer capacity</source>
+        <translation>Capacità di trasferimento disponibile</translation>
+    </message>
+    <message>
+        <source>Available transfer capacity (N)</source>
+        <translation>Capacità di trasferimento disponibile (N)</translation>
+    </message>
+    <message>
+        <source>Available transfer capacity (final)</source>
+        <translation>Capacità di trasferimento disponibile (finale)</translation>
+    </message>
+    <message>
+        <source>Available transfer capacity time series</source>
+        <translation>Serie temporale della capacità di trasferimento disponibile</translation>
+    </message>
+    <message>
+        <source>AvailableTransferCapacity</source>
+        <translation>CapacitaTrasferimentoDisponibile</translation>
+    </message>
+    <message>
+        <source>AvailableTransferCapacityTimeSeries</source>
+        <translation>SerieTemporaleCapacitaTrasferimentoDisponibile</translation>
+    </message>
+    <message>
+        <source>Balance plot</source>
+        <translation>Grafico di bilancio</translation>
+    </message>
+    <message>
+        <source>Base flow report</source>
+        <translation>Rapporto flusso base</translation>
+    </message>
+    <message>
+        <source>Batteries</source>
+        <translation>Batterie</translation>
+    </message>
+    <message>
+        <source>Battery</source>
+        <translation>Batteria</translation>
+    </message>
+    <message>
+        <source>Battery energy</source>
+        <translation>Energia batteria</translation>
+    </message>
+    <message>
+        <source>Battery invested</source>
+        <translation>Investimento batteria</translation>
+    </message>
+    <message>
+        <source>Battery power</source>
+        <translation>Potenza batteria</translation>
+    </message>
+    <message>
+        <source>Battery reactive power</source>
+        <translation>Potenza reattiva batteria</translation>
+    </message>
+    <message>
+        <source>Battery reactive power A</source>
+        <translation>Potenza reattiva batteria A</translation>
+    </message>
+    <message>
+        <source>Battery reactive power B</source>
+        <translation>Potenza reattiva batteria B</translation>
+    </message>
+    <message>
+        <source>Battery reactive power C</source>
+        <translation>Potenza reattiva batteria C</translation>
+    </message>
+    <message>
+        <source>Beq: Equivalent susceptance</source>
+        <translation>Beq: Suscettanza equivalente</translation>
+    </message>
+    <message>
+        <source>Branch</source>
+        <translation>Ramo</translation>
+    </message>
+    <message>
+        <source>Branch Loading</source>
+        <translation>Carico ramo</translation>
+    </message>
+    <message>
+        <source>Branch Loading A</source>
+        <translation>Carico ramo A</translation>
+    </message>
+    <message>
+        <source>Branch Loading B</source>
+        <translation>Carico ramo B</translation>
+    </message>
+    <message>
+        <source>Branch Loading C</source>
+        <translation>Carico ramo C</translation>
+    </message>
+    <message>
+        <source>Branch active current &quot;from&quot; (0)</source>
+        <translation>Corrente attiva ramo &quot;da&quot; (0)</translation>
+    </message>
+    <message>
+        <source>Branch active current &quot;from&quot; (1)</source>
+        <translation>Corrente attiva ramo &quot;da&quot; (1)</translation>
+    </message>
+    <message>
+        <source>Branch active current &quot;from&quot; (2)</source>
+        <translation>Corrente attiva ramo &quot;da&quot; (2)</translation>
+    </message>
+    <message>
+        <source>Branch active losses (0)</source>
+        <translation>Perdite attive ramo (0)</translation>
+    </message>
+    <message>
+        <source>Branch active losses (1)</source>
+        <translation>Perdite attive ramo (1)</translation>
+    </message>
+    <message>
+        <source>Branch active losses (2)</source>
+        <translation>Perdite attive ramo (2)</translation>
+    </message>
+    <message>
+        <source>Branch active power &quot;from&quot; (0)</source>
+        <translation>Potenza attiva ramo &quot;da&quot; (0)</translation>
+    </message>
+    <message>
+        <source>Branch active power &quot;from&quot; (1)</source>
+        <translation>Potenza attiva ramo &quot;da&quot; (1)</translation>
+    </message>
+    <message>
+        <source>Branch active power &quot;from&quot; (2)</source>
+        <translation>Potenza attiva ramo &quot;da&quot; (2)</translation>
+    </message>
+    <message>
+        <source>Branch group</source>
+        <translation>Gruppo ramo</translation>
+    </message>
+    <message>
+        <source>Branch loading (0)</source>
+        <translation>Carico ramo (0)</translation>
+    </message>
+    <message>
+        <source>Branch loading (1)</source>
+        <translation>Carico ramo (1)</translation>
+    </message>
+    <message>
+        <source>Branch loading (2)</source>
+        <translation>Carico ramo (2)</translation>
+    </message>
+    <message>
+        <source>Branch losses</source>
+        <translation>Perdite ramo</translation>
+    </message>
+    <message>
+        <source>Branch monitoring logic</source>
+        <translation>Logica di monitoraggio ramo</translation>
+    </message>
+    <message>
+        <source>Branch overloads</source>
+        <translation>Sovraccarichi ramo</translation>
+    </message>
+    <message>
+        <source>Branch overloads cost</source>
+        <translation>Costo sovraccarichi ramo</translation>
+    </message>
+    <message>
+        <source>Branch power CDF</source>
+        <translation>CDF potenza ramo</translation>
+    </message>
+    <message>
+        <source>Branch power avg</source>
+        <translation>Media potenza ramo</translation>
+    </message>
+    <message>
+        <source>Branch power std</source>
+        <translation>Std potenza ramo</translation>
+    </message>
+    <message>
+        <source>Branch reactive current &quot;from&quot; (0)</source>
+        <translation>Corrente reattiva ramo &quot;da&quot; (0)</translation>
+    </message>
+    <message>
+        <source>Branch reactive current &quot;from&quot; (1)</source>
+        <translation>Branch reactive current &quot;from&quot; (1)</translation>
+    </message>
+    <message>
+        <source>Branch reactive current &quot;from&quot; (2)</source>
+        <translation>Branch reactive current &quot;from&quot; (2)</translation>
+    </message>
+    <message>
+        <source>Branch reactive losses (0)</source>
+        <translation>Branch reactive losses (0)</translation>
+    </message>
+    <message>
+        <source>Branch reactive losses (1)</source>
+        <translation>Branch reactive losses (1)</translation>
+    </message>
+    <message>
+        <source>Branch reactive losses (2)</source>
+        <translation>Branch reactive losses (2)</translation>
+    </message>
+    <message>
+        <source>Branch reactive power &quot;from&quot; (0)</source>
+        <translation>Branch reactive power &quot;from&quot; (0)</translation>
+    </message>
+    <message>
+        <source>Branch reactive power &quot;from&quot; (1)</source>
+        <translation>Branch reactive power &quot;from&quot; (1)</translation>
+    </message>
+    <message>
+        <source>Branch reactive power &quot;from&quot; (2)</source>
+        <translation>Branch reactive power &quot;from&quot; (2)</translation>
+    </message>
+    <message>
+        <source>Branch template</source>
+        <translation>Modello ramo</translation>
+    </message>
+    <message>
+        <source>Branches</source>
+        <translation>Rami</translation>
+    </message>
+    <message>
+        <source>Bus</source>
+        <translation>Bus</translation>
+    </message>
+    <message>
+        <source>Bus nodal capacity</source>
+        <translation>Capacità nodale del bus</translation>
+    </message>
+    <message>
+        <source>Bus power</source>
+        <translation>Potenza del bus</translation>
+    </message>
+    <message>
+        <source>Bus power CDF</source>
+        <translation>CDF potenza del bus</translation>
+    </message>
+    <message>
+        <source>Bus voltage CDF</source>
+        <translation>CDF tensione del bus</translation>
+    </message>
+    <message>
+        <source>Bus voltage avg</source>
+        <translation>Media tensione del bus</translation>
+    </message>
+    <message>
+        <source>Bus voltage sensitivity</source>
+        <translation>Sensibilità tensione del bus</translation>
+    </message>
+    <message>
+        <source>Bus voltage std</source>
+        <translation>Std deviazione tensione del bus</translation>
+    </message>
+    <message>
+        <source>BusBar</source>
+        <translation>BusBar</translation>
+    </message>
+    <message>
+        <source>BusOrBranch</source>
+        <translation>Bus o Ramo</translation>
+    </message>
+    <message>
+        <source>CAIDI</source>
+        <translation>CAIDI</translation>
+    </message>
+    <message>
+        <source>Cascade</source>
+        <translation>Cascata</translation>
+    </message>
+    <message>
+        <source>Catalogue</source>
+        <translation>Catalogare</translation>
+    </message>
+    <message>
+        <source>Catalogue optimization</source>
+        <translation>Ottimizzazione catalogo</translation>
+    </message>
+    <message>
+        <source>Circuit</source>
+        <translation>Circuito</translation>
+    </message>
+    <message>
+        <source>Clean room</source>
+        <translation>Sala pulita</translation>
+    </message>
+    <message>
+        <source>Clustering</source>
+        <translation>Raggruppamento</translation>
+    </message>
+    <message>
+        <source>Clustering Analysis</source>
+        <translation>Analisi di clustering</translation>
+    </message>
+    <message>
+        <source>Clustering time series report</source>
+        <translation>Rapporto serie temporali di clustering</translation>
+    </message>
+    <message>
+        <source>Combinations</source>
+        <translation>Combinazioni</translation>
+    </message>
+    <message>
+        <source>Community</source>
+        <translation>Comunità</translation>
+    </message>
+    <message>
+        <source>Community analysis</source>
+        <translation>Analisi comunità</translation>
+    </message>
+    <message>
+        <source>Community balance analysis</source>
+        <translation>Analisi bilancio comunità</translation>
+    </message>
+    <message>
+        <source>Community generation analysis</source>
+        <translation>Analisi generazione comunità</translation>
+    </message>
+    <message>
+        <source>Community load analysis</source>
+        <translation>Analisi carico comunità</translation>
+    </message>
+    <message>
+        <source>Contingencies</source>
+        <translation>Contingenze</translation>
+    </message>
+    <message>
+        <source>Contingencies report</source>
+        <translation>Rapporto sulle emergenze</translation>
+    </message>
+    <message>
+        <source>Contingencies statistical report</source>
+        <translation>Rapporto statistico sulle emergenze</translation>
+    </message>
+    <message>
+        <source>Contingency</source>
+        <translation>Contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency Group</source>
+        <translation>Gruppo di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency analysis</source>
+        <translation>Analisi di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency analysis time series</source>
+        <translation>Serie temporali dell&apos;analisi di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency flow</source>
+        <translation>Flusso di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency flow report</source>
+        <translation>Rapporto sul flusso di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency frequency</source>
+        <translation>Frequenza di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency loading</source>
+        <translation>Carico di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency overload sum</source>
+        <translation>Somma sovraccarico di contingenza</translation>
+    </message>
+    <message>
+        <source>Contingency relative frequency</source>
+        <translation>Frequenza relativa di contingenza</translation>
+    </message>
+    <message>
+        <source>ContingencyAnalysis</source>
+        <translation>AnalisiContingenza</translation>
+    </message>
+    <message>
+        <source>ContingencyAnalysisTimeSeries</source>
+        <translation>SerieTemporaliAnalisiContingenza</translation>
+    </message>
+    <message>
+        <source>ContinuationPowerFlow</source>
+        <translation>FlussoPotenzaContinuazione</translation>
+    </message>
+    <message>
+        <source>Controllable shunt</source>
+        <translation>Shunt controllabile</translation>
+    </message>
+    <message>
+        <source>Country</source>
+        <translation>Paese</translation>
+    </message>
+    <message>
+        <source>Country analysis</source>
+        <translation>Analisi paese</translation>
+    </message>
+    <message>
+        <source>Country balance analysis</source>
+        <translation>Analisi bilancio paese</translation>
+    </message>
+    <message>
+        <source>Country generation analysis</source>
+        <translation>Analisi generazione paese</translation>
+    </message>
+    <message>
+        <source>Country load analysis</source>
+        <translation>Analisi carico paese</translation>
+    </message>
+    <message>
+        <source>Current injection</source>
+        <translation>Iniezione di corrente</translation>
+    </message>
+    <message>
+        <source>DC line</source>
+        <translation>Linea CC</translation>
+    </message>
+    <message>
+        <source>Delete and reduce</source>
+        <translation>Eliminare e ridurre</translation>
+    </message>
+    <message>
+        <source>Design View</source>
+        <translation>Vista Progetto</translation>
+    </message>
+    <message>
+        <source>Diagram</source>
+        <translation>Diagramma</translation>
+    </message>
+    <message>
+        <source>Dispatch</source>
+        <translation>Dispatch</translation>
+    </message>
+    <message>
+        <source>Dynamic</source>
+        <translation>Dinamico</translation>
+    </message>
+    <message>
+        <source>Dynamic Model Host</source>
+        <translation>Host Modello Dinamico</translation>
+    </message>
+    <message>
+        <source>EMT Dynamic</source>
+        <translation>Dinamico EMT</translation>
+    </message>
+    <message>
+        <source>EMT Small Signal stability</source>
+        <translation>Stabilità a Piccolo Segnale EMT</translation>
+    </message>
+    <message>
+        <source>EMT template</source>
+        <translation>Modello EMT</translation>
+    </message>
+    <message>
+        <source>ENS</source>
+        <translation>ENS</translation>
+    </message>
+    <message>
+        <source>Emission</source>
+        <translation>Emissione</translation>
+    </message>
+    <message>
+        <source>Emt Event</source>
+        <translation>Evento EMT</translation>
+    </message>
+    <message>
+        <source>Emt Events Group</source>
+        <translation>Gruppo Eventi EMT</translation>
+    </message>
+    <message>
+        <source>EmtSimulation</source>
+        <translation>Simulazione EMT</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>Evaluation report</source>
+        <translation>Rapporto di valutazione</translation>
+    </message>
+    <message>
+        <source>Exciter</source>
+        <translation>Eccitatore</translation>
+    </message>
+    <message>
+        <source>External grid</source>
+        <translation>Rete esterna</translation>
+    </message>
+    <message>
+        <source>FMU template</source>
+        <translation>Modello FMU</translation>
+    </message>
+    <message>
+        <source>Facility</source>
+        <translation>Impianto</translation>
+    </message>
+    <message>
+        <source>Flow Reports</source>
+        <translation>Rapporti di Flusso</translation>
+    </message>
+    <message>
+        <source>Flow circulating in the device</source>
+        <translation>Flusso circolante nel dispositivo</translation>
+    </message>
+    <message>
+        <source>Flow entering the node</source>
+        <translation>Flusso in ingresso al nodo</translation>
+    </message>
+    <message>
+        <source>Flow exiting the node</source>
+        <translation>Flusso in uscita dal nodo</translation>
+    </message>
+    <message>
+        <source>Flow from the P2X</source>
+        <translation>Flusso dal P2X</translation>
+    </message>
+    <message>
+        <source>Flow in the river</source>
+        <translation>Flusso nel fiume</translation>
+    </message>
+    <message>
+        <source>Fluid</source>
+        <translation>Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid Injection</source>
+        <translation>Iniezione di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid P2X</source>
+        <translation>Fluido P2X</translation>
+    </message>
+    <message>
+        <source>Fluid P2Xs</source>
+        <translation>Fluido P2Xs</translation>
+    </message>
+    <message>
+        <source>Fluid Pump</source>
+        <translation>Pompa di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid Turbine</source>
+        <translation>Turbina di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid injections</source>
+        <translation>Iniezioni di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid node</source>
+        <translation>Nodo fluido</translation>
+    </message>
+    <message>
+        <source>Fluid nodes</source>
+        <translation>Nodi di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid path</source>
+        <translation>Percorso di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid paths</source>
+        <translation>Percorsi di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid pumps</source>
+        <translation>Pompe di Fluido</translation>
+    </message>
+    <message>
+        <source>Fluid turbines</source>
+        <translation>Turbine di Fluido</translation>
+    </message>
+    <message>
+        <source>Frequency</source>
+        <translation>Frequenza</translation>
+    </message>
+    <message>
+        <source>Fuel</source>
+        <translation>Carburante</translation>
+    </message>
+    <message>
+        <source>Generation delta slacks</source>
+        <translation>Delta slacks di generazione</translation>
+    </message>
+    <message>
+        <source>Generation deltas</source>
+        <translation>Delta di generazione</translation>
+    </message>
+    <message>
+        <source>Generator</source>
+        <translation>Generatore</translation>
+    </message>
+    <message>
+        <source>Generator Emission</source>
+        <translation>Emissione Generatore</translation>
+    </message>
+    <message>
+        <source>Generator Fuel</source>
+        <translation>Carburante Generatore</translation>
+    </message>
+    <message>
+        <source>Generator Technology</source>
+        <translation>Tecnologia Generatore</translation>
+    </message>
+    <message>
+        <source>Generator cost</source>
+        <translation>Costo Generatore</translation>
+    </message>
+    <message>
+        <source>Generator emissions</source>
+        <translation>Emissioni Generatore</translation>
+    </message>
+    <message>
+        <source>Generator fuels</source>
+        <translation>Carburanti Generatore</translation>
+    </message>
+    <message>
+        <source>Generator invested</source>
+        <translation>Investimento Generatore</translation>
+    </message>
+    <message>
+        <source>Generator power</source>
+        <translation>Potenza Generatore</translation>
+    </message>
+    <message>
+        <source>Generator producing</source>
+        <translation>Potenza prodotta</translation>
+    </message>
+    <message>
+        <source>Generator reactive power</source>
+        <translation>Potenza reattiva Generatore</translation>
+    </message>
+    <message>
+        <source>Generator reactive power A</source>
+        <translation>Potenza reattiva Generatore A</translation>
+    </message>
+    <message>
+        <source>Generator reactive power B</source>
+        <translation>Potenza reattiva del Generatore B</translation>
+    </message>
+    <message>
+        <source>Generator reactive power C</source>
+        <translation>Potenza reattiva del Generatore C</translation>
+    </message>
+    <message>
+        <source>Generator reserve</source>
+        <translation>Riserva del Generatore</translation>
+    </message>
+    <message>
+        <source>Generator shedding</source>
+        <translation>Spegnimento del Generatore</translation>
+    </message>
+    <message>
+        <source>Generator shutting down</source>
+        <translation>Arresto del Generatore</translation>
+    </message>
+    <message>
+        <source>Generator starting up</source>
+        <translation>Avviamento del Generatore</translation>
+    </message>
+    <message>
+        <source>Generators</source>
+        <translation>Generatori</translation>
+    </message>
+    <message>
+        <source>Generic Area</source>
+        <translation>Area Generica</translation>
+    </message>
+    <message>
+        <source>Governor</source>
+        <translation>Governatore</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Gruppi</translation>
+    </message>
+    <message>
+        <source>HVDC Line</source>
+        <translation>Linea HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC ODF</source>
+        <translation>ODF HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC PTDF</source>
+        <translation>PTDF HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC loading</source>
+        <translation>Carico HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC losses</source>
+        <translation>Perdite HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC overloads</source>
+        <translation>Sovraccarichi HVDC</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;from&quot;</source>
+        <translation>Potenza HVDC &quot;da&quot;</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;from&quot; A</source>
+        <translation>Potenza HVDC &quot;da&quot; A</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;from&quot; B</source>
+        <translation>Potenza HVDC &quot;da&quot; B</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;from&quot; C</source>
+        <translation>Potenza HVDC &quot;da&quot; C</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;to&quot;</source>
+        <translation>Potenza HVDC &quot;a&quot;</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;to&quot; A</source>
+        <translation>Potenza HVDC &quot;a&quot; A</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;to&quot; B</source>
+        <translation>Potenza HVDC &quot;a&quot; B</translation>
+    </message>
+    <message>
+        <source>HVDC power &quot;to&quot; C</source>
+        <translation>Potenza HVDC &quot;a&quot; C</translation>
+    </message>
+    <message>
+        <source>Hvdc</source>
+        <translation>Hvdc</translation>
+    </message>
+    <message>
+        <source>If Measurement</source>
+        <translation>Misurazione If</translation>
+    </message>
+    <message>
+        <source>Iif: Reactive current &quot;from&quot;</source>
+        <translation>Iif: Corrente reattiva &quot;da&quot;</translation>
+    </message>
+    <message>
+        <source>Iif: Reactive current &quot;from&quot; A</source>
+        <translation>Iif: Corrente reattiva &quot;da&quot; A</translation>
+    </message>
+    <message>
+        <source>Iif: Reactive current &quot;from&quot; B</source>
+        <translation>Iif: Corrente reattiva &quot;da&quot; B</translation>
+    </message>
+    <message>
+        <source>Iif: Reactive current &quot;from&quot; C</source>
+        <translation>Iif: Corrente reattiva &quot;da&quot; C</translation>
+    </message>
+    <message>
+        <source>Iit: Reactive current &quot;to&quot;</source>
+        <translation>Iit: Corrente reattiva &quot;a&quot;</translation>
+    </message>
+    <message>
+        <source>Iit: Reactive current &quot;to&quot; A</source>
+        <translation>Iit: Corrente reattiva &quot;a&quot; A</translation>
+    </message>
+    <message>
+        <source>Iit: Reactive current &quot;to&quot; B</source>
+        <translation>Iit: Corrente reattiva &quot;a&quot; B</translation>
+    </message>
+    <message>
+        <source>Iit: Reactive current &quot;to&quot; C</source>
+        <translation>Iit: Corrente reattiva &quot;a&quot; C</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informazioni</translation>
+    </message>
+    <message>
+        <source>Injections</source>
+        <translation>Iniezioni</translation>
+    </message>
+    <message>
+        <source>Inputs Analysis</source>
+        <translation>Analisi degli Input</translation>
+    </message>
+    <message>
+        <source>InputsAnalysis</source>
+        <translation>AnalisiInput</translation>
+    </message>
+    <message>
+        <source>Inter-Area exchange</source>
+        <translation>Scambio Inter-Area</translation>
+    </message>
+    <message>
+        <source>Inter-space branch loading</source>
+        <translation>Carico del ramo Inter-spazio</translation>
+    </message>
+    <message>
+        <source>Inter-space branch power</source>
+        <translation>Potenza del ramo Inter-spazio</translation>
+    </message>
+    <message>
+        <source>InterAggregationInfo</source>
+        <translation>InfoAggregazioneInter</translation>
+    </message>
+    <message>
+        <source>Investment</source>
+        <translation>Investimento</translation>
+    </message>
+    <message>
+        <source>InvestmentEvaluations</source>
+        <translation>ValutazioniInvestimento</translation>
+    </message>
+    <message>
+        <source>Investments</source>
+        <translation>Investimenti</translation>
+    </message>
+    <message>
+        <source>Investments Group</source>
+        <translation>Gruppo Investimenti</translation>
+    </message>
+    <message>
+        <source>Investments evaluation</source>
+        <translation>Valutazione degli investimenti</translation>
+    </message>
+    <message>
+        <source>Irf: Active current &quot;from&quot;</source>
+        <translation>Irf: Corrente attiva &quot;da&quot;</translation>
+    </message>
+    <message>
+        <source>Irf: Active current &quot;from&quot; A</source>
+        <translation>Irf: Corrente attiva &quot;da&quot; A</translation>
+    </message>
+    <message>
+        <source>Irf: Active current &quot;from&quot; B</source>
+        <translation>Irf: Corrente attiva &quot;da&quot; B</translation>
+    </message>
+    <message>
+        <source>Irf: Active current &quot;from&quot; C</source>
+        <translation>Irf: Corrente attiva &quot;da&quot; C</translation>
+    </message>
+    <message>
+        <source>Irt: Active current &quot;to&quot;</source>
+        <translation>Irt: Corrente attiva &quot;a&quot;</translation>
+    </message>
+    <message>
+        <source>Irt: Active current &quot;to&quot; A</source>
+        <translation>Irt: Corrente attiva &quot;a&quot; A</translation>
+    </message>
+    <message>
+        <source>Irt: Active current &quot;to&quot; B</source>
+        <translation>Irt: Corrente attiva &quot;a&quot; B</translation>
+    </message>
+    <message>
+        <source>Irt: Active current &quot;to&quot; C</source>
+        <translation>Irt: Corrente attiva &quot;a&quot; C</translation>
+    </message>
+    <message>
+        <source>It Measurement</source>
+        <translation>Misurazione It</translation>
+    </message>
+    <message>
+        <source>Iterations plot</source>
+        <translation>Grafico delle iterazioni</translation>
+    </message>
+    <message>
+        <source>LODF</source>
+        <translation>LODF</translation>
+    </message>
+    <message>
+        <source>LOLE</source>
+        <translation>LOLE</translation>
+    </message>
+    <message>
+        <source>LOLET</source>
+        <translation>LOLET</translation>
+    </message>
+    <message>
+        <source>LOLF</source>
+        <translation>LOLF</translation>
+    </message>
+    <message>
+        <source>LOLFT</source>
+        <translation>LOLFT</translation>
+    </message>
+    <message>
+        <source>Latin Hypercube</source>
+        <translation>Ipercubo Latino</translation>
+    </message>
+    <message>
+        <source>Line</source>
+        <translation>Linea</translation>
+    </message>
+    <message>
+        <source>Line Location</source>
+        <translation>Posizione della linea</translation>
+    </message>
+    <message>
+        <source>Line Locations</source>
+        <translation>Posizioni delle linee</translation>
+    </message>
+    <message>
+        <source>Line Template</source>
+        <translation>Modello di linea</translation>
+    </message>
+    <message>
+        <source>Linear analysis</source>
+        <translation>Analisi lineare</translation>
+    </message>
+    <message>
+        <source>Linear analysis time series</source>
+        <translation>Serie temporali di analisi lineare</translation>
+    </message>
+    <message>
+        <source>LinearAnalysis</source>
+        <translation>Analisi Lineare</translation>
+    </message>
+    <message>
+        <source>LinearAnalysisTimeSeries</source>
+        <translation>Serie temporali di analisi lineare</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Carico</translation>
+    </message>
+    <message>
+        <source>Load like</source>
+        <translation>Carico simile</translation>
+    </message>
+    <message>
+        <source>Load neutral voltage</source>
+        <translation>Tensione neutro del carico</translation>
+    </message>
+    <message>
+        <source>Load power</source>
+        <translation>Potenza del carico</translation>
+    </message>
+    <message>
+        <source>Load shedding</source>
+        <translation>Scollegamento del carico</translation>
+    </message>
+    <message>
+        <source>Load shedding cost</source>
+        <translation>Costo dello scollegamento del carico</translation>
+    </message>
+    <message>
+        <source>Loading CDF</source>
+        <translation>CDF del carico</translation>
+    </message>
+    <message>
+        <source>Loading from the base situation ($\lambda$)</source>
+        <translation>Carico dalla situazione di base ($\lambda$)</translation>
+    </message>
+    <message>
+        <source>Loading std</source>
+        <translation>Deviazione standard del carico</translation>
+    </message>
+    <message>
+        <source>Loads</source>
+        <translation>Carichi</translation>
+    </message>
+    <message>
+        <source>Losses % per area</source>
+        <translation>Perdite % per area</translation>
+    </message>
+    <message>
+        <source>Losses CDF</source>
+        <translation>CDF delle perdite</translation>
+    </message>
+    <message>
+        <source>Losses avg</source>
+        <translation>Perdite medie</translation>
+    </message>
+    <message>
+        <source>Losses per area</source>
+        <translation>Perdite per area</translation>
+    </message>
+    <message>
+        <source>Losses per generation unit in area</source>
+        <translation>Perdite per unità di generazione nell&apos;area</translation>
+    </message>
+    <message>
+        <source>Losses std</source>
+        <translation>Deviazione standard delle perdite</translation>
+    </message>
+    <message>
+        <source>Market</source>
+        <translation>Mercato</translation>
+    </message>
+    <message>
+        <source>Market unit</source>
+        <translation>Unità di mercato</translation>
+    </message>
+    <message>
+        <source>Max contingency flow</source>
+        <translation>Flusso massimo di contingenza</translation>
+    </message>
+    <message>
+        <source>Max contingency loading</source>
+        <translation>Carico massimo di contingenza</translation>
+    </message>
+    <message>
+        <source>Maximum contingency flow</source>
+        <translation>Flusso massimo di contingenza</translation>
+    </message>
+    <message>
+        <source>Mean contingency overloading</source>
+        <translation>Sovraccarico medio di contingenza</translation>
+    </message>
+    <message>
+        <source>Measurements</source>
+        <translation>Misurazioni</translation>
+    </message>
+    <message>
+        <source>Modelling Authority</source>
+        <translation>Autorità di modellazione</translation>
+    </message>
+    <message>
+        <source>Modes</source>
+        <translation>Modalità</translation>
+    </message>
+    <message>
+        <source>Monte Carlo</source>
+        <translation>Monte Carlo</translation>
+    </message>
+    <message>
+        <source>Municipality</source>
+        <translation>Municipalità</translation>
+    </message>
+    <message>
+        <source>Municipality analysis</source>
+        <translation>Analisi della municipalità</translation>
+    </message>
+    <message>
+        <source>Municipality balance analysis</source>
+        <translation>Analisi di bilancio della municipalità</translation>
+    </message>
+    <message>
+        <source>Municipality generation analysis</source>
+        <translation>Analisi di generazione della municipalità</translation>
+    </message>
+    <message>
+        <source>Municipality load analysis</source>
+        <translation>Analisi del carico della municipalità</translation>
+    </message>
+    <message>
+        <source>NTC</source>
+        <translation>NTC</translation>
+    </message>
+    <message>
+        <source>Net transfer capacity</source>
+        <translation>Capacità di trasferimento netta</translation>
+    </message>
+    <message>
+        <source>NetTransferCapacity</source>
+        <translation>Capacità di trasferimento netta</translation>
+    </message>
+    <message>
+        <source>NetTransferCapacityTimeSeries</source>
+        <translation>Serie temporali della capacità di trasferimento netta</translation>
+    </message>
+    <message>
+        <source>No simulation</source>
+        <translation>Nessuna simulazione</translation>
+    </message>
+    <message>
+        <source>NoDevice</source>
+        <translation>Nessodispositivo</translation>
+    </message>
+    <message>
+        <source>Nodal capacity</source>
+        <translation>Capacità nodale</translation>
+    </message>
+    <message>
+        <source>Nodal capacity time series</source>
+        <translation>Serie temporale della capacità nodale</translation>
+    </message>
+    <message>
+        <source>Nodal shadow prices</source>
+        <translation>Prezzi ombra nodali</translation>
+    </message>
+    <message>
+        <source>Nodal slacks</source>
+        <translation>Slacks nodali</translation>
+    </message>
+    <message>
+        <source>Node groups</source>
+        <translation>Gruppi nodali</translation>
+    </message>
+    <message>
+        <source>NodeGroups</source>
+        <translation>Gruppi di nodi</translation>
+    </message>
+    <message>
+        <source>Nonlinear analysis</source>
+        <translation>Analisi non lineare</translation>
+    </message>
+    <message>
+        <source>Nonlinear analysis time series</source>
+        <translation>Serie temporale dell&apos;analisi non lineare</translation>
+    </message>
+    <message>
+        <source>Ntc: Base flow report</source>
+        <translation>Ntc: Rapporto di flusso base</translation>
+    </message>
+    <message>
+        <source>Ntc: Contingency flow report</source>
+        <translation>Ntc: Rapporto di flusso di contingenza</translation>
+    </message>
+    <message>
+        <source>Ntc: Contingency flow report. (Branch)</source>
+        <translation>Ntc: Rapporto di flusso di contingenza. (Ramo)</translation>
+    </message>
+    <message>
+        <source>Ntc: Contingency flow report. (Generation)</source>
+        <translation>Ntc: Rapporto di flusso di contingenza. (Generazione)</translation>
+    </message>
+    <message>
+        <source>Ntc: Contingency flow report. (Hvdc)</source>
+        <translation>Ntc: Rapporto di flusso di contingenza. (HVDC)</translation>
+    </message>
+    <message>
+        <source>Objectives</source>
+        <translation>Obiettivi</translation>
+    </message>
+    <message>
+        <source>Objects</source>
+        <translation>Oggetti</translation>
+    </message>
+    <message>
+        <source>Optimal net transfer capacity</source>
+        <translation>Capacità di trasferimento netta ottimale</translation>
+    </message>
+    <message>
+        <source>Optimal net transfer capacity time series</source>
+        <translation>Serie temporale della capacità netta di trasferimento ottimale</translation>
+    </message>
+    <message>
+        <source>Optimal power flow</source>
+        <translation>Flusso di potenza ottimale</translation>
+    </message>
+    <message>
+        <source>Optimal power flow time series</source>
+        <translation>Serie temporali del flusso di potenza ottimale</translation>
+    </message>
+    <message>
+        <source>Owner</source>
+        <translation>Proprietario</translation>
+    </message>
+    <message>
+        <source>P: Active power</source>
+        <translation>P: Potenza attiva</translation>
+    </message>
+    <message>
+        <source>PA: Active power A</source>
+        <translation>PA: Potenza attiva A</translation>
+    </message>
+    <message>
+        <source>PB: Active power B</source>
+        <translation>PB: Potenza attiva B</translation>
+    </message>
+    <message>
+        <source>PC: Active power C</source>
+        <translation>PC: Potenza attiva C</translation>
+    </message>
+    <message>
+        <source>PTDF</source>
+        <translation>PTDF</translation>
+    </message>
+    <message>
+        <source>Pareto</source>
+        <translation>Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto combinations</source>
+        <translation>Combinazioni di Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto evaluation report</source>
+        <translation>Rapporto di valutazione Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto frequency</source>
+        <translation>Frequenza Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto objectives</source>
+        <translation>Obiettivi Pareto</translation>
+    </message>
+    <message>
+        <source>Pareto plot NSGA2</source>
+        <translation>Grafico Pareto NSGA2</translation>
+    </message>
+    <message>
+        <source>Pareto plots</source>
+        <translation>Grafici Pareto</translation>
+    </message>
+    <message>
+        <source>Participation Factors</source>
+        <translation>Fattori di partecipazione</translation>
+    </message>
+    <message>
+        <source>Pf Measurement</source>
+        <translation>Misurazione Pf</translation>
+    </message>
+    <message>
+        <source>Pf: Active power &quot;from&quot;</source>
+        <translation>Pf: Potenza attiva &quot;da&quot;</translation>
+    </message>
+    <message>
+        <source>Pf: Active power &quot;from&quot; base case</source>
+        <translation>Pf: Potenza attiva &quot;da&quot; caso base</translation>
+    </message>
+    <message>
+        <source>PfA: Active power &quot;from&quot; A</source>
+        <translation>PfA: Potenza attiva &quot;da&quot; A</translation>
+    </message>
+    <message>
+        <source>PfB: Active power &quot;from&quot; B</source>
+        <translation>PfB: Potenza attiva &quot;da&quot; B</translation>
+    </message>
+    <message>
+        <source>PfC: Active power &quot;from&quot; C</source>
+        <translation>PfC: Potenza attiva &quot;da&quot; C</translation>
+    </message>
+    <message>
+        <source>Pg Measurement</source>
+        <translation>Misurazione Pg</translation>
+    </message>
+    <message>
+        <source>Pi Measurement</source>
+        <translation>Misurazione Pi</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses</source>
+        <translation>Pl: Perdite attive</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses (%)</source>
+        <translation>Pl: Perdite attive (%)</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses (%) A</source>
+        <translation>Pl: Perdite attive (%) A</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses (%) B</source>
+        <translation>Pl: Perdite attive (%) B</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses (%) C</source>
+        <translation>Pl: Perdite attive (%) C</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses A</source>
+        <translation>Pl: Perdite attive A</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses B</source>
+        <translation>Pl: Perdite attive B</translation>
+    </message>
+    <message>
+        <source>Pl: Active losses C</source>
+        <translation>Pl: Perdite attive C</translation>
+    </message>
+    <message>
+        <source>Plot Event</source>
+        <translation>Evento di tracciamento</translation>
+    </message>
+    <message>
+        <source>Plot Group</source>
+        <translation>Gruppo di tracciamento</translation>
+    </message>
+    <message>
+        <source>Power by technology</source>
+        <translation>Potenza per tecnologia</translation>
+    </message>
+    <message>
+        <source>Power flow</source>
+        <translation>Flusso di potenza</translation>
+    </message>
+    <message>
+        <source>Power flow 3ph</source>
+        <translation>Flusso di potenza trifase</translation>
+    </message>
+    <message>
+        <source>Power flow time series</source>
+        <translation>Serie temporali del flusso di potenza</translation>
+    </message>
+    <message>
+        <source>Power flow time series 3ph</source>
+        <translation>Serie temporale di flusso di potenza 3fase</translation>
+    </message>
+    <message>
+        <source>PowerFlow</source>
+        <translation>Flusso di Potenza</translation>
+    </message>
+    <message>
+        <source>PowerFlowTimeSeries</source>
+        <translation>Serie Temporale di Flusso di Potenza</translation>
+    </message>
+    <message>
+        <source>Pt Measurement</source>
+        <translation>Misurazione P_t</translation>
+    </message>
+    <message>
+        <source>Pt: Active power &quot;to&quot;</source>
+        <translation>P_t: Potenza attiva &quot;verso&quot;</translation>
+    </message>
+    <message>
+        <source>Pt: Active power &quot;to&quot; A</source>
+        <translation>P_t: Potenza attiva &quot;verso&quot; A</translation>
+    </message>
+    <message>
+        <source>Pt: Active power &quot;to&quot; B</source>
+        <translation>P_t: Potenza attiva &quot;verso&quot; B</translation>
+    </message>
+    <message>
+        <source>Pt: Active power &quot;to&quot; C</source>
+        <translation>P_t: Potenza attiva &quot;verso&quot; C</translation>
+    </message>
+    <message>
+        <source>Q: Reactive power</source>
+        <translation>Q: Potenza reattiva</translation>
+    </message>
+    <message>
+        <source>QA: Reactive power A</source>
+        <translation>Q_A: Potenza reattiva A</translation>
+    </message>
+    <message>
+        <source>QB: Reactive power B</source>
+        <translation>Q_B: Potenza reattiva B</translation>
+    </message>
+    <message>
+        <source>QC: Reactive power C</source>
+        <translation>Q_C: Potenza reattiva C</translation>
+    </message>
+    <message>
+        <source>Qf Measurement</source>
+        <translation>Misurazione Q_f</translation>
+    </message>
+    <message>
+        <source>Qf: Reactive power &quot;from&quot;</source>
+        <translation>Q_f: Potenza reattiva &quot;da&quot;</translation>
+    </message>
+    <message>
+        <source>QfA: Reactive power &quot;from&quot; A</source>
+        <translation>Q_fA: Potenza reattiva &quot;da&quot; A</translation>
+    </message>
+    <message>
+        <source>QfB: Reactive power &quot;from&quot; B</source>
+        <translation>Q_fB: Potenza reattiva &quot;da&quot; B</translation>
+    </message>
+    <message>
+        <source>QfC: Reactive power &quot;from&quot; C</source>
+        <translation>Q_fC: Potenza reattiva &quot;da&quot; C</translation>
+    </message>
+    <message>
+        <source>Qg Measurement</source>
+        <translation>Misurazione Q_g</translation>
+    </message>
+    <message>
+        <source>Qi Measurement</source>
+        <translation>Misurazione Q_i</translation>
+    </message>
+    <message>
+        <source>Ql: Reactive losses</source>
+        <translation>Q_l: Perdite reattive</translation>
+    </message>
+    <message>
+        <source>Ql: Reactive losses A</source>
+        <translation>Q_l: Perdite reattive A</translation>
+    </message>
+    <message>
+        <source>Ql: Reactive losses B</source>
+        <translation>Q_l: Perdite reattive B</translation>
+    </message>
+    <message>
+        <source>Ql: Reactive losses C</source>
+        <translation>Q_l: Perdite reattive C</translation>
+    </message>
+    <message>
+        <source>Qt Measurement</source>
+        <translation>Misurazione Q_t</translation>
+    </message>
+    <message>
+        <source>Qt: Reactive power &quot;to&quot;</source>
+        <translation>Q_t: Potenza reattiva &quot;verso&quot;</translation>
+    </message>
+    <message>
+        <source>Qt: Reactive power &quot;to&quot; A</source>
+        <translation>Q_t: Potenza reattiva &quot;verso&quot; A</translation>
+    </message>
+    <message>
+        <source>Qt: Reactive power &quot;to&quot; B</source>
+        <translation>Q_t: Potenza reattiva &quot;verso&quot; B</translation>
+    </message>
+    <message>
+        <source>Qt: Reactive power &quot;to&quot; C</source>
+        <translation>Q_t: Potenza reattiva &quot;verso&quot; C</translation>
+    </message>
+    <message>
+        <source>RMS Dynamic</source>
+        <translation>Dinamica RMS</translation>
+    </message>
+    <message>
+        <source>RMS Small Signal stability</source>
+        <translation>Stabilità a piccolo segnale RMS</translation>
+    </message>
+    <message>
+        <source>RMS template</source>
+        <translation>Template RMS</translation>
+    </message>
+    <message>
+        <source>Region</source>
+        <translation>Regione</translation>
+    </message>
+    <message>
+        <source>Region analysis</source>
+        <translation>Analisi della Regione</translation>
+    </message>
+    <message>
+        <source>Region balance analysis</source>
+        <translation>Analisi dell&apos;equilibrio regionale</translation>
+    </message>
+    <message>
+        <source>Region generation analysis</source>
+        <translation>Analisi di generazione regionale</translation>
+    </message>
+    <message>
+        <source>Region load analysis</source>
+        <translation>Analisi del carico regionale</translation>
+    </message>
+    <message>
+        <source>Regions</source>
+        <translation>Regioni</translation>
+    </message>
+    <message>
+        <source>Reliability</source>
+        <translation>Affidabilità</translation>
+    </message>
+    <message>
+        <source>Remedial action</source>
+        <translation>Azione correttiva</translation>
+    </message>
+    <message>
+        <source>Remedial action Group</source>
+        <translation>Gruppo di azioni correttive</translation>
+    </message>
+    <message>
+        <source>Reports</source>
+        <translation>Rapporti</translation>
+    </message>
+    <message>
+        <source>Reservoir fluid level</source>
+        <translation>Livello del fluido del serbatoio</translation>
+    </message>
+    <message>
+        <source>Results</source>
+        <translation>Risultati</translation>
+    </message>
+    <message>
+        <source>Right Eigenvectors</source>
+        <translation>Autovettori destri</translation>
+    </message>
+    <message>
+        <source>Rms Event</source>
+        <translation>Evento RMS</translation>
+    </message>
+    <message>
+        <source>Rms Events Group</source>
+        <translation>Gruppo di eventi RMS</translation>
+    </message>
+    <message>
+        <source>Rms Generator results</source>
+        <translation>Risultati del generatore RMS</translation>
+    </message>
+    <message>
+        <source>Rms Genqec delta results</source>
+        <translation>Risultati delta Genqec RMS</translation>
+    </message>
+    <message>
+        <source>Rms Genqec omega results</source>
+        <translation>Risultati omega Genqec RMS</translation>
+    </message>
+    <message>
+        <source>Rms Line results</source>
+        <translation>Risultati della linea RMS</translation>
+    </message>
+    <message>
+        <source>Rms Load P results</source>
+        <translation>Risultati P del carico RMS</translation>
+    </message>
+    <message>
+        <source>Rms Load Q results</source>
+        <translation>Risultati Q del carico RMS</translation>
+    </message>
+    <message>
+        <source>Rms Simple Line P results</source>
+        <translation>Risultati P Linea Semplice RMS</translation>
+    </message>
+    <message>
+        <source>Rms Simple Line Q results</source>
+        <translation>Risultati Q Linea Semplice RMS</translation>
+    </message>
+    <message>
+        <source>Rms load results</source>
+        <translation>Risultati carico RMS</translation>
+    </message>
+    <message>
+        <source>Rms plot results</source>
+        <translation>Risultati grafico RMS</translation>
+    </message>
+    <message>
+        <source>Rms time series report</source>
+        <translation>Rapporto serie temporale RMS</translation>
+    </message>
+    <message>
+        <source>RmsSimulation</source>
+        <translation>Simulazione RMS</translation>
+    </message>
+    <message>
+        <source>S-Domain Plot</source>
+        <translation>Grafico Dominio S</translation>
+    </message>
+    <message>
+        <source>S-Domain Plot in Hz</source>
+        <translation>Grafico Dominio S in Hz</translation>
+    </message>
+    <message>
+        <source>SAIDI</source>
+        <translation>SAIDI</translation>
+    </message>
+    <message>
+        <source>SAIFI</source>
+        <translation>SAIFI</translation>
+    </message>
+    <message>
+        <source>Sensibilities</source>
+        <translation>Sensibilità</translation>
+    </message>
+    <message>
+        <source>Sensitivity to the exchange</source>
+        <translation>Sensibilità allo scambio</translation>
+    </message>
+    <message>
+        <source>Sensitivity to the exchange (N-1)</source>
+        <translation>Sensibilità allo scambio (N-1)</translation>
+    </message>
+    <message>
+        <source>Sequence line</source>
+        <translation>Linea di sequenza</translation>
+    </message>
+    <message>
+        <source>Series</source>
+        <translation>Serie</translation>
+    </message>
+    <message>
+        <source>Series reactance</source>
+        <translation>Reattanza in serie</translation>
+    </message>
+    <message>
+        <source>Short circuit</source>
+        <translation>Corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit active current</source>
+        <translation>Corrente attiva di corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit active current A</source>
+        <translation>Corrente attiva di corto circuito A</translation>
+    </message>
+    <message>
+        <source>Short circuit active current B</source>
+        <translation>Corrente attiva di corto circuito B</translation>
+    </message>
+    <message>
+        <source>Short circuit active current C</source>
+        <translation>Corrente attiva di corto circuito C</translation>
+    </message>
+    <message>
+        <source>Short circuit active power</source>
+        <translation>Potenza attiva di corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit active power A</source>
+        <translation>Potenza attiva di corto circuito A</translation>
+    </message>
+    <message>
+        <source>Short circuit active power B</source>
+        <translation>Potenza attiva di corto circuito B</translation>
+    </message>
+    <message>
+        <source>Short circuit active power C</source>
+        <translation>Potenza attiva di corto circuito C</translation>
+    </message>
+    <message>
+        <source>Short circuit event</source>
+        <translation>Evento di corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive current</source>
+        <translation>Corrente reattiva di corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive current A</source>
+        <translation>Corrente reattiva di corto circuito A</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive current B</source>
+        <translation>Corrente reattiva di corto circuito B</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive current C</source>
+        <translation>Corrente reattiva di corto circuito C</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive power</source>
+        <translation>Potenza reattiva di corto circuito</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive power A</source>
+        <translation>Potenza reattiva di corto circuito A</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive power B</source>
+        <translation>Potenza reattiva di corto circuito B</translation>
+    </message>
+    <message>
+        <source>Short circuit reactive power C</source>
+        <translation>Potenza reattiva di corto circuito C</translation>
+    </message>
+    <message>
+        <source>Short-circuit information</source>
+        <translation>Informazioni sul corto circuito</translation>
+    </message>
+    <message>
+        <source>ShortCircuit</source>
+        <translation>CortoCircuito</translation>
+    </message>
+    <message>
+        <source>Shunt</source>
+        <translation>Shunt</translation>
+    </message>
+    <message>
+        <source>Shunt like devices</source>
+        <translation>Dispositivi shunt</translation>
+    </message>
+    <message>
+        <source>Shunt neutral voltage</source>
+        <translation>Tensione neutra shunt</translation>
+    </message>
+    <message>
+        <source>Shunt reactive power</source>
+        <translation>Potenza reattiva shunt</translation>
+    </message>
+    <message>
+        <source>Shunt reactive power A</source>
+        <translation>Potenza reattiva shunt A</translation>
+    </message>
+    <message>
+        <source>Shunt reactive power B</source>
+        <translation>Potenza reattiva shunt B</translation>
+    </message>
+    <message>
+        <source>Shunt reactive power C</source>
+        <translation>Potenza reattiva shunt C</translation>
+    </message>
+    <message>
+        <source>Sigma + distances</source>
+        <translation>Distanze Sigma +</translation>
+    </message>
+    <message>
+        <source>Sigma Analysis</source>
+        <translation>Analisi Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma distances</source>
+        <translation>Distanze Sigma</translation>
+    </message>
+    <message>
+        <source>Sigma imaginary</source>
+        <translation>Sigma immaginario</translation>
+    </message>
+    <message>
+        <source>Sigma real</source>
+        <translation>Sigma reale</translation>
+    </message>
+    <message>
+        <source>SigmaAnalysis</source>
+        <translation>AnalisiSigma</translation>
+    </message>
+    <message>
+        <source>SimulationOptionsDevice</source>
+        <translation>Opzioni Simulazione Dispositivo</translation>
+    </message>
+    <message>
+        <source>Slacks</source>
+        <translation>Slacks</translation>
+    </message>
+    <message>
+        <source>SmallSignalStability</source>
+        <translation>Stabilità a piccolo segnale</translation>
+    </message>
+    <message>
+        <source>Snapshot</source>
+        <translation>Istantanea</translation>
+    </message>
+    <message>
+        <source>Special plots</source>
+        <translation>Grafici speciali</translation>
+    </message>
+    <message>
+        <source>Spillage flow leaving</source>
+        <translation>Flusso di spillage in uscita</translation>
+    </message>
+    <message>
+        <source>Srap used power</source>
+        <translation>Potenza utilizzata Srap</translation>
+    </message>
+    <message>
+        <source>Stabilizer</source>
+        <translation>Stabilizzatore</translation>
+    </message>
+    <message>
+        <source>State Matrix</source>
+        <translation>Matrice di stato</translation>
+    </message>
+    <message>
+        <source>State estimation</source>
+        <translation>Stima dello Stato</translation>
+    </message>
+    <message>
+        <source>StateEstimation</source>
+        <translation>Stima dello stato</translation>
+    </message>
+    <message>
+        <source>Static Generator</source>
+        <translation>Generatore statico</translation>
+    </message>
+    <message>
+        <source>Statistics</source>
+        <translation>Statistiche</translation>
+    </message>
+    <message>
+        <source>Std-dev contingency overloading</source>
+        <translation>Sovraccarico di contingenza dev. std</translation>
+    </message>
+    <message>
+        <source>Stochastic Power Flow</source>
+        <translation>Flusso di potenza stocastico</translation>
+    </message>
+    <message>
+        <source>StochasticPowerFlow</source>
+        <translation>Flusso di potenza stocastico</translation>
+    </message>
+    <message>
+        <source>Substation</source>
+        <translation>Sottostazione</translation>
+    </message>
+    <message>
+        <source>Substation analysis</source>
+        <translation>Analisi della sottostazione</translation>
+    </message>
+    <message>
+        <source>Substation balance analysis</source>
+        <translation>Analisi di bilancio della sottostazione</translation>
+    </message>
+    <message>
+        <source>Substation generation analysis</source>
+        <translation>Analisi di generazione della sottostazione</translation>
+    </message>
+    <message>
+        <source>Substation load analysis</source>
+        <translation>Analisi del carico della sottostazione</translation>
+    </message>
+    <message>
+        <source>Switch</source>
+        <translation>Interruttore</translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation>Sistema</translation>
+    </message>
+    <message>
+        <source>System emissions</source>
+        <translation>Emissioni del sistema</translation>
+    </message>
+    <message>
+        <source>System energy cost</source>
+        <translation>Costo energetico del sistema</translation>
+    </message>
+    <message>
+        <source>System energy total cost</source>
+        <translation>Costo totale energetico del sistema</translation>
+    </message>
+    <message>
+        <source>System fuel consumption</source>
+        <translation>Consumo di combustibile del sistema</translation>
+    </message>
+    <message>
+        <source>Technology</source>
+        <translation>Tecnologia</translation>
+    </message>
+    <message>
+        <source>Technology Category</source>
+        <translation>Categoria di tecnologia</translation>
+    </message>
+    <message>
+        <source>Technology Group</source>
+        <translation>Gruppo di tecnologia</translation>
+    </message>
+    <message>
+        <source>Technology plot</source>
+        <translation>Grafico di tecnologia</translation>
+    </message>
+    <message>
+        <source>Template</source>
+        <translation>Modello</translation>
+    </message>
+    <message>
+        <source>Templates</source>
+        <translation>Modelli</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <source>Time series Contingency flow report (Branches)</source>
+        <translation>Rapporto di flusso di contingenza serie temporale (Rami)</translation>
+    </message>
+    <message>
+        <source>Time series base flow report</source>
+        <translation>Rapporto di flusso base serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series branch monitoring logic report</source>
+        <translation>Rapporto di logica di monitoraggio dei rami serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series contingency Branches report</source>
+        <translation>Rapporto di rami di contingenza serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series contingency flow report</source>
+        <translation>Rapporto di flusso di contingenza serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series contingency flow report. (Generation)</source>
+        <translation>Rapporto di flusso di contingenza serie temporale. (Generazione)</translation>
+    </message>
+    <message>
+        <source>Time series contingency flow report. (Hvdc)</source>
+        <translation>Rapporto di flusso di contingenza serie temporale. (HVDC)</translation>
+    </message>
+    <message>
+        <source>Time series critical Branches report</source>
+        <translation>Rapporto di rami critici serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series generation delta power report</source>
+        <translation>Rapporto di potenza delta di generazione serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series generation power report</source>
+        <translation>Rapporto di potenza di generazione serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series sensitivity to the exchange report</source>
+        <translation>Rapporto di sensibilità allo scambio serie temporale</translation>
+    </message>
+    <message>
+        <source>Time series worst sensitivity to the exchange report (N-1)</source>
+        <translation>Rapporto di peggior sensibilità allo scambio serie temporale (N-1)</translation>
+    </message>
+    <message>
+        <source>Topology Processor</source>
+        <translation>Processore di topologia</translation>
+    </message>
+    <message>
+        <source>Topology reduction</source>
+        <translation>Riduzione di topologia</translation>
+    </message>
+    <message>
+        <source>Tower</source>
+        <translation>Torre</translation>
+    </message>
+    <message>
+        <source>Transformer</source>
+        <translation>Trasformatore</translation>
+    </message>
+    <message>
+        <source>Transformer type</source>
+        <translation>Tipo di trasformatore</translation>
+    </message>
+    <message>
+        <source>Transformer3W</source>
+        <translation>Transformer3W</translation>
+    </message>
+    <message>
+        <source>TransformerNw</source>
+        <translation>TransformerNw</translation>
+    </message>
+    <message>
+        <source>Transient stability</source>
+        <translation>Stabilità transitoria</translation>
+    </message>
+    <message>
+        <source>UPFC</source>
+        <translation>UPFC</translation>
+    </message>
+    <message>
+        <source>Underground line</source>
+        <translation>Linea sotterranea</translation>
+    </message>
+    <message>
+        <source>V: Voltage module</source>
+        <translation>V: Modulo di tensione</translation>
+    </message>
+    <message>
+        <source>VA: Voltage module A</source>
+        <translation>VA: Modulo di tensione A</translation>
+    </message>
+    <message>
+        <source>VB: Voltage module B</source>
+        <translation>VB: Modulo di tensione B</translation>
+    </message>
+    <message>
+        <source>VC: Voltage module C</source>
+        <translation>VC: Modulo di tensione C</translation>
+    </message>
+    <message>
+        <source>VSC</source>
+        <translation>VSC</translation>
+    </message>
+    <message>
+        <source>Va Measurement</source>
+        <translation>Misurazione Va</translation>
+    </message>
+    <message>
+        <source>Var Factory</source>
+        <translation>Generatore Var</translation>
+    </message>
+    <message>
+        <source>Vm Measurement</source>
+        <translation>Misurazione Vm</translation>
+    </message>
+    <message>
+        <source>Voltage angle (0)</source>
+        <translation>Angolo di tensione (0)</translation>
+    </message>
+    <message>
+        <source>Voltage angle (1)</source>
+        <translation>Angolo di tensione (1)</translation>
+    </message>
+    <message>
+        <source>Voltage angle (2)</source>
+        <translation>Angolo di tensione (2)</translation>
+    </message>
+    <message>
+        <source>Voltage collapse</source>
+        <translation>Collasso di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level</source>
+        <translation>Livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level analysis</source>
+        <translation>Analisi del livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level balance analysis</source>
+        <translation>Analisi di bilancio del livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level generation analysis</source>
+        <translation>Analisi di generazione del livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level load analysis</source>
+        <translation>Analisi di carico del livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage level template</source>
+        <translation>Modello di livello di tensione</translation>
+    </message>
+    <message>
+        <source>Voltage module (0)</source>
+        <translation>Modulo di tensione (0)</translation>
+    </message>
+    <message>
+        <source>Voltage module (1)</source>
+        <translation>Modulo di tensione (1)</translation>
+    </message>
+    <message>
+        <source>Voltage module (2)</source>
+        <translation>Modulo di tensione (2)</translation>
+    </message>
+    <message>
+        <source>Voltage plot</source>
+        <translation>Grafico di tensione</translation>
+    </message>
+    <message>
+        <source>Vsc</source>
+        <translation>Vsc</translation>
+    </message>
+    <message>
+        <source>Vsc ODF</source>
+        <translation>Vsc ODF</translation>
+    </message>
+    <message>
+        <source>Vsc PTDF</source>
+        <translation>Vsc PTDF</translation>
+    </message>
+    <message>
+        <source>Vsc Pdc</source>
+        <translation>Vsc Pdc</translation>
+    </message>
+    <message>
+        <source>Vsc Vdc</source>
+        <translation>Vsc Vdc</translation>
+    </message>
+    <message>
+        <source>Vsc loading</source>
+        <translation>Carico Vsc</translation>
+    </message>
+    <message>
+        <source>Vsc losses</source>
+        <translation>Perdite Vsc</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;from&quot; negative pole</source>
+        <translation>Potenza Vsc &quot;dal&quot; polo negativo</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;from&quot; positive pole</source>
+        <translation>Potenza Vsc &quot;dal&quot; polo positivo</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;to&quot;</source>
+        <translation>Potenza Vsc &quot;verso&quot;</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;to&quot; A</source>
+        <translation>Potenza Vsc &quot;verso&quot; A</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;to&quot; B</source>
+        <translation>Potenza Vsc &quot;verso&quot; B</translation>
+    </message>
+    <message>
+        <source>Vsc power &quot;to&quot; C</source>
+        <translation>Potenza Vsc &quot;verso&quot; C</translation>
+    </message>
+    <message>
+        <source>When to make them plot</source>
+        <translation>Quando tracciarli</translation>
+    </message>
+    <message>
+        <source>Winding</source>
+        <translation>Avvolgimento</translation>
+    </message>
+    <message>
+        <source>Wire</source>
+        <translation>Linea</translation>
+    </message>
+    <message>
+        <source>Zone</source>
+        <translation>Zona</translation>
+    </message>
+    <message>
+        <source>Zone analysis</source>
+        <translation>Analisi di zona</translation>
+    </message>
+    <message>
+        <source>Zone balance analysis</source>
+        <translation>Analisi di bilancio di zona</translation>
+    </message>
+    <message>
+        <source>Zone generation analysis</source>
+        <translation>Analisi di generazione di zona</translation>
+    </message>
+    <message>
+        <source>Zone load analysis</source>
+        <translation>Analisi di carico di zona</translation>
+    </message>
+    <message>
+        <source>export all</source>
+        <translation>Esporta tutto</translation>
+    </message>
+    <message>
+        <source>file open</source>
+        <translation>Apri file</translation>
+    </message>
+    <message>
+        <source>file save</source>
+        <translation>Salva file</translation>
+    </message>
+    <message>
+        <source>loading avg</source>
+        <translation>Carico medio</translation>
+    </message>
+    <message>
+        <source>m: Tap module</source>
+        <translation>m: Modulo Tap</translation>
+    </message>
+    <message>
+        <source>ΔP: Active power increment</source>
+        <translation>ΔP: Incremento di potenza attiva</translation>
+    </message>
+    <message>
+        <source>ΔV: Voltage modules drop</source>
+        <translation>ΔV: Calo dei moduli di tensione</translation>
+    </message>
+    <message>
+        <source>ΔV: Voltage modules drop A</source>
+        <translation>ΔV: Calo dei moduli di tensione A</translation>
+    </message>
+    <message>
+        <source>ΔV: Voltage modules drop B</source>
+        <translation>ΔV: Calo dei moduli di tensione B</translation>
+    </message>
+    <message>
+        <source>ΔV: Voltage modules drop C</source>
+        <translation>ΔV: Calo dei moduli di tensione C</translation>
+    </message>
+    <message>
+        <source>Δθ: Voltage angles drop</source>
+        <translation>Δθ: Calo degli angoli di tensione</translation>
+    </message>
+    <message>
+        <source>Δθ: Voltage angles drop A</source>
+        <translation>Δθ: Calo degli angoli di tensione A</translation>
+    </message>
+    <message>
+        <source>Δθ: Voltage angles drop B</source>
+        <translation>Δθ: Calo degli angoli di tensione B</translation>
+    </message>
+    <message>
+        <source>Δθ: Voltage angles drop C</source>
+        <translation>Δθ: Calo degli angoli di tensione C</translation>
+    </message>
+    <message>
+        <source>θ: Voltage angle</source>
+        <translation>θ: Angolo di tensione</translation>
+    </message>
+    <message>
+        <source>θA: Voltage angle A</source>
+        <translation>θA: Angolo di tensione A</translation>
+    </message>
+    <message>
+        <source>θB: Voltage angle B</source>
+        <translation>θB: Angolo di tensione B</translation>
+    </message>
+    <message>
+        <source>θC: Voltage angle C</source>
+        <translation>θC: Angolo di tensione C</translation>
+    </message>
+    <message>
+        <source>𝜏: Tap angle</source>
+        <translation>𝜏: Tap angle</translation>
+    </message>
+    <message>
+        <source>Control PC</source>
+        <translation>Controllare PC</translation>
+    </message>
+    <message>
+        <source>Net transfer capacity slack</source>
+        <translation>Slack di capacità di trasferimento netta</translation>
+    </message>
+    <message>
+        <source>Net transfer capacity status</source>
+        <translation>Stato della capacità di trasferimento netta</translation>
+    </message>
+    <message>
+        <source>DC cable type</source>
+        <translation>Tipo di cavo CC</translation>
+    </message>
+    <message>
+        <source>Fluid value</source>
+        <translation>Valore fluido</translation>
+    </message>
+</context>
+<context>
+    <name>VerticalHeaderWidthResizer</name>
+    <message>
+        <source>Resize index column</source>
+        <translation>Ridimensiona colonna indice</translation>
+    </message>
+</context>
+<context>
+    <name>VoltageLevelConversionWizard</name>
+    <message>
+        <source>+ Add spare position</source>
+        <translation>+ Aggiungi posizione di riserva</translation>
+    </message>
+    <message>
+        <source>- Remove selected</source>
+        <translation>- Rimuovi selezionato</translation>
+    </message>
+    <message>
+        <source>Bars with impedance</source>
+        <translation>Barre con impedenza</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancellare</translation>
+    </message>
+    <message>
+        <source>Cannot Remove</source>
+        <translation>Non è possibile rimuovere</translation>
+    </message>
+    <message>
+        <source>Convert Bus to Voltage Level</source>
+        <translation>Converti Bus in Livello di Tensione</translation>
+    </message>
+    <message>
+        <source>Do it</source>
+        <translation>Fallo</translation>
+    </message>
+    <message>
+        <source>Enable transfer bus (JBPT)</source>
+        <translation>Abilita bus di trasferimento (JBPT)</translation>
+    </message>
+    <message>
+        <source>Keep original rates</source>
+        <translation>Mantieni i tassi originali</translation>
+    </message>
+    <message>
+        <source>Only spare positions can be removed. Actual devices cannot be removed from the list.</source>
+        <translation>Possono essere rimosse solo le posizioni di riserva. I dispositivi effettivi non possono essere rimossi dall&apos;elenco.</translation>
+    </message>
+    <message>
+        <source>Options</source>
+        <translation>Opzioni</translation>
+    </message>
+    <message>
+        <source>Positions (use arrows to reorder):</source>
+        <translation>Posizioni (usa le frecce per riordinare):</translation>
+    </message>
+    <message>
+        <source>Reducible branches</source>
+        <translation>Rami riducibili</translation>
+    </message>
+    <message>
+        <source>Scheme type:</source>
+        <translation>Tipo di schema:</translation>
+    </message>
+    <message>
+        <source>Use breakers</source>
+        <translation>Usare interruttori</translation>
+    </message>
+    <message>
+        <source>Validation Error</source>
+        <translation>Errore di validazione</translation>
+    </message>
+    <message>
+        <source>▲</source>
+        <translation>▲</translation>
+    </message>
+    <message>
+        <source>▼</source>
+        <translation>▼</translation>
+    </message>
+</context>
+<context>
+    <name>VoltageWarningDialog</name>
+    <message>
+        <source>Invalid Voltage Levels</source>
+        <translation>Livelli di tensione non validi</translation>
+    </message>
+</context>
+<context>
+    <name>VscDeviceEditor</name>
+    <message>
+        <source>VSC editor</source>
+        <translation>Editor VSC</translation>
     </message>
 </context>
 <context>
@@ -4267,6 +12712,27 @@ Monte Carlo power flow results:</source>
     </message>
 </context>
 <context>
+    <name>WindFarmWizard</name>
+    <message>
+        <source>The selected turbine has no design curves</source>
+        <translation>La turbina selezionata non ha curve di progetto</translation>
+    </message>
+    <message>
+        <source>The selected wind turbine could not be created:
+{error_text}</source>
+        <translation>La turbina eolica selezionata non può essere creata:
+{error_text}</translation>
+    </message>
+    <message>
+        <source>Wind power profile</source>
+        <translation>Profilo di potenza eolica</translation>
+    </message>
+    <message>
+        <source>Wind turbine design curves</source>
+        <translation>Curve di progetto delle turbine eoliche</translation>
+    </message>
+</context>
+<context>
     <name>mainWindow</name>
     <message>
         <location filename="../Main/MainWindow.ui" line="31"/>
@@ -4275,7 +12741,7 @@ Monte Carlo power flow results:</source>
     </message>
     <message>
         <location filename="../Main/MainWindow.ui" line="86"/>
-        <location filename="../Main/MainWindow.ui" line="10904"/>
+        <location filename="../Main/MainWindow.ui" line="11170"/>
         <source>Model</source>
         <translation>Modello</translation>
     </message>
@@ -4292,788 +12758,861 @@ Monte Carlo power flow results:</source>
         <translation>Impostazioni e controllo dei diagrammi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="338"/>
+        <location filename="../Main/MainWindow.ui" line="330"/>
+        <source>Search diagram by name</source>
+        <translation>Cerca diagramma per nome</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="351"/>
         <source>List of available diagrams</source>
         <translation>Elenco degli schemi disponibili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="361"/>
+        <location filename="../Main/MainWindow.ui" line="374"/>
         <source>Map settings</source>
         <translation>Impostazioni della mappa</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="388"/>
+        <location filename="../Main/MainWindow.ui" line="401"/>
         <source>Map tile provider</source>
         <translation>Fornitore di riquadri della mappa</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="395"/>
+        <location filename="../Main/MainWindow.ui" line="408"/>
         <source>Map tile provides (map background)</source>
         <translation>Il riquadro della mappa fornisce (sfondo della mappa)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="408"/>
+        <location filename="../Main/MainWindow.ui" line="421"/>
         <source>Preset</source>
         <translation>Preimpostato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="436"/>
+        <location filename="../Main/MainWindow.ui" line="449"/>
         <source>Apply country meaningful sizes</source>
         <translation>Applicare le dimensioni significative del paese</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="450"/>
+        <location filename="../Main/MainWindow.ui" line="463"/>
         <source>Apply region meaningful sizes</source>
         <translation>Applicare dimensioni significative della regione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="464"/>
+        <location filename="../Main/MainWindow.ui" line="477"/>
         <source>Apply municipality meaningful sizes</source>
         <translation>Applicare le dimensioni significative del comune</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="478"/>
+        <location filename="../Main/MainWindow.ui" line="491"/>
         <source>Apply street meaningful sizes</source>
         <translation>Applicare dimensioni stradali significative</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="501"/>
+        <location filename="../Main/MainWindow.ui" line="514"/>
         <source>Node size</source>
         <translation>Dimensione del nodo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="529"/>
+        <location filename="../Main/MainWindow.ui" line="542"/>
         <source>Maximum node / substation sizes</source>
         <translation>Dimensioni massime del nodo/sottostazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="532"/>
-        <location filename="../Main/MainWindow.ui" line="557"/>
-        <location filename="../Main/MainWindow.ui" line="619"/>
-        <location filename="../Main/MainWindow.ui" line="644"/>
-        <location filename="../Main/MainWindow.ui" line="685"/>
+        <location filename="../Main/MainWindow.ui" line="545"/>
+        <location filename="../Main/MainWindow.ui" line="570"/>
+        <location filename="../Main/MainWindow.ui" line="632"/>
+        <location filename="../Main/MainWindow.ui" line="657"/>
+        <location filename="../Main/MainWindow.ui" line="698"/>
         <source> px</source>
         <translation>px</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="554"/>
+        <location filename="../Main/MainWindow.ui" line="567"/>
         <source>Minimum node / substation sizes</source>
         <translation>Dimensioni minime del nodo/sottostazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="588"/>
+        <location filename="../Main/MainWindow.ui" line="601"/>
         <source>Branch size</source>
         <translation>Dimensione del ramo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="616"/>
+        <location filename="../Main/MainWindow.ui" line="629"/>
         <source>Minimum branch sizes</source>
         <translation>Dimensioni minime dei rami</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="641"/>
+        <location filename="../Main/MainWindow.ui" line="654"/>
         <source>Maximum branch sizes</source>
         <translation>Dimensioni massime dei rami</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="675"/>
+        <location filename="../Main/MainWindow.ui" line="688"/>
         <source>Arrow size</source>
         <translation>Dimensione della freccia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="682"/>
+        <location filename="../Main/MainWindow.ui" line="695"/>
         <source>Branch arrow sizes</source>
         <translation>Dimensioni delle frecce dei rami</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="707"/>
+        <location filename="../Main/MainWindow.ui" line="720"/>
         <source>Width based on flow</source>
         <translation>Larghezza in base al flusso</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="717"/>
+        <location filename="../Main/MainWindow.ui" line="730"/>
         <source>Redraw the map or schematic with the new parameters</source>
         <translation>Ridisegna la mappa o lo schema con i nuovi parametri</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="720"/>
+        <location filename="../Main/MainWindow.ui" line="733"/>
         <source>Redraw</source>
         <translation>Ridisegna</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="756"/>
+        <location filename="../Main/MainWindow.ui" line="769"/>
         <source>Schematic settings</source>
         <translation>Impostazioni schematiche</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="783"/>
+        <location filename="../Main/MainWindow.ui" line="796"/>
         <source>Default voltage</source>
         <translation>Voltaggio predefinito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="790"/>
+        <location filename="../Main/MainWindow.ui" line="803"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Bus default voltage&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This is the voltage that drag&amp;amp;drop buses have when they are created from the schematic.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Tensione predefinita del bus&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Questa è la tensione che hanno i bus drag&amp;drop quando vengono creati dallo schema.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="793"/>
+        <location filename="../Main/MainWindow.ui" line="806"/>
         <source> kV</source>
         <translation>kV</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="809"/>
+        <location filename="../Main/MainWindow.ui" line="822"/>
         <source>Node expansion factor</source>
         <translation>Fattore di espansione dei nodi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="816"/>
+        <location filename="../Main/MainWindow.ui" line="829"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When expanding or contracting the distances between nodes, this is the factor that applies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quando si espandono o si contraggono le distanze tra i nodi, questo è il fattore che si applica.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="838"/>
-        <location filename="../Main/MainWindow.ui" line="862"/>
+        <location filename="../Main/MainWindow.ui" line="851"/>
+        <location filename="../Main/MainWindow.ui" line="875"/>
         <source>Ask before running the automatic grid layout. This is because you might have a layout already and ruin it accidentally.</source>
         <translation>Chiedi prima di eseguire il layout automatico della griglia. Questo perché potresti avere già un layout e rovinarlo accidentalmente.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="841"/>
+        <location filename="../Main/MainWindow.ui" line="854"/>
         <source>Layout algorithm 
 (mark to ask)</source>
         <translation>Algoritmo di layout 
 (segnare per chiedere)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="855"/>
+        <location filename="../Main/MainWindow.ui" line="868"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Algorithm to use for the automatic &lt;/p&gt;&lt;p&gt;layout of the grid nodes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Algoritmo da utilizzare per l&apos;automatico&lt;/p&gt;&lt;p&gt;disposizione dei nodi della griglia&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="865"/>
+        <location filename="../Main/MainWindow.ui" line="878"/>
         <source>Use the objects&apos; color</source>
         <translation>Usa il colore degli oggetti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="907"/>
-        <location filename="../Main/MainWindow.ui" line="3600"/>
-        <location filename="../Main/MainWindow.ui" line="5839"/>
+        <location filename="../Main/MainWindow.ui" line="920"/>
+        <location filename="../Main/MainWindow.ui" line="3670"/>
+        <location filename="../Main/MainWindow.ui" line="5952"/>
         <source>General settings</source>
         <translation>Impostazioni generali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="940"/>
+        <location filename="../Main/MainWindow.ui" line="953"/>
         <source>Palette</source>
         <translation>Tavolozza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="947"/>
+        <location filename="../Main/MainWindow.ui" line="960"/>
         <source>Select the colour palette</source>
         <translation>Seleziona la tavolozza dei colori</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="954"/>
+        <location filename="../Main/MainWindow.ui" line="967"/>
         <source>Export resolution</source>
         <translation>Risoluzione dell&apos;esportazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="961"/>
+        <location filename="../Main/MainWindow.ui" line="974"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resolution factor.&lt;/p&gt;&lt;p&gt;1K = 1920 x 1080 pixels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fattore di risoluzione.&lt;/p&gt;&lt;p&gt;1K = 1920×1080 pixel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="964"/>
+        <location filename="../Main/MainWindow.ui" line="977"/>
         <source> K</source>
         <translation>K</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="980"/>
+        <location filename="../Main/MainWindow.ui" line="993"/>
         <source>Video FPS</source>
         <translation>VideoFPS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="987"/>
+        <location filename="../Main/MainWindow.ui" line="1000"/>
         <source>Video frames per second</source>
         <translation>Fotogrammi video al secondo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="990"/>
+        <location filename="../Main/MainWindow.ui" line="1003"/>
         <source> FPS</source>
         <translation>FPS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1006"/>
+        <location filename="../Main/MainWindow.ui" line="1019"/>
         <source>Plotting style</source>
         <translation>Stile di trama</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1013"/>
+        <location filename="../Main/MainWindow.ui" line="1026"/>
         <source>MatPlotlib plot styles to choose from</source>
         <translation>MatPlotlib stili di stampa tra cui scegliere</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1067"/>
+        <location filename="../Main/MainWindow.ui" line="1080"/>
         <source>Available results</source>
         <translation>Risultati disponibili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1080"/>
+        <location filename="../Main/MainWindow.ui" line="1093"/>
         <source>Color the grid with the selected study</source>
         <translation>Colora la griglia con lo studio selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1118"/>
-        <location filename="../Main/MainWindow.ui" line="1528"/>
-        <location filename="../Main/MainWindow.ui" line="2218"/>
+        <location filename="../Main/MainWindow.ui" line="1131"/>
+        <location filename="../Main/MainWindow.ui" line="1584"/>
+        <location filename="../Main/MainWindow.ui" line="2274"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time slider&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Move this time slider to select the appropriate time slot to view.&lt;/p&gt;&lt;p&gt;The first position sets the snapshot values, the rest attend to the time series values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Cursore del tempo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Spostare questo cursore temporale per selezionare la fascia oraria appropriata da visualizzare.&lt;/p&gt;&lt;p&gt;La prima posizione imposta i valori dell&apos;istantanea, il resto si occupa dei valori delle serie temporali.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1133"/>
-        <location filename="../Main/MainWindow.ui" line="1544"/>
-        <location filename="../Main/MainWindow.ui" line="2287"/>
+        <location filename="../Main/MainWindow.ui" line="1146"/>
+        <location filename="../Main/MainWindow.ui" line="1600"/>
+        <location filename="../Main/MainWindow.ui" line="2343"/>
         <source>Snapshot</source>
         <translation>Istantanea</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1154"/>
+        <location filename="../Main/MainWindow.ui" line="1167"/>
         <source>Scenarios</source>
         <translation>Scenari</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1157"/>
+        <location filename="../Main/MainWindow.ui" line="1170"/>
         <source>Scenarios selection and control</source>
         <translation>Selezione e controllo degli scenari</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1204"/>
-        <location filename="../Main/MainWindow.ui" line="1658"/>
-        <location filename="../Main/MainWindow.ui" line="2623"/>
-        <location filename="../Main/MainWindow.ui" line="10392"/>
-        <location filename="../Main/MainWindow.ui" line="10406"/>
-        <location filename="../Main/MainWindow.ui" line="10413"/>
-        <location filename="../Main/MainWindow.ui" line="10476"/>
-        <location filename="../Main/MainWindow.ui" line="10678"/>
+        <location filename="../Main/MainWindow.ui" line="1217"/>
+        <location filename="../Main/MainWindow.ui" line="1714"/>
+        <location filename="../Main/MainWindow.ui" line="2685"/>
+        <location filename="../Main/MainWindow.ui" line="10612"/>
+        <location filename="../Main/MainWindow.ui" line="10626"/>
+        <location filename="../Main/MainWindow.ui" line="10633"/>
+        <location filename="../Main/MainWindow.ui" line="10696"/>
+        <location filename="../Main/MainWindow.ui" line="10898"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1219"/>
+        <location filename="../Main/MainWindow.ui" line="1232"/>
         <source>Variations</source>
         <translation>Variazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1222"/>
+        <location filename="../Main/MainWindow.ui" line="1235"/>
         <source>Results variations control</source>
         <translation>Controllo delle variazioni dei risultati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1263"/>
+        <location filename="../Main/MainWindow.ui" line="1276"/>
         <source>Database</source>
         <translation>Banca dati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1358"/>
+        <location filename="../Main/MainWindow.ui" line="1343"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search the device. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Digita qualsiasi cosa per cercare il dispositivo. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="1346"/>
+        <source>Search device type</source>
+        <translation>Cerca tipo di dispositivo</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="1411"/>
         <source>Objects</source>
         <translation>Oggetti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1409"/>
+        <location filename="../Main/MainWindow.ui" line="1462"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search on the name property. &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For more advanced searches you can compose a filter expression:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;If none is specified idxobj is taken&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Filter all object names that are similar to &apos;alba&apos; and their Vnom property &amp;gt; 200&lt;/p&gt;&lt;p&gt;-&amp;gt; idx&lt;span style=&quot; font-style:italic;&quot;&gt;obj.name like alba and idxobj.Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Equivalently:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;-&amp;gt; name like alba and Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Enter] to search &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Digita qualsiasi cosa da cercare nella proprietà name.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Per ricerche più avanzate puoi comporre un&apos;espressione di filtro:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Soggetti:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj e idxobj consentono l&apos;accesso agli oggetti che possono essere rappresentati nell&apos;indice o nelle colonne. Con questi puoi accedere alle loro proprietà interne per il filtraggio.&lt;/p&gt;&lt;p&gt;Se non ne viene specificato nessuno, viene utilizzato idxobj&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operatori:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&gt;, &lt;, &gt;=, &lt;=, !=, =, come, non come, inizia, finisce&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Esempi:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Filtra tutti i nomi degli oggetti simili a &quot;alba&quot; e la loro proprietà Vnom &gt; 200&lt;/p&gt;&lt;p&gt;-&gt; idx&lt;span style=&quot; font-style:italic;&quot;&gt;obj.name come alba e idxobj.Vnom &gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Equivalentemente:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;-&gt; nome come alba e Vnom &gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Invio] per cercare&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1416"/>
+        <location filename="../Main/MainWindow.ui" line="1465"/>
+        <source>Device smart search</source>
+        <translation>Ricerca intelligente dispositivo</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="1472"/>
         <source>Smart filter</source>
         <translation>Filtro intelligente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1446"/>
+        <location filename="../Main/MainWindow.ui" line="1502"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Histogram&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the histogram analysis of the selected data structure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Istogramma&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Esegui l&apos;analisi dell&apos;istogramma della struttura dati selezionata&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1493"/>
+        <location filename="../Main/MainWindow.ui" line="1549"/>
         <source>Select the time series point to search</source>
         <translation>Selezionare il punto della serie temporale da cercare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1500"/>
+        <location filename="../Main/MainWindow.ui" line="1556"/>
         <source>Search and navigate to the selected time series point</source>
         <translation>Cerca e naviga fino al punto della serie temporale selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1514"/>
+        <location filename="../Main/MainWindow.ui" line="1570"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Snapshot&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Assign the values of the selected time step into the snapshot&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Istantanea&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Assegnare i valori dell&apos;intervallo temporale selezionato nell&apos;istantanea&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1567"/>
+        <location filename="../Main/MainWindow.ui" line="1623"/>
         <source>Add new object</source>
         <translation>Aggiungi nuovo oggetto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1581"/>
+        <location filename="../Main/MainWindow.ui" line="1637"/>
         <source>Delete selection</source>
         <translation>Elimina la selezione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1603"/>
+        <location filename="../Main/MainWindow.ui" line="1659"/>
         <source>Associations</source>
         <translation>Associazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1713"/>
+        <location filename="../Main/MainWindow.ui" line="1769"/>
         <source>Time series</source>
         <translation>Serie temporali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1758"/>
+        <location filename="../Main/MainWindow.ui" line="1814"/>
         <source>Magnitude with profile</source>
         <translation>Grandezza con profilo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1765"/>
+        <location filename="../Main/MainWindow.ui" line="1821"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Create profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will create all the object&apos;s profiles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Crea profili&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Questo creerà tutti i profili dell&apos;oggetto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1779"/>
+        <location filename="../Main/MainWindow.ui" line="1835"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Delete profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will delete all the profiles and leave the snapshot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Elimina profili&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ciò eliminerà tutti i profili e lascerà l&apos;istantanea.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1793"/>
+        <location filename="../Main/MainWindow.ui" line="1849"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Import profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Import from data in CSV or Excel files&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Importa profili&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Importa da dati in CSV o file Excel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1810"/>
+        <location filename="../Main/MainWindow.ui" line="1866"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Import profiles from grid models. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;This is, load many individual grids in any of the supported VeraGrid formats and take the operational data from them, aplying them to all the profiles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Importa profili da modelli a griglia.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Cioè, carica molte griglie individuali in uno qualsiasi dei formati VeraGrid supportati e prendi da esse i dati operativi, applicandoli a tutti i profili.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1827"/>
+        <location filename="../Main/MainWindow.ui" line="1883"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time series  crop to the selected time interval&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le serie temporali vengono ritagliate nell&apos;intervallo di tempo selezionato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1844"/>
+        <location filename="../Main/MainWindow.ui" line="1900"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time series crop to the clusteres time indices.&lt;/p&gt;&lt;p&gt;For that you need cluster simulation in memory&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le serie temporali vengono ritagliate in base agli indici temporali dei cluster.&lt;/p&gt;&lt;p&gt;Per questo è necessaria la simulazione del cluster in memoria&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1874"/>
+        <location filename="../Main/MainWindow.ui" line="1930"/>
         <source>Plot the selected object&apos;s profile</source>
         <translation>Traccia il profilo dell&apos;oggetto selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1925"/>
+        <location filename="../Main/MainWindow.ui" line="1981"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copy displayed profile&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copia dati&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copia il profilo visualizzato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1942"/>
+        <location filename="../Main/MainWindow.ui" line="1998"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Paste data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Paste clipboard into the displayed profile&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Incolla i dati&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Incolla gli appunti nel profilo visualizzato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1956"/>
+        <location filename="../Main/MainWindow.ui" line="2012"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy profile&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copy the current profile into the profile selected by the drop-down selector&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copia profilo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copia il profilo corrente nel profilo selezionato dal selettore a discesa&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1976"/>
+        <location filename="../Main/MainWindow.ui" line="2032"/>
         <source>Profile where to copy the current profile</source>
         <translation>Profilo dove copiare il profilo corrente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1996"/>
+        <location filename="../Main/MainWindow.ui" line="2052"/>
         <source>Add value to the profile</source>
         <translation>Aggiungere valore al profilo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2010"/>
+        <location filename="../Main/MainWindow.ui" line="2066"/>
         <source>Subtract value from the profile</source>
         <translation>Sottrarre valore dal profilo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2024"/>
+        <location filename="../Main/MainWindow.ui" line="2080"/>
         <source>Multiply the profile by a value</source>
         <translation>Moltiplicare il profilo per un valore</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2038"/>
+        <location filename="../Main/MainWindow.ui" line="2094"/>
         <source>Divide the profile by a value</source>
         <translation>Dividere il profilo per un valore</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2052"/>
+        <location filename="../Main/MainWindow.ui" line="2108"/>
         <source>Set the value to all or to the selection</source>
         <translation>Impostare il valore su tutto o sulla selezione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2095"/>
+        <location filename="../Main/MainWindow.ui" line="2151"/>
         <source>Compiled arrays</source>
         <translation>Array compilati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2144"/>
+        <location filename="../Main/MainWindow.ui" line="2200"/>
         <source>Export simulation data</source>
         <translation>Esporta i dati della simulazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2164"/>
+        <location filename="../Main/MainWindow.ui" line="2220"/>
         <source>Update the islands dispayed</source>
         <translation>Aggiorna le isole visualizzate</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2204"/>
+        <location filename="../Main/MainWindow.ui" line="2260"/>
         <source>Copy to data frame to clipboard in array format</source>
         <translation>Copia nel frame di dati negli appunti in formato array</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2247"/>
+        <location filename="../Main/MainWindow.ui" line="2303"/>
         <source>Plot values</source>
         <translation>Tracciare i valori</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2270"/>
+        <location filename="../Main/MainWindow.ui" line="2326"/>
         <source>Copy array to clipboard</source>
         <translation>Copia l&apos;array negli appunti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2306"/>
+        <location filename="../Main/MainWindow.ui" line="2362"/>
         <source>Comments</source>
         <translation>Commenti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2312"/>
+        <location filename="../Main/MainWindow.ui" line="2368"/>
         <source>Write here some comments about the grid</source>
         <translation>Scrivi qui alcuni commenti sulla griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2328"/>
-        <location filename="../Main/MainWindow.ui" line="2393"/>
-        <location filename="../Main/MainWindow.ui" line="12686"/>
+        <location filename="../Main/MainWindow.ui" line="2371"/>
+        <source>Type here your comments about the model</source>
+        <translation>Digita qui i tuoi commenti sul modello</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="2387"/>
+        <location filename="../Main/MainWindow.ui" line="2452"/>
+        <location filename="../Main/MainWindow.ui" line="12957"/>
         <source>Results</source>
         <translation>Risultati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2449"/>
+        <location filename="../Main/MainWindow.ui" line="2508"/>
         <source>Saved results in this file</source>
         <translation>Risultati salvati in questo file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2505"/>
+        <location filename="../Main/MainWindow.ui" line="2564"/>
         <source>Tables</source>
         <translation>Tabelle</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2589"/>
+        <location filename="../Main/MainWindow.ui" line="2648"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;The columns should not be column1 or column2, the values should be &amp;gt; 5 and the index be like ab of mn&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;col != [column1, column2] and val &amp;gt; 5 or idx like [ab, mn]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Filter the table values that are between 0.5 and 20&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;val &amp;gt; 0.5 and val &amp;lt; 20.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Soggetti:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj e idxobj consentono l&apos;accesso agli oggetti che possono essere rappresentati nell&apos;indice o nelle colonne. Con questi puoi accedere alle loro proprietà interne per il filtraggio.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operatori:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&gt;, &lt;, &gt;=, &lt;=, !=, =, come, non come, inizia, finisce&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Esempi:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Le colonne non dovrebbero essere colonna1 o colonna2, i valori dovrebbero essere &gt; 5 e l&apos;indice essere come ab di mn&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;col != [colonna1, colonna2] e val &gt; 5 o idx come [ab, mn]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Filtra i valori della tabella compresi tra 0,5 e 20&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;val &gt; 0,5 e val &lt; 20,0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2596"/>
-        <location filename="../Main/MainWindow.ui" line="2830"/>
+        <location filename="../Main/MainWindow.ui" line="2651"/>
+        <source>Results smart query</source>
+        <translation>Risultati query intelligente</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="2658"/>
+        <location filename="../Main/MainWindow.ui" line="2892"/>
         <source>Smart search</source>
         <translation>Ricerca intelligente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2630"/>
+        <location filename="../Main/MainWindow.ui" line="2692"/>
         <source>Transpose the results</source>
         <translation>Trasporre i risultati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2644"/>
+        <location filename="../Main/MainWindow.ui" line="2706"/>
         <source>Results as cummulative density functions</source>
         <translation>Risultati come funzioni di densità cumulativa</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2661"/>
+        <location filename="../Main/MainWindow.ui" line="2723"/>
         <source>Results as absolute values</source>
         <translation>Risultati come valori assoluti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2678"/>
+        <location filename="../Main/MainWindow.ui" line="2740"/>
         <source>Stacked plot</source>
         <translation>Trama impilata</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2695"/>
+        <location filename="../Main/MainWindow.ui" line="2757"/>
         <source>Copy to data frame to clipboard</source>
         <translation>Copia nel frame dati negli appunti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2709"/>
+        <location filename="../Main/MainWindow.ui" line="2771"/>
         <source>Copy data in numpy format to clipboard</source>
         <translation>Copia i dati in formato Numpy negli appunti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2723"/>
-        <location filename="../Main/MainWindow.ui" line="10806"/>
+        <location filename="../Main/MainWindow.ui" line="2785"/>
+        <location filename="../Main/MainWindow.ui" line="11071"/>
         <source>Export data</source>
         <translation>Esporta dati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2737"/>
+        <location filename="../Main/MainWindow.ui" line="2799"/>
         <source>Plot the data in a separated window</source>
         <translation>Traccia i dati in una finestra separata</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2775"/>
+        <location filename="../Main/MainWindow.ui" line="2837"/>
         <source>Dynamics</source>
         <translation>Dinamica</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2823"/>
+        <location filename="../Main/MainWindow.ui" line="2885"/>
         <source>Type the search term</source>
         <translation>Digita il termine di ricerca</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2844"/>
+        <location filename="../Main/MainWindow.ui" line="2906"/>
         <source>Open the RMS pre-simulation dynamic plot editor</source>
         <translation>Aprire l&apos;editor di grafici dinamici di pre-simulazione RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2847"/>
-        <source>RMS plots</source>
-        <translation>Grafici RMS</translation>
+        <location filename="../Main/MainWindow.ui" line="3856"/>
+        <source>Name of the grid</source>
+        <translation>Nome della rete</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2854"/>
+        <location filename="../Main/MainWindow.ui" line="10944"/>
+        <source>Unlock the Interface</source>
+        <translation>Sblocca l'interfaccia</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="12783"/>
+        <source>Add RMS event</source>
+        <translation>Aggiungi evento RMS</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="12786"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add RMS event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring RMS events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi evento RMS&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Apri l&apos;editor eventi dinamici preferendo eventi RMS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13008"/>
+        <source>Candidate investment generator</source>
+        <translation>Generatore di investimenti candidati</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13011"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Candidate investment generator&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Generate candidate reinforcements (new lines and upgrades) for N-1 violations via LODF/PTDF screening&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Generatore di investimenti candidati&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Genera rinforzi candidati (nuove linee e aggiornamenti) per violazioni N-1 tramite screening LODF/PTDF&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13129"/>
+        <source>Add EMT event</source>
+        <translation>Aggiungi evento EMT</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13132"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add EMT event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring EMT events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi evento EMT&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Apri l&apos;editor eventi dinamici preferendo eventi EMT&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13204"/>
+        <source>Community chat</source>
+        <translation>Chat community</translation>
+    </message>
+    <message>
+        <source>RMS plots</source>
+        <translation type="vanished">Grafici RMS</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="2920"/>
         <source>Open the EMT pre-simulation dynamic plot editor</source>
         <translation>Aprire l&apos;editor di grafici dinamici di pre-simulazione EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2857"/>
         <source>EMT plots</source>
-        <translation>Grafici EMT</translation>
+        <translation type="vanished">Grafici EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2877"/>
+        <location filename="../Main/MainWindow.ui" line="2947"/>
         <source>Add new plot</source>
         <translation>Aggiungi nuova trama</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2891"/>
+        <location filename="../Main/MainWindow.ui" line="2961"/>
         <source>Remove selected plot</source>
         <translation>Rimuovi la trama selezionata</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2905"/>
+        <location filename="../Main/MainWindow.ui" line="2975"/>
         <source>Display selected plot</source>
         <translation>Visualizza il grafico selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2950"/>
+        <location filename="../Main/MainWindow.ui" line="3020"/>
         <source>Drag and drop the Var to the desired plot. Double click to plot directly.</source>
         <translation>Trascina e rilascia la Var sul grafico desiderato. Fare doppio clic per tracciare direttamente.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3021"/>
+        <location filename="../Main/MainWindow.ui" line="3091"/>
         <source>Logs</source>
         <translation>Registri</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3064"/>
+        <location filename="../Main/MainWindow.ui" line="3134"/>
         <source>Save the logs to a file</source>
         <translation>Salvare i registri in un file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3093"/>
+        <location filename="../Main/MainWindow.ui" line="3163"/>
         <source>Report</source>
         <translation>Rapporto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3118"/>
+        <location filename="../Main/MainWindow.ui" line="3188"/>
         <source>Scripting</source>
         <translation>Scrittura</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3203"/>
+        <location filename="../Main/MainWindow.ui" line="3273"/>
         <source>New script, will delete the existing code.</source>
         <translation>Il nuovo script eliminerà il codice esistente.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3217"/>
+        <location filename="../Main/MainWindow.ui" line="3287"/>
         <source>Save the current source code</source>
         <translation>Salva il codice sorgente corrente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3238"/>
+        <location filename="../Main/MainWindow.ui" line="3308"/>
         <source>Name of the source code file</source>
         <translation>Nome del file del codice sorgente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3252"/>
+        <location filename="../Main/MainWindow.ui" line="3322"/>
         <source>Run the source code in the console</source>
         <translation>Esegui il codice sorgente nella console</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3318"/>
+        <location filename="../Main/MainWindow.ui" line="3388"/>
         <source>Python console</source>
         <translation>Consolle Python</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3391"/>
+        <location filename="../Main/MainWindow.ui" line="3461"/>
         <source>Clear the console</source>
         <translation>Svuota la console</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3419"/>
+        <location filename="../Main/MainWindow.ui" line="3489"/>
         <source>Source code</source>
         <translation>Codice sorgente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3461"/>
+        <location filename="../Main/MainWindow.ui" line="3531"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3690"/>
+        <location filename="../Main/MainWindow.ui" line="3870"/>
         <source>Frequency</source>
         <translation>Frequenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3697"/>
+        <location filename="../Main/MainWindow.ui" line="3760"/>
         <source>Snapshot time</source>
         <translation>Tempo di istantanea</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3728"/>
+        <location filename="../Main/MainWindow.ui" line="3817"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;System frequency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This only has an effect in the program when computing lines&apos; per-unit impedance from ohm values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Frequenza del sistema&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ciò ha effetto solo nel programma quando si calcola l&apos;impedenza per unità delle linee da valori ohm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3731"/>
+        <location filename="../Main/MainWindow.ui" line="3820"/>
         <source> Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3757"/>
+        <location filename="../Main/MainWindow.ui" line="3788"/>
         <source>Base power</source>
         <translation>Potenza di base</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3764"/>
+        <location filename="../Main/MainWindow.ui" line="3853"/>
         <source>Name of the grid model</source>
         <translation>Nome del modello di griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3778"/>
+        <location filename="../Main/MainWindow.ui" line="3774"/>
         <source>Grid name</source>
         <translation>Nome della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3785"/>
+        <location filename="../Main/MainWindow.ui" line="3795"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Base power&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Despite all the bibliography, changing this number to anything other than 100 MVA, might change the meaning of what sensible per-unit voltage are.&lt;/p&gt;&lt;p&gt;So, don&apos;t touch it. To have power in kW, use the option at the loads, geneerators, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Potenza di base&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Nonostante tutta la bibliografia, cambiare questo numero in qualcosa di diverso da 100 MVA, potrebbe cambiare il significato di quale sia la tensione per unità sensibile.&lt;/p&gt;&lt;p&gt;Quindi, non toccarlo. Per avere potenza in kW, utilizzare l&apos;opzione sui carichi, generatori, ecc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3788"/>
+        <location filename="../Main/MainWindow.ui" line="3798"/>
         <source> MVA</source>
         <translation>MVA</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3807"/>
+        <location filename="../Main/MainWindow.ui" line="3904"/>
         <source>Engine to be used when available</source>
         <translation>Motore da utilizzare quando disponibile</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3814"/>
+        <location filename="../Main/MainWindow.ui" line="3839"/>
         <source>Engine</source>
         <translation>Motore</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3821"/>
+        <location filename="../Main/MainWindow.ui" line="3863"/>
         <source>Language</source>
         <translation>Lingua</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3831"/>
+        <location filename="../Main/MainWindow.ui" line="3846"/>
         <source>Dark mode</source>
         <translation>Modalità oscura</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3860"/>
+        <location filename="../Main/MainWindow.ui" line="3933"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for state estimation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Impostazioni per la stima dello stato.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3897"/>
-        <location filename="../Main/MainWindow.ui" line="3907"/>
+        <location filename="../Main/MainWindow.ui" line="3970"/>
+        <location filename="../Main/MainWindow.ui" line="3980"/>
         <source>Power flow settings</source>
         <translation>Impostazioni del flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3904"/>
+        <location filename="../Main/MainWindow.ui" line="3977"/>
         <source>Pf</source>
         <translation>Pf</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3980"/>
+        <location filename="../Main/MainWindow.ui" line="4053"/>
         <source>Power flow</source>
         <translation>Flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4120"/>
+        <location filename="../Main/MainWindow.ui" line="4193"/>
         <source>PTDF / LODF</source>
         <translation>PTDF/LODF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4192"/>
+        <location filename="../Main/MainWindow.ui" line="4265"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Theoretically PTDF and LODF values should be in the range (-1, 1)&lt;br/&gt;However, this is not true in general for any grid due to the existence of antennas.&lt;br/&gt;With this option the values are truncated to the range (-1, 1)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Teoricamente i valori PTDF e LODF dovrebbero essere nell&apos;intervallo (-1, 1)&lt;br/&gt;Tuttavia, questo non è vero in generale per nessuna rete a causa dell&apos;esistenza di antenne.&lt;br/&gt;Con questa opzione i valori vengono troncati nell&apos;intervallo (-1, 1)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4195"/>
+        <location filename="../Main/MainWindow.ui" line="4268"/>
         <source>Correct nonsense values</source>
         <translation>Correggere i valori senza senso</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4205"/>
+        <location filename="../Main/MainWindow.ui" line="4278"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this option, the PTDF is computed such that the slack effects are distributed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Con questa opzione, il PTDF viene calcolato in modo tale da distribuire gli effetti del margine di flessibilità&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4208"/>
-        <location filename="../Main/MainWindow.ui" line="4437"/>
+        <location filename="../Main/MainWindow.ui" line="4281"/>
+        <location filename="../Main/MainWindow.ui" line="4510"/>
         <source>Distributed slack</source>
         <translation>Lasco distribuito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4218"/>
+        <location filename="../Main/MainWindow.ui" line="4291"/>
         <source>Threshold under which sensitivities are ignored when the PTDF is converted to sparse</source>
         <translation>Soglia sotto la quale le sensibilità vengono ignorate quando il PTDF viene convertito in sparse</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4237"/>
+        <location filename="../Main/MainWindow.ui" line="4310"/>
         <source>LODF threshold</source>
         <translation>Soglia LODF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4281"/>
+        <location filename="../Main/MainWindow.ui" line="4354"/>
         <source>Threshold under which sensitivities are ignored when the LODF is converted to sparse</source>
         <translation>Soglia sotto la quale le sensibilità vengono ignorate quando il LODF viene convertito in sparse</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4300"/>
+        <location filename="../Main/MainWindow.ui" line="4373"/>
         <source>PTDF threshold</source>
         <translation>Soglia PTDF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4326"/>
+        <location filename="../Main/MainWindow.ui" line="4399"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum numberof iterations to use.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Tipical values: &lt;/p&gt;&lt;p&gt;Newton Raphson: 5&lt;/p&gt;&lt;p&gt;Levenberg-Marquards: 20&lt;/p&gt;&lt;p&gt;Fast decoupled: 10&lt;/p&gt;&lt;p&gt;Others: 20&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Numero massimo di iterazioni da utilizzare.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Valori tipici:&lt;/p&gt;&lt;p&gt;Newton Raphson: 5&lt;/p&gt;&lt;p&gt;Levenberg-Marquards: 20&lt;/p&gt;&lt;p&gt;Disaccoppiamento rapido: 10&lt;/p&gt;&lt;p&gt;Altri: 20&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4329"/>
+        <location filename="../Main/MainWindow.ui" line="4402"/>
         <source> iterations</source>
         <translation>iterazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4351"/>
+        <location filename="../Main/MainWindow.ui" line="4424"/>
         <source>Find the tolerance that best represents the load values for power flow</source>
         <translation>Trovare la tolleranza che meglio rappresenta i valori di carico per il flusso di potenza</translation>
     </message>
@@ -5082,2464 +13621,2536 @@ Monte Carlo power flow results:</source>
         <translation type="vanished">Trovare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4378"/>
+        <location filename="../Main/MainWindow.ui" line="4451"/>
         <source>Max. iterations</source>
         <translation>Massimo. iterazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4394"/>
+        <location filename="../Main/MainWindow.ui" line="4467"/>
         <source>General switch for generators remote voltage control</source>
         <translation>Interruttore generale per il controllo remoto della tensione dei generatori</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4397"/>
+        <location filename="../Main/MainWindow.ui" line="4470"/>
         <source>Control remote voltage</source>
         <translation>Controllare la tensione remota</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4404"/>
+        <location filename="../Main/MainWindow.ui" line="4477"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the selected method does not converge, try a list of methods that may help&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se il metodo selezionato non converge, provare un elenco di metodi che potrebbero essere d&apos;aiuto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4407"/>
+        <location filename="../Main/MainWindow.ui" line="4480"/>
         <source>Retry with other methods</source>
         <translation>Riprovare con altri metodi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4417"/>
+        <location filename="../Main/MainWindow.ui" line="4490"/>
         <source>General switch for branches tap module control</source>
         <translation>Interruttore generale per il comando del modulo prese derivate</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4420"/>
+        <location filename="../Main/MainWindow.ui" line="4493"/>
         <source>Control tap module</source>
         <translation>Modulo rubinetto di controllo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4427"/>
+        <location filename="../Main/MainWindow.ui" line="4500"/>
         <source>Apply impedance tolerances</source>
         <translation>Applicare le tolleranze di impedenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4434"/>
+        <location filename="../Main/MainWindow.ui" line="4507"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If active, the slack power is distributed among the generators according to their installed power &amp;quot;Snom&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se attivo, la potenza di rallentamento viene distribuita tra i generatori in base alla loro potenza installata &quot;Snom&quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4444"/>
+        <location filename="../Main/MainWindow.ui" line="4517"/>
         <source>If checked, the power flow solution is initialized with a linear (so called DC) power flow first</source>
         <translation>Se selezionato, la soluzione del flusso di potenza viene inizializzata prima con un flusso di potenza lineare (il cosiddetto DC)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4447"/>
+        <location filename="../Main/MainWindow.ui" line="4520"/>
         <source>Initialize angles</source>
         <translation>Inizializza gli angoli</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4454"/>
+        <location filename="../Main/MainWindow.ui" line="4527"/>
         <source>If active, the islands of a single node are ignored.</source>
         <translation>Se attivo le isole di un singolo nodo vengono ignorate.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4457"/>
+        <location filename="../Main/MainWindow.ui" line="4530"/>
         <source>Ignore single node islands</source>
         <translation>Ignora le isole a nodo singolo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4467"/>
+        <location filename="../Main/MainWindow.ui" line="4540"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If active, the Vm0 and Va0 properties of the bus objects are used to initialize the power flow simulation.&lt;/p&gt;&lt;p&gt;If you need this it is a sign of grid ill conditioning by something else like incorrect impedances of too much loading, specially reactive power that cannot be transported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se attive, le proprietà Vm0 e Va0 degli oggetti bus vengono utilizzate per inizializzare la simulazione del flusso di potenza.&lt;/p&gt;&lt;p&gt;Se ne hai bisogno, è un segno di mal condizionamento della rete da parte di qualcos&apos;altro come impedenze errate di carico eccessivo, specialmente potenza reattiva che non può essere trasportata.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4470"/>
+        <location filename="../Main/MainWindow.ui" line="4543"/>
         <source>Use voltage guess</source>
         <translation>Utilizzare l&apos;ipotesi di tensione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4477"/>
-        <location filename="../Main/MainWindow.ui" line="5923"/>
+        <location filename="../Main/MainWindow.ui" line="4550"/>
+        <location filename="../Main/MainWindow.ui" line="6036"/>
         <source>Add a results report in the logs</source>
         <translation>Aggiungi un rapporto sui risultati nei registri</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4480"/>
-        <location filename="../Main/MainWindow.ui" line="5926"/>
+        <location filename="../Main/MainWindow.ui" line="4553"/>
+        <location filename="../Main/MainWindow.ui" line="6039"/>
         <source>Add report</source>
         <translation>Aggiungi rapporto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4487"/>
+        <location filename="../Main/MainWindow.ui" line="4560"/>
         <source>General switch for reactive power limits control</source>
         <translation>Interruttore generale per il controllo dei limiti di potenza reattiva</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4490"/>
-        <location filename="../Main/MainWindow.ui" line="5823"/>
+        <location filename="../Main/MainWindow.ui" line="4563"/>
+        <location filename="../Main/MainWindow.ui" line="5936"/>
         <source>Control Q limits</source>
         <translation>Controllare i limiti Q</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4497"/>
+        <location filename="../Main/MainWindow.ui" line="4570"/>
         <source>General switch for branches tap phase control</source>
         <translation>Interruttore generale per il controllo della fase dei rubinetti dei rami</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4500"/>
+        <location filename="../Main/MainWindow.ui" line="4573"/>
         <source>Control tap phase</source>
         <translation>Controllo della fase del rubinetto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4507"/>
+        <location filename="../Main/MainWindow.ui" line="4580"/>
         <source>If checked, the controls are adjusted to their closest tap</source>
         <translation>Se selezionato, i controlli vengono regolati al tocco più vicino</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4510"/>
+        <location filename="../Main/MainWindow.ui" line="4583"/>
         <source>Orthogonalize controls</source>
         <translation>Ortogonalizzare i controlli</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4517"/>
+        <location filename="../Main/MainWindow.ui" line="4590"/>
         <source>Correct the branches resistance using the temperature</source>
         <translation>Correggere la resistenza dei rami utilizzando la temperatura</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4520"/>
+        <location filename="../Main/MainWindow.ui" line="4593"/>
         <source>Apply temperature correction</source>
         <translation>Applicare la correzione della temperatura</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4530"/>
-        <location filename="../Main/MainWindow.ui" line="5782"/>
+        <location filename="../Main/MainWindow.ui" line="4603"/>
+        <location filename="../Main/MainWindow.ui" line="5895"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor that multiplies each increment solution. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fattore che moltiplica ciascuna soluzione incrementale.&lt;/p&gt;&lt;p&gt;In pratica questo viene utilizzato per rallentare soluzioni problematiche.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4533"/>
-        <location filename="../Main/MainWindow.ui" line="4582"/>
-        <location filename="../Main/MainWindow.ui" line="4635"/>
+        <location filename="../Main/MainWindow.ui" line="4606"/>
+        <location filename="../Main/MainWindow.ui" line="4655"/>
+        <location filename="../Main/MainWindow.ui" line="4708"/>
         <source> p.u.</source>
         <translation>p.u.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4555"/>
+        <location filename="../Main/MainWindow.ui" line="4628"/>
         <source>Level of console information. 0: None, 1: some information, 2: all the information</source>
         <translation>Livello di informazioni sulla console. 0: Nessuno, 1: alcune informazioni, 2: tutte le informazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4565"/>
-        <location filename="../Main/MainWindow.ui" line="5107"/>
-        <location filename="../Main/MainWindow.ui" line="8340"/>
+        <location filename="../Main/MainWindow.ui" line="4638"/>
+        <location filename="../Main/MainWindow.ui" line="5180"/>
+        <location filename="../Main/MainWindow.ui" line="8614"/>
         <source>Solver</source>
         <translation>Risolutore</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4572"/>
-        <location filename="../Main/MainWindow.ui" line="5807"/>
+        <location filename="../Main/MainWindow.ui" line="4645"/>
+        <location filename="../Main/MainWindow.ui" line="5920"/>
         <source>Trust radius</source>
         <translation>Raggio di fiducia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4579"/>
-        <location filename="../Main/MainWindow.ui" line="5235"/>
-        <location filename="../Main/MainWindow.ui" line="5741"/>
-        <location filename="../Main/MainWindow.ui" line="7899"/>
-        <location filename="../Main/MainWindow.ui" line="8550"/>
+        <location filename="../Main/MainWindow.ui" line="4652"/>
+        <location filename="../Main/MainWindow.ui" line="5308"/>
+        <location filename="../Main/MainWindow.ui" line="5854"/>
+        <location filename="../Main/MainWindow.ui" line="8104"/>
+        <location filename="../Main/MainWindow.ui" line="8522"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tolleranza agli errori del metodo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4585"/>
-        <location filename="../Main/MainWindow.ui" line="4638"/>
-        <location filename="../Main/MainWindow.ui" line="5238"/>
-        <location filename="../Main/MainWindow.ui" line="5744"/>
-        <location filename="../Main/MainWindow.ui" line="7902"/>
-        <location filename="../Main/MainWindow.ui" line="8553"/>
-        <location filename="../Main/MainWindow.ui" line="9813"/>
-        <location filename="../Main/MainWindow.ui" line="10075"/>
+        <location filename="../Main/MainWindow.ui" line="4658"/>
+        <location filename="../Main/MainWindow.ui" line="4711"/>
+        <location filename="../Main/MainWindow.ui" line="5311"/>
+        <location filename="../Main/MainWindow.ui" line="5857"/>
+        <location filename="../Main/MainWindow.ui" line="8107"/>
+        <location filename="../Main/MainWindow.ui" line="8525"/>
+        <location filename="../Main/MainWindow.ui" line="10033"/>
+        <location filename="../Main/MainWindow.ui" line="10295"/>
         <source>1e-</source>
         <translation>1e-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4611"/>
+        <location filename="../Main/MainWindow.ui" line="4684"/>
         <source>Verbosity</source>
         <translation>Verbosità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4618"/>
-        <location filename="../Main/MainWindow.ui" line="5215"/>
-        <location filename="../Main/MainWindow.ui" line="5728"/>
-        <location filename="../Main/MainWindow.ui" line="7835"/>
-        <location filename="../Main/MainWindow.ui" line="8333"/>
+        <location filename="../Main/MainWindow.ui" line="4691"/>
+        <location filename="../Main/MainWindow.ui" line="5288"/>
+        <location filename="../Main/MainWindow.ui" line="5841"/>
+        <location filename="../Main/MainWindow.ui" line="8178"/>
+        <location filename="../Main/MainWindow.ui" line="8561"/>
         <source>Tolerance</source>
         <translation>Tolleranza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4625"/>
+        <location filename="../Main/MainWindow.ui" line="4698"/>
         <source>Controls apply after</source>
         <translation>I controlli si applicano dopo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4632"/>
+        <location filename="../Main/MainWindow.ui" line="4705"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;VeraGrid does not have an &amp;quot;outer loop&amp;quot;&lt;br/&gt;Instead, in iterative numerical methods (Newton-Raphson, Levenberg-Marquardt, Powell Dog Leg) the controls apply after a certain error threshold has been reached.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;VeraGrid non ha un &quot;loop esterno&quot;&lt;br/&gt;Nei metodi numerici iterativi, invece, (Newton-Raphson, Levenberg-Marquardt, Powell Dog Leg) i controlli si applicano dopo che è stata raggiunta una certa soglia di errore.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4658"/>
+        <location filename="../Main/MainWindow.ui" line="4731"/>
         <source>Continuation power flow settings</source>
         <translation>Impostazioni del flusso di potenza di continuazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4665"/>
+        <location filename="../Main/MainWindow.ui" line="4738"/>
         <source>Cpf</source>
         <translation>Cpf</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4668"/>
+        <location filename="../Main/MainWindow.ui" line="4741"/>
         <source>Continuation power flow related settings</source>
         <translation>Impostazioni relative al flusso di potenza di continuazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4699"/>
+        <location filename="../Main/MainWindow.ui" line="4772"/>
         <source>Stop at</source>
         <translation>Fermati a</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4706"/>
+        <location filename="../Main/MainWindow.ui" line="4779"/>
         <source>Refer to the NTC areas (Linear tab)</source>
         <translation>Fare riferimento alle aree NTC (scheda Lineare)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4786"/>
+        <location filename="../Main/MainWindow.ui" line="4859"/>
         <source>Now</source>
         <translation>Ora</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4793"/>
+        <location filename="../Main/MainWindow.ui" line="4866"/>
         <source>Use departure and target points from time series</source>
         <translation>Utilizza i punti di partenza e di arrivo dalle serie temporali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4803"/>
+        <location filename="../Main/MainWindow.ui" line="4876"/>
         <source>Available transfer capacity</source>
         <translation>Capacità di trasferimento disponibile</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4817"/>
+        <location filename="../Main/MainWindow.ui" line="4890"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lambda factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fattore Lambda&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4824"/>
-        <location filename="../Main/MainWindow.ui" line="5020"/>
+        <location filename="../Main/MainWindow.ui" line="4897"/>
+        <location filename="../Main/MainWindow.ui" line="5093"/>
         <source>Max. Iterations</source>
         <translation>Massimo. Iterazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4831"/>
+        <location filename="../Main/MainWindow.ui" line="4904"/>
         <source>Target</source>
         <translation>Bersaglio</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4933"/>
-        <location filename="../Main/MainWindow.ui" line="11216"/>
+        <location filename="../Main/MainWindow.ui" line="5006"/>
+        <location filename="../Main/MainWindow.ui" line="11484"/>
         <source>Continuation power flow</source>
         <translation>Flusso di potenza di continuazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4951"/>
+        <location filename="../Main/MainWindow.ui" line="5024"/>
         <source>Simulation mode</source>
         <translation>Modalità di simulazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4958"/>
+        <location filename="../Main/MainWindow.ui" line="5031"/>
         <source>Increase system loading</source>
         <translation>Aumentare il carico del sistema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5002"/>
+        <location filename="../Main/MainWindow.ui" line="5075"/>
         <source>SE</source>
         <translation>SE</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5030"/>
+        <location filename="../Main/MainWindow.ui" line="5103"/>
         <source>Observability analysis</source>
         <translation>Analisi di osservabilità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5100"/>
+        <location filename="../Main/MainWindow.ui" line="5173"/>
         <source>Fixed slack</source>
         <translation>Gioco fisso</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5202"/>
-        <location filename="../Main/MainWindow.ui" line="12542"/>
+        <location filename="../Main/MainWindow.ui" line="5275"/>
+        <location filename="../Main/MainWindow.ui" line="12813"/>
         <source>State estimation</source>
         <translation>Stima dello Stato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5254"/>
+        <location filename="../Main/MainWindow.ui" line="5327"/>
         <source>Prefer correct</source>
         <translation>Preferisco corretto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5261"/>
+        <location filename="../Main/MainWindow.ui" line="5334"/>
         <source>Add pseudo measurements</source>
         <translation>Aggiungi pseudo misurazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5268"/>
+        <location filename="../Main/MainWindow.ui" line="5341"/>
         <source>Measurements profiling</source>
         <translation>Profilazione delle misure</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5292"/>
-        <location filename="../Main/MainWindow.ui" line="5302"/>
+        <location filename="../Main/MainWindow.ui" line="5365"/>
+        <location filename="../Main/MainWindow.ui" line="5375"/>
         <source>Optimal power flow settings</source>
         <translation>Impostazioni ottimali del flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5299"/>
+        <location filename="../Main/MainWindow.ui" line="5372"/>
         <source>Opf</source>
         <translation>Opf</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5314"/>
+        <location filename="../Main/MainWindow.ui" line="5387"/>
         <source>Linear settings</source>
         <translation>Impostazioni lineari</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5326"/>
+        <location filename="../Main/MainWindow.ui" line="5523"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the time grouping to possibly shorten the solution time.&lt;/p&gt;&lt;p&gt;This splits the time series by week, month, etc. and the subproblems are solved sequentially.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scegliere il raggruppamento temporale per eventualmente abbreviare i tempi di soluzione.&lt;/p&gt;&lt;p&gt;In questo modo la serie temporale viene suddivisa per settimana, mese, ecc. e i sottoproblemi vengono risolti in sequenza.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5339"/>
+        <location filename="../Main/MainWindow.ui" line="5557"/>
         <source>Consider per-area generation spinning reserve</source>
         <translation>Considerare la riserva rotante di generazione per area</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5342"/>
+        <location filename="../Main/MainWindow.ui" line="5560"/>
         <source>Spinning reserve</source>
         <translation>Riserva rotante</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5355"/>
+        <location filename="../Main/MainWindow.ui" line="5672"/>
         <source>Instead of using the generation, loads cost for dispatching, use the GLSK (Generation, Load Shift Keys)</source>
         <translation>Invece di utilizzare la generazione, carica i costi per l&apos;invio, utilizza GLSK (Generazione, Carica tasti di spostamento)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5358"/>
+        <location filename="../Main/MainWindow.ui" line="5675"/>
         <source>Use GSLK as costs</source>
         <translation>Utilizza GSLK come costi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5371"/>
+        <location filename="../Main/MainWindow.ui" line="5438"/>
         <source>MIP framework</source>
         <translation>quadro MIP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5583"/>
+        <location filename="../Main/MainWindow.ui" line="5656"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the generation costs will use the quadratic coefficients cost, which will trigger a more complex formulation to approximate the quadratic thermal generation curve. Otherwise a linear model is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se selezionata, i costi di generazione useranno i coefficienti di costo quadratici, attivando una formulazione più complessa per approssimare la curva quadratica di generazione termica. In caso contrario viene usato un modello lineare.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5586"/>
+        <location filename="../Main/MainWindow.ui" line="5659"/>
         <source>Use quadratic costs</source>
         <translation>Usa costi quadratici</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5384"/>
+        <location filename="../Main/MainWindow.ui" line="5484"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the zonal grouping.&lt;br/&gt;When All (Copper plate) is selected, the branch restrictions are ignored&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scegli il raggruppamento zonale.&lt;br/&gt;Quando è selezionato Tutto (piastra in rame), le restrizioni sui rami vengono ignorate&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5397"/>
+        <location filename="../Main/MainWindow.ui" line="5497"/>
         <source>Choose the external mixed integer framework</source>
         <translation>Scegli il framework intero misto esterno</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5410"/>
+        <location filename="../Main/MainWindow.ui" line="5464"/>
         <source>Time grouping</source>
         <translation>Raggruppamento temporale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5443"/>
+        <location filename="../Main/MainWindow.ui" line="5573"/>
         <source>Consider generation minimum up/down time</source>
         <translation>Considerare il tempo minimo di up/down della generazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5446"/>
+        <location filename="../Main/MainWindow.ui" line="5576"/>
         <source>Consider min up/down time</source>
         <translation>Considera il tempo minimo di accensione/spegnimento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5459"/>
+        <location filename="../Main/MainWindow.ui" line="5688"/>
         <source>When checked, the branch losses will be aproximated by a factor r * rate / (V^2)</source>
         <translation>Se selezionato, le perdite dei rami verranno approssimate da un fattore r * tasso / (V^2)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5462"/>
+        <location filename="../Main/MainWindow.ui" line="5691"/>
         <source>Approximate losses</source>
         <translation>Perdite approssimative</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5475"/>
+        <location filename="../Main/MainWindow.ui" line="5412"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how the generation dispatch should behave&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Seleziona come dovrebbe comportarsi l&apos;invio di generazione&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5488"/>
+        <location filename="../Main/MainWindow.ui" line="5643"/>
         <source>Contingency tolerance</source>
         <translation>Tolleranza alle contingenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5501"/>
+        <location filename="../Main/MainWindow.ui" line="5605"/>
         <source>LODF matrix tolerance choosing contingencies</source>
         <translation>Tolleranza della matrice LODF nella scelta delle contingenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5523"/>
+        <location filename="../Main/MainWindow.ui" line="5589"/>
         <source>Consider the contingencies when dispatching</source>
         <translation>Considera gli imprevisti durante la spedizione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5526"/>
+        <location filename="../Main/MainWindow.ui" line="5592"/>
         <source>Compute contingencies</source>
         <translation>Calcolare gli imprevisti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5539"/>
+        <location filename="../Main/MainWindow.ui" line="5720"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The program will save the MIP formulation and be displayed in the text tab of the results&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Il programma salverà la formulazione MIP e verrà visualizzata nella scheda testo dei risultati&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5542"/>
+        <location filename="../Main/MainWindow.ui" line="5723"/>
         <source>Report MIP formulation</source>
         <translation>Riportare la formulazione del MIP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5555"/>
+        <location filename="../Main/MainWindow.ui" line="5704"/>
         <source>Fix infeasible problems and rey with the relaxed problem. Applies to OPF and NTC</source>
         <translation>Risolvi i problemi irrealizzabili e risolvi il problema rilassato. Si applica a OPF e NTC</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5558"/>
+        <location filename="../Main/MainWindow.ui" line="5707"/>
         <source>Fix infeasibilities and retry</source>
         <translation>Correggere le impossibilità e riprovare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5571"/>
+        <location filename="../Main/MainWindow.ui" line="5627"/>
         <source>Consider generation ramps</source>
         <translation>Considera le rampe di generazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5574"/>
+        <location filename="../Main/MainWindow.ui" line="5630"/>
         <source>Consider ramps</source>
         <translation>Considera le rampe</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5587"/>
+        <location filename="../Main/MainWindow.ui" line="5425"/>
         <source>Dispatch mode</source>
         <translation>Modalità di spedizione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5600"/>
+        <location filename="../Main/MainWindow.ui" line="5451"/>
         <source>Choose the external mixed integer programming solver</source>
         <translation>Scegli il risolutore esterno di programmazione a numeri interi misti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5613"/>
+        <location filename="../Main/MainWindow.ui" line="5399"/>
         <source>Zone grouping</source>
         <translation>Raggruppamento di zone</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5629"/>
+        <location filename="../Main/MainWindow.ui" line="5742"/>
         <source>Nonlinear settings</source>
         <translation>Impostazioni non lineari</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5654"/>
+        <location filename="../Main/MainWindow.ui" line="5767"/>
         <source>Interior point solver maximum number of iterations</source>
         <translation>Numero massimo di iterazioni del risolutore di punti interni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5657"/>
+        <location filename="../Main/MainWindow.ui" line="5770"/>
         <source>Iterations</source>
         <translation>Iterazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5670"/>
+        <location filename="../Main/MainWindow.ui" line="5783"/>
         <source>Initialize the interior point OPF with the power flow solution</source>
         <translation>Inizializzare il punto interno OPF con la soluzione del flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5673"/>
+        <location filename="../Main/MainWindow.ui" line="5786"/>
         <source>Initialize with power flow</source>
         <translation>Inizializzare con il flusso di corrente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5696"/>
+        <location filename="../Main/MainWindow.ui" line="5809"/>
         <source>Number of iterations of the method</source>
         <translation>Numero di iterazioni del metodo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5725"/>
+        <location filename="../Main/MainWindow.ui" line="5838"/>
         <source>Interior point solver tolerance</source>
         <translation>Tolleranza del risolutore del punto interno</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5766"/>
+        <location filename="../Main/MainWindow.ui" line="5879"/>
         <source>Interior point solver method</source>
         <translation>Metodo del risolutore del punto interno</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5769"/>
+        <location filename="../Main/MainWindow.ui" line="5882"/>
         <source>IPS method</source>
         <translation>Metodo IPS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5804"/>
+        <location filename="../Main/MainWindow.ui" line="5917"/>
         <source>Interior point trust radius</source>
         <translation>Raggio di fiducia del punto interno</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5820"/>
+        <location filename="../Main/MainWindow.ui" line="5933"/>
         <source>General switch for reactive power limits control in the nonlinear optimal power flow</source>
         <translation>Interruttore generale per il controllo dei limiti di potenza reattiva nel flusso di potenza ottimale non lineare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5851"/>
+        <location filename="../Main/MainWindow.ui" line="5964"/>
         <source>Verbosity level</source>
         <translation>Livello di verbosità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5864"/>
-        <location filename="../Main/MainWindow.ui" line="6140"/>
+        <location filename="../Main/MainWindow.ui" line="5977"/>
+        <location filename="../Main/MainWindow.ui" line="6253"/>
         <source>Skip generation limits</source>
         <translation>Salta i limiti di generazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5877"/>
+        <location filename="../Main/MainWindow.ui" line="5990"/>
         <source>Verbose</source>
         <translation>Verboso</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5897"/>
+        <location filename="../Main/MainWindow.ui" line="6010"/>
         <source>Choose the optimal power flow method</source>
         <translation>Scegli il metodo del flusso di potenza ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5910"/>
-        <location filename="../Main/MainWindow.ui" line="6800"/>
-        <location filename="../Main/MainWindow.ui" line="8866"/>
-        <location filename="../Main/MainWindow.ui" line="9771"/>
-        <location filename="../Main/MainWindow.ui" line="9836"/>
+        <location filename="../Main/MainWindow.ui" line="6023"/>
+        <location filename="../Main/MainWindow.ui" line="6913"/>
+        <location filename="../Main/MainWindow.ui" line="9086"/>
+        <location filename="../Main/MainWindow.ui" line="9991"/>
+        <location filename="../Main/MainWindow.ui" line="10056"/>
         <source>Method</source>
         <translation>Metodo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6079"/>
+        <location filename="../Main/MainWindow.ui" line="6192"/>
         <source>Optimal Power Flow</source>
         <translation>Flusso di potenza ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6090"/>
+        <location filename="../Main/MainWindow.ui" line="6203"/>
         <source>Net transfer capacity settings</source>
         <translation>Impostazioni della capacità di trasferimento netto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6097"/>
+        <location filename="../Main/MainWindow.ui" line="6210"/>
         <source>Ntc</source>
         <translation>NTC</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6100"/>
+        <location filename="../Main/MainWindow.ui" line="6213"/>
         <source>Network transfer capacity related settings</source>
         <translation>Impostazioni relative alla capacità di trasferimento della rete</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6111"/>
+        <location filename="../Main/MainWindow.ui" line="6224"/>
         <source>Optimization</source>
         <translation>Ottimizzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6122"/>
+        <location filename="../Main/MainWindow.ui" line="6235"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This criteria springs from the ACER (Agency for the Cooperation for Energy Regulators).&lt;/p&gt;&lt;p&gt;It determines that a branch is only relevant to be considered in a NTC calculation if the flow due to the exchange is over a percentage (70%) &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;A branch is monitored only if:&lt;/p&gt;&lt;p&gt;(branch_rate * 70%) / branch_alpha &amp;lt;= total exchange rating&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Questo criterio scaturisce dall&apos;ACER (Agenzia per la Cooperazione per i Regolatori dell&apos;Energia).&lt;/p&gt;&lt;p&gt;Determina che una diramazione è rilevante da considerare nel calcolo NTC solo se il flusso dovuto allo scambio è superiore ad una percentuale (70%)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Una filiale viene monitorata solo se:&lt;/p&gt;&lt;p&gt;(tasso_ramo * 70%) / alfa_ramo &lt;= rating di cambio totale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6125"/>
+        <location filename="../Main/MainWindow.ui" line="6238"/>
         <source>Branch rating contribution (ACER)</source>
         <translation>Contributo rating filiali (ACER)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6137"/>
+        <location filename="../Main/MainWindow.ui" line="6250"/>
         <source>If activated, the generation limits are not considered</source>
         <translation>Se attivato i limiti di generazione non vengono considerati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6155"/>
-        <location filename="../Main/MainWindow.ui" line="7498"/>
+        <location filename="../Main/MainWindow.ui" line="6268"/>
+        <location filename="../Main/MainWindow.ui" line="7611"/>
         <source> MW</source>
         <translation>MW</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6179"/>
+        <location filename="../Main/MainWindow.ui" line="6292"/>
         <source>If checked, the NTC optimization will use the system declared contingencies</source>
         <translation>Se selezionata, l&apos;ottimizzazione NTC utilizzerà le contingenze dichiarate dal sistema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6182"/>
+        <location filename="../Main/MainWindow.ui" line="6295"/>
         <source>Consider constingencies</source>
         <translation>Considera le contingenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6194"/>
+        <location filename="../Main/MainWindow.ui" line="6307"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A branch is monitored solely based on its contribution to the inter-area excahge sensitivity. Therefore a branch is selected if it&apos;s alpha value is greater than the set alpha %&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Una filiale viene monitorata esclusivamente in base al suo contributo alla sensibilità dello scambio interarea. Pertanto un ramo viene selezionato se il suo valore alfa è maggiore della % alfa impostata&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6197"/>
+        <location filename="../Main/MainWindow.ui" line="6310"/>
         <source>Branch exchange sensitivity (α)</source>
         <translation>Sensibilità della centrale (α)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6212"/>
-        <location filename="../Main/MainWindow.ui" line="6362"/>
-        <location filename="../Main/MainWindow.ui" line="6461"/>
+        <location filename="../Main/MainWindow.ui" line="6325"/>
+        <location filename="../Main/MainWindow.ui" line="6475"/>
+        <location filename="../Main/MainWindow.ui" line="6574"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6295"/>
+        <location filename="../Main/MainWindow.ui" line="6408"/>
         <source>Determine the branches that enter the optimization</source>
         <translation>Determinare i rami che entrano nell&apos;ottimizzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6298"/>
+        <location filename="../Main/MainWindow.ui" line="6411"/>
         <source>Branch monitoring selection criteria</source>
         <translation>Criteri di scelta del monitoraggio delle filiali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6347"/>
-        <location filename="../Main/MainWindow.ui" line="7419"/>
-        <location filename="../Main/MainWindow.ui" line="12677"/>
-        <location filename="../Main/MainWindow.ui" line="12704"/>
+        <location filename="../Main/MainWindow.ui" line="6460"/>
+        <location filename="../Main/MainWindow.ui" line="7532"/>
+        <location filename="../Main/MainWindow.ui" line="12948"/>
+        <location filename="../Main/MainWindow.ui" line="12975"/>
         <source>Contingencies</source>
         <translation>Contingenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6359"/>
+        <location filename="../Main/MainWindow.ui" line="6472"/>
         <source>Minimum exchange contribution (Alpha)</source>
         <translation>Contributo di cambio minimo (Alpha)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6380"/>
-        <location filename="../Main/MainWindow.ui" line="6383"/>
+        <location filename="../Main/MainWindow.ui" line="6493"/>
+        <location filename="../Main/MainWindow.ui" line="6496"/>
         <source>Transmission reliability margin (TRM)</source>
         <translation>Margine di affidabilità della trasmissione (TRM)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6395"/>
+        <location filename="../Main/MainWindow.ui" line="6508"/>
         <source>More strict NTC Formulation: No slacks of any type and specific monitoring criteria</source>
         <translation>Formulazione NTC più rigorosa: assenza di allentamenti di alcun tipo e criteri di monitoraggio specifici</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6398"/>
+        <location filename="../Main/MainWindow.ui" line="6511"/>
         <source>Strict formulation</source>
         <translation>Formulazione rigorosa</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6413"/>
-        <location filename="../Main/MainWindow.ui" line="6750"/>
+        <location filename="../Main/MainWindow.ui" line="6526"/>
+        <location filename="../Main/MainWindow.ui" line="6863"/>
         <source>General</source>
         <translation>Generale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6437"/>
+        <location filename="../Main/MainWindow.ui" line="6550"/>
         <source>Loading threshold to report</source>
         <translation>Soglia di caricamento da segnalare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6449"/>
+        <location filename="../Main/MainWindow.ui" line="6562"/>
         <source>Transfer method</source>
         <translation>Metodo di trasferimento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6579"/>
+        <location filename="../Main/MainWindow.ui" line="6692"/>
         <source>Linear</source>
         <translation>Lineare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6596"/>
+        <location filename="../Main/MainWindow.ui" line="6709"/>
         <source>Transfer sensitivity threshold</source>
         <translation>Soglia di sensibilità di trasferimento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6608"/>
+        <location filename="../Main/MainWindow.ui" line="6721"/>
         <source>n-1 sensibility consideration</source>
         <translation>n-1 considerazione sulla sensibilità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6636"/>
+        <location filename="../Main/MainWindow.ui" line="6749"/>
         <source>Threshold used to discard insensitive branches</source>
         <translation>Soglia utilizzata per scartare i rami non sensibili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6660"/>
+        <location filename="../Main/MainWindow.ui" line="6773"/>
         <source>Use existing power flow values for the contingency initialization in the net transfer capacity and contingency simulations</source>
         <translation>Utilizzare i valori del flusso di potenza esistenti per l&apos;inizializzazione di contingenza nella capacità di trasferimento netta e nelle simulazioni di contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6663"/>
+        <location filename="../Main/MainWindow.ui" line="6776"/>
         <source>Use power flow values for initialization</source>
         <translation>Utilizzare i valori del flusso di potenza per l&apos;inizializzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6718"/>
-        <location filename="../Main/MainWindow.ui" line="6962"/>
+        <location filename="../Main/MainWindow.ui" line="6831"/>
+        <location filename="../Main/MainWindow.ui" line="7075"/>
         <source>Select the solver in the OPF tab and the areas in the areas tab</source>
         <translation>Selezionare il risolutore nella scheda OPF e le aree nella scheda aree</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6721"/>
+        <location filename="../Main/MainWindow.ui" line="6834"/>
         <source>Net transfer capacity</source>
         <translation>Capacità di trasferimento netta</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6729"/>
+        <location filename="../Main/MainWindow.ui" line="6842"/>
         <source>Nodal capacity hosting options</source>
         <translation>Opzioni di hosting della capacità nodale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6736"/>
+        <location filename="../Main/MainWindow.ui" line="6849"/>
         <source>Nhc</source>
         <translation>Nhc</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6739"/>
+        <location filename="../Main/MainWindow.ui" line="6852"/>
         <source>Nodal hosting capacity related settings</source>
         <translation>Impostazioni relative alla capacità di hosting nodale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6761"/>
-        <location filename="../Main/MainWindow.ui" line="6779"/>
+        <location filename="../Main/MainWindow.ui" line="6874"/>
+        <location filename="../Main/MainWindow.ui" line="6892"/>
         <source>If the sense is positive, the algorithm will assess the maximum generation capacity in the selected nodes. If it is negative it will asses the maximum loading capacity in the selected nodes.</source>
         <translation>Se il senso è positivo, l&apos;algoritmo valuterà la massima capacità di generazione nei nodi selezionati. Se è negativo valuterà la massima capacità di carico nei nodi selezionati.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6767"/>
+        <location filename="../Main/MainWindow.ui" line="6880"/>
         <source>Sense</source>
         <translation>Senso</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6812"/>
+        <location filename="../Main/MainWindow.ui" line="6925"/>
         <source>Optimization method to use</source>
         <translation>Metodo di ottimizzazione da utilizzare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6965"/>
+        <location filename="../Main/MainWindow.ui" line="7078"/>
         <source>Nodal hosting capacity</source>
         <translation>Capacità di hosting nodale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6986"/>
+        <location filename="../Main/MainWindow.ui" line="7099"/>
         <source>Area transfer settings</source>
         <translation>Impostazioni di trasferimento di area</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6993"/>
+        <location filename="../Main/MainWindow.ui" line="7106"/>
         <source>Txfr</source>
         <translation>Txfr</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6996"/>
+        <location filename="../Main/MainWindow.ui" line="7109"/>
         <source>Area, Zone, etc related settings</source>
         <translation>Impostazioni relative ad area, zona, ecc</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7103"/>
+        <location filename="../Main/MainWindow.ui" line="7216"/>
         <source>Transfer configuration</source>
         <translation>Trasferisci configurazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7148"/>
+        <location filename="../Main/MainWindow.ui" line="7261"/>
         <source>From</source>
         <translation>Da</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7171"/>
+        <location filename="../Main/MainWindow.ui" line="7284"/>
         <source>To</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7192"/>
+        <location filename="../Main/MainWindow.ui" line="7305"/>
         <source>Contingencies settings</source>
         <translation>Impostazioni degli imprevisti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7199"/>
+        <location filename="../Main/MainWindow.ui" line="7312"/>
         <source>Con</source>
         <translation>Contro</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7202"/>
+        <location filename="../Main/MainWindow.ui" line="7315"/>
         <source>Contingencies related settings</source>
         <translation>Impostazioni relative agli imprevisti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7229"/>
+        <location filename="../Main/MainWindow.ui" line="7342"/>
         <source>Contingency filter</source>
         <translation>Filtro di contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7242"/>
+        <location filename="../Main/MainWindow.ui" line="7355"/>
         <source>Filter by</source>
         <translation>Filtra per</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7258"/>
+        <location filename="../Main/MainWindow.ui" line="7371"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Filter contingencies&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This option allows you to only consider the contingencies that fall in ceratain groupings such as Area, Zone or Country. The filtering is performed based on the information stored in the Buses.&lt;/p&gt;&lt;p&gt;This is highly discouraged. We trully advise you to not to filter the contingencies and select All Contingencies. Use this feature at your own risk.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Filtra gli imprevisti&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Questa opzione consente di considerare solo gli imprevisti che rientrano in determinati raggruppamenti come Area, Zona o Paese. Il filtraggio viene eseguito in base alle informazioni memorizzate nei bus.&lt;/p&gt;&lt;p&gt;Questo è altamente scoraggiato. Ti consigliamo vivamente di non filtrare gli imprevisti e di selezionare Tutti gli imprevisti. Utilizza questa funzionalità a tuo rischio e pericolo.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7441"/>
+        <location filename="../Main/MainWindow.ui" line="7554"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dead band over the SRAP rating.&lt;/p&gt;&lt;p&gt;If greater than zero, the SRAP is investigated for values over the branch protections rating until the specified value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Banda morta rispetto al rating SRAP.&lt;/p&gt;&lt;p&gt;Se maggiore di zero, lo SRAP viene indagato per valori superiori al rating delle protezioni di ramo fino al valore specificato.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7444"/>
+        <location filename="../Main/MainWindow.ui" line="7557"/>
         <source>SRAP dead band</source>
         <translation>Zona morta SRAP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7458"/>
+        <location filename="../Main/MainWindow.ui" line="7571"/>
         <source>SRAP limit</source>
         <translation>Limite SRAP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7465"/>
+        <location filename="../Main/MainWindow.ui" line="7578"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked the SRAP objective solution is the branch nominal rate. Otherwise, the objective rating is the contingency rating.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se selezionata, la soluzione oggettiva dello SRAP è il tasso nominale della filiale. Altrimenti, la valutazione oggettiva è la valutazione di contingenza.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7468"/>
+        <location filename="../Main/MainWindow.ui" line="7581"/>
         <source>Revert to nominal rating</source>
         <translation>Ritorna alla valutazione nominale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7475"/>
+        <location filename="../Main/MainWindow.ui" line="7588"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activate SRAP (Sistema de reducción automática de potencia)&lt;/p&gt;&lt;p&gt;It is a mechanism that helps avoiding considering a contingency if it would be eventually resolved by nearby generation shifting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attiva SRAP (Sistema di riduzione automatica della potenza)&lt;/p&gt;&lt;p&gt;È un meccanismo che aiuta a evitare di considerare una contingenza nel caso in cui questa venisse eventualmente risolta dal prossimo passaggio generazionale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7478"/>
+        <location filename="../Main/MainWindow.ui" line="7591"/>
         <source>Use SRAP</source>
         <translation>Usa SRAP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7485"/>
+        <location filename="../Main/MainWindow.ui" line="7598"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, a massive posibly intractable report is generated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se selezionato, viene generato un report massiccio e possibilmente intrattabile.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7488"/>
+        <location filename="../Main/MainWindow.ui" line="7601"/>
         <source>Detailed report</source>
         <translation>Rapporto dettagliato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7495"/>
+        <location filename="../Main/MainWindow.ui" line="7608"/>
         <source>Maximum overload power that is solvable using the SRAP technique.</source>
         <translation>Massima potenza di sovraccarico risolvibile mediante la tecnica SRAP.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7527"/>
-        <location filename="../Main/MainWindow.ui" line="7567"/>
-        <location filename="../Main/MainWindow.ui" line="8928"/>
+        <location filename="../Main/MainWindow.ui" line="7640"/>
+        <location filename="../Main/MainWindow.ui" line="7680"/>
+        <location filename="../Main/MainWindow.ui" line="9148"/>
         <source> %</source>
         <translation> %</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7540"/>
+        <location filename="../Main/MainWindow.ui" line="7653"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amount of contingency loading with respect to the base situation loading that triggers the report of the contingency. This is specially useful when we want to avoig reporting contingencies that are not significant with respect to the base situation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantità di caricamento di contingenza rispetto al caricamento della situazione base che attiva la segnalazione della contingenza. Ciò è particolarmente utile quando si vuole evitare di segnalare contingenze non significative rispetto alla situazione base.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7543"/>
+        <location filename="../Main/MainWindow.ui" line="7656"/>
         <source>Contingency dead band</source>
         <translation>Zona morta di emergenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7550"/>
+        <location filename="../Main/MainWindow.ui" line="7663"/>
         <source>Maximum number of generation nodes to participate in the SRAP</source>
         <translation>Numero massimo di nodi di generazione per partecipare allo SRAP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7553"/>
+        <location filename="../Main/MainWindow.ui" line="7666"/>
         <source>SRAP top N</source>
         <translation>SRAP primo N</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7560"/>
+        <location filename="../Main/MainWindow.ui" line="7673"/>
         <source>Contingency engine</source>
         <translation>Motore di contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7610"/>
+        <location filename="../Main/MainWindow.ui" line="7723"/>
         <source>Dyn</source>
         <translation>Din</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7613"/>
+        <location filename="../Main/MainWindow.ui" line="7726"/>
         <source>Rms simulation settings</source>
         <translation>Impostazioni di simulazione Rms</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7691"/>
+        <location filename="../Main/MainWindow.ui" line="7854"/>
         <source>RMS</source>
         <translation>RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7758"/>
-        <location filename="../Main/MainWindow.ui" line="7918"/>
-        <location filename="../Main/MainWindow.ui" line="8002"/>
-        <location filename="../Main/MainWindow.ui" line="8347"/>
-        <location filename="../Main/MainWindow.ui" line="8403"/>
-        <location filename="../Main/MainWindow.ui" line="8525"/>
+        <location filename="../Main/MainWindow.ui" line="7962"/>
+        <location filename="../Main/MainWindow.ui" line="8008"/>
+        <location filename="../Main/MainWindow.ui" line="8123"/>
+        <location filename="../Main/MainWindow.ui" line="8465"/>
+        <location filename="../Main/MainWindow.ui" line="8490"/>
+        <location filename="../Main/MainWindow.ui" line="8819"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tempo iniziale per la simulazione.&lt;/p&gt;&lt;p&gt;In pratica questo viene utilizzato per rallentare soluzioni problematiche.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7761"/>
-        <location filename="../Main/MainWindow.ui" line="8005"/>
-        <location filename="../Main/MainWindow.ui" line="8350"/>
-        <location filename="../Main/MainWindow.ui" line="8406"/>
-        <location filename="../Main/MainWindow.ui" line="8528"/>
+        <location filename="../Main/MainWindow.ui" line="8011"/>
+        <location filename="../Main/MainWindow.ui" line="8126"/>
+        <location filename="../Main/MainWindow.ui" line="8468"/>
+        <location filename="../Main/MainWindow.ui" line="8493"/>
+        <location filename="../Main/MainWindow.ui" line="8806"/>
+        <location filename="../Main/MainWindow.ui" line="8822"/>
         <source> s</source>
         <translation>S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7783"/>
-        <location filename="../Main/MainWindow.ui" line="8442"/>
+        <location filename="../Main/MainWindow.ui" line="8097"/>
+        <location filename="../Main/MainWindow.ui" line="8685"/>
         <source>Assessment time</source>
         <translation>Tempo di valutazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7821"/>
-        <location filename="../Main/MainWindow.ui" line="8435"/>
+        <location filename="../Main/MainWindow.ui" line="7955"/>
+        <location filename="../Main/MainWindow.ui" line="8844"/>
         <source>Initialization</source>
         <translation>Inizializzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7828"/>
-        <location filename="../Main/MainWindow.ui" line="8462"/>
+        <location filename="../Main/MainWindow.ui" line="8198"/>
+        <location filename="../Main/MainWindow.ui" line="8692"/>
         <source>Time step</source>
         <translation>Passo temporale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7892"/>
-        <location filename="../Main/MainWindow.ui" line="8428"/>
+        <location filename="../Main/MainWindow.ui" line="7987"/>
+        <location filename="../Main/MainWindow.ui" line="8621"/>
         <source>Integration</source>
         <translation>Integrazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7921"/>
+        <location filename="../Main/MainWindow.ui" line="7965"/>
         <source>s</source>
         <translation>S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7943"/>
-        <location filename="../Main/MainWindow.ui" line="8569"/>
+        <location filename="../Main/MainWindow.ui" line="8158"/>
+        <location filename="../Main/MainWindow.ui" line="8628"/>
         <source>Simulation time</source>
         <translation>Tempo di simulazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7992"/>
+        <location filename="../Main/MainWindow.ui" line="8254"/>
         <source>RMS Small-Signal</source>
         <translation>RMS Piccolo segnale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8040"/>
-        <location filename="../Main/MainWindow.ui" line="8264"/>
-        <location filename="../Main/MainWindow.ui" line="8268"/>
+        <location filename="../Main/MainWindow.ui" line="7942"/>
+        <location filename="../Main/MainWindow.ui" line="8577"/>
+        <location filename="../Main/MainWindow.ui" line="8581"/>
         <source>trapezoid</source>
         <translation>trapezio</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8045"/>
-        <location filename="../Main/MainWindow.ui" line="8273"/>
+        <location filename="../Main/MainWindow.ui" line="7947"/>
+        <location filename="../Main/MainWindow.ui" line="8586"/>
         <source>implicit euler</source>
         <translation>Eulero implicito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8066"/>
-        <location filename="../Main/MainWindow.ui" line="8583"/>
+        <location filename="../Main/MainWindow.ui" line="8151"/>
+        <location filename="../Main/MainWindow.ui" line="8597"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of modes.&lt;br/&gt;If zero, all modes are included and the calculation is done using dense matrices.&lt;br/&gt;If a number of modes greater than zero is given the calculation is sparse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Numero di modalità.&lt;br/&gt;Se zero, tutte le modalità sono incluse e il calcolo viene eseguito utilizzando matrici dense.&lt;br/&gt;Se viene fornito un numero di modi maggiore di zero il calcolo è sparso.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8073"/>
-        <location filename="../Main/MainWindow.ui" line="8590"/>
+        <location filename="../Main/MainWindow.ui" line="8033"/>
+        <location filename="../Main/MainWindow.ui" line="8699"/>
         <source>Modes</source>
         <translation>Modalità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8208"/>
+        <location filename="../Main/MainWindow.ui" line="7995"/>
+        <location filename="../Main/MainWindow.ui" line="8790"/>
+        <source>standard</source>
+        <translation>standard</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8000"/>
+        <location filename="../Main/MainWindow.ui" line="8795"/>
+        <source>vectorized</source>
+        <translation>vettorizzato</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8205"/>
+        <location filename="../Main/MainWindow.ui" line="8554"/>
+        <source>Problem</source>
+        <translation>Problema</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8392"/>
         <source>EMT</source>
         <translation>EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8323"/>
+        <location filename="../Main/MainWindow.ui" line="8445"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Subspace build type. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tipo di costruzione dello subspace. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8448"/>
+        <location filename="../Main/MainWindow.ui" line="8452"/>
+        <source>Arnoldi</source>
+        <translation>Arnoldi</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8457"/>
+        <source>Hybrid Arnoldi</source>
+        <translation>Arnoldi Ibrido</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8515"/>
+        <source>Build type</source>
+        <translation>Tipo di costruzione</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8607"/>
+        <source>Target period</source>
+        <translation>Periodo target</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8748"/>
         <source>EMT Small-Signal</source>
         <translation>EMT Piccolo segnale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8667"/>
+        <location filename="../Main/MainWindow.ui" line="8803"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Period of the periodic orbit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Periodo dell&apos;orbita periodica. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Hz</source>
+        <translation type="vanished">Hz</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="8887"/>
         <source>Machine-learning related settings</source>
         <translation>Impostazioni relative all&apos;apprendimento automatico</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8674"/>
+        <location filename="../Main/MainWindow.ui" line="8894"/>
         <source>ML</source>
         <translation>M.L</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8677"/>
+        <location filename="../Main/MainWindow.ui" line="8897"/>
         <source>Machine learning related settings</source>
         <translation>Impostazioni relative all&apos;apprendimento automatico</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8695"/>
+        <location filename="../Main/MainWindow.ui" line="8915"/>
         <source>Objective function</source>
         <translation>Funzione oggettiva</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8859"/>
+        <location filename="../Main/MainWindow.ui" line="9079"/>
         <source>Minimum form capacity</source>
         <translation>Capacità minima del modulo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8915"/>
+        <location filename="../Main/MainWindow.ui" line="9135"/>
         <source>Node grouping</source>
         <translation>Raggruppamento dei nodi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8925"/>
+        <location filename="../Main/MainWindow.ui" line="9145"/>
         <source>In adequecy and simple dispatch indicated the minimum share of total firm capacity of the system to be in desirable, less is penalized</source>
         <translation>Nell’adeguatezza e nel semplice dispaccio viene indicata la quota minima della capacità aziendale totale del sistema per essere auspicabile, meno viene penalizzato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8944"/>
+        <location filename="../Main/MainWindow.ui" line="9164"/>
         <source>Number of maximum evaluations for the optimization methods</source>
         <translation>Numero di valutazioni massime per i metodi di ottimizzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8947"/>
+        <location filename="../Main/MainWindow.ui" line="9167"/>
         <source> x number of investments</source>
         <translation>x numero di investimenti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9026"/>
-        <location filename="../Main/MainWindow.ui" line="12017"/>
+        <location filename="../Main/MainWindow.ui" line="9246"/>
+        <location filename="../Main/MainWindow.ui" line="12288"/>
         <source>Clustering</source>
         <translation>Raggruppamento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9039"/>
+        <location filename="../Main/MainWindow.ui" line="9259"/>
         <source>Nodal distances</source>
         <translation>Distanze nodali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9046"/>
+        <location filename="../Main/MainWindow.ui" line="9266"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of clusters, this affects all the simulations that deal with clustering&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Numero di cluster, influisce su tutte le simulazioni che trattano il clustering&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9049"/>
+        <location filename="../Main/MainWindow.ui" line="9269"/>
         <source> Clusters</source>
         <translation>Cluster</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9065"/>
+        <location filename="../Main/MainWindow.ui" line="9285"/>
         <source>Maximum evaluations</source>
         <translation>Valutazioni massime</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9099"/>
+        <location filename="../Main/MainWindow.ui" line="9319"/>
         <source>Máximum standard deviation to determine the groups</source>
         <translation>Deviazione standard massima per determinare i gruppi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9102"/>
+        <location filename="../Main/MainWindow.ui" line="9322"/>
         <source> σ</source>
         <translation> σ</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9118"/>
+        <location filename="../Main/MainWindow.ui" line="9338"/>
         <source>Min. group size</source>
         <translation>minimo dimensione del gruppo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9125"/>
+        <location filename="../Main/MainWindow.ui" line="9345"/>
         <source>Select the investment evaluation method</source>
         <translation>Seleziona il metodo di valutazione dell&apos;investimento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9132"/>
+        <location filename="../Main/MainWindow.ui" line="9352"/>
         <source>Minimum size of the group</source>
         <translation>Dimensione minima del gruppo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9138"/>
+        <location filename="../Main/MainWindow.ui" line="9358"/>
         <source> elements</source>
         <translation>elementi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9196"/>
+        <location filename="../Main/MainWindow.ui" line="9416"/>
         <source>Investment evaluation</source>
         <translation>Valutazione degli investimenti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9206"/>
+        <location filename="../Main/MainWindow.ui" line="9426"/>
         <source>Number of clusters</source>
         <translation>Numero di cluster</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9312"/>
+        <location filename="../Main/MainWindow.ui" line="9532"/>
         <source>Number of islands produced until the analysis stops</source>
         <translation>Numero di isole prodotte fino all&apos;arresto dell&apos;analisi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9353"/>
+        <location filename="../Main/MainWindow.ui" line="9573"/>
         <source>Reliability evaluation method</source>
         <translation>Metodo di valutazione dell&apos;affidabilità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9360"/>
+        <location filename="../Main/MainWindow.ui" line="9580"/>
         <source>Maximum number of samples</source>
         <translation>Numero massimo di campioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9418"/>
+        <location filename="../Main/MainWindow.ui" line="9638"/>
         <source>Reliability</source>
         <translation>Affidabilità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9428"/>
-        <location filename="../Main/MainWindow.ui" line="9764"/>
+        <location filename="../Main/MainWindow.ui" line="9648"/>
+        <location filename="../Main/MainWindow.ui" line="9984"/>
         <source>Samples</source>
         <translation>Campioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9477"/>
+        <location filename="../Main/MainWindow.ui" line="9697"/>
         <source>Cascading</source>
         <translation>A cascata</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9674"/>
-        <location filename="../Main/MainWindow.ui" line="11201"/>
+        <location filename="../Main/MainWindow.ui" line="9894"/>
+        <location filename="../Main/MainWindow.ui" line="11469"/>
         <source>Stochastic power flow</source>
         <translation>Flusso di potenza stocastico</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9684"/>
+        <location filename="../Main/MainWindow.ui" line="9904"/>
         <source>Maximum number of Monte Carlo samples</source>
         <translation>Numero massimo di campioni Monte Carlo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9700"/>
+        <location filename="../Main/MainWindow.ui" line="9920"/>
         <source>Aditional islands until stop</source>
         <translation>Isole aggiuntive fino allo stop</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9707"/>
+        <location filename="../Main/MainWindow.ui" line="9927"/>
         <source>Voltage variance</source>
         <translation>Variazione di tensione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9778"/>
+        <location filename="../Main/MainWindow.ui" line="9998"/>
         <source>Stochastic power flow method</source>
         <translation>Metodo del flusso di potenza stocastico</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9810"/>
+        <location filename="../Main/MainWindow.ui" line="10030"/>
         <source>Monte Carlo variance until stop</source>
         <translation>Varianza Monte Carlo fino allo stop</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9860"/>
+        <location filename="../Main/MainWindow.ui" line="10080"/>
         <source>Topology settings</source>
         <translation>Impostazioni della topologia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9867"/>
+        <location filename="../Main/MainWindow.ui" line="10087"/>
         <source>Tplgy</source>
         <translation>Tplgy</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9870"/>
+        <location filename="../Main/MainWindow.ui" line="10090"/>
         <source>Topology related settings</source>
         <translation>Impostazioni relative alla topologia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9989"/>
-        <location filename="../Main/MainWindow.ui" line="12434"/>
+        <location filename="../Main/MainWindow.ui" line="10209"/>
+        <location filename="../Main/MainWindow.ui" line="12705"/>
         <source>Grid reduction</source>
         <translation>Riduzione della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10052"/>
+        <location filename="../Main/MainWindow.ui" line="10272"/>
         <source>Select branch types to reduce</source>
         <translation>Seleziona i tipi di rami da ridurre</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10062"/>
+        <location filename="../Main/MainWindow.ui" line="10282"/>
         <source>Filter by r+x under threshold</source>
         <translation>Filtra per r+x sotto soglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10072"/>
+        <location filename="../Main/MainWindow.ui" line="10292"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Exponent of the threshold to use.&lt;/p&gt;&lt;p&gt;threshold = 1x10^-factor&lt;/p&gt;&lt;p&gt;i.e.&lt;/p&gt;&lt;p&gt;factor=3&lt;/p&gt;&lt;p&gt;threshold = 1e-3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Esponente della soglia da utilizzare.&lt;/p&gt;&lt;p&gt;soglia = fattore 1x10^&lt;/p&gt;&lt;p&gt;cioè.&lt;/p&gt;&lt;p&gt;fattore=3&lt;/p&gt;&lt;p&gt;soglia = 1e-3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10201"/>
+        <location filename="../Main/MainWindow.ui" line="10421"/>
         <source>Branch rating</source>
         <translation>Valutazione delle filiali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10273"/>
+        <location filename="../Main/MainWindow.ui" line="10493"/>
         <source>Branch rating factor</source>
         <translation>Fattore di rating della filiale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10280"/>
+        <location filename="../Main/MainWindow.ui" line="10500"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor to aply to the branch calculated power to use as rating&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fattore da applicare alla potenza calcolata della filiale da utilizzare come rating&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10299"/>
+        <location filename="../Main/MainWindow.ui" line="10519"/>
         <source>override values</source>
         <translation>sovrascrivere i valori</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10326"/>
+        <location filename="../Main/MainWindow.ui" line="10546"/>
         <source>File settings</source>
         <translation>Impostazioni del file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10333"/>
-        <location filename="../Main/MainWindow.ui" line="10785"/>
+        <location filename="../Main/MainWindow.ui" line="10553"/>
+        <location filename="../Main/MainWindow.ui" line="11050"/>
         <source>File</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10336"/>
+        <location filename="../Main/MainWindow.ui" line="10556"/>
         <source>File related settings</source>
         <translation>Impostazioni relative ai file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10357"/>
+        <location filename="../Main/MainWindow.ui" line="10577"/>
         <source>If checked, the results are stored inside the VeraGrid file in a compressed format.</source>
         <translation>Se selezionato, i risultati vengono archiviati nel file VeraGrid in un formato compresso.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10360"/>
+        <location filename="../Main/MainWindow.ui" line="10580"/>
         <source>Save results in .veragrid files</source>
         <translation>Salva i risultati in file .veragrid</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10399"/>
+        <location filename="../Main/MainWindow.ui" line="10619"/>
         <source>File path</source>
         <translation>Percorso del file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10525"/>
+        <location filename="../Main/MainWindow.ui" line="10745"/>
         <source>File Information</source>
         <translation>Informazioni sul file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10573"/>
+        <location filename="../Main/MainWindow.ui" line="10793"/>
         <source>Server</source>
         <translation>Server</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10579"/>
+        <location filename="../Main/MainWindow.ui" line="10799"/>
         <source>Server jobs currently on cue</source>
         <translation>Lavori del server attualmente in fase di elaborazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10607"/>
+        <location filename="../Main/MainWindow.ui" line="10827"/>
         <source>Url</source>
         <translation>URL</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10614"/>
+        <location filename="../Main/MainWindow.ui" line="10834"/>
         <source>Type here the VeraGrid server URL (ask your IT team)</source>
         <translation>Digita qui l&apos;URL del server VeraGrid (chiedi al tuo team IT)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10621"/>
+        <location filename="../Main/MainWindow.ui" line="10841"/>
         <source>Port</source>
         <translation>Porta</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10628"/>
+        <location filename="../Main/MainWindow.ui" line="10848"/>
         <source>Type here the VeraGrid server Port (ask your IT team)</source>
         <translation>Digita qui la porta del server VeraGrid (chiedi al tuo team IT)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10641"/>
+        <location filename="../Main/MainWindow.ui" line="10861"/>
         <source>Password</source>
         <translation>Password</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10648"/>
+        <location filename="../Main/MainWindow.ui" line="10868"/>
         <source>Type here the VeraGrid server password (ask your IT team)</source>
         <translation>Digita qui la password del server VeraGrid (chiedi al tuo team IT)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10658"/>
+        <location filename="../Main/MainWindow.ui" line="10878"/>
         <source>Secure</source>
         <translation>Sicuro</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10716"/>
+        <location filename="../Main/MainWindow.ui" line="11015"/>
         <source>Cancel process</source>
         <translation>Annulla il processo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10789"/>
+        <location filename="../Main/MainWindow.ui" line="11054"/>
         <source>Export grid</source>
         <translation>Griglia di esportazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10815"/>
+        <location filename="../Main/MainWindow.ui" line="11080"/>
         <source>Import data</source>
         <translation>Importa dati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10836"/>
+        <location filename="../Main/MainWindow.ui" line="11101"/>
         <source>Help</source>
         <translation>Aiuto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10844"/>
+        <location filename="../Main/MainWindow.ui" line="11110"/>
         <source>Actions</source>
         <translation>Azioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10857"/>
+        <location filename="../Main/MainWindow.ui" line="11123"/>
         <source>Simulations</source>
         <translation>Simulazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10932"/>
+        <location filename="../Main/MainWindow.ui" line="11200"/>
         <source>Diagram</source>
         <translation>Diagramma</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10936"/>
+        <location filename="../Main/MainWindow.ui" line="11204"/>
         <source>Branches drawing style</source>
         <translation>Stile di disegno dei rami</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10976"/>
+        <location filename="../Main/MainWindow.ui" line="11244"/>
         <source>plugins</source>
         <translation>plugin</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10981"/>
+        <location filename="../Main/MainWindow.ui" line="11249"/>
         <source>Events</source>
         <translation>Eventi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11002"/>
+        <location filename="../Main/MainWindow.ui" line="11270"/>
         <source>toolBar</source>
         <translation>toolBar</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11069"/>
+        <location filename="../Main/MainWindow.ui" line="11337"/>
         <source>Open file</source>
         <translation>Apri file</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11075"/>
+        <location filename="../Main/MainWindow.ui" line="11343"/>
         <source>Ctrl+O</source>
         <translation>CTRL+O</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11084"/>
+        <location filename="../Main/MainWindow.ui" line="11352"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11090"/>
-        <location filename="../Main/MainWindow.ui" line="12903"/>
+        <location filename="../Main/MainWindow.ui" line="11358"/>
+        <location filename="../Main/MainWindow.ui" line="13186"/>
         <source>Ctrl+S</source>
         <translation>CTRL+S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11099"/>
+        <location filename="../Main/MainWindow.ui" line="11367"/>
         <source>Take picture</source>
         <translation>Scatta una foto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11111"/>
+        <location filename="../Main/MainWindow.ui" line="11379"/>
         <source>New project</source>
         <translation>Nuovo progetto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11117"/>
+        <location filename="../Main/MainWindow.ui" line="11385"/>
         <source>Ctrl+N</source>
         <translation>CTRL+N</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11126"/>
+        <location filename="../Main/MainWindow.ui" line="11394"/>
         <source>Power Flow</source>
         <translation>Flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11129"/>
+        <location filename="../Main/MainWindow.ui" line="11397"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power Flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a power flow analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi del flusso di potenza&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11135"/>
+        <location filename="../Main/MainWindow.ui" line="11403"/>
         <source>F5</source>
         <translation>F5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11147"/>
+        <location filename="../Main/MainWindow.ui" line="11415"/>
         <source>Power flow time series</source>
         <translation>Serie temporali del flusso di potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11150"/>
+        <location filename="../Main/MainWindow.ui" line="11418"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the power flow study with time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire lo studio del flusso di potenza con i dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11156"/>
+        <location filename="../Main/MainWindow.ui" line="11424"/>
         <source>Ctrl+F5</source>
         <translation>CTRL+F5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11165"/>
+        <location filename="../Main/MainWindow.ui" line="11433"/>
         <source>Expand</source>
         <translation>Espandere</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11168"/>
+        <location filename="../Main/MainWindow.ui" line="11436"/>
         <source>Expand distances</source>
         <translation>Ampliare le distanze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11174"/>
         <source>Ctrl+Alt++</source>
-        <translation>Ctrl+Alt++</translation>
+        <translation type="vanished">Ctrl+Alt++</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11183"/>
+        <location filename="../Main/MainWindow.ui" line="11451"/>
         <source>Shrink</source>
         <translation>Restringersi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11186"/>
+        <location filename="../Main/MainWindow.ui" line="11454"/>
         <source>Shrink distances</source>
         <translation>Ridurre le distanze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11192"/>
         <source>Ctrl+Alt+-</source>
-        <translation>Ctrl+Alt+-</translation>
+        <translation type="vanished">Ctrl+Alt+-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11204"/>
+        <location filename="../Main/MainWindow.ui" line="11442"/>
+        <source>Ctrl+Shift++</source>
+        <translation>Ctrl+Shift++</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11460"/>
+        <source>Ctrl+Shift+-</source>
+        <translation>Ctrl+Shift+-</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11472"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Stochastic power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a stochastic power flow over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza stocastico&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un flusso di potenza stocastico sui dati della serie temporale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11219"/>
+        <location filename="../Main/MainWindow.ui" line="11487"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Continuation power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a continuation power flow over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza di continuazione&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un flusso di alimentazione continuativo sui dati dell&apos;istantanea&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11231"/>
+        <location filename="../Main/MainWindow.ui" line="11499"/>
         <source>About</source>
         <translation>Di</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11243"/>
+        <location filename="../Main/MainWindow.ui" line="11511"/>
         <source>center view</source>
         <translation>vista centrale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11246"/>
+        <location filename="../Main/MainWindow.ui" line="11514"/>
         <source>Center view</source>
         <translation>Vista centrale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11252"/>
+        <location filename="../Main/MainWindow.ui" line="11520"/>
         <source>Ctrl+E</source>
         <translation>CTRL+E</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11261"/>
+        <location filename="../Main/MainWindow.ui" line="11529"/>
         <source>Short Circuit</source>
         <translation>Cortocircuito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11264"/>
+        <location filename="../Main/MainWindow.ui" line="11532"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Short Circuit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a short circuit study over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Cortocircuito&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire uno studio di cortocircuito sui dati dell&apos;istantanea&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11276"/>
+        <location filename="../Main/MainWindow.ui" line="11544"/>
         <source>Automatic grid layout</source>
         <translation>Disposizione automatica della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11279"/>
+        <location filename="../Main/MainWindow.ui" line="11547"/>
         <source>Automatic layout the of the grid</source>
         <translation>Layout automatico della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11294"/>
+        <location filename="../Main/MainWindow.ui" line="11562"/>
         <source>Blackout cascade</source>
         <translation>Cascata di blackout</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11297"/>
+        <location filename="../Main/MainWindow.ui" line="11565"/>
         <source>Run a simulation or step by step blackout cascade</source>
         <translation>Esegui una simulazione o una cascata di blackout passo dopo passo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11309"/>
+        <location filename="../Main/MainWindow.ui" line="11577"/>
         <source>Optimal power flow</source>
         <translation>Flusso di potenza ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11312"/>
+        <location filename="../Main/MainWindow.ui" line="11580"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This runs an optimal power flow&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza ottimale&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Questo garantisce un flusso di potenza ottimale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11318"/>
+        <location filename="../Main/MainWindow.ui" line="11586"/>
         <source>F6</source>
         <translation>F6</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11327"/>
+        <location filename="../Main/MainWindow.ui" line="11595"/>
         <source>Optimal power flow time series</source>
         <translation>Serie temporali del flusso di potenza ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11330"/>
+        <location filename="../Main/MainWindow.ui" line="11598"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This runs an optimal power flow for the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza ottimale&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ciò esegue un flusso di potenza ottimale per i dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11336"/>
+        <location filename="../Main/MainWindow.ui" line="11604"/>
         <source>Ctrl+F6</source>
         <translation>CTRL+F6</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11345"/>
+        <location filename="../Main/MainWindow.ui" line="11613"/>
         <source>Detect transformers</source>
         <translation>Rileva i trasformatori</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11348"/>
+        <location filename="../Main/MainWindow.ui" line="11616"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Detect transformers.&lt;/p&gt;&lt;p&gt;Use the nodes nominal voltage to determine which branches should be a transformer.&lt;/p&gt;&lt;p&gt;If a branch joins two nodes with different voltage levels, the branch should be a transformer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rileva i trasformatori.&lt;/p&gt;&lt;p&gt;Utilizzare la tensione nominale dei nodi per determinare quali rami dovrebbero essere un trasformatore.&lt;/p&gt;&lt;p&gt;Se un ramo unisce due nodi con livelli di tensione diversi, il ramo dovrebbe essere un trasformatore.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11360"/>
+        <location filename="../Main/MainWindow.ui" line="11628"/>
         <source>Auto rate branches</source>
         <translation>Filiali a tariffa automatica</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11363"/>
+        <location filename="../Main/MainWindow.ui" line="11631"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Automatic rating of the branches.&lt;/p&gt;&lt;p&gt;Use the branches calculated power to establish a rate, if the branch rate is unknown. A factor is available in the settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Classificazione automatica delle filiali.&lt;/p&gt;&lt;p&gt;Utilizzare la potenza calcolata dalle filiali per stabilire una tariffa, se la tariffa della filiale è sconosciuta. Un fattore è disponibile nelle impostazioni.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11378"/>
+        <location filename="../Main/MainWindow.ui" line="11646"/>
         <source>Storage location suggestion</source>
         <translation>Suggerimento sulla posizione di archiviazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11381"/>
+        <location filename="../Main/MainWindow.ui" line="11649"/>
         <source>Suggest places where storage devices are useful</source>
         <translation>Suggerisci luoghi in cui i dispositivi di archiviazione sono utili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11393"/>
+        <location filename="../Main/MainWindow.ui" line="11661"/>
         <source>Launch data analysis tool</source>
         <translation>Avvia lo strumento di analisi dei dati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11396"/>
+        <location filename="../Main/MainWindow.ui" line="11664"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Data analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Launch the data analysis tool that finds and tries to repair common grid modelling issues&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi dei dati&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Avvia lo strumento di analisi dei dati che rileva e tenta di riparare i problemi comuni di modellazione della griglia&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11402"/>
+        <location filename="../Main/MainWindow.ui" line="11670"/>
         <source>F12</source>
         <translation>F12</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11411"/>
+        <location filename="../Main/MainWindow.ui" line="11679"/>
         <source>Online documentation</source>
         <translation>Documentazione in linea</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11417"/>
+        <location filename="../Main/MainWindow.ui" line="11685"/>
         <source>F1</source>
         <translation>F1</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11426"/>
+        <location filename="../Main/MainWindow.ui" line="11694"/>
         <source>Save as</source>
         <translation>Salva con nome</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11438"/>
+        <location filename="../Main/MainWindow.ui" line="11706"/>
         <source>Delete selected</source>
         <translation>Elimina selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11441"/>
+        <location filename="../Main/MainWindow.ui" line="11709"/>
         <source>Delete selected objects from the diagrams and optionally from the database</source>
         <translation>Elimina gli oggetti selezionati dai diagrammi e facoltativamente dal database</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11447"/>
+        <location filename="../Main/MainWindow.ui" line="11715"/>
         <source>Del</source>
         <translation>Del</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11456"/>
+        <location filename="../Main/MainWindow.ui" line="11724"/>
         <source>Linear analysis</source>
         <translation>Analisi lineare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11459"/>
+        <location filename="../Main/MainWindow.ui" line="11727"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Linear analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform linear analysis with distribution factors (PTDF, LODF)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi lineare&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire analisi lineari con fattori di distribuzione (PTDF, LODF)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11465"/>
+        <location filename="../Main/MainWindow.ui" line="11733"/>
         <source>F7</source>
         <translation>F7</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11474"/>
+        <location filename="../Main/MainWindow.ui" line="11742"/>
         <source>Reset console</source>
         <translation>Ripristina la console</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11489"/>
+        <location filename="../Main/MainWindow.ui" line="11757"/>
         <source>Set OPF results to power flow (non destructive)</source>
         <translation>Imposta i risultati OPF sul flusso di potenza (non distruttivo)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11492"/>
+        <location filename="../Main/MainWindow.ui" line="11760"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy OPF data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Set the OPF results into the power flow or time series simulations (non destructive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copia i dati OPF&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Impostare i risultati OPF nelle simulazioni del flusso di potenza o delle serie temporali (non distruttive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11504"/>
+        <location filename="../Main/MainWindow.ui" line="11772"/>
         <source>Correct buses location</source>
         <translation>Posizione corretta degli autobus</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11507"/>
+        <location filename="../Main/MainWindow.ui" line="11775"/>
         <source>Set selected buses location closer to their neighbours</source>
         <translation>Imposta la posizione degli autobus selezionati più vicina ai loro vicini</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11519"/>
+        <location filename="../Main/MainWindow.ui" line="11787"/>
         <source>Copy OPF generation to database (destructive)</source>
         <translation>Copia la generazione OPF nel database (distruttivo)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11522"/>
+        <location filename="../Main/MainWindow.ui" line="11790"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy OPF data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Destructive copy of the OPF generation results to the input profiles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copia i dati OPF&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copia distruttiva dei risultati della generazione OPF nei profili di input&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11534"/>
+        <location filename="../Main/MainWindow.ui" line="11802"/>
         <source>Linear analysis time series power flow</source>
         <translation>Analisi lineare del flusso di potenza in serie temporali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11537"/>
+        <location filename="../Main/MainWindow.ui" line="11805"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Linear analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;PTDF based time series power flow&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi lineare&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Flusso di potenza in serie temporali basato su PTDF&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11543"/>
+        <location filename="../Main/MainWindow.ui" line="11811"/>
         <source>Ctrl+F7</source>
         <translation>CTRL+F7</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11552"/>
+        <location filename="../Main/MainWindow.ui" line="11820"/>
         <source>Import circuit</source>
         <translation>Circuito di importazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11555"/>
+        <location filename="../Main/MainWindow.ui" line="11823"/>
         <source>Add circuit to the current circuit</source>
         <translation>Aggiungi un circuito al circuito corrente</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11561"/>
+        <location filename="../Main/MainWindow.ui" line="11829"/>
         <source>Ctrl+N, Ctrl+O</source>
         <translation>Ctrl+N, Ctrl+O</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11573"/>
+        <location filename="../Main/MainWindow.ui" line="11841"/>
         <source>Sync</source>
         <translation>Sincronizzazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11576"/>
+        <location filename="../Main/MainWindow.ui" line="11844"/>
         <source>Sync with the file for colaborative editing of the grid</source>
         <translation>Sincronizzazione con il file per la modifica collaborativa della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11585"/>
+        <location filename="../Main/MainWindow.ui" line="11853"/>
         <source>Draw schematic</source>
         <translation>Disegna uno schema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11594"/>
+        <location filename="../Main/MainWindow.ui" line="11862"/>
         <source>Sigma analysis</source>
         <translation>Analisi Sigma</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11597"/>
+        <location filename="../Main/MainWindow.ui" line="11865"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Sigma analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform HELM-Sigma analysis over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi Sigma&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire l&apos;analisi HELM-Sigma sui dati dell&apos;istantanea&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11609"/>
         <source>Clear &quot;stuff running right now&quot;</source>
-        <translation>Cancella &quot;roba in esecuzione in questo momento&quot;</translation>
+        <translation type="vanished">Cancella &quot;roba in esecuzione in questo momento&quot;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11621"/>
+        <location filename="../Main/MainWindow.ui" line="11892"/>
         <source>Add default catalogue</source>
         <translation>Aggiungi catalogo predefinito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11636"/>
+        <location filename="../Main/MainWindow.ui" line="11907"/>
         <source>Find node groups</source>
         <translation>Trova gruppi di nodi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11639"/>
+        <location filename="../Main/MainWindow.ui" line="11910"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Finds the electrically related nodes by using their electrical distance and the DBSCAN clustering method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trova i nodi elettricamente correlati utilizzando la loro distanza elettrica e il metodo di clustering DBSCAN&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11651"/>
+        <location filename="../Main/MainWindow.ui" line="11922"/>
         <source>Grid Generator</source>
         <translation>Generatore di griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11657"/>
+        <location filename="../Main/MainWindow.ui" line="11928"/>
         <source>Ctrl+G</source>
         <translation>CTRL+G</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11666"/>
+        <location filename="../Main/MainWindow.ui" line="11937"/>
         <source>Node load</source>
         <translation>Carico del nodo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11675"/>
+        <location filename="../Main/MainWindow.ui" line="11946"/>
         <source>Generator generation</source>
         <translation>Generazione del generatore</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11684"/>
+        <location filename="../Main/MainWindow.ui" line="11955"/>
         <source>Contingency analysis time series</source>
         <translation>Serie temporali dell&apos;analisi di contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11687"/>
+        <location filename="../Main/MainWindow.ui" line="11958"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingency analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Per form a contingency analysis with the selected method over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi di contingenza&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi di contingenza con il metodo selezionato sui dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11693"/>
+        <location filename="../Main/MainWindow.ui" line="11964"/>
         <source>Ctrl+F8</source>
         <translation>CTRL+F8</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11702"/>
+        <location filename="../Main/MainWindow.ui" line="11973"/>
         <source>Branch rates</source>
         <translation>Tariffe delle filiali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11711"/>
+        <location filename="../Main/MainWindow.ui" line="11982"/>
         <source>Set selected buses&apos; Area</source>
         <translation>Imposta l&apos;area degli autobus selezionati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11723"/>
+        <location filename="../Main/MainWindow.ui" line="11994"/>
         <source>Set selected buses&apos; Zone</source>
         <translation>Imposta la zona degli autobus selezionati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11735"/>
+        <location filename="../Main/MainWindow.ui" line="12006"/>
         <source>Set seleted buses&apos; Country</source>
         <translation>Imposta il Paese degli autobus selezionati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11747"/>
         <source>Import bus coordinates</source>
-        <translation>Importa le coordinate dell&apos;autobus</translation>
+        <translation type="vanished">Importa le coordinate dell&apos;autobus</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11759"/>
+        <location filename="../Main/MainWindow.ui" line="11877"/>
+        <location filename="../Main/MainWindow.ui" line="11880"/>
+        <source>Stop &quot;stuff running right now&quot;</source>
+        <translation>Fermare &quot;ciò che sta girando ora&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="12018"/>
+        <source>Coordinates</source>
+        <translation>Coordinate</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="12030"/>
         <source>Available Transfer Capacity</source>
         <translation>Capacità di trasferimento disponibile</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11762"/>
+        <location filename="../Main/MainWindow.ui" line="12033"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a linear net transfer capacity assesment for the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Capacità di trasferimento netto&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire una valutazione della capacità di trasferimento netto lineare per i dati dello snapshot&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11774"/>
+        <location filename="../Main/MainWindow.ui" line="12045"/>
         <source>Available Transfer Capacity Time Series</source>
         <translation>Serie temporali della capacità di trasferimento disponibile</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11777"/>
+        <location filename="../Main/MainWindow.ui" line="12048"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a linear net transfer capacity assesment for the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Capacità di trasferimento netto&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire una valutazione della capacità di trasferimento netta lineare per i dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11789"/>
+        <location filename="../Main/MainWindow.ui" line="12060"/>
         <source>Contingency analysis</source>
         <translation>Analisi di contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11792"/>
+        <location filename="../Main/MainWindow.ui" line="12063"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingency analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a contingency analysis with the selected method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi di contingenza&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi di contingenza con il metodo selezionato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11798"/>
+        <location filename="../Main/MainWindow.ui" line="12069"/>
         <source>F8</source>
         <translation>F8</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11807"/>
+        <location filename="../Main/MainWindow.ui" line="12078"/>
         <source>Optimal net transfer capacity</source>
         <translation>Capacità di trasferimento netta ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11810"/>
+        <location filename="../Main/MainWindow.ui" line="12081"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform an optimal net transfer capacity optimization&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Capacità di trasferimento netto ottimale&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;ottimizzazione ottimale della capacità di trasferimento netto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11822"/>
+        <location filename="../Main/MainWindow.ui" line="12093"/>
         <source>Set schematic (x,y) from (lat,lon)</source>
         <translation>Imposta lo schema (x,y) da (lat,lon)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11834"/>
+        <location filename="../Main/MainWindow.ui" line="12105"/>
         <source>Inputs analysis</source>
         <translation>Analisi degli input</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11837"/>
+        <location filename="../Main/MainWindow.ui" line="12108"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Inputs analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform an analysis of the inputs for both the snapshot and time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Analisi degli input&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi degli input sia per lo snapshot che per i dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11843"/>
+        <location filename="../Main/MainWindow.ui" line="12114"/>
         <source>F11</source>
         <translation>F11</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11852"/>
+        <location filename="../Main/MainWindow.ui" line="12123"/>
         <source>Fuse devices</source>
         <translation>Dispositivi con fusibili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11855"/>
+        <location filename="../Main/MainWindow.ui" line="12126"/>
         <source>Fuse devices into a single device of each category per node</source>
         <translation>Unisci i dispositivi in ​​un unico dispositivo di ciascuna categoria per nodo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11867"/>
-        <location filename="../Main/MainWindow.ui" line="11870"/>
+        <location filename="../Main/MainWindow.ui" line="12138"/>
+        <location filename="../Main/MainWindow.ui" line="12141"/>
         <source>Delete inconsistencies</source>
         <translation>Eliminare le incongruenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11882"/>
+        <location filename="../Main/MainWindow.ui" line="12153"/>
         <source>Optimal NTC time series</source>
         <translation>Serie temporali NTC ottimali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11885"/>
+        <location filename="../Main/MainWindow.ui" line="12156"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a net transfer capacity optimization over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Capacità di trasferimento netto&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;ottimizzazione della capacità di trasferimento netto sui dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11897"/>
+        <location filename="../Main/MainWindow.ui" line="12168"/>
         <source>re-index time</source>
         <translation>reindicizzare l&apos;ora</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11909"/>
+        <location filename="../Main/MainWindow.ui" line="12180"/>
         <source>Fix generators active based on the power</source>
         <translation>Correggi i generatori attivi in ​​base alla potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11921"/>
-        <location filename="../Main/MainWindow.ui" line="11924"/>
+        <location filename="../Main/MainWindow.ui" line="12192"/>
+        <location filename="../Main/MainWindow.ui" line="12195"/>
         <source>Fix loads active based on the power</source>
         <translation>Fissa i carichi attivi in ​​base alla potenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11936"/>
+        <location filename="../Main/MainWindow.ui" line="12207"/>
         <source>Initialize contingencies</source>
         <translation>Inizializzare le contingenze</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11939"/>
+        <location filename="../Main/MainWindow.ui" line="12210"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingencies wizard&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Launch the contingencies wizard to automatically set up the contingency objects&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Procedura guidata per gli imprevisti&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Avviare la procedura guidata per gli imprevisti per impostare automaticamente gli oggetti di emergenza&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11951"/>
+        <location filename="../Main/MainWindow.ui" line="12222"/>
         <source>Add selected as new contingency</source>
         <translation>Aggiungi selezionato come nuova contingenza</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11954"/>
+        <location filename="../Main/MainWindow.ui" line="12225"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add contingency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new contingency from the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi contingenza&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea una nuova contingenza dalla selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11960"/>
+        <location filename="../Main/MainWindow.ui" line="12231"/>
         <source>Ctrl+A, Ctrl+C</source>
         <translation>Ctrl+A, Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11969"/>
+        <location filename="../Main/MainWindow.ui" line="12240"/>
         <source>Add selected as new investment</source>
         <translation>Aggiungi selezionato come nuovo investimento</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11972"/>
+        <location filename="../Main/MainWindow.ui" line="12243"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investments&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create new investment with the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investimenti&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo investimento con la selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11978"/>
+        <location filename="../Main/MainWindow.ui" line="12249"/>
         <source>Ctrl+A, Ctrl+I</source>
         <translation>Ctrl+A, Ctrl+I</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11987"/>
+        <location filename="../Main/MainWindow.ui" line="12258"/>
         <source>Zoom in</source>
         <translation>Ingrandisci</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11993"/>
+        <location filename="../Main/MainWindow.ui" line="12264"/>
         <source>Ctrl++</source>
         <translation>CTRL++</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12002"/>
+        <location filename="../Main/MainWindow.ui" line="12273"/>
         <source>Zoom out</source>
         <translation>Rimpicciolisci</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12008"/>
+        <location filename="../Main/MainWindow.ui" line="12279"/>
         <source>Ctrl+-</source>
         <translation>Ctrl+-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12020"/>
+        <location filename="../Main/MainWindow.ui" line="12291"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Clustering&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a clustering study of the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Raggruppamento&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire uno studio di clustering dei dati delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12038"/>
+        <location filename="../Main/MainWindow.ui" line="12309"/>
         <source>Use clustering</source>
         <translation>Utilizzare il clustering</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12041"/>
+        <location filename="../Main/MainWindow.ui" line="12312"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Clustering&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If active, the available clustering results are used in all the simulations that handle time series data non-destructivelly&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Raggruppamento&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Se attivo, i risultati del clustering disponibili vengono utilizzati in tutte le simulazioni che gestiscono i dati delle serie temporali in modo non distruttivo&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12053"/>
+        <location filename="../Main/MainWindow.ui" line="12324"/>
         <source>Investments evaluation</source>
         <translation>Valutazione degli investimenti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12056"/>
+        <location filename="../Main/MainWindow.ui" line="12327"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investments&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform the investments evaluation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investimenti&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire la valutazione degli investimenti&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12062"/>
+        <location filename="../Main/MainWindow.ui" line="12333"/>
         <source>Ctrl+I, Ctrl+E</source>
         <translation>Ctrl+I, Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12071"/>
+        <location filename="../Main/MainWindow.ui" line="12342"/>
         <source>New schematic from selection</source>
         <translation>Nuovo schema dalla selezione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12083"/>
+        <location filename="../Main/MainWindow.ui" line="12354"/>
         <source>New schematic</source>
         <translation>Nuovo schema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12095"/>
+        <location filename="../Main/MainWindow.ui" line="12366"/>
         <source>New map</source>
         <translation>Nuova mappa</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12107"/>
+        <location filename="../Main/MainWindow.ui" line="12378"/>
         <source>Remove selected diagram</source>
         <translation>Rimuovi il diagramma selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12116"/>
+        <location filename="../Main/MainWindow.ui" line="12387"/>
         <source>Report a bug or feature</source>
         <translation>Segnala un bug o una funzionalità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12128"/>
+        <location filename="../Main/MainWindow.ui" line="12399"/>
         <source>Search</source>
         <translation>Ricerca</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12140"/>
+        <location filename="../Main/MainWindow.ui" line="12411"/>
         <source>Process topology</source>
         <translation>Topologia del processo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12152"/>
+        <location filename="../Main/MainWindow.ui" line="12423"/>
         <source>Edit simulation time limits</source>
         <translation>Modifica i limiti di tempo della simulazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12155"/>
+        <location filename="../Main/MainWindow.ui" line="12426"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time series&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Edit simulation time limits&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Serie temporali&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Modifica i limiti di tempo della simulazione&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12170"/>
+        <location filename="../Main/MainWindow.ui" line="12441"/>
         <source>activate time series</source>
         <translation>attivare le serie temporali</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12173"/>
+        <location filename="../Main/MainWindow.ui" line="12444"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time series mode&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When activated, the simulations run their time series version&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Modalità serie temporali&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Quando attivate, le simulazioni eseguono la versione delle serie temporali&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12179"/>
+        <location filename="../Main/MainWindow.ui" line="12450"/>
         <source>Ctrl+T</source>
         <translation>CTRL+T</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12188"/>
+        <location filename="../Main/MainWindow.ui" line="12459"/>
         <source>Clean database</source>
         <translation>Database pulito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12194"/>
+        <location filename="../Main/MainWindow.ui" line="12465"/>
         <source>Ctrl+C, Ctrl+D</source>
         <translation>Ctrl+C, Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12203"/>
+        <location filename="../Main/MainWindow.ui" line="12474"/>
         <source>Scale</source>
         <translation>Scala</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12206"/>
+        <location filename="../Main/MainWindow.ui" line="12477"/>
         <source>Scale the system load and or generation</source>
         <translation>Ridimensionare il carico e/o la generazione del sistema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12218"/>
+        <location filename="../Main/MainWindow.ui" line="12489"/>
         <source>Disable all results tags</source>
         <translation>Disabilita tutti i tag dei risultati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12230"/>
+        <location filename="../Main/MainWindow.ui" line="12501"/>
         <source>Enable all results tags</source>
         <translation>Abilita tutti i tag dei risultati</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12242"/>
+        <location filename="../Main/MainWindow.ui" line="12513"/>
         <source>Detect substations</source>
         <translation>Rileva sottostazioni</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12254"/>
+        <location filename="../Main/MainWindow.ui" line="12525"/>
         <source>Optimal hosting capacity</source>
         <translation>Capacità di hosting ottimale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12257"/>
+        <location filename="../Main/MainWindow.ui" line="12528"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Nodal hosting capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the nodal hosting capacity calculation using the selected optimization method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Capacità di hosting nodale&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Esegui il calcolo della capacità di hosting nodale utilizzando il metodo di ottimizzazione selezionato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12272"/>
+        <location filename="../Main/MainWindow.ui" line="12543"/>
         <source>Enable server mode</source>
         <translation>Abilita la modalità server</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12284"/>
+        <location filename="../Main/MainWindow.ui" line="12555"/>
         <source>Record video</source>
         <translation>Registra video</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12287"/>
+        <location filename="../Main/MainWindow.ui" line="12558"/>
         <source>Record video of the schematic</source>
         <translation>Registra il video dello schema</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12299"/>
+        <location filename="../Main/MainWindow.ui" line="12570"/>
         <source>Save  differential</source>
         <translation>Salva differenziale</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12311"/>
+        <location filename="../Main/MainWindow.ui" line="12582"/>
         <source>Consolidate coordinates</source>
         <translation>Consolida le coordinate</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12323"/>
+        <location filename="../Main/MainWindow.ui" line="12594"/>
         <source>Add selected as new remedial action</source>
         <translation>Aggiungi selezionato come nuova azione correttiva</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12326"/>
+        <location filename="../Main/MainWindow.ui" line="12597"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add remedial action&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new remedial action from the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi un&apos;azione correttiva&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Creare una nuova azione correttiva dalla selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12332"/>
+        <location filename="../Main/MainWindow.ui" line="12603"/>
         <source>Ctrl+A, Ctrl+R</source>
         <translation>Ctrl+A, Ctrl+R</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12341"/>
+        <location filename="../Main/MainWindow.ui" line="12612"/>
         <source>Detect facilities</source>
         <translation>Rileva strutture</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12350"/>
+        <location filename="../Main/MainWindow.ui" line="12621"/>
         <source>Rotate</source>
         <translation>Ruotare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12362"/>
+        <location filename="../Main/MainWindow.ui" line="12633"/>
         <source>Reset diagram coordinates to database values</source>
         <translation>Reimposta le coordinate del diagramma sui valori del database</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12374"/>
+        <location filename="../Main/MainWindow.ui" line="12645"/>
         <source>Reliability analysis</source>
         <translation>Analisi di affidabilità</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12377"/>
+        <location filename="../Main/MainWindow.ui" line="12648"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Reliability study&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the reliability calculation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Studio sull&apos;affidabilità&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Esegui il calcolo dell&apos;affidabilità&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12392"/>
+        <location filename="../Main/MainWindow.ui" line="12663"/>
         <source>Color buses by...</source>
         <translation>Autobus colorati di...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12404"/>
+        <location filename="../Main/MainWindow.ui" line="12675"/>
         <source>Color substations by...</source>
         <translation>Sottostazioni colore di...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12419"/>
+        <location filename="../Main/MainWindow.ui" line="12690"/>
         <source>Select buses by...</source>
         <translation>Seleziona gli autobus per...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12446"/>
+        <location filename="../Main/MainWindow.ui" line="12717"/>
         <source>Substation wizard</source>
         <translation>Procedura guidata per sottostazione</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12449"/>
+        <location filename="../Main/MainWindow.ui" line="12720"/>
         <source>Add substation with a wizard form</source>
         <translation>Aggiungi sottostazione con un modulo di procedura guidata</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12452"/>
+        <location filename="../Main/MainWindow.ui" line="12723"/>
         <source>Ctrl+A, Ctrl+S</source>
         <translation>Ctrl+A, Ctrl+S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12464"/>
+        <location filename="../Main/MainWindow.ui" line="12735"/>
         <source>Dynamic RMS Simulation</source>
         <translation>Simulazione dinamica RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12467"/>
+        <location filename="../Main/MainWindow.ui" line="12738"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RMS Simulation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a dynamic RMS simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RMS Simulazione&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Esegui una simulazione dinamica RMS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12479"/>
+        <location filename="../Main/MainWindow.ui" line="12750"/>
         <source>Prepare RMS dynamic plots</source>
         <translation>Preparare grafici dinamici RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12482"/>
+        <location filename="../Main/MainWindow.ui" line="12753"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Prepare RMS dynamic plots&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the RMS dynamic plot editor before running the simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Preparare grafici dinamici RMS&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Aprire l&apos;editor di grafici dinamici RMS prima di eseguire la simulazione&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12494"/>
-        <location filename="../Main/MainWindow.ui" line="12497"/>
+        <location filename="../Main/MainWindow.ui" line="12765"/>
+        <location filename="../Main/MainWindow.ui" line="12768"/>
         <source>Small-Signal RMS Simulation</source>
         <translation>Simulazione di piccoli segnali RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12500"/>
+        <location filename="../Main/MainWindow.ui" line="12771"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Small Signal Simulation (RMS)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an RMS Small Signal stability analysis simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Simulazione di piccoli segnali (RMS)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire una simulazione di analisi della stabilità del piccolo segnale RMS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12512"/>
         <source>Add rms event to selected</source>
-        <translation>Aggiungi evento rms a selezionato</translation>
+        <translation type="vanished">Aggiungi evento rms a selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12515"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add RMS event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new RMS event to the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi l&apos;evento RMS&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo evento RMS nella selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi l&apos;evento RMS&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo evento RMS nella selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12530"/>
+        <location filename="../Main/MainWindow.ui" line="12801"/>
         <source>Clear highlights</source>
         <translation>Evidenziazioni chiare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12545"/>
+        <location filename="../Main/MainWindow.ui" line="12816"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;State estimation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a state estimation analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Stima dello Stato&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi di stima dello stato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12557"/>
+        <location filename="../Main/MainWindow.ui" line="12828"/>
         <source>Add short circuit events</source>
         <translation>Aggiungi eventi di cortocircuito</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12569"/>
+        <location filename="../Main/MainWindow.ui" line="12840"/>
         <source>PSS/e Raw / Rawx</source>
         <translation>PSS/e Grezzo/Rawx</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12578"/>
+        <location filename="../Main/MainWindow.ui" line="12849"/>
         <source>Power Factory DGS</source>
         <translation>Fabbrica di energia DGS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12587"/>
+        <location filename="../Main/MainWindow.ui" line="12858"/>
         <source>Matpower</source>
         <translation>Matpower</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12596"/>
+        <location filename="../Main/MainWindow.ui" line="12867"/>
         <source>UCTE</source>
         <translation>UCTE</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12605"/>
+        <location filename="../Main/MainWindow.ui" line="12876"/>
         <source>CGMES</source>
         <translation>CGMES</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12614"/>
+        <location filename="../Main/MainWindow.ui" line="12885"/>
         <source>Power Grid Models</source>
         <translation>Modelli di rete elettrica</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12623"/>
+        <location filename="../Main/MainWindow.ui" line="12894"/>
         <source>CIM</source>
         <translation>CIM</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12632"/>
+        <location filename="../Main/MainWindow.ui" line="12903"/>
         <source>H5</source>
         <translation>H5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12641"/>
+        <location filename="../Main/MainWindow.ui" line="12912"/>
         <source>JSON</source>
         <translation>JSON</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12650"/>
+        <location filename="../Main/MainWindow.ui" line="12921"/>
         <source>Microsoft Excel</source>
         <translation>Microsoft Excel</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12659"/>
+        <location filename="../Main/MainWindow.ui" line="12930"/>
         <source>SQLite</source>
         <translation>SQLite</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12668"/>
+        <location filename="../Main/MainWindow.ui" line="12939"/>
         <source>Profiles</source>
         <translation>Profili</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12695"/>
-        <location filename="../Main/MainWindow.ui" line="12713"/>
+        <location filename="../Main/MainWindow.ui" line="12966"/>
+        <location filename="../Main/MainWindow.ui" line="12984"/>
         <source>Catalogue</source>
         <translation>Catalogare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12722"/>
+        <location filename="../Main/MainWindow.ui" line="12993"/>
         <source>Clean Room</source>
         <translation>Camera pulita</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12725"/>
+        <location filename="../Main/MainWindow.ui" line="12996"/>
         <source>Cleam room utility to produce an machine learning statistical representation of the static time series</source>
         <translation>Utilità di cleam room per produrre una rappresentazione statistica di machine learning delle serie temporali statiche</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12737"/>
+        <location filename="../Main/MainWindow.ui" line="13020"/>
         <source>Procedural grid expansion</source>
         <translation>Espansione procedurale della griglia</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12746"/>
+        <location filename="../Main/MainWindow.ui" line="13029"/>
         <source>Catalogue element optimization</source>
         <translation>Ottimizzazione degli elementi del catalogo</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12755"/>
+        <location filename="../Main/MainWindow.ui" line="13038"/>
         <source>Dynamic EMT Simulation</source>
         <translation>Simulazione dinamica EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12758"/>
+        <location filename="../Main/MainWindow.ui" line="13041"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;EMT Simulation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a dynamic EMT simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;EMT Simulazione&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Esegui una simulazione dinamica EMT&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12770"/>
+        <location filename="../Main/MainWindow.ui" line="13053"/>
         <source>Prepare EMT dynamic plots</source>
         <translation>Preparare grafici dinamici EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12773"/>
+        <location filename="../Main/MainWindow.ui" line="13056"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Prepare EMT dynamic plots&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the EMT dynamic plot editor before running the simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Preparare grafici dinamici EMT&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Aprire l&apos;editor di grafici dinamici EMT prima di eseguire la simulazione&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12785"/>
-        <location filename="../Main/MainWindow.ui" line="12788"/>
+        <location filename="../Main/MainWindow.ui" line="13068"/>
+        <location filename="../Main/MainWindow.ui" line="13071"/>
         <source>Small-Signal EMT Simulation</source>
         <translation>Simulazione di piccoli segnali EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12791"/>
+        <location filename="../Main/MainWindow.ui" line="13074"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Small Signal Simulation (EMT)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an EMT Small Signal stability analysis simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Simulazione di piccoli segnali (EMT)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire una simulazione di analisi della stabilità del piccolo segnale EMT&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12799"/>
+        <location filename="../Main/MainWindow.ui" line="13082"/>
         <source>Reticular</source>
         <translation>Reticolare</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12804"/>
+        <location filename="../Main/MainWindow.ui" line="13087"/>
         <source>Straight</source>
         <translation>Dritto</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12813"/>
+        <location filename="../Main/MainWindow.ui" line="13096"/>
         <source>ai_chat</source>
         <translation>ai_chat</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12816"/>
+        <location filename="../Main/MainWindow.ui" line="13099"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;VeraGrid AI &lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show the VeraGrid AI chat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;VeraGrid AI&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Mostra la chat VeraGrid AI&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12828"/>
+        <location filename="../Main/MainWindow.ui" line="13111"/>
         <source>Power Flow 3-phase</source>
         <translation>Flusso di potenza trifase</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12831"/>
+        <location filename="../Main/MainWindow.ui" line="13114"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power Flow 3-phase&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an unbalanced 3-phase power flow analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Flusso di potenza trifase&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Eseguire un&apos;analisi del flusso di potenza trifase sbilanciato&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12846"/>
         <source>Add emt event to selected</source>
-        <translation>Aggiungi evento emt a selezionato</translation>
+        <translation type="vanished">Aggiungi evento emt a selezionato</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12849"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add EMT event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new EMT event to the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi l&apos;evento EMT&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo evento EMT nella selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Aggiungi l&apos;evento EMT&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo evento EMT nella selezione dello schema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12858"/>
+        <location filename="../Main/MainWindow.ui" line="13141"/>
         <source>Set model (x,y) based on (lat, lon)</source>
         <translation>Imposta il modello (x,y) in base a (lat, lon)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12867"/>
+        <location filename="../Main/MainWindow.ui" line="13150"/>
         <source>Restore investments</source>
         <translation>Ripristinare gli investimenti</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12879"/>
+        <location filename="../Main/MainWindow.ui" line="13162"/>
         <source>Veragrid Scenario</source>
         <translation>Scenario Veragrid</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12888"/>
+        <location filename="../Main/MainWindow.ui" line="13171"/>
         <source>Show dynamic models editor</source>
         <translation>Mostra l&apos;editor dei modelli dinamici</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12900"/>
+        <location filename="../Main/MainWindow.ui" line="13183"/>
         <source>Repair diagram</source>
         <translation>Schema di riparazione</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="13195"/>
+        <source>Clear cache</source>
+        <translation>Cancella cache</translation>
     </message>
 </context>
 <context>

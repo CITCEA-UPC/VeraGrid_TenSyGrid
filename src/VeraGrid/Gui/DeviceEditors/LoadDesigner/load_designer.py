@@ -18,6 +18,7 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication
 
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_designer_ui import Ui_Dialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 
 class LoadArchetype(Enum):
@@ -588,7 +589,7 @@ class LoadDesigner(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui: Ui_Dialog = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Load designer')
+        self.setWindowTitle(self.tr('Load designer'))
 
         if time_array is None:
             start_time: datetime = datetime(year=2026, month=1, day=1)
@@ -634,6 +635,16 @@ class LoadDesigner(QtWidgets.QDialog):
 
         self.generate_from_components()
 
+    def done(self, result: int) -> None:
+        """
+        Release plot resources before the modal dialog closes.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        self.ui.plotwidget.dispose()
+        QtWidgets.QDialog.done(self, result)
+
     def msg(self, text: str, title: str = "Warning") -> None:
         """
         Show a message box.
@@ -647,7 +658,7 @@ class LoadDesigner(QtWidgets.QDialog):
         msg.setText(text)
         msg.setWindowTitle(title)
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
-        msg.exec()
+        exec_dialog_safely(dialog=msg)
 
     def process_by_peak(self) -> None:
         """

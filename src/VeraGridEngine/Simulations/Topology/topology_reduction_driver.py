@@ -282,6 +282,7 @@ class TopologyReduction(DriverTemplate):
         @return:
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
         self.report_progress(0.0)
         self.report_text('Detecting which Branches to delete...')
 
@@ -302,13 +303,13 @@ class TopologyReduction(DriverTemplate):
 
         self.toc()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """
         Cancel the simulation
-        :return:
+
+        :return: None
         """
         self.__cancel__ = True
-        self.report_done("Cancelled!")
 
 
 class DeleteAndReduce(DriverTemplate):
@@ -341,6 +342,7 @@ class DeleteAndReduce(DriverTemplate):
         @return:
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
         self._is_running = True
         self.report_progress(0.0)
         self.report_text('Detecting which Branches to delete...')
@@ -359,13 +361,13 @@ class DeleteAndReduce(DriverTemplate):
         self._is_running = False
         self.toc()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """
         Cancel the simulation
-        :return:
+
+        :return: None
         """
         self.__cancel__ = True
-        self.report_done()
 
     def start(self):
         self.run()

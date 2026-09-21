@@ -3,9 +3,15 @@ from __future__ import annotations
 from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.colors import to_rgba
+from matplotlib.figure import Figure
 from PySide6 import QtCore
 
-from VeraGrid.Gui.Main.SubClasses.Results.dynamics_results_handler import DynamicsResultsHandler
+from VeraGrid.Gui.DynamicModelEditor.Plots.dynamic_plots_handler import (
+    DynamicsResultsHandler,
+    _get_next_available_plot_colour,
+)
 from VeraGridEngine.Devices.Events.dynamic_plot import DynamicPlot
 from VeraGridEngine.Devices.Events.dynamic_plot_entry import DynamicPlotEntry
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -13,6 +19,36 @@ from VeraGridEngine.Simulations.EMT.emt_results import EmtResults
 from VeraGridEngine.Simulations.Rms.rms_results import RmsResults
 from VeraGridEngine.Utils.Symbolic.symbolic import Var
 from VeraGridEngine.enumerations import DeviceType, PlotSimulationType
+
+
+def test_plot_colour_allocator_uses_one_palette_for_lines_and_collections() -> None:
+    """Keep variables and segmented parameters on distinct plot colours.
+
+    :return: None.
+    """
+    figure: Figure = Figure(figsize=(4, 3))
+    axis: Axes = figure.add_subplot(111)
+
+    # A regular variable is represented by a line artist.
+    variable_colour: str = _get_next_available_plot_colour(axis=axis)
+    axis.plot(
+        np.array(list((0.0, 1.0)), dtype=float),
+        np.array(list((0.0, 1.0)), dtype=float),
+        color=variable_colour,
+    )
+
+    # A constant parameter is represented by a line collection. Its colour and
+    # that of the following parameter must respect the already occupied line.
+    first_parameter_colour: str = _get_next_available_plot_colour(axis=axis)
+    axis.hlines(y=1.0, xmin=0.0, xmax=1.0, colors=first_parameter_colour)
+    second_parameter_colour: str = _get_next_available_plot_colour(axis=axis)
+
+    allocated_colours: set[tuple[float, float, float, float]] = set((
+        to_rgba(variable_colour),
+        to_rgba(first_parameter_colour),
+        to_rgba(second_parameter_colour),
+    ))
+    assert len(allocated_colours) == 3
 
 
 class FakeDynamicDevice:

@@ -13,10 +13,14 @@ from PySide6.QtGui import QStandardItemModel, QStandardItem
 
 from VeraGrid.Gui.CatalogueElementsDialogue.catalogue_elements_gui import Ui_CatalogueElementsDialog
 from VeraGrid.Gui.CatalogueElementsDialogue.catalogue_actions import CatalogueAction, CatalogueActionKind
+from VeraGrid.Gui.DynamicModelEditor.Editor.DynamicLibrary.dynamic_editor_library import (
+    LibraryDeviceTemplateSpec,
+    get_dynamic_library_device_specs,
+)
+from VeraGridEngine.enumerations import DynamicSimulationMode
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGrid.templates import (get_transformer_catalogue, get_cables_catalogue,
                                 get_wires_catalogue, get_sequence_lines_catalogue)
-import VeraGridEngine.Templates as tem
 
 
 class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
@@ -39,6 +43,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
     _COL_NAME: int = 0
     _COL_VOLTAGE: int = 1
     _COL_POWER: int = 2
+    _COL_DESCRIPTION: int = 3
 
     _ROLE_OBJ: int = int(Qt.ItemDataRole.UserRole) + 1
     _ROLE_KIND: int = int(Qt.ItemDataRole.UserRole) + 2
@@ -65,7 +70,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         self._model = QStandardItemModel()
-        self._model.setHorizontalHeaderLabels(['Element', 'Voltage', 'Power'])
+        self._model.setHorizontalHeaderLabels(list(('Element', 'Voltage', 'Power', 'Description')))
 
         self.ui.treeView.setModel(self._model)
         self.ui.treeView.setHeaderHidden(False)
@@ -210,6 +215,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
                                                        name=str(obj.name),
                                                        voltage_text=f"{float(obj.HV):.3g}/{float(obj.LV):.3g} kV",
                                                        power_text=f"{float(obj.Sn):.3g} MVA",
+                                                       description_text='',
                                                        unique_key=f"{obj.name}|{obj.HV}|{obj.LV}|{obj.Sn}"))
         categories['Transformer types'] = transformer_actions
 
@@ -220,6 +226,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
                                                  name=str(obj.name),
                                                  voltage_text=f"{float(obj.Vnom):.3g} kV",
                                                  power_text=f"{self.compute_mva_from_v_i(v_kv=float(obj.Vnom), i_ka=float(obj.Imax)):.3g} MVA",
+                                                 description_text='',
                                                  unique_key=f"{obj.name}|{obj.Vnom}|{obj.Imax}"))
         categories['Underground line types'] = cable_actions
 
@@ -230,6 +237,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
                                                 name=str(obj.name),
                                                 voltage_text='',
                                                 power_text='',
+                                                description_text='',
                                                 unique_key=str(obj.name)))
         categories['Wire types'] = wire_actions
 
@@ -240,6 +248,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
                                                     name=str(obj.name),
                                                     voltage_text=f"{float(obj.Vnom):.3g} kV",
                                                     power_text=f"{self.compute_mva_from_v_i(v_kv=float(obj.Vnom), i_ka=float(obj.Imax)):.3g} MVA",
+                                                    description_text='',
                                                     unique_key=f"{obj.name}|{obj.Vnom}|{obj.Imax}"))
         categories['Sequence line types'] = sequence_actions
 
@@ -248,369 +257,50 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
 
         return categories
 
-    def build_rms_actions(self) -> List[CatalogueAction]:
-        """
-        Build the RMS template action list.
+    def build_dynamic_device_actions(
+            self,
+            mode: DynamicSimulationMode,
+    ) -> List[CatalogueAction]:
+        """Build catalogue actions from the canonical Library Devices branch.
 
-        :return: List[CatalogueAction]
+        :param mode: Dynamic simulation domain to expose.
+        :return: Device-template actions in canonical Library order.
         """
+        if mode == DynamicSimulationMode.RMS:
+            action_kind: CatalogueActionKind = CatalogueActionKind.AddRmsTemplate
+        elif mode == DynamicSimulationMode.EMT:
+            action_kind = CatalogueActionKind.AddEmtTemplate
+        else:
+            return list()
+
         actions: List[CatalogueAction] = list()
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='GENQEC',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:get_genqec_rms',
-                                       function_ptr=tem.get_genqec_rms)
-                       )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='Governor',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='rms:get_governor_rms',
-        #                                function_ptr=tem.get_governor_rms)
-        #                )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='Stabilizer',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='rms:get_stabilizer_rms',
-        #                                function_ptr=tem.get_stabilizer_rms)
-        #                )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='Exciter',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='rms:get_exciter_rms',
-        #                                function_ptr=tem.get_exciter_rms)
-        #                )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='Complete generator',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:get_complete_generator_template_rms',
-                                       function_ptr=tem.get_complete_generator_template_rms)
-                       )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='GENROU/GENROW',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:get_genrow_rms_template',
-                                       function_ptr=tem.get_genrow_rms_template)
-                       )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='Line',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:get_line_rms_template',
-                                       function_ptr=tem.get_line_rms_template)
-                       )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='Load',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:get_load_rms_template',
-                                       function_ptr=tem.get_load_rms_template)
-                       )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                        args=(self._circuit.var_factory,),
-                                        name='Distributed PV',
-                                        voltage_text='',
-                                        power_text='',
-                                        unique_key='rms:get_distributed_pv_rms_template',
-                                        function_ptr=tem.get_pvd1_dc_mppt_rms_template)
-                        )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                        args=(self._circuit.var_factory,),
-                                        name='Battery',
-                                        voltage_text='',
-                                        power_text='',
-                                        unique_key='rms:get_battery_rms_template',
-                                        function_ptr=tem.get_esd1_rms_template)
-                        )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                        args=(self._circuit.var_factory,),
-                                        name='2W Transformer',
-                                        voltage_text='',
-                                        power_text='',
-                                        unique_key='rms:get_transformer2w_rms_template',
-                                        function_ptr=tem.get_transformer2w_rms)
-                        )
-        actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-                                       args=(self._circuit.var_factory,),
-                                       name='GFM VSC',
-                                       voltage_text='',
-                                       power_text='',
-                                       unique_key='rms:build_vsc_rms',
-                                       function_ptr=tem.build_vsc_rms)
-                       )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='DC PV source',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='rms:DCPVSourceAveraged',
-        #                                function_ptr=tem.DCPVSourceAveraged)
-        #                )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddRmsTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='Empty template',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='rms:get_empty_rms_template',
-        #                                function_ptr=tem.get_empty_rms_template)
-        #                )
+        device_spec: LibraryDeviceTemplateSpec
+        for device_spec in get_dynamic_library_device_specs(mode=mode):
+            actions.append(CatalogueAction(
+                kind=action_kind,
+                args=tuple(),
+                name=device_spec.label,
+                voltage_text='',
+                power_text='',
+                description_text=device_spec.description,
+                unique_key=device_spec.unique_key,
+                device_template_spec=device_spec,
+            ))
         return actions
+
+    def build_rms_actions(self) -> List[CatalogueAction]:
+        """Build RMS actions exclusively from the Library Devices branch.
+
+        :return: Canonical RMS device-template actions.
+        """
+        return self.build_dynamic_device_actions(mode=DynamicSimulationMode.RMS)
 
     def build_emt_actions(self) -> List[CatalogueAction]:
+        """Build EMT actions exclusively from the Library Devices branch.
+
+        :return: Canonical EMT device-template actions.
         """
-        Build the EMT template action list.
-
-        :return: List[CatalogueAction]
-        """
-        actions: List[CatalogueAction] = list()
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='Simple generator',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_simple_generator_emt_template',
-        #     function_ptr=tem.get_simple_generator_emt_template)
-        # )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='Sauer Pai generator',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_generator_sauer_pai_type_emt_template',
-        #     function_ptr=tem.get_generator_sauer_pai_type_emt_template)
-        # )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Complete generator',
-            voltage_text='', power_text='',
-            unique_key='emt:get_complete_generator_template_emt',
-            function_ptr=tem.get_complete_generator_template_emt)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Thevenin generator',
-            voltage_text='', power_text='',
-            unique_key='emt:get_generator_thevenin_rl_emt_template_with_ref',
-            function_ptr=tem.get_generator_thevenin_rl_emt_template_with_ref)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Ideal converter',
-            voltage_text='', power_text='',
-            unique_key='emt:get_emt_ideal_converter',
-            function_ptr=tem.get_emt_ideal_converter)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Full pseudo converter',
-            voltage_text='', power_text='',
-            unique_key='emt:get_full_pseudo_emt_converter',
-            function_ptr=tem.get_full_pseudo_emt_converter)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Switched converter',
-            voltage_text='', power_text='',
-            unique_key='emt:get_switched_emt_converter',
-            function_ptr=tem.get_switched_emt_converter)
-        )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='Bridge 2-level 3ph',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_bridge_2level_3ph_emt_template',
-        #     function_ptr=tem.get_bridge_2level_3ph_emt_template)
-        # )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='Bridge filter 2-level 3ph',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_bridge_filter_2level_3ph_emt_template',
-        #     function_ptr=tem.get_bridge_filter_2level_3ph_emt_template)
-        # )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='Bridge filter control 2-level 3ph',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_bridge_filter_control_2level_3ph_emt_template',
-        #     function_ptr=tem.get_bridge_filter_control_2level_3ph_emt_template)
-        # )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='DC load',
-            voltage_text='', power_text='',
-            unique_key='emt:get_dc_load_emt_template',
-            function_ptr=tem.get_dc_load_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='DC line',
-            voltage_text='', power_text='',
-            unique_key='emt:get_dc_line_emt_template',
-            function_ptr=tem.get_dc_line_with_power_input_emt_template)
-        )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='DC line',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_dc_line_emt_template',
-        #     function_ptr=tem.get_dc_line_emt_template)
-        # )
-
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Transformer',
-            voltage_text='', power_text='',
-            unique_key='emt:get_transformer_emt_template',
-            function_ptr=tem.get_transformer_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='XFMR',
-            voltage_text='', power_text='',
-            unique_key='emt:get_xfmr_emt_template',
-            function_ptr=tem.get_xfmr_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, True, True, True),
-            name='Shunt C (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_shunt_c_emt_template:abc',
-            function_ptr=tem.get_shunt_c_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, True, True, True),
-            name='Shunt L (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_shunt_l_emt_template:abc',
-            function_ptr=tem.get_shunt_l_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, True, True, True),
-            name='Shunt R (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_shunt_r_emt_template:abc',
-            function_ptr=tem.get_shunt_r_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, True, True, True),
-            name='Exponential load (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_exponential_load_emt:abc',
-            function_ptr=tem.get_exponential_load_emt)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, True, True, True),
-            name='ZIP load (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_load_ZIP_emt_template:abc',
-            function_ptr=tem.get_load_ZIP_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, False, True, True, True),
-            name='PI line (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_pi_line_emt_template:abc',
-            function_ptr=tem.get_pi_line_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory, False, True, True, True),
-            name='Bergeron line (ABC)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_bergeron_line_emt_template:abc',
-            function_ptr=tem.get_bergeron_line_emt_template)
-        )
-
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Single cage induction motor',
-            voltage_text='', power_text='',
-            unique_key='emt:get_induction_motor_single_cage_emt_template:abc',
-            function_ptr=tem.get_induction_motor_single_cage_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='Double cage induction motor',
-            voltage_text='', power_text='',
-            unique_key='emt:get_induction_motor_double_cage_emt_template:abc',
-            function_ptr=tem.get_induction_motor_double_cage_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='BESS',
-            voltage_text='', power_text='',
-            unique_key='emt:get_bess_avm_grid_following_emt_template:abc',
-            function_ptr=tem.get_bess_avm_grid_following_emt_template)
-        )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='PV plant grid following',
-            voltage_text='', power_text='',
-            unique_key='emt:get_pv_avm_grid_following_emt_template:abc',
-            function_ptr=tem.get_pv_avm_grid_following_emt_template)
-        )
-        # actions.append(CatalogueAction(
-        #     kind=CatalogueActionKind.AddEmtTemplate,
-        #     args=(self._circuit.var_factory,),
-        #     name='PV plant boost grid following',
-        #     voltage_text='', power_text='',
-        #     unique_key='emt:get_pv_avm_boost_grid_following_emt_template:abc',
-        #     function_ptr=tem.get_pv_avm_boost_grid_following_emt_template)
-        # )
-        actions.append(CatalogueAction(
-            kind=CatalogueActionKind.AddEmtTemplate,
-            args=(self._circuit.var_factory,),
-            name='VSC Grid-Forming (GFM)',
-            voltage_text='', power_text='',
-            unique_key='emt:get_gfm_emt_template',
-            function_ptr=tem.get_gfm_emt_template)
-        )
-        # actions.append(CatalogueAction(kind=CatalogueActionKind.AddEmtTemplate,
-        #                                args=(self._circuit.var_factory,),
-        #                                name='Empty template',
-        #                                voltage_text='',
-        #                                power_text='',
-        #                                unique_key='emt:get_empty_emt_template',
-        #                                function_ptr=tem.get_empty_emt_template)
-        #                )
-        return actions
+        return self.build_dynamic_device_actions(mode=DynamicSimulationMode.EMT)
 
     def get_existing_keys(self) -> Dict[str, bool]:
         """
@@ -629,9 +319,22 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
         for tpe in self._circuit.sequence_line_types:
             existing_keys[f"Sequence line types|{tpe.name}|{tpe.Vnom}|{tpe.Imax}"] = True
         for tpe in self._circuit.rms_models:
-            existing_keys[f"RMS model templates|{tpe.name}"] = True
+            rms_catalogue_key: str = tpe.code
+            if len(rms_catalogue_key) == 0:
+                # Legacy catalogue entries did not persist their stable action
+                # key, so retain their display name as a compatibility fallback.
+                rms_catalogue_key = tpe.name
+            else:
+                pass
+            existing_keys[f"RMS model templates|{rms_catalogue_key}"] = True
         for tpe in self._circuit.emt_models:
-            existing_keys[f"EMT model templates|{tpe.name}"] = True
+            emt_catalogue_key: str = tpe.code
+            if len(emt_catalogue_key) == 0:
+                # Apply the same compatibility path to legacy EMT templates.
+                emt_catalogue_key = tpe.name
+            else:
+                pass
+            existing_keys[f"EMT model templates|{emt_catalogue_key}"] = True
 
         return existing_keys
 
@@ -657,10 +360,12 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
         cat_name_item = QStandardItem(str(category_name))
         cat_voltage_item = QStandardItem('')
         cat_power_item = QStandardItem('')
+        cat_description_item = QStandardItem('')
 
         cat_name_item.setEditable(False)
         cat_voltage_item.setEditable(False)
         cat_power_item.setEditable(False)
+        cat_description_item.setEditable(False)
 
         cat_name_item.setCheckable(True)
         # In PySide6, QStandardItem exposes tri-state via auto/user tristate flags.
@@ -669,7 +374,7 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
         cat_name_item.setCheckState(Qt.CheckState.Unchecked)
         cat_name_item.setData(True, self._ROLE_IS_CATEGORY)
 
-        self._model.appendRow([cat_name_item, cat_voltage_item, cat_power_item])
+        self._model.appendRow([cat_name_item, cat_voltage_item, cat_power_item, cat_description_item])
 
         # Child rows.
         for obj in objects_list:
@@ -678,19 +383,21 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
 
     def create_leaf_row(self, action: CatalogueAction) -> List[QStandardItem]:
         """
-        Create the 3-column row representing a concrete template object.
+        Create the 4-column row representing a concrete template object.
 
         :param action: CatalogueAction.
-        :return: List of 3 ``QStandardItem``.
+        :return: List of 4 ``QStandardItem``.
         """
         name_item = QStandardItem(action.name)
         voltage_item = QStandardItem(action.voltage_text)
         power_item = QStandardItem(action.power_text)
+        description_item = QStandardItem(action.description_text)
 
         # Make leaf selectable and checkable.
         name_item.setEditable(False)
         voltage_item.setEditable(False)
         power_item.setEditable(False)
+        description_item.setEditable(False)
 
         name_item.setCheckable(True)
         name_item.setCheckState(Qt.CheckState.Unchecked)
@@ -700,11 +407,12 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
         name_item.setData(int(action.kind.value), self._ROLE_KIND)
         name_item.setData(False, self._ROLE_IS_CATEGORY)
 
-        # Keep numeric columns aligned.
+        # Keep electrical values aligned while descriptions remain natural text.
         voltage_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         power_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        description_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
-        return [name_item, voltage_item, power_item]
+        return [name_item, voltage_item, power_item, description_item]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Checkbox propagation
@@ -741,7 +449,6 @@ class CatalogueElementsSelectionDialogue(QtWidgets.QDialog):
                 self.update_parent_state_from_children(leaf_item=item)
         finally:
             self._signals_blocked = False
-
     def propagate_category_state(self, category_item: QStandardItem) -> None:
         """
         Apply a category checkbox state to all its children.

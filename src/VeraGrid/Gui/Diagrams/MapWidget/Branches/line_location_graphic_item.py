@@ -171,8 +171,12 @@ class LineLocationGraphicItem(QtWidgets.QGraphicsEllipseItem, NodeTemplate):
         :return:
         """
         if question:
-            ok = yes_no_question(f"Move substation {self.api_object.name} graphics to it's database coordinates?",
-                                 "Move substation graphics")
+            ok = yes_no_question(
+                self.tr("Move substation {substation_name} graphics to it's database coordinates?").format(
+                    substation_name=self.api_object.name,
+                ),
+                self.tr("Move substation graphics"),
+            )
 
             if ok:
                 x, y = self.move_to(lat=self.api_object.lat,
@@ -231,7 +235,7 @@ class LineLocationGraphicItem(QtWidgets.QGraphicsEllipseItem, NodeTemplate):
         super().mouseReleaseEvent(event)
         self.editor.disableMove = True
         self.update_position_at_the_diagram()
-        # self.update_database_position()
+        self.update_database_position()
 
     def hoverEnterEvent(self, event: QtWidgets.QGraphicsSceneHoverEvent) -> None:
         """

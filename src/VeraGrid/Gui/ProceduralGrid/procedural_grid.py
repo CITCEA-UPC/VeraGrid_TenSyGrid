@@ -21,6 +21,7 @@ from VeraGridEngine.Topology.Procedural.procedural_grid_engine import Procedural
 from VeraGridEngine.basic_structures import Logger
 from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import make_diagram_from_buses, SchematicWidget
 from VeraGrid.Gui.ProceduralGrid.voltage_warning import VoltageWarningDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import LogsDialogue, CheckListDialogue
 
 if TYPE_CHECKING:
@@ -42,7 +43,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Procedural grid expansion')
+        self.setWindowTitle(self.tr('Procedural grid expansion'))
         self.app = app
 
         # Setup combobox
@@ -94,6 +95,16 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         # Initialise the enable/disable state of the inputs and buttons so it matches the
         # method currently shown in the combo box at construction time.
         self._on_method_changed()
+
+    def done(self, result: int) -> None:
+        """
+        Release plot resources before the modal dialog closes.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        self.ui.plotWidget.dispose()
+        QtWidgets.QDialog.done(self, result)
 
     def _invalidate_preview(self) -> None:
         """
@@ -176,7 +187,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         if distances.shape[0] > 0:
 
             distances2 = np.min(distances, axis=1)
-            sorted_indices = np.argsort(distances2, axis=0)
+            sorted_indices = np.argsort(distances2, axis=0, kind="stable")
 
             self.candidate_list.clear()
             for i in sorted_indices:
@@ -233,7 +244,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         if offenders:
             dlg = VoltageWarningDialog(offenders=offenders, valid_voltages=valid_voltages, parent=self)
             dlg.setModal(True)
-            dlg.exec()
+            exec_dialog_safely(dialog=dlg)
             # Voltage mismatch: do not enable Accept; user must fix inputs first
             self._invalidate_preview()
             return None
@@ -472,8 +483,8 @@ class ProceduralGridWindow(QtWidgets.QDialog):
 
         # Show logger if there are any entries
         if logger.has_logs():
-            logs_dlg = LogsDialogue('Procedural grid expansion log', logger)
-            logs_dlg.exec()
+            logs_dlg = LogsDialogue(self.tr('Procedural grid expansion log'), logger)
+            exec_dialog_safely(dialog=logs_dlg)
         else:
             pass
 
@@ -489,7 +500,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
                                                        group_label="Investment name",
                                                        group_text=group_name)
         inv_dlg.setModal(True)
-        inv_dlg.exec()
+        exec_dialog_safely(dialog=inv_dlg)
 
         if inv_dlg.is_accepted:
             group: dev.InvestmentsGroup = dev.InvestmentsGroup(

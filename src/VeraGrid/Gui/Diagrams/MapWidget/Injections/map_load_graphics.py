@@ -12,6 +12,7 @@ from VeraGrid.Gui.profile_wizard_utils import fill_substation_weather_profiles
 from VeraGrid.Gui.Diagrams.MapWidget.Injections.map_injections_template_graphics import MapInjectionTemplateGraphicItem
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_designer import LoadDesigner
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_device_editor import LoadDeviceEditorDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.Devices.Injections.load import Load
 from VeraGridEngine.enumerations import  DynamicSimulationMode
 
@@ -51,7 +52,7 @@ class MapLoadGraphicItem(MapInjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = LoadDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -123,7 +124,7 @@ class MapLoadGraphicItem(MapInjectionTemplateGraphicItem):
                                              load_name=self.api_object.name,
                                              bus_name=bus_name)
 
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 if dlg.is_accepted:
                     if len(dlg.P) == self.api_object.P_prof.size() and len(dlg.Q) == self.api_object.Q_prof.size():
                         self.api_object.P_prof.set(dlg.P)

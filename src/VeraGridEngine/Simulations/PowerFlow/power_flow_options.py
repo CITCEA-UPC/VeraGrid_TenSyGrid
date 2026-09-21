@@ -65,7 +65,7 @@ class PowerFlowOptions(OptionsTemplate):
                  initialize_angles: bool = False,
                  use_autodiff_jacobian: bool = False,
                  generate_report: bool = False,
-                 controls_start_tolerance: float = 1e-2,):
+                 controls_start_tolerance: float = 1e-2):
         """
         Power flow options class
         :param solver_type: Solver type

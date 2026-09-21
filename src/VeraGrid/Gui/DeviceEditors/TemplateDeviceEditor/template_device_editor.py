@@ -18,6 +18,7 @@ from VeraGrid.Gui.DeviceEditors.LineLocationsEditor.line_locations_editor import
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor_gui import Ui_TemplateDeviceEditorDialog
 from VeraGrid.Gui.gui_functions import ComboDelegate, FloatDelegate, IntDelegate, TextDelegate, ComplexDelegate
 from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
 from VeraGrid.Gui.messages import warning_msg
 from VeraGrid.Gui.object_model import ObjectsModel
 from VeraGrid.Gui.spread_sheet_table import SpreadsheetTableView
@@ -282,7 +283,7 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
         self.ui = Ui_TemplateDeviceEditorDialog()
         self.ui.setupUi(self)
         self._replace_profiles_table_view()
-        self.setWindowTitle("Device editor")
+        self.setWindowTitle(self.tr("Device editor"))
         self.toast_manager: ToastManager = ToastManager(parent=self, position_top=False)
 
         prop_filter_mdl = gf.ComboModel(
@@ -337,6 +338,8 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
 
         # UI post-configuration.
         self.properties_table_view.setAlternatingRowColors(True)
+        self.properties_table_view.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.properties_table_view.customContextMenuRequested.connect(self.show_properties_table_context_menu)
         self.profiles_table_view.setAlternatingRowColors(True)
         self.associations_table_view.setAlternatingRowColors(True)
         self.associations_table_view.setHorizontalHeader(HeaderViewWithWordWrap(self.associations_table_view))
@@ -465,6 +468,43 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
         :param duration: Duration in milliseconds.
         """
         self.toast_manager.show_info_toast(message=message, duration=duration)
+
+    def open_hosted_device_editor(self, hosted_device: EditableDevice) -> None:
+        """
+        Open the best available editor for one hosted device.
+
+        :param hosted_device: Device referenced by the clicked cell.
+        :return: None.
+        """
+        from VeraGrid.Gui.DeviceEditors.device_editor_factory import build_device_editor_dialog
+
+        # Use this editor's circuit context so selector delegates keep the same model visibility.
+        dialog: QtWidgets.QDialog = build_device_editor_dialog(api_object=hosted_device, circuit=self.circuit)
+        exec_dialog_safely(dialog=dialog)
+
+    def show_properties_table_context_menu(self, position: QtCore.QPoint) -> None:
+        """
+        Open the hosted device editor for a right-clicked property cell.
+
+        :param position: Table-local click position.
+        :return: None.
+        """
+        index: QtCore.QModelIndex = self.properties_table_view.indexAt(position)
+
+        if index.isValid():
+            model: QtCore.QAbstractItemModel | None = self.properties_table_view.model()
+
+            if isinstance(model, ObjectsModel):
+                hosted_device: EditableDevice | None = model.get_hosted_device_at_index(index=index)
+
+                if hosted_device is not None:
+                    self.open_hosted_device_editor(hosted_device=hosted_device)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
 
     def _build_delegate_dictionary(self) -> dict[DeviceType, list[object]]:
         """
@@ -1081,6 +1121,8 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
             else:
                 axes = list(np.ravel(np.asarray(axes_object)))
 
+            plot_widget.canvas.zoom_axis = axes[0]
+
             axis_index: int
             for axis_index, unit_label in enumerate(unit_labels):
                 axis = axes[axis_index]
@@ -1098,7 +1140,11 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
             axes[len(axes) - 1].set_xlabel("Time index")
             figure.tight_layout()
             plot_widget.redraw()
-            dialog.exec()
+            try:
+                exec_dialog_safely(dialog=dialog)
+            finally:
+                plot_widget.dispose()
+                delete_dialog_safely(dialog=dialog)
         else:
             self.show_warning_toast("No numeric profile columns available for plotting")
 

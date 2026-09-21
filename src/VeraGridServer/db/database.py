@@ -390,12 +390,22 @@ def ensure_primary_key_columns(cursor: CursorLike,
 
 
 def ensure_default_admin_user(cursor: CursorLike,
-                              schema_name: str) -> None:
+                              schema_name: str,
+                              user_idtag: str = "admin",
+                              user_name: str = "admin",
+                              user_password: str = "veragrid is great",
+                              organization_idtag: str = "admin") -> None:
     """
     Insert the default admin user when it is missing.
 
     :param cursor: Open database cursor.
     :param schema_name: Target schema name.
+    :param user_idtag: Identifier for the seeded user row.
+    :param user_name: Display name for the seeded user row.
+    :param user_password: Bookkeeping password stored on the seeded user row
+        (not used for authentication; the admin console and API only check
+        the single instance-level password/API key).
+    :param organization_idtag: Identifier of the organization the seeded user belongs to.
     :return: None.
     """
     quoted_schema_name: str = quote_sql_identifier(schema_name)
@@ -414,17 +424,21 @@ def ensure_default_admin_user(cursor: CursorLike,
             password = EXCLUDED.password,
             organization_idtag = EXCLUDED.organization_idtag
         ''',
-        ("admin", "admin", "veragrid is great", "admin"),
+        (user_idtag, user_name, user_password, organization_idtag),
     )
 
 
 def ensure_default_admin_organization(cursor: CursorLike,
-                                      schema_name: str) -> None:
+                                      schema_name: str,
+                                      organization_idtag: str = "admin",
+                                      organization_name: str = "admin") -> None:
     """
     Insert the default admin organization when it is missing.
 
     :param cursor: Open database cursor.
     :param schema_name: Target schema name.
+    :param organization_idtag: Identifier for the seeded organization row.
+    :param organization_name: Display name for the seeded organization row.
     :return: None.
     """
     quoted_schema_name: str = quote_sql_identifier(schema_name)
@@ -440,7 +454,7 @@ def ensure_default_admin_organization(cursor: CursorLike,
         VALUES (%s, %s)
         ON CONFLICT (idtag) DO NOTHING
         ''',
-        ("admin", "admin"),
+        (organization_idtag, organization_name),
     )
 
 
@@ -466,6 +480,66 @@ def ensure_device_table_composite_primary_key(cursor: CursorLike,
         table_name=table_name,
         constraint_name=constraint_name,
         column_names=("model_idtag", "idtag"),
+    )
+
+
+def ensure_veragrid_object_table(cursor: CursorLike,
+                                 schema_name: str,
+                                 table_name: str) -> None:
+    """
+    Ensure one VeraGrid typed-object table exists with the current generic schema.
+
+    :param cursor: Open database cursor.
+    :param schema_name: Target schema name.
+    :param table_name: Target typed-object table name.
+    :return: None.
+    """
+    quoted_schema_name: str = quote_sql_identifier(schema_name)
+    quoted_table_name: str = quote_sql_identifier(table_name)
+    constraint_name: str = f"{table_name}_model_fk".lower().replace(" ", "_")
+    primary_key_name: str = f"{table_name}_pkey".lower().replace(" ", "_")
+
+    # New VeraGrid device types should not require a full database rebuild. The
+    # typed object table stores opaque JSONB payloads, so creating the missing
+    # table lazily is equivalent to the normal schema bootstrap path.
+    log_database_operation(
+        f"Creating table '{schema_name}.{table_name}' if it does not exist."
+    )
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS {quoted_schema_name}.{quoted_table_name} (
+            model_idtag TEXT NOT NULL,
+            idtag TEXT NOT NULL,
+            data JSONB NOT NULL,
+            object_index INTEGER NOT NULL,
+            CONSTRAINT {quote_sql_identifier(primary_key_name)}
+                PRIMARY KEY (model_idtag, idtag),
+            CONSTRAINT {quote_sql_identifier(constraint_name)}
+                FOREIGN KEY (model_idtag)
+                REFERENCES {quoted_schema_name}."Models"(idtag)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    add_column_if_not_exists(cursor, schema_name, table_name, "idtag", "TEXT")
+    add_column_if_not_exists(cursor, schema_name, table_name, "data", "JSONB")
+    add_column_if_not_exists(cursor, schema_name, table_name, "object_index", "INTEGER")
+    add_column_if_not_exists(cursor, schema_name, table_name, "model_idtag", "TEXT")
+    ensure_device_table_composite_primary_key(
+        cursor=cursor,
+        schema_name=schema_name,
+        table_name=table_name,
+        constraint_name=primary_key_name,
+    )
+    add_constraint_if_not_exists(
+        cursor=cursor,
+        schema_name=schema_name,
+        table_name=table_name,
+        constraint_name=constraint_name,
+        constraint_sql=(
+            f'FOREIGN KEY (model_idtag) REFERENCES {quoted_schema_name}."Models"(idtag) '
+            f'ON DELETE CASCADE'
+        ),
     )
 
 
@@ -649,7 +723,13 @@ def get_veragrid_object_table_names() -> List[str]:
     return ordered_names
 
 
-def create_veragrid_schema(settings: PostgreSqlConnectionSettings) -> List[str]:
+def create_veragrid_schema(settings: PostgreSqlConnectionSettings,
+                           seed_default_admin: bool = True,
+                           default_admin_org_idtag: str = "admin",
+                           default_admin_org_name: str = "admin",
+                           default_admin_user_idtag: str = "admin",
+                           default_admin_user_name: str = "admin",
+                           default_admin_user_password: str = "veragrid is great") -> List[str]:
     """
     Create the PostgreSQL schema used to persist VeraGrid models and objects.
 
@@ -666,6 +746,15 @@ def create_veragrid_schema(settings: PostgreSqlConnectionSettings) -> List[str]:
       linked to ``Models``
 
     :param settings: Open DB-API compatible PostgreSQL connection.
+    :param seed_default_admin: Whether to (re-)seed the default admin organization/user
+        on every startup. Set to ``False`` once a deployment manages its own
+        organizations/users, so the built-in "admin"/"admin" row stops reappearing.
+    :param default_admin_org_idtag: Identifier for the seeded organization row.
+    :param default_admin_org_name: Display name for the seeded organization row.
+    :param default_admin_user_idtag: Identifier for the seeded user row.
+    :param default_admin_user_name: Display name for the seeded user row.
+    :param default_admin_user_password: Bookkeeping password for the seeded user row
+        (not used for authentication; see :func:`ensure_default_admin_user`).
     :return: Ordered list of created VeraGrid object table names.
     """
     schema_name: str = settings.schema_name
@@ -723,7 +812,15 @@ def create_veragrid_schema(settings: PostgreSqlConnectionSettings) -> List[str]:
         )
         add_column_if_not_exists(cursor, schema_name, "Organization", "idtag", "TEXT")
         add_column_if_not_exists(cursor, schema_name, "Organization", "name", "TEXT")
-        ensure_default_admin_organization(cursor=cursor, schema_name=schema_name)
+        if seed_default_admin:
+            ensure_default_admin_organization(
+                cursor=cursor,
+                schema_name=schema_name,
+                organization_idtag=default_admin_org_idtag,
+                organization_name=default_admin_org_name,
+            )
+        else:
+            pass
 
         # Users are owned by organizations and later own files.
         log_database_operation(
@@ -757,7 +854,17 @@ def create_veragrid_schema(settings: PostgreSqlConnectionSettings) -> List[str]:
                 f'ON DELETE RESTRICT'
             ),
         )
-        ensure_default_admin_user(cursor=cursor, schema_name=schema_name)
+        if seed_default_admin:
+            ensure_default_admin_user(
+                cursor=cursor,
+                schema_name=schema_name,
+                user_idtag=default_admin_user_idtag,
+                user_name=default_admin_user_name,
+                user_password=default_admin_user_password,
+                organization_idtag=default_admin_org_idtag,
+            )
+        else:
+            pass
 
         # Files are the top-level persisted artifacts. A file can contain one base
         # model plus optional delta models that together form one MultiVerse.
@@ -908,48 +1015,10 @@ def create_veragrid_schema(settings: PostgreSqlConnectionSettings) -> List[str]:
         # as JSONB so the object structure can evolve without forcing a table redesign
         # for every engine-side property change.
         for table_name in object_table_names:
-            quoted_table_name: str = quote_sql_identifier(table_name)
-            constraint_name: str = f"{table_name}_model_fk".lower().replace(" ", "_")
-            primary_key_name: str = f"{table_name}_pkey".lower().replace(" ", "_")
-
-            log_database_operation(
-                f"Creating table '{schema_name}.{table_name}' if it does not exist."
-            )
-            cursor.execute(
-                f"""
-                CREATE TABLE IF NOT EXISTS {quoted_schema_name}.{quoted_table_name} (
-                    model_idtag TEXT NOT NULL,
-                    idtag TEXT NOT NULL,
-                    data JSONB NOT NULL,
-                    object_index INTEGER NOT NULL,
-                    CONSTRAINT {quote_sql_identifier(primary_key_name)}
-                        PRIMARY KEY (model_idtag, idtag),
-                    CONSTRAINT {quote_sql_identifier(constraint_name)}
-                        FOREIGN KEY (model_idtag)
-                        REFERENCES {quoted_schema_name}."Models"(idtag)
-                        ON DELETE CASCADE
-                )
-                """
-            )
-            add_column_if_not_exists(cursor, schema_name, table_name, "idtag", "TEXT")
-            add_column_if_not_exists(cursor, schema_name, table_name, "data", "JSONB")
-            add_column_if_not_exists(cursor, schema_name, table_name, "object_index", "INTEGER")
-            add_column_if_not_exists(cursor, schema_name, table_name, "model_idtag", "TEXT")
-            ensure_device_table_composite_primary_key(
+            ensure_veragrid_object_table(
                 cursor=cursor,
                 schema_name=schema_name,
                 table_name=table_name,
-                constraint_name=primary_key_name,
-            )
-            add_constraint_if_not_exists(
-                cursor=cursor,
-                schema_name=schema_name,
-                table_name=table_name,
-                constraint_name=constraint_name,
-                constraint_sql=(
-                    f'FOREIGN KEY (model_idtag) REFERENCES {quoted_schema_name}."Models"(idtag) '
-                    f'ON DELETE CASCADE'
-                ),
             )
 
         log_database_operation(

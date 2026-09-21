@@ -345,12 +345,12 @@ def __multi_island_pf_nc_limited_support_3ph(nc: NumericalCircuit,
 
     for i in load_idx:
 
-        if nc.load_data.A_floatingstar[i] > 0:
+        if nc.load_data.A_floatingstar[i] != 0.0 + 0.0j:
             results.load_Vn[i] = nc.load_data.A_floatingstar[i] * results.voltage_A[load_bus_idx[i]] + \
                               nc.load_data.B_floatingstar[i] * results.voltage_B[load_bus_idx[i]] + \
                               nc.load_data.C_floatingstar[i] * results.voltage_C[load_bus_idx[i]]
 
-        elif nc.load_data.I3_floatingstar[i+1] > 0.0+0.0j:
+        elif nc.load_data.I3_floatingstar[4 * i + 1] != 0.0 + 0.0j:
 
             Vn_prev = (results.voltage_A[load_bus_idx[i]] + results.voltage_B[load_bus_idx[i]] + results.voltage_C[
                 load_bus_idx[i]]) / 3
@@ -363,7 +363,7 @@ def __multi_island_pf_nc_limited_support_3ph(nc: NumericalCircuit,
                                                                  nc.load_data.I3_floatingstar[4 * i + 3],
                                                                  Vn_prev)
 
-        elif nc.load_data.S3_floatingstar[i+1] > 0.0+0.0j:
+        elif nc.load_data.S3_floatingstar[4 * i + 1] != 0.0 + 0.0j:
 
             Ia, Ib, Ic, results.load_Vn[i] = floating_star_powers(results.voltage_A[load_bus_idx[i]],
                                                                   results.voltage_B[load_bus_idx[i]],

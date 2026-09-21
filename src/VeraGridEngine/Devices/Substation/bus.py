@@ -9,13 +9,14 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from VeraGridEngine.enumerations import BusMode, DeviceType, BusGraphicType, BuildStatus, PrpCat
-from VeraGridEngine.Devices.Parents.dynamic_bus_parent import DynamicBusDevice
+
 from VeraGridEngine.Devices.Aggregation import Area, Zone, Country, Community, Region, Municipality
 from VeraGridEngine.Devices.Substation.substation import Substation
 from VeraGridEngine.Devices.Substation.busbar import BusBar
 from VeraGridEngine.Devices.Substation.voltage_level import VoltageLevel
 from VeraGridEngine.Devices.Profiles import ProfileBool, ProfileFloat
 from VeraGridEngine.Devices.Parents.editable_device import get_at, GCProp
+from VeraGridEngine.Devices.Parents.dynamic_bus_parent import DynamicBusDevice
 from VeraGridEngine.basic_structures import BoolVec
 
 
@@ -578,8 +579,12 @@ class Bus(DynamicBusDevice):
             self._voltage_level = val
 
             if val is not None:
-                if val.substation is not None and self.substation is None:
-                    self.substation = val.substation
+
+                if self.auto_update_enabled:
+                    self.Vnom = val.Vnom
+
+                    if val.substation is not None and self.substation is None:
+                        self.substation = val.substation
         else:
             raise Exception(f'{type(val)} not supported to be set into a '
                             f'voltage_level of type Union[VoltageLevel, None]')
@@ -803,7 +808,7 @@ class Bus(DynamicBusDevice):
             ax_voltage.legend()
 
         if show_fig:
-            plt.show()
+            plt.show(block=False)
 
     def get_coordinates(self) -> Tuple[float, float]:
         """

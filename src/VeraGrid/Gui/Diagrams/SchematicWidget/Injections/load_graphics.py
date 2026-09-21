@@ -16,6 +16,7 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphi
 from VeraGridEngine.Devices.Injections.load import Load
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_designer import LoadDesigner
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_device_editor import LoadDeviceEditorDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
     from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import SchematicWidget
@@ -59,7 +60,7 @@ class LoadGraphicItem(InjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = LoadDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -107,7 +108,7 @@ class LoadGraphicItem(InjectionTemplateGraphicItem):
                                              load_name=self.api_object.name,
                                              bus_name=bus_name)
 
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 if dlg.is_accepted:
                     if len(dlg.P) == self.api_object.P_prof.size() and len(dlg.Q) == self.api_object.Q_prof.size():
                         self.api_object.P_prof.set(dlg.P)

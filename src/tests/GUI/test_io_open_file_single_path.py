@@ -37,7 +37,7 @@ class FakeThreadObject:
     Minimal file-open thread used to capture the normalized input path.
     """
 
-    __slots__ = ("file_name", "options", "progress_signal", "progress_text", "done_signal", "started")
+    __slots__ = ("file_name", "options", "progress_signal", "progress_text", "done_signal", "finished", "started", "parent")
 
     def __init__(self, file_name: str | list[str], previous_circuit: Any, options: Any) -> None:
         """
@@ -54,7 +54,18 @@ class FakeThreadObject:
         self.progress_signal: FakeSignal = FakeSignal()
         self.progress_text: FakeSignal = FakeSignal()
         self.done_signal: FakeSignal = FakeSignal()
+        self.finished: FakeSignal = FakeSignal()
         self.started: bool = False
+        self.parent: Any = None
+
+    def setParent(self, parent: Any) -> None:
+        """
+        Store the owner assigned by the production Qt workflow.
+
+        :param parent: Owning GUI object.
+        :return: None.
+        """
+        self.parent = parent
 
     def start(self) -> None:
         """
@@ -198,10 +209,24 @@ def test_open_file_now_accepts_one_string_path_without_iterating_characters(monk
     IoMain.open_file_now(harness, filenames=str(file_path))
 
     assert captured_errors == list()
-    assert harness.file_name == str(file_path)
+    # The visible project identity changes only after the loaded circuit has
+    # passed the project-replacement guards in ``post_open_file``.
+    assert harness.file_name == ""
     assert harness.project_directory == str(file_path.parent)
     assert isinstance(harness.open_file_thread_object, FakeThreadObject)
     assert harness.open_file_thread_object.file_name == str(file_path)
     assert harness.open_file_thread_object.started is True
     assert harness.last_file_driver is harness.open_file_thread_object
     assert harness.stuff_running_now == [SimulationTypes.FileOpen]
+
+
+def test_save_file_overwrites_only_native_veragrid_files() -> None:
+    """
+    Check that imported non-VeraGrid files are not treated as direct save targets.
+
+    :return: None.
+    """
+    assert IoMain.is_direct_veragrid_save_path(file_name="/tmp/grid.veragrid")
+    assert IoMain.is_direct_veragrid_save_path(file_name="/tmp/grid.gridcal")
+    assert not IoMain.is_direct_veragrid_save_path(file_name="/tmp/grid.raw")
+    assert not IoMain.is_direct_veragrid_save_path(file_name="/tmp/grid.xml")

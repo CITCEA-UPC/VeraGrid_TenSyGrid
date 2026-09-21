@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QMenu, QGraphicsItem, QGraphicsRectItem, QGraphics
 
 from VeraGrid.Gui.DeviceEditors.VscEditor.vsc_device_editor import VscDeviceEditorDialog
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem, RoundTerminalItem
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget, ACTIVE, DEACTIVATED
 from VeraGridEngine.Devices.Branches.vsc import VSC
@@ -216,7 +217,7 @@ class VscGraphicItem3Term(GenericDiagramWidget, QGraphicsRectItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = VscDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit, main_gui=self.editor.gui)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -279,7 +280,13 @@ class VscGraphicItem3Term(GenericDiagramWidget, QGraphicsRectItem):
 
     def get_associated_widgets(self) -> List[LineGraphicTemplateItem]:
         """Return the graphical line items connected to this VSC."""
-        return [self.conn_line_ac, self.conn_line_dc_p, self.conn_line_dc_n]
+        associated_widgets: List[LineGraphicTemplateItem] = list()
+        for conn_line in (self.conn_line_ac, self.conn_line_dc_p, self.conn_line_dc_n):
+            if conn_line is not None:
+                associated_widgets.append(conn_line)
+            else:
+                pass
+        return associated_widgets
 
     def get_connection_layout_key(self, conn_line: "LineGraphicTemplateItem") -> str | None:
         """
@@ -532,9 +539,19 @@ class VscGraphicItem3Term(GenericDiagramWidget, QGraphicsRectItem):
 
         attachments[endpoint] = dict(attachment)
 
-    def get_extra_graphics(self):
+    def get_extra_graphics(self) -> List[QGraphicsItem]:
         """Return terminals associated with this widget."""
-        return [self.terminal_ac, self.terminal_dc_p, self.terminal_dc_n]
+        extra_graphics: List[QGraphicsItem] = list()
+        for terminal in (self.terminal_ac, self.terminal_dc_p, self.terminal_dc_n):
+            if terminal is not None:
+                extra_graphics.append(terminal)
+            else:
+                pass
+
+        for conn_line in self.get_associated_widgets():
+            extra_graphics.append(conn_line)
+
+        return extra_graphics
 
     def recolour_mode(self):
         """Change the colour according to the system theme and active state."""
@@ -596,13 +613,16 @@ class VscGraphicItem3Term(GenericDiagramWidget, QGraphicsRectItem):
 
     def delete(self):
         """Delete the VSC and its connections."""
-        # Remove connections first
-        self.remove_connection(self.conn_line_ac)
-        self.remove_connection(self.conn_line_dc_p)
-        self.remove_connection(self.conn_line_dc_n)
+        selected_graphics: List[GenericDiagramWidget] = list()
+        selected_graphics.append(self)
+        self.editor.delete_with_dialogue(selected=selected_graphics, delete_from_db=False)
 
-        # Remove the item itself
-        self.editor.diagram_scene.removeItem(self)
+    def delete_from_associations(self) -> None:
+        """
+        Detach this VSC connection graphics from their hosted terminals.
+        """
+        for conn_line in self.get_associated_widgets():
+            conn_line.delete_from_associations()
 
     def set_connection(self, terminal_type: TerminalType, bus: Bus, conn_line: LineGraphicTemplateItem):
         """Set a connection to a specific terminal."""

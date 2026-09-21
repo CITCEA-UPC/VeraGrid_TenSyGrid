@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 from PySide6 import QtCore
 from PySide6.QtGui import QIcon, QImage
 from PySide6.QtWidgets import (QListView, QTableView, QVBoxLayout, QHBoxLayout, QFrame, QSplitter, QAbstractItemView,
-                               QGraphicsItem, QToolBox, QComboBox)
+                               QGraphicsItem, QToolBox, QComboBox, QDialog)
 
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
@@ -35,10 +35,15 @@ from VeraGridEngine.enumerations import SimulationTypes, ResultTypes, PrpCat
 import VeraGridEngine.Devices.Diagrams.palettes as palettes
 
 from VeraGrid.Gui.Diagrams.graphics_manager import GraphicsManager, ALL_GRAPHICS
+from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphics import InjectionNexusPathItem
+from VeraGrid.Gui.DeviceEditors.device_editor_factory import build_device_editor_dialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import DeleteDialogue
 from VeraGrid.Gui.messages import yes_no_question, info_msg
 from VeraGrid.Gui.object_model import ObjectsModel
+from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 import VeraGrid.Gui.gui_functions as gf
+from VeraGridEngine.Devices.Parents.editable_device import EditableDevice
 
 if TYPE_CHECKING:
     from VeraGrid.Gui.Diagrams.MapWidget.grid_map_widget import MapLibraryModel
@@ -169,6 +174,8 @@ class BaseDiagramWidget(QSplitter):
 
         # Table to display object's properties
         self.object_editor_table = QTableView(self)
+        self.object_editor_table.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.object_editor_table.customContextMenuRequested.connect(self.show_object_editor_table_context_menu)
         # change_font_size(self.object_editor_table, 9)
         # change_font_size(self.object_editor_table.verticalHeader(), 9)
         # change_font_size(self.object_editor_table.horizontalHeader(), 9)
@@ -306,6 +313,7 @@ class BaseDiagramWidget(QSplitter):
         """
         self.left_panel_toolbox.setItemText(0, self._translate_library_label())
         self.left_panel_toolbox.setItemText(1, self._translate_properties_label())
+        self.library_model.retranslate()
 
     def set_video_export_active(self, value: bool) -> None:
         """
@@ -474,20 +482,38 @@ class BaseDiagramWidget(QSplitter):
         """
         if len(selected) > 0:
 
-            # get the set of all affected GenericDiagramWidget instances
-            extended: Set[ALL_DEV_TYPES] = set()
+            # Collect affected devices by stable id instead of hashing the device object.
+            extended: List[ALL_DEV_TYPES] = list()
+            extended_keys: Set[Tuple[str, str]] = set()
 
             for graphic_obj in selected:
 
                 if graphic_obj is not None:
-                    if isinstance(graphic_obj, GenericDiagramWidget):
-                        extended.add(graphic_obj.api_object)
+                    owner_graphic: GenericDiagramWidget | None = self._get_delete_owner_graphic(graphic_obj=graphic_obj)
 
-                    for child_item in graphic_obj.get_associated_devices():
-                        if child_item is not None:
-                            extended.add(child_item)
+                    if owner_graphic is not None:
+                        device: ALL_DEV_TYPES = owner_graphic.api_object
+                        device_key: Tuple[str, str] = (device.device_type.value, device.idtag)
+                        if device_key not in extended_keys:
+                            extended_keys.add(device_key)
+                            extended.append(device)
+                        else:
+                            pass
 
-            extended_lst: List[ALL_DEV_TYPES] = list(extended)
+                        for child_item in owner_graphic.get_associated_devices():
+                            if child_item is not None:
+                                child_key: Tuple[str, str] = (child_item.device_type.value, child_item.idtag)
+                                if child_key not in extended_keys:
+                                    extended_keys.add(child_key)
+                                    extended.append(child_item)
+                                else:
+                                    pass
+                            else:
+                                pass
+                    else:
+                        pass
+
+            extended_lst: List[ALL_DEV_TYPES] = extended
 
             dlg = DeleteDialogue(
                 names_list=[f"{device.device_type.value}: "
@@ -499,7 +525,7 @@ class BaseDiagramWidget(QSplitter):
             )
 
             dlg.setModal(True)
-            dlg.exec()
+            exec_dialog_safely(dialog=dlg)
 
             if dlg.is_accepted:
                 for device in extended_lst:
@@ -513,6 +539,29 @@ class BaseDiagramWidget(QSplitter):
         else:
             self.gui.show_warning_toast("Choose some elements to delete_with_dialogue")
             return False, False
+
+    def _get_delete_owner_graphic(self, graphic_obj: QGraphicsItem) -> GenericDiagramWidget | None:
+        """
+        Resolve one selected graphics item to the diagram widget that owns the device.
+
+        Some selectable helper items, such as injection nexus paths, are not
+        ``GenericDiagramWidget`` instances. Deletion must still target the owning
+        device widget so the dependency dialogue and removal flow remain valid.
+
+        :param graphic_obj: Selected graphics item.
+        :return: Owning diagram widget or ``None`` when unsupported.
+        """
+        if isinstance(graphic_obj, GenericDiagramWidget):
+            return graphic_obj
+        elif isinstance(graphic_obj, InjectionNexusPathItem):
+            owner_item: QGraphicsItem = graphic_obj.owner_item
+
+            if isinstance(owner_item, GenericDiagramWidget):
+                return owner_item
+            else:
+                return None
+        else:
+            return None
 
     def delete_selected_from_widget(self, delete_from_db: bool) -> None:
         """
@@ -562,6 +611,43 @@ class BaseDiagramWidget(QSplitter):
         """
         if self.api_object is not None:
             self.set_editor_model(api_object=self.api_object)
+
+    def open_hosted_device_editor(self, hosted_device: EditableDevice) -> None:
+        """
+        Open the best available editor for one hosted device.
+
+        :param hosted_device: Device referenced by the clicked cell.
+        :return: None.
+        """
+        # Use the diagram circuit so selectors and specialized editor tabs have the same model context.
+        dialog: QDialog = build_device_editor_dialog(api_object=hosted_device,
+                                                     circuit=self.circuit,
+                                                     main_gui=self.gui)
+        exec_dialog_safely(dialog=dialog)
+
+    def show_object_editor_table_context_menu(self, position: QtCore.QPoint) -> None:
+        """
+        Open the hosted device editor for a right-clicked property cell.
+
+        :param position: Table-local click position.
+        :return: None.
+        """
+        index: QtCore.QModelIndex = self.object_editor_table.indexAt(position)
+
+        if index.isValid():
+            model: QtCore.QAbstractItemModel | None = self.object_editor_table.model()
+
+            if isinstance(model, ObjectsModel):
+                hosted_device: EditableDevice | None = model.get_hosted_device_at_index(index=index)
+
+                if hosted_device is not None:
+                    self.open_hosted_device_editor(hosted_device=hosted_device)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
 
     def set_editor_model(self, api_object: ALL_DEV_TYPES):
         """
@@ -666,10 +752,13 @@ class BaseDiagramWidget(QSplitter):
 
         if any_plot:
             plt.legend()
-            plt.show()
+            show_matplotlib_figure(figure=fig,
+                                   parent=self.gui,
+                                   open_dialogs=self.gui._open_plot_dialogs,
+                                   title=self.tr("{device_name} results plot").format(device_name=api_object.name))
         else:
-            info_msg("No time series results to plot, run some time series results. Even partial results are fine",
-                     f"{api_object.name} results plot")
+            info_msg(self.tr("No time series results to plot, run some time series results. Even partial results are fine"),
+                     self.tr("{device_name} results plot").format(device_name=api_object.name))
 
     def plot_hvdc_branch(self, i: int, api_object: HvdcLine):
         """
@@ -716,10 +805,13 @@ class BaseDiagramWidget(QSplitter):
 
         if any_plot:
             plt.legend()
-            plt.show()
+            show_matplotlib_figure(figure=fig,
+                                   parent=self.gui,
+                                   open_dialogs=self.gui._open_plot_dialogs,
+                                   title=self.tr("{device_name} results plot").format(device_name=api_object.name))
         else:
-            info_msg("No time series results to plot, run some time series results. Even partial results are fine",
-                     f"{api_object.name} results plot")
+            info_msg(self.tr("No time series results to plot, run some time series results. Even partial results are fine"),
+                     self.tr("{device_name} results plot").format(device_name=api_object.name))
 
     @staticmethod
     def set_rate_to_profile(api_object: ALL_DEV_TYPES):
@@ -732,7 +824,10 @@ class BaseDiagramWidget(QSplitter):
                 quit_msg = (f"{api_object.name}\nAre you sure that you want to overwrite the "
                             f"rates profile with the snapshot value?")
 
-                ok = yes_no_question(text=quit_msg, title='Overwrite the profile')
+                ok = yes_no_question(
+                    text=quit_msg,
+                    title=QtCore.QCoreApplication.translate("BaseDiagramWidget", "Overwrite the profile"),
+                )
 
                 if ok:
                     api_object.rate_prof.fill(api_object.rate)
@@ -751,7 +846,10 @@ class BaseDiagramWidget(QSplitter):
                     quit_msg = (f"{api_object.name}\nAre you sure that you want to overwrite the "
                                 f"active profile with the snapshot value?")
 
-                    ok = yes_no_question(text=quit_msg, title='Overwrite the active profile')
+                    ok = yes_no_question(
+                        text=quit_msg,
+                        title=QtCore.QCoreApplication.translate("BaseDiagramWidget", "Overwrite the active profile"),
+                    )
                 else:
                     ok = True
 
