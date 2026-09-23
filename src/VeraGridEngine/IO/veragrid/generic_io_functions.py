@@ -47,6 +47,8 @@ def parse_config_df(df, data=None):
 
 
 class CustomJSONizer(json.JSONEncoder):
+    __slots__ = ()
+
     def default(self, obj):
         if isinstance(obj, (np.int32, np.int64)):  # Handle NumPy integers
             return int(obj)

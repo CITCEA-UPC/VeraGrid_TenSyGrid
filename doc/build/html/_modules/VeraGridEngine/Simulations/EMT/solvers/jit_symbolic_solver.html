@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.EMT.solvers.jit_symbolic_solver &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.EMT.solvers.jit_symbolic_solver &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -235,7 +235,8 @@
 <span class="sd">    :return: ``True`` when the residual backend should use Numba.</span>
 <span class="sd">    :rtype: bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">small_system_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">160</span>
+    <span class="c1"># Avoid disproportionate Numba lowering time for medium sparse EMT cases.</span>
+    <span class="n">small_system_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span>
 
     <span class="k">if</span> <span class="n">total_equation_count</span> <span class="o">&lt;=</span> <span class="n">small_system_threshold</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -266,9 +267,11 @@
 
     <span class="c1"># Small EMT systems are faster and more predictable when they avoid the first</span>
     <span class="c1"># lazy Numba compilation altogether, even if the Jacobian is assembled densely.</span>
-    <span class="k">if</span> <span class="n">total_variable_count</span> <span class="o">&lt;=</span> <span class="n">small_variable_threshold</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">jacobian_expression_count</span> <span class="o">&lt;=</span> <span class="n">moderate_jacobian_threshold</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">elif</span> <span class="n">total_variable_count</span> <span class="o">&lt;=</span> <span class="n">medium_variable_threshold</span> <span class="ow">and</span> <span class="n">jacobian_expression_count</span> <span class="o">&lt;=</span> <span class="n">moderate_jacobian_threshold</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">total_variable_count</span> <span class="o">&lt;=</span> <span class="n">small_variable_threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">total_variable_count</span> <span class="o">&lt;=</span> <span class="n">medium_variable_threshold</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>

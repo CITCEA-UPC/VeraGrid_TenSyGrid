@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.ATC package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.ATC package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -442,28 +442,88 @@ base_exchange #14</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.action">
-<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ActionType" title="VeraGridEngine.enumerations.ActionType"><span class="pre">ActionType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.action" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.Pf">
+<span class="sig-name descname"><span class="pre">Pf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.Pf" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.comment" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.Pf_hvdc">
+<span class="sig-name descname"><span class="pre">Pf_hvdc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.Pf_hvdc" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.device_type">
-<span class="sig-name descname"><span class="pre">device_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.DeviceType" title="VeraGridEngine.enumerations.DeviceType"><span class="pre">DeviceType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.device_type" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.bus_idx_from">
+<span class="sig-name descname"><span class="pre">bus_idx_from</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.bus_idx_from" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.diff_changes">
-<span class="sig-name descname"><span class="pre">diff_changes</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.diff_changes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.bus_idx_to">
+<span class="sig-name descname"><span class="pre">bus_idx_to</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.bus_idx_to" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.selected_to_merge">
-<span class="sig-name descname"><span class="pre">selected_to_merge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.selected_to_merge" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.cluster_number">
+<span class="sig-name descname"><span class="pre">cluster_number</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.cluster_number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.correct_values">
+<span class="sig-name descname"><span class="pre">correct_values</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.correct_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.dT">
+<span class="sig-name descname"><span class="pre">dT</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.dT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.distributed_slack">
+<span class="sig-name descname"><span class="pre">distributed_slack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.distributed_slack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.idx_hvdc_br">
+<span class="sig-name descname"><span class="pre">idx_hvdc_br</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.idx_hvdc_br" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_branch_idx">
+<span class="sig-name descname"><span class="pre">inter_area_branch_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_branch_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_branch_sense">
+<span class="sig-name descname"><span class="pre">inter_area_branch_sense</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_branch_sense" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_hvdc_branch_sense">
+<span class="sig-name descname"><span class="pre">inter_area_hvdc_branch_sense</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.inter_area_hvdc_branch_sense" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.max_report_elements">
+<span class="sig-name descname"><span class="pre">max_report_elements</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.max_report_elements" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.mode" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.use_clustering">
+<span class="sig-name descname"><span class="pre">use_clustering</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.use_clustering" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.use_provided_flows">
+<span class="sig-name descname"><span class="pre">use_provided_flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.ATC.available_transfer_capacity_options.AvailableTransferCapacityOptions.use_provided_flows" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

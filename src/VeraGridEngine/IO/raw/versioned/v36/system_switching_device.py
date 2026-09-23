@@ -11,6 +11,9 @@ from VeraGridEngine.IO.raw.versioned.v35.system_switching_device import RawSyste
 
 class RawSystemSwitchingDeviceV36(RawSystemSwitchingDeviceV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = (
+        "RSETNAM",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='RSETNAM', rawx_key='rsetnam', class_type=str,

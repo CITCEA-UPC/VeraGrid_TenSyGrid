@@ -7,18 +7,30 @@ class MatAcDcBus:
     """
     Class to parse and write DC bus data from MATPOWER .m files.
     """
-    def __init__(self):
-        # Initialize all attributes to default values
-        self.busdc_i = 0         # DC bus number
-        self.grid = 0           # Associated grid or area identifier
-        self.pdc = 0.0          # DC power demand or injection (MW)
-        self.vdc = 1.0          # DC voltage magnitude (p.u.)
-        self.base_kvdc = 0.0    # Base DC voltage (kV)
-        self.vdcmax = 1.1       # Maximum DC voltage (p.u.)
-        self.vdcmin = 0.9       # Minimum DC voltage (p.u.)
-        self.cdc = 0.0          # DC capacitance (F)
 
-    def parse_row(self, row):
+    __slots__ = (
+        "busdc_i",
+        "grid",
+        "pdc",
+        "vdc",
+        "base_kvdc",
+        "vdcmax",
+        "vdcmin",
+        "cdc",
+    )
+
+    def __init__(self) -> None:
+        # Initialize all attributes to default values
+        self.busdc_i: int = 0         # DC bus number
+        self.grid: int = 0           # Associated grid or area identifier
+        self.pdc: float = 0.0          # DC power demand or injection (MW)
+        self.vdc: float = 1.0          # DC voltage magnitude (p.u.)
+        self.base_kvdc: float = 0.0    # Base DC voltage (kV)
+        self.vdcmax: float = 1.1       # Maximum DC voltage (p.u.)
+        self.vdcmin: float = 0.9       # Minimum DC voltage (p.u.)
+        self.cdc: float = 0.0          # DC capacitance (F)
+
+    def parse_row(self, row: list) -> None:
         """
         Parses a single row of DC bus data and assigns values to the instance attributes.
         :param row: List of values corresponding to a MATPOWER DC bus row.

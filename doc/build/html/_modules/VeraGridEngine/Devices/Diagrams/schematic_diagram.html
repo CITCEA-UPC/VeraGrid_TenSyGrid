@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Diagrams.schematic_diagram &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Diagrams.schematic_diagram &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -229,12 +229,19 @@
 <span class="sd">    Diagram</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idtag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param name: Diagram name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">BaseDiagram</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idtag</span><span class="o">=</span><span class="n">idtag</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">diagram_type</span><span class="o">=</span><span class="n">DiagramType</span><span class="o">.</span><span class="n">Schematic</span><span class="p">)</span>
+        <span class="n">BaseDiagram</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">idtag</span><span class="o">=</span><span class="n">idtag</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">diagram_type</span><span class="o">=</span><span class="n">DiagramType</span><span class="o">.</span><span class="n">Schematic</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="SchematicDiagram.update_xy">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Diagrams.html#VeraGridEngine.Devices.Diagrams.schematic_diagram.SchematicDiagram.update_xy">[docs]</a>
@@ -727,9 +734,11 @@
                 <span class="n">attachment_record</span><span class="o">.</span><span class="n">side</span> <span class="o">=</span> <span class="n">explicit_slot_side</span>
             <span class="k">elif</span> <span class="n">explicit_terminal_side</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">attachment_record</span><span class="o">.</span><span class="n">side</span> <span class="o">=</span> <span class="n">explicit_terminal_side</span>
-            <span class="k">elif</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">slot_side</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_canonical_attachment_slot</span><span class="p">(</span><span class="n">slot_key</span><span class="o">=</span><span class="n">attachment_record</span><span class="o">.</span><span class="n">slot_side</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">slot_side</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_canonical_attachment_slot</span><span class="p">(</span>
+                    <span class="n">slot_key</span><span class="o">=</span><span class="n">attachment_record</span><span class="o">.</span><span class="n">slot_side</span><span class="p">):</span>
                 <span class="n">attachment_record</span><span class="o">.</span><span class="n">side</span> <span class="o">=</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">slot_side</span>
-            <span class="k">elif</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">terminal_side</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_canonical_attachment_slot</span><span class="p">(</span><span class="n">slot_key</span><span class="o">=</span><span class="n">attachment_record</span><span class="o">.</span><span class="n">terminal_side</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">terminal_side</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_canonical_attachment_slot</span><span class="p">(</span>
+                    <span class="n">slot_key</span><span class="o">=</span><span class="n">attachment_record</span><span class="o">.</span><span class="n">terminal_side</span><span class="p">):</span>
                 <span class="n">attachment_record</span><span class="o">.</span><span class="n">side</span> <span class="o">=</span> <span class="n">attachment_record</span><span class="o">.</span><span class="n">terminal_side</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
@@ -834,7 +843,7 @@
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Diagrams.html#VeraGridEngine.Devices.Diagrams.schematic_diagram.SchematicDiagram.sync_branch_attachment_records">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sync_branch_attachment_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                        <span class="n">api_object</span><span class="p">:</span> <span class="n">ALL_DEV_TYPES</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SchematicBranchEndpoint</span><span class="p">,</span>
-                                                                          <span class="n">SchematicAttachmentRecord</span><span class="p">]:</span>
+    <span class="n">SchematicAttachmentRecord</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Synchronize the standard typed attachment records for branch-like devices.</span>
 
@@ -856,11 +865,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">{</span>
                     <span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">FROM</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_attachment_record</span><span class="p">(</span><span class="n">api_object</span><span class="o">=</span><span class="n">api_object</span><span class="p">,</span>
-                                                                             <span class="n">endpoint</span><span class="o">=</span><span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">FROM</span><span class="p">,</span>
-                                                                             <span class="n">owner_device</span><span class="o">=</span><span class="n">obj_from</span><span class="p">),</span>
+                                                                              <span class="n">endpoint</span><span class="o">=</span><span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">FROM</span><span class="p">,</span>
+                                                                              <span class="n">owner_device</span><span class="o">=</span><span class="n">obj_from</span><span class="p">),</span>
                     <span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">TO</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_attachment_record</span><span class="p">(</span><span class="n">api_object</span><span class="o">=</span><span class="n">api_object</span><span class="p">,</span>
-                                                                           <span class="n">endpoint</span><span class="o">=</span><span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">TO</span><span class="p">,</span>
-                                                                           <span class="n">owner_device</span><span class="o">=</span><span class="n">obj_to</span><span class="p">),</span>
+                                                                            <span class="n">endpoint</span><span class="o">=</span><span class="n">SchematicBranchEndpoint</span><span class="o">.</span><span class="n">TO</span><span class="p">,</span>
+                                                                            <span class="n">owner_device</span><span class="o">=</span><span class="n">obj_to</span><span class="p">),</span>
                 <span class="p">}</span></div>
 
 

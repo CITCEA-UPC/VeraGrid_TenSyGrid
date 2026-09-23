@@ -6,6 +6,10 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class IidmIdentifiableShortCircuit(IidmObject):
+    __slots__ = (
+        "id",
+        "voltageSource",
+    )
     def __init__(self, id: str, voltageSource: bool):
         super().__init__("IdentifiableShortCircuit")
         self.id = id

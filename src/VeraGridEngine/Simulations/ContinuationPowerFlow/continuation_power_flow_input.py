@@ -9,21 +9,32 @@ from VeraGridEngine.basic_structures import CxVec
 
 class ContinuationPowerFlowInput:
     """
-
+    Input data for Continuation Power Flow.
     """
-    def __init__(self, Sbase: CxVec, Vbase: CxVec, Starget: CxVec, base_overload_number=0):
+    __slots__ = (
+        "Sbase",
+        "Starget",
+        "Vbase",
+        "base_overload_number",
+    )
+
+    def __init__(
+        self,
+        Sbase: CxVec,
+        Vbase: CxVec,
+        Starget: CxVec,
+        base_overload_number: int = 0,
+    ) -> None:
         """
-        ContinuationPowerFlowInput constructor
-        @param Sbase: Initial power array
-        @param Vbase: Initial voltage array
-        @param Starget: Final power array
-        @:param base_overload_number: number of overloads in the base situation
+        ContinuationPowerFlowInput constructor.
+
+        :param Sbase: Initial power array
+        :param Vbase: Initial voltage array
+        :param Starget: Final power array
+        :param base_overload_number: Number of overloads in the base situation
         """
-        self.Sbase = Sbase
-
-        self.Starget = Starget
-
-        self.Vbase = Vbase
-
-        self.base_overload_number = base_overload_number
+        self.Sbase: CxVec = Sbase
+        self.Starget: CxVec = Starget
+        self.Vbase: CxVec = Vbase
+        self.base_overload_number: int = base_overload_number
 

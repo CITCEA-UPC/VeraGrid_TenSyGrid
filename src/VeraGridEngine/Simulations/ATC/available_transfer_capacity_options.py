@@ -16,6 +16,26 @@ class AvailableTransferCapacityOptions(OptionsTemplate):
     Available Transfer Capacity Options
     """
 
+    __slots__ = (
+        "distributed_slack",
+        "correct_values",
+        "use_provided_flows",
+        "bus_idx_from",
+        "bus_idx_to",
+        "inter_area_branch_idx",
+        "inter_area_branch_sense",
+        "Pf",
+        "idx_hvdc_br",
+        "inter_area_hvdc_branch_sense",
+        "Pf_hvdc",
+        "dT",
+        "threshold",
+        "mode",
+        "max_report_elements",
+        "use_clustering",
+        "cluster_number",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="distributed_slack", tpe=bool),
         GCProp(key="correct_values", tpe=bool),

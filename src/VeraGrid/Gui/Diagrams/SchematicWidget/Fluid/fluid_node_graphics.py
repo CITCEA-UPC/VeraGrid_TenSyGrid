@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 import numpy as np
-from typing import Union, TYPE_CHECKING, List, Dict, Tuple
+from typing import Union, TYPE_CHECKING, List, Dict, Tuple, Any
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QPoint, QPointF
 from PySide6.QtGui import QPen, QCursor, QBrush, QColor

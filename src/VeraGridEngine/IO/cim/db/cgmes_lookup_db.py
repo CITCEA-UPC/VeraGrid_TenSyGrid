@@ -19,6 +19,8 @@ class CgmesLookUpDb(BaseDb):
     CgmesLookUpDb
     """
 
+    __slots__ = ("circuit",)
+
     def __init__(self, new_db=False):
         """
 

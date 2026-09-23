@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.Rms.numerical.back_euler_mti &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.Rms.numerical.back_euler_mti &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -138,6 +138,33 @@
 <span class="sd">    ``BackEulerImplicitIntegration`` and adds a post-Newton MTI feasibility</span>
 <span class="sd">    gate based on inequality residuals ``G &lt;= tol``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;inequality_tolerance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;z&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;debug&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;debug_solve&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;debug_newton&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;debug_residuals&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;compare&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;iteration_summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_iteration_stats&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;debug_max_cands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;polish_candidates&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;event_bisect_iter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mti_max_iter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mti_solve_tol&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mti_newton_tol&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mti_lsqr_iter_lim&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_nonlinear_subproblem_lsq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_full_fixed_z_mti_rows&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_direct_xp_subproblem&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_subproblem_line_search&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_debug_x0_ref&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_debug_first_eval_done&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_debug_subproblem_label_prints&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_last_subproblem_context&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_last_subproblem_fail_reason&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -148,7 +175,7 @@
         <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span><span class="p">,</span>
         <span class="n">inequality_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">problem</span><span class="o">=</span><span class="n">problem</span><span class="p">,</span>
             <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span>

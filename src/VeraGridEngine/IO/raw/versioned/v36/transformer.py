@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v35.transformer import RawTransformerV35
 
 class RawTransformerV36(RawTransformerV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = ()
     pass

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.passive_branch_data &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.DataStructures.passive_branch_data &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -123,6 +123,36 @@
 <span class="sd">    Structure to host all branches data for calculation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;R0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;X0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;G0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;B0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;R2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;X2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;G2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;B2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau_taps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;m_taps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;virtual_tap_f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;virtual_tap_t&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;conn_f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;conn_t&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;conn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yff3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yft3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ytf3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ytt3&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nelm</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Branch data arrays</span>
@@ -190,7 +220,6 @@
 <span class="sd">        :return: new BranchData instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">bus_map</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">elm_idx</span><span class="p">,</span> <span class="n">bus_idx</span><span class="p">,</span> <span class="n">bus_map</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">PassiveBranchData</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">PassiveBranchData</span> <span class="o">=</span> <span class="n">data</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="n">elm_idx</span><span class="p">]</span>
@@ -241,7 +270,6 @@
 <span class="sd">        :return: new BranchData instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">PassiveBranchData</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">PassiveBranchData</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">data</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>

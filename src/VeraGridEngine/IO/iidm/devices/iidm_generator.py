@@ -6,6 +6,11 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class IidmGeneratorShortCircuit(IidmObject):
+    __slots__ = (
+        "generatorId",
+        "voltageFactor",
+        "k",
+    )
     def __init__(self, generatorId: str, voltageFactor: float, k: float):
         super().__init__("GeneratorShortCircuit")
         self.generatorId = generatorId
@@ -24,6 +29,13 @@ class IidmGeneratorShortCircuit(IidmObject):
 
 
 class IidmGenerator(IidmObject):
+    __slots__ = (
+        "id",
+        "bus",
+        "targetP",
+        "targetQ",
+        "targetV",
+    )
     def __init__(self, id_, bus, targetP, targetQ, targetV):
         super().__init__("Generator")
         self.id = id_

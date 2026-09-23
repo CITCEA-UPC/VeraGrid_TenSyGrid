@@ -14,6 +14,8 @@ from VeraGridEngine.IO.cim.cgmes.cgmes_circuit import CgmesCircuit
 
 
 class CgmesDataValidator:
+    __slots__ = ("cgmes_circuit",)
+
     def __init__(self, cgmes_circuit: CgmesCircuit):
         self.cgmes_circuit = cgmes_circuit
 

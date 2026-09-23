@@ -482,16 +482,8 @@ def apply_generated_block_state(source: Block, target: Block) -> None:
     target.api_obj_mapping = source.api_obj_mapping
     target.var_mapping = source.var_mapping
     target.diagram = source.diagram
-    modal_kind: object = source.__dict__.get("_modal_template_kind", None)
-    modal_config: object = source.__dict__.get("_modal_template_config", None)
-    if isinstance(modal_kind, str) and isinstance(modal_config, dict):
-        # Generated builders own serializable, editor-specific configuration.
-        # Copy it explicitly because the symbolic field migration above must
-        # preserve the outer Block identity referenced by the scene.
-        target.__dict__["_modal_template_kind"] = modal_kind
-        target.__dict__["_modal_template_config"] = copy.deepcopy(modal_config)
-    else:
-        pass
+    target.modal_template_kind = source.modal_template_kind
+    target.modal_template_config = copy.deepcopy(source.modal_template_config)
 
 
 def apply_generated_parameter_values(block: Block,

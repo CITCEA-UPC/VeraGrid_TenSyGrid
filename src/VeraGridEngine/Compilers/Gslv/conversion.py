@@ -360,6 +360,12 @@ class FakeAdmittances:
     Fake admittances class needed to make the translation
     """
 
+    __slots__ = (
+        'Ybus',
+        'Yf',
+        'Yt',
+    )
+
     def __init__(self) -> None:
         """
         Build one placeholder admittance container.

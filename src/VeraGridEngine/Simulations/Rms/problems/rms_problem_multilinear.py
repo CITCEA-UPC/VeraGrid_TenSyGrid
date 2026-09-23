@@ -107,6 +107,17 @@ class MultilinearCpnApproximator:
         factors[0]     -> equation factor, shape (n_eq, rank)
         factors[i + 1] -> variable i factor, shape (2, rank)
     """
+    __slots__ = (
+        "S",
+        "Phi",
+        "n_vars",
+        "n_mon",
+        "n_eq",
+        "_Phi_csc",
+        "_S_csr",
+        "cp_tensor",
+        "diagnostics",
+    )
 
     def __init__(
             self,
@@ -667,11 +678,36 @@ class RmsProblemMultilinear(RmsProblemPhasor):
     and adds lightweight operating-point extraction and small-signal helpers
     inspired by ``PolynomialMatrixBuilder`` but without SciPy dependencies.
     """
+    __slots__ = (
+        "Phi",
+        "S",
+        "_last_cp_tensor",
+        "_last_cpn_approximator",
+        "_ml_all_basis_vars",
+        "_ml_all_vars_sa",
+        "_ml_idx_vars",
+        "_ml_uid_to_basis_idx",
+        "_ml_uid_to_idx_full",
+    )
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.Phi: sparse.csr_matrix | None = None
+        self.S: sparse.csc_matrix | None = None
+        self._last_cp_tensor: MultilinearCpTensor | None = None
+        self._last_cpn_approximator: MultilinearCpnApproximator | None = None
+        self._ml_all_basis_vars: list[Var] | None = None
+        self._ml_all_vars_sa: list[Var] | None = None
+        self._ml_idx_vars: list[int] | None = None
+        self._ml_uid_to_basis_idx: dict[int, int] | None = None
+        self._ml_uid_to_idx_full: dict[int, int] | None = None
+        super().__init__(*args, **kwargs)
 
     def _ensure_multilinear_index_cache(self) -> None:
         """Build and cache multilinear index maps reused across methods."""
-        if hasattr(self, "_ml_uid_to_idx_full"):
+        if self._ml_all_vars_sa is not None:
             return
+        else:
+            pass
 
         all_vars_sa = list(self._state_vars) + list(self._algebraic_vars)
         all_basis_vars = all_vars_sa + list(self._diff_vars)

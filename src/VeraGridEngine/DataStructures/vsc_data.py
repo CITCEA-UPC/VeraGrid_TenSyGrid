@@ -15,6 +15,36 @@ class VscData(BranchParentData):
     Voltage Source Converters (VSC) in power grid simulations.
     """
 
+    __slots__ = (
+        "F_dcn",
+        "alpha1",
+        "alpha2",
+        "alpha3",
+        "control1_int",
+        "control2_int",
+        "fault_control_int",
+        "control1_val",
+        "control2_val",
+        "control1_val_min",
+        "control1_val_max",
+        "control1_val_droop",
+        "control1_droop_val",
+        "control1_droop_val_min",
+        "control1_droop_val_max",
+        "control2_val_min",
+        "control2_val_max",
+        "control2_val_droop",
+        "control2_droop_val",
+        "control2_droop_val_min",
+        "control2_droop_val_max",
+        "control1_bus_idx",
+        "control2_bus_idx",
+        "control1_branch_idx",
+        "control2_branch_idx",
+        "min_ac_voltage",
+        "ysvs",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Branch data arrays
@@ -70,7 +100,6 @@ class VscData(BranchParentData):
 
         data, bus_map = super().slice(elm_idx, bus_idx, bus_map, logger)
         data: VscData = data
-        data.__class__ = VscData
 
         # data.F_dcp = self.F_dcp[elm_idx]
         data.F_dcn = self.F_dcn[elm_idx]
@@ -136,7 +165,6 @@ class VscData(BranchParentData):
         :return: new BranchData instance
         """
         data: VscData = super().copy()
-        data.__class__ = VscData
 
         data.F_dcn = self.F_dcn.copy()
 

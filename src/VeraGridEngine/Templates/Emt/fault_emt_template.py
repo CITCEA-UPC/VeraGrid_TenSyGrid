@@ -19,6 +19,7 @@ from VeraGridEngine.enumerations import BlockType, DeviceType, EmtFaultPlacement
 
 
 class FaultEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

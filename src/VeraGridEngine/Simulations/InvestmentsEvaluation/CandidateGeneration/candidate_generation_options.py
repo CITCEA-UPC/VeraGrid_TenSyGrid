@@ -51,6 +51,22 @@ class CandidateGenerationOptions:
     """
     Options for the candidate-investment generator.
     """
+    __slots__ = (
+        "top_n_corridors",
+        "base_overload_threshold",
+        "n1_overload_threshold",
+        "ptdf_threshold",
+        "verify_top_k",
+        "use_time_series",
+        "time_indices",
+        "battery_duration_hours",
+        "shunt_bmax_margin",
+        "max_injection_mw",
+        "shunt_cost_per_mvar",
+        "static_gen_cost_per_mw",
+        "battery_cost_per_mwh",
+        "line_cost_per_mva",
+    )
 
     def __init__(self,
                  top_n_corridors: int = 5,
@@ -66,7 +82,7 @@ class CandidateGenerationOptions:
                  shunt_cost_per_mvar: float = DEFAULT_SHUNT_COST_PER_MVAR,
                  static_gen_cost_per_mw: float = DEFAULT_STATIC_GEN_COST_PER_MW,
                  battery_cost_per_mwh: float = DEFAULT_BATTERY_COST_PER_MWH,
-                 line_cost_per_mva: float = DEFAULT_LINE_COST_PER_MVA):
+                 line_cost_per_mva: float = DEFAULT_LINE_COST_PER_MVA) -> None:
         """
         :param top_n_corridors: Number of nearby-substation corridors enumerated as new-line
                                 candidates for each flagged violation (in addition to the parallel

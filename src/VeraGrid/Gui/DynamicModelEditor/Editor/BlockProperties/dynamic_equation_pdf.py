@@ -290,7 +290,7 @@ def get_latex_group_end(source: str, opening_index: int) -> int | None:
 def expand_latex_fractions_for_wrapping(latex: str) -> str:
     """Convert fractions to equivalent slash notation for multiline display.
 
-    A large ``\\frac`` is one indivisible brace group for MathText. Converting
+    A large ``\\frac`` is one indivisible brace group in source. Converting
     only the wrapped visual representation to parenthesized slash notation
     exposes safe operator spaces while the copyable source PDF retains the
     original LaTeX unchanged.
@@ -330,9 +330,8 @@ def expand_latex_fractions_for_wrapping(latex: str) -> str:
 def expand_latex_square_roots_for_wrapping(latex: str) -> str:
     """Convert square roots to equivalent powers for multiline rendering.
 
-    MathText cannot render one square-root bar across independent pixmap
-    lines. The equivalent parenthesized power notation exposes the terms as
-    safe line-break candidates without changing the symbolic expression.
+    A square-root command cannot be rendered across independent text lines.
+    Parenthesized power notation exposes safe line-break candidates.
 
     :param latex: LaTeX source after scalable delimiters were normalized.
     :return: Equivalent source whose long radicand can span several lines.
@@ -361,33 +360,22 @@ def expand_latex_square_roots_for_wrapping(latex: str) -> str:
 def render_wrapped_equation(renderer: LatexRenderer,
                             latex: str,
                             maximum_width: int) -> List[RenderedSvgEquation]:
-    """Render one equation as vector lines that fit the available width.
+    """Wrap literal equation source into SVG text lines that fit the page.
 
-    Safe top-level spaces are preferred as line boundaries. Scaling is only a
-    final fallback for one indivisible LaTeX group, never the primary layout
-    mechanism for a long equation.
+    Safe top-level spaces are preferred as line boundaries. One indivisible
+    token is scaled as a final fallback.
 
-    :param renderer: Ten-point equation renderer.
-    :param latex: Raw equation LaTeX.
+    :param renderer: Ten-point Qt text renderer.
+    :param latex: Raw equation LaTeX source.
     :param maximum_width: Available equation width in painter pixels.
-    :return: Ordered SVG equations, each guaranteed to fit the available width.
+    :return: Ordered SVG text lines, each guaranteed to fit the available width.
     """
     complete_render: RenderedSvgEquation = renderer.render_svg(latex)
-    if (
-            complete_render.get_uses_mathtext()
-            and complete_render.get_size().width() <= maximum_width
-    ):
+    if complete_render.get_size().width() <= maximum_width:
         return list((complete_render,))
-    elif (
-            not complete_render.get_uses_mathtext()
-            and len(latex) <= renderer.get_maximum_mathtext_length()
-    ):
-        raise ValueError(f"Invalid LaTeX equation generated for PDF export: {latex}")
     else:
         pass
 
-    # MathText requires paired scalable delimiters. Ordinary parentheses can
-    # be distributed over continuation lines, so remove only the sizing hints.
     delimiter_source: str = latex.replace(r"\left", "").replace(r"\right", "")
     fraction_source: str = expand_latex_fractions_for_wrapping(delimiter_source)
     line_break_source: str = expand_latex_square_roots_for_wrapping(fraction_source)
@@ -400,29 +388,21 @@ def render_wrapped_equation(renderer: LatexRenderer,
             candidate: str = segment
         else:
             candidate = f"{current_source} {segment}"
+
         candidate_render: RenderedSvgEquation = renderer.render_svg(candidate)
-        if (
-                not candidate_render.get_uses_mathtext()
-                and len(candidate) > renderer.get_maximum_mathtext_length()
-                and len(current_source) > 0
-        ):
-            line_sources.append(current_source)
-            current_source = segment
-        elif not candidate_render.get_uses_mathtext():
-            raise ValueError(
-                f"Invalid wrapped LaTeX equation generated for PDF export: {candidate}"
-            )
-        elif candidate_render.get_size().width() <= maximum_width:
+        if candidate_render.get_size().width() <= maximum_width:
             current_source = candidate
         elif len(current_source) > 0:
             line_sources.append(current_source)
             current_source = segment
         else:
             current_source = segment
+
     if len(current_source) > 0:
         line_sources.append(current_source)
     else:
         pass
+
     if len(line_sources) == 0:
         line_sources.append(line_break_source)
     else:
@@ -432,12 +412,6 @@ def render_wrapped_equation(renderer: LatexRenderer,
     line_source: str
     for line_source in line_sources:
         line_render: RenderedSvgEquation = renderer.render_svg(line_source)
-        if not line_render.get_uses_mathtext():
-            raise ValueError(
-                f"Invalid wrapped LaTeX equation generated for PDF export: {line_source}"
-            )
-        else:
-            pass
         line_size: QtCore.QSize = line_render.get_size()
         if line_size.width() > maximum_width:
             scale: float = float(maximum_width) / float(line_size.width())
@@ -447,7 +421,7 @@ def render_wrapped_equation(renderer: LatexRenderer,
                     maximum_width,
                     max(1, int(round(float(line_size.height()) * scale))),
                 ),
-                uses_mathtext=True,
+                uses_mathtext=False,
             )
         else:
             displayed_render = line_render
@@ -570,7 +544,7 @@ class EquationPdfDocumentPainter:
             self._content_rect.width(),
         )
         cursor_y += self._draw_plain_text(
-            "Format: Rendered equations",
+            "Format: LaTeX source",
             left,
             cursor_y + 2,
             self._content_rect.width(),
@@ -649,7 +623,7 @@ class EquationPdfDocumentPainter:
         self._draw_rendered_equation(latex, equation_index)
 
     def _draw_rendered_equation(self, latex: str, equation_index: int) -> None:
-        """Draw one MathText-rendered equation as scale-independent SVG paths.
+        """Draw literal LaTeX source as SVG text.
 
         :param latex: Raw LaTeX equation source.
         :param equation_index: One-based equation number.

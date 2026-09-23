@@ -295,6 +295,20 @@ class BusNtcVars:
     Struct to store the bus related vars
     """
 
+    __slots__ = (
+        "angle_min",
+        "angle_max",
+        "Va",
+        "Vm",
+        "kirchhoff",
+        "shadow_prices",
+        "load_p",
+        "Pinj",
+        "Pbalance",
+        "delta_p",
+        "proportions",
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BusVars structure
@@ -353,6 +367,25 @@ class BranchNtcVars:
     """
     Struct to store the branch related vars
     """
+
+    __slots__ = (
+        "flows",
+        "tap_angles",
+        "flow_constraints_ub",
+        "flow_constraints_lb",
+        "rates",
+        "contingency_rates",
+        "loading",
+        "alpha",
+        "monitor",
+        "monitor_logic",
+        "contingency_flow_data",
+        "inter_space_branches",
+        "worst_contingency_idx",
+        "worst_contingency_flow",
+        "worst_contingency_loading",
+        "alpha_n1_worst",
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -446,6 +479,15 @@ class HvdcNtcVars:
     Struct to store the generation vars
     """
 
+    __slots__ = (
+        "flows",
+        "z",
+        "y",
+        "rates",
+        "loading",
+        "inter_space_hvdc",
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         GenerationVars structure
@@ -490,6 +532,15 @@ class VscNtcVars:
     Struct to store the VSC vars
     """
 
+    __slots__ = (
+        "flows",
+        "z",
+        "y",
+        "rates",
+        "loading",
+        "inter_space_vsc",
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         VscNtcVars structure
@@ -508,7 +559,7 @@ class VscNtcVars:
     def get_values(self, Sbase: float, model: OrToolsLpModel) -> "VscNtcVars":
         """
         Return an instance of this class where the arrays content are not LP vars but their value
-        :return: HvdcVars
+        :return: VscNtcVars
         """
         nt, n_elm = self.flows.shape
         data = VscNtcVars(nt=nt, n_elm=n_elm)
@@ -533,6 +584,30 @@ class NtcVars:
     """
     Structure to host the opf variables
     """
+
+    __slots__ = (
+        "nt",
+        "nbus",
+        "ng",
+        "nb",
+        "nl",
+        "nbr",
+        "n_hvdc",
+        "n_vsc",
+        "model",
+        "acceptable_solution",
+        "bus_vars",
+        "branch_vars",
+        "hvdc_vars",
+        "vsc_vars",
+        "delta_1",
+        "delta_2",
+        "delta_sl_1",
+        "delta_sl_2",
+        "power_shift",
+        "structural_ntc",
+        "inter_area_flows",
+    )
 
     def __init__(self, nt: int, nbus: int, ng: int, nb: int, nl: int, nbr: int, n_hvdc: int, n_vsc: int,
                  model: OrToolsLpModel):

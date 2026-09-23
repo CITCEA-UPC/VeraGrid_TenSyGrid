@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.vsc_dc_line import RawVscDCLine
 
 class RawVscDCLineV29(RawVscDCLine):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

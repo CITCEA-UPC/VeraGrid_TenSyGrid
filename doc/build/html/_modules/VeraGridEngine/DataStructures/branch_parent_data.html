@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.branch_parent_data &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.DataStructures.branch_parent_data &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -123,6 +123,27 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structure to host all branches data for calculation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nelm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idtag&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rates&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contingency_rates&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protection_rates&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;F&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mttf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mttr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contingency_enabled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;monitor_loading&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;overload_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;original_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reducible&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nelm</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -259,7 +280,7 @@
 <span class="sd">        :return: new BranchData instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">BranchParentData</span><span class="p">(</span><span class="n">nelm</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">elm_idx</span><span class="p">),</span> <span class="n">nbus</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bus_idx</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">nelm</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">elm_idx</span><span class="p">),</span> <span class="n">nbus</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bus_idx</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">nelm</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -314,7 +335,7 @@
 <span class="sd">        :return: new BranchData instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">BranchParentData</span><span class="p">(</span><span class="n">nelm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nelm</span><span class="p">,</span> <span class="n">nbus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nbus</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">BranchParentData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">nelm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nelm</span><span class="p">,</span> <span class="n">nbus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nbus</span><span class="p">)</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">data</span><span class="o">.</span><span class="n">idtag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idtag</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>

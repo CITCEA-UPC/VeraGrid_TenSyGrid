@@ -11,7 +11,7 @@ from typing import List, Union, Any, Dict
 from datetime import datetime
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import (QApplication, QDialog, QTableView, QVBoxLayout, QPushButton, QHBoxLayout,
-                               QLabel, QComboBox, QSpacerItem, QSizePolicy)
+                               QLabel, QComboBox, QSpacerItem, QSizePolicy, QWidget)
 
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from VeraGridEngine.basic_structures import Logger, IntVec
@@ -360,7 +360,8 @@ class LogsDialogue(CenteredDialog):
     New profile dialogue window
     """
 
-    def __init__(self, name: str, logger: Logger, expand_all=True, modal: bool = True):
+    def __init__(self, name: str, logger: Logger, expand_all=True, modal: bool = True,
+                 parent: QWidget | None = None):
         """
 
         :param name:
@@ -368,7 +369,7 @@ class LogsDialogue(CenteredDialog):
         :param expand_all:
         :param modal:
         """
-        super(LogsDialogue, self).__init__()
+        super(LogsDialogue, self).__init__(parent=parent)
         self.setObjectName("self")
         self.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.NoContextMenu)
         self.main_layout = QtWidgets.QVBoxLayout(self)

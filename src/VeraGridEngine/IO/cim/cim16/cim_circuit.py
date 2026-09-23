@@ -11,6 +11,16 @@ import VeraGridEngine.IO.cim.cim16.cim_devices as cimdev
 
 
 class CIMCircuit:
+    __slots__ = (
+        "elements",
+        "all_objects_dict",
+        "elements_by_type",
+        "logger",
+        "text_func",
+        "progress_func",
+        "class_dict",
+        "classes",
+    )
 
     def __init__(self, text_func=None, progress_func=None, logger=Logger()):
         """

@@ -10,6 +10,11 @@ from VeraGridEngine.IO.cim.db.cgmes_lookup_db import CgmesLookUpDb
 
 
 class DbHandler:
+    __slots__ = (
+        "db_folder",
+        "psse_lookup_db",
+        "cgmes_lookup_db",
+    )
 
     def __init__(self, new_db=False):
 

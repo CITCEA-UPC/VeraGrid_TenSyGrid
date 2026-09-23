@@ -139,6 +139,7 @@ def _build_line_parameter_matrices_from_template_or_balanced_data(line: Any,
     return r_full, l_full, c_full
 
 class BergeronLineEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

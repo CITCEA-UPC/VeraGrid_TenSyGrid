@@ -10,6 +10,13 @@ from typing import List
 
 
 class BaseDb:
+    __slots__ = (
+        "config_file_name",
+        "last_file_opened",
+        "list_of_db_files",
+        "db_folder",
+        "db_extension",
+    )
 
     def __init__(self, db_folder: str, db_extension: str, new_db=False, init_files: List[str] = ()):
         """

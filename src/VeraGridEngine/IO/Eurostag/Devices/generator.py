@@ -19,20 +19,36 @@ class EurostagGenerator:
     REGULATED_NODE_NAME = (88, 96)
     REACTIVE_SHARING_COEFFICIENT = (97, 105)
 
-    def __init__(self):
-        self.name = ""
-        self.state = "Y"
-        self.bus_name = ""
-        self.min_active_power = 0.0
-        self.active_power = 0.0
-        self.max_active_power = 9999.0
-        self.min_reactive_power = -9999.0
-        self.reactive_power = 0.0
-        self.max_reactive_power = 9999.0
-        self.regulating_mode = ""
-        self.target_voltage = 0.0
-        self.regulated_node_name = ""
-        self.reactive_sharing_coefficient = 1.0
+    __slots__ = (
+        "name",
+        "state",
+        "bus_name",
+        "min_active_power",
+        "active_power",
+        "max_active_power",
+        "min_reactive_power",
+        "reactive_power",
+        "max_reactive_power",
+        "regulating_mode",
+        "target_voltage",
+        "regulated_node_name",
+        "reactive_sharing_coefficient",
+    )
+
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.state: str = "Y"
+        self.bus_name: str = ""
+        self.min_active_power: float = 0.0
+        self.active_power: float = 0.0
+        self.max_active_power: float = 9999.0
+        self.min_reactive_power: float = -9999.0
+        self.reactive_power: float = 0.0
+        self.max_reactive_power: float = 9999.0
+        self.regulating_mode: str = ""
+        self.target_voltage: float = 0.0
+        self.regulated_node_name: str = ""
+        self.reactive_sharing_coefficient: float = 1.0
 
     def parse_line(self, line: str) -> None:
         self.name = slice_text(line, *self.NAME)
@@ -58,9 +74,14 @@ class EurostagDynamicGenerator:
     NAME = (0, 8)
     RATED_APPARENT_POWER = (18, 26)
 
-    def __init__(self):
-        self.name = ""
-        self.rated_apparent_power = 0.0
+    __slots__ = (
+        "name",
+        "rated_apparent_power",
+    )
+
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.rated_apparent_power: float = 0.0
 
     @classmethod
     def from_lines(cls, rows: list[str], start: int) -> tuple["EurostagDynamicGenerator", int]:

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Templates.Emt.load_RLC_emt_template &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Templates.Emt.load_RLC_emt_template &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -110,6 +110,7 @@
 <span class="sd">&quot;&quot;&quot;Phase-selective EMT templates for shunt R/L/C devices.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
@@ -353,6 +354,7 @@
 <div class="viewcode-block" id="GroundingLinkEmtTemplate">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Templates.Emt.html#VeraGridEngine.Templates.Emt.load_RLC_emt_template.GroundingLinkEmtTemplate">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GroundingLinkEmtTemplate</span><span class="p">(</span><span class="n">TemplateDefinition</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1541,6 +1543,7 @@
 <div class="viewcode-block" id="ShuntRComboEmtTemplate">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Templates.Emt.html#VeraGridEngine.Templates.Emt.load_RLC_emt_template.ShuntRComboEmtTemplate">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShuntRComboEmtTemplate</span><span class="p">(</span><span class="n">TemplateDefinition</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1575,6 +1578,7 @@
 <div class="viewcode-block" id="ShuntLComboEmtTemplate">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Templates.Emt.html#VeraGridEngine.Templates.Emt.load_RLC_emt_template.ShuntLComboEmtTemplate">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShuntLComboEmtTemplate</span><span class="p">(</span><span class="n">TemplateDefinition</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1609,6 +1613,7 @@
 <div class="viewcode-block" id="ShuntCComboEmtTemplate">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Templates.Emt.html#VeraGridEngine.Templates.Emt.load_RLC_emt_template.ShuntCComboEmtTemplate">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShuntCComboEmtTemplate</span><span class="p">(</span><span class="n">TemplateDefinition</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vf</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1677,6 +1682,8 @@
     <span class="n">active_phases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_active_phases</span><span class="p">(</span><span class="n">phA</span><span class="o">=</span><span class="n">phA</span><span class="p">,</span> <span class="n">phB</span><span class="o">=</span><span class="n">phB</span><span class="p">,</span> <span class="n">phC</span><span class="o">=</span><span class="n">phC</span><span class="p">)</span>
     <span class="n">phase_voltage_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">total_current_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">inductive_current_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">inductance_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">in_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="n">out_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="n">algebraic_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -1809,7 +1816,9 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing nominal-voltage variable for EMT RLC resistor initialization&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
-                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">resistance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">pl0_var</span>
+                <span class="c1"># Pl0_* is one-third of total power on the system three-phase</span>
+                <span class="c1"># Sbase.  Convert it to the conventional phase-current base.</span>
+                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">resistance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pl0_var</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">resistance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">direct_r_value</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">resistance_var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -1826,15 +1835,17 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing base variables for EMT RLC inductive initialization&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
-                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">inductance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">ql0_var</span> <span class="o">*</span> <span class="n">omega_base_var</span><span class="p">)</span>
+                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">inductance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ql0_var</span> <span class="o">*</span> <span class="n">omega_base_var</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">inductance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">direct_l_value</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">inductance_var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">inductive_current_var</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;iL_</span><span class="si">{</span><span class="n">phase_label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">inductive_diff_var</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_diff_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;d_iL_</span><span class="si">{</span><span class="n">phase_label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_var</span><span class="o">=</span><span class="n">inductive_current_var</span><span class="p">)</span>
             <span class="n">state_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inductive_current_var</span><span class="p">)</span>
+            <span class="n">inductive_current_vars</span><span class="p">[</span><span class="n">phase_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">inductive_current_var</span>
+            <span class="n">inductance_vars</span><span class="p">[</span><span class="n">phase_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">inductance_var</span>
             <span class="n">diff_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inductive_diff_var</span><span class="p">)</span>
-            <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">diff_init_eqs</span><span class="p">[</span><span class="n">inductive_diff_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
             <span class="n">state_eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="n">voltage_drop</span> <span class="o">/</span> <span class="n">inductance_var</span><span class="p">)</span>
             <span class="n">phase_current_expr</span> <span class="o">=</span> <span class="n">phase_current_expr</span> <span class="o">-</span> <span class="n">inductive_current_var</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1849,7 +1860,9 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing base variables for EMT RLC capacitive initialization&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
-                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">capacitance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">ql0_var</span> <span class="o">/</span> <span class="p">(</span><span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">omega_base_var</span><span class="p">)</span>
+                <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">capacitance_var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ql0_var</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="n">vnom_var</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">omega_base_var</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="p">[</span><span class="n">capacitance_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">direct_c_value</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">capacitance_var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -1867,6 +1880,28 @@
             <span class="k">pass</span>
 
         <span class="n">algebraic_eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase_current_expr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+            <span class="n">include_l</span>
+            <span class="ow">and</span> <span class="n">connection_type</span> <span class="o">==</span> <span class="n">ShuntConnectionType</span><span class="o">.</span><span class="n">FloatingStar</span>
+            <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="n">active_phases</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">}</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">omega_base_var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Floating-star EMT inductor initialization requires omega_base&quot;</span><span class="p">)</span>
+        <span class="n">sqrt_three</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
+        <span class="n">rotating_voltage</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">phase_voltage_vars</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">phase_label</span> <span class="ow">in</span> <span class="n">active_phases</span><span class="p">:</span>
+            <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">init_eqs</span><span class="p">[</span><span class="n">inductive_current_vars</span><span class="p">[</span><span class="n">phase_label</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">rotating_voltage</span><span class="p">[</span><span class="n">phase_label</span><span class="p">]</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">sqrt_three</span> <span class="o">*</span> <span class="n">omega_base_var</span> <span class="o">*</span> <span class="n">inductance_vars</span><span class="p">[</span><span class="n">phase_label</span><span class="p">])</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">include_l</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">phase_label</span> <span class="ow">in</span> <span class="n">active_phases</span><span class="p">:</span>
+            <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">init_eqs</span><span class="p">[</span><span class="n">inductive_current_vars</span><span class="p">[</span><span class="n">phase_label</span><span class="p">]]</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">connection_type</span> <span class="o">==</span> <span class="n">ShuntConnectionType</span><span class="o">.</span><span class="n">FloatingStar</span><span class="p">:</span>
         <span class="n">neutral_kcl</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
@@ -1912,6 +1947,8 @@
         <span class="n">neutral_voltage_var</span><span class="o">=</span><span class="n">neutral_voltage_var</span> <span class="k">if</span> <span class="n">connection_type</span> <span class="ow">in</span> <span class="p">{</span><span class="n">ShuntConnectionType</span><span class="o">.</span><span class="n">NeutralStar</span><span class="p">,</span> <span class="n">ShuntConnectionType</span><span class="o">.</span><span class="n">GroundedStar</span><span class="p">}</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">neutral_current_var</span><span class="o">=</span><span class="n">neutral_current_var</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="k">if</span> <span class="n">vnom_var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">external_mapping</span><span class="p">[</span><span class="n">VarPowerFlowReferenceType</span><span class="o">.</span><span class="n">Vm</span><span class="p">]</span> <span class="o">=</span> <span class="n">vnom_var</span>
     <span class="n">_attach_combo_editor_diagram</span><span class="p">(</span>
         <span class="n">root_block</span><span class="o">=</span><span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="p">,</span>
         <span class="n">input_vars</span><span class="o">=</span><span class="n">in_vars</span><span class="p">,</span>
@@ -1921,7 +1958,6 @@
         <span class="n">grounding_link_block</span><span class="o">=</span><span class="n">grounding_link_block</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">templ</span></div>
-
 
 </pre></div>
 

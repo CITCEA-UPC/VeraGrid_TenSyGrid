@@ -11,6 +11,11 @@ from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var
 
 
 def _unique_keep_order(vars_list: list[Var]) -> list[Var]:
+    """
+
+    :param vars_list:
+    :return:
+    """
     seen: set[int] = set()
     out: list[Var] = []
     for var in vars_list:
@@ -28,6 +33,31 @@ class SingleBlockDaeProblem:
     This class is shaped like the problem API consumed by implicit RMS solvers,
     but focuses on one symbolic block and optional externally-driven inputs.
     """
+    __slots__ = (
+        "block",
+        "_state_vars",
+        "_algebraic_vars",
+        "_diff_vars",
+        "_state_eqs",
+        "_algebraic_eqs",
+        "_all_vars",
+        "uid2idx_vars",
+        "_uid2idx_diff",
+        "_compiler_names_dict",
+        "_alias_names_dict",
+        "_constant_params",
+        "_variable_parameters",
+        "_variable_parameters_eqs",
+        "_variable_parameters_values",
+        "_rhs_fn",
+        "_derivative_fn",
+        "_jacobian_fn",
+        "_input_var_by_name",
+        "_input_param_by_name",
+        "_input_profile_by_name",
+        "init_guess",
+        "_x0",
+    )
 
     VARS_NAME = "vrs"
     VARIABLE_PARAMS_NAME = "vprms"
@@ -76,6 +106,10 @@ class SingleBlockDaeProblem:
         self._x0 = self._build_x0_from_init_data()
 
     def _collect_block_runtime_parameters(self) -> None:
+        """
+
+        :return:
+        """
         for var, eq in self.block.event_dict.items():
             if not isinstance(var, Var):
                 continue
@@ -83,11 +117,19 @@ class SingleBlockDaeProblem:
             self._variable_parameters_eqs.append(eq)
 
     def _promote_differential_eqs_to_algebraic_all_blocks(self) -> None:
+        """
+
+        :return:
+        """
         for blk in self.block.get_all_blocks():
             if len(blk.differential_eqs):
                 blk.algebraic_eqs.extend(blk.differential_eqs)
 
     def _wire_in_vars_as_runtime_inputs(self) -> None:
+        """
+
+        :return:
+        """
         for in_var in list(self.block.in_vars):
             if in_var.uid not in self.uid2idx_vars:
                 self._algebraic_vars.append(in_var)
@@ -113,6 +155,10 @@ class SingleBlockDaeProblem:
         self._variable_parameters_values = np.zeros(len(self._variable_parameters), dtype=float)
 
     def _compile_rhs_and_jacobian(self) -> None:
+        """
+
+        :return:
+        """
         all_eqs = self._state_eqs + self._algebraic_eqs
 
         self._rhs_fn = SymbolicVector(
@@ -147,6 +193,10 @@ class SingleBlockDaeProblem:
         )
 
     def _populate_init_guess(self) -> None:
+        """
+
+        :return:
+        """
         for var, value in self.block.init_values.items():
             if isinstance(var, Var) and var.uid in self.uid2idx_vars:
                 self.init_guess[var.uid] = float(value.value if isinstance(value, Const) else value)
@@ -179,51 +229,111 @@ class SingleBlockDaeProblem:
             self.init_guess.setdefault(var.uid, 0.0)
 
     def _build_x0_from_init_data(self) -> np.ndarray:
+        """
+
+        :return:
+        """
         x0 = np.zeros(len(self._all_vars), dtype=float)
         for var in self._all_vars:
             x0[self.uid2idx_vars[var.uid]] = float(self.init_guess.get(var.uid, 0.0))
         return x0
 
     def bind_input_constant(self, input_name: str, value: float) -> None:
+        """
+
+        :param input_name:
+        :param value:
+        :return:
+        """
         if input_name not in self._input_profile_by_name:
             raise KeyError(f"Unknown input '{input_name}'. Available: {sorted(self._input_profile_by_name.keys())}")
         self._input_profile_by_name[input_name] = float(value)
 
     def bind_input_profile(self, input_name: str, profile: Callable[[float], float]) -> None:
+        """
+
+        :param input_name:
+        :param profile:
+        :return:
+        """
         if input_name not in self._input_profile_by_name:
             raise KeyError(f"Unknown input '{input_name}'. Available: {sorted(self._input_profile_by_name.keys())}")
         self._input_profile_by_name[input_name] = profile
 
     def list_inputs(self) -> list[str]:
+        """
+
+        :return:
+        """
         return sorted(self._input_profile_by_name.keys())
 
     def get_all_vars_number(self) -> int:
+        """
+
+        :return:
+        """
         return len(self._all_vars)
 
     def get_states_number(self) -> int:
+        """
+
+        :return:
+        """
         return len(self._state_vars)
 
     def get_algebraic_var_number(self) -> int:
+        """
+
+        :return:
+        """
         return len(self._algebraic_vars)
 
     def get_diff_var_number(self) -> int:
+        """
+
+        :return:
+        """
         return len(self._diff_vars)
 
     @property
     def algebraic_vars(self):
+        """
+
+        :return:
+        """
         return self._algebraic_vars
 
     @property
     def _algebraic_vars_(self):
+        """
+
+        :return:
+        """
         return self._algebraic_vars
 
     def get_x0(self) -> np.ndarray:
+        """
+
+        :return:
+        """
         return self._x0.copy()
 
     def update_variable_params_ts(self, x_snapshot: np.ndarray, t: float) -> None:
+        """
+
+        :param x_snapshot:
+        :param t:
+        :return:
+        """
         self.update_variable_params(t=t, x_snapshot=x_snapshot)
 
     def update_variable_params(self, t: float, x_snapshot: np.ndarray | None = None) -> None:
+        """
+
+        :param t:
+        :param x_snapshot:
+        :return:
+        """
         _ = x_snapshot
         for i, param in enumerate(self._variable_parameters):
             if i < len(self._variable_parameters_eqs):
@@ -246,6 +356,12 @@ class SingleBlockDaeProblem:
                 self._variable_parameters_values[i] = float(expr)
 
     def rhs_algebraic(self, x: np.ndarray, dx: np.ndarray) -> np.ndarray:
+        """
+
+        :param x:
+        :param dx:
+        :return:
+        """
         if self._rhs_fn is None:
             return np.array([])
         full = self._rhs_fn(x, dx, self._variable_parameters_values, self._constant_params)
@@ -253,6 +369,12 @@ class SingleBlockDaeProblem:
         return full[ns:]
 
     def rhs_state(self, x: np.ndarray, dx: np.ndarray) -> np.ndarray:
+        """
+
+        :param x:
+        :param dx:
+        :return:
+        """
         if self._rhs_fn is None or self.get_states_number() == 0:
             return np.array([])
         full = self._rhs_fn(x, dx, self._variable_parameters_values, self._constant_params)
@@ -260,14 +382,36 @@ class SingleBlockDaeProblem:
         return full[:ns]
 
     def get_dx(self, x: np.ndarray, xn: np.ndarray, dx: np.ndarray, h: float) -> np.ndarray:
+        """
+
+        :param x:
+        :param xn:
+        :param dx:
+        :param h:
+        :return:
+        """
         return self._derivative_fn(x, xn, dx, h)
 
     def _jac_full(self, x: np.ndarray, dx: np.ndarray, h: float) -> sp.csc_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         if self._jacobian_fn is None:
             return sp.csc_matrix((0, 0))
         return self._jacobian_fn(x, dx, self._variable_parameters_values, self._constant_params, h).tocsc()
 
     def get_j11(self, x: np.ndarray, dx: np.ndarray, h: float) -> sp.csc_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         ns = self.get_states_number()
         if ns == 0:
             return sp.csc_matrix((0, 0))
@@ -275,6 +419,13 @@ class SingleBlockDaeProblem:
         return J[:ns, :ns]
 
     def get_j12(self, x: np.ndarray, dx: np.ndarray, h: float) -> sp.csc_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         ns = self.get_states_number()
         na = self.get_algebraic_var_number()
         if ns == 0:
@@ -283,6 +434,13 @@ class SingleBlockDaeProblem:
         return J[:ns, ns:ns + na]
 
     def get_j21(self, x: np.ndarray, dx: np.ndarray, h: float) -> sp.csc_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         ns = self.get_states_number()
         na = self.get_algebraic_var_number()
         if na == 0:
@@ -291,6 +449,13 @@ class SingleBlockDaeProblem:
         return J[ns:ns + na, :ns]
 
     def get_j22(self, x: np.ndarray, dx: np.ndarray, h: float) -> sp.csc_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         ns = self.get_states_number()
         na = self.get_algebraic_var_number()
         if na == 0:
@@ -299,29 +464,79 @@ class SingleBlockDaeProblem:
         return J[ns:ns + na, ns:ns + na]
 
     def get_var_idx(self, v: Var) -> int:
+        """
+
+        :param v:
+        :return:
+        """
         return self.uid2idx_vars[v.uid]
 
     def report_progress2(self, step_idx: int, steps: int) -> None:
+        """
+
+        :param step_idx:
+        :param steps:
+        :return:
+        """
         _ = (step_idx, steps)
 
     def update(self, t: float, x_snapshot: np.ndarray, event_values: np.ndarray) -> None:
+        """
+
+        :param t:
+        :param x_snapshot:
+        :param event_values:
+        :return:
+        """
         _ = (t, x_snapshot, event_values)
 
     def get_next_forced_event_time(self, t_prev: float, t_target: float):
+        """
+
+        :param t_prev:
+        :param t_target:
+        :return:
+        """
         _ = (t_prev, t_target)
         return None
 
     def initialize_fmu_cs_devices(self, x0: np.ndarray, t0: float) -> None:
-        _ = (x0, t0)
+        """
+
+        :param x0:
+        :param t0:
+        :return:
+        """
+        _ = (x0, t0)  # TODO: wtf
 
     def initialize_fmu_me_devices(self, x0: np.ndarray, t0: float) -> None:
-        _ = (x0, t0)
+        """
+
+        :param x0:
+        :param t0:
+        :return:
+        """
+        _ = (x0, t0)  # TODO: wtf
 
     def advance_fmu_cs_devices(self, t: float, x_snapshot: np.ndarray, h: float) -> None:
-        _ = (t, x_snapshot, h)
+        """
+
+        :param t:
+        :param x_snapshot:
+        :param h:
+        :return:
+        """
+        _ = (t, x_snapshot, h)  # TODO: wtf
 
     def advance_fmu_me_devices(self, t: float, x_snapshot: np.ndarray, h: float) -> None:
-        _ = (t, x_snapshot, h)
+        """
+
+        :param t:
+        :param x_snapshot:
+        :param h:
+        :return:
+        """
+        _ = (t, x_snapshot, h)  # TODO: wtf
 
     def resolve_fmu_me_devices(self, accepted: bool) -> float | None:
         """Resolve a prepared FMU ME step for the no-device test problem.
@@ -330,7 +545,7 @@ class SingleBlockDaeProblem:
         :return: Always ``None`` because this problem owns no FMU.
         """
 
-        _ = accepted
+        _ = accepted  # TODO: wtf
         return None
 
     def prepare_fmu_me_state_event_retry(self) -> float | None:
@@ -342,7 +557,15 @@ class SingleBlockDaeProblem:
         return None
 
     def close_fmu_cs_devices(self) -> None:
+        """
+
+        :return:
+        """
         return None
 
     def close_fmu_me_devices(self) -> None:
+        """
+
+        :return:
+        """
         return None

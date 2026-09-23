@@ -81,6 +81,12 @@ class TemplateProp:
 
 class TemplateDefinition:
 
+    __slots__ = (
+        'vf',
+        'params',
+        'params_dict',
+    )
+
     def __init__(self, vf, params):
         """
 

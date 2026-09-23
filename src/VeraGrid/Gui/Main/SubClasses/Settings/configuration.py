@@ -476,7 +476,6 @@ class ConfigurationMain(ResultsMain):
                 # "max_branch_size": self.ui.max_branch_size_spinBox,
                 # "width_based_flow": self.ui.branch_width_based_on_flow_checkBox,
                 "map_tile_provider": self.ui.tile_provider_comboBox,
-                "plotting_style": self.ui.plt_style_comboBox,
                 "video_fps": self.ui.fps_spinBox
             },
             "general": {

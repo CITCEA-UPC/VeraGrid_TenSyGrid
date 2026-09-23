@@ -531,7 +531,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="MatplotlibWidget" name="plotwidget" native="true"/>
+        <widget class="GraphsWidget" name="plotwidget" native="true"/>
        </item>
       </layout>
      </widget>
@@ -642,9 +642,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MatplotlibWidget</class>
+   <class>GraphsWidget</class>
    <extends>QWidget</extends>
-   <header>.matplotlibwidget</header>
+   <header>VeraGrid.Gui.PlotDialogue.qt_chart_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

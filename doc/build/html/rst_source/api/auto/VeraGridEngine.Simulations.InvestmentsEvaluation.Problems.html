@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.InvestmentsEvaluation.Problems package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.InvestmentsEvaluation.Problems package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -139,8 +139,59 @@
 <span id="veragridengine-simulations-investmentsevaluation-problems-adequacy-problem-module"></span><h2>VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem module<a class="headerlink" href="#module-VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.</span></span><span class="sig-name descname"><span class="pre">AdequacyInvestmentProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_monte_carlo_sim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_monte_carlo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_firm_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_firm_capacity_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.Clustering.html#VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults" title="VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults"><span class="pre">ClusteringResults</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/adequacy_problem.html#AdequacyInvestmentProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.</span></span><span class="sig-name descname"><span class="pre">AdequacyInvestmentProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_monte_carlo_sim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_monte_carlo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_firm_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_firm_capacity_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.Clustering.html#VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults" title="VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults"><span class="pre">ClusteringResults</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/adequacy_problem.html#AdequacyInvestmentProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate" title="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackBoxProblemTemplate</span></code></a></p>
+<p>Adequacy investment optimization problem.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.batt_capex">
+<span class="sig-name descname"><span class="pre">batt_capex</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.batt_capex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.branches_cost">
+<span class="sig-name descname"><span class="pre">branches_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.branches_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.clustering_results">
+<span class="sig-name descname"><span class="pre">clustering_results</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.Clustering.html#VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults" title="VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults"><span class="pre">ClusteringResults</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.clustering_results" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim">
+<span class="sig-name descname"><span class="pre">dim</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim2batt">
+<span class="sig-name descname"><span class="pre">dim2batt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim2batt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim2gen">
+<span class="sig-name descname"><span class="pre">dim2gen</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dim2gen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.dt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_capex">
+<span class="sig-name descname"><span class="pre">gen_capex</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_capex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_mttf">
+<span class="sig-name descname"><span class="pre">gen_mttf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_mttf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_mttr">
+<span class="sig-name descname"><span class="pre">gen_mttr</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.gen_mttr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.get_objectives_names">
 <span class="sig-name descname"><span class="pre">get_objectives_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">str_</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/adequacy_problem.html#AdequacyInvestmentProblem.get_objectives_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.get_objectives_names" title="Link to this definition"></a></dt>
@@ -154,6 +205,36 @@
 <dd><p>Get a list of names for the elements of x
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.greedy_dispatch_inputs">
+<span class="sig-name descname"><span class="pre">greedy_dispatch_inputs</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.greedy_dispatch_inputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_batt_idx">
+<span class="sig-name descname"><span class="pre">inv_batt_idx</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_batt_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_gen_idx">
+<span class="sig-name descname"><span class="pre">inv_gen_idx</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_gen_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_group_capex">
+<span class="sig-name descname"><span class="pre">inv_group_capex</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.inv_group_capex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.minimum_firm_share">
+<span class="sig-name descname"><span class="pre">minimum_firm_share</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.minimum_firm_share" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.n_monte_carlo_sim">
+<span class="sig-name descname"><span class="pre">n_monte_carlo_sim</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.n_monte_carlo_sim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.n_objectives">
@@ -176,6 +257,41 @@
 :param x: array of variable values
 :return: array of objectives</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.output_f">
+<span class="sig-name descname"><span class="pre">output_f</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.output_f" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.save_file">
+<span class="sig-name descname"><span class="pre">save_file</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.save_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.time_indices">
+<span class="sig-name descname"><span class="pre">time_indices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.time_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.total_load">
+<span class="sig-name descname"><span class="pre">total_load</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.total_load" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.use_firm_capacity_penalty">
+<span class="sig-name descname"><span class="pre">use_firm_capacity_penalty</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.use_firm_capacity_penalty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.use_monte_carlo">
+<span class="sig-name descname"><span class="pre">use_monte_carlo</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.use_monte_carlo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.years_starts_indices">
+<span class="sig-name descname"><span class="pre">years_starts_indices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.adequacy_problem.AdequacyInvestmentProblem.years_starts_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -222,6 +338,7 @@
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.</span></span><span class="sig-name descname"><span class="pre">BlackBoxProblemTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_x_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_y_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/black_box_problem_template.html#BlackBoxProblemTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Template class for black-box optimization problems.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.get_investments_for_combination">
 <span class="sig-name descname"><span class="pre">get_investments_for_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Aggregation.html#VeraGridEngine.Devices.Aggregation.investment.Investment" title="VeraGridEngine.Devices.Aggregation.investment.Investment"><span class="pre">Investment</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/black_box_problem_template.html#BlackBoxProblemTemplate.get_investments_for_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.get_investments_for_combination" title="Link to this definition"></a></dt>
@@ -244,6 +361,21 @@
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.grid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.investments_by_group">
+<span class="sig-name descname"><span class="pre">investments_by_group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Aggregation.html#VeraGridEngine.Devices.Aggregation.investment.Investment" title="VeraGridEngine.Devices.Aggregation.investment.Investment"><span class="pre">Investment</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.investments_by_group" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.n_objectives">
 <span class="sig-name descname"><span class="pre">n_objectives</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/black_box_problem_template.html#BlackBoxProblemTemplate.n_objectives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.n_objectives" title="Link to this definition"></a></dt>
@@ -265,6 +397,31 @@
 :param x: array of variable values
 :return: array of objectives</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.plot_x_idx">
+<span class="sig-name descname"><span class="pre">plot_x_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.plot_x_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.plot_y_idx">
+<span class="sig-name descname"><span class="pre">plot_y_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.plot_y_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_dim">
+<span class="sig-name descname"><span class="pre">x_dim</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_dim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_max">
+<span class="sig-name descname"><span class="pre">x_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_min">
+<span class="sig-name descname"><span class="pre">x_min</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate.x_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -549,6 +706,17 @@
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.</span></span><span class="sig-name descname"><span class="pre">PowerFlowInvestmentProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pf_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/power_flow_problem.html#PowerFlowInvestmentProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate" title="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackBoxProblemTemplate</span></code></a></p>
+<p>Power flow investment problem definition.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.branches_cost">
+<span class="sig-name descname"><span class="pre">branches_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.branches_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.get_all_elements_dict">
+<span class="sig-name descname"><span class="pre">get_all_elements_dict</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.get_all_elements_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.get_objectives_names">
 <span class="sig-name descname"><span class="pre">get_objectives_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">str_</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/power_flow_problem.html#PowerFlowInvestmentProblem.get_objectives_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.get_objectives_names" title="Link to this definition"></a></dt>
@@ -585,6 +753,41 @@
 :return: array of objectives</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.pf_options">
+<span class="sig-name descname"><span class="pre">pf_options</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.pf_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_cost">
+<span class="sig-name descname"><span class="pre">va_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_max">
+<span class="sig-name descname"><span class="pre">va_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_min">
+<span class="sig-name descname"><span class="pre">va_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.va_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_cost">
+<span class="sig-name descname"><span class="pre">vm_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_max">
+<span class="sig-name descname"><span class="pre">vm_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_min">
+<span class="sig-name descname"><span class="pre">vm_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_problem.PowerFlowInvestmentProblem.vm_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -611,6 +814,27 @@
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.</span></span><span class="sig-name descname"><span class="pre">TimeSeriesPowerFlowInvestmentProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pf_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.Clustering.html#VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults" title="VeraGridEngine.Simulations.Clustering.clustering_results.ClusteringResults"><span class="pre">ClusteringResults</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opf_time_series_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.OPF.html#VeraGridEngine.Simulations.OPF.opf_ts_results.OptimalPowerFlowTimeSeriesResults" title="VeraGridEngine.Simulations.OPF.opf_ts_results.OptimalPowerFlowTimeSeriesResults"><span class="pre">OptimalPowerFlowTimeSeriesResults</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.EngineType" title="VeraGridEngine.enumerations.EngineType"><span class="pre">EngineType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">VeraGrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/power_flow_ts_problem.html#TimeSeriesPowerFlowInvestmentProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate" title="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.black_box_problem_template.BlackBoxProblemTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackBoxProblemTemplate</span></code></a></p>
+<p>Time series power flow investment problem.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.branches_cost">
+<span class="sig-name descname"><span class="pre">branches_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.branches_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.clustering_results">
+<span class="sig-name descname"><span class="pre">clustering_results</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.clustering_results" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.engine" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.get_all_elements_dict">
+<span class="sig-name descname"><span class="pre">get_all_elements_dict</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.get_all_elements_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.get_objectives_names">
 <span class="sig-name descname"><span class="pre">get_objectives_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">str_</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/InvestmentsEvaluation/Problems/power_flow_ts_problem.html#TimeSeriesPowerFlowInvestmentProblem.get_objectives_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.get_objectives_names" title="Link to this definition"></a></dt>
@@ -646,6 +870,56 @@
 :param x: array of variable values
 :return: array of objectives</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.opf_time_series_results">
+<span class="sig-name descname"><span class="pre">opf_time_series_results</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.opf_time_series_results" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.pf_options">
+<span class="sig-name descname"><span class="pre">pf_options</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.pf_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.time_indices">
+<span class="sig-name descname"><span class="pre">time_indices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.time_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_cost">
+<span class="sig-name descname"><span class="pre">va_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_max">
+<span class="sig-name descname"><span class="pre">va_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_min">
+<span class="sig-name descname"><span class="pre">va_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.va_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_cost">
+<span class="sig-name descname"><span class="pre">vm_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_max">
+<span class="sig-name descname"><span class="pre">vm_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_min">
+<span class="sig-name descname"><span class="pre">vm_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.vm_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.years_starts_indices">
+<span class="sig-name descname"><span class="pre">years_starts_indices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.InvestmentsEvaluation.Problems.power_flow_ts_problem.TimeSeriesPowerFlowInvestmentProblem.years_starts_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

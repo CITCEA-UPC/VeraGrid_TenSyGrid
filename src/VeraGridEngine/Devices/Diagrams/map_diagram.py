@@ -20,6 +20,13 @@ class MapDiagram(BaseDiagram):
     MapDiagram
     """
 
+    __slots__ = (
+        'tile_source',
+        'start_level',
+        'longitude',
+        'latitude',
+    )
+
     def __init__(self, idtag: Union[None, str] = None, name: str = '',
                  tile_source: str = '', start_level: int = 11,
                  longitude: float = -15.41, latitude: float = 40.11,
@@ -38,7 +45,10 @@ class MapDiagram(BaseDiagram):
         :param tile_source: tiles' source
         :param start_level: zoom level
         """
-        BaseDiagram.__init__(self, idtag=idtag, name=name, diagram_type=DiagramType.SubstationLineMap,
+        BaseDiagram.__init__(self,
+                             idtag=idtag,
+                             name=name,
+                             diagram_type=DiagramType.SubstationLineMap,
                              use_flow_based_width=use_flow_based_width,
                              min_branch_width=min_branch_width,
                              max_branch_width=max_branch_width,
@@ -55,6 +65,17 @@ class MapDiagram(BaseDiagram):
         self.longitude = longitude  # longitude
 
         self.latitude = latitude  # latitude
+
+    def copy(self, obj_dict: Dict[str, Dict[str, ALL_DEV_TYPES]] | None = None) -> "MapDiagram":
+        """
+        Copy the map diagram layout while treating API objects as pointers.
+        """
+        cpy: MapDiagram = super().copy(obj_dict=obj_dict)  # type: ignore
+        cpy.tile_source = self.tile_source
+        cpy.start_level = self.start_level
+        cpy.longitude = self.longitude
+        cpy.latitude = self.latitude
+        return cpy
 
     def get_data_dict(self) -> Dict[str, Union[str, int, float, Dict[str, Union[GraphicLocation, MapLocation]]]]:
         """

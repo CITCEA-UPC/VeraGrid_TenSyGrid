@@ -7,9 +7,36 @@ class MatpowerBus:
     """
     Class to parse and write bus data from MATPOWER .m files.
     """
-    def __init__(self):
+
+    __slots__ = (
+        "bus_i",
+        "bus_type",
+        "pd",
+        "qd",
+        "gs",
+        "bs",
+        "bus_area",
+        "vm",
+        "va",
+        "base_kv",
+        "zone",
+        "vmax",
+        "vmin",
+        "lam_p",
+        "lam_q",
+        "mu_vmax",
+        "mu_vmin",
+        "bus_x",
+        "bus_y",
+        "collapsed",
+        "dispatchable_bus",
+        "fix_power_bus",
+        "name",
+    )
+
+    def __init__(self) -> None:
         # Initialize all attributes to default values
-        self.bus_i = 0              # Bus number
+        self.bus_i: int = 0              # Bus number
         self.bus_type = 0           # Bus type (PQ, PV, REF, NONE)
         self.pd = 0.0               # Real power demand (MW)
         self.qd = 0.0               # Reactive power demand (MVAr)

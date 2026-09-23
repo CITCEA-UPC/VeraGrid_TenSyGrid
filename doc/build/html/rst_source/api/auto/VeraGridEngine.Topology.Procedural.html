@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Topology.Procedural package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Topology.Procedural package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -201,25 +201,6 @@ after a previous snapshot.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_debugger.ProceduralGridDebugger.plot_mst_graph">
-<span class="sig-name descname"><span class="pre">plot_mst_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords_final_network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_candidate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_steiner_pts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Procedural</span> <span class="pre">Grid</span> <span class="pre">Graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_debugger.html#ProceduralGridDebugger.plot_mst_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_debugger.ProceduralGridDebugger.plot_mst_graph" title="Link to this definition"></a></dt>
-<dd><p>Plot the graph defined by node coordinates and edge list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>coords_final_network</strong> – Array of shape (n_nodes, 2) with [lon, lat]</p></li>
-<li><p><strong>edges</strong> – List of node index pairs</p></li>
-<li><p><strong>n_candidate</strong> – Number of candidate buses</p></li>
-<li><p><strong>n_target</strong> – Number of target buses</p></li>
-<li><p><strong>final_steiner_pts</strong> – Array of Steiner point coordinates</p></li>
-<li><p><strong>title</strong> – Plot title</p></li>
-<li><p><strong>show_labels</strong> – Whether to label nodes with their indices</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_debugger.ProceduralGridDebugger.snapshot_grid_element_names">
 <span class="sig-name descname"><span class="pre">snapshot_grid_element_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_debugger.html#ProceduralGridDebugger.snapshot_grid_element_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_debugger.ProceduralGridDebugger.snapshot_grid_element_names" title="Link to this definition"></a></dt>
 <dd><p>Take a snapshot of the current element names in the grid.</p>
@@ -243,6 +224,21 @@ after a previous snapshot.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Topology.Procedural.procedural_grid_engine.</span></span><span class="sig-name descname"><span class="pre">ProceduralGridComputationEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ProceduralGridMethods" title="VeraGridEngine.enumerations.ProceduralGridMethods"><span class="pre">ProceduralGridMethods</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dev.Substation</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dev.Substation</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#ProceduralGridComputationEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Core engine for procedural grid expansion calculations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.candidate_buses">
+<span class="sig-name descname"><span class="pre">candidate_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.candidate_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.candidates_substations">
+<span class="sig-name descname"><span class="pre">candidates_substations</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.candidates_substations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.debugger">
+<span class="sig-name descname"><span class="pre">debugger</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.debugger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.get_buses">
 <span class="sig-name descname"><span class="pre">get_buses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#ProceduralGridComputationEngine.get_buses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.get_buses" title="Link to this definition"></a></dt>
@@ -289,6 +285,36 @@ These have no substation assigned and need one for map rendering.
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.grid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.intermediate_buses">
+<span class="sig-name descname"><span class="pre">intermediate_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.intermediate_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.new_lines">
+<span class="sig-name descname"><span class="pre">new_lines</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.line.Line" title="VeraGridEngine.Devices.Branches.line.Line"><span class="pre">Line</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.new_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.new_transformers">
+<span class="sig-name descname"><span class="pre">new_transformers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformer.Transformer2W" title="VeraGridEngine.Devices.Branches.transformer.Transformer2W"><span class="pre">Transformer2W</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.new_transformers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.run_steiner_alone">
 <span class="sig-name descname"><span class="pre">run_steiner_alone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#ProceduralGridComputationEngine.run_steiner_alone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.run_steiner_alone" title="Link to this definition"></a></dt>
@@ -323,12 +349,42 @@ actual NSGA-3 evaluation cap becomes
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.steiner_buses">
+<span class="sig-name descname"><span class="pre">steiner_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.steiner_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.target_buses">
+<span class="sig-name descname"><span class="pre">target_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.target_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.targets_substations">
+<span class="sig-name descname"><span class="pre">targets_substations</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.targets_substations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.transition_matrix">
+<span class="sig-name descname"><span class="pre">transition_matrix</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridComputationEngine.transition_matrix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Topology.Procedural.procedural_grid_engine.</span></span><span class="sig-name descname"><span class="pre">ProceduralGridGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_buses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidate_buses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#ProceduralGridGraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.base_coords">
+<span class="sig-name descname"><span class="pre">base_coords</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.base_coords" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.base_voltages">
+<span class="sig-name descname"><span class="pre">base_voltages</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.base_voltages" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.calculate_fitness">
 <span class="sig-name descname"><span class="pre">calculate_fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#ProceduralGridGraph.calculate_fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.calculate_fitness" title="Link to this definition"></a></dt>
@@ -336,6 +392,66 @@ actual NSGA-3 evaluation cap becomes
 :param mu_lat: steiner points latitudes
 :param mu_lon: steiner points longitudes</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.candidate_buses">
+<span class="sig-name descname"><span class="pre">candidate_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.candidate_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.coord_candidate">
+<span class="sig-name descname"><span class="pre">coord_candidate</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.coord_candidate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.coord_target">
+<span class="sig-name descname"><span class="pre">coord_target</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.coord_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_iterations">
+<span class="sig-name descname"><span class="pre">max_iterations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_iterations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_lat">
+<span class="sig-name descname"><span class="pre">max_lat</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_lat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_lon">
+<span class="sig-name descname"><span class="pre">max_lon</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.max_lon" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.min_lat">
+<span class="sig-name descname"><span class="pre">min_lat</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.min_lat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.min_lon">
+<span class="sig-name descname"><span class="pre">min_lon</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.min_lon" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_candidate">
+<span class="sig-name descname"><span class="pre">n_candidate</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_candidate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_steiner">
+<span class="sig-name descname"><span class="pre">n_steiner</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_steiner" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_target">
+<span class="sig-name descname"><span class="pre">n_target</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.n_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.prune_redundant_nodes">
@@ -379,6 +495,11 @@ are always kept.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.target_buses">
+<span class="sig-name descname"><span class="pre">target_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.ProceduralGridGraph.target_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -392,6 +513,21 @@ Contains a Graph instance via composition.</p>
 <span class="sig-name descname"><span class="pre">add_branch_to_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">branch</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#Topology.add_branch_to_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.add_branch_to_grid" title="Link to this definition"></a></dt>
 <dd><p>Add a branch object to the correct container of the expansion grid.</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.all_buses">
+<span class="sig-name descname"><span class="pre">all_buses</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.all_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.discretization">
+<span class="sig-name descname"><span class="pre">discretization</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.discretization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.edges">
+<span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.find_voltage_path">
@@ -416,6 +552,16 @@ available in template_dict.</p>
 <span class="sig-name descname"><span class="pre">generate_markov</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#Topology.generate_markov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.generate_markov" title="Link to this definition"></a></dt>
 <dd><p>Generates combinations that are valid by construction.</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.grid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.intermediate_buses">
+<span class="sig-name descname"><span class="pre">intermediate_buses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.intermediate_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.last_bus_fix">
@@ -448,6 +594,26 @@ bridge bus to output_bus.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.new_lines">
+<span class="sig-name descname"><span class="pre">new_lines</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.line.Line" title="VeraGridEngine.Devices.Branches.line.Line"><span class="pre">Line</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.new_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.new_transformers">
+<span class="sig-name descname"><span class="pre">new_transformers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformer.Transformer2W" title="VeraGridEngine.Devices.Branches.transformer.Transformer2W"><span class="pre">Transformer2W</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.new_transformers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.transition_matrix">
+<span class="sig-name descname"><span class="pre">transition_matrix</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.Topology.transition_matrix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -471,6 +637,11 @@ bridge bus to output_bus.</p></li>
 :return: The most likely voltage target</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.template_dict">
+<span class="sig-name descname"><span class="pre">template_dict</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.template_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.template_dictionary">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">template_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Topology/Procedural/procedural_grid_engine.html#TransitionMatrix.template_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.template_dictionary" title="Link to this definition"></a></dt>
@@ -489,6 +660,21 @@ is assigned uniformly among all branches that share the same voltage transition.
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.transition_matrix">
+<span class="sig-name descname"><span class="pre">transition_matrix</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.transition_matrix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.voltages_dict">
+<span class="sig-name descname"><span class="pre">voltages_dict</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.voltages_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.voltages_sorted">
+<span class="sig-name descname"><span class="pre">voltages_sorted</span></span><a class="headerlink" href="#VeraGridEngine.Topology.Procedural.procedural_grid_engine.TransitionMatrix.voltages_sorted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

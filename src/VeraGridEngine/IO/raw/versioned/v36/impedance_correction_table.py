@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v35.impedance_correction_table import RawIm
 
 class RawImpedanceCorrectionTableV36(RawImpedanceCorrectionTableV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = ()
     pass

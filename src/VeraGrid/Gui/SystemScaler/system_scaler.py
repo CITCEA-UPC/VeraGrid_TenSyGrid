@@ -6,17 +6,14 @@ import sys
 from typing import Sequence, Union
 import numpy as np
 import pandas as pd
-import shiboken6
 from PySide6.QtWidgets import QApplication
 from PySide6 import QtCore, QtGui, QtWidgets
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
-from matplotlib import pyplot as plt
 
 from VeraGrid.Gui.SystemScaler.system_scaler_ui import Ui_Dialog
 from VeraGrid.Gui.gui_functions import ComboDelegate, FloatDelegate
+from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely
 from VeraGrid.Gui.messages import yes_no_question
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGridEngine.enumerations import DeviceType
 import VeraGridEngine.Devices as dev
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -924,20 +921,10 @@ class SystemScaler(QtWidgets.QDialog):
         self.checkpoints_model: Union[SystemScalingCheckpointsModel, None] = None
         self.current_checkpoint_data_model: Union[SystemScalingModel, None] = None
         self.connected_checkpoint_data_models: list[SystemScalingModel] = list()
-        self.plot_figure: Figure = Figure(figsize=(7.0, 5.0))
-        self.plot_canvas: FigureCanvas = FigureCanvas(self.plot_figure)
-        self.plot_toolbar: NavigationToolbar = NavigationToolbar(self.plot_canvas, self)
-
-        self.ui.verticalLayout_2.addWidget(self.plot_toolbar)
-        self.ui.verticalLayout_2.addWidget(self.plot_canvas)
-
-        plot_axis = self.plot_figure.add_subplot(111)
-        plot_axis.text(0.5, 0.5, self.tr("Press plot to preview scaling"), ha="center", va="center")
-        plot_axis.set_axis_off()
-        if self.is_plot_canvas_valid():
-            self.plot_canvas.draw()
-        else:
-            pass
+        self._open_plot_dialogs: list[QtWidgets.QDialog] = list()
+        plot_hint: QtWidgets.QLabel = QtWidgets.QLabel(self.tr("Use the plot button to open a preview window."), self)
+        plot_hint.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.ui.verticalLayout_2.addWidget(plot_hint)
 
         self.groups = [DeviceType.AreaDevice,
                        DeviceType.ZoneDevice,
@@ -974,20 +961,10 @@ class SystemScaler(QtWidgets.QDialog):
         self.ui.plotButton.clicked.connect(self.plot_scaling)
         self.ui.addButton.clicked.connect(self.add_checkpoint)
         self.ui.removeButton.clicked.connect(self.remove_checkpoint)
-        self._plot_disposed: bool = False
-
-    def is_plot_canvas_valid(self) -> bool:
-        """
-        Check whether the scaling preview canvas still owns a valid Qt object.
-
-        :return: True if the plot canvas can still be used.
-        """
-        result: bool = shiboken6.isValid(self.plot_canvas)
-        return result
 
     def done(self, result: int) -> None:
         """
-        Release Matplotlib resources before the modal dialog closes.
+        Release native preview dialogs before the modal dialog closes.
 
         :param result: Qt dialog result code.
         :return: None.
@@ -997,7 +974,7 @@ class SystemScaler(QtWidgets.QDialog):
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """
-        Release the preview plot before the window closes.
+        Release native preview dialogs before the window closes.
 
         :param event: Qt close event.
         :return: None.
@@ -1006,39 +983,11 @@ class SystemScaler(QtWidgets.QDialog):
         QtWidgets.QDialog.closeEvent(self, event)
 
     def dispose_plot(self) -> None:
-        """
-        Schedule the preview canvas and toolbar for deferred deletion.
+        """Close all owned native scaling preview dialogs.
 
         :return: None.
         """
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            canvas_is_valid: bool = self.is_plot_canvas_valid()
-            toolbar_is_valid: bool = shiboken6.isValid(self.plot_toolbar)
-
-            if canvas_is_valid:
-                self.plot_canvas._draw_pending = False
-            else:
-                pass
-
-            self.plot_figure.clear()
-            plt.close(self.plot_figure)
-
-            if toolbar_is_valid:
-                self.plot_toolbar.close()
-                self.plot_toolbar.setParent(None)
-                self.plot_toolbar.deleteLater()
-            else:
-                pass
-
-            if canvas_is_valid:
-                self.plot_canvas.close()
-                self.plot_canvas.setParent(None)
-                self.plot_canvas.deleteLater()
-            else:
-                pass
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
 
     def set_checkpoints_delegates(self) -> None:
         """
@@ -1558,46 +1507,62 @@ class SystemScaler(QtWidgets.QDialog):
             original_load_energy: np.ndarray = -original_load * time_delta_hours
             scaled_load_energy: np.ndarray = -scaled_load * time_delta_hours
 
-            self.plot_figure.clear()
-            power_axis = self.plot_figure.add_subplot(211)
-            energy_axis = self.plot_figure.add_subplot(212, sharex=power_axis)
-
-            power_axis.plot(time_profile,
-                            original_generation,
-                            label=self.tr("Original generation"),
-                            linewidth=2.0)
-            power_axis.plot(time_profile,
-                            scaled_generation,
-                            label=self.tr("Scaled generation"),
-                            linewidth=2.0)
-            power_axis.plot(time_profile, -original_load, label=self.tr("Original load"), linewidth=2.0)
-            power_axis.plot(time_profile, -scaled_load, label=self.tr("Scaled load"), linewidth=2.0)
-            power_axis.axhline(0.0, color="black", linewidth=0.8)
-            power_axis.set_ylabel(self.tr("MW"))
-            power_axis.set_title(self.tr("Aggregated power scaling preview"))
-            power_axis.grid(True)
-            power_axis.legend()
-
-            energy_axis.fill_between(time_profile, 0.0, scaled_generation_energy,
-                                     alpha=0.35, label=self.tr("Scaled generation energy"))
-            energy_axis.fill_between(time_profile, 0.0, scaled_load_energy,
-                                     alpha=0.35, label=self.tr("Scaled load energy"))
-            energy_axis.plot(time_profile, original_generation_energy,
-                             linestyle="--", linewidth=1.6, label=self.tr("Original generation energy"))
-            energy_axis.plot(time_profile, original_load_energy,
-                             linestyle="--", linewidth=1.6, label=self.tr("Original load energy"))
-            energy_axis.axhline(0.0, color="black", linewidth=0.8)
-            energy_axis.set_ylabel(self.tr("MWh"))
-            energy_axis.set_title(self.tr("Aggregated energy scaling preview"))
-            energy_axis.grid(True)
-            energy_axis.legend()
-
-            self.plot_figure.autofmt_xdate()
-            self.plot_figure.tight_layout()
-            if self.is_plot_canvas_valid():
-                self.plot_canvas.draw()
+            self.dispose_plot()
+            power_dialogue: PlotDialogue = PlotDialogue(
+                title=self.tr("Aggregated power scaling preview"),
+                parent=self,
+            )
+            power_accepted: bool = power_dialogue.set_time_series(
+                time_values=np.asarray(time_profile),
+                series_names=(
+                    self.tr("Original generation"),
+                    self.tr("Scaled generation"),
+                    self.tr("Original load"),
+                    self.tr("Scaled load"),
+                ),
+                series_values=(
+                    original_generation,
+                    scaled_generation,
+                    -original_load,
+                    -scaled_load,
+                ),
+                colors=("#2563eb", "#0f766e", "#f97316", "#dc2626"),
+                title=self.tr("Aggregated power scaling preview"),
+                y_axis_title=self.tr("MW"),
+            )
+            if power_accepted:
+                self._open_plot_dialogs.append(power_dialogue)
+                power_dialogue.show()
             else:
-                pass
+                power_dialogue.reject()
+
+            energy_dialogue: PlotDialogue = PlotDialogue(
+                title=self.tr("Aggregated energy scaling preview"),
+                parent=self,
+            )
+            energy_accepted: bool = energy_dialogue.set_time_series(
+                time_values=np.asarray(time_profile),
+                series_names=(
+                    self.tr("Original generation energy"),
+                    self.tr("Scaled generation energy"),
+                    self.tr("Original load energy"),
+                    self.tr("Scaled load energy"),
+                ),
+                series_values=(
+                    original_generation_energy,
+                    scaled_generation_energy,
+                    original_load_energy,
+                    scaled_load_energy,
+                ),
+                colors=("#2563eb", "#0f766e", "#f97316", "#dc2626"),
+                title=self.tr("Aggregated energy scaling preview"),
+                y_axis_title=self.tr("MWh"),
+            )
+            if energy_accepted:
+                self._open_plot_dialogs.append(energy_dialogue)
+                energy_dialogue.show()
+            else:
+                energy_dialogue.reject()
         else:
             QtWidgets.QMessageBox.warning(self,
                                           self.tr("System scaling"),

@@ -43,6 +43,34 @@ class StateEstimationInput:
     StateEstimationInput
     """
 
+    __slots__ = (
+        "p_inj",
+        "p_idx",
+        "q_inj",
+        "q_idx",
+        "pg_inj",
+        "pg_idx",
+        "qg_inj",
+        "qg_idx",
+        "pf_value",
+        "pf_idx",
+        "pt_value",
+        "pt_idx",
+        "qf_value",
+        "qf_idx",
+        "qt_value",
+        "qt_idx",
+        "if_value",
+        "if_idx",
+        "it_value",
+        "it_idx",
+        "vm_value",
+        "vm_idx",
+        "va_value",
+        "va_idx",
+        "flags",
+    )
+
     def __init__(self) -> None:
         """
         State estimation inputs constructor
@@ -86,7 +114,7 @@ class StateEstimationInput:
         nz = self.size()
         self.flags = np.ones(nz, dtype=int)
 
-    def size(self):
+    def size(self) -> int:
         return (len(self.p_inj)
                 + len(self.q_inj)
                 + len(self.pg_inj)

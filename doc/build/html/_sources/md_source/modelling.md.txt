@@ -382,7 +382,7 @@ grid.add_generator(bus=bus, api_obj=gen)
 ```
 
 ### Registered properties
-Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `market_unit`, `market_unit_share`, `srap_enabled`.
+Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `srap_enabled`.
 
 |          name          |       class_type        | unit  |mandatory|max_chars|                                  descriptions                                  |has_profile|comment|
 |------------------------|-------------------------|-------|---------|---------|--------------------------------------------------------------------------------|-----------|-------|
@@ -468,8 +468,6 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |must_run                |bool                     |       |False    |         |P >= Pmin constraint. Used in OPF with unit commitment active.                  |True       |       |
 |emissions               |AssociationsList         |t/MWh  |False    |         |List of emissions                                                               |False      |       |
 |fuels                   |AssociationsList         |t/MWh  |False    |         |List of fuels                                                                   |False      |       |
-|market_unit             |Market unit              |       |False    |         |Market unit associated to this generator.                                       |True       |       |
-|market_unit_share       |float                    |p.u.   |False    |         |Participation share of the generator inside the market unit.                    |True       |       |
 |srap_enabled            |bool                     |       |False    |         |Is the unit available for SRAP participation?                                   |True       |       |
 |tpe                     |enum GeneratorType       |       |False    |         |Machine type of the generator.                                                  |False      |       |
 |is_static_generator     |bool                     |       |False    |         |Use the static generator short-circuit model.                                   |False      |       |
@@ -481,7 +479,7 @@ A `Battery` extends generator-style injection modelling with energy-capacity and
 This device connects to a bus and contributes power, current, or admittance to the solved network model.
 
 ### Registered properties
-Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `market_unit`, `market_unit_share`, `srap_enabled`.
+Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `srap_enabled`.
 
 |          name          |       class_type        | unit  |mandatory|max_chars|                                  descriptions                                  |has_profile|comment|
 |------------------------|-------------------------|-------|---------|---------|--------------------------------------------------------------------------------|-----------|-------|
@@ -567,8 +565,6 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |must_run                |bool                     |       |False    |         |P >= Pmin constraint. Used in OPF with unit commitment active.                  |True       |       |
 |emissions               |AssociationsList         |t/MWh  |False    |         |List of emissions                                                               |False      |       |
 |fuels                   |AssociationsList         |t/MWh  |False    |         |List of fuels                                                                   |False      |       |
-|market_unit             |Market unit              |       |False    |         |Market unit associated to this generator.                                       |True       |       |
-|market_unit_share       |float                    |p.u.   |False    |         |Participation share of the generator inside the market unit.                    |True       |       |
 |srap_enabled            |bool                     |       |False    |         |Is the unit available for SRAP participation?                                   |True       |       |
 |tpe                     |enum GeneratorType       |       |False    |         |Machine type of the generator.                                                  |False      |       |
 |is_static_generator     |bool                     |       |False    |         |Use the static generator short-circuit model.                                   |False      |       |
@@ -1621,21 +1617,23 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pa`, `Pb`, `Pc`
 
 ## Line
 
-Power lines are essential in delivering electricity from generation to loads. They consist of phase conductors
-positioned above the ground, sometimes using it as a return path, which must be considered in parameter calculations.
-Transmission lines may use bundled conductors and ground wires, while distribution lines can include a neutral return.
-Both types can introduce geometric and electrical unbalances. Accurate modelling aims to calculate voltage drops and
-losses, based on determining the per-unit-length parameters: resistance $R$, inductance $L$, conductance $G$,
-and capacitance $C$.
+VeraGrid uses the same `Line` branch for overhead and underground AC lines. Both connect two buses and use a
+series impedance and a shunt admittance; their physical construction determines how these parameters are calculated.
+The reusable catalogue objects are distinct from the branch installed in the network:
 
-<div style="text-align: center;">
-    <img src="https://github.com/SanPen/VeraGrid/blob/master/doc/md_source/figures/3ph_power_line.png?raw=true"
-    alt="Power line geometric arrangement"
-    title="Power line geometric arrangement"
-    width="30%"/>
-</div>
+| Purpose | Overhead lines | Underground lines |
+|---|---|---|
+| Conductor or cable construction | `Wire` | `UndergroundCableType` |
+| Geometry and per-unit-length electrical parameters | `OverheadLineType` (Tower) | `UndergroundLineType` |
+| Connection between buses, length and applied template | `Line` | `Line` |
 
-### π model
+The [underground cable construction](modelling.md#undergroundcabletype) and
+[underground line template](modelling.md#undergroundlinetype) catalogue entries describe all their input parameters.
+The following sections explain the common electrical model and the calculation specific to each technology.
+
+### Common electrical model
+
+#### π model
 
 Transmission lines are mathematically modelled to describe their electrical behaviour. The inductive and resistive
 effects of multiconductor lines are represented by a series impedance matrix, while capacitive effects are modelled as
@@ -1656,25 +1654,14 @@ It consists of:
 - Shunt admittance: $Y_{\text{shunt}} = G + jB$
 
 In the $\pi$-model, $R$ represents conductor resistance, $X$ the self and mutual inductive reactances, $G$ the shunt
-conductance through insulation, and $B$ the shunt susceptance from line capacitance. Shunt admittance is divided between
-the ends, with series impedance in the middle. While the single-phase model is common, unbalanced systems require a 5-wire
-representation, the three-phase conductors ($a$, $b$, $c$), the neutral ($n$), and the ground ($g$). The neutral returns
-unbalanced current and stabilises voltage, while the ground provides a fault current path for safety. Each conductor
-has its own impedance, and mutual coupling between all conductors requires a $5\times 5$ impedance or admittance matrix.
+conductance through insulation, and $B$ the shunt susceptance from line capacitance. Half of the total shunt admittance
+is placed at each end, with series impedance in the middle.
 
-$$
-\vec{Z} =
-\begin{bmatrix}
-\vec{Z}_{aa} & \vec{Z}_{ab} & \vec{Z}_{ac} & \vec{Z}_{an} & \vec{Z}_{ag} \\
-\vec{Z}_{ba} & \vec{Z}_{bb} & \vec{Z}_{bc} & \vec{Z}_{bn} & \vec{Z}_{bg} \\
-\vec{Z}_{ca} & \vec{Z}_{cb} & \vec{Z}_{cc} & \vec{Z}_{cn} & \vec{Z}_{cg} \\
-\vec{Z}_{na} & \vec{Z}_{nb} & \vec{Z}_{nc} & \vec{Z}_{nn} & \vec{Z}_{ng} \\
-\vec{Z}_{ga} & \vec{Z}_{gb} & \vec{Z}_{gc} & \vec{Z}_{gn} & \vec{Z}_{gg} \\
-\end{bmatrix}
-$$
+#### Phase matrices, length and per-unit conversion
 
-In most transmission lines, the neutral conductor is absent as it is earthed at both ends. The ground return effect can
-be incorporated into the phase impedance, allowing the line to be represented with a simplified $3\times 3$ matrix.
+Matrix dimensions depend on the conductors represented, not on a universal five-wire assumption. A primitive matrix
+retains individual conductors, including any ground wires or metallic sheaths. After the appropriate grounding
+conditions and reductions, a complete three-phase circuit has a $3\times3$ phase matrix:
 
 $$
 \vec{Z} =
@@ -1685,7 +1672,35 @@ $$
 \end{bmatrix}
 $$
 
-### Series Impedance
+Single- and two-phase circuits retain only their represented phases. A metallic sheath is not a fourth phase or an
+explicit network neutral. Phase matrices preserve geometrical asymmetry and mutual coupling, which cannot generally
+be replaced by a single positive-sequence impedance.
+
+Use primes for quantities per unit length: $Z'$ in $\Omega$/km and $Y'$ in S/km. For a branch of length $\ell$ in km,
+with voltage base $V_b$ in kV and three-phase power base $S_b$ in MVA:
+
+$$
+Z_b=\frac{V_b^2}{S_b},\qquad Z_{\mathrm{pu}}=\frac{\ell Z'}{Z_b},\qquad
+Y_{\mathrm{sh,pu}}=\ell Y' Z_b,\qquad Y_{\mathrm{s,pu}}=Z_{\mathrm{pu}}^{-1}.
+$$
+
+The two diagonal blocks of the branch nodal admittance are $Y_{\mathrm{s,pu}}+Y_{\mathrm{sh,pu}}/2$;
+the off-diagonal blocks are $-Y_{\mathrm{s,pu}}$. The connected-bus voltage supplies the base when applying a template.
+The cable builder displays admittance in $\mu$S/km, whereas the template's numerical admittance matrices use S/km.
+The branch stores `ys` in p.u. and `ysh` in micro-p.u.; the compiler converts the latter before splitting it between ends.
+
+### Overhead lines
+
+Overhead lines consist of conductors above ground, possibly with bundled phase conductors, an explicit neutral or
+ground wires. Conductor heights and spacings, internal impedance and the earth-return path determine the parameters.
+
+<div style="text-align: center;">
+    <img src="https://github.com/SanPen/VeraGrid/blob/master/doc/md_source/figures/3ph_power_line.png?raw=true"
+    alt="Overhead conductor arrangement"
+    width="30%"/>
+</div>
+
+#### Series impedance
 
 Carson’s equations calculate the series self and mutual impedances of overhead transmission lines, accounting for the
 ground return path. They assume long, horizontally arranged conductors with average height for sag effects, homogeneous
@@ -1725,7 +1740,7 @@ Where:
 The correction terms $R^c$ and $X^c$ are derived from an infinite integral representing the impedance contribution due
 to the earth return path.
 
-### Shunt Admittance
+#### Shunt admittance
 
 Just as series impedance accounts for resistance and inductance, shunt admittance includes capacitance between
 conductors and ground, and between conductors themselves. Under the assumptions of lossless air, uniformly grounded
@@ -1733,18 +1748,24 @@ earth, and conductor radii much smaller than inter-conductor spacing, these capa
 to compute the corresponding shunt admittances.
 
 $$
-    \vec{Y}_{ii} = j\frac{\omega}{2 \pi \varepsilon_0} \ln{\frac{2 h_i}{r_i}}
-    \label{eq:self_Y}
+    P_{ii} = \frac{1}{2 \pi \varepsilon_0} \ln{\frac{2 h_i}{r_i}}
 $$
 
 $$
-    \vec{Y}_{ij} = j\frac{\omega}{2 \pi \varepsilon_0} \ln{\frac{D_{ij}}{d_{ij}}}
-    \label{eq:mutual_Y}
+    P_{ij} = \frac{1}{2 \pi \varepsilon_0} \ln{\frac{D_{ij}}{d_{ij}}}
 $$
 
-Where $\varepsilon_0 = \dfrac{1}{\mu_0 c^2} \approx 8,85 \cdot 10^{-12}$ F/m is the free space permittivity.
+These expressions form Maxwell's potential-coefficient matrix $P$, not the admittance matrix itself. With
+$\varepsilon_0=8.854187817\cdot10^{-9}$ F/km, $P$ is in km/F. After conductor bundling and any grounded-conductor
+elimination in the potential formulation, the shunt admittance is:
 
-### Kron's reduction
+$$
+    C'=P^{-1},\qquad Y'=j\omega P^{-1}\quad[\mathrm{S/km}].
+$$
+
+The inversion is a matrix inversion, not an element-by-element reciprocal.
+
+#### Ground-wire reduction
 
 Kron's reduction, or node elimination, is a technique from network theory used to simplify a multi-node electrical
 network by eliminating certain nodes, often called internal or passive nodes, while preserving the electrical
@@ -1807,7 +1828,7 @@ $$
 This new matrix allows to describe the electrical behaviour of the remaining phase nodes $p$, while implicitly
 incorporating the effect of the eliminated ground nodes $g$, which were assumed to be held at 0 V.
 
-### Line definition example
+#### Line definition example
 
 ```python
 import VeraGridEngine.api as gce
@@ -1846,8 +1867,8 @@ y_601 = np.array([
 # Line Configuration
 # ----------------------------------------------------------------------------------------------------------------------
 config_601 = gce.create_known_abc_overhead_template(name='Config. 601',
-                                                    z_abc=z_601,
-                                                    ysh_abc=y_601,
+                                                    z_nabc=z_601,
+                                                    ysh_nabc=y_601,
                                                     phases=np.array([1, 2, 3]),
                                                     Vnom=4.16,
                                                     frequency=60)
@@ -1863,7 +1884,7 @@ line_632_671.apply_template(config_601, grid.Sbase, grid.fBase, logger)
 grid.add_line(obj=line_632_671)
 ```
 
-### Definition of a line from the wire configuration
+#### Definition of a line from the wire configuration
 
 **Definition of the exercise**
 
@@ -1925,6 +1946,280 @@ This tab shows the series shunt admittance matrix ($\mu S / km$) in several form
 ![](figures/tutorials/tower/editorY.png)
 
 When closed, the values are applied to the overhead line catalogue type that we were editing.
+
+### Underground lines
+
+An underground system is built from positioned instances of `UndergroundCableType`. Each instance represents a
+single-core cable with a solid conducting core and one concentric tubular metallic sheath. Main insulation separates
+the two conductors; outer insulation separates the sheath from the surrounding earth. Thus there are two conducting
+layers and two dielectric regions. The model below assumes direct burial in homogeneous, nonmagnetic soil and
+ideal grounding of the sheaths when forming the phase-only equivalent.
+
+#### Cable construction and system geometry
+
+![Cable layers and positive burial-depth convention; schematic, not to scale](figures/underground_cable_geometry.svg)
+
+Let $r_c$ denote the core radius, $r_{si}$ and $r_{so}$ the inner and outer sheath radii, and $r_o$ the overall
+cable radius. From the construction inputs, expressed in mm:
+
+$$
+r_c=\frac{d_c}{2},\qquad r_{si}=r_c+t_i,\qquad r_{so}=r_{si}+t_s,\qquad
+r_o=\frac{d_{\mathrm{cable}}}{2},\qquad t_o=r_o-r_{so}.
+$$
+
+Here $d_c$ is `core_diameter`, $t_i$ is `main_insulation_thickness`, $t_s$ is `sheath_thickness` and
+$d_{\mathrm{cable}}$ is `cable_diameter`. The outer insulation thickness $t_o$ is derived, not an independent input.
+The electromagnetic equations below use radii in metres, so these dimensions are multiplied by $10^{-3}$ first.
+Physically valid concentric layers require $0<r_c<r_{si}<r_{so}<r_o$.
+
+Each cable centre has horizontal coordinate $x_i$ and **positive burial depth** $h_i$, both in metres.
+For two distinct cables:
+
+$$
+d_{ij}=\sqrt{(x_i-x_j)^2+(h_i-h_j)^2},\qquad
+D_{ij}=\sqrt{(x_i-x_j)^2+(h_i+h_j)^2},\qquad
+\theta_{ij}=\arccos\frac{h_i+h_j}{D_{ij}}.
+$$
+
+$D_{ij}$ is the distance to the other cable's image across the earth surface. For a self term, the earth-return
+calculation uses $d_{ii}=r_{o,i}$, $D_{ii}=2h_i$ and $\theta_{ii}=0$.
+
+#### Series impedance
+
+**Material properties and core.** The effective resistivity of each conducting layer is
+
+$$
+\rho=\frac{10^{-8}\rho_{\mu\Omega\mathrm{cm}}}{C_f/100}\quad[\Omega\,\mathrm{m}],\qquad
+\mu=\mu_0\mu_r,\qquad \mu_0=4\pi\,10^{-7}\ \mathrm{H/m},\qquad \omega=2\pi f.
+$$
+
+$C_f$ is the conducting filling factor in percent, **not capacitance**. It accounts for the conducting fraction
+of the geometric cross-section. Resistance is calculated from material resistivity and geometry; the informational
+`core_dc_resistance` does not replace it.
+
+Using modified Bessel functions $I_\nu$ and $K_\nu$, the solid-core surface impedance is
+
+$$
+m_c=\sqrt{\frac{j\omega\mu_c}{\rho_c}}\sqrt{k_s},\qquad
+z_c=1000\frac{\rho_c m_c}{2\pi r_c}\frac{I_0(m_c r_c)}{I_1(m_c r_c)}\quad[\Omega/\mathrm{km}].
+$$
+
+The factor $k_s$ is `skin_effect_factor`; the factor 1000 converts impedance per metre to impedance per kilometre.
+No proximity-effect correction is applied by this calculation.
+
+**Metallic sheath.** For the sheath propagation constant $m_s=\sqrt{j\omega\mu_s/\rho_s}$, define
+$u=m_s r_{si}$, $v=m_s r_{so}$ and $\Delta=I_1(v)K_1(u)-I_1(u)K_1(v)$. Its inner, outer and mutual
+surface impedances, respectively, are
+
+$$
+z_{si}=1000\frac{\rho_s m_s}{2\pi r_{si}}
+\frac{I_0(u)K_1(v)+K_0(u)I_1(v)}{\Delta},
+$$
+
+$$
+z_{so}=1000\frac{\rho_s m_s}{2\pi r_{so}}
+\frac{I_0(v)K_1(u)+K_0(v)I_1(u)}{\Delta},\qquad
+z_{sm}=1000\frac{\rho_s}{2\pi r_{si}r_{so}\Delta}.
+$$
+
+**Insulating regions and internal matrix.** The longitudinal magnetic-field contribution of an insulating annulus is
+
+$$
+z_{\mathrm{ins}}(r_1,r_2)=1000\frac{j\omega\mu_0}{2\pi}\ln\frac{r_2}{r_1}.
+$$
+
+This is an inductive contribution to the series model, not a current flowing through the dielectric.
+Set $L_{11}=z_c+z_{\mathrm{ins}}(r_c,r_{si})+z_{si}$,
+$L_{22}=z_{so}+z_{\mathrm{ins}}(r_{so},r_o)$ and $L_{12}=-z_{sm}$.
+Transforming the two coaxial loop equations to core/sheath conductor quantities gives
+
+$$
+Z'_{\mathrm{int}}=
+\begin{bmatrix}
+L_{11}+2L_{12}+L_{22}&L_{12}+L_{22}\\
+L_{12}+L_{22}&L_{22}
+\end{bmatrix}.
+$$
+
+**Earth return.** With soil resistivity $\rho_e$ in $\Omega$ m, conductivity $\sigma_e=1/\rho_e$ in S/m and
+$m_e=\sqrt{j\omega\mu_0\sigma_e}$, the earth-return contribution is
+
+$$
+z'_{e,ij}=1000\left[
+\frac{j\omega\mu_0}{2\pi}\left(K_0(m_e d_{ij})-K_0(m_e D_{ij})\right)
++\frac{\omega\mu_0}{\pi}\left(P(\alpha_{ij},\theta_{ij})+jQ(\alpha_{ij},\theta_{ij})\right)
+\right],\qquad \alpha_{ij}=D_{ij}\sqrt{\omega\mu_0\sigma_e}.
+$$
+
+$P$ and $Q$ are the Carson correction coefficients. The implementation evaluates their small-argument expansion
+through eighth order in `calculate_carson_coefficients()`; its stated range is $\alpha<5$. It does not implement a
+separate large-argument branch. See the numerical scope note below for the additional fixed self-term adjustment.
+
+**Primitive assembly.** For $n$ cables, order the conductors as
+$[c_1,\ldots,c_n,s_1,\ldots,s_n]$: all cores first, then all sheaths. With the earth-return matrix $E$ and each
+cable's internal matrix entries, the $2n\times2n$ series matrix is
+
+$$
+Z'_{\mathrm{primitive}}=
+\begin{bmatrix}
+E+\operatorname{diag}(Z'_{\mathrm{int},11})&E+\operatorname{diag}(Z'_{\mathrm{int},12})\\
+E+\operatorname{diag}(Z'_{\mathrm{int},12})&E+\operatorname{diag}(Z'_{\mathrm{int},22})
+\end{bmatrix}.
+$$
+
+Thus three single-core cables produce a $6\times6$ primitive matrix, not a six-phase circuit.
+
+#### Shunt admittance
+
+The main and outer coaxial capacitances per metre are
+
+$$
+C'_m=\frac{2\pi\varepsilon_0\varepsilon_{r,m}}{\ln(r_{si}/r_c)},\qquad
+C'_o=\frac{2\pi\varepsilon_0\varepsilon_{r,o}}{\ln(r_o/r_{so})},\qquad
+\varepsilon_0=8.854187817\cdot10^{-12}\ \mathrm{F/m}.
+$$
+
+For each insulating region, relative permittivity controls capacitance and loss tangent controls dielectric losses:
+
+$$
+y'=1000\,\omega C'(\tan\delta+j)\quad[\mathrm{S/km}].
+$$
+
+Here $\tan\delta$ is dimensionless, not a percentage. With diagonal matrices $Y_m$ and $Y_o$ containing these
+main and outer admittances, the primitive matrix in the same core-then-sheath order is
+
+$$
+Y'_{\mathrm{primitive}}=
+\begin{bmatrix}Y_m&-Y_m\\-Y_m&Y_m+Y_o\end{bmatrix}.
+$$
+
+This screened coaxial model has no direct electrostatic coupling between the cores of different cables.
+Both insulating regions are nevertheless present in the primitive matrix.
+
+#### Grounded-sheath reduction
+
+The phase-only model eliminates the sheaths under an ideal-grounding assumption. Partition the primitive series
+matrix into core and sheath blocks, indexed $c$ and $s$. Setting the longitudinal sheath voltage drop to zero gives
+
+$$
+Z'_{\mathrm{phase}}=Z'_{cc}-Z'_{cs}(Z'_{ss})^{-1}Z'_{sc}.
+$$
+
+For the shunt equations $I_c=Y'_{cc}U_c+Y'_{cs}U_s$, ideal grounding means $U_s=0$. Therefore
+
+$$
+Y'_{\mathrm{phase}}=Y'_{cc}=Y_m.
+$$
+
+The shunt reduction is **not** the Schur complement used for series impedance. In particular, outer-insulation
+permittivity and loss tangent affect the primitive shunt matrix but not the reduced core shunt matrix under this
+grounding assumption. Finite sheath-earthing impedance, single-point bonding and cross-bonding are not represented.
+
+#### Phase and sequence matrices
+
+The reduced matrices keep the phase ordering defined by the cable composition. For each complete ABC circuit,
+symmetrical components are obtained without transposing or averaging the physical geometry:
+
+$$
+A=\begin{bmatrix}1&1&1\\1&a^2&a\\1&a&a^2\end{bmatrix},\qquad a=e^{j2\pi/3},\qquad
+Z'_{012}=A^{-1}Z'_{abc}A,\qquad Y'_{012}=A^{-1}Y'_{abc}A.
+$$
+
+The sequence order is zero, positive, negative. Multiple complete circuits use a block-diagonal transformation.
+Sequence matrices need not be diagonal for an asymmetric system. A single- or two-phase system retains its valid
+phase matrices but has no complete sequence representation. The scalar `R`, `X`, `B`, `R0`, `X0`, `B0` fields
+summarize diagonal sequence entries when available; they do not replace the full phase matrices in unbalanced studies.
+
+#### Definition from the GUI
+
+The following example uses three identical 10 kV cables with the construction defaults listed in
+[UndergroundCableType](modelling.md#undergroundcabletype).
+
+1. In `Model / Database -> Catalogue -> Underground cable type`, add an entry named `Demo cable`.
+   Set `nominal voltage` to 10 kV. Keep the default 10 mm core diameter, 5 mm main insulation thickness,
+   1 mm sheath thickness and 30 mm overall cable diameter, with the remaining material defaults.
+2. In `Catalogue -> Underground line`, create `Buried circuit` and open its editor using the edit button.
+   Set voltage to 10 kV, frequency to 50 Hz, earth resistivity to 100 $\Omega$ m and rated current to 0.4 kA.
+3. Select `Demo cable` in the cable catalogue and press `+` three times. Set the composition rows to:
+
+   | Cable | X (m) | Depth (m) | Phase | Derived circuit | Derived phase name |
+   |---|---:|---:|---:|---:|---|
+   | Demo cable | -0.15 | 0.8 | 1 | 1 | A |
+   | Demo cable | 0.00 | 0.8 | 2 | 1 | B |
+   | Demo cable | 0.15 | 0.8 | 3 | 1 | C |
+
+4. Press the calculator button. Check the geometry and choose primitive, phase or sequence impedance/admittance
+   in the matrix selector. Impedance is displayed in $\Omega$/km and admittance in $\mu$S/km.
+5. Accept the cable-system editor. Double-click the network line in the schematic and open its `Line editor` tab.
+   Choose `Buried circuit` under `Available templates`, then press `Load template values`. Set length to 1 km
+   and press the tab's `Accept` button to apply the template. Selecting a combo-box entry alone does not load it.
+
+The line editor lists templates matching the connected-bus nominal voltage, so use 10 kV buses for this example.
+The current GUI applies circuit 1 for an underground template; it does not offer arbitrary underground circuit selection.
+
+The construction is shared catalogue data: editing it can affect several templates. Recalculate affected systems
+and reapply their templates to the branches after changing construction, geometry or frequency. Reapply the template
+after changing the branch length as well. An existing branch's applied matrices must not be assumed to refresh merely
+because its template reference or a construction field changed.
+
+#### Definition from Python
+
+This example builds the same geometry without opening the GUI. The frequency of the system and the network agree;
+`Imax` is supplied as a rating, not computed from a thermal model.
+
+```python
+import VeraGridEngine.api as vg
+
+
+def underground_line_example() -> None:
+    """Create a cable construction, calculate its system and apply it to a branch.
+
+    :return: None.
+    """
+    grid: vg.MultiCircuit = vg.MultiCircuit()
+    grid.fBase = 50.0
+    logger: vg.Logger = vg.Logger()
+
+    # The reusable construction describes layers, not their installation positions.
+    cable: vg.UndergroundCableType = vg.UndergroundCableType(
+        name="Demo cable", nominal_voltage=10.0,
+        core_diameter=10.0, main_insulation_thickness=5.0,
+        sheath_thickness=1.0, cable_diameter=30.0,
+    )
+    grid.add_underground_cable(cable)
+    system: vg.UndergroundLineType = vg.UndergroundLineType(
+        name="Buried circuit", Vnom=10.0, Imax=0.4,
+        freq=50.0, earth_resistivity=100.0,
+    )
+
+    # One positioned instance per phase; depth is positive below the earth surface.
+    phase: int
+    xpos: float
+    for phase, xpos in enumerate((-0.15, 0.0, 0.15), start=1):
+        system.add_cable_relationship(cable=cable, xpos=xpos, ypos=0.8, phase=phase)
+    calculated: bool = system.compute(logger=logger)
+    if calculated:
+        grid.add_underground_line(system)
+        print("Z phase [ohm/km]:", system.z_nabc)
+        print("Y phase [S/km]:", system.y_nabc)
+
+        # Applying the template includes the branch length and the network base.
+        source: vg.Bus = grid.add_bus(vg.Bus(name="Source", Vnom=10.0))
+        destination: vg.Bus = grid.add_bus(vg.Bus(name="Destination", Vnom=10.0))
+        line: vg.Line = grid.add_line(
+            vg.Line(bus_from=source, bus_to=destination, length=1.0)
+        )
+        line.apply_template(obj=system, Sbase=grid.Sbase, freq=grid.fBase, logger=logger)
+    else:
+        print(logger)
+
+
+underground_line_example()
+```
+
+For this example, the primitive matrices are $6\times6$ and the phase matrices are $3\times3$.
+The reduced self-impedance of phase A is approximately $0.36590254+j0.15735713$ $\Omega$/km;
+its shunt susceptance is approximately 57.99 $\mu$S/km. These are per-kilometre quantities, not per-unit branch values.
 
 ### Registered properties
 Profile-enabled properties: `active`, `rate`, `contingency_factor`, `protection_rating_factor`, `Cost`, `temp_oper`.
@@ -3389,11 +3684,192 @@ Profile-enabled properties: none.
 |capex                   |float              |currency/km |False    |         |Capital expenditure per km                                                      |False      |       |
 |opex                    |float              |currency/MWh|False    |         |Operational expenditure                                                         |False      |       |
 
+## UndergroundCableType
+
+An `UndergroundCableType` is a reusable construction for one single-core underground cable. It describes two conducting layers, the core and its metallic sheath, separated by main insulation and surrounded by outer insulation. It does not define a route, burial depth, circuit arrangement or line length. Those belong to an [underground cable system](modelling.md#undergroundlinetype) and its network line.
+
+All construction inputs are scalars: core and sheath properties have separate fields. The catalogue tables display Python property names with spaces instead of underscores. Unless marked otherwise below, these fields are editable. Defaults describe an initial construction, not a validated manufacturer's cable or a calculated current rating.
+
+### Identification and rating
+
+| Python property | Description | Unit | Default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `name` | Catalogue name | — | `Underground cable` | Editable label used when selecting and positioning this construction. |
+| `idtag` | Persistent identifier | — | Automatically generated | Identifies the object and its references; normally leave the generated identifier unchanged. |
+| `code` | User code | — | Empty | Optional catalogue or equipment identifier; does not affect the calculation. |
+| `comment` | User comment | — | Empty | Optional description or modelling notes; does not affect the calculation. |
+| `nominal_voltage` | Rated cable voltage | kV | 1.0 | Editable catalogue rating; not an input to the geometric impedance/admittance calculation. Set the system voltage separately using `UndergroundLineType.Vnom`. |
+
+### Dimensions
+
+| Python property | Description | Unit | Default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `core_diameter` | Core outer diameter | mm | 10.0 | Outside diameter of the conducting core; used in the electrical geometry. |
+| `core_internal_diameter` | Core inner diameter | mm | 0.0 | Stored and editable, but currently has no effect on the calculated matrices. The implemented core impedance model is solid-core; leave this value at zero. |
+| `main_insulation_thickness` | Main insulation thickness | mm | 5.0 | Radial insulation thickness between the core surface and the inside of the metallic sheath. |
+| `sheath_thickness` | Metallic sheath thickness | mm | 1.0 | Radial thickness of the conducting sheath, outside the main insulation. |
+| `cable_diameter` | Overall cable diameter | mm | 30.0 | Outside diameter including the outer insulation; determines the outer insulation thickness. |
+
+Outer insulation thickness is derived, not entered separately:
+
+```text
+outer thickness = (cable_diameter - core_diameter) / 2
+                  - main_insulation_thickness - sheath_thickness
+```
+
+All quantities in this expression are in mm. The default dimensions give 4 mm of outer insulation. The main and outer insulation thicknesses must both be positive for a valid layered construction.
+
+### Conducting materials and correction factors
+
+| Python property | Description | Unit | Default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `core_resistivity` | Core material resistivity | μΩ·cm | 1.7241 | Resistivity at 20 °C used to calculate the core impedance. |
+| `sheath_resistivity` | Sheath material resistivity | μΩ·cm | 1.7241 | Resistivity at 20 °C used to calculate the sheath impedance. |
+| `core_filling_factor` | Core conducting filling factor | % | 100.0 | Percentage of the modelled core section occupied by conducting material. Effective resistivity is divided by this fraction; this is not a capacitance. |
+| `sheath_filling_factor` | Sheath conducting filling factor | % | 100.0 | Corresponding conducting fraction of the sheath section; applied to sheath resistivity. |
+| `core_relative_permeability` | Core relative magnetic permeability | — | 1.0 | Dimensionless permeability relative to vacuum, used in the core internal impedance. |
+| `sheath_relative_permeability` | Sheath relative magnetic permeability | — | 1.0 | Dimensionless permeability used in the sheath internal impedance. |
+| `skin_effect_factor` | Core skin-effect factor | — | 1.0 | Factor used in the frequency-dependent core internal impedance calculation. |
+| `core_dc_resistance` | Reference core DC resistance | Ω/km | 0.0 | Informational value at 20 °C, read-only in the catalogue tables. The geometric calculation uses dimensions, resistivity and filling factor instead. |
+| `proximity_effect_factor` | Reference proximity-effect factor | — | 1.0 | Informational, read-only in the catalogue tables; not used by the current calculation. |
+
+Use positive material resistivities and relative permeabilities. Filling factors are percentages, with physically meaningful values greater than zero and no greater than 100. There is no construction-temperature input: these material values are not automatically converted to another operating temperature by the geometric cable calculation.
+
+### Insulation materials
+
+| Python property | Description | Unit | Default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `main_insulation_permittivity` | Main insulation relative permittivity | — | 2.3 | Dimensionless dielectric permittivity between core and sheath; determines the main insulation capacitance. |
+| `outer_insulation_permittivity` | Outer insulation relative permittivity | — | 2.5 | Dimensionless dielectric permittivity between the sheath and the cable exterior. |
+| `main_insulation_loss_tangent` | Main insulation loss tangent | — | 0.0 | Dielectric loss tangent, tan δ, between core and sheath. Enter a fraction, not a percentage; zero represents lossless insulation. |
+| `outer_insulation_loss_tangent` | Outer insulation loss tangent | — | 0.0 | Corresponding loss tangent for the outer insulation. |
+
+The two outer-insulation material fields affect the primitive shunt matrix. With the implemented ideal-grounded-sheath reduction they do not affect the reduced core shunt matrix. See the [underground line model](modelling.md#underground-lines) for the matrix definitions and grounding assumptions.
+
+### Supported scope and catalogue reuse
+
+The construction model supports a solid core and one metallic sheath, not a third conducting layer such as armour or a separate additional screen. An unsupported layer must not be interpreted as another editable core or sheath parameter.
+
+The GUI and Python API use the same construction objects. Editing a catalogue construction changes that shared object for every system referencing it; it does not create an independent copy. Recalculate each affected system and reapply its template to the affected network lines before solving. The cable builder recalculates the system currently being edited, but does not automatically update every other system that uses the same construction.
+
+### Registered properties
+Profile-enabled properties: none.
+
+|            name             |   class_type   | unit  |mandatory|max_chars|                                                descriptions                                                |has_profile|comment|
+|-----------------------------|----------------|-------|---------|---------|------------------------------------------------------------------------------------------------------------|-----------|-------|
+|idtag                        |str             |       |False    |         |Unique ID                                                                                                   |False      |       |
+|name                         |str             |       |False    |         |Name of the device.                                                                                         |False      |       |
+|code                         |str             |       |False    |         |Secondary ID                                                                                                |False      |       |
+|rdfid                        |str             |       |False    |         |RDF ID for further compatibility                                                                            |False      |       |
+|action                       |enum ActionType |       |False    |         |Object action to perform. Only used for model merging.                                                      |False      |       |
+|selected_to_merge            |bool            |       |False    |         |Whether this object should be applied during diff merge.                                                    |False      |       |
+|comment                      |str             |       |False    |         |User comment                                                                                                |False      |       |
+|diff_changes                 |MergeInformation|       |False    |         |                                                                                                            |False      |       |
+|nominal_voltage              |float           |kV     |False    |         |Rated cable voltage                                                                    |False      |       |
+|core_dc_resistance           |float           |Ohm/km |False    |         |Imported core DC resistance at 20 degrees Celsius; informational, not used by the geometric calculation     |False      |       |
+|core_diameter                |float           |mm     |False    |         |Core outer diameter                                                                                         |False      |       |
+|core_internal_diameter       |float           |mm     |False    |         |Core inner diameter                                                                                         |False      |       |
+|cable_diameter               |float           |mm     |False    |         |Overall cable diameter, including outer insulation                                                          |False      |       |
+|sheath_thickness             |float           |mm     |False    |         |Metallic sheath thickness                                                                                   |False      |       |
+|main_insulation_thickness    |float           |mm     |False    |         |Core-to-sheath insulation thickness; outer insulation is derived from cable_diameter|False      |       |
+|core_resistivity             |float           |uOhm*cm|False    |         |Core resistivity at 20 degrees Celsius                                               |False      |       |
+|sheath_resistivity           |float           |uOhm*cm|False    |         |Sheath resistivity at 20 degrees Celsius                                             |False      |       |
+|core_filling_factor          |float           |%      |False    |         |Core conducting filling factor                                                         |False      |       |
+|sheath_filling_factor        |float           |%      |False    |         |Sheath conducting filling factor                                                       |False      |       |
+|main_insulation_permittivity |float           |       |False    |         |Core-to-sheath insulation relative permittivity                                     |False      |       |
+|outer_insulation_permittivity|float           |       |False    |         |Outer insulation relative permittivity                                              |False      |       |
+|main_insulation_loss_tangent |float           |       |False    |         |Core-to-sheath insulation dielectric loss factor                                    |False      |       |
+|outer_insulation_loss_tangent|float           |       |False    |         |Outer insulation dielectric loss factor                                             |False      |       |
+|core_relative_permeability   |float           |       |False    |         |Core relative magnetic permeability                                                    |False      |       |
+|sheath_relative_permeability |float           |       |False    |         |Sheath relative magnetic permeability                                                  |False      |       |
+|skin_effect_factor           |float           |       |False    |         |Core skin-effect factor                                                                                     |False      |       |
+|proximity_effect_factor      |float           |       |False    |         |Imported core proximity-effect factor; informational, not used by this calculation                          |False      |       |
+
 ## UndergroundLineType
 
-An `UndergroundLineType` stores reusable cable data for underground line modelling.
+An `UndergroundLineType` is a reusable underground line template. It can be defined either from positioned [cable constructions](modelling.md#undergroundcabletype), or directly from per-kilometre sequence parameters. A network `Line` then selects this template and supplies its buses, length and circuit index.
 
-This device stores reusable equipment data that can be applied to physical network elements.
+### System identification, environment and rating
+
+| Python property | Description | Unit | Default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `name` | System name | — | `UndergroundLine` | Editable template name displayed in the catalogue and cable builder. |
+| `idtag` | Persistent identifier | — | Automatically generated | Identifies the template and its references; normally leave unchanged. |
+| `code` | User code | — | Empty | Optional inherited identifier; assign after construction if needed. It is not a constructor argument for this class. |
+| `comment` | User comment | — | Empty | Optional description or installation notes; does not affect the calculation. |
+| `Vnom` | System rated voltage | kV | 1.0 | System voltage rating, distinct from a construction's `nominal_voltage`. Used as the voltage base when no connected-bus voltage is supplied. |
+| `Imax` | Rated current | kA | 1.0 | User-supplied current rating, not calculated from cable dimensions or soil data. Applying the template converts this to a line power rating using the applicable voltage. |
+| `freq` | Calculation frequency | Hz | 50.0 | Frequency used in physical impedance and admittance calculations and capacitance-to-susceptance conversion. |
+| `earth_resistivity` | Earth resistivity | Ω·m | 100.0 | Soil resistivity for the earth-return impedance calculation; use a positive value. |
+| `cables_in_system` | Physical composition | — | Empty | Collection of construction references and positions. Use the builder or `add_cable_relationship()` rather than editing this as a single table cell. |
+| `n_circuits` | Number of circuits | — | 1 | Stored circuit count, recomputed from global phase numbers when a physical system is calculated. It is not an independent geometry input. |
+| `capex` | Capital expenditure | currency/km | 0.0 | Optional economic data; does not change the electrical matrices. |
+| `opex` | Operating expenditure | currency/MWh | 0.0 | Optional economic data; does not change the electrical matrices. |
+
+The builder's top controls edit the system name, voltage, frequency, earth resistivity and rated current. Its construction table edits shared catalogue entries, while its composition table edits their positions and phase ordering.
+
+### Positioned cable inputs
+
+Each composition entry is a `CableInSystem` relationship, created through `system.add_cable_relationship(cable=..., xpos=..., ypos=..., phase=...)`.
+
+| Python property | Builder column | Unit | API default | Meaning and role |
+| --- | --- | --- | --- | --- |
+| `cable` | Cable | — | Required | Reference to an `UndergroundCableType`, not a copy of its parameters. Select a catalogue row and press `+` to add it in the builder. |
+| `xpos` | X | m | 0.0 | Horizontal coordinate of the cable centre. Editable in the composition table. |
+| `ypos` | Depth | m | 1.0 | Positive burial depth of the cable centre below ground. Editable in the composition table. |
+| `phase` | Phase | — | 1 | Global, one-based phase number controlling matrix order. Editable in the composition table. |
+| `circuit_index` | Circuit index | — | Derived | One-based circuit number calculated from `phase`; read-only in the composition table. |
+| `phase_type` | Phase name | — | Derived | A, B or C within the circuit, calculated from `phase`; read-only in the composition table. |
+
+Global phases 1, 2 and 3 mean circuit 1 phases A, B and C; 4, 5 and 6 mean circuit 2 phases A, B and C, and so on. For `n` positioned cables, the global phase numbers must be exactly 1 through `n`, without gaps or duplicates. A one- or two-cable composition is supported even though it has no complete three-phase sequence representation.
+
+The builder initially places newly added cables at 1 m depth and horizontal coordinates 0.0, 0.1, 0.2 m, and so on. These are editing defaults, not a prescribed cable arrangement. Position and phase changes recalculate the currently edited system. If removing a cable leaves a gap in phase numbering, renumber the remaining entries.
+
+### Sequence-only inputs and calculated results
+
+Leave the physical composition empty to define an existing cable directly by its sequence parameters. All the following values default to zero and are per kilometre, not per-unit branch quantities.
+
+| Python property | Description | Unit | Default | Role |
+| --- | --- | --- | --- | --- |
+| `R` | Positive-sequence series resistance | Ω/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `X` | Positive-sequence series reactance | Ω/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `B` | Positive-sequence shunt susceptance | μS/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `C` | Positive-sequence shunt capacitance | μF/km | 0.0 | Alternative representation of `B`; calculated in complete physical mode. |
+| `R0` | Zero-sequence series resistance | Ω/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `X0` | Zero-sequence series reactance | Ω/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `B0` | Zero-sequence shunt susceptance | μS/km | 0.0 | Input in sequence-only mode; calculated from the first circuit in complete physical mode. |
+| `C0` | Zero-sequence shunt capacitance | μF/km | 0.0 | Alternative representation of `B0`; calculated in complete physical mode. |
+
+Keep each capacitance/susceptance pair consistent: with these units, `B = 2 * pi * freq * C`, and likewise for `B0` and `C0`. Assigning `C` or `C0` through its property updates the corresponding susceptance when automatic updates are enabled. Constructor arguments are stored separately, so do not supply inconsistent pairs or assume that a nonzero constructor `C` also initializes `B`.
+
+In physical mode, call `compute()` to obtain the primitive core-and-sheath matrices and the reduced phase matrices. Their impedance units are Ω/km and their admittance units are S/km in the API; the builder displays admittances in μS/km. Sequence matrices are available when the phase count forms complete three-phase circuit blocks. They are results, not additional material inputs. For incomplete blocks, use the phase matrices rather than interpreting the scalar sequence fields as calculated equivalents.
+
+The matrix choices and physical reduction are explained in the [underground line model](modelling.md#underground-lines).
+
+| Read-only result | Meaning in physical mode | Unit |
+| --- | --- | --- |
+| `z_primitive`, `y_primitive` | Full core-then-sheath matrices, each of size `2n × 2n` for `n` cables. | Ω/km, S/km |
+| `z_nabc`, `y_nabc` | Reduced core phase matrices, each of size `n × n`. Despite the names, these do not contain an explicit sheath or neutral row. | Ω/km, S/km |
+| `z_phases_nabc`, `y_phases_nabc` | Global phase numbers identifying the rows and columns of the phase matrices. | — |
+| `z_seq`, `y_seq` | Zero-, positive- and negative-sequence matrices for complete ABC circuit blocks; otherwise `None`. | Ω/km, S/km |
+
+Without a physical composition, the phase matrices are reconstructed from the scalar sequence values, assuming
+negative sequence equals positive sequence. Physical primitive matrices are not available in this mode.
+
+### Validation and applying a template
+
+A physical calculation requires at least one construction, consecutive unique phases, distinct cable-centre positions, positive burial depths, positive core diameters and sheath thicknesses, overall diameters larger than the core diameters, and positive filling factors. The current checks do not enforce every physical constraint: also ensure positive main and outer insulation thicknesses, sensible material properties, positive frequency and soil resistivity, and a non-overlapping cable arrangement. Successful input conversion in a table cell is not a full geometry validation.
+
+The Python workflow is:
+
+1. Create the construction entries and register them with `grid.add_underground_cable()`.
+2. Create the `UndergroundLineType`, add its cable relationships, and call `system.compute(logger=logger)`. Check its return value and validation log.
+3. Register the template with `grid.add_underground_line()` and create a network `Line` with its connected buses, length in km and one-based `circuit_idx`.
+4. Apply the calculated template using `line.apply_template(obj=system, Sbase=grid.Sbase, freq=grid.fBase, logger=logger)`.
+
+The system's own `freq` controls its physical calculation. Set it consistently with the network frequency; the `freq` argument to `Line.apply_template()` does not replace it for an underground template.
+
+Assigning `line.template` alone does not calculate or copy the electrical parameters. Recompute the system after changing construction, positions or environmental inputs, then reapply it to each affected line. Reapply the template after changing line length as well, so both scalar parameters and phase matrices correspond to the new length. Line length and circuit selection belong to the network branch, not to the reusable construction or system.
 
 ### Registered properties
 Profile-enabled properties: none.
@@ -3426,6 +3902,8 @@ Profile-enabled properties: none.
 |Imax                    |float              |kA          |False    |         |Current rating of the line                                                      |False      |       |
 |Vnom                    |float              |kV          |False    |         |Voltage rating of the line                                                      |False      |       |
 |freq                    |float              |Hz          |False    |         |Cable frequency                                                                 |False      |       |
+|earth_resistivity       |float              |Ohm*m       |False    |         |Earth resistivity                                                               |False      |       |
+|cables_in_system        |ListOfCables       |            |False    |         |Physical cables and their positions                                             |False      |       |
 |R                       |float              |Ohm/km      |False    |         |Positive-sequence resistance per km                                             |False      |       |
 |X                       |float              |Ohm/km      |False    |         |Positive-sequence reactance per km                                              |False      |       |
 |B                       |float              |uS/km       |False    |         |Positive-sequence shunt susceptance per km                                      |False      |       |

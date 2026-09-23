@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation &mdash; VeraGrid 6.4.4 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/style.css?v=b3745da1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/style.css?v=ba3a54df" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=f2c0b4ab"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -44,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/installation.html">💽 Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/user_interface.html">📊 User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/veragrid_scripting_guide.html">📑 VeraGrid scripting guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/grid_analysis.html">🔎 Grid analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/structure.html">🌁 Structure of VeraGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/modelling.html">📐 Grid Modelling</a></li>
@@ -59,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/short_circuit.html">⚡ Short-Circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/stochastic_power_flow.html">🎲 Stochastic power flow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/continuation_power_flow.html">➿ Continuation power flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/sigma_analysis.html">🌘 Sigma analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/solar_wizard.html">☀️ Solar power wizard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/contingency_analysis.html">💥 Contingency analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/investment_optimization.html">🏦 Investment optimization</a></li>
@@ -68,13 +70,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/state_estimation.html">🌀 State estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/dynamic_simulations.html">🧲 Dynamic simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/rms_simulations.html">📝 RMS simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/small_signal_stability.html">Small-Signal Stability Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/emt_simulations.html">🔬 EMT simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/license.html">📜 License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../rst_source/change_log.html">Change log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/data_models.html">Data Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../rst_source/api/auto/modules.html">VeraGrid</a></li>
 </ul>
@@ -610,6 +608,59 @@
 <div class="viewcode-block" id="PfGeneralizedFormulation">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.PowerFlow.Formulations.html#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PfGeneralizedFormulation</span><span class="p">(</span><span class="n">PfFormulationTemplate</span><span class="p">):</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;I0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Y0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmax&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_p_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_q_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_vm_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_va_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_cbr_m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_cbr_tau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_cbr_m_tau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_cbr_pf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_cbr_pt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_cbr_qf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_cbr_qt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cbr_pf_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cbr_pt_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cbr_qf_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cbr_qt_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_vsc_pf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_vsc_pt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;u_vsc_qt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_vsc_pf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_vsc_pt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;k_vsc_qt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_pf_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_pt_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_qt_set&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_droop_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i_u_vm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i_u_va&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i_k_p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i_k_q&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pfp_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pfn_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pt_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qt_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pf_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qf_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pt_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qt_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;adm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;discrete_shunt_control&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;qv_droop_control&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">S0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">I0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">Y0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
                  <span class="n">Qmin</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">Qmax</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>

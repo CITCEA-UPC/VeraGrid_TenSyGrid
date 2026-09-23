@@ -1027,6 +1027,25 @@ class CgmesCircuit(BaseCircuit):
     CgmesCircuit
     """
 
+    __slots__ = (
+        "cgmes_version",
+        "cgmes_map_areas_like_raw",
+        "cgmes_recovery_mode",
+        "cgmes_recovery_event_threshold",
+        "logger",
+        "text_func",
+        "progress_func",
+        "cgmes_assets",
+        "ncp_assets",
+        "classes",
+        "all_objects_dict",
+        "all_objects_dict_boundary",
+        "elements_by_type",
+        "elements_by_type_boundary",
+        "data",
+        "boundary_set",
+    )
+
     def __init__(self,
                  cgmes_version: CGMESVersions = CGMESVersions.v2_4_15,
                  cgmes_map_areas_like_raw: bool = False,

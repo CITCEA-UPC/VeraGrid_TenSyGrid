@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation &mdash; VeraGrid 6.4.4 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/style.css?v=b3745da1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/style.css?v=ba3a54df" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=f2c0b4ab"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -44,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/installation.html">💽 Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/user_interface.html">📊 User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/veragrid_scripting_guide.html">📑 VeraGrid scripting guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/grid_analysis.html">🔎 Grid analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/structure.html">🌁 Structure of VeraGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/modelling.html">📐 Grid Modelling</a></li>
@@ -59,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/short_circuit.html">⚡ Short-Circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/stochastic_power_flow.html">🎲 Stochastic power flow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/continuation_power_flow.html">➿ Continuation power flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/sigma_analysis.html">🌘 Sigma analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/solar_wizard.html">☀️ Solar power wizard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/contingency_analysis.html">💥 Contingency analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/investment_optimization.html">🏦 Investment optimization</a></li>
@@ -68,13 +70,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/state_estimation.html">🌀 State estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/dynamic_simulations.html">🧲 Dynamic simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/rms_simulations.html">📝 RMS simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/small_signal_stability.html">Small-Signal Stability Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/emt_simulations.html">🔬 EMT simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/license.html">📜 License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../rst_source/change_log.html">Change log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../md_source/data_models.html">Data Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../rst_source/api/auto/modules.html">VeraGrid</a></li>
 </ul>
@@ -278,6 +276,44 @@
 <div class="viewcode-block" id="PfAdvancedFormulation">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.PowerFlow.Formulations.html#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PfAdvancedFormulation</span><span class="p">(</span><span class="n">PfFormulationTemplate</span><span class="p">):</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;I0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Y0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmax&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module_control_mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_phase_control_mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Cf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ct&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pqv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dVa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dVm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dQ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dtau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dPf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dQf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dPt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dQt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;no_slack&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yshunt_bus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ys&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;adm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;discrete_shunt_control&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;qv_droop_control&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">S0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">I0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">Y0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
                  <span class="n">Qmin</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">Qmax</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>

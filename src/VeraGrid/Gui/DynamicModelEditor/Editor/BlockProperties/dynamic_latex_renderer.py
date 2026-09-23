@@ -10,7 +10,7 @@ Architecture::
 
     LaTeX string
         ↓
-    LatexRenderer  (matplotlib → QPixmap + QSize, cached)
+    LatexRenderer  (Qt text → QPixmap + QSize, cached)
         ↓
     LatexEquationDelegate  (sizeHint + paint, no scaling)
         ↓
@@ -24,12 +24,9 @@ symbolic expression tree.
 
 from __future__ import annotations
 
-from io import BytesIO
+from html import escape
 
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.figure import Figure
-from matplotlib.text import Text
-from PySide6 import QtCore, QtGui, QtSvg, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 
@@ -47,7 +44,7 @@ class RenderedEquation:
 
         :param pixmap: Equation image.
         :param size: Preferred table-cell size.
-        :param uses_mathtext: Whether mathematical parsing succeeded.
+        :param uses_mathtext: Whether a mathematical text parser was used.
         :return: None.
         """
         self._pixmap: QPixmap = pixmap
@@ -68,7 +65,7 @@ class RenderedEquation:
 
     def get_uses_mathtext(self) -> bool:
         """
-        :return: Whether the source compiled instead of using plain text.
+        :return: Whether a mathematical text parser was used.
         """
         return self._uses_mathtext
 
@@ -86,7 +83,7 @@ class RenderedSvgEquation:
 
         :param data: Complete SVG document payload.
         :param size: Intrinsic logical display size.
-        :param uses_mathtext: Whether mathematical parsing succeeded.
+        :param uses_mathtext: Whether a mathematical text parser was used.
         :return: None.
         """
         self._data: QtCore.QByteArray = data
@@ -107,46 +104,34 @@ class RenderedSvgEquation:
 
     def get_uses_mathtext(self) -> bool:
         """
-        :return: Whether the SVG contains compiled mathematical glyphs.
+        :return: Whether a mathematical text parser was used.
         """
         return self._uses_mathtext
 
 
 def normalize_mathtext_latex(latex: str) -> str:
-    """Separate delimiter commands from adjacent symbolic variable names.
-
-    VeraGrid's LaTeX printer may emit strings such as ``\\lvertVm`` when an
-    absolute-value delimiter directly precedes ``Vm``. TeX understands where
-    the command ends from broader parsing context, while Matplotlib MathText
-    treats the complete ``lvertVm`` token as one unknown command.
+    """Return LaTeX source unchanged for compatibility with existing callers.
 
     :param latex: LaTeX emitted by the symbolic printer.
-    :return: MathText-compatible LaTeX with unambiguous delimiter tokens.
+    :return: Original LaTeX source.
     """
-    # Matplotlib MathText does not implement ``\lvert`` or ``\rvert`` even
-    # though they are standard LaTeX. Its supported scalable equivalents
-    # preserve the same absolute-value semantics and compile reliably.
-    normalized: str = latex.replace(r"\lvert", r"\left|")
-    normalized = normalized.replace(r"\rvert", r"\right|")
-    return normalized
+    return latex
 
 
 # ---------------------------------------------------------------------------
-# LatexRenderer  –  matplotlib mathtext → QPixmap with cache
+# LatexRenderer  –  Qt text → QPixmap with cache
 # ---------------------------------------------------------------------------
 
 
 class LatexRenderer:
     """
-    Render a LaTeX math string into a :class:`QPixmap` using matplotlib.
+    Render equation source into a :class:`QPixmap` using Qt text APIs.
 
     The pixmap has a fully transparent background so Qt's native
     selection / hover / alternating-row painting shows through.
 
-    Uses ``bbox_inches='tight'`` with ``pad_inches=0`` so the image
-    occupies exactly the real space of the equation — no white margins.
-
-    A dictionary cache keyed by the raw LaTeX string avoids re-rendering
+    The source is displayed literally because the GUI no longer embeds a
+    plotting renderer. A cache keyed by the raw source avoids re-rendering
     the same equation on every repaint / sizeHint query.
     """
 
@@ -155,6 +140,7 @@ class LatexRenderer:
         "_dpi",
         "_minimum_row_height",
         "_maximum_mathtext_length",
+        "_maximum_fallback_width",
         "_cache",
         "_svg_cache",
     )
@@ -170,6 +156,7 @@ class LatexRenderer:
         self._dpi: int = dpi
         self._minimum_row_height: int = 24
         self._maximum_mathtext_length: int = 2000
+        self._maximum_fallback_width: int = 960
         self._cache: dict[str, RenderedEquation] = dict()
         self._svg_cache: dict[str, RenderedSvgEquation] = dict()
 
@@ -179,7 +166,7 @@ class LatexRenderer:
         """
         Return a cached :class:`RenderedEquation` for *latex*.
 
-        If not yet in the cache it is rendered with matplotlib and stored.
+        If not yet in the cache it is rendered with Qt and stored.
 
         :param latex: LaTeX source handled by the operation.
         :return: A cached :class:`RenderedEquation` for *latex*.
@@ -188,31 +175,25 @@ class LatexRenderer:
         if cached is not None:
             return cached
         else:
-            normalized_latex: str = normalize_mathtext_latex(latex)
-            if len(normalized_latex) > self._maximum_mathtext_length:
-                # Rendering an enormous symbolic expansion as one raster image
-                # can abort a native graphics backend before Python receives an
-                # exception. The complete source remains available in Python.
+            if len(latex) > self._maximum_mathtext_length:
                 preview_message: str = (
                     f"Equation is too large for graphical preview ({len(latex)} characters). "
                     "See Python code."
                 )
-                rendered: RenderedEquation = self._render_to_pixmap(preview_message, False)
+                rendered: RenderedEquation = self._render_to_pixmap(
+                    preview_message,
+                    False,
+                    self._maximum_fallback_width,
+                )
             else:
-                try:
-                    rendered = self._render_to_pixmap(normalized_latex, True)
-                except (RuntimeError, ValueError):
-                    # A valid VeraGrid expression must never make Qt's delegate
-                    # fail merely because MathText supports a smaller TeX subset.
-                    rendered = self._render_to_pixmap(latex, False)
+                rendered = self._render_to_pixmap(latex, False)
             self._cache[latex] = rendered
             return rendered
 
     def render_plain_text(self, text: str) -> RenderedEquation:
-        """Render literal text without asking MathText to parse TeX commands.
+        """Render literal text with Qt's native font renderer.
 
-        This is used by PDF metadata and LaTeX-source exports so the result is
-        independent from Qt's platform font discovery.
+        This is used by PDF metadata and source previews.
 
         :param text: Literal text to rasterize.
         :return: Rendered text image and preferred size.
@@ -227,35 +208,35 @@ class LatexRenderer:
             return rendered
 
     def render_svg(self, latex: str) -> RenderedSvgEquation:
-        """Return a cached, scale-independent SVG equation.
+        """Return a cached SVG containing the literal equation source.
 
-        :param latex: Mathematical source without outer dollar delimiters.
-        :return: Self-contained SVG and its intrinsic logical size.
+        :param latex: LaTeX source.
+        :return: Self-contained SVG text and its intrinsic logical size.
         """
         cached: RenderedSvgEquation | None = self._svg_cache.get(latex, None)
         if cached is not None:
             return cached
         else:
-            normalized_latex: str = normalize_mathtext_latex(latex)
-            if len(normalized_latex) > self._maximum_mathtext_length:
+            if len(latex) > self._maximum_mathtext_length:
                 preview_message: str = (
                     f"Equation is too large for graphical preview ({len(latex)} characters). "
                     "See Python code."
                 )
-                rendered: RenderedSvgEquation = self._render_to_svg(preview_message, False)
+                rendered: RenderedSvgEquation = self._render_to_svg(
+                    preview_message,
+                    False,
+                    self._maximum_fallback_width,
+                )
             else:
-                try:
-                    rendered = self._render_to_svg(normalized_latex, True)
-                except (RuntimeError, ValueError):
-                    rendered = self._render_to_svg(latex, False)
+                rendered = self._render_to_svg(latex, False)
             self._svg_cache[latex] = rendered
             return rendered
 
     def render_plain_text_svg(self, text: str) -> RenderedSvgEquation:
-        """Return literal text as self-contained vector glyph paths.
+        """Return literal text as SVG text.
 
-        :param text: Literal label text without mathematical interpretation.
-        :return: Scale-independent SVG label and its logical size.
+        :param text: Literal label text.
+        :return: Self-contained SVG label and its logical size.
         """
         cache_key: str = f"__plain_svg__:{text}"
         cached: RenderedSvgEquation | None = self._svg_cache.get(cache_key, None)
@@ -287,109 +268,122 @@ class LatexRenderer:
 
     def get_maximum_mathtext_length(self) -> int:
         """
-        Return the safe single-expression MathText character limit.
+        Return the maximum equation source length shown in the preview.
 
-        :return: The safe single-expression MathText character limit.
+        :return: Maximum equation source length shown in the preview.
         """
         return self._maximum_mathtext_length
 
     # -- internals ---------------------------------------------------------
 
-    def _render_to_pixmap(self, latex: str, use_mathtext: bool) -> RenderedEquation:
-        """Render one equation through MathText or the safe plain-text path.
+    def _render_to_pixmap(
+            self,
+            latex: str,
+            use_mathtext: bool,
+            maximum_width: int | None = None,
+    ) -> RenderedEquation:
+        """Render equation source with a Qt painter.
 
         :param latex: Equation source.
-        :param use_mathtext: Whether to ask Matplotlib to parse math commands.
+        :param use_mathtext: Compatibility flag; Qt renders source literally.
+        :param maximum_width: Optional logical-pixel cap for fallback messages.
         :return: Rendered Qt image and preferred size.
         """
-        fig: Figure = Figure(dpi=self._dpi)
-        FigureCanvasAgg(fig)
-        fig.patch.set_alpha(0.0)
-
-        # Use fig.text (not ax.text) so bbox_inches='tight' computes the
-        # bounding box from the text glyphs alone, without axes geometry.
-        self._draw_text(fig, latex, use_mathtext)
-
-        buf: BytesIO = BytesIO()
-        fig.savefig(buf, format="png", transparent=True,
-                    bbox_inches="tight", pad_inches=0)
-        fig.clear()
-
-        buf.seek(0)
-        image: QtGui.QImage = QtGui.QImage()
-        image.loadFromData(buf.read())
-        pixmap: QPixmap = QPixmap.fromImage(image)
-        size: QtCore.QSize = QtCore.QSize(
-            pixmap.width(),
-            max(pixmap.height() + 4, self._minimum_row_height),
+        _ = use_mathtext
+        font: QtGui.QFont = QtWidgets.QApplication.font()
+        font.setPixelSize(max(1, int(round(float(self._font_size * self._dpi) / 72.0))))
+        metrics: QtGui.QFontMetrics = QtGui.QFontMetrics(font)
+        padding: int = 2
+        draw_text: str = latex
+        if maximum_width is not None:
+            available_width: int = max(1, maximum_width - padding * 2)
+            if metrics.horizontalAdvance(draw_text) > available_width:
+                draw_text = metrics.elidedText(
+                    draw_text,
+                    Qt.TextElideMode.ElideRight,
+                    available_width,
+                )
+            else:
+                pass
+        else:
+            pass
+        measured_width: int = metrics.horizontalAdvance(draw_text) + padding * 2
+        if maximum_width is None:
+            image_width: int = max(1, measured_width)
+        else:
+            image_width = max(1, min(maximum_width, measured_width))
+        image_height: int = max(self._minimum_row_height, metrics.height() + padding * 2)
+        image: QtGui.QImage = QtGui.QImage(
+            image_width,
+            image_height,
+            QtGui.QImage.Format.Format_ARGB32_Premultiplied,
         )
+        image.fill(QtGui.QColor(0, 0, 0, 0))
+        painter: QtGui.QPainter = QtGui.QPainter(image)
+        painter.setFont(font)
+        painter.setPen(QtWidgets.QApplication.palette().color(QtGui.QPalette.ColorRole.Text))
+        painter.drawText(padding, padding + metrics.ascent(), draw_text)
+        painter.end()
+        pixmap: QPixmap = QPixmap.fromImage(image)
+        size: QtCore.QSize = QtCore.QSize(image_width, image_height)
         return RenderedEquation(
             pixmap=pixmap,
             size=size,
-            uses_mathtext=use_mathtext,
+            uses_mathtext=False,
         )
 
-    def _render_to_svg(self, latex: str, use_mathtext: bool) -> RenderedSvgEquation:
-        """Render one equation into self-contained vector paths.
+    def _render_to_svg(
+            self,
+            latex: str,
+            use_mathtext: bool,
+            maximum_width: int | None = None,
+    ) -> RenderedSvgEquation:
+        """Render equation source as self-contained SVG text.
 
         :param latex: Equation source.
-        :param use_mathtext: Whether Matplotlib should compile math commands.
-        :return: Vector equation payload and intrinsic logical size.
+        :param use_mathtext: Compatibility flag; Qt renders source literally.
+        :param maximum_width: Optional logical-pixel cap for fallback messages.
+        :return: SVG text payload and intrinsic logical size.
         """
-        # A frameless figure prevents QSvgRenderer from interpreting the
-        # transparent Matplotlib canvas patch as a visible outline in PDF.
-        fig: Figure = Figure(dpi=self._dpi, frameon=False)
-        FigureCanvasAgg(fig)
-        self._draw_text(fig, latex, use_mathtext)
-
-        buffer: BytesIO = BytesIO()
-        fig.savefig(
-            buffer,
-            format="svg",
-            transparent=True,
-            bbox_inches="tight",
-            pad_inches=0,
-        )
-        fig.clear()
-        svg_data: QtCore.QByteArray = QtCore.QByteArray(buffer.getvalue())
-        svg_renderer: QtSvg.QSvgRenderer = QtSvg.QSvgRenderer(svg_data)
-        if svg_renderer.isValid():
-            intrinsic_size: QtCore.QSize = svg_renderer.defaultSize()
-            # Matplotlib expresses SVG dimensions in 72-dpi points, whereas
-            # the previous document preview used renderer-dpi screen pixels.
-            # Scale only the logical box; SVG paths remain fully vectorial.
-            logical_scale: float = float(self._dpi) / 72.0
-            size: QtCore.QSize = QtCore.QSize(
-                max(1, int(round(intrinsic_size.width() * logical_scale))),
-                max(1, int(round(intrinsic_size.height() * logical_scale))),
-            )
+        _ = use_mathtext
+        font: QtGui.QFont = QtWidgets.QApplication.font()
+        font.setPixelSize(max(1, int(round(float(self._font_size * self._dpi) / 72.0))))
+        metrics: QtGui.QFontMetrics = QtGui.QFontMetrics(font)
+        padding: int = 2
+        draw_text: str = latex
+        if maximum_width is not None:
+            available_width: int = max(1, maximum_width - padding * 2)
+            if metrics.horizontalAdvance(draw_text) > available_width:
+                draw_text = metrics.elidedText(
+                    draw_text,
+                    Qt.TextElideMode.ElideRight,
+                    available_width,
+                )
+            else:
+                pass
         else:
-            raise ValueError("Matplotlib produced an invalid SVG equation")
+            pass
+        measured_width: int = metrics.horizontalAdvance(draw_text) + padding * 2
+        if maximum_width is None:
+            image_width: int = max(1, measured_width)
+        else:
+            image_width = max(1, min(maximum_width, measured_width))
+        image_height: int = max(1, metrics.height() + padding * 2)
+        baseline: int = padding + metrics.ascent()
+        font_size: int = max(1, font.pixelSize())
+        svg_source: str = (
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            f'width="{image_width}px" height="{image_height}px" '
+            f'viewBox="0 0 {image_width} {image_height}">'
+            f'<text x="{padding}" y="{baseline}" '
+            f'font-family="{escape(font.family(), quote=True)}" '
+            f'font-size="{font_size}px" fill="#000000">{escape(draw_text)}</text></svg>'
+        )
+        svg_data: QtCore.QByteArray = QtCore.QByteArray(svg_source.encode("utf-8"))
         return RenderedSvgEquation(
             data=svg_data,
-            size=size,
-            uses_mathtext=use_mathtext,
-        )
-
-    def _draw_text(self, fig: Figure, latex: str, use_mathtext: bool) -> Text:
-        """Draw math or literal source on the transparent figure.
-
-        :param fig: Matplotlib figure receiving the text artist.
-        :param latex: Equation source.
-        :param use_mathtext: Whether to surround the source with math markers.
-        :return: Created Matplotlib text artist.
-        """
-        if use_mathtext:
-            displayed_text: str = f"${latex}$"
-        else:
-            displayed_text = latex
-        return fig.text(
-            0,
-            0,
-            displayed_text,
-            fontsize=self._font_size,
-            ha="left",
-            va="baseline",
+            size=QtCore.QSize(image_width, image_height),
+            uses_mathtext=False,
         )
 
 

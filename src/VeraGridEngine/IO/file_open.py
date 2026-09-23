@@ -56,6 +56,23 @@ class FileOpenOptions:
     This class is to store the extra stuff that needs to be passed to open more complex files
     """
 
+    __slots__ = (
+        "file_type",
+        "crash_on_errors",
+        "cgmes_version",
+        "cgmes_map_areas_like_raw",
+        "cgmes_try_to_map_dc_to_hvdc_line",
+        "cgmes_topology_mode",
+        "cgmes_create_busbar_section_for_every_connectivity_node",
+        "cgmes_recovery_mode",
+        "psse_adjust_taps_to_discrete_positions",
+        "psse_use_short_names",
+        "psse_flatten_virtual_taps",
+        "dgs_use_vsc_for_injections",
+        "dgs_use_dynamic_information",
+        "dgs_dynamic_simulation_mode",
+    )
+
     def __init__(self,
                  # General
                  file_type: FileType | None = None,
@@ -338,6 +355,19 @@ class FileOpen:
     """
     File open interface
     """
+
+    __slots__ = (
+        "file_name",
+        "circuit",
+        "multiverse",
+        "options",
+        "cgmes_circuit",
+        "json_files",
+        "logger",
+        "cgmes_logger",
+        "_previous_circuit",
+        "file_type"
+    )
 
     def __init__(self,
                  file_name: Union[str, List[str]],

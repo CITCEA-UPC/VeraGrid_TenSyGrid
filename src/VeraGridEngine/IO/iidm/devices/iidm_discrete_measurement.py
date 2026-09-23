@@ -6,6 +6,11 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class IidmDiscreteMeasurement(IidmObject):
+    __slots__ = (
+        "id",
+        "equipmentId",
+        "value",
+    )
     def __init__(self, id: str, equipmentId: str, value: bool):
         super().__init__("DiscreteMeasurement")
         self.id = id

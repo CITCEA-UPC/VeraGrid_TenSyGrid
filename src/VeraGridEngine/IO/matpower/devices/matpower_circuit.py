@@ -17,8 +17,23 @@ from VeraGridEngine.basic_structures import Logger
 
 
 class MatpowerCircuit:
+    """
+    MATPOWER circuit container class.
+    """
 
-    def __init__(self):
+    __slots__ = (
+        "areas",
+        "buses",
+        "generators",
+        "branches",
+        "dc_buses",
+        "converters",
+        "dc_branches",
+        "Sbase",
+        "logger",
+    )
+
+    def __init__(self) -> None:
         """
         Constructor
         """

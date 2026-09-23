@@ -6,6 +6,12 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class IidmLoad(IidmObject):
+    __slots__ = (
+        "id",
+        "bus",
+        "p0",
+        "q0",
+    )
     def __init__(self, id, bus, p0, q0):
         super().__init__("Load")
         self.id = id

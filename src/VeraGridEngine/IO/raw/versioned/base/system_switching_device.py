@@ -11,6 +11,29 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_str
 
 
 class RawSystemSwitchingDevice(RawObject):
+    __slots__ = (
+        "I",
+        "J",
+        "CKT",
+        "X",
+        "RATE1",
+        "RATE2",
+        "RATE3",
+        "RATE4",
+        "RATE5",
+        "RATE6",
+        "RATE7",
+        "RATE8",
+        "RATE9",
+        "RATE10",
+        "RATE11",
+        "RATE12",
+        "STATUS",
+        "NSTATUS",
+        "METERED",
+        "STYPE",
+        "NAME",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='ibus', class_type=int, description='From bus number.', min_value=1,
                      max_value=999997),

@@ -9,15 +9,17 @@ from typing import List, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 import requests
-from matplotlib.axes import Axes
-from matplotlib import pyplot as plt
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.WindPowerWizard.wind_power_wizard_gui import Ui_MainWindow
 from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 from VeraGrid.Gui.messages import error_msg
 from VeraGrid.Gui.pandas_model import PandasModel
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.profile_wizard_utils import (
+    build_mapped_time_index,
+    get_longitude_time_offset,
+)
 
 
 class WindTurbineParameterModel(QtCore.QAbstractTableModel):
@@ -186,43 +188,7 @@ def get_wind_reference_base_year(ts1: pd.Timestamp, ts2: pd.Timestamp) -> Tuple[
         return False, reference_year, message
 
 
-def build_mapped_wind_time_index(time_index: pd.DatetimeIndex, base_year: int) -> pd.DatetimeIndex:
-    """
-    Map circuit timestamps to a historical weather year while preserving month, day and time.
-
-    :param time_index: Circuit time index.
-    :param base_year: Historical base year used for the mapped timestamps.
-    :return: Historical weather time index.
-    """
-    ts1: pd.Timestamp = time_index[0]
-    mapped_timestamps: List[datetime] = list()
-
-    for ts in time_index:
-        target_year: int = base_year + int(ts.year - ts1.year)
-        mapped_timestamp: datetime = datetime(year=target_year,
-                                              month=int(ts.month),
-                                              day=int(ts.day),
-                                              hour=int(ts.hour),
-                                              minute=int(ts.minute),
-                                              second=int(ts.second),
-                                              microsecond=int(ts.microsecond))
-        mapped_timestamps.append(mapped_timestamp)
-
-    return pd.DatetimeIndex(pd.to_datetime(mapped_timestamps))
-
-
-def get_longitude_time_offset(longitude: float) -> timedelta:
-    """
-    Get the local solar time offset from longitude.
-
-    :param longitude: Site longitude in degrees.
-    :type longitude: float
-    :return: Offset to add to UTC timestamps to obtain local solar time.
-    :rtype: timedelta
-    """
-    offset_hours: float = float(longitude) / 15.0
-
-    return timedelta(hours=offset_hours)
+build_mapped_wind_time_index = build_mapped_time_index
 
 
 def get_open_meteo_wind_weather_df(time_index: pd.DatetimeIndex,
@@ -920,53 +886,67 @@ class WindFarmWizard(QtWidgets.QDialog):
             return None
 
     def plot_design_curves(self) -> None:
-        """
-        Plot Cp on the left axis and power on the right axis for the selected turbine.
+        """Show each turbine design curve in a retained native chart dialog.
 
         :return: Nothing.
         """
         turbine = self.get_selected_windpowerlib_turbine()
 
         if turbine is not None:
-            figure, cp_axis = plt.subplots()
-            power_axis = cp_axis.twinx()
             plotted_cp: bool = False
             plotted_power: bool = False
+            delete_dialogs_safely(dialogs=self._open_plot_dialogs)
 
             if turbine.power_coefficient_curve is not None:
-                turbine.power_coefficient_curve.plot(x="wind_speed",
-                                                     y="value",
-                                                     ax=cp_axis,
-                                                     color="tab:blue",
-                                                     label="Cp")
-                plotted_cp = True
+                cp_curve: pd.DataFrame = turbine.power_coefficient_curve
+                cp_dialogue: PlotDialogue = PlotDialogue(
+                    title=self.tr('Wind turbine Cp curve'),
+                    parent=self,
+                )
+                plotted_cp = cp_dialogue.set_line_series(
+                    x_values=cp_curve['wind_speed'].to_numpy(dtype=float),
+                    series_names=(self.tr('Cp'),),
+                    series_values=(cp_curve['value'].to_numpy(dtype=float),),
+                    colors=('#2563eb',),
+                    title=self.tr('Wind turbine Cp curve'),
+                    x_axis_title=self.tr('Wind speed (m/s)'),
+                    y_axis_title=self.tr('Cp'),
+                )
+                if plotted_cp:
+                    self._open_plot_dialogs.append(cp_dialogue)
+                    cp_dialogue.show()
+                else:
+                    cp_dialogue.reject()
             else:
                 pass
 
             if turbine.power_curve is not None:
-                turbine.power_curve.plot(x="wind_speed",
-                                         y="value",
-                                         ax=power_axis,
-                                         color="tab:red",
-                                         label="Power")
-                plotted_power = True
+                power_curve: pd.DataFrame = turbine.power_curve
+                power_dialogue: PlotDialogue = PlotDialogue(
+                    title=self.tr('Wind turbine power curve'),
+                    parent=self,
+                )
+                plotted_power = power_dialogue.set_line_series(
+                    x_values=power_curve['wind_speed'].to_numpy(dtype=float),
+                    series_names=(self.tr('Power'),),
+                    series_values=(power_curve['value'].to_numpy(dtype=float),),
+                    colors=('#dc2626',),
+                    title=self.tr('Wind turbine power curve'),
+                    x_axis_title=self.tr('Wind speed (m/s)'),
+                    y_axis_title=self.tr('Power (W)'),
+                )
+                if plotted_power:
+                    self._open_plot_dialogs.append(power_dialogue)
+                    power_dialogue.show()
+                else:
+                    power_dialogue.reject()
             else:
                 pass
 
             if plotted_cp or plotted_power:
-                cp_axis.set_xlabel("Wind speed (m/s)")
-                cp_axis.set_ylabel("Cp", color="tab:blue")
-                power_axis.set_ylabel("Power (W)", color="tab:red")
-                cp_axis.tick_params(axis="y", labelcolor="tab:blue")
-                power_axis.tick_params(axis="y", labelcolor="tab:red")
-                figure.suptitle("Wind turbine design curves")
-                figure.tight_layout()
-                show_matplotlib_figure(figure=figure,
-                                       parent=self,
-                                       open_dialogs=self._open_plot_dialogs,
-                                       title=self.tr("Wind turbine design curves"))
+                pass
             else:
-                error_msg(self.tr("The selected turbine has no design curves"))
+                error_msg(self.tr('The selected turbine has no design curves'))
         else:
             pass
 
@@ -1005,17 +985,28 @@ class WindFarmWizard(QtWidgets.QDialog):
             self.ui.tableView_2.setModel(None)
 
     def plot(self) -> None:
-        """
-        Plot the wind power profile.
+        """Show the generated wind-power profile in a retained native chart.
 
         :return: Nothing.
         """
-        df: pd.DataFrame = pd.DataFrame(data=self.P, index=self.time_array, columns=["P (MW)"])
-        axis: Axes = df.plot()
-        show_matplotlib_figure(figure=axis.figure,
-                               parent=self,
-                               open_dialogs=self._open_plot_dialogs,
-                               title=self.tr("Wind power profile"))
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        plot_dialogue: PlotDialogue = PlotDialogue(
+            title=self.tr('Wind power profile'),
+            parent=self,
+        )
+        accepted: bool = plot_dialogue.set_time_series(
+            time_values=np.asarray(self.time_array),
+            series_names=(self.tr('P (MW)'),),
+            series_values=(np.asarray(self.P, dtype=float),),
+            colors=('#0f766e',),
+            title=self.tr('Wind power profile'),
+            y_axis_title=self.tr('Power (MW)'),
+        )
+        if accepted:
+            self._open_plot_dialogs.append(plot_dialogue)
+            plot_dialogue.show()
+        else:
+            plot_dialogue.reject()
 
     def accept_click(self) -> None:
         """

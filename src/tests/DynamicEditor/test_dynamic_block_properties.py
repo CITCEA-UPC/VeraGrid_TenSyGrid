@@ -52,7 +52,6 @@ from VeraGrid.Gui.DynamicModelEditor.Editor.BlockProperties.dynamic_latex_render
     LatexRenderer,
     RenderedEquation,
     RenderedSvgEquation,
-    normalize_mathtext_latex,
 )
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
@@ -3189,16 +3188,20 @@ def test_rendered_pdf_equations_wrap_before_scaling() -> None:
     rendered_line: RenderedSvgEquation
     for rendered_line in rendered_lines:
         assert rendered_line.get_size().width() <= maximum_width
-    with pytest.raises(ValueError, match="Invalid LaTeX equation"):
-        render_wrapped_equation(
-            renderer,
-            r"\command_that_mathtext_does_not_support{Vm}",
-            maximum_width,
-        )
+    unsupported_latex: str = r"\command_that_mathtext_does_not_support{Vm}"
+    unsupported_lines: list[RenderedSvgEquation] = render_wrapped_equation(
+        renderer,
+        unsupported_latex,
+        maximum_width,
+    )
+    assert len(unsupported_lines) == 1
+    assert unsupported_lines[0].get_uses_mathtext() is False
+    assert unsupported_latex.encode("utf-8") in unsupported_lines[0].get_data().data()
+    assert unsupported_lines[0].get_size().width() <= maximum_width
 
 
-def test_genqec_equations_compile_as_mathtext_and_wrap_long_roots() -> None:
-    """GENQEC export must never expose raw LaTeX or clip a long radicand."""
+def test_genqec_equations_render_as_literal_text_and_wrap_long_roots() -> None:
+    """GENQEC equation SVGs keep their source text and wrap long radicands."""
     application: QtWidgets.QApplication = get_qt_application()
     _unused_application: QtWidgets.QApplication = application
     block: Block = get_genqec_rms(VarFactory()).block.children[0]
@@ -3227,8 +3230,10 @@ def test_genqec_equations_compile_as_mathtext_and_wrap_long_roots() -> None:
     assert r"\mathrm{j}" in entries[28].get_latex()
     entry: EquationExportEntry
     for entry in entries:
-        rendered: RenderedEquation = renderer.render(entry.get_latex())
-        assert rendered.get_uses_mathtext(), entry.get_latex()
+        latex_source: str = entry.get_latex()
+        rendered: RenderedSvgEquation = renderer.render_svg(latex_source)
+        assert not rendered.get_uses_mathtext(), latex_source
+        assert latex_source.encode("utf-8") in rendered.get_data().data(), latex_source
 
     long_root: str = entries[28].get_latex()
     wrapped_root: str = expand_latex_square_roots_for_wrapping(long_root)
@@ -3348,13 +3353,12 @@ def test_genraw_rendered_pdf_accepts_absolute_value_initialization(tmp_path: Pat
     assert len(payload) > 1000
 
 
-def test_latex_renderer_separates_delimiters_and_falls_back_for_unsupported_mathtext() -> None:
-    """LaTeX limitations must degrade to readable text instead of escaping into Qt."""
+def test_latex_renderer_keeps_unsupported_and_oversized_text_readable() -> None:
+    """Unsupported commands and oversized sources use Qt's readable text fallback."""
     application: QtWidgets.QApplication = get_qt_application()
     _unused_application: QtWidgets.QApplication = application
     renderer: LatexRenderer = LatexRenderer()
 
-    assert normalize_mathtext_latex(r"\lvertVm\rvert") == r"\left|Vm\right|"
     rendered: RenderedEquation = renderer.render(r"\command_that_mathtext_does_not_support{Vm}")
     assert not rendered.get_pixmap().isNull()
     assert rendered.get_size().height() >= 24

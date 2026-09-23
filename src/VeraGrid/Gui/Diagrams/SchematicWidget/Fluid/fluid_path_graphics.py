@@ -158,15 +158,15 @@ class FluidPathGraphicItem(LineGraphicTemplateItem):
         else:
             pass
 
-    def plot_profiles(self):
+    def plot_profiles(self) -> None:
+        """Open this fluid path's persisted profiles and simulation results.
+
+        :return: None.
         """
-        Plot the time series profiles
-        @return:
-        """
-        # get the index of this object
-        # i = self.editor.circuit.get_fluid_paths().index(self.api_object)
-        # self.editor.diagramScene.plot_branch(i, self.api_object)
-        pass
+        if self.api_object is not None:
+            self.editor.plot_device(api_object=self.api_object)
+        else:
+            pass
 
     def edit(self):
         """

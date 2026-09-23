@@ -12,7 +12,6 @@ import statistics
 import time
 from typing import Dict, List, Mapping, Optional, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
@@ -248,10 +247,6 @@ def _first_true_time(time_array: np.ndarray, signal: np.ndarray, threshold: floa
     return float(time_array[int(idx[0])])
 
 
-def _add_vertical_marker(ax: plt.Axes, time_value: Optional[float], text: str, *, color: str, linestyle: str) -> None:
-    if time_value is None:
-        return
-    ax.axvline(time_value, color=color, linestyle=linestyle, linewidth=1.3, label=f"{text} = {time_value:.4f} s")
 
 
 def _build_case(builder) -> Tuple[GenericEmtProblem, JitSymbolicSolver, Dict[str, Var], List[dict]]:

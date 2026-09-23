@@ -14,6 +14,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block, Var, Expr
 
 
 class PiLineEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

@@ -17,6 +17,64 @@ class GeneratorData:
     GeneratorData
     """
 
+    __slots__ = (
+        "nelm",
+        "nbus",
+        "names",
+        "idtag",
+        "control_mode_int",
+        "installed_p",
+        "active",
+        "is_static_generator",
+        "p",
+        "p3_star",
+        "q",
+        "v",
+        "k_droop",
+        "dead_band",
+        "qmin",
+        "qmax",
+        "snom",
+        "q_share",
+        "mttf",
+        "mttr",
+        "bus_idx",
+        "controllable_bus_idx",
+        "r0",
+        "r1",
+        "r2",
+        "x0",
+        "x1",
+        "x2",
+        "Rs",
+        "Xs",
+        "Xm",
+        "Rr",
+        "Xr",
+        "tpe_int",
+        "dispatchable",
+        "must_run",
+        "pmax",
+        "pmin",
+        "cost_1",
+        "cost_0",
+        "cost_2",
+        "startup_cost",
+        "shut_down_cost",
+        "ramp_up",
+        "ramp_down",
+        "min_time_up",
+        "min_time_down",
+        "capex",
+        "discount_rate",
+        "is_candidate",
+        "shift_key",
+        "scalable",
+        "original_idx",
+        "name_to_idx",
+        "is_at_dc_bus",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Generator data arrays
@@ -109,8 +167,8 @@ class GeneratorData:
         :return: new GeneratorData instance
         """
 
-        data = GeneratorData(nelm=len(elm_idx),
-                             nbus=len(bus_idx))
+        data: GeneratorData = self.__class__(nelm=len(elm_idx),
+                                              nbus=len(bus_idx))
 
         data.names = self.names[elm_idx]
         data.idtag = self.idtag[elm_idx]
@@ -221,7 +279,7 @@ class GeneratorData:
         :return: new GeneratorData instance
         """
 
-        data = GeneratorData(nelm=self.nelm, nbus=self.nbus)
+        data: GeneratorData = self.__class__(nelm=self.nelm, nbus=self.nbus)
 
         data.names = self.names.copy()
         data.idtag = self.idtag.copy()

@@ -256,6 +256,7 @@ class EmtBoundaryUpdateProtocol(Protocol):
     """
     Structural protocol implemented by EMT boundary update providers.
     """
+    __slots__ = ()
 
     def update(self, t: float, x: Vec, params: Vec) -> float | None:
         """
@@ -286,16 +287,7 @@ def _implements_forced_event_time_api(boundary_updater: Any) -> bool:
     :param boundary_updater: Boundary updater instance.
     :return: ``True`` when the API is implemented.
     """
-    updater_type: type = type(boundary_updater)
-    base_type: type
-
-    for base_type in updater_type.__mro__:
-        if "get_next_forced_event_time" in base_type.__dict__:
-            return True
-        else:
-            pass
-
-    return False
+    return "get_next_forced_event_time" in dir(boundary_updater)
 
 
 def _implements_step_resolution_api(boundary_updater: Any) -> bool:
@@ -305,14 +297,7 @@ def _implements_step_resolution_api(boundary_updater: Any) -> bool:
     :return: ``True`` when transactional step resolution is implemented.
     """
 
-    updater_type: type = type(boundary_updater)
-    base_type: type
-    for base_type in updater_type.__mro__:
-        if "resolve_step" in base_type.__dict__:
-            return True
-        else:
-            pass
-    return False
+    return "resolve_step" in dir(boundary_updater)
 
 
 def _emt_event_spec_time_sort_key(event_spec: Dict[str, float | str | None]) -> float:
@@ -479,6 +464,56 @@ class EmtProblemTemplate(ABC):
     CONSTANT_PARAMS_NAME = "cprms"
     DIFF_NAME = "diff"
     TIME_NAME = "glob_time"
+
+    __slots__ = (
+        "sys_block",
+        "grid",
+        "_glob_time",
+        "_newton_trace_collector",
+        "_init_eqs_flat",
+        "_diff_init_eqs_flat",
+        "_state_vars",
+        "_algebraic_vars",
+        "_state_eqs",
+        "_algebraic_eqs",
+        "_diff_vars",
+        "_static_parameter_values",
+        "_variable_parameters",
+        "_event_parameters_eqs",
+        "_runtime_mode_uids",
+        "_constant_parameters",
+        "_parameters_values",
+        "_runtime_all_parameters_source",
+        "_runtime_all_eqs_source",
+        "_runtime_continuous_parameters",
+        "_runtime_mode_parameters",
+        "_runtime_continuous_eqs",
+        "_runtime_mode_eqs",
+        "_runtime_continuous_slice",
+        "_runtime_mode_slice",
+        "_vars_glob_name2uid",
+        "init_guess",
+        "event_params_init_dict",
+        "diff_init_guess",
+        "_event_params_values",
+        "_constant_params_values",
+        "progress_signal",
+        "progress_text",
+        "_n_vars",
+        "_n_state",
+        "_n_alg",
+        "_n_algebraic",
+        "_n_diff",
+        "_n_params",
+        "_n_event_params",
+        "_uid2idx_vars",
+        "_uid2idx_diff",
+        "_uid2idx_params",
+        "_uid2idx_event_params",
+        "_compiler_names_dict",
+        "_alias_names_dict",
+        "_uid2idx_t",
+    )
 
     def __init__(self,
                  sys_block: Block,
@@ -999,7 +1034,7 @@ class EmtProblemTemplate(ABC):
             if runtime_parameter.uid in runtime_equation_lookup:
                 refreshed_equations.append(runtime_equation_lookup[runtime_parameter.uid])
             else:
-                runtime_idx: int | None = self.uid2idx_event_params.get(runtime_parameter.uid, None) if hasattr(self, 'uid2idx_event_params') else None
+                runtime_idx: int | None = self.uid2idx_event_params.get(runtime_parameter.uid, None)
                 if runtime_idx is None or runtime_idx >= len(self._event_parameters_eqs):
                     refreshed_equations.append(Const(None))
                 else:
@@ -1363,6 +1398,34 @@ class EmtProblemTemplate(ABC):
                 pass
         return dx
 
+    def set_x0(self, x0: Vec) -> None:
+        """
+        Set the initial state vector guess from an array.
+
+        :param x0: Initial state vector.
+        :type x0: Vec
+        :return: None.
+        """
+        for uid, idx in self._uid2idx_vars.items():
+            if idx < len(x0):
+                self.init_guess[uid] = float(x0[idx])
+            else:
+                pass
+
+    def set_dx0(self, dx0: Vec) -> None:
+        """
+        Set the initial differential vector guess from an array.
+
+        :param dx0: Initial differential vector.
+        :type dx0: Vec
+        :return: None.
+        """
+        for uid, idx in self._uid2idx_diff.items():
+            if idx < len(dx0):
+                self.diff_init_guess[uid] = float(dx0[idx])
+            else:
+                pass
+
     def def_event_params_fn(
             self,
             ev_param: Vec,
@@ -1600,4 +1663,3 @@ class EmtProblemTemplate(ABC):
     @property
     def event_parameters_eqs(self) -> List[Any]:
         return self._event_parameters_eqs
-

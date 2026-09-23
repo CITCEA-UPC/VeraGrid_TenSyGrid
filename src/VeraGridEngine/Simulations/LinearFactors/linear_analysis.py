@@ -609,6 +609,23 @@ class LinearAnalysis:
     Linear Analysis
     """
 
+    __slots__ = (
+        "logger",
+        "islands",
+        "PTDF",
+        "PTDF_by_island",
+        "LODF",
+        "HvdcDF",
+        "HvdcODF",
+        "VscDF",
+        "VscODF",
+        "bus_types",
+        "distributed_slack",
+        "Sbase",
+        "tau_flows",
+        "tau_injections",
+    )
+
     def __init__(self,
                  nc: NumericalCircuit,
                  distributed_slack: bool = False,
@@ -897,6 +914,21 @@ class LinearMultiContingency:
     LinearMultiContingency
     """
 
+    __slots__ = (
+        "branch_indices",
+        "hvdc_indices",
+        "vsc_indices",
+        "bus_indices",
+        "mlodf_factors",
+        "compensated_ptdf_factors",
+        "injections_factor",
+        "hvdc_odf",
+        "vsc_odf",
+        "compensated_vsc_df",
+        "compensated_hvdc_df",
+        "enabled",
+    )
+
     def __init__(self,
                  branch_indices: IntVec,
                  hvdc_indices: IntVec,
@@ -1080,6 +1112,14 @@ class ContingencyIndices:
     Contingency indices
     """
 
+    __slots__ = (
+        "branch_contingency_indices",
+        "hvdc_contingency_indices",
+        "vsc_contingency_indices",
+        "bus_contingency_indices",
+        "injections_factors",
+    )
+
     def __init__(self,
                  contingency_group: ContingencyGroup,
                  contingency_group_dict: Dict[str, List[Contingency]],
@@ -1165,6 +1205,18 @@ class LinearMultiContingencies:
     """
     LinearMultiContingencies
     """
+
+    __slots__ = (
+        "grid",
+        "contingency_groups_used",
+        "__contingency_group_dict",
+        "__branches_dict",
+        "__hvdc_dict",
+        "__vsc_dict",
+        "__injections_bus_index_dict",
+        "contingency_indices_list",
+        "multi_contingencies",
+    )
 
     def __init__(self, grid: MultiCircuit, contingency_groups_used: List[ContingencyGroup]):
         """
@@ -1408,6 +1460,18 @@ class LinearAnalysisTs:
     """
     Class to compute the different linear states of a grid
     """
+
+    __slots__ = (
+        "time_indices",
+        "_inverse_time_index",
+        "groups",
+        "mapping",
+        "_linear_analysis",
+        "_linear_multi_contingencies",
+        "nbr",
+        "nbus",
+        "nt",
+    )
 
     def __init__(self, grid: MultiCircuit,
                  distributed_slack: bool = False,

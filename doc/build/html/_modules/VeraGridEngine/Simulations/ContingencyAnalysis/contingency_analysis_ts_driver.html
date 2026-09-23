@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.ContingencyAnalysis.contingency_analysis_ts_driver &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.ContingencyAnalysis.contingency_analysis_ts_driver &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -517,6 +517,10 @@
         <span class="p">)</span>
 
         <span class="n">Pbus_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">get_Pbus_prof</span><span class="p">()</span>
+        <span class="n">rates_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">get_branch_rates_prof</span><span class="p">(</span><span class="n">add_hvdc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_vsc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_switch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">contingency_rates_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">get_branch_contingency_rates_prof</span><span class="p">(</span>
+            <span class="n">add_hvdc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_vsc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_switch</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
         <span class="n">std_dev_counter</span> <span class="o">=</span> <span class="n">WeldorfOnlineStdDevMat</span><span class="p">(</span><span class="n">nrow</span><span class="o">=</span><span class="n">results</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="n">results</span><span class="o">.</span><span class="n">nbranch</span><span class="p">)</span>
 
@@ -532,8 +536,8 @@
                 <span class="n">nbr</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">nbr</span><span class="p">,</span>
                 <span class="n">n_con_groups</span><span class="o">=</span><span class="n">n_con_groups</span><span class="p">,</span>
                 <span class="n">Pbus</span><span class="o">=</span><span class="n">Pbus_mat</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:],</span>
-                <span class="n">rates</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">rates</span><span class="p">,</span>
-                <span class="n">con_rates</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">contingency_rates</span><span class="p">,</span>
+                <span class="n">rates</span><span class="o">=</span><span class="n">rates_mat</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">con_rates</span><span class="o">=</span><span class="n">contingency_rates_mat</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:],</span>
                 <span class="n">PTDF</span><span class="o">=</span><span class="n">lin_t</span><span class="o">.</span><span class="n">PTDF</span><span class="p">,</span>
                 <span class="n">LODF</span><span class="o">=</span><span class="n">lin_t</span><span class="o">.</span><span class="n">LODF</span><span class="p">,</span>
                 <span class="n">mon_idx</span><span class="o">=</span><span class="n">mon_idx</span><span class="p">,</span>

@@ -5,7 +5,6 @@
 
 import numpy as np
 import numba as nb
-from matplotlib import pyplot as plt
 import scipy.linalg as la
 import scipy.sparse.linalg as spla
 import math
@@ -272,52 +271,6 @@ def compute_damping_ratios_and_frequencies(eigenvalues: Vec,
     return damping_ratios, conjugate_frequencies
 
 
-def plot_stability(eigenvalues: Vec,
-                   plot_units: str = "rad/s") -> None:
-    """
-    :param eigenvalues: row np array with modes
-    :param plot_units: string with the imaginary units "rad/s" or "Hz"
-    :return: plot S-domain modes
-    """
-    x = eigenvalues.real
-    y = eigenvalues.imag
-    slope = 1 / 0.05
-    x_z = np.linspace(-200, 0, 400)
-    y_z = slope * x_z
-
-    x_label = "Re"
-    y_label = "Im [rad/s]"
-
-    if plot_units == "Hz":
-        y = y / (2 * math.pi)
-        y_z = y_z / (2 * math.pi)
-        y_label = "Im [Hz]"
-    else:
-        pass
-
-    # plot 5% damping ratio lines
-    plt.plot(x_z, y_z, '--', color='grey', label='ζ = 5%')
-    plt.plot(x_z, -y_z, '--', color='grey')
-    # Plot the two lines (positive and negative imaginary axis)
-    plt.axhline(0, color='black', linewidth=1)
-    plt.axvline(0, color='black', linewidth=1)
-    # plot modes
-    plt.scatter(x, y, marker='x', color='blue')
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title("Stability plot")
-
-    margin_x = (x.max() - x.min()) * 0.1
-    margin_y = (y.max() - y.min()) * 0.1
-    x_min = x.min() - margin_x
-    x_max = x.max() + margin_x
-    y_min = y.min() - margin_y
-    y_max = y.max() + margin_y
-    plt.xlim([x_min, x_max])
-    plt.ylim([y_min, y_max])
-
-    plt.tight_layout()
-    plt.show(block=False)
 
 
 def run_dense_small_signal_stability(problem: RmsProblemTemplate,

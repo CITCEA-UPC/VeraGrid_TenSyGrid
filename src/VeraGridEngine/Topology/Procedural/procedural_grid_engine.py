@@ -109,6 +109,13 @@ def instantiate_branch_from_template(template_branch,
 
 class TransitionMatrix:
 
+    __slots__ = (
+        'voltages_sorted',
+        'voltages_dict',
+        'transition_matrix',
+        'template_dict',
+    )
+
     def __init__(self, grid: MultiCircuit):
 
         # Find out my unique voltages
@@ -209,6 +216,24 @@ class TransitionMatrix:
         return self.voltages_sorted[i2]
 
 class ProceduralGridGraph:
+
+    __slots__ = (
+        'target_buses',
+        'candidate_buses',
+        'max_iterations',
+        'logger',
+        'n_target',
+        'n_candidate',
+        'n_steiner',
+        'coord_candidate',
+        'coord_target',
+        'min_lon',
+        'min_lat',
+        'max_lon',
+        'max_lat',
+        'base_coords',
+        'base_voltages',
+    )
 
     def __init__(self,
                  target_buses: List[dev.Bus],
@@ -414,6 +439,18 @@ class Topology:
     Represents the physical layout using domain objects.
     Contains a Graph instance via composition.
     """
+
+    __slots__ = (
+        'all_buses',
+        'discretization',
+        'edges',
+        'grid',
+        'intermediate_buses',
+        'logger',
+        'new_lines',
+        'new_transformers',
+        'transition_matrix',
+    )
 
     def __init__(self,
                  edges: list[tuple[int, int]],
@@ -777,6 +814,22 @@ class ProceduralGridComputationEngine:
     """
     Core engine for procedural grid expansion calculations.
     """
+
+    __slots__ = (
+        'candidate_buses',
+        'candidates_substations',
+        'debugger',
+        'grid',
+        'intermediate_buses',
+        'logger',
+        'method',
+        'new_lines',
+        'new_transformers',
+        'steiner_buses',
+        'target_buses',
+        'targets_substations',
+        'transition_matrix',
+    )
 
     def __init__(self,
                  grid: MultiCircuit,

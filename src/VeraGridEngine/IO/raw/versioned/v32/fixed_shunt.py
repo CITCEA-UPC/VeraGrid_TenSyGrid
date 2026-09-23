@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v31.fixed_shunt import RawFixedShuntV31
 
 class RawFixedShuntV32(RawFixedShuntV31):
     """PSSE v32 typed object inheriting v31."""
+    __slots__ = ()
     pass

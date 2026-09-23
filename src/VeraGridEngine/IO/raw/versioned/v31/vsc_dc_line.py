@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v30.vsc_dc_line import RawVscDCLineV30
 
 class RawVscDCLineV31(RawVscDCLineV30):
     """PSSE v31 typed object inheriting v30."""
+    __slots__ = ()
     pass

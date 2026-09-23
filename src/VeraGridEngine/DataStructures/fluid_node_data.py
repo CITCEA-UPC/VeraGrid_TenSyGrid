@@ -11,6 +11,19 @@ class FluidNodeData:
     FluidNodeData
     """
 
+    __slots__ = (
+        "nelm",
+        "names",
+        "idtag",
+        "min_level",
+        "max_level",
+        "min_soc",
+        "max_soc",
+        "initial_level",
+        "inflow",
+        "spillage_cost",
+    )
+
     def __init__(self, nelm: int):
         """
         Fluid node data arrays

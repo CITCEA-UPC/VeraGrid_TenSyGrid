@@ -799,7 +799,53 @@ class PseudoTransientInitProblem:
     Lightweight problem class for pseudo-transient initialization of a single device block.
     Similar interface to RmsProblemDae but for initialization only.
     """
-    
+    __slots__ = (
+        "x_global",
+        "block",
+        "compiler_names_dict",
+        "alias_names_dict",
+        "_uid2idx_vars_global",
+        "_variable_parameters",
+        "_constant_parameters",
+        "_event_params_fn",
+        "_equilibrium_reference_update_eqs",
+        "_ordered_init_update_eqs",
+        "pseudo_transient_options",
+        "equilibrium_references_as_equations",
+        "equilibrium_references_as_params",
+        "equilibrium_inputs_as_params",
+        "_equilibrium_reference_eqs",
+        "_diff_vars",
+        "_all_vars",
+        "_uid2idx_vars",
+        "_uid2idx_diff",
+        "_compiler_names_dict_local",
+        "_alias_names_dict_local",
+        "_state_vars",
+        "_algebraic_vars",
+        "_state_eqs",
+        "_algebraic_eqs",
+        "_has_full_numerical_jacobian",
+        "_rhs_fn",
+        "_derivative_fn",
+        "_jacobian_fn",
+        "_constant_params",
+        "_variable_parameters_values",
+        "_equilibrium_reference_values",
+        "_equilibrium_reference_update_vars",
+        "_equilibrium_reference_update_expressions",
+        "_equilibrium_reference_update_indices",
+        "_equilibrium_reference_update_fn",
+        "_equilibrium_input_update_expressions",
+        "_equilibrium_input_param_indices",
+        "_equilibrium_input_update_indices",
+        "_equilibrium_input_update_fn",
+        "_n_states",
+        "_n_vars",
+        "_uid2idx_params",
+        "_uid2idx_event_params",
+    )
+
     def __init__(self,
                  block: Block,
                  x_global: Vec,
@@ -817,6 +863,20 @@ class PseudoTransientInitProblem:
                  CONSTANT_PARAMS_NAME: str = "cprms"):
         """
         Initialize problem for pseudo-transient initialization.
+        :param block:
+        :param x_global:
+        :param compiler_names_dict:
+        :param alias_names_dict:
+        :param uid2idx_vars:
+        :param variable_parameters:
+        :param constant_parameters:
+        :param equilibrium_reference_update_eqs:
+        :param ordered_init_update_eqs:
+        :param pseudo_transient_options:
+        :param VARS_NAME:
+        :param DIFF_NAME:
+        :param VARIABLE_PARAMS_NAME:
+        :param CONSTANT_PARAMS_NAME:
         """
 
         self.x_global = x_global
@@ -1032,7 +1092,15 @@ class PseudoTransientInitProblem:
         self.update_variable_params(0.0)
         self.update_variable_params(0.0)
 
+        self._uid2idx_params: Dict[int, int] = dict()
+        self._uid2idx_event_params: Dict[int, int] = dict()
+
     def _ensure_variable_parameter(self, var: Var) -> int:
+        """
+
+        :param var:
+        :return:
+        """
         for i, param in enumerate(self._variable_parameters):
             if isinstance(param, Var) and param.uid == var.uid:
                 return i
@@ -1118,6 +1186,11 @@ class PseudoTransientInitProblem:
             )
 
     def update_equilibrium_parameters(self, x: Vec) -> None:
+        """
+
+        :param x:
+        :return:
+        """
         if self.equilibrium_references_as_equations:
             return
 
@@ -1163,7 +1236,14 @@ class PseudoTransientInitProblem:
     
     def _compile_functions(self, VARS_NAME: str, DIFF_NAME: str,
                            VARIABLE_PARAMS_NAME: str, CONSTANT_PARAMS_NAME: str):
-        """Compile RHS and derivative functions for the block."""
+        """
+        Compile RHS and derivative functions for the block.
+        :param VARS_NAME:
+        :param DIFF_NAME:
+        :param VARIABLE_PARAMS_NAME:
+        :param CONSTANT_PARAMS_NAME:
+        :return:
+        """
         # Collect all equations
         all_eqs = list(self.block.state_eqs) + list(self.block.algebraic_eqs) + list(self._equilibrium_reference_eqs)
         
@@ -1202,6 +1282,12 @@ class PseudoTransientInitProblem:
         )
 
     def _compile_event_params_function(self, VARIABLE_PARAMS_NAME: str, TIME_NAME: str) -> None:
+        """
+
+        :param VARIABLE_PARAMS_NAME:
+        :param TIME_NAME:
+        :return:
+        """
         param_eqs: list[Expr | Const] = []
         for i, param in enumerate(self._variable_parameters):
             eq = self.block.event_dict.get(param, self.block.mode_dict.get(param))
@@ -1243,7 +1329,12 @@ class PseudoTransientInitProblem:
         return self._state_vars
     
     def rhs_algebraic(self, x: Vec, dx: Vec) -> Vec:
-        """Evaluate RHS for algebraic equations."""
+        """
+        Evaluate RHS for algebraic equations.
+        :param x:
+        :param dx:
+        :return:
+        """
         if self._rhs_fn is None:
             return np.array([])
 
@@ -1255,7 +1346,12 @@ class PseudoTransientInitProblem:
         return full_rhs
     
     def rhs_state(self, x: Vec, dx: Vec) -> Vec:
-        """Evaluate RHS for state equations."""
+        """
+        Evaluate RHS for state equations.
+        :param x:
+        :param dx:
+        :return:
+        """
         if self._rhs_fn is None or self._n_states == 0:
             return np.array([])
 
@@ -1264,11 +1360,22 @@ class PseudoTransientInitProblem:
         return full_rhs[:self._n_states]
     
     def get_dx(self, x: Vec, xn: Vec, dx: Vec, h: float) -> Vec:
-        """Compute derivatives."""
+        """
+        Compute derivatives.
+        :param x:
+        :param xn:
+        :param dx:
+        :param h:
+        :return:
+        """
         return self._derivative_fn(x, xn, dx, h)
     
     def update_variable_params(self, t: float):
-        """Update variable parameters at time t."""
+        """
+        Update variable parameters at time t.
+        :param t:
+        :return:
+        """
         if self._event_params_fn is None:
             return
         self._variable_parameters_values = np.array(
@@ -1278,7 +1385,13 @@ class PseudoTransientInitProblem:
         )
 
     def _compute_numerical_jacobian(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
-        """Compute Jacobian with compiled symbolic fallback to finite differences."""
+        """
+        Compute Jacobian with compiled symbolic fallback to finite differences.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         n_total = self._n_vars
         if n_total == 0:
             return sp.csc_matrix((0, 0))
@@ -1287,7 +1400,7 @@ class PseudoTransientInitProblem:
         if self._jacobian_fn is not None:
             try:
                 return self._jacobian_fn(x, dx, self._variable_parameters_values, self._constant_params, h).tocsc()
-            except Exception:
+            except Exception:   # TODO: Except what?
                 pass
 
         # Compute RHS at current point
@@ -1307,20 +1420,38 @@ class PseudoTransientInitProblem:
         return sp.csc_matrix(J_dense)
 
     def _compute_rhs_full(self, x: Vec, dx: Vec, h: float) -> Vec:
-        """Compute full RHS (state + algebraic) for Jacobian computation."""
+        """
+        Compute full RHS (state + algebraic) for Jacobian computation.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         if self._rhs_fn is None:
             return np.array([])
         return self._rhs_fn(x, dx, self._variable_parameters_values, self._constant_params)
 
     def get_j11(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
-        """Jacobian of state equations w.r.t. state variables."""
+        """
+        Jacobian of state equations w.r.t. state variables.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         if self._n_states == 0:
             return sp.csc_matrix((0, 0))
         J_full = self._compute_numerical_jacobian(x, dx, h)
         return J_full[:self._n_states, :self._n_states]
 
     def get_j12(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
-        """Jacobian of state equations w.r.t. algebraic variables."""
+        """
+        Jacobian of state equations w.r.t. algebraic variables.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         if self._n_states == 0:
             return sp.csc_matrix((0, self.get_algebraic_var_number()))
         J_full = self._compute_numerical_jacobian(x, dx, h)
@@ -1328,7 +1459,13 @@ class PseudoTransientInitProblem:
         return J_full[:self._n_states, self._n_states:self._n_states + n_alg]
 
     def get_j21(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
-        """Jacobian of algebraic equations w.r.t. state variables."""
+        """
+        Jacobian of algebraic equations w.r.t. state variables.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         n_alg = self.get_algebraic_var_number()
         if self._n_states == 0 or n_alg == 0:
             return sp.csc_matrix((n_alg, self._n_states))
@@ -1336,7 +1473,13 @@ class PseudoTransientInitProblem:
         return J_full[self._n_states:, :self._n_states]
 
     def get_j22(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
-        """Jacobian of algebraic equations w.r.t. algebraic variables."""
+        """
+        Jacobian of algebraic equations w.r.t. algebraic variables.
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         n_alg = self.get_algebraic_var_number()
         if n_alg == 0:
             return sp.csc_matrix((0, 0))
@@ -1373,9 +1516,31 @@ def init_pseudo_transient(mdl: Block,
                           pseudo_transient_options: object | None = None):
     """
     Initialize model using pseudo-transient method.
-    
+
     Similar interface to init_explicit but uses pseudo-transient simulation
     instead of explicit equation evaluation.
+    :param mdl:
+    :param sys_vars:
+    :param variable_parameters:
+    :param event_parameters_eqs:
+    :param constant_parameters:
+    :param init_guess:
+    :param uid2idx_vars:
+    :param uid2idx_params:
+    :param uid2idx_event_params:
+    :param compiler_names_dict:
+    :param alias_names_dict:
+    :param VARIABLE_PARAMS_NAME:
+    :param TIME_NAME:
+    :param VARS_NAME:
+    :param DIFF_NAME:
+    :param CONSTANT_PARAMS_NAME:
+    :param dtau0:
+    :param max_iter:
+    :param tol:
+    :param verbose:
+    :param pseudo_transient_options:
+    :return:
     """
     # Import here to avoid circular imports
     from VeraGridEngine.Simulations.Rms.numerical.pseudo_transient import PseudoTransient, PseudoTransientOptions
@@ -1908,7 +2073,7 @@ def init_pseudo_transient(mdl: Block,
             continue
         try:
             value = float(eval_expr_uid(eq, uid_bindings))
-        except Exception:
+        except Exception:  # TODO: except what?
             continue
         if np.isfinite(value):
             event_parameters_eqs[ep_idx] = Const(value)

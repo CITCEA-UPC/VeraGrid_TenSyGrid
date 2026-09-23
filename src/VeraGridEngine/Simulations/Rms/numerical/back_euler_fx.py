@@ -18,6 +18,21 @@ from VeraGridEngine.basic_structures import Vec, Mat
 
 
 class BackEulerImplicitIntegration:
+    """
+    Backward Euler implicit integration solver.
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+        "tol",
+        "_cancel_checker",
+        "_timings",
+    )
 
     def __init__(self,
                  problem: RmsProblemDae,
@@ -245,6 +260,8 @@ class BackEulerImplicitIntegration:
 
                     h_eff: float = t_curr - t_local_prev
                     if h_eff <= 0.0:
+                        # TODO: Is this the right thing?
+                        # Better to handle the situation and log it
                         raise RuntimeError(
                             f"Invalid local step size h_eff={h_eff} while integrating RMS macro step {step_idx}."
                         )
@@ -350,6 +367,8 @@ class BackEulerImplicitIntegration:
                                 nan_indices = np.where(np.isnan(rhs))[0]
                                 nan_eqs = [self.problem._algebraic_eqs[i] for i in nan_indices]
                                 print(f"Jf is {Jf}")
+                                # TODO: Is this the right thing?
+                                # Better to handle the situation and log it
                                 raise ValueError(
                                     f"spsolve returned non-finite values (NaN or Inf).\n"
                                     f"delta = {delta}\n"
@@ -381,6 +400,8 @@ class BackEulerImplicitIntegration:
                                 )
                                 if state_event_retry_time is not None:
                                     if co_simulation_advanced:
+                                        # TODO: Is this the right thing?
+                                        # Better to handle the situation and log it
                                         raise RuntimeError(
                                             "RMS FMI ME state event cannot retry after Co-Simulation devices advanced"
                                         )

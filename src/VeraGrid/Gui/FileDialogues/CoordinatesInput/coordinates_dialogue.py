@@ -459,20 +459,24 @@ class CoordinatesInputGUI(QtWidgets.QDialog):
         filename, type_selected = QtWidgets.QFileDialog.getOpenFileName(self, self.tr('Open file'), filter=files_types)
         self.open_file_now(filename)
 
-    def open_file_now(self, filename: str):
+    def open_file_now(self, filename: str) -> None:
         """
-        Open a file
-        :param filename: path of the file
+        Open and parse a coordinate file (.csv, .xlsx, .xls).
+
+        :param filename: Path of the file
         """
         if len(filename) > 0:
             # get the filename extension
+            name: str
+            file_extension: str
             name, file_extension = os.path.splitext(filename)
+            ext: str = file_extension.lower()
 
             # Depending on the extension load the file
-            if file_extension == '.csv':
+            if ext == '.csv':
                 self.original_data_frame = pd.read_csv(filename, index_col=None)
 
-            elif file_extension in ['.xlsx', '.xls']:
+            elif ext in ['.xlsx', '.xls']:
 
                 # select the sheet from the file
                 excel_window: ExcelDialog = ExcelDialog(self, filename)
@@ -486,26 +490,40 @@ class CoordinatesInputGUI(QtWidgets.QDialog):
                     self.original_data_frame = pd.read_excel(filename, sheet_name=sheet_index, index_col=None)
                 else:
                     return
+            else:
+                error_msg(f"Unsupported file format '{file_extension}'. Supported formats: .csv, .xlsx, .xls", parent=self)
+                return
+
+            if self.original_data_frame is None:
+                return
+            else:
+                pass
 
             # check for duplicates
+            unique_hdr: List[str]
+            duplicate_hdr: List[str]
             unique_hdr, duplicate_hdr = find_duplicates(arr=list(self.original_data_frame.columns))
 
-            if len(duplicate_hdr):
+            if len(duplicate_hdr) > 0:
                 # notify
-                logger = Logger()
+                logger: Logger = Logger()
                 for hdr in duplicate_hdr:
                     logger.add_error("Duplicated header", device=hdr)
 
                 logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Duplicated headers"),
-                                                           logger=logger, expand_all=True)
+                                                           logger=logger, expand_all=True, parent=self)
                 exec_dialog_safely(dialog=logs_dialogue)
 
                 # filter the headers
                 self.original_data_frame = self.original_data_frame[unique_hdr]
+            else:
+                pass
 
             # set the profile names list
             self.set_object_type()
             self.assigned_count = 0
+        else:
+            pass
 
     def do_it(self) -> None:
         """

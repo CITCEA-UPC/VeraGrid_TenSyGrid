@@ -91,12 +91,34 @@ class GridGeneratorGUI(QtWidgets.QDialog):
         G = nx.Graph(self.g.edges)
         pos = {i: (self.g.lat[i], self.g.lon[i]) for i in range(self.g.added_nodes)}
 
-        self.ui.plotwidget.clear()
-        nx.draw(G,
-                ax=self.ui.plotwidget.get_axis(),
-                pos=pos,
-                with_labels=True,
-                node_color='lightblue')
+        series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = list()
+        for edge_from, edge_to in G.edges:
+            x_values: np.ndarray = np.asarray([pos[edge_from][0], pos[edge_to][0]], dtype=float)
+            y_values: np.ndarray = np.asarray([pos[edge_from][1], pos[edge_to][1]], dtype=float)
+            series_data.append((x_values, y_values, "#8b9dad"))
+
+        node_indices: np.ndarray = np.asarray(list(G.nodes), dtype=int)
+        node_x: np.ndarray = np.asarray([pos[node][0] for node in node_indices], dtype=float)
+        node_y: np.ndarray = np.asarray([pos[node][1] for node in node_indices], dtype=float)
+        series_data.append((node_x, node_y, "#8ac6e8"))
+        updated: bool = self.ui.plotwidget.replace_xy_series_data(series_data=series_data)
+        if not updated:
+            self.ui.plotwidget.clear()
+            edge_index: int
+            for edge_index in range(len(G.edges)):
+                edge_data: tuple[np.ndarray, np.ndarray, str | None] = series_data[edge_index]
+                self.ui.plotwidget.add_line_series(name="",
+                                                   x_values=edge_data[0],
+                                                   y_values=edge_data[1],
+                                                   color=edge_data[2])
+            self.ui.plotwidget.add_scatter_series(name=self.tr("Buses"),
+                                                  x_values=node_x,
+                                                  y_values=node_y,
+                                                  color="#8ac6e8")
+        else:
+            pass
+        self.ui.plotwidget.setTitle(self.tr("Generated grid"))
+        self.ui.plotwidget.set_axis_titles(self.tr("Latitude"), self.tr("Longitude"))
         self.ui.plotwidget.redraw()
 
     def apply(self):

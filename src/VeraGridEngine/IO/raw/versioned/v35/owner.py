@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v34.owner import RawOwnerV34
 
 class RawOwnerV35(RawOwnerV34):
     """PSSE v35 typed object inheriting v34."""
+    __slots__ = ()
     pass

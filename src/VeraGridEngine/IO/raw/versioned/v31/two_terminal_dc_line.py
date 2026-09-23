@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v30.two_terminal_dc_line import RawTwoTermi
 
 class RawTwoTerminalDCLineV31(RawTwoTerminalDCLineV30):
     """PSSE v31 typed object inheriting v30."""
+    __slots__ = ()
     pass

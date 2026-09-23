@@ -68,7 +68,7 @@ grid.add_generator(bus=bus, api_obj=gen)
 ```
 
 ### Registered properties
-Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `market_unit`, `market_unit_share`, `srap_enabled`.
+Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, `Q`, `Qmin`, `Qmax`, `Pf`, `Vset`, `Cost2`, `Cost0`, `enabled_dispatch`, `must_run`, `srap_enabled`.
 
 |          name          |       class_type        | unit  |mandatory|max_chars|                                  descriptions                                  |has_profile|comment|
 |------------------------|-------------------------|-------|---------|---------|--------------------------------------------------------------------------------|-----------|-------|
@@ -154,8 +154,6 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |must_run                |bool                     |       |False    |         |P >= Pmin constraint. Used in OPF with unit commitment active.                  |True       |       |
 |emissions               |AssociationsList         |t/MWh  |False    |         |List of emissions                                                               |False      |       |
 |fuels                   |AssociationsList         |t/MWh  |False    |         |List of fuels                                                                   |False      |       |
-|market_unit             |Market unit              |       |False    |         |Market unit associated to this generator.                                       |True       |       |
-|market_unit_share       |float                    |p.u.   |False    |         |Participation share of the generator inside the market unit.                    |True       |       |
 |srap_enabled            |bool                     |       |False    |         |Is the unit available for SRAP participation?                                   |True       |       |
 |tpe                     |enum GeneratorType       |       |False    |         |Machine type of the generator.                                                  |False      |       |
 |is_static_generator     |bool                     |       |False    |         |Use the static generator short-circuit model.                                   |False      |       |

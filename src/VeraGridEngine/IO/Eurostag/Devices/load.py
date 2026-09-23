@@ -11,12 +11,20 @@ class EurostagLoad:
     ACTIVE_POWER = (41, 49)
     REACTIVE_POWER = (68, 76)
 
-    def __init__(self):
-        self.name = ""
-        self.state = "Y"
-        self.bus_name = ""
-        self.active_power = 0.0
-        self.reactive_power = 0.0
+    __slots__ = (
+        "name",
+        "state",
+        "bus_name",
+        "active_power",
+        "reactive_power",
+    )
+
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.state: str = "Y"
+        self.bus_name: str = ""
+        self.active_power: float = 0.0
+        self.reactive_power: float = 0.0
 
     def parse_line(self, line: str) -> None:
         self.name = slice_text(line, *self.NAME)
@@ -34,12 +42,20 @@ class EurostagCapacitorBank:
     ACTIVE_LOSS_ON_STEP = (42, 50)
     REACTIVE_POWER_ON_STEP = (51, 59)
 
-    def __init__(self):
-        self.name = ""
-        self.bus_name = ""
-        self.number_active_steps = 0
-        self.active_loss_on_step = 0.0
-        self.reactive_power_on_step = 0.0
+    __slots__ = (
+        "name",
+        "bus_name",
+        "number_active_steps",
+        "active_loss_on_step",
+        "reactive_power_on_step",
+    )
+
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.bus_name: str = ""
+        self.number_active_steps: int = 0
+        self.active_loss_on_step: float = 0.0
+        self.reactive_power_on_step: float = 0.0
 
     def parse_line(self, line: str) -> None:
         self.name = slice_text(line, *self.NAME)

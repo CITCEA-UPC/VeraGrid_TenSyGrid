@@ -41,7 +41,8 @@ class GridMergeDialogue(QtWidgets.QDialog):
         self.all_elms_base_dict, ok = self._base_grid.get_all_elements_dict(logger=self.logger)
 
         if not ok:
-            dlg = LogsDialogue(self.tr('The base circuit has duplicated idtags and cannot be merged :('), self.logger)
+            dlg = LogsDialogue(self.tr('The base circuit has duplicated idtags and cannot be merged :('),
+                               self.logger, parent=self)
             exec_dialog_safely(dialog=dlg)
             return
 
@@ -50,7 +51,8 @@ class GridMergeDialogue(QtWidgets.QDialog):
         self.diff_objects_dict, ok2 = self._diff.get_all_elements_dict(logger=self.logger)
 
         if not ok2:
-            dlg = LogsDialogue(self.tr('The diff circuit has duplicated idtags and cannot be merged :('), self.logger)
+            dlg = LogsDialogue(self.tr('The diff circuit has duplicated idtags and cannot be merged :('),
+                               self.logger, parent=self)
             exec_dialog_safely(dialog=dlg)
             return
 

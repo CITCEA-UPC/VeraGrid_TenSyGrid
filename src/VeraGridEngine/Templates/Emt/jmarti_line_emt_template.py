@@ -12,6 +12,7 @@ from VeraGridEngine.Templates.template_definition import TemplateDefinition, Tem
 
 
 class JmartiLineEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

@@ -137,6 +137,8 @@ class BusesForSrap:
     Buses information for SRAP over a particular branch
     """
 
+    __slots__ = ("branch_idx", "bus_indices", "sensitivities")
+
     def __init__(self,
                  branch_idx: int,
                  bus_indices: IntVec,

@@ -13,6 +13,11 @@ class IidmObject:
     """
     RteObject
     """
+    __slots__ = (
+        "class_name",
+        "idtag",
+        "__registered_properties",
+    )
 
     def __init__(self, class_name):
 

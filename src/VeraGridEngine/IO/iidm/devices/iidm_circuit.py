@@ -18,6 +18,21 @@ from VeraGridEngine.IO.iidm.devices.iidm_busbar_section import IidmBusbarSection
 from VeraGridEngine.IO.iidm.devices.static_var_compensator import StaticVarCompensator
 
 class IidmCircuit:
+    __slots__ = (
+        "substations",
+        "voltage_levels",
+        "areas",
+        "buses",
+        "generators",
+        "loads",
+        "lines",
+        "transformers",
+        "dangling_lines",
+        "shunts",
+        "switches",
+        "busbar_sections",
+        "svcs",
+    )
     def __init__(self):
         self.substations: List[IidmSubstation] = []
         self.voltage_levels: List[IidmVoltageLevel] = []

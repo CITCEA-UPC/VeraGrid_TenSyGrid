@@ -12,14 +12,11 @@ from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Devices.Dynamic.fmu_template import FmuTemplate
 from VeraGridEngine.enumerations import (DeviceType, BuildStatus, SubObjectType, FmuTemplateDomain, FmuTemplateMode,
-                                          PrpCat)
+                                         PrpCat)
 from VeraGridEngine.Utils.Symbolic.symbolic_io import duplicate_block
 
-
-from VeraGridEngine.Utils.Symbolic.templates_common_functions import connect_bus_variables_rms, connect_bus_variables_emt
-
-
-
+from VeraGridEngine.Utils.Symbolic.templates_common_functions import connect_bus_variables_rms, \
+    connect_bus_variables_emt
 
 
 class DynamicDevice(PhysicalDevice):
@@ -534,4 +531,3 @@ class DynamicDevice(PhysicalDevice):
         """
 
         self._emt_fmu_me_import_config = str(val)
-

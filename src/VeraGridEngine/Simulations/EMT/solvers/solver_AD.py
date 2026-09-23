@@ -207,6 +207,8 @@ def greedy_color_columns(col_rows: List[List[int]], n_rows: int) -> Tuple[np.nda
     return colors, int(max_color + 1)
 
 class BoundaryUpdaterInterface:
+    __slots__ = ()
+
     def update(
         self,
         t: float,

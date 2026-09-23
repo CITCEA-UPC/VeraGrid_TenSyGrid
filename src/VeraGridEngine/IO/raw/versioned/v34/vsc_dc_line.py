@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v33.vsc_dc_line import RawVscDCLineV33
 
 class RawVscDCLineV34(RawVscDCLineV33):
     """PSSE v34 typed object inheriting v33."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

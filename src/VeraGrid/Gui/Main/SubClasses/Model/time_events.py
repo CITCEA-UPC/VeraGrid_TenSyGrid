@@ -3,10 +3,8 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
-import pandas as pd
 from typing import List
 from PySide6 import QtWidgets
-from matplotlib import pyplot as plt
 
 from VeraGrid.Gui.object_proxy_model import ObjectModelFilterProxy
 from VeraGridEngine.basic_structures import Logger
@@ -20,7 +18,7 @@ from VeraGrid.Gui.FileDialogues.ProfilesInput.models_dialogue import ModelsInput
 from VeraGrid.Gui.FileDialogues.ProfilesInput.profile_dialogue import ProfileInputGUI, GeneratorsProfileOptionsDialogue
 from VeraGrid.Gui.profiles_model import ProfilesModel
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 
 
 class TimeEventsMain(DataBaseTableMain):
@@ -485,43 +483,56 @@ class TimeEventsMain(DataBaseTableMain):
             t = self.circuit.time_profile
 
             # Assign profiles
-            if len(obj_idx):
-                fig = plt.figure(figsize=(12, 8))
-                ax = fig.add_subplot(111)
-
+            if len(obj_idx) > 0:
                 units_dict = {attr: pair.units for attr, pair in objects[0].registered_properties.items()}
-
                 data_tpe = objects[0].get_property_by_name(magnitude).tpe
                 unit = units_dict[magnitude]
-                ax.set_ylabel(unit)
 
                 # get the unique columns in the selected cells
                 cols = set()
                 for i in range(len(obj_idx)):
                     cols.add(obj_idx[i].column())
 
-                # plot every column
-                dta = dict()
+                # Copy selected profile buffers before constructing the child
+                # dialog so its paint code never references mutable device data.
+                series_names: list[str] = list()
+                series_values: list[np.ndarray] = list()
                 for k in cols:
                     arr = objects[k].get_profile(magnitude=magnitude).toarray()
 
                     if data_tpe == bool:
-                        dta[objects[k].name] = arr.astype(int)
+                        series_names.append(objects[k].name)
+                        series_values.append(np.asarray(arr, dtype=int))
                     elif data_tpe == float:
-                        dta[objects[k].name] = arr
+                        series_names.append(objects[k].name)
+                        series_values.append(np.asarray(arr, dtype=float))
                     elif data_tpe == int:
-                        dta[objects[k].name] = arr
+                        series_names.append(objects[k].name)
+                        series_values.append(np.asarray(arr, dtype=float))
+                    else:
+                        pass
 
-                df = pd.DataFrame(data=dta, index=t)
-
-                try:
-                    df.plot(ax=ax)
-                    show_matplotlib_figure(figure=fig,
-                                           parent=self,
-                                           open_dialogs=self._open_plot_dialogs,
-                                           title=self.tr("Profiles plot"))
-                except TypeError as e:
-                    self.show_error_toast(str(e))
+                if len(series_values) > 0:
+                    plot_dialogue: PlotDialogue = PlotDialogue(title=self.tr("Profiles plot"), parent=self)
+                    accepted: bool = plot_dialogue.set_time_series(
+                        time_values=np.asarray(t),
+                        series_names=series_names,
+                        series_values=series_values,
+                        title=self.tr("Profiles plot"),
+                        y_axis_title=unit,
+                    )
+                    if accepted:
+                        # BaseMainGui retains these modeless child dialogs and
+                        # closes them before its native main-window teardown.
+                        self.register_open_plot_dialog(plot_dialogue)
+                        plot_dialogue.show()
+                    else:
+                        plot_dialogue.reject()
+                        self.show_error_toast(self.tr("Selected profiles cannot be charted"))
+                else:
+                    self.show_warning_toast(self.tr("Selected profile values are not numeric"))
+            else:
+                pass
 
     def import_profiles_from_models(self):
         """

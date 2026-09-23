@@ -799,6 +799,19 @@ def _compute_path_signature(expr, var_uid, target_occurrence, current_path, curr
 
 
 class VariableAlignmentEngine:
+    __slots__ = (
+        "sys1",
+        "sys2",
+        "sys1_hashes",
+        "sys2_hashes",
+        "_var_signatures_sys1",
+        "_var_signatures_sys2",
+        "_candidate_map",
+        "_mapping",
+        "_norm_sys1",
+        "_norm_sys2",
+    )
+
     def __init__(self, sys1, sys2):
         self.sys1 = sys1
         self.sys2 = sys2

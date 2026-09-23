@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from matplotlib import pyplot as plt
 from typing import List, Tuple
 
 from VeraGridEngine.Simulations.results_table import ResultsTable
@@ -157,17 +156,6 @@ class SmallSignalStabilityEmtResults(ResultsTemplate):
                 cols_device_type=DeviceType.NoDevice
             )
         elif result_type == ResultTypes.SDomainPlot:
-            if self.plotting_allowed():
-                plt.figure(figsize=(6, 6))
-                th = np.linspace(0, 2 * np.pi, 100)
-                plt.plot(np.cos(th), np.sin(th), 'k--', alpha=0.4, label='Unit Circle')
-                plt.scatter(self.multipliers.real, self.multipliers.imag, color='red', marker='x', s=80)
-                plt.xlabel("Real(mu)")
-                plt.ylabel("Imag(mu)")
-                plt.axis('equal')
-                plt.grid(True)
-                plt.title("Floquet Multipliers: Unit Circle Stability")
-                plt.show(block=False)
 
             row_indices = np.arange(len(self.multipliers))
 

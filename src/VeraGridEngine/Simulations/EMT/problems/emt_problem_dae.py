@@ -628,7 +628,7 @@ def _get_external_mapping_local(problem: Any, mdl: Block) -> Optional[Dict[Any, 
     :param mdl: Root block to inspect.
     :return: Effective external mapping or ``None``.
     """
-    local_registry: Any = problem.__dict__.get("_local_external_mapping_by_block_uid", None)
+    local_registry: Any = problem._local_external_mapping_by_block_uid
     local_mapping: Optional[Dict[Any, Var]]
 
     if isinstance(local_registry, dict):
@@ -677,7 +677,7 @@ def _get_api_obj_mapping_local(problem: Any, mdl: Block) -> Dict[ParamPowerFlowR
     :param mdl: Root block to inspect.
     :return: Effective API-object mapping.
     """
-    local_registry: Any = problem.__dict__.get("_local_api_mapping_by_block_uid", None)
+    local_registry: Any = problem._local_api_mapping_by_block_uid
     local_mapping: Optional[Dict[ParamPowerFlowReferenceType, Any]]
 
     if isinstance(local_registry, dict):
@@ -1086,7 +1086,7 @@ def _get_internal_runtime_default_local(problem: Any, mdl: Block, var_name: str,
     else:
         pass
 
-    runtime_exprs = problem.__dict__.get("_event_parameters_eqs", None)
+    runtime_exprs = problem._event_parameters_eqs
     if isinstance(runtime_exprs, list) and 0 <= runtime_idx < len(runtime_exprs):
         expression = runtime_exprs[runtime_idx]
     else:
@@ -1159,7 +1159,7 @@ def _get_internal_mode_default_local(problem: Any, mdl: Block, var_name: str, de
     else:
         pass
 
-    runtime_exprs = problem.__dict__.get("_event_parameters_eqs", None)
+    runtime_exprs = problem._event_parameters_eqs
     if isinstance(runtime_exprs, list) and 0 <= runtime_idx < len(runtime_exprs):
         expression = runtime_exprs[runtime_idx]
     else:
@@ -2042,6 +2042,43 @@ class EmtProblemDae(EmtProblemTemplate):
       - Delegates all mathematical and indexing plumbing to BaseProblem.
       - Initializes PF-based guesses AND evaluates mdl.init_eqs explicitly (Explicit init).
     """
+    __slots__ = (
+        "logger",
+        "options",
+        "power_flow_results",
+        "power_flow_results_3ph",
+        "build_report",
+        "history_models",
+        "initialization_report",
+        "step_counter",
+        "_device_type_disposition",
+        "_local_bus_kcl_blocks",
+        "_runtime_parameter_eqs0",
+        "_runtime_parameter_devices",
+        "_runtime_parameter_owner_blocks",
+        "_event_parameter_device_idtags",
+        "_event_parameter_name_lookup",
+        "_active_events_group",
+        "_continuous_event_parameter_uids",
+        "_discrete_event_parameter_uids",
+        "_scheduled_mode_events",
+        "_mode_event_cursor",
+        "_block_boundary_updater",
+        "_fmu_cs_adapters",
+        "_pending_fmu_cs_devices",
+        "_fmu_me_adapters",
+        "_pending_fmu_me_devices",
+        "_device_models_with_init_eqs",
+        "_device_models_with_init_eqs_seen",
+        "_local_api_mapping_by_block_uid",
+        "_local_external_mapping_by_block_uid",
+        "_temp_init_guess",
+        "_temp_diff_init_guess",
+        "_temp_post_init_guess",
+        "_temp_post_diff_init_guess",
+        "_vars2device",
+        "_vars_info",
+    )
 
     def __init__(self,
                  grid: MultiCircuit,
@@ -2087,6 +2124,14 @@ class EmtProblemDae(EmtProblemTemplate):
         self._scheduled_mode_events: Dict[int, List[Tuple[float, float, bool]]] = dict()
         self._mode_event_cursor: Dict[int, int] = dict()
         self._runtime_parameter_eqs0: List[Any] = list()
+        # Structural collection can seed PF values before the template constructor
+        # creates its runtime index and value containers, so provide empty stores
+        # for that pre-construction phase. The template replaces them afterwards.
+        self._uid2idx_event_params: Dict[int, int] = dict()
+        self._event_parameters_eqs: List[Any] = list()
+        self._runtime_all_parameters_source: List[Var] = list()
+        self._runtime_all_eqs_source: List[Any] = list()
+        self._event_params_values: np.ndarray = np.zeros(0, dtype=np.float64)
         self._event_parameter_device_idtags: Dict[int, str] = dict()
         self._event_parameter_name_lookup: Dict[Tuple[str, str], int] = dict()
         self._continuous_event_parameter_uids: Set[int] = set()
@@ -8951,10 +8996,7 @@ class EmtProblemDae(EmtProblemTemplate):
                 pass
             else:
                 runtime_idx: int | None = None
-                if "_uid2idx_event_params" in self.__dict__:
-                    runtime_idx = self._uid2idx_event_params.get(mapped_var.uid, None)
-                else:
-                    pass
+                runtime_idx = self._uid2idx_event_params.get(mapped_var.uid, None)
 
                 if runtime_idx is not None:
                     self._set_runtime_parameter_seed_by_uid(
@@ -8977,10 +9019,7 @@ class EmtProblemDae(EmtProblemTemplate):
                             pass
                     else:
                         if runtime_idx is None:
-                            if "uid2idx_event_params" in self.__dict__:
-                                runtime_idx_local: int | None = self.uid2idx_event_params.get(mapped_var.uid, None)
-                            else:
-                                runtime_idx_local = None
+                            runtime_idx_local: int | None = self.uid2idx_event_params.get(mapped_var.uid, None)
                         else:
                             runtime_idx_local = runtime_idx
                         if runtime_idx_local is None:
@@ -9030,14 +9069,11 @@ class EmtProblemDae(EmtProblemTemplate):
         else:
             if internal_var in owner_block.mode_dict:
                 runtime_idx: int | None = None
-                if "_uid2idx_event_params" in self.__dict__:
-                    runtime_idx = self._uid2idx_event_params.get(internal_var.uid, None)
-                else:
-                    pass
+                runtime_idx = self._uid2idx_event_params.get(internal_var.uid, None)
 
                 if runtime_idx is None:
-                    runtime_source_parameters: Any = self.__dict__.get("_runtime_all_parameters_source", None)
-                    runtime_source_equations: Any = self.__dict__.get("_runtime_all_eqs_source", None)
+                    runtime_source_parameters: Any = self._runtime_all_parameters_source
+                    runtime_source_equations: Any = self._runtime_all_eqs_source
                     if isinstance(runtime_source_parameters, list) and isinstance(runtime_source_equations, list):
                         source_index: int = 0
                         while source_index < len(runtime_source_parameters):
@@ -9078,8 +9114,8 @@ class EmtProblemDae(EmtProblemTemplate):
                 # updating only the temporary flat buffer would silently restore
                 # the template default before explicit initialization.
                 owner_block.event_dict[internal_var] = Const(float(value))
-                runtime_source_parameters: Any = self.__dict__.get("_runtime_all_parameters_source", None)
-                runtime_source_equations: Any = self.__dict__.get("_runtime_all_eqs_source", None)
+                runtime_source_parameters: Any = self._runtime_all_parameters_source
+                runtime_source_equations: Any = self._runtime_all_eqs_source
                 source_index: int = 0
 
                 if isinstance(runtime_source_parameters, list) and isinstance(runtime_source_equations, list):
@@ -9124,34 +9160,29 @@ class EmtProblemDae(EmtProblemTemplate):
         """
         runtime_idx: Optional[int]
 
-        if "_uid2idx_event_params" in self.__dict__ and "_event_params_values" in self.__dict__ and "_event_parameters_eqs" in self.__dict__:
-            runtime_idx = self._uid2idx_event_params.get(uid, None)
-            if runtime_idx is None:
-                pass
+        runtime_idx = self._uid2idx_event_params.get(uid, None)
+        if runtime_idx is not None:
+            self._event_params_values[runtime_idx] = float(value)
+            self._event_parameters_eqs[runtime_idx] = Const(float(value))
+            runtime_eqs0: Any = self._runtime_parameter_eqs0
+            if isinstance(runtime_eqs0, list) and runtime_idx < len(runtime_eqs0):
+                runtime_eqs0[runtime_idx] = Const(float(value))
             else:
-                self._event_params_values[runtime_idx] = float(value)
-                self._event_parameters_eqs[runtime_idx] = Const(float(value))
-                runtime_eqs0: Any = self.__dict__.get("_runtime_parameter_eqs0", None)
-                if isinstance(runtime_eqs0, list) and runtime_idx < len(runtime_eqs0):
-                    runtime_eqs0[runtime_idx] = Const(float(value))
-                else:
-                    pass
+                pass
 
-                runtime_source_parameters: Any = self.__dict__.get("_runtime_all_parameters_source", None)
-                runtime_source_equations: Any = self.__dict__.get("_runtime_all_eqs_source", None)
-                if isinstance(runtime_source_parameters, list) and isinstance(runtime_source_equations, list):
-                    source_index: int = 0
-                    while source_index < len(runtime_source_parameters):
-                        runtime_parameter: Any = runtime_source_parameters[source_index]
-                        if isinstance(runtime_parameter, Var) and runtime_parameter.uid == uid:
-                            runtime_source_equations[source_index] = Const(float(value))
-                        else:
-                            pass
-                        source_index += 1
-                else:
-                    pass
-        else:
-            pass
+            runtime_source_parameters: Any = self._runtime_all_parameters_source
+            runtime_source_equations: Any = self._runtime_all_eqs_source
+            if isinstance(runtime_source_parameters, list) and isinstance(runtime_source_equations, list):
+                source_index: int = 0
+                while source_index < len(runtime_source_parameters):
+                    runtime_parameter: Any = runtime_source_parameters[source_index]
+                    if isinstance(runtime_parameter, Var) and runtime_parameter.uid == uid:
+                        runtime_source_equations[source_index] = Const(float(value))
+                    else:
+                        pass
+                    source_index += 1
+            else:
+                pass
 
     def _set_runtime_parameter_seed_by_uid(self, uid: int, value: float, persist_after_native_init: bool = False) -> None:
         """
@@ -9414,13 +9445,10 @@ class EmtProblemDae(EmtProblemTemplate):
 
         if isinstance(var, Var):
             runtime_idx: int | None = None
-            if "_uid2idx_event_params" in self.__dict__:
-                runtime_idx = self._uid2idx_event_params.get(var.uid, None)
-            else:
-                pass
+            runtime_idx = self._uid2idx_event_params.get(var.uid, None)
 
             if runtime_idx is None:
-                runtime_source_parameters_any: Any = self.__dict__.get("_runtime_all_parameters_source", None)
+                runtime_source_parameters_any: Any = self._runtime_all_parameters_source
                 if isinstance(runtime_source_parameters_any, list):
                     runtime_source_index: int = 0
                     while runtime_source_index < len(runtime_source_parameters_any):
@@ -9440,28 +9468,25 @@ class EmtProblemDae(EmtProblemTemplate):
                 self._temp_init_guess[var.uid] = value_float_runtime
                 self._temp_post_init_guess[var.uid] = value_float_runtime
 
-                event_parameter_equations_any: Any = self.__dict__.get("_event_parameters_eqs", None)
+                event_parameter_equations_any: Any = self._event_parameters_eqs
                 if isinstance(event_parameter_equations_any, list) and runtime_idx < len(event_parameter_equations_any):
                     event_parameter_equations_any[runtime_idx] = Const(value_float_runtime)
                 else:
                     pass
 
-                runtime_source_equations_any: Any = self.__dict__.get("_runtime_all_eqs_source", None)
+                runtime_source_equations_any: Any = self._runtime_all_eqs_source
                 if isinstance(runtime_source_equations_any, list) and runtime_idx < len(runtime_source_equations_any):
                     runtime_source_equations_any[runtime_idx] = Const(value_float_runtime)
                 else:
                     pass
 
-                runtime_eqs0_any: Any = self.__dict__.get("_runtime_parameter_eqs0", None)
+                runtime_eqs0_any: Any = self._runtime_parameter_eqs0
                 if isinstance(runtime_eqs0_any, list) and runtime_idx < len(runtime_eqs0_any):
                     runtime_eqs0_any[runtime_idx] = Const(value_float_runtime)
                 else:
                     pass
 
-                if "_uid2idx_event_params" in self.__dict__ and "_event_params_values" in self.__dict__:
-                    self._set_runtime_parameter_seed_by_uid(uid=var.uid, value=value_float_runtime, persist_after_native_init=True)
-                else:
-                    pass
+                self._set_runtime_parameter_seed_by_uid(uid=var.uid, value=value_float_runtime, persist_after_native_init=True)
             else:
                 # GUI wrapper roots often expose the PF reference while the actual
                 # mutable runtime parameter lives in a child ``event_dict``. The
@@ -9476,8 +9501,8 @@ class EmtProblemDae(EmtProblemTemplate):
                     self._temp_init_guess[var.uid] = value_float
                     self._temp_post_init_guess[var.uid] = value_float
                     owner_block.event_dict[var] = Const(value_float)
-                    runtime_source_parameters = self.__dict__.get("_runtime_all_parameters_source", None)
-                    runtime_source_equations = self.__dict__.get("_runtime_all_eqs_source", None)
+                    runtime_source_parameters = self._runtime_all_parameters_source
+                    runtime_source_equations = self._runtime_all_eqs_source
                     if isinstance(runtime_source_parameters, list) and isinstance(runtime_source_equations, list):
                         source_index = 0
                         while source_index < len(runtime_source_parameters):

@@ -89,13 +89,32 @@ def power_flow_ts_function(inv_list: List[Investment],
 
 
 class TimeSeriesPowerFlowInvestmentProblem(BlackBoxProblemTemplate):
+    """
+    Time series power flow investment problem.
+    """
+    __slots__ = (
+        "pf_options",
+        "time_indices",
+        "opf_time_series_results",
+        "clustering_results",
+        "engine",
+        "years_starts_indices",
+        "get_all_elements_dict",
+        "vm_cost",
+        "vm_max",
+        "vm_min",
+        "va_cost",
+        "va_max",
+        "va_min",
+        "branches_cost",
+    )
 
     def __init__(self, grid: MultiCircuit,
                  pf_options: PowerFlowOptions,
                  time_indices: Union[IntVec, None],
                  clustering_results: Union[ClusteringResults, None] = None,
                  opf_time_series_results: Union[None, OptimalPowerFlowTimeSeriesResults] = None,
-                 engine: EngineType = EngineType.VeraGrid):
+                 engine: EngineType = EngineType.VeraGrid) -> None:
         """
         Constructor
         :param grid: MultiCircuit

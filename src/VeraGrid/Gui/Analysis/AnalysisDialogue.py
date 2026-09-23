@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import base64
 import html
-import io
 import math
 from typing import List, Optional, Tuple
 
@@ -20,8 +19,7 @@ from VeraGrid.Gui.Analysis.object_plot_analysis import (FIXABLE_ERROR_TYPES, Fix
                                                         FixableErrorOutOfRange, FixableErrorRangeFlip,
                                                         FixableErrorValueCorrection, FixableTransformerVtaps,
                                                         GridErrorLog, grid_analysis)
-from VeraGrid.Gui.Icons import icons_rc
-from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import Logger, LogsDialogue
 from VeraGrid.Gui.results_model import ResultsModel
@@ -679,7 +677,7 @@ class GridAnalysisGUI(QtWidgets.QMainWindow):
         self.balanceSummaryLabel.setWordWrap(True)
         panel_layout.addWidget(self.balanceSummaryLabel)
 
-        self.balancePlotWidget = MatplotlibWidget(panel_frame)
+        self.balancePlotWidget = GraphsWidget(panel_frame)
         self.balancePlotWidget.setObjectName("balancePlotWidget")
         panel_layout.addWidget(self.balancePlotWidget)
 
@@ -1114,44 +1112,12 @@ QWidget#overviewPage QProgressBar::chunk {{
         """
         Refresh the balance explorer chart from the latest inputs-analysis results.
         """
-        axis = self.balancePlotWidget.get_axis()
-        figure = self.balancePlotWidget.get_figure()
         self.balancePlotWidget.clear(force=True)
-        axis = self.balancePlotWidget.get_axis()
-        figure = self.balancePlotWidget.get_figure()
-
-        if self.theme_is_dark:
-            figure_facecolor: str = "#1f2630"
-            axis_facecolor: str = "#171c24"
-            grid_color: str = "#455365"
-            label_color: str = "#e7edf5"
-            positive_color: str = "#00aa88"
-            negative_color: str = "#c96f5d"
-        else:
-            figure_facecolor = "#ffffff"
-            axis_facecolor = "#f7fbff"
-            grid_color = "#dce7f2"
-            label_color = "#17324a"
-            positive_color = "#00aa88"
-            negative_color = "#c96f5d"
-
-        figure.set_facecolor(figure_facecolor)
-        axis.set_facecolor(axis_facecolor)
+        self.balancePlotWidget.apply_theme(dark=self.theme_is_dark)
 
         if self.inputs_results is None:
             self.balanceSummaryLabel.setText(self.tr("Inputs analysis is unavailable for the current grid."))
-            axis.text(0.5,
-                      0.5,
-                      self.tr("Inputs analysis unavailable"),
-                      ha="center",
-                      va="center",
-                      fontsize=12,
-                      color=label_color,
-                      transform=axis.transAxes)
-            axis.set_xticks(list())
-            axis.set_yticks(list())
-            axis.set_frame_on(False)
-            figure.tight_layout()
+            self.balancePlotWidget.setTitle(self.tr("Inputs analysis unavailable"))
             self.balancePlotWidget.redraw()
             return
         else:
@@ -1159,50 +1125,47 @@ QWidget#overviewPage QProgressBar::chunk {{
 
         result_type: ResultTypes = self.balanceAggregationComboBox.currentData()
         top_n: int = self.balanceTopNSpinBox.value()
+        aggregation: str = self.get_balance_aggregation(result_type)
 
         if self.circuit.get_time_number() > 0:
             self.plot_time_series_balances(result_type=result_type,
-                                           top_n=top_n,
-                                           axis=axis,
-                                           label_color=label_color,
-                                           grid_color=grid_color,
-                                           positive_color=positive_color,
-                                           negative_color=negative_color)
+                                           top_n=top_n)
+            self.balancePlotWidget.set_axis_titles(self.tr("Time"), self.tr("Net balance (MW)"))
         else:
             self.plot_snapshot_balances(result_type=result_type,
-                                        top_n=top_n,
-                                        axis=axis,
-                                        label_color=label_color,
-                                        grid_color=grid_color,
-                                        positive_color=positive_color,
-                                        negative_color=negative_color)
+                                        top_n=top_n)
+            self.balancePlotWidget.set_axis_titles(aggregation, self.tr("Net balance (MW)"))
 
-        figure.tight_layout()
         self.balancePlotWidget.redraw()
         self.ui.mainTabWidget.setTabText(self.ui.mainTabWidget.indexOf(self.balance_page),
                                          self.tr("Balance Explorer"))
 
     def plot_time_series_balances(self,
                                   result_type: ResultTypes,
-                                  top_n: int,
-                                  axis,
-                                  label_color: str,
-                                  grid_color: str,
-                                  positive_color: str,
-                                  negative_color: str) -> None:
+                                  top_n: int) -> None:
         """
         Plot the strongest time-series balances for the selected aggregation.
 
         :param result_type: Balance result type
         :param top_n: Maximum number of traces to show
-        :param axis: Matplotlib axis
-        :param label_color: Theme text color
-        :param grid_color: Theme grid color
-        :param positive_color: Positive accent color
-        :param negative_color: Negative accent color
+        :return: None.
         """
         aggregation: str = self.get_balance_aggregation(result_type)
         result_table = self.inputs_results.mdl(result_type)
+
+        if (result_table.data_c.ndim != 2
+                or result_table.data_c.shape[0] == 0
+                or result_table.data_c.shape[1] == 0):
+            self.balancePlotWidget.setTitle(self.tr("No balance series available"))
+            self.balanceSummaryLabel.setText(
+                self.tr("No {aggregation} balances are available to plot.").format(
+                    aggregation=aggregation.lower(),
+                )
+            )
+            return
+        else:
+            pass
+
         magnitude: np.ndarray = np.max(np.abs(result_table.data_c), axis=0)
         ranking: np.ndarray = np.argsort(magnitude, kind="stable")[::-1]
         selected_indices: np.ndarray = ranking[:min(top_n, len(ranking))]
@@ -1213,52 +1176,28 @@ QWidget#overviewPage QProgressBar::chunk {{
                     aggregation=aggregation.lower(),
                 )
             )
-            axis.text(0.5,
-                      0.5,
-                      self.tr("No balance series available"),
-                      ha="center",
-                      va="center",
-                      fontsize=12,
-                      color=label_color,
-                      transform=axis.transAxes)
-            axis.set_xticks(list())
-            axis.set_yticks(list())
-            axis.set_frame_on(False)
+            self.balancePlotWidget.setTitle(self.tr("No balance series available"))
             return
         else:
             pass
 
-        time_index = pd.to_datetime(result_table.index_c)
+        time_values: np.ndarray = np.asarray(pd.to_datetime(result_table.index_c), dtype="datetime64[ms]")
+        line_colors: list[str] = ["#00aa88", "#c96f5d", "#4f7cac"]
         for position, column_index in enumerate(selected_indices):
             series_values: np.ndarray = result_table.data_c[:, column_index]
             column_name: str = str(result_table.cols_c[column_index])
+            line_color: str = line_colors[position % len(line_colors)]
+            self.balancePlotWidget.add_line_series(name=column_name,
+                                                   x_values=time_values,
+                                                   y_values=series_values,
+                                                   color=line_color)
 
-            if position == 0:
-                line_color: str = positive_color
-            else:
-                if position == 1:
-                    line_color = negative_color
-                else:
-                    line_color = "#4f7cac"
-
-            axis.plot(time_index, series_values, linewidth=1.8, label=column_name, color=line_color)
-
-        axis.axhline(0.0, color=grid_color, linewidth=1.0, linestyle="--")
-        axis.grid(True, color=grid_color, linewidth=0.7)
-        axis.tick_params(axis="x", colors=label_color)
-        axis.tick_params(axis="y", colors=label_color)
-        axis.title.set_color(label_color)
-        axis.xaxis.label.set_color(label_color)
-        axis.yaxis.label.set_color(label_color)
-        axis.set_title(
+        self.balancePlotWidget.setTitle(
             self.tr("Top {count} {aggregation} balances over time").format(
                 count=len(selected_indices),
                 aggregation=aggregation,
             )
         )
-        axis.set_xlabel(self.tr("Time"))
-        axis.set_ylabel(self.tr("Net balance (MW)"))
-        axis.legend(loc="best")
 
         top_column_name: str = str(result_table.cols_c[selected_indices[0]])
         top_column_value: float = float(magnitude[selected_indices[0]])
@@ -1274,22 +1213,13 @@ QWidget#overviewPage QProgressBar::chunk {{
 
     def plot_snapshot_balances(self,
                                result_type: ResultTypes,
-                               top_n: int,
-                               axis,
-                               label_color: str,
-                               grid_color: str,
-                               positive_color: str,
-                               negative_color: str) -> None:
+                               top_n: int) -> None:
         """
         Plot the strongest snapshot balances for the selected aggregation.
 
         :param result_type: Balance result type
         :param top_n: Maximum number of bars to show
-        :param axis: Matplotlib axis
-        :param label_color: Theme text color
-        :param grid_color: Theme grid color
-        :param positive_color: Positive accent color
-        :param negative_color: Negative accent color
+        :return: None.
         """
         aggregation: str = self.get_balance_aggregation(result_type)
         grouped_frame: pd.DataFrame = self.inputs_results.group_by(aggregation)
@@ -1303,48 +1233,23 @@ QWidget#overviewPage QProgressBar::chunk {{
                     aggregation=aggregation.lower(),
                 )
             )
-            axis.text(0.5,
-                      0.5,
-                      self.tr("No snapshot balances available"),
-                      ha="center",
-                      va="center",
-                      fontsize=12,
-                      color=label_color,
-                      transform=axis.transAxes)
-            axis.set_xticks(list())
-            axis.set_yticks(list())
-            axis.set_frame_on(False)
+            self.balancePlotWidget.setTitle(self.tr("No snapshot balances available"))
             return
         else:
             pass
 
-        labels: List[str] = list(selected_series.index.astype(str))
+        labels: list[str] = list(selected_series.index.astype(str))
         values: np.ndarray = selected_series.to_numpy(dtype=float)
-        colors: List[str] = list()
-        value_index: int = 0
-        while value_index < len(values):
-            if values[value_index] >= 0.0:
-                colors.append(positive_color)
-            else:
-                colors.append(negative_color)
-            value_index += 1
-
-        axis.barh(labels[::-1], values[::-1], color=colors[::-1])
-        axis.axvline(0.0, color=grid_color, linewidth=1.0, linestyle="--")
-        axis.grid(True, color=grid_color, linewidth=0.7, axis="x")
-        axis.tick_params(axis="x", colors=label_color)
-        axis.tick_params(axis="y", colors=label_color)
-        axis.title.set_color(label_color)
-        axis.xaxis.label.set_color(label_color)
-        axis.yaxis.label.set_color(label_color)
-        axis.set_title(
+        self.balancePlotWidget.add_horizontal_bar_series(labels=labels,
+                                                         values=values,
+                                                         positive_color="#00aa88",
+                                                         negative_color="#c96f5d")
+        self.balancePlotWidget.setTitle(
             self.tr("Top {count} {aggregation} snapshot balances").format(
                 count=len(values),
                 aggregation=aggregation,
             )
         )
-        axis.set_xlabel(self.tr("Net balance (MW)"))
-        axis.set_ylabel(aggregation)
 
         exporter_name: str = str(selected_series.idxmax())
         exporter_value: float = float(selected_series.max())
@@ -1984,34 +1889,60 @@ QWidget#overviewPage QProgressBar::chunk {{
         """
         Refresh the sigma plot and sigma status copy.
         """
-        # Always clear the plot first because sigma availability may change between runs.
-        self.ui.sigmaPlotWidget.clear(force=True)
-        axis = self.ui.sigmaPlotWidget.get_axis()
-        figure = self.ui.sigmaPlotWidget.get_figure()
-        if self.theme_is_dark:
-            figure_facecolor: str = "#1f2630"
-            axis_facecolor: str = "#171c24"
-            grid_color: str = "#455365"
-            label_color: str = "#e7edf5"
-            boundary_line_color: str = "#d8e3ee"
-        else:
-            figure_facecolor = "#ffffff"
-            axis_facecolor = "#f7fbff"
-            grid_color = "#dce7f2"
-            label_color = "#17324a"
-            boundary_line_color = "#102235"
-
-        figure.set_facecolor(figure_facecolor)
-        axis.set_facecolor(axis_facecolor)
+        plot_widget: GraphsWidget = self.ui.sigmaPlotWidget
+        plot_widget.apply_theme(dark=self.theme_is_dark)
 
         if self.sigma_results is not None:
-            self.sigma_results.plot(figure, axis)
-            self.apply_sigma_plot_theme(axis=axis,
-                                        label_color=label_color,
-                                        grid_color=grid_color,
-                                        boundary_line_color=boundary_line_color)
-            figure.tight_layout()
-            self.ui.sigmaPlotWidget.redraw()
+            sigma_x: np.ndarray = np.asarray(self.sigma_results.sigma_re, dtype=float)
+            sigma_y: np.ndarray = np.asarray(self.sigma_results.sigma_im, dtype=float)
+            if len(sigma_x) > 0:
+                boundary_max: float = float(np.max(sigma_x)) + 0.1
+            else:
+                boundary_max = 0.1
+
+            boundary_x: np.ndarray = np.linspace(-0.25, max(boundary_max, -0.15), 1000)
+            boundary_y: np.ndarray = np.sqrt(np.maximum(0.25 + boundary_x, 0.0))
+            if self.theme_is_dark:
+                boundary_color: str = "#d8e3ee"
+            else:
+                boundary_color = "#102235"
+
+            plot_color: str = "#00a884" if self.sigma_results.converged else "#ef6c45"
+            if len(self.sigma_results.bus_names) == len(sigma_x):
+                sigma_tooltips: list[str] | None = list()
+                bus_index: int
+                for bus_index in range(len(self.sigma_results.bus_names)):
+                    sigma_tooltips.append(str(self.sigma_results.bus_names[bus_index]))
+            else:
+                sigma_tooltips = None
+            series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = [
+                (boundary_x, boundary_y, boundary_color),
+                (boundary_x, -boundary_y, boundary_color),
+                (sigma_x, sigma_y, plot_color),
+            ]
+            updated: bool = plot_widget.replace_xy_series_data(series_data=series_data)
+            if not updated:
+                plot_widget.clear()
+                plot_widget.apply_theme(dark=self.theme_is_dark)
+                plot_widget.add_line_series(name=self.tr("Stability boundary"),
+                                            x_values=boundary_x,
+                                            y_values=boundary_y,
+                                            color=boundary_color)
+                plot_widget.add_line_series(name="",
+                                            x_values=boundary_x,
+                                            y_values=-boundary_y,
+                                            color=boundary_color)
+                plot_widget.add_scatter_series(name=self.tr("Buses"),
+                                               x_values=sigma_x,
+                                               y_values=sigma_y,
+                                               color=plot_color,
+                                               point_tooltips=sigma_tooltips)
+            else:
+                pass
+            plot_widget.set_series_point_tooltips(series_index=2, point_tooltips=sigma_tooltips)
+            plot_widget.setTitle(self.tr("Sigma plot"))
+            plot_widget.set_axis_titles("σre", "σim")
+            plot_widget.redraw()
             self.populate_sigma_table()
 
             sigma_status_text: str = (
@@ -2025,56 +1956,25 @@ QWidget#overviewPage QProgressBar::chunk {{
             self.ui.sigmaStatusLabel.setText(sigma_status_text)
         else:
             self.sigma_model = None
-            axis.text(
-                0.5,
-                0.5,
-                self.summary.sigma_status_text,
-                ha="center",
-                va="center",
-                fontsize=12,
-                color=label_color,
-                transform=axis.transAxes,
-            )
-            axis.set_xticks(list())
-            axis.set_yticks(list())
-            axis.set_frame_on(False)
-            figure.tight_layout()
-            self.ui.sigmaPlotWidget.redraw()
+            empty_values: np.ndarray = np.zeros(0, dtype=float)
+            empty_series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = [
+                (empty_values, empty_values, None),
+                (empty_values, empty_values, None),
+                (empty_values, empty_values, None),
+            ]
+            updated: bool = plot_widget.replace_xy_series_data(series_data=empty_series_data)
+            if not updated:
+                plot_widget.clear()
+            else:
+                pass
+            plot_widget.setTitle(self.summary.sigma_status_text)
+            plot_widget.set_axis_titles("σre", "σim")
+            plot_widget.redraw()
             self.ui.sigmaStatusLabel.setText(self.summary.sigma_status_text)
         self.ui.mainTabWidget.setTabText(self.ui.mainTabWidget.indexOf(self.ui.sigmaPage),
                                          self.tr("Sigma Stability"))
         self.ui.mainTabWidget.setTabText(self.ui.mainTabWidget.indexOf(self.ui.controlsPage),
                                          self.tr("Assessment Controls"))
-
-    def apply_sigma_plot_theme(self,
-                               axis,
-                               label_color: str,
-                               grid_color: str,
-                               boundary_line_color: str) -> None:
-        """
-        Restyle the sigma plot after the sigma backend populates it.
-
-        :param axis: Matplotlib axis to retheme
-        :param label_color: Theme text color
-        :param grid_color: Theme grid color
-        :param boundary_line_color: Theme color for the sigma boundary curves
-        """
-        # Update axes and grid colors because the sigma backend draws with Matplotlib defaults.
-        axis.grid(True, color=grid_color, linewidth=0.7)
-        axis.tick_params(axis="x", colors=label_color)
-        axis.tick_params(axis="y", colors=label_color)
-        axis.title.set_color(label_color)
-        axis.xaxis.label.set_color(label_color)
-        axis.yaxis.label.set_color(label_color)
-
-        for spine in axis.spines.values():
-            spine.set_color(grid_color)
-
-        for index, line in enumerate(axis.lines):
-            if index < 2:
-                line.set_color(boundary_line_color)
-            else:
-                pass
 
     def populate_sigma_table(self) -> None:
         """
@@ -2273,7 +2173,7 @@ QWidget#overviewPage QProgressBar::chunk {{
                 fixable_error.fix(logger=logger, fix_ts=self.ui.fixTimeSeriesCheckBox.isChecked())
 
             if logger.has_logs():
-                dialogue: LogsDialogue = LogsDialogue(self.tr("Fixed issues"), logger)
+                dialogue: LogsDialogue = LogsDialogue(self.tr("Fixed issues"), logger, parent=self)
                 dialogue.setModal(True)
                 exec_dialog_safely(dialog=dialogue)
             else:
@@ -2610,16 +2510,16 @@ QWidget#overviewPage QProgressBar::chunk {{
 
     def get_sigma_plot_base64(self) -> str:
         """
-        Convert the current sigma figure into a base64-encoded PNG string.
+        Convert the current Qt Graphs widget into a base64-encoded PNG string.
 
         :return: Base64 image string
         """
-        # Write the live figure into an in-memory PNG so HTML export remains self-contained.
-        image_buffer: io.BytesIO = io.BytesIO()
-        self.ui.sigmaPlotWidget.get_figure().savefig(image_buffer, format="png", dpi=160, bbox_inches="tight")
-        image_buffer.seek(0)
-        encoded_image: str = base64.b64encode(image_buffer.getvalue()).decode("ascii")
+        image_data: QtCore.QByteArray = QtCore.QByteArray()
+        image_buffer: QtCore.QBuffer = QtCore.QBuffer(image_data)
+        image_buffer.open(QtCore.QIODevice.OpenModeFlag.WriteOnly)
+        self.ui.sigmaPlotWidget.grab().save(image_buffer, "PNG")
         image_buffer.close()
+        encoded_image: str = base64.b64encode(bytes(image_data)).decode("ascii")
         return encoded_image
 
     def show_information_message(self, text: str, title: str) -> None:

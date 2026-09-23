@@ -17,7 +17,9 @@ from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 import VeraGridEngine.Devices as devices
 from VeraGridEngine.Devices.Parents.editable_device import GCProp, EditableDevice
 from VeraGridEngine.Devices.Profiles import AnyProfile
-from VeraGridEngine.Utils.Symbolic.symbolic_io import BlockSaver, BlockParser, Block
+from VeraGridEngine.Utils.Symbolic.symbolic_io import (BlockSaver, BlockParser, Block,
+                                                       normalize_persisted_block_uid,
+                                                       normalize_persisted_blocks)
 from VeraGridEngine.Utils.procedural_logic import ProceduralLogicCodec
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES, VERAGRID_FILE_TYPE
 from VeraGridEngine.Devices.Diagrams.base_diagram import copy_diagrams
@@ -90,6 +92,7 @@ def get_objects_dictionary() -> Dict[str, ALL_DEV_TYPES]:
 
         'wires': devices.Wire(),
         'overhead_line_types': devices.OverheadLineType(),
+        'underground_cable_constructions': devices.UndergroundCableType(),
         'underground_cable_types': devices.UndergroundLineType(),
         'sequence_line_types': devices.SequenceLineType(),
         'dc_cable_types': devices.DcCableType(),
@@ -703,6 +706,9 @@ def veragrid_object_to_json(elm: ALL_DEV_TYPES,
         elif prop.tpe == SubObjectType.ListOfWires:
             data[name] = obj.to_list()
 
+        elif prop.tpe == SubObjectType.ListOfCables:
+            data[name] = obj.to_list()
+
         elif prop.tpe == SubObjectType.TapChanger:
             data[name] = obj.to_dict()
 
@@ -927,6 +933,15 @@ class CreatedOnTheFly:
     """
     This class is to pack all those devices that are created "on the fly" to support legacy formats
     """
+
+    __slots__ = (
+        "legacy_area_dict",
+        "legacy_zone_dict",
+        "legacy_substation_dict",
+        "contingency_groups",
+        "contingencies",
+        "technologies",
+    )
 
     def __init__(self) -> None:
         """
@@ -1494,6 +1509,15 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                     list_of_wires.parse(data=property_value,
                                                         wire_dict=elements_dict_by_type[DeviceType.WireDevice])
 
+                                elif gc_prop.tpe == SubObjectType.ListOfCables:
+
+                                    # Fill cable systems after their physical cable catalogue is available.
+                                    list_of_cables: devices.ListOfCables = elm.get_snapshot_value(prop=gc_prop)
+                                    list_of_cables.parse(
+                                        data=property_value,
+                                        cable_dict=elements_dict_by_type[DeviceType.UndergroundCableTypeDevice],
+                                    )
+
 
                                 elif gc_prop.tpe == SubObjectType.ImpedanceTripletList:
 
@@ -1717,6 +1741,229 @@ def handle_legacy_jsons(model_data: Dict[str, List],
                                 value=f"{generator.name} -> {emission.name} at {rate}")
 
 
+
+def normalize_dynamic_legacy(data: VERAGRID_FILE_TYPE,
+                             logger: Logger) -> Dict[str, Any] | None:
+    """
+    Normalize previous VeraGrid versions which used different mappings in the dynamic symbolism:
+    - Some static mapping ParamPowerFlowReferenceType are now named differently.
+    - Duplicated mapping of some parameters both in the parent block and the child block.
+
+    :param data: veragrid file data
+    :param logger: logger object used
+    :return symbolic_data: symbolic dictionary or None, if there's no symbolic data.
+    """
+
+    symbolic_data: Dict[str, Any] | None = data.get('symbolic_data', None)
+
+    if symbolic_data is not None:
+        if len(symbolic_data) > 0:
+            # Every historical symbolic container is first converted to the flat
+            # UID-indexed representation consumed by the current BlockParser. The
+            # compatibility branches below can then inspect one stable structure
+            # instead of repeating the list, dictionary and inline-child cases.
+            blocks_data = normalize_persisted_blocks(
+                blocks_data=symbolic_data.get("blocks", dict())
+            )
+            symbolic_data["blocks"] = blocks_data
+
+            # Transformer static mappings written by the first dynamic editor used
+            # transformer-specific names. Those enum members were later replaced by
+            # the generic branch names. Rename the persisted keys while preserving
+            # their symbolic target UID so the current enum can rebuild the mapping.
+            legacy_mapping_names: List[Tuple[str, str]] = list()
+            legacy_mapping_names.append(("transformer_tap_module", "tap_module"))
+            legacy_mapping_names.append(("transformer_tap_phase", "tap_phase"))
+            converted_mapping_count: int = 0
+
+            block_uid: int
+            block_data: Dict[str, Any]
+            for block_uid, block_data in blocks_data.items():
+                raw_api_obj_mapping: Any = block_data.get("api_obj_mapping", dict())
+                if isinstance(raw_api_obj_mapping, dict):
+                    api_obj_mapping: Dict[str, Any] = raw_api_obj_mapping
+                    legacy_mapping_name: str
+                    current_mapping_name: str
+                    for legacy_mapping_name, current_mapping_name in legacy_mapping_names:
+                        if legacy_mapping_name in api_obj_mapping:
+                            legacy_target_uid: Any = api_obj_mapping[legacy_mapping_name]
+                            if current_mapping_name in api_obj_mapping:
+                                current_target_uid: Any = api_obj_mapping[current_mapping_name]
+                                if current_target_uid != legacy_target_uid:
+                                    logger.add_warning(
+                                        msg="Conflicting legacy dynamic static mapping",
+                                        device=block_data.get("name", ""),
+                                        value=legacy_target_uid,
+                                        expected_value=current_target_uid,
+                                        device_property=legacy_mapping_name,
+                                        device_class=f"Block:{block_uid}",
+                                    )
+                                else:
+                                    pass
+                            else:
+                                api_obj_mapping[current_mapping_name] = legacy_target_uid
+
+                            # The legacy key must not reach ParamPowerFlowReferenceType,
+                            # even when both representations were present in the file.
+                            del api_obj_mapping[legacy_mapping_name]
+                            converted_mapping_count += 1
+                        else:
+                            pass
+                else:
+                    logger.add_warning(
+                        msg="Invalid dynamic static mapping container",
+                        device=block_data.get("name", ""),
+                        value=str(type(raw_api_obj_mapping)),
+                        expected_value="dictionary",
+                        device_property="api_obj_mapping",
+                        device_class=f"Block:{block_uid}",
+                    )
+
+            if converted_mapping_count > 0:
+                logger.add_info(
+                    msg="Converted legacy transformer dynamic static mappings",
+                    value=converted_mapping_count,
+                )
+            else:
+                pass
+
+            # Dynamic-editor files from the affected releases persisted the line
+            # admittance constants both on the device wrapper and on its template
+            # child. The wrapper owns the static-device mapping, while the child is
+            # the semantic owner of the parameter declaration. Removing only the
+            # duplicate wrapper declaration reproduces the current persisted form
+            # without losing the authoritative static mapping.
+            legacy_static_mapping_names: List[str] = list()
+            legacy_static_mapping_names.append("g")
+            legacy_static_mapping_names.append("b")
+            legacy_static_mapping_names.append("bsh")
+            removed_wrapper_parameter_count: int = 0
+
+            for block_uid, block_data in blocks_data.items():
+                raw_api_obj_mapping = block_data.get("api_obj_mapping", dict())
+                raw_root_parameters: Any = block_data.get("parameters", list())
+                if isinstance(raw_api_obj_mapping, dict) and isinstance(raw_root_parameters, list):
+                    api_obj_mapping = raw_api_obj_mapping
+                    root_parameters: List[Any] = raw_root_parameters
+
+                    # Gather parameter ownership from the complete descendant tree.
+                    # This is intentionally iterative because nested functions are
+                    # forbidden and historical templates can contain several levels.
+                    descendant_parameter_uids: set[int] = set()
+                    pending_child_uids: List[int] = list()
+                    visited_child_uids: set[int] = set()
+                    child_entry: Any
+                    for child_entry in block_data.get("children", list()):
+                        if isinstance(child_entry, dict):
+                            child_uid: int | None = normalize_persisted_block_uid(
+                                child_entry.get("uid", None)
+                            )
+                        else:
+                            child_uid = normalize_persisted_block_uid(child_entry)
+
+                        if child_uid is not None:
+                            pending_child_uids.append(child_uid)
+                        else:
+                            pass
+
+                    while len(pending_child_uids) > 0:
+                        child_uid = pending_child_uids.pop()
+                        if child_uid not in visited_child_uids:
+                            visited_child_uids.add(child_uid)
+                            child_block_data: Dict[str, Any] | None = blocks_data.get(child_uid, None)
+                            if child_block_data is not None:
+                                raw_child_parameters: Any = child_block_data.get("parameters", list())
+                                if isinstance(raw_child_parameters, list):
+                                    child_parameter_entry: Any
+                                    for child_parameter_entry in raw_child_parameters:
+                                        if isinstance(child_parameter_entry, dict):
+                                            child_parameter_uid: int | None = normalize_persisted_block_uid(
+                                                child_parameter_entry.get("var", None)
+                                            )
+                                            if child_parameter_uid is not None:
+                                                descendant_parameter_uids.add(child_parameter_uid)
+                                            else:
+                                                pass
+                                        else:
+                                            pass
+                                else:
+                                    pass
+
+                                grandchild_entry: Any
+                                for grandchild_entry in child_block_data.get("children", list()):
+                                    if isinstance(grandchild_entry, dict):
+                                        grandchild_uid: int | None = normalize_persisted_block_uid(
+                                            grandchild_entry.get("uid", None)
+                                        )
+                                    else:
+                                        grandchild_uid = normalize_persisted_block_uid(grandchild_entry)
+
+                                    if grandchild_uid is not None:
+                                        if grandchild_uid not in visited_child_uids:
+                                            pending_child_uids.append(grandchild_uid)
+                                        else:
+                                            pass
+                                    else:
+                                        pass
+                            else:
+                                pass
+                        else:
+                            pass
+
+                    duplicate_wrapper_parameter_uids: set[int] = set()
+                    static_mapping_name: str
+                    for static_mapping_name in legacy_static_mapping_names:
+                        if static_mapping_name in api_obj_mapping:
+                            mapped_parameter_uid: int | None = normalize_persisted_block_uid(
+                                api_obj_mapping[static_mapping_name]
+                            )
+                            if mapped_parameter_uid is not None:
+                                if mapped_parameter_uid in descendant_parameter_uids:
+                                    duplicate_wrapper_parameter_uids.add(mapped_parameter_uid)
+                                else:
+                                    pass
+                            else:
+                                pass
+                        else:
+                            pass
+
+                    if len(duplicate_wrapper_parameter_uids) > 0:
+                        filtered_root_parameters: List[Any] = list()
+                        root_parameter_entry: Any
+                        for root_parameter_entry in root_parameters:
+                            if isinstance(root_parameter_entry, dict):
+                                root_parameter_uid: int | None = normalize_persisted_block_uid(
+                                    root_parameter_entry.get("var", None)
+                                )
+                                if root_parameter_uid in duplicate_wrapper_parameter_uids:
+                                    removed_wrapper_parameter_count += 1
+                                else:
+                                    filtered_root_parameters.append(root_parameter_entry)
+                            else:
+                                filtered_root_parameters.append(root_parameter_entry)
+
+                        block_data["parameters"] = filtered_root_parameters
+                    else:
+                        pass
+                else:
+                    pass
+
+            if removed_wrapper_parameter_count > 0:
+                logger.add_info(
+                    msg="Removed duplicate legacy wrapper static parameters",
+                    value=removed_wrapper_parameter_count,
+                    device_property="g, b, bsh",
+                )
+            else:
+                pass
+        else:
+            pass
+    else:
+        pass
+
+    return symbolic_data
+
+
 def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                         previous_circuit: Union[MultiCircuit, None] = None,
                         project_directory: str | Path | None = None,
@@ -1854,33 +2101,45 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
     # Parse the declarative information stored in JSON ``.model`` files.
     # These files are just .json stored in the model_data inside the zip file
 
+    model_data: Dict[str, Any] | None = data.get('model_data', None)
+
+    # Allow compatibility with old VeraGrid versions
+    symbolic_data = normalize_dynamic_legacy(data=data, logger=logger)
+
+    if symbolic_data is not None:
+        blocks_data = symbolic_data.get("blocks", dict())
+    else:
+        blocks_data = dict()
+
     block_parser = BlockParser(
         var_factory=circuit.var_factory,
         logger=logger,
         procedural_logic_codec=ProceduralLogicCodec(),
     )
-    symbolic_data: Dict[str, Any] | None = data.get('symbolic_data', None)
     if symbolic_data is not None:
         if len(symbolic_data) > 0:
             if "shared_references" in symbolic_data:
                 block_parser.parse_references(symbolic_data["shared_references"])
+            else:
+                pass
             block_parser.parse_consts(symbolic_data["consts"])
             block_parser.parse_vars(symbolic_data["vars"])
             block_parser.parse_diff_vars(symbolic_data["diff_vars"])
 
             if "connections" in symbolic_data:
                 block_parser.parse_connections(symbolic_data["connections"])
+            else:
+                pass
             # BlockParser owns compatibility with all historical dynamics
             # containers, including list-based tables, inline children and
             # archives created before main_block_uids existed.
-            block_parser.parse_blocks(blocks_data=symbolic_data.get("blocks", dict()),
+            block_parser.parse_blocks(blocks_data=blocks_data,
                                       main_block_uids=symbolic_data.get("main_block_uids", None))
         else:
             pass  # the symbolic data is empty
     else:
         pass  # there is no symbolic data records
 
-    model_data = data.get('model_data', None)
     if model_data is not None:
 
         if len(model_data) > 0:
@@ -2032,6 +2291,7 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
 
         if len(list_of_diagrams):
             obj_dict = circuit.get_all_elements_dict_by_type(add_locations=True)
+            diagrams_by_id: Dict[str, devices.BaseDiagram] = dict()
 
             for diagram_dict in list_of_diagrams:
 
@@ -2039,13 +2299,19 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                     diagram = devices.SchematicDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     circuit.add_diagram(diagram)
+                    diagrams_by_id[diagram.idtag] = diagram
 
                 elif diagram_dict['type'] == DiagramType.SubstationLineMap.value:
                     diagram = devices.MapDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     circuit.add_diagram(diagram)
+                    diagrams_by_id[diagram.idtag] = diagram
                 else:
                     print('unrecognized diagram', diagram_dict['type'])
+
+            diagram_tree_data = data.get('diagram_tree', None)
+            if diagram_tree_data is not None and hasattr(circuit.diagrams, 'parse_data'):
+                circuit.diagrams.parse_data(diagram_tree_data, diagrams_by_id)
 
     if text_func is not None:
         text_func("Done!")
@@ -2090,6 +2356,7 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
 
     diffs_dict: Dict[str, MultiCircuit] = dict()
     diagrams_dict: Dict[str, List[Dict[str, Any]]] = dict()
+    diagram_tree_dict: Dict[str, Optional[Dict[str, Any]]] = dict()
     composed_by_node_id: Dict[int, MultiCircuit] = dict()
 
     # IMPORTANT:
@@ -2131,9 +2398,11 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
 
             if model_data is not None:
                 diagrams_dict[circuit_idtag] = model_data.get("diagrams", list())
+                diagram_tree_dict[circuit_idtag] = model_data.get("diagram_tree", None)
 
                 model_without_diagrams = dict(model_data)
                 model_without_diagrams["diagrams"] = list()
+                model_without_diagrams.pop("diagram_tree", None)
 
                 previous_circuit = None if parent_id is None else composed_by_node_id[parent_id]
 
@@ -2184,20 +2453,29 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
             node = mv.get_node(node_id)
             full_circuit = mv.checkout(node)
             obj_dict = full_circuit.get_all_elements_dict_by_type(add_locations=True)
-            parsed_diagrams: List[Any] = list()
+            parsed_diagrams: devices.DiagramTree = devices.DiagramTree()
+            diagrams_by_id: Dict[str, devices.BaseDiagram] = dict()
 
             for diagram_dict in diagrams_dict.get(circuit_idtag, list()):
                 if diagram_dict['type'] in [DiagramType.Schematic.value, "bus-branch"]:
                     diagram = devices.SchematicDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     parsed_diagrams.append(diagram)
+                    diagrams_by_id[diagram.idtag] = diagram
 
                 elif diagram_dict['type'] == DiagramType.SubstationLineMap.value:
                     diagram = devices.MapDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     parsed_diagrams.append(diagram)
+                    diagrams_by_id[diagram.idtag] = diagram
+
+            node_tree_data = diagram_tree_dict.get(circuit_idtag, None)
+            if node_tree_data is not None and hasattr(parsed_diagrams, 'parse_data'):
+                parsed_diagrams.parse_data(node_tree_data, diagrams_by_id)
 
             node.diagrams = parsed_diagrams
+            if node.circuit is not None:
+                node.circuit.diagrams = parsed_diagrams
         else:
             logger.add_error("Node ID not found", value=str(node_id))
 

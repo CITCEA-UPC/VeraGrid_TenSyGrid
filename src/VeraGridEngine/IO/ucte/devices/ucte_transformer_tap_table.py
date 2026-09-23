@@ -8,33 +8,50 @@ from VeraGridEngine.basic_structures import Logger
 
 class UcteTransformerTapTable:
     """
-
+    UcteTransformerTapTable device.
     """
-    def __init__(self):
-        self.node1 = ""  # 0-7: Node 1 code
-        self.node2 = ""  # 9-16: Node 2 code
-        self.order_code = ""  # 18: Order code
-        self.tap_position = 0  # 22-24: Tap position (n')
-        self.resistance = 0.0  # 26-31: Resistance (Ω)
-        self.reactance = 0.0  # 33-38: Reactance (Ω)
-        self.delta_u = 0.0  # 40-44: Voltage deviation (%)
-        self.phase_shift = 0.0  # 46-50: Phase shift angle (°)
 
-    def get_primary_key(self):
+    __slots__ = (
+        "node1",
+        "node2",
+        "order_code",
+        "tap_position",
+        "resistance",
+        "reactance",
+        "delta_u",
+        "phase_shift",
+    )
+
+    def __init__(self) -> None:
         """
-        Get a transformer primary key
-        :return:
+        Initialize the UcteTransformerTapTable instance.
+        """
+        self.node1: str = ""  # 0-7: Node 1 code
+        self.node2: str = ""  # 9-16: Node 2 code
+        self.order_code: str = ""  # 18: Order code
+        self.tap_position: int = 0  # 22-24: Tap position (n')
+        self.resistance: float = 0.0  # 26-31: Resistance (Ω)
+        self.reactance: float = 0.0  # 33-38: Reactance (Ω)
+        self.delta_u: float = 0.0  # 40-44: Voltage deviation (%)
+        self.phase_shift: float = 0.0  # 46-50: Phase shift angle (°)
+
+    def get_primary_key(self) -> str:
+        """
+        Get a transformer primary key.
+
+        :return: Primary key string.
         """
         return f"{self.node1}_{self.node2}_{self.order_code}"
 
-    def parse(self, line, logger: Logger):
+    def parse(self, line: str, logger: Logger) -> None:
         """
+        Parse transformer tap table from line.
 
-        :param line:
-        :param logger:
-        :return:
+        :param line: Raw text line.
+        :param logger: Logger instance.
+        :return: None
         """
-        device = "TransformerTapTable"
+        device: str = "TransformerTapTable"
         if len(line) == 52:
             self.node1 = sub_str(line, 0, 8, device, "node1", logger)
             self.node2 = sub_str(line, 9, 17, device, "node2", logger)
@@ -45,7 +62,6 @@ class UcteTransformerTapTable:
             self.delta_u = sub_float(line, 40, 45, device, "delta_u", logger)
             self.phase_shift = sub_float(line, 46, 51, device, "phase_shift", logger)
         else:
-
             logger.add_warning("Non canonical line length",
                                device_class=device,
                                value=len(line),
@@ -55,24 +71,40 @@ class UcteTransformerTapTable:
 
             if len(chunks) >= 1:
                 self.node1 = chunks[0]
+            else:
+                pass
 
             if len(chunks) >= 2:
                 self.node2 = chunks[1]
+            else:
+                pass
 
             if len(chunks) >= 3:
                 self.order_code = chunks[2]
+            else:
+                pass
 
             if len(chunks) >= 4:
                 self.tap_position = try_int(chunks[3], device, "tap_position", logger)
+            else:
+                pass
 
             if len(chunks) >= 5:
                 self.resistance = try_float(chunks[4], device, "resistance", logger)
+            else:
+                pass
 
             if len(chunks) >= 6:
                 self.reactance = try_float(chunks[5], device, "reactance", logger)
+            else:
+                pass
 
             if len(chunks) >= 7:
                 self.delta_u = try_float(chunks[6], device, "delta_u", logger)
+            else:
+                pass
 
             if len(chunks) >= 8:
                 self.phase_shift = try_float(chunks[7], device, "phase_shift", logger)
+            else:
+                pass

@@ -103,6 +103,36 @@ class BusData:
     BusData
     """
 
+    __slots__ = (
+        "nbus",
+        "idtag",
+        "names",
+        "active",
+        "Vbus",
+        "Vmin",
+        "Vmax",
+        "Vnom",
+        "cost_v",
+        "angle_min",
+        "angle_max",
+        "bus_types",
+        "is_p_controlled",
+        "is_q_controlled",
+        "is_vm_controlled",
+        "is_va_controlled",
+        "installed_power",
+        "srap_available_power",
+        "is_dc",
+        "is_grounded",
+        "areas",
+        "substations",
+        "q_shared_total",
+        "q_fixed",
+        "ii_fixed",
+        "b_fixed",
+        "original_idx",
+    )
+
     def __init__(self, nbus: int):
         """
         Bus data arrays

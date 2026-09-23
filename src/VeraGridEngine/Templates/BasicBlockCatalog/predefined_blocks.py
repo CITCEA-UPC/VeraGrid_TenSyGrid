@@ -85,6 +85,7 @@ def variable(var_factory: VarFactory, name: str = "variable_", vartype: str = "v
 
 
 class AdderTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -154,6 +155,7 @@ def adder(var_factory: VarFactory, minuend_inputs: int = 1, subtrahend_inputs: i
     return blk
 
 class ProductTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

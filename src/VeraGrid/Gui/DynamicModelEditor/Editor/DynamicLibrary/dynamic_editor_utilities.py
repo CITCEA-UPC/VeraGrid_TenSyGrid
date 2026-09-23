@@ -173,8 +173,8 @@ class JMartiBlockTemplateDefinition(TemplateDefinition):
                     configuration[prop.name] = prop.value
             else:
                 pass
-        template.block.__dict__["_modal_template_kind"] = "jmarti_line_emt"
-        template.block.__dict__["_modal_template_config"] = configuration
+        template.block.modal_template_kind = "jmarti_line_emt"
+        template.block.modal_template_config = configuration
         return template
 
 
@@ -401,7 +401,7 @@ def initialize_template_builder_from_block(builder: TemplateDefinition,
             pass
 
     if block_type in (BlockType.EMT_JMARTI_LINE, BlockType.GFL_VSC_HVDC_RMS):
-        stored_configuration: object = block.__dict__.get("_modal_template_config", None)
+        stored_configuration: object = block.modal_template_config
         if isinstance(stored_configuration, dict):
             configuration_name: str
             configuration_value: object

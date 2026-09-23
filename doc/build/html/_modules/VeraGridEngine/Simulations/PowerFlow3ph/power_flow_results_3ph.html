@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -109,15 +109,13 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt_colors</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_table</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_template</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTemplate</span><span class="p">,</span> <span class="n">ResultsProperty</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.PowerFlow.power_flow_results</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericPowerFlowResults</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.basic_structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntVec</span><span class="p">,</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">StrVec</span><span class="p">,</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">ConvergenceReport</span><span class="p">,</span> <span class="n">Logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">StudyResultsType</span><span class="p">,</span> <span class="n">ResultTypes</span><span class="p">,</span> <span class="n">DeviceType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">StudyResultsType</span><span class="p">,</span> <span class="n">ResultTypes</span><span class="p">,</span> <span class="n">DeviceType</span><span class="p">,</span> <span class="n">ResultTablePlotType</span>
 
 
 <div class="viewcode-block" id="get_3p_indices">
@@ -220,6 +218,92 @@
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;shunt_q_C&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;shunt_Vn&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">CxVec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;load_Vn&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">CxVec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;n&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_gen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_batt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_sh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_load&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sh_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbus_N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbus_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbus_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbus_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;voltage_N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;voltage_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;voltage_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;voltage_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sf_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sf_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sf_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;If_N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;If_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;If_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;If_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_angle&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vbranch_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vbranch_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vbranch_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;loading_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;loading_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;loading_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;losses_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;losses_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;losses_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;losses_hvdc&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;Pf_hvdc&quot;,</span>
+        <span class="s2">&quot;Pf_hvdc_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pf_hvdc_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pf_hvdc_C&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;Pt_hvdc&quot;,</span>
+        <span class="s2">&quot;Pt_hvdc_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pt_hvdc_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pt_hvdc_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;loading_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pfp_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_vsc_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_vsc_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St_vsc_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;If_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_vsc_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_vsc_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;It_vsc_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;losses_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;loading_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_q_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_q_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_q_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;battery_q_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;battery_q_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;battery_q_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shunt_q_A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shunt_q_B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shunt_q_C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shunt_Vn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_Vn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;plot_bars_limit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;convergence_reports&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -1013,18 +1097,8 @@
             <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">voltage_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltage_B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltage_C</span><span class="p">]</span>
             <span class="n">vm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
             <span class="n">va</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">va_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">vm</span><span class="p">,</span> <span class="n">va</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting_allowed</span><span class="p">():</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
-                <span class="n">color_norm</span> <span class="o">=</span> <span class="n">plt_colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">()</span>
-                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-                <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;polar&#39;</span><span class="p">)</span>
-                <span class="n">sc3</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">va_rad</span><span class="p">,</span> <span class="n">vm</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">vm</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">color_norm</span><span class="p">)</span>
-                <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                                 <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bus_names</span><span class="p">,</span>
@@ -1033,6 +1107,7 @@
                                 <span class="n">cols_device_type</span><span class="o">=</span><span class="n">DeviceType</span><span class="o">.</span><span class="n">NoDevice</span><span class="p">,</span>
                                 <span class="n">title</span><span class="o">=</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                                 <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;(p.u., deg)&#39;</span><span class="p">,</span>
+                                <span class="n">plot_type</span><span class="o">=</span><span class="n">ResultTablePlotType</span><span class="o">.</span><span class="n">POLAR</span><span class="p">,</span>
                                 <span class="n">units</span><span class="o">=</span><span class="s1">&#39;(p.u., deg)&#39;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">result_type</span> <span class="o">==</span> <span class="n">ResultTypes</span><span class="o">.</span><span class="n">BusActivePowerA</span><span class="p">:</span>

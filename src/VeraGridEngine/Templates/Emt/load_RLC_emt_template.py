@@ -245,6 +245,7 @@ def get_ground_emt_template(vf: VarFactory, name: str = "ground_emt") -> EmtMode
 
 # ---
 class GroundingLinkEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -1409,6 +1410,7 @@ def get_shunt_c_emt_template(
 
 
 class ShuntRComboEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -1437,6 +1439,7 @@ class ShuntRComboEmtTemplate(TemplateDefinition):
         )
 
 class ShuntLComboEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -1465,6 +1468,7 @@ class ShuntLComboEmtTemplate(TemplateDefinition):
         )
 
 class ShuntCComboEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

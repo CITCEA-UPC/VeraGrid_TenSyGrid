@@ -33,6 +33,11 @@ class CatalogueOptimizationOptions(OptionsTemplate):
     currently exposes for catalogue optimization (max evaluations + power flow options).
     """
 
+    __slots__ = (
+        "max_eval",
+        "pf_options",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="max_eval", tpe=int),
         GCProp(key="pf_options", tpe=DeviceType.SimulationOptionsDevice),

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.ShortCircuitStudies.short_circuit_worker &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.ShortCircuitStudies.short_circuit_worker &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -284,7 +284,11 @@
 
 <div class="viewcode-block" id="short_circuit_ph3">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.ShortCircuitStudies.html#VeraGridEngine.Simulations.ShortCircuitStudies.short_circuit_worker.short_circuit_ph3">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">short_circuit_ph3</span><span class="p">(</span><span class="n">nc</span><span class="p">:</span> <span class="n">NumericalCircuit</span><span class="p">,</span> <span class="n">Vpf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">Zf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">bus_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">short_circuit_ph3</span><span class="p">(</span><span class="n">nc</span><span class="p">:</span> <span class="n">NumericalCircuit</span><span class="p">,</span>
+                      <span class="n">Vpf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
+                      <span class="n">Zf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
+                      <span class="n">bus_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                      <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShortCircuitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a 3-phase short circuit simulation for a single island</span>
 <span class="sd">    :param nc: NumericalCircuit</span>
@@ -304,7 +308,8 @@
                                             <span class="n">Vbus</span><span class="o">=</span><span class="n">Vpf</span><span class="p">,</span>
                                             <span class="n">Vnom</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">Vnom</span><span class="p">,</span>
                                             <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">,</span>
-                                            <span class="n">baseMVA</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">Sbase</span><span class="p">)</span>
+                                            <span class="n">baseMVA</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">Sbase</span><span class="p">,</span>
+                                            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">Sfb</span><span class="p">,</span> <span class="n">Stb</span><span class="p">,</span> <span class="n">If</span><span class="p">,</span> <span class="n">It</span><span class="p">,</span> <span class="n">Vbranch</span><span class="p">,</span>
      <span class="n">loading</span><span class="p">,</span> <span class="n">losses</span><span class="p">)</span> <span class="o">=</span> <span class="n">short_circuit_post_process</span><span class="p">(</span><span class="n">calculation_inputs</span><span class="o">=</span><span class="n">nc</span><span class="p">,</span>
@@ -351,7 +356,8 @@
                              <span class="n">Vpf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
                              <span class="n">Zf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
                              <span class="n">bus_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                             <span class="n">fault_type</span><span class="p">:</span> <span class="n">FaultType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShortCircuitResults</span><span class="p">:</span>
+                             <span class="n">fault_type</span><span class="p">:</span> <span class="n">FaultType</span><span class="p">,</span>
+                             <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShortCircuitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run an unbalanced short circuit simulation for a single island</span>
 <span class="sd">    :param nc:</span>
@@ -490,7 +496,8 @@
                                                    <span class="n">Vbus</span><span class="o">=</span><span class="n">Vpf</span><span class="p">,</span>
                                                    <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">,</span>
                                                    <span class="n">fault_type</span><span class="o">=</span><span class="n">fault_type</span><span class="p">,</span>
-                                                   <span class="n">baseMVA</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">Sbase</span><span class="p">)</span>
+                                                   <span class="n">baseMVA</span><span class="o">=</span><span class="n">nc</span><span class="o">.</span><span class="n">Sbase</span><span class="p">,</span>
+                                                   <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
     <span class="c1"># process results in the sequences</span>
     <span class="p">(</span><span class="n">Sfb0</span><span class="p">,</span> <span class="n">Stb0</span><span class="p">,</span> <span class="n">If0</span><span class="p">,</span> <span class="n">It0</span><span class="p">,</span> <span class="n">Vbranch0</span><span class="p">,</span>

@@ -10,6 +10,8 @@ class FluidP2XData(FluidTurbineData):
     FluidP2XData
     """
 
+    __slots__ = ()
+
     def __init__(self, nelm: int):
         """
         Fluid P2X data arrays
@@ -25,5 +27,4 @@ class FluidP2XData(FluidTurbineData):
         :return: new FluidP2XData instance
         """
         data: FluidP2XData = super().copy()
-        data.__class__ = FluidP2XData
         return data

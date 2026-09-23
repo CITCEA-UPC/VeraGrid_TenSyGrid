@@ -6,6 +6,12 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class Shunt(IidmObject):
+    __slots__ = (
+        "id",
+        "bus",
+        "g",
+        "b",
+    )
     def __init__(self, id: str, bus: str, g: float, b: float):
         super().__init__("Shunt")
         self.id = id

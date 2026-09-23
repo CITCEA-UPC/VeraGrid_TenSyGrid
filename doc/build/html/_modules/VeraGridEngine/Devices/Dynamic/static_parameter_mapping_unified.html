@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -2690,7 +2690,9 @@
         <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
             <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">Pl0</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">P</span><span class="p">)</span> <span class="o">/</span> <span class="n">sbase</span><span class="p">,</span>
+            <span class="c1"># RMS network injections use generation-positive signs, whereas</span>
+            <span class="c1"># the static Load API stores consumed P/Q as positive values.</span>
+            <span class="n">value</span><span class="o">=-</span><span class="nb">float</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">P</span><span class="p">)</span> <span class="o">/</span> <span class="n">sbase</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">device_name</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span>
             <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
@@ -2698,7 +2700,7 @@
         <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
             <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">Ql0</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">/</span> <span class="n">sbase</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=-</span><span class="nb">float</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">/</span> <span class="n">sbase</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">device_name</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span>
             <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
@@ -2880,10 +2882,38 @@
 <span class="sd">    :param logger: Optional logger.</span>
 <span class="sd">    :return: None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">direct_assigned_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">pass</span></div>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">direct_assigned_keys</span>
+
+    <span class="c1"># The generic direct mapper deliberately leaves the historical ``g`` and</span>
+    <span class="c1"># ``b`` keys unresolved because they mean series admittance for branches.</span>
+    <span class="c1"># For a shunt their meaning is unambiguous: the static MW/MVAr-at-1-pu</span>
+    <span class="c1"># values become system-per-unit conductance and susceptance.</span>
+    <span class="n">device_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">shunt</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">g</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">shunt</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">shunt</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span><span class="p">)),</span>
+    <span class="p">):</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">Var</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">api_obj_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">problem_mapping</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># Also support templates using the unambiguous shunt-specific references.</span>
+    <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">shunt_g_pu</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">shunt</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span><span class="p">),</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">device_name</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span>
+        <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">shunt_b_pu</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">shunt</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span><span class="p">),</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">device_name</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span>
+        <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 
@@ -3456,6 +3486,22 @@
         <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
         <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">R</span><span class="p">),</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">device_name</span><span class="o">=</span><span class="n">transformer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">X</span><span class="p">),</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">device_name</span><span class="o">=</span><span class="n">transformer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">problem_mapping</span><span class="o">=</span><span class="n">problem_mapping</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">needs_series_admittance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">g</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">api_obj_mapping</span>
         <span class="ow">or</span> <span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">b</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">api_obj_mapping</span>
@@ -3536,7 +3582,7 @@
     <span class="p">)</span>
     <span class="n">assign_api_mapping_value_if_present</span><span class="p">(</span>
         <span class="n">mdl</span><span class="o">=</span><span class="n">mdl</span><span class="p">,</span>
-        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">transformer_tap_ratio</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">tap_phase</span><span class="p">,</span>
         <span class="n">value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">tap_phase</span><span class="p">),</span>
         <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
         <span class="n">device_name</span><span class="o">=</span><span class="n">transformer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>

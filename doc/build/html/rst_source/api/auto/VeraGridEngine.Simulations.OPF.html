@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.OPF package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.OPF package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -336,56 +336,134 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#module-VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars"><code class="docutils literal notranslate"><span class="pre">BatteryVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.e"><code class="docutils literal notranslate"><span class="pre">BatteryVars.e</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.get_values"><code class="docutils literal notranslate"><span class="pre">BatteryVars.get_values()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars"><code class="docutils literal notranslate"><span class="pre">BranchVars</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.add_contingency_flow"><code class="docutils literal notranslate"><span class="pre">BranchVars.add_contingency_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.contingency_flow_data"><code class="docutils literal notranslate"><span class="pre">BranchVars.contingency_flow_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_lb"><code class="docutils literal notranslate"><span class="pre">BranchVars.flow_constraints_lb</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_ub"><code class="docutils literal notranslate"><span class="pre">BranchVars.flow_constraints_ub</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_neg"><code class="docutils literal notranslate"><span class="pre">BranchVars.flow_slacks_neg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_pos"><code class="docutils literal notranslate"><span class="pre">BranchVars.flow_slacks_pos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flows"><code class="docutils literal notranslate"><span class="pre">BranchVars.flows</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.get_values"><code class="docutils literal notranslate"><span class="pre">BranchVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.loading"><code class="docutils literal notranslate"><span class="pre">BranchVars.loading</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.losses"><code class="docutils literal notranslate"><span class="pre">BranchVars.losses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.overload_cost"><code class="docutils literal notranslate"><span class="pre">BranchVars.overload_cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.rates"><code class="docutils literal notranslate"><span class="pre">BranchVars.rates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.tap_angles"><code class="docutils literal notranslate"><span class="pre">BranchVars.tap_angles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.z_flows"><code class="docutils literal notranslate"><span class="pre">BranchVars.z_flows</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars"><code class="docutils literal notranslate"><span class="pre">BusVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pbalance"><code class="docutils literal notranslate"><span class="pre">BusVars.Pbalance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pgen"><code class="docutils literal notranslate"><span class="pre">BusVars.Pgen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pinj"><code class="docutils literal notranslate"><span class="pre">BusVars.Pinj</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Va"><code class="docutils literal notranslate"><span class="pre">BusVars.Va</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Vm"><code class="docutils literal notranslate"><span class="pre">BusVars.Vm</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.get_values"><code class="docutils literal notranslate"><span class="pre">BusVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.kirchhoff"><code class="docutils literal notranslate"><span class="pre">BusVars.kirchhoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.shadow_prices"><code class="docutils literal notranslate"><span class="pre">BusVars.shadow_prices</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars"><code class="docutils literal notranslate"><span class="pre">FluidInjectionVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.flow"><code class="docutils literal notranslate"><span class="pre">FluidInjectionVars.flow</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.get_values"><code class="docutils literal notranslate"><span class="pre">FluidInjectionVars.get_values()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.current_level"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.current_level</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_in"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.flow_in</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_out"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.flow_out</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.fluid_value"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.fluid_value</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.get_values"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.p2x_flow"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.p2x_flow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.spillage"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.spillage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.water_balance"><code class="docutils literal notranslate"><span class="pre">FluidNodeVars.water_balance</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars"><code class="docutils literal notranslate"><span class="pre">FluidPathVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.flow"><code class="docutils literal notranslate"><span class="pre">FluidPathVars.flow</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.get_values"><code class="docutils literal notranslate"><span class="pre">FluidPathVars.get_values()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars"><code class="docutils literal notranslate"><span class="pre">GenerationVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.cost"><code class="docutils literal notranslate"><span class="pre">GenerationVars.cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.dp"><code class="docutils literal notranslate"><span class="pre">GenerationVars.dp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.get_values"><code class="docutils literal notranslate"><span class="pre">GenerationVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.invested"><code class="docutils literal notranslate"><span class="pre">GenerationVars.invested</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.p"><code class="docutils literal notranslate"><span class="pre">GenerationVars.p</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.producing"><code class="docutils literal notranslate"><span class="pre">GenerationVars.producing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.reserve"><code class="docutils literal notranslate"><span class="pre">GenerationVars.reserve</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shedding"><code class="docutils literal notranslate"><span class="pre">GenerationVars.shedding</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shutting_down"><code class="docutils literal notranslate"><span class="pre">GenerationVars.shutting_down</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.starting_up"><code class="docutils literal notranslate"><span class="pre">GenerationVars.starting_up</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars"><code class="docutils literal notranslate"><span class="pre">HvdcVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.flows"><code class="docutils literal notranslate"><span class="pre">HvdcVars.flows</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.get_values"><code class="docutils literal notranslate"><span class="pre">HvdcVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.loading"><code class="docutils literal notranslate"><span class="pre">HvdcVars.loading</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.rates"><code class="docutils literal notranslate"><span class="pre">HvdcVars.rates</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars"><code class="docutils literal notranslate"><span class="pre">LoadVars</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.get_values"><code class="docutils literal notranslate"><span class="pre">LoadVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.p"><code class="docutils literal notranslate"><span class="pre">LoadVars.p</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding"><code class="docutils literal notranslate"><span class="pre">LoadVars.shedding</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding_cost"><code class="docutils literal notranslate"><span class="pre">LoadVars.shedding_cost</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars"><code class="docutils literal notranslate"><span class="pre">NodalCapacityVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.P"><code class="docutils literal notranslate"><span class="pre">NodalCapacityVars.P</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.get_values"><code class="docutils literal notranslate"><span class="pre">NodalCapacityVars.get_values()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars"><code class="docutils literal notranslate"><span class="pre">OpfVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.acceptable_solution"><code class="docutils literal notranslate"><span class="pre">OpfVars.acceptable_solution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.batt_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.batt_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.branch_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.branch_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.bus_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.bus_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_inject_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.fluid_inject_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_node_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.fluid_node_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_path_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.fluid_path_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.gen_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.gen_vars</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.get_values"><code class="docutils literal notranslate"><span class="pre">OpfVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.hvdc_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.hvdc_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.load_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.load_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_cap_buses"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_cap_buses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_inj"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_fluid_inj</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_node"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_fluid_node</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_path"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_fluid_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_hvdc"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_hvdc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_vsc"><code class="docutils literal notranslate"><span class="pre">OpfVars.n_vsc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nb"><code class="docutils literal notranslate"><span class="pre">OpfVars.nb</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbr"><code class="docutils literal notranslate"><span class="pre">OpfVars.nbr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbus"><code class="docutils literal notranslate"><span class="pre">OpfVars.nbus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.ng"><code class="docutils literal notranslate"><span class="pre">OpfVars.ng</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nl"><code class="docutils literal notranslate"><span class="pre">OpfVars.nl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nodal_capacity_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.nodal_capacity_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nt"><code class="docutils literal notranslate"><span class="pre">OpfVars.nt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.sys_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.sys_vars</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.vsc_vars"><code class="docutils literal notranslate"><span class="pre">OpfVars.vsc_vars</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars"><code class="docutils literal notranslate"><span class="pre">SystemVars</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.compute"><code class="docutils literal notranslate"><span class="pre">SystemVars.compute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.power_by_technology"><code class="docutils literal notranslate"><span class="pre">SystemVars.power_by_technology</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_emissions"><code class="docutils literal notranslate"><span class="pre">SystemVars.system_emissions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_fuel"><code class="docutils literal notranslate"><span class="pre">SystemVars.system_fuel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_total_energy_cost"><code class="docutils literal notranslate"><span class="pre">SystemVars.system_total_energy_cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_unit_energy_cost"><code class="docutils literal notranslate"><span class="pre">SystemVars.system_unit_energy_cost</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars"><code class="docutils literal notranslate"><span class="pre">VscVars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.flows"><code class="docutils literal notranslate"><span class="pre">VscVars.flows</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.get_values"><code class="docutils literal notranslate"><span class="pre">VscVars.get_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.loading"><code class="docutils literal notranslate"><span class="pre">VscVars.loading</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.rates"><code class="docutils literal notranslate"><span class="pre">VscVars.rates</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.add_area_spinning_reserve_formulation"><code class="docutils literal notranslate"><span class="pre">add_area_spinning_reserve_formulation()</span></code></a></li>
@@ -476,7 +554,6 @@
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.iterations"><code class="docutils literal notranslate"><span class="pre">IpsSolution.iterations</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.lam"><code class="docutils literal notranslate"><span class="pre">IpsSolution.lam</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.mu"><code class="docutils literal notranslate"><span class="pre">IpsSolution.mu</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.plot_error"><code class="docutils literal notranslate"><span class="pre">IpsSolution.plot_error()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.residuals"><code class="docutils literal notranslate"><span class="pre">IpsSolution.residuals</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.x"><code class="docutils literal notranslate"><span class="pre">IpsSolution.x</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="VeraGridEngine.Simulations.OPF.NumericalMethods.html#VeraGridEngine.Simulations.OPF.NumericalMethods.newton_raphson_ips_fx.IpsSolution.z"><code class="docutils literal notranslate"><span class="pre">IpsSolution.z</span></code></a></li>
@@ -669,28 +746,173 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.action">
-<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ActionType" title="VeraGridEngine.enumerations.ActionType"><span class="pre">ActionType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.action" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_S0">
+<span class="sig-name descname"><span class="pre">acopf_S0</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_S0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.comment" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_mode">
+<span class="sig-name descname"><span class="pre">acopf_mode</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_mode" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.device_type">
-<span class="sig-name descname"><span class="pre">device_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.DeviceType" title="VeraGridEngine.enumerations.DeviceType"><span class="pre">DeviceType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.device_type" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_pf_converged">
+<span class="sig-name descname"><span class="pre">acopf_pf_converged</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_pf_converged" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.diff_changes">
-<span class="sig-name descname"><span class="pre">diff_changes</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.diff_changes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_v0">
+<span class="sig-name descname"><span class="pre">acopf_v0</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.acopf_v0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.selected_to_merge">
-<span class="sig-name descname"><span class="pre">selected_to_merge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.selected_to_merge" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.add_losses_approximation">
+<span class="sig-name descname"><span class="pre">add_losses_approximation</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.add_losses_approximation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.area_spinning_reserve">
+<span class="sig-name descname"><span class="pre">area_spinning_reserve</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.area_spinning_reserve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_contingencies">
+<span class="sig-name descname"><span class="pre">consider_contingencies</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_contingencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_ramps">
+<span class="sig-name descname"><span class="pre">consider_ramps</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_ramps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_time_up_down">
+<span class="sig-name descname"><span class="pre">consider_time_up_down</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.consider_time_up_down" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.contingency_groups_used">
+<span class="sig-name descname"><span class="pre">contingency_groups_used</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Events.html#VeraGridEngine.Devices.Events.contingency_group.ContingencyGroup" title="VeraGridEngine.Devices.Events.contingency_group.ContingencyGroup"><span class="pre">ContingencyGroup</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.contingency_groups_used" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.dispatch_mode">
+<span class="sig-name descname"><span class="pre">dispatch_mode</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.dispatch_mode" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.generate_report">
+<span class="sig-name descname"><span class="pre">generate_report</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.generate_report" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.inter_aggregation_info">
+<span class="sig-name descname"><span class="pre">inter_aggregation_info</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.inter_aggregation_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_control_q_limits">
+<span class="sig-name descname"><span class="pre">ips_control_q_limits</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_control_q_limits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_init_with_pf">
+<span class="sig-name descname"><span class="pre">ips_init_with_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_init_with_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_iterations">
+<span class="sig-name descname"><span class="pre">ips_iterations</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_iterations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_method">
+<span class="sig-name descname"><span class="pre">ips_method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.SolverType" title="VeraGridEngine.enumerations.SolverType"><span class="pre">SolverType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_tolerance">
+<span class="sig-name descname"><span class="pre">ips_tolerance</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_tolerance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_trust_radius">
+<span class="sig-name descname"><span class="pre">ips_trust_radius</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.ips_trust_radius" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.lodf_tolerance">
+<span class="sig-name descname"><span class="pre">lodf_tolerance</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.lodf_tolerance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.max_va">
+<span class="sig-name descname"><span class="pre">max_va</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.max_va" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.max_vm">
+<span class="sig-name descname"><span class="pre">max_vm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.max_vm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.mip_framework">
+<span class="sig-name descname"><span class="pre">mip_framework</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.MIPFramework" title="VeraGridEngine.enumerations.MIPFramework"><span class="pre">MIPFramework</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.mip_framework" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.mip_solver">
+<span class="sig-name descname"><span class="pre">mip_solver</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.mip_solver" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.power_flow_options">
+<span class="sig-name descname"><span class="pre">power_flow_options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.power_flow_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.quadratic_costs">
+<span class="sig-name descname"><span class="pre">quadratic_costs</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.quadratic_costs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.report_formulation">
+<span class="sig-name descname"><span class="pre">report_formulation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.report_formulation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.robust">
+<span class="sig-name descname"><span class="pre">robust</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.robust" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.skip_generation_limits">
+<span class="sig-name descname"><span class="pre">skip_generation_limits</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.skip_generation_limits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.solver">
+<span class="sig-name descname"><span class="pre">solver</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.solver" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.time_grouping">
+<span class="sig-name descname"><span class="pre">time_grouping</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.time_grouping" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.use_glsk_as_cost">
+<span class="sig-name descname"><span class="pre">use_glsk_as_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.use_glsk_as_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.verbose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.zonal_grouping">
+<span class="sig-name descname"><span class="pre">zonal_grouping</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.opf_options.OptimalPowerFlowOptions.zonal_grouping" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1626,12 +1848,189 @@ That means that solves the OPF problem for a complete time series at once</p>
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.simple_dispatch_ts.</span></span><span class="sig-name descname"><span class="pre">GreedyDispatchInputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">grid:</span> <span class="pre">~VeraGridEngine.Devices.multi_circuit.MultiCircuit,</span> <span class="pre">time_indices:</span> <span class="pre">~numpy.ndarray[tuple[~typing.Any,</span> <span class="pre">...],</span> <span class="pre">~numpy.dtype[~numpy.int64]]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">logger:</span> <span class="pre">~VeraGridEngine.basic_structures.Logger</span> <span class="pre">=</span> <span class="pre">&lt;VeraGridEngine.basic_structures.Logger</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/simple_dispatch_ts.html#GreedyDispatchInputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Inputs container for greedy dispatch time series.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_active">
+<span class="sig-name descname"><span class="pre">batt_active</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_active" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_cost">
+<span class="sig-name descname"><span class="pre">batt_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_eff_charge">
+<span class="sig-name descname"><span class="pre">batt_eff_charge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_eff_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_eff_discharge">
+<span class="sig-name descname"><span class="pre">batt_eff_discharge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_eff_discharge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_energy_max">
+<span class="sig-name descname"><span class="pre">batt_energy_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_energy_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_p_max_charge">
+<span class="sig-name descname"><span class="pre">batt_p_max_charge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_p_max_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_p_max_discharge">
+<span class="sig-name descname"><span class="pre">batt_p_max_discharge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_p_max_discharge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_soc0">
+<span class="sig-name descname"><span class="pre">batt_soc0</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_soc0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_soc_min">
+<span class="sig-name descname"><span class="pre">batt_soc_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.batt_soc_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.dt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_active">
+<span class="sig-name descname"><span class="pre">gen_active</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_active" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_cost">
+<span class="sig-name descname"><span class="pre">gen_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_dispatchable">
+<span class="sig-name descname"><span class="pre">gen_dispatchable</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_dispatchable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_p_max">
+<span class="sig-name descname"><span class="pre">gen_p_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_p_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_p_min">
+<span class="sig-name descname"><span class="pre">gen_p_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_p_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_profile">
+<span class="sig-name descname"><span class="pre">gen_profile</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.gen_profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.load_profile">
+<span class="sig-name descname"><span class="pre">load_profile</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.load_profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.load_shedding_cost">
+<span class="sig-name descname"><span class="pre">load_shedding_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs.load_shedding_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.simple_dispatch_ts.</span></span><span class="sig-name descname"><span class="pre">GreedyDispatchInputsSnapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;VeraGridEngine.basic_structures.Logger</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/simple_dispatch_ts.html#GreedyDispatchInputsSnapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Inputs container for greedy dispatch snapshot.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_active">
+<span class="sig-name descname"><span class="pre">batt_active</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_active" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_cost">
+<span class="sig-name descname"><span class="pre">batt_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_eff_charge">
+<span class="sig-name descname"><span class="pre">batt_eff_charge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_eff_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_eff_discharge">
+<span class="sig-name descname"><span class="pre">batt_eff_discharge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_eff_discharge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_energy_max">
+<span class="sig-name descname"><span class="pre">batt_energy_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_energy_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_p_max_charge">
+<span class="sig-name descname"><span class="pre">batt_p_max_charge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_p_max_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_p_max_discharge">
+<span class="sig-name descname"><span class="pre">batt_p_max_discharge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_p_max_discharge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_soc0">
+<span class="sig-name descname"><span class="pre">batt_soc0</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_soc0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_soc_min">
+<span class="sig-name descname"><span class="pre">batt_soc_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.batt_soc_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.dt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_active">
+<span class="sig-name descname"><span class="pre">gen_active</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_active" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_cost">
+<span class="sig-name descname"><span class="pre">gen_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_dispatchable">
+<span class="sig-name descname"><span class="pre">gen_dispatchable</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_dispatchable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_p_max">
+<span class="sig-name descname"><span class="pre">gen_p_max</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_p_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_p_min">
+<span class="sig-name descname"><span class="pre">gen_p_min</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_p_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_profile">
+<span class="sig-name descname"><span class="pre">gen_profile</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.gen_profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.load_profile">
+<span class="sig-name descname"><span class="pre">load_profile</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot.load_profile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py function">

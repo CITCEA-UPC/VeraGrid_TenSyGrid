@@ -81,7 +81,6 @@ dependencies = ["numpy>=2.2.0",
                 "highspy>=1.8.0",
                 "xlwt>=1.3.0",
                 "xlrd>=2.0.2",
-                "matplotlib>=3.10.0",
                 "openpyxl>=3.1.5",
                 "chardet>=5.2.0",  # for the psse files character detection
                 "scikit-learn>=1.5.0",

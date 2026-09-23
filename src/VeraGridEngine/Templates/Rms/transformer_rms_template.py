@@ -400,6 +400,7 @@ class IdealTrafoRmsTemplate(RmsModelTemplate):
         self._block: Block = block
 
 class TrafoPhasorRmsTemplate(RmsModelTemplate):
+    __slots__ = ()
 
     def __init__(self, vf: VarFactory, name: str = "rms_trafo_phasor_template"):
         """

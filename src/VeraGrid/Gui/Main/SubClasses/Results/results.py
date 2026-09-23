@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
 from PySide6 import QtCore, QtWidgets, QtGui
-from matplotlib import pyplot as plt
 from typing import Union, Dict
 
 from VeraGrid.Gui.DynamicModelEditor.Plots.dynamic_plots_handler import (
@@ -16,7 +15,9 @@ from VeraGrid.Gui.Main.SubClasses.simulations import SimulationsMain
 from VeraGrid.Gui.results_model import ResultsModel
 from VeraGrid.Gui.general_dialogues import fill_tree_from_logs
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.PlotDialogue.result_table_data import get_result_table_series
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget, PolarAngleUnit
 import VeraGridEngine.Utils.Filtering as flt
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.enumerations import (ResultTypes, SimulationTypes, PlotSimulationType, DynamicPlotEntryKind,
@@ -25,6 +26,7 @@ from VeraGridEngine.Utils.Symbolic.symbolic import Var
 from VeraGridEngine.Simulations.Rms.rms_results import RmsResults
 from VeraGridEngine.Simulations.EMT.emt_results import EmtResults
 from VeraGridEngine.Devices.Events.dynamic_plot_entry import DynamicPlotEntry
+from VeraGridEngine.Simulations.results_table import ResultsTable
 
 
 class ResultsMain(SimulationsMain):
@@ -820,8 +822,6 @@ class ResultsMain(SimulationsMain):
 
         if mdl is not None:
 
-            plt.rcParams["date.autoformatter.minute"] = "%Y-%m-%d %H:%M:%S"
-
             # Collect the selected cells once so all plot types use the same
             # visible model after filtering.
             selected_indexes: list[QtCore.QModelIndex] = self.ui.resultsTableView.selectedIndexes()
@@ -903,23 +903,12 @@ class ResultsMain(SimulationsMain):
                 ok = True
 
             if ok:
-                # create figure to plot
-                fig = plt.figure(figsize=(12, 8))
-                ax = fig.add_subplot(111)
-
-                # The table dispatches to the series, complex-point, or
-                # complex-vector renderer without simulation-specific GUI code.
-                mdl.plot(
-                    ax=ax,
-                    selected_col_idx=selected_columns,
+                self.open_native_results_plot(
+                    mdl=mdl,
+                    selected_columns=selected_columns,
                     selected_rows=selected_rows,
-                    stacked=self.ui.stacked_plot_checkBox.isChecked()
+                    stacked=self.ui.stacked_plot_checkBox.isChecked(),
                 )
-
-                show_matplotlib_figure(figure=fig,
-                                       parent=self,
-                                       open_dialogs=self._open_plot_dialogs,
-                                       title=self.tr("Results plot"))
             else:
                 pass
         else:
@@ -927,6 +916,522 @@ class ResultsMain(SimulationsMain):
                 self.tr("There are no results available to plot."),
                 self.tr("Plot results"),
             )
+
+    def open_native_results_plot(self,
+                                 mdl: ResultsModel,
+                                 selected_columns: np.ndarray | None,
+                                 selected_rows: np.ndarray | None,
+                                 stacked: bool) -> None:
+        """Open the native plot matching the visible results-table contract.
+
+        :param mdl: Filtered table model currently displayed in the results view.
+        :param selected_columns: Optional selected visible result columns.
+        :param selected_rows: Optional selected visible result rows.
+        :param stacked: Whether ordinary series use cumulative areas.
+        :return: None.
+        """
+        plot_type: ResultTablePlotType = mdl.table.plot_type
+        if plot_type == ResultTablePlotType.SERIES:
+            self.open_native_results_series_plot(
+                mdl=mdl,
+                selected_columns=selected_columns,
+                selected_rows=selected_rows,
+                stacked=stacked,
+            )
+        elif plot_type == ResultTablePlotType.POLAR:
+            self.open_native_polar_results_plot(
+                mdl=mdl,
+                selected_columns=selected_columns,
+                selected_rows=selected_rows,
+            )
+        elif plot_type == ResultTablePlotType.COMPLEX_POINTS:
+            self.open_native_complex_points_plot(
+                mdl=mdl,
+                selected_columns=selected_columns,
+                selected_rows=selected_rows,
+            )
+        elif plot_type == ResultTablePlotType.COMPLEX_VECTORS:
+            self.open_native_complex_vectors_plot(
+                mdl=mdl,
+                selected_columns=selected_columns,
+                selected_rows=selected_rows,
+            )
+        else:
+            error_msg(text=self.tr("This results table has no supported native plot mode."),
+                      title=self.tr("Plotting error"))
+
+    def open_native_polar_results_plot(self,
+                                       mdl: ResultsModel,
+                                       selected_columns: np.ndarray | None,
+                                       selected_rows: np.ndarray | None) -> None:
+        """Open paired magnitude-angle table columns as native polar samples.
+
+        :param mdl: Filtered table model currently displayed in the results view.
+        :param selected_columns: Optional magnitude-angle pair selection.
+        :param selected_rows: Optional selected time or device rows.
+        :return: None.
+        """
+        table: ResultsTable = mdl.table
+        pair_count: int = table.c // 2
+        all_pairs_valid: bool = table.c >= 2 and table.c % 2 == 0
+        if selected_rows is None:
+            row_indices: np.ndarray = np.arange(table.r, dtype=np.int64)
+        else:
+            row_indices = np.unique(np.asarray(selected_rows, dtype=np.int64))
+        rows_valid: bool = (
+            len(row_indices) > 0
+            and int(np.min(row_indices)) >= 0
+            and int(np.max(row_indices)) < table.r
+        )
+
+        pair_indices: np.ndarray = np.arange(pair_count, dtype=np.int64)
+        if selected_columns is not None:
+            selected_column_indices: np.ndarray = np.unique(np.asarray(selected_columns, dtype=np.int64))
+            pair_selected: bool = (
+                len(selected_column_indices) == 2
+                and int(np.min(selected_column_indices)) >= 0
+                and int(np.max(selected_column_indices)) < table.c
+            )
+            if pair_selected:
+                first_column: int = int(selected_column_indices[0])
+                second_column: int = int(selected_column_indices[1])
+                if first_column < pair_count and second_column == first_column + pair_count:
+                    pair_indices = np.array([first_column], dtype=np.int64)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+
+        if all_pairs_valid and rows_valid:
+            series_names: list[str] = list()
+            angle_values: list[np.ndarray] = list()
+            radius_values: list[np.ndarray] = list()
+            pair_position: int
+            for pair_position in range(len(pair_indices)):
+                magnitude_column: int = int(pair_indices[pair_position])
+                angle_column: int = magnitude_column + pair_count
+                series_names.append(str(table.cols_c[magnitude_column]))
+                angle_values.append(np.asarray(table.data_c[row_indices, angle_column], dtype=float).copy())
+                radius_values.append(np.asarray(table.data_c[row_indices, magnitude_column], dtype=float).copy())
+
+            plot_dialogue: PlotDialogue = PlotDialogue(title=self.tr("Results plot"), parent=self)
+            accepted: bool = plot_dialogue.set_polar_series(
+                series_names=series_names,
+                angle_values=angle_values,
+                radius_values=radius_values,
+                title=table.title,
+                radius_title=table.y_label,
+                angle_unit=PolarAngleUnit.DEGREES,
+                connect_points=False,
+            )
+            if accepted:
+                self.register_open_plot_dialog(plot_dialogue)
+                plot_dialogue.show()
+            else:
+                plot_dialogue.reject()
+                error_msg(text=self.tr("The selected polar values cannot be plotted."),
+                          title=self.tr("Plotting error"))
+        else:
+            error_msg(text=self.tr("Select valid rows and a complete magnitude-angle table."),
+                      title=self.tr("Plotting error"))
+
+    def open_native_results_series_plot(self,
+                                        mdl: ResultsModel,
+                                        selected_columns: np.ndarray | None,
+                                        selected_rows: np.ndarray | None,
+                                        stacked: bool) -> None:
+        """Open selected ordinary result columns in one native chart.
+
+        :param mdl: Filtered table model currently displayed in the results view.
+        :param selected_columns: Optional selected visible result columns.
+        :param selected_rows: Optional selected visible result rows.
+        :param stacked: Whether more than one series uses cumulative areas.
+        :return: None.
+        """
+        table: ResultsTable = mdl.table
+        hide_zero_values: bool = 'voltage' in table.title.lower()
+        plot_data: tuple[np.ndarray, list[str], list[np.ndarray]] | None = get_result_table_series(
+            table=table,
+            selected_col_idx=selected_columns,
+            selected_rows=selected_rows,
+            hide_zero_values=hide_zero_values,
+        )
+        if plot_data is not None:
+            x_values: np.ndarray = plot_data[0]
+            series_names: list[str] = plot_data[1]
+            series_values: list[np.ndarray] = plot_data[2]
+            dialog_title: str = self.tr("Results plot")
+            plot_dialogue: PlotDialogue = PlotDialogue(
+                title=dialog_title,
+                parent=self,
+            )
+            accepted: bool
+            if stacked and len(series_names) > 1:
+                accepted = plot_dialogue.set_cumulative_area_series(
+                    x_values=x_values,
+                    series_names=series_names,
+                    series_values=series_values,
+                    title=table.title,
+                    x_axis_title=table.x_label,
+                    y_axis_title=table.y_label,
+                )
+            else:
+                accepted = plot_dialogue.set_line_series(
+                    x_values=x_values,
+                    series_names=series_names,
+                    series_values=series_values,
+                    title=table.title,
+                    x_axis_title=table.x_label,
+                    y_axis_title=table.y_label,
+                )
+            if accepted:
+                self.register_open_plot_dialog(plot_dialogue)
+                plot_dialogue.show()
+            else:
+                plot_dialogue.reject()
+                error_msg(text=self.tr("The selected values cannot be plotted."),
+                          title=self.tr("Plotting error"))
+        else:
+            error_msg(text=self.tr("Select at least one valid result row and column."),
+                      title=self.tr("Plotting error"))
+
+    def open_native_complex_points_plot(self,
+                                        mdl: ResultsModel,
+                                        selected_columns: np.ndarray | None,
+                                        selected_rows: np.ndarray | None) -> None:
+        """Open labelled circular points for one configured complex plane.
+
+        :param mdl: Filtered table model currently displayed in the results view.
+        :param selected_columns: Optional selected real and imaginary columns.
+        :param selected_rows: Optional selected visible mode rows.
+        :return: None.
+        """
+        table: ResultsTable = mdl.table
+        x_column_name: str | None = table.complex_plot_x_column
+        y_column_names: np.ndarray = np.asarray(table.complex_plot_y_columns, dtype=str)
+        visible_column_names: np.ndarray = np.asarray(table.cols_c, dtype=str)
+        selected_y_name: str | None = None
+        if x_column_name is not None and len(y_column_names) > 0:
+            if selected_columns is None:
+                selected_y_name = str(y_column_names[0])
+            else:
+                selected_column_indices: np.ndarray = np.unique(np.asarray(selected_columns, dtype=np.int64))
+                selected_columns_valid: bool = (
+                    len(selected_column_indices) == 2
+                    and int(np.min(selected_column_indices)) >= 0
+                    and int(np.max(selected_column_indices)) < table.c
+                )
+                if selected_columns_valid:
+                    selected_names: np.ndarray = visible_column_names[selected_column_indices]
+                    has_x_coordinate: bool = bool(np.any(selected_names == x_column_name))
+                    y_matches: np.ndarray = np.intersect1d(selected_names, y_column_names)
+                    if has_x_coordinate and len(y_matches) == 1:
+                        selected_y_name = str(y_matches[0])
+                    else:
+                        pass
+                else:
+                    pass
+        else:
+            pass
+
+        if selected_y_name is not None and x_column_name is not None:
+            x_matches: np.ndarray = np.where(visible_column_names == x_column_name)[0]
+            y_matches = np.where(visible_column_names == selected_y_name)[0]
+            if len(x_matches) == 1 and len(y_matches) == 1:
+                selected_y_config_matches: np.ndarray = np.where(y_column_names == selected_y_name)[0]
+                selected_y_scale: float = float(
+                    table.complex_plot_y_scales[int(selected_y_config_matches[0])]
+                )
+                if selected_rows is None:
+                    row_indices: np.ndarray = np.arange(table.r, dtype=np.int64)
+                else:
+                    row_indices = np.unique(np.asarray(selected_rows, dtype=np.int64))
+                row_indices_valid: bool = (
+                    len(row_indices) > 0
+                    and int(np.min(row_indices)) >= 0
+                    and int(np.max(row_indices)) < table.r
+                )
+                if row_indices_valid:
+                    real_values: np.ndarray = np.asarray(table.data_c[row_indices, int(x_matches[0])], dtype=float)
+                    imaginary_values: np.ndarray = np.asarray(table.data_c[row_indices, int(y_matches[0])], dtype=float)
+                    finite_values: np.ndarray = np.isfinite(real_values) & np.isfinite(imaginary_values)
+                    if bool(np.any(finite_values)):
+                        finite_real_values: np.ndarray = real_values[finite_values]
+                        finite_imaginary_values: np.ndarray = imaginary_values[finite_values]
+                        point_labels: np.ndarray = np.asarray(table.index_c, dtype=str)[row_indices][finite_values]
+                        tooltip_values: list[str] = list()
+                        point_index: int
+                        for point_index in range(len(point_labels)):
+                            tooltip_values.append(
+                                f"{point_labels[point_index]}\n"
+                                f"Re={finite_real_values[point_index]:.6g}, "
+                                f"Im={finite_imaginary_values[point_index]:.6g}"
+                            )
+                        dialog_title: str = self.tr("Results plot")
+                        plot_dialogue: PlotDialogue = PlotDialogue(title=dialog_title, parent=self)
+                        chart: GraphsWidget = plot_dialogue.chart
+                        # Derive the viewport from the modes and the origin so
+                        # reference geometry cannot pull the useful data away.
+                        mode_x_limits: np.ndarray = np.array(
+                            [min(float(np.min(finite_real_values)), 0.0),
+                             max(float(np.max(finite_real_values)), 0.0)],
+                            dtype=float,
+                        )
+                        mode_y_limits: np.ndarray = np.array(
+                            [min(float(np.min(finite_imaginary_values)), 0.0),
+                             max(float(np.max(finite_imaginary_values)), 0.0)],
+                            dtype=float,
+                        )
+                        x_span: float = float(mode_x_limits[1] - mode_x_limits[0])
+                        y_span: float = float(mode_y_limits[1] - mode_y_limits[0])
+                        if x_span > 0.0:
+                            x_padding: float = x_span * 0.05
+                        else:
+                            x_padding = 0.05
+                        if y_span > 0.0:
+                            y_padding: float = y_span * 0.05
+                        else:
+                            y_padding = 0.05
+                        plot_x_limits: np.ndarray = np.array(
+                            [mode_x_limits[0] - x_padding, mode_x_limits[1] + x_padding],
+                            dtype=float,
+                        )
+                        plot_y_limits: np.ndarray = np.array(
+                            [mode_y_limits[0] - y_padding, mode_y_limits[1] + y_padding],
+                            dtype=float,
+                        )
+
+                        # Extend both zero axes to the viewport boundary so no
+                        # visual gap remains between an axis and the plot frame.
+                        chart.add_line_series(
+                            name="",
+                            x_values=plot_x_limits,
+                            y_values=np.zeros(2, dtype=float),
+                            color="#64748b",
+                        )
+                        chart.add_line_series(
+                            name="",
+                            x_values=np.zeros(2, dtype=float),
+                            y_values=plot_y_limits,
+                            color="#64748b",
+                        )
+
+                        # A constant damping ratio is a pair of rays in the
+                        # stable half-plane. Clip the 5% rays to the mode-based
+                        # viewport instead of allowing them to affect its size.
+                        configured_damping_ratio: float | None = table.damping_ratio_boundary
+                        if (configured_damping_ratio is not None
+                                and 0.0 < configured_damping_ratio < 1.0):
+                            damping_ratio: float = configured_damping_ratio
+                        else:
+                            damping_ratio = 0.05
+                        damping_slope: float = float(
+                            selected_y_scale
+                            * np.sqrt(1.0 - damping_ratio * damping_ratio)
+                            / damping_ratio
+                        )
+                        upper_ray_x: float = max(
+                            float(plot_x_limits[0]),
+                            -float(plot_y_limits[1]) / damping_slope,
+                        )
+                        lower_ray_x: float = max(
+                            float(plot_x_limits[0]),
+                            float(plot_y_limits[0]) / damping_slope,
+                        )
+                        damping_x_values: np.ndarray = np.array(
+                            [upper_ray_x, 0.0, lower_ray_x],
+                            dtype=float,
+                        )
+                        damping_y_values: np.ndarray = np.array(
+                            [-upper_ray_x * damping_slope, 0.0, lower_ray_x * damping_slope],
+                            dtype=float,
+                        )
+                        chart.add_line_series(
+                            name=self.tr("5% damping ratio"),
+                            x_values=damping_x_values,
+                            y_values=damping_y_values,
+                            color="#94a3b8",
+                            dashed=True,
+                        )
+
+                        # Keep stable modes in the existing colour and make
+                        # positive-real modes visually identify instability.
+                        unstable_values: np.ndarray = finite_real_values > 0.0001
+                        stable_values: np.ndarray = ~unstable_values
+                        tooltip_array: np.ndarray = np.asarray(tooltip_values, dtype=str)
+                        if bool(np.any(stable_values)):
+                            chart.add_scatter_series(
+                                name=self.tr("Modes"),
+                                x_values=finite_real_values[stable_values],
+                                y_values=finite_imaginary_values[stable_values],
+                                color="#0f766e",
+                                point_tooltips=tooltip_array[stable_values],
+                            )
+                        else:
+                            pass
+                        if bool(np.any(unstable_values)):
+                            chart.add_scatter_series(
+                                name=self.tr("Unstable modes"),
+                                x_values=finite_real_values[unstable_values],
+                                y_values=finite_imaginary_values[unstable_values],
+                                color="#dc2626",
+                                point_tooltips=tooltip_array[unstable_values],
+                            )
+                        else:
+                            pass
+                        # Adding reference lines updates generic chart bounds;
+                        # restore the mode-derived viewport after all series.
+                        chart.axis_x.set_range(float(plot_x_limits[0]), float(plot_x_limits[1]))
+                        chart.axis_y.set_range(float(plot_y_limits[0]), float(plot_y_limits[1]))
+                        chart.axis_x.reset_viewport()
+                        chart.axis_y.reset_viewport()
+                        chart.redraw()
+                        displayed_title: str = table.title if table.plot_title is None else table.plot_title
+                        chart.setTitle(displayed_title)
+                        chart.set_axis_titles(x_column_name, selected_y_name)
+                        self.register_open_plot_dialog(plot_dialogue)
+                        plot_dialogue.show()
+                    else:
+                        error_msg(text=self.tr("The selected modes have no finite complex coordinates."),
+                                  title=self.tr("Plotting error"))
+                else:
+                    error_msg(text=self.tr("Select valid mode rows to plot."), title=self.tr("Plotting error"))
+            else:
+                error_msg(text=self.tr("The selected results no longer contain a complex coordinate pair."),
+                          title=self.tr("Plotting error"))
+        else:
+            error_msg(text=self.tr("Select the Real column and one configured Imaginary column."),
+                      title=self.tr("Plotting error"))
+
+    def open_native_complex_vectors_plot(self,
+                                         mdl: ResultsModel,
+                                         selected_columns: np.ndarray | None,
+                                         selected_rows: np.ndarray | None) -> None:
+        """Open one labelled complex-mode vector plot per tab.
+
+        :param mdl: Filtered table model currently displayed in the results view.
+        :param selected_columns: Optional selected visible mode columns.
+        :param selected_rows: Optional selected visible state rows.
+        :return: None.
+        """
+        table: ResultsTable = mdl.table
+        if selected_columns is None:
+            mode_indices: np.ndarray = np.arange(table.c, dtype=np.int64)
+        else:
+            mode_indices = np.unique(np.asarray(selected_columns, dtype=np.int64))
+        if selected_rows is None:
+            state_indices: np.ndarray = np.arange(table.r, dtype=np.int64)
+        else:
+            state_indices = np.unique(np.asarray(selected_rows, dtype=np.int64))
+        mode_indices_valid: bool = (
+            len(mode_indices) > 0
+            and int(np.min(mode_indices)) >= 0
+            and int(np.max(mode_indices)) < table.c
+        )
+        state_indices_valid: bool = (
+            len(state_indices) > 0
+            and int(np.min(state_indices)) >= 0
+            and int(np.max(state_indices)) < table.r
+        )
+        if mode_indices_valid and state_indices_valid:
+            dialog_title: str = self.tr("Results plot")
+            plot_dialogue: PlotDialogue = PlotDialogue(title=dialog_title, parent=self)
+            circle_angles: np.ndarray = np.linspace(0.0, 2.0 * np.pi, 361)
+            circle_x: np.ndarray = np.cos(circle_angles)
+            circle_y: np.ndarray = np.sin(circle_angles)
+            state_names: np.ndarray = np.asarray(table.index_c, dtype=str)
+            mode_position: int
+            for mode_position in range(len(mode_indices)):
+                mode_index: int = int(mode_indices[mode_position])
+                # Results tables may use line breaks to make narrow column
+                # headers readable, but plot titles and tabs are single-line.
+                raw_mode_title: str = str(table.cols_c[mode_index])
+                mode_title: str = " ".join(raw_mode_title.split())
+                chart: GraphsWidget
+                if mode_position == 0:
+                    chart = plot_dialogue.chart
+                    plot_dialogue.set_current_tab_title(mode_title)
+                else:
+                    chart = plot_dialogue.add_tab(title=mode_title)
+                mode_values: np.ndarray = np.asarray(table.data_c[state_indices, mode_index], dtype=complex)
+                finite_values: np.ndarray = np.isfinite(mode_values.real) & np.isfinite(mode_values.imag)
+                chart.clear()
+                chart.set_equal_axis_scale(enabled=True)
+                chart.add_line_series(
+                    name=self.tr("Unit circle"),
+                    x_values=circle_x,
+                    y_values=circle_y,
+                    color="#64748b",
+                )
+                if bool(np.any(finite_values)):
+                    visible_values: np.ndarray = mode_values[finite_values]
+                    magnitudes: np.ndarray = np.abs(visible_values)
+                    maximum_magnitude: float = float(np.max(magnitudes))
+                    if maximum_magnitude > 0.0:
+                        reference_position: int = int(np.argmax(magnitudes))
+                        reference_phase: float = float(np.angle(visible_values[reference_position]))
+                        aligned_values: np.ndarray = visible_values * np.exp(-1j * reference_phase) / maximum_magnitude
+                    else:
+                        aligned_values = np.zeros_like(visible_values)
+                    visible_states: np.ndarray = state_names[state_indices][finite_values]
+                    state_position: int
+                    for state_position in range(len(visible_states)):
+                        # Give every state its own colour and legend entry so
+                        # the modal component can be identified directly.
+                        state_name: str = str(visible_states[state_position])
+                        aligned_value: complex = complex(aligned_values[state_position])
+                        magnitude: float = float(abs(aligned_value))
+                        state_hue: float = (0.60 + float(state_position) / float(len(visible_states))) % 1.0
+                        state_color: str = QtGui.QColor.fromHsvF(state_hue, 0.72, 0.90).name()
+                        if magnitude > 0.0:
+                            # Draw the shaft from the origin and finish it with
+                            # a small arrow head expressed in normalized units.
+                            unit_real: float = aligned_value.real / magnitude
+                            unit_imaginary: float = aligned_value.imag / magnitude
+                            arrow_length: float = min(0.04, magnitude * 0.35)
+                            arrow_half_width: float = arrow_length * 0.5
+                            arrow_left: complex = aligned_value + complex(
+                                -arrow_length * unit_real - arrow_half_width * unit_imaginary,
+                                -arrow_length * unit_imaginary + arrow_half_width * unit_real,
+                            )
+                            arrow_right: complex = aligned_value + complex(
+                                -arrow_length * unit_real + arrow_half_width * unit_imaginary,
+                                -arrow_length * unit_imaginary - arrow_half_width * unit_real,
+                            )
+                            arrow_points: np.ndarray = np.array(
+                                [0.0j, aligned_value, arrow_left, aligned_value, arrow_right],
+                                dtype=complex,
+                            )
+                            chart.add_line_series(
+                                name=state_name,
+                                x_values=arrow_points.real,
+                                y_values=arrow_points.imag,
+                                color=state_color,
+                            )
+                        else:
+                            chart.add_scatter_series(
+                                name=state_name,
+                                x_values=np.zeros(1, dtype=float),
+                                y_values=np.zeros(1, dtype=float),
+                                color=state_color,
+                            )
+                else:
+                    pass
+                # The normalized eigenvector and its unit circle share an
+                # identical range on both square axes.
+                chart.axis_x.set_range(-1.05, 1.05)
+                chart.axis_y.set_range(-1.05, 1.05)
+                chart.axis_x.reset_viewport()
+                chart.axis_y.reset_viewport()
+                chart.setTitle(mode_title)
+                chart.set_axis_titles(self.tr("Real"), self.tr("Imaginary"))
+            self.register_open_plot_dialog(plot_dialogue)
+            plot_dialogue.show()
+        else:
+            error_msg(text=self.tr("Select at least one valid mode column and state row."),
+                      title=self.tr("Plotting error"))
 
     def save_results_df(self):
         """
