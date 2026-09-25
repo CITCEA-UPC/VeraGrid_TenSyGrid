@@ -35,9 +35,6 @@ from VeraGridEngine.Templates.Emt.vsc_gfl_internal_filter import (
     add_gfl_internal_filter,
     connect_gfl_internal_filter_ports,
 )
-from VeraGridEngine.Templates.Emt.emt_gfm_converter_multilinear import (
-    make_gfm_trigonometry_multilinear,
-)
 from VeraGridEngine.Templates.Emt import emt_gfm_upc
 from VeraGridEngine.Utils.Symbolic.block import Block, Var, find_name_in_block
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
@@ -50,12 +47,20 @@ from VeraGridEngine.enumerations import (
     VarPowerFlowReferenceType,
 )
 
-from emt_ieee9 import (
-    attach_emt_models,
-    build_emt_options,
-    build_ieee9_grid,
-    build_power_flow_options,
-)
+try:
+    from .emt_ieee9 import (
+        attach_emt_models,
+        build_emt_options,
+        build_ieee9_grid,
+        build_power_flow_options,
+    )
+except ImportError:  # Allow running this file directly.
+    from emt_ieee9 import (
+        attach_emt_models,
+        build_emt_options,
+        build_ieee9_grid,
+        build_power_flow_options,
+    )
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -64,8 +69,9 @@ VERAGRID_VALIDATION = EROOTS_ROOT / "VeraGrid" / "trunk" / "dynamics" / "model_v
 
 N_GFL = int(os.environ.get("VERAGRID_IEEE9_N_GFL", "1"))
 N_GFM = int(os.environ.get("VERAGRID_IEEE9_N_GFM", "0"))
-TIME_STEP = float(os.environ.get("VERAGRID_IEEE9_IBR_TIME_STEP", "5e-6"))
+TIME_STEP = float(os.environ.get("VERAGRID_IEEE9_IBR_TIME_STEP", "2.5e-6"))
 SIMULATION_TIME = float(os.environ.get("VERAGRID_IEEE9_IBR_SIM_TIME", "0.001"))
+SOLVER_TOLERANCE = float(os.environ.get("VERAGRID_IEEE9_IBR_TOLERANCE", "1e-9"))
 MULTILINEAR_INVERTERS = os.environ.get("VERAGRID_IEEE9_IBR_MULTILINEAR", "0") == "1"
 
 
@@ -307,8 +313,6 @@ def build_ibr_grid(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
             name=f"emt_gfm_{replacement_index}_{bus_name}",
             multilinear=multilinear_inverters,
         )
-        if multilinear_inverters:
-            make_gfm_trigonometry_multilinear(block, vf)
         os.environ.setdefault("VERAGRID_GFM_EMT_KP_VCL", "0.00075")
         os.environ.setdefault("VERAGRID_GFM_EMT_KI_VCL", "0.2")
         os.environ.setdefault("VERAGRID_GFM_EMT_KP_ICL", "0.00075")
@@ -532,6 +536,7 @@ def run_case(
     options.solver_type = EmtSolverTypes.StructuralAD
     options.time_step = TIME_STEP
     options.simulation_time = SIMULATION_TIME
+    options.tolerance = SOLVER_TOLERANCE
     # The IEEE9 network remains a mixed formulation: only the selected inverter
     # trig products are multilinearized, while lines, loads and any remaining
     # machines still use the current-balance DAE contract.  Selecting the global
@@ -539,23 +544,6 @@ def run_case(
     # and produces a spurious first-step jump.  Both inverter formulations must
     # therefore be compared through the same CurrentBalance assembly.
     options.problem_type = EmtProblemTypes.CurrentBalance
-    buses_by_name = {bus.name: bus for bus in grid.buses}
-    # Materialize the GFM controller references before EmtProblemDae clones
-    # and compiles the device blocks.  Updating the original event_dict after
-    # problem construction is too late for parameters initialized from None.
-    for bus_name, gfm_block in gfm_blocks:
-        bus_index = grid.buses.index(buses_by_name[bus_name])
-        p_reference = float(np.real(pf.results.Sbus[bus_index]) / grid.Sbase)
-        q_reference = float(np.imag(pf.results.Sbus[bus_index]) / grid.Sbase)
-        v_peak = float(np.sqrt(2.0) * abs(pf.results.voltage[bus_index]))
-        for logical_name, value in (
-            ("P_ref", p_reference),
-            ("Q_ref", q_reference),
-            ("V_ref", _gfm_filter_voltage_reference(p_reference, q_reference, v_peak)),
-        ):
-            _set_combined_event_value(
-                gfm_block, grid.var_factory, logical_name, value
-            )
     if configure_events is not None:
         configure_events(grid, gfl_devices, gfm_blocks)
     problem = build_emt_problem(
@@ -564,40 +552,6 @@ def run_case(
         pf_results=pf.results,
         pf_results_3ph=pf3.results,
     )
-    generators_by_bus = {generator.bus.name: generator for generator in grid.generators}
-    for bus_name, gfm_block in gfm_blocks:
-        gfm_validation.seed_gfm_from_power_flow(
-            problem, grid, pf.results, gfm_block, buses_by_name[bus_name]
-        )
-        if multilinear_inverters:
-            _synchronize_gfm_multilinear_trig(problem, gfm_block, grid.fBase)
-        bus_index = grid.buses.index(buses_by_name[bus_name])
-        p_ref = float(np.real(pf.results.Sbus[bus_index]) / grid.Sbase)
-        q_ref = float(np.imag(pf.results.Sbus[bus_index]) / grid.Sbase)
-        vq_f = gfm_validation.find_name_in_block("vq_f", gfm_block)
-        v_ref = (
-            float(problem.init_guess[vq_f.uid])
-            if vq_f is not None and vq_f.uid in problem.init_guess
-            else float(np.sqrt(2.0) * abs(pf.results.voltage[bus_index]))
-        )
-        working_block = problem._working_emt_models[str(generators_by_bus[bus_name].idtag)]
-        for logical_name, value in (
-            ("P_ref", p_ref), ("Q_ref", q_ref), ("V_ref", v_ref),
-        ):
-            original_var = gfm_validation.find_name_in_block(logical_name, gfm_block)
-            if original_var is not None:
-                problem.set_internal_runtime_if_exists(
-                    working_block, original_var.name, value
-                )
-        theta = find_name_in_block("theta", gfm_block)
-        if theta is None:
-            theta = next(
-                (var for var in gfm_block.get_all_vars() if var.name.startswith("theta_")),
-                None,
-            )
-        if theta is not None and theta.diff_var is not None:
-            problem.diff_init_guess[theta.diff_var.uid] = -2.0 * np.pi * grid.fBase
-        _synchronize_gfm_state_derivatives(problem, gfm_block, gfm_validation)
     if os.environ.get("VERAGRID_IEEE9_IBR_DIAGNOSTICS", "0") == "1":
         bindings = gfm_validation.uid_bindings_from_problem(problem)
         print("Machine/exciter assembled initial values:")
@@ -690,7 +644,10 @@ def run_case(
     )
     for bus_name, gfm_block in gfm_blocks:
         diagnostics = []
-        for logical_name in ("omega", "P", "y_p_lp", "P_ref", "Kdp"):
+        for logical_name in (
+            "omega", "P", "y_p_lp", "P_ref", "Q", "y_q_lp", "Q_ref",
+            "V", "V_ref", "Kdp", "Kdq",
+        ):
             var = gfm_validation.find_name_in_block(logical_name, gfm_block)
             if var is None:
                 continue
@@ -755,7 +712,10 @@ def main() -> None:
         axis.grid(True, alpha=0.3)
         if axis.lines:
             axis.legend()
-    output = Path(__file__).with_name("results") / f"ieee9_emt_ibr_gfl{N_GFL}_gfm{N_GFM}.png"
+    formulation_suffix = "_multilinear" if MULTILINEAR_INVERTERS else ""
+    output = Path(__file__).with_name("results") / (
+        f"ieee9_emt_ibr_gfl{N_GFL}_gfm{N_GFM}{formulation_suffix}.png"
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=180)
     plt.close(fig)

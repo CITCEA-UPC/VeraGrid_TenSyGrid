@@ -55,6 +55,7 @@ class EmtOptions(OptionsTemplate):
         GCProp(key="external_sparse_solver_directory", tpe=str),
         GCProp(key="external_sparse_solver_plugin_name", tpe=str),
         GCProp(key="allow_internal_sparse_fallback", tpe=bool),
+        GCProp(key="conventional_three_phase_base", tpe=bool),
         GCProp(key="fmi_state_event_time_tolerance", tpe=float),
         GCProp(key="fmi_state_event_max_iterations", tpe=int),
         GCProp(key="fmi_me_newton_absolute_tolerance", tpe=float),
@@ -101,6 +102,7 @@ class EmtOptions(OptionsTemplate):
                  external_sparse_solver_directory: str = "",
                  external_sparse_solver_plugin_name: str = "",
                  allow_internal_sparse_fallback: bool = True,
+                 conventional_three_phase_base: bool = False,
                  fmi_state_event_time_tolerance: float = 1e-9,
                  fmi_state_event_max_iterations: int = 32,
                  fmi_me_newton_absolute_tolerance: float = 1e-8,
@@ -162,6 +164,7 @@ class EmtOptions(OptionsTemplate):
         self.external_sparse_solver_directory: str = external_sparse_solver_directory
         self.external_sparse_solver_plugin_name: str = external_sparse_solver_plugin_name
         self.allow_internal_sparse_fallback: bool = allow_internal_sparse_fallback
+        self.conventional_three_phase_base: bool = conventional_three_phase_base
         if (
             math.isfinite(fmi_state_event_time_tolerance)
             and fmi_state_event_time_tolerance > 0.0

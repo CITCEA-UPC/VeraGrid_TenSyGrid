@@ -62,12 +62,7 @@ def run() -> tuple[Path, dict[str, float]]:
 
     gfm = harness.attach_emt_models(grid, devices, pf_results=pf_results)
     bus_idx = grid.buses.index(devices["bus_gfm"])
-    voltage = complex(pf_results.voltage[bus_idx])
     p0 = float(np.real(pf_results.Sbus[bus_idx]) / grid.Sbase)
-    q0 = float(np.imag(pf_results.Sbus[bus_idx]) / grid.Sbase)
-    harness.set_block_event_value(gfm, grid.var_factory, "P_ref", p0)
-    harness.set_block_event_value(gfm, grid.var_factory, "Q_ref", q0)
-    harness.set_block_event_value(gfm, grid.var_factory, "V_ref", float(np.sqrt(2.0) * abs(voltage)))
 
     options = EmtOptions(
         time_step=harness.TIME_STEP,
@@ -80,7 +75,9 @@ def run() -> tuple[Path, dict[str, float]]:
         verbose=0,
     )
     problem = EmtProblemDae(grid=grid, options=options, pf_results=pf_results)
-    harness.seed_gfm_from_power_flow(problem, grid, pf_results, gfm, devices["bus_gfm"])
+    # All GFM device variables and derivatives come from the production
+    # template's symbolic init_eqs/diff_init_eqs.  The remaining predictors
+    # initialize network-owned bus and line variables only.
     harness.seed_bus_algebraic_predictors(problem, grid, pf_results)
     harness.seed_line_current_predictors(problem, grid, pf_results, devices)
 

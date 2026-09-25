@@ -27,6 +27,32 @@ from VeraGridEngine.basic_structures import Mat, Vec
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 
 
+def _differential_base_indices(problem: Any) -> np.ndarray:
+    """Return the state-vector column owned by each differential variable."""
+    state_index = {var.uid: i for i, var in enumerate(problem.get_state_vars())}
+    return np.asarray([
+        state_index.get(diff_var.base_var.uid, -1) if diff_var.base_var is not None else -1
+        for diff_var in problem.get_diff_vars()
+    ], dtype=np.int64)
+
+
+def _structural_mass_matrices(n_total: int, n_states: int,
+                              diff_base_indices: np.ndarray) -> tuple[sp.csc_matrix, sp.csc_matrix]:
+    """Build derivative-to-residual and state-history mass mappings."""
+    n_diff = len(diff_base_indices)
+    diff_rows = np.arange(n_diff, dtype=np.int64)
+    mass_derivative = sp.csc_matrix(
+        (np.ones(n_diff), (diff_rows, diff_rows)), shape=(n_total, n_diff)
+    )
+    valid = diff_base_indices >= 0
+    mass_state = sp.csc_matrix(
+        (np.ones(int(np.count_nonzero(valid))),
+         (diff_rows[valid], diff_base_indices[valid])),
+        shape=(n_total, n_states),
+    )
+    return mass_state, mass_derivative
+
+
 class EmtFloquetOperator(spla.LinearOperator):
     """
     HPC Matrix-Free Monodromy Operator for abc-frame EMT systems.
@@ -39,7 +65,7 @@ class EmtFloquetOperator(spla.LinearOperator):
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
                  jac_evaluator: Optional[Any] = None, static_params:Optional[Vec] = None, n_event_params: int = 0,
-                 t_trajectory: Optional[Vec] = None):
+                 t_trajectory: Optional[Vec] = None, d_trajectory: Optional[Mat] = None):
 
         """
         Initializes the standard EmtFloquetOperator.
@@ -56,7 +82,10 @@ class EmtFloquetOperator(spla.LinearOperator):
             t_trajectory: Time array corresponding to the limit cycle trajectory.
         """
 
-        op_shape = (n_states, n_states)
+        self.n_diff = len(problem.get_diff_vars())
+        self.diff_base_indices = _differential_base_indices(problem)
+        operator_size = n_states + self.n_diff if method == DynamicIntegrationMethod.DaeTrapezoidal else n_states
+        op_shape = (operator_size, operator_size)
         op_dtype = np.float64
 
         super().__init__(dtype=op_dtype, shape=op_shape)
@@ -70,14 +99,20 @@ class EmtFloquetOperator(spla.LinearOperator):
         self.n_total = self.problem.get_states_number() + self.problem.get_algebraic_var_number()
 
         self.lu_solvers = []
+        self.mass_state_matrices = []
+        self.mass_derivative_matrices = []
+        self.mass_state, self.mass_derivative = _structural_mass_matrices(
+            self.n_total, self.n_states, self.diff_base_indices
+        )
 
         # Pre-computing Router
         if jac_evaluator is not None and t_trajectory is not None:
-            self._precompute_from_jit(jac_evaluator, static_params, n_event_params,t_trajectory)
+            self._precompute_from_jit(jac_evaluator, static_params, n_event_params, t_trajectory, d_trajectory)
         else:
             self._precompute_lu_factorizations()
 
-    def _precompute_from_jit(self, jac_evaluator: Any, static_params: Vec, n_ev_params: int, t_trajectory:Vec)->None:
+    def _precompute_from_jit(self, jac_evaluator: Any, static_params: Vec, n_ev_params: int,
+                             t_trajectory: Vec, d_trajectory: Optional[Mat])->None:
         """
         Evaluates and caches sparse LU factorizations using the JIT compiled evaluator
         :param jac_evaluator:
@@ -93,6 +128,8 @@ class EmtFloquetOperator(spla.LinearOperator):
 
         ev_params = np.zeros(n_ev_params, dtype=np.float64)
         dx_dummy = np.zeros(self.n_total, dtype=np.float64)
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal and d_trajectory is None:
+            raise ValueError("Trapezoidal Floquet requires the captured derivative trajectory")
 
         for i in range(1, len(self.trajectory)):
             step_k = self.trajectory[i]
@@ -108,8 +145,17 @@ class EmtFloquetOperator(spla.LinearOperator):
                 ev_params = self.problem.def_event_params_fn(ev_params, float(t_curr))
                 full_params[:n_ev_params] = ev_params
 
-            J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
-                                     d_history=dx_dummy, h=self.h, history2=x_prev2)
+            d_prev = dx_dummy.copy()
+            if d_trajectory is not None:
+                d_prev[:self.n_states] = np.asarray(d_trajectory[i - 1], dtype=np.float64)[:self.n_states]
+            if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+                J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
+                                         d_history=d_prev, h=self.h, history2=x_prev2)
+                self.mass_state_matrices.append(self.mass_state)
+                self.mass_derivative_matrices.append(self.mass_derivative)
+            else:
+                J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
+                                         d_history=dx_dummy, h=self.h, history2=x_prev2)
             self.lu_solvers.append(spla.splu(J_sparse))
 
     def _precompute_lu_factorizations(self)-> None:
@@ -139,32 +185,45 @@ class EmtFloquetOperator(spla.LinearOperator):
         :return:
         """
         v_curr = np.zeros(self.n_total, dtype=np.float64)
-        v_curr[:self.n_states] = v0
+        v_curr[:self.n_states] = v0[:self.n_states]
 
         v_prev = v_curr.copy()
         v_prev2 = v_curr.copy()
-        dv_prev = np.zeros_like(v_curr)
+        # Store eta = h * delta(xdot) in the augmented coordinate.  This is a
+        # similarity scaling of the discrete map and avoids a 1/h imbalance in
+        # Arnoldi between state and derivative-history components.
+        eta_prev = np.zeros(self.n_diff, dtype=np.float64)
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+            eta_prev[:] = v0[self.n_states:]
         rhs = np.zeros_like(v_curr)
 
-        for lu in self.lu_solvers:
+        for step_index, lu in enumerate(self.lu_solvers):
             if self.method == DynamicIntegrationMethod.DaeBackEuler:
                 rhs[:self.n_states] = v_prev[:self.n_states] / self.h
             elif self.method == DynamicIntegrationMethod.DaeBDF2:
                 rhs[:self.n_states] = (2.0 * v_prev[:self.n_states] - 0.5 * v_prev2[:self.n_states]) / self.h
             elif self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                rhs[:self.n_states] = (2.0 / self.h) * v_prev[:self.n_states] + dv_prev[:self.n_states]
+                rhs[:] = (
+                    (2.0 / self.h) * (self.mass_state_matrices[step_index] @ v_prev[:self.n_states])
+                    + (1.0 / self.h) * (self.mass_derivative_matrices[step_index] @ eta_prev)
+                )
             else:
                 rhs[:self.n_states] = v_prev[:self.n_states] / self.h
 
             v_curr = lu.solve(rhs)
 
             if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                dv_prev[:self.n_states] = (2.0 / self.h) * (v_curr[:self.n_states] - v_prev[:self.n_states]) - dv_prev[
-                    :self.n_states]
+                for diff_index, base_index in enumerate(self.diff_base_indices):
+                    if base_index >= 0:
+                        eta_prev[diff_index] = 2.0 * (
+                            v_curr[base_index] - v_prev[base_index]
+                        ) - eta_prev[diff_index]
 
             v_prev2 = v_prev.copy()
             v_prev = v_curr.copy()
 
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+            return np.concatenate((v_curr[:self.n_states], eta_prev))
         return v_curr[:self.n_states]
 
     def _rmatvec(self, w0: Vec) -> Vec:
@@ -214,7 +273,7 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
                  jac_evaluator: Optional[Any]=None, static_params:Optional[Vec]=None, n_event_params:int =0,
-                 t_trajectory:Optional[Vec]=None):
+                 t_trajectory:Optional[Vec]=None, d_trajectory: Optional[Mat] = None):
         """
         Initializes the BlockEmtFloquetOperator.
 
@@ -231,7 +290,10 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         """
 
         n_total_calc = problem.get_states_number() + problem.get_algebraic_var_number()
-        op_shape = (n_states, n_states)
+        self.n_diff = len(problem.get_diff_vars())
+        self.diff_base_indices = _differential_base_indices(problem)
+        operator_size = n_states + self.n_diff if method == DynamicIntegrationMethod.DaeTrapezoidal else n_states
+        op_shape = (operator_size, operator_size)
         op_dtype = np.float64
 
         super().__init__(dtype=op_dtype, shape=op_shape)
@@ -245,14 +307,20 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         self.n_total = n_total_calc
 
         self.lu_solvers = []
+        self.mass_state_matrices = []
+        self.mass_derivative_matrices = []
+        self.mass_state, self.mass_derivative = _structural_mass_matrices(
+            self.n_total, self.n_states, self.diff_base_indices
+        )
 
         if jac_evaluator is not None:
-            self._precompute_from_jit(jac_evaluator, static_params, n_event_params, t_trajectory)
+            self._precompute_from_jit(jac_evaluator, static_params, n_event_params, t_trajectory, d_trajectory)
         else:
             self._precompute_lu_factorizations()
 
     def _precompute_from_jit(self, jac_evaluator: Any, static_params: Vec,
-                             n_ev_params:int, t_trajectory:Optional[Vec]=None)->None:
+                             n_ev_params:int, t_trajectory:Optional[Vec]=None,
+                             d_trajectory: Optional[Mat] = None)->None:
         """
         Evaluates and caches sparse LU factorizations using the JIT compiled evaluator.
         :param jac_evaluator:
@@ -267,6 +335,8 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
 
         ev_params = np.zeros(n_ev_params, dtype=np.float64)
         dx_dummy = np.zeros(self.n_total, dtype=np.float64)
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal and d_trajectory is None:
+            raise ValueError("Trapezoidal Floquet requires the captured derivative trajectory")
 
         for i in range(1, len(self.trajectory)):
             step_k = self.trajectory[i]
@@ -282,8 +352,17 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
                 ev_params = self.problem.def_event_params_fn(ev_params, float(t_curr))
                 full_params[:n_ev_params] = ev_params
 
-            J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
-                                     d_history=dx_dummy, h=self.h, history2=x_prev2)
+            d_prev = dx_dummy.copy()
+            if d_trajectory is not None:
+                d_prev[:self.n_states] = np.asarray(d_trajectory[i - 1], dtype=np.float64)[:self.n_states]
+            if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+                J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
+                                         d_history=d_prev, h=self.h, history2=x_prev2)
+                self.mass_state_matrices.append(self.mass_state)
+                self.mass_derivative_matrices.append(self.mass_derivative)
+            else:
+                J_sparse = jac_evaluator(states=x_k, params=full_params, history=x_prev,
+                                         d_history=dx_dummy, h=self.h, history2=x_prev2)
 
             self.lu_solvers.append(spla.splu(J_sparse))
 
@@ -320,33 +399,44 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         """
         p_cols = X.shape[1]
         X_curr = np.zeros((self.n_total, p_cols), dtype=X.dtype)
-        X_curr[:self.n_states, :] = X
+        X_curr[:self.n_states, :] = X[:self.n_states, :]
 
         X_prev = X_curr.copy()
         X_prev2 = X_curr.copy()
-        dX_prev = np.zeros_like(X_curr)
+        # Scaled derivative history eta = h * delta(xdot).
+        eta_prev = np.zeros((self.n_diff, p_cols), dtype=X.dtype)
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+            eta_prev[:, :] = X[self.n_states:, :]
         rhs_block = np.zeros_like(X_curr)
 
-        for lu in self.lu_solvers:
+        for step_index, lu in enumerate(self.lu_solvers):
             if self.method == DynamicIntegrationMethod.DaeBackEuler:
                 rhs_block[:self.n_states, :] = X_prev[:self.n_states, :] / self.h
             elif self.method == DynamicIntegrationMethod.DaeBDF2:
                 rhs_block[:self.n_states, :] = (2.0 * X_prev[:self.n_states, :] - 0.5 * X_prev2[
                     :self.n_states, :]) / self.h
             elif self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                rhs_block[:self.n_states, :] = (2.0 / self.h) * X_prev[:self.n_states, :] + dX_prev[:self.n_states, :]
+                rhs_block[:, :] = (
+                    (2.0 / self.h) * (self.mass_state_matrices[step_index] @ X_prev[:self.n_states, :])
+                    + (1.0 / self.h) * (self.mass_derivative_matrices[step_index] @ eta_prev)
+                )
             else:
                 rhs_block[:self.n_states, :] = X_prev[:self.n_states, :] / self.h
 
             X_curr = lu.solve(rhs_block)
 
             if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                dX_prev[:self.n_states, :] = (2.0 / self.h) * (X_curr[:self.n_states, :] - X_prev[:self.n_states, :]) - \
-                                             dX_prev[:self.n_states, :]
+                for diff_index, base_index in enumerate(self.diff_base_indices):
+                    if base_index >= 0:
+                        eta_prev[diff_index, :] = 2.0 * (
+                            X_curr[base_index, :] - X_prev[base_index, :]
+                        ) - eta_prev[diff_index, :]
 
             X_prev2 = X_prev.copy()
             X_prev = X_curr.copy()
 
+        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
+            return np.vstack((X_curr[:self.n_states, :], eta_prev))
         return X_curr[:self.n_states, :]
 
     def _matvec(self, v0:Vec)-> Vec:

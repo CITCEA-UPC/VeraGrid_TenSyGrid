@@ -327,16 +327,22 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         sim_result = solver.simulate()
         t_full = sim_result[0]
         y_full = sim_result[1]
+        d_full = sim_result[2]
 
         steps_per_period = int(self.sss_options.target_period / h)
-        y_limit = y_full[-steps_per_period:]
-        t_limit = t_full[-steps_per_period:]
+        # N integration intervals require N+1 samples, including both period
+        # endpoints. Keeping only N samples made the monodromy operator apply
+        # one Jacobian step too few.
+        samples_per_period = steps_per_period + 1
+        y_limit = y_full[-samples_per_period:]
+        d_limit = d_full[-samples_per_period:]
+        t_limit = t_full[-samples_per_period:]
 
         static_params = np.array([c.value for c in params_values], dtype=np.float64)
 
         jacobian_evaluator = self.problem.get_floquet_jacobian_evaluator(solver.vec_jacobian)
 
-        return y_limit, t_limit, jacobian_evaluator, static_params, n_event_params
+        return y_limit, d_limit, t_limit, jacobian_evaluator, static_params, n_event_params
 
     def run_arnoldi(self):
         """
@@ -349,7 +355,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         n_states = self.problem.get_states_number()
 
         # 1. Capture limit cycle trajectory
-        y_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
+        y_traj, d_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
 
         # 2. Operator initialized with HPC LU Caching
         monodromy_op = EmtFloquetOperator(  # O BlockEmtFloquetOperator
@@ -361,25 +367,29 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             jac_evaluator=jac_eval,
             static_params=stat_params,
             n_event_params=n_ev_params,
-            t_trajectory=t_traj
+            t_trajectory=t_traj,
+            d_trajectory=d_traj,
         )
+        operator_states = monodromy_op.shape[0]
 
         # 3. Eigenvalue Extraction
         # Arnoldi struggles when all eigenvalues have identical magnitudes.
-        if n_states <= max(self.sss_options.k + 1, 20):
+        if operator_states <= max(self.sss_options.k + 1, 20):
             if self.sss_options.verbose:
-                print(f"System size (N={n_states}). Using dense fallback for full spectrum.")
+                print(f"System size (N={operator_states}). Using dense fallback for full spectrum.")
 
-            I_dense = np.eye(n_states)
-            C_M = np.zeros((n_states, n_states))
-            for i in range(n_states):
+            I_dense = np.eye(operator_states)
+            C_M = np.zeros((operator_states, operator_states))
+            for i in range(operator_states):
                 C_M[:, i] = monodromy_op.matvec(I_dense[:, i])
 
             mu, v = la.eig(C_M)
         else:
             # High-Performance Sparse Arnoldi
-            search_k = min(self.sss_options.k * 2, n_states - 2)
-            mu, v = spla.eigs(monodromy_op, k=search_k, which='LM', tol=1e-8)
+            search_k = min(self.sss_options.k * 2, operator_states - 2)
+            v0 = np.zeros(operator_states, dtype=np.float64)
+            v0[:n_states] = np.random.default_rng(42).standard_normal(n_states)
+            mu, v = spla.eigs(monodromy_op, k=search_k, which='LM', tol=1e-8, v0=v0)
 
         # 4. SPECTRAL SHIFT FILTERING (Resonance Hunt)
         if self.sss_options.target_frequency_hz is not None:
@@ -404,12 +414,16 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         w = np.linalg.pinv(v).conj().T
 
         # 6. Results Mapping
+        base_stat_vars = list(self.problem.get_state_vars())
+        stat_vars = list(base_stat_vars)
+        if operator_states > n_states:
+            stat_vars.extend([f"history({var})" for var in self.problem.get_diff_vars()])
         self.results = SmallSignalStabilityEmtResults(
             multipliers=mu,
             right_vecs=v,
             left_vecs=w,
             period=self.sss_options.target_period,
-            stat_vars=self.problem.get_state_vars()
+            stat_vars=stat_vars
         )
 
         self.toc()
@@ -424,7 +438,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         :return: An initialized LinearOperator instance (Block or Stack-based).
         """
 
-        y_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
+        y_traj, d_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
 
         if self.sss_options.prefer_ak_operator:
             Ak_stack = self.problem.get_floquet_ak_stack(
@@ -448,7 +462,8 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             jac_evaluator=jac_eval,
             static_params=stat_params,
             n_event_params=n_ev_params,
-            t_trajectory=t_traj
+            t_trajectory=t_traj,
+            d_trajectory=d_traj,
         )
 
     @staticmethod
@@ -531,10 +546,11 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         self.tic()
 
         h = self.emt_options.time_step
-        n_states = self.problem.get_states_number()
+        physical_states = self.problem.get_states_number()
 
         # Operator (A_k stack if the EMT backend exposes it, else LU-cached DAE operator)
-        monodromy_op = self._make_monodromy_operator(h, n_states)
+        monodromy_op = self._make_monodromy_operator(h, physical_states)
+        n_states = monodromy_op.shape[0]
 
         # Hyperparameters (Clean Code: Native types passed directly from Options)
         k_target = self.sss_options.k
@@ -567,7 +583,9 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
                 print('   [BIRAM] Numba BMGS kernel: ON')
 
         rng = np.random.default_rng(42)
-        V_seed, _ = np.linalg.qr(rng.standard_normal((n_states, p_seed)))
+        raw_seed = np.zeros((n_states, p_seed), dtype=np.float64)
+        raw_seed[:physical_states, :] = rng.standard_normal((physical_states, p_seed))
+        V_seed, _ = np.linalg.qr(raw_seed)
 
         best_pack = BestPack()
         residual_history = []
@@ -660,12 +678,16 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         # Pseudo-inverse dual space lifting (Cleaned)
         w = np.linalg.pinv(v).conj().T
 
+        base_stat_vars = list(self.problem.get_state_vars())
+        stat_vars = list(base_stat_vars)
+        if n_states > physical_states:
+            stat_vars.extend([f"history({var})" for var in self.problem.get_diff_vars()])
         self.results = SmallSignalStabilityEmtResults(
             multipliers=mu,
             right_vecs=v,
             left_vecs=w,
             period=self.sss_options.target_period,
-            stat_vars=self.problem.get_state_vars()
+            stat_vars=stat_vars
         )
 
         self.toc()
