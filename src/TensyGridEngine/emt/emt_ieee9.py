@@ -155,9 +155,6 @@ def attach_emt_models(
         model = generator_factory(
             vf=grid.var_factory,
             name=f"emt_complete_generator_{idx}",
-            conventional_three_phase_base=True,
-            frozen_controls=frozen_controls,
-            multilinear_controls=multilinear_controls,
         ).block
         set_emt_model(device=generator, model=model, var_factory=grid.var_factory)
         # K is inverse droop. K=40 corresponds to 2.5% droop and stabilizes the
@@ -292,7 +289,6 @@ def build_emt_options() -> EmtOptions:
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
         problem_type=EmtProblemTypes.Multilinear,
-        conventional_three_phase_base=True,
         verbose=0,
     )
 

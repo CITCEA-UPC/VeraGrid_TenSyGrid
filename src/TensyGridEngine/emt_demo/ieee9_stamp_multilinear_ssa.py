@@ -125,7 +125,6 @@ def main() -> None:
         solver_type=EmtSolverTypes.StructuralCompiled,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
-        conventional_three_phase_base=True,
         verbose=0)
     problem = EmtProblemMultilinear(
         grid=grid, options=options, pf_results=pf.results, pf_results_3ph=pf3.results)

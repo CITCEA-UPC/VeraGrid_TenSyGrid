@@ -567,7 +567,6 @@ print(
 for generator in generators:
     generator_emt_model = get_complete_generator_template_emt(
         vf=grid.var_factory,
-        conventional_three_phase_base=True,
     ).block
     set_emt_model(device=generator, model=generator_emt_model, var_factory=grid.var_factory)
 
@@ -704,7 +703,6 @@ emt_options = EmtOptions(
     integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
     initialization_method=INITIALIZATION_METHOD,
     init_fix_pf_bus_voltages=FIX_PF_BUS_VOLTAGES_DURING_INITIALIZATION,
-    conventional_three_phase_base=True,
     verbose=1,
 )
 

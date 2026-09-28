@@ -188,9 +188,19 @@ def _adapt_gfl_as_generator(block: Block, vf) -> None:
     vg = [_find_combined_variable(block, name) for name in ("vg_A", "vg_B", "vg_C")]
     if any(variable is None for variable in vg):
         raise RuntimeError("GFL model is missing its AC bus-voltage inputs")
-    block.external_mapping[VarPowerFlowReferenceType.v_A] = vg[0]
-    block.external_mapping[VarPowerFlowReferenceType.v_B] = vg[1]
-    block.external_mapping[VarPowerFlowReferenceType.v_C] = vg[2]
+    voltage_references = (
+        VarPowerFlowReferenceType.v_A,
+        VarPowerFlowReferenceType.v_B,
+        VarPowerFlowReferenceType.v_C,
+    )
+    for variable, reference in zip(vg, voltage_references):
+        variable.ref = reference
+        block.external_mapping[reference] = variable
+    block.in_vars = [
+        variable for variable in block.in_vars
+        if variable.ref not in voltage_references
+    ]
+    block.in_vars.extend(vg)
 
     # The GFL uses the VSC branch convention: i_filter is positive from the AC
     # bus into the converter, hence generated P/Q are negative internally.
@@ -203,15 +213,27 @@ def _adapt_gfl_as_generator(block: Block, vf) -> None:
     ]
     if any(variable is None for variable in filter_currents):
         raise RuntimeError("GFL internal-filter currents were not found")
-    injection_currents = [vf.add_var(f"i_gfl_inj_{phase}") for phase in "ABC"]
+    current_references = (
+        VarPowerFlowReferenceType.i_A,
+        VarPowerFlowReferenceType.i_B,
+        VarPowerFlowReferenceType.i_C,
+    )
+    injection_currents = [
+        vf.add_var(f"i_gfl_inj_{phase}", reference=reference)
+        for phase, reference in zip("ABC", current_references)
+    ]
     block.algebraic_vars.extend(injection_currents)
     block.algebraic_eqs.extend(
         injection + filter_current
         for injection, filter_current in zip(injection_currents, filter_currents)
     )
-    block.external_mapping[VarPowerFlowReferenceType.i_A] = injection_currents[0]
-    block.external_mapping[VarPowerFlowReferenceType.i_B] = injection_currents[1]
-    block.external_mapping[VarPowerFlowReferenceType.i_C] = injection_currents[2]
+    for variable, reference in zip(injection_currents, current_references):
+        block.external_mapping[reference] = variable
+    block.out_vars = [
+        variable for variable in block.out_vars
+        if variable.ref not in current_references
+    ]
+    block.out_vars.extend(injection_currents)
     block.external_mapping.pop(VarPowerFlowReferenceType.Vdc, None)
     block.external_mapping.pop(VarPowerFlowReferenceType.Idc, None)
 
@@ -298,9 +320,8 @@ def build_ibr_grid(n_gfl: int, n_gfm: int, multilinear_inverters: bool = False):
         connect_gfl_internal_filter_ports(vf, block)
         _adapt_gfl_as_generator(block, vf)
         set_emt_model(device=generator, model=block, var_factory=vf)
-        # Port connection/substitution performed by set_emt_model may replace
-        # converter-side variables, so install initialization on the finalized
-        # device block.
+        # Port connection/substitution may replace converter-side variables, so
+        # install initialization on the finalized device block.
         install_gfl_generator_initialization(generator.emt_model, vf, grid.fBase)
         block = generator.emt_model
         gfl_blocks.append((generator, generator.bus, block, targets[bus_name]))

@@ -9,7 +9,6 @@ from VeraGridEngine.Templates.Emt.generator_emt_type_template import (
 )
 from VeraGridEngine.Utils.Symbolic.block import Block
 
-from ieee9_emt_from_scratch import USE_CONVENTIONAL_THREE_PHASE_BASE
 from ieee9_emt_multilinear_simulation import run_case
 
 
@@ -18,9 +17,6 @@ def get_ieee9_classic_generator(vf: Any, name: str) -> Block:
     return get_complete_generator_template_emt(
         vf=vf,
         name=name,
-        conventional_three_phase_base=USE_CONVENTIONAL_THREE_PHASE_BASE,
-        frozen_excitation=True,
-        multilinear_controls=False,
     ).block
 
 

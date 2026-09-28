@@ -96,17 +96,11 @@ def _make_sauer_pai_trig_multilinear(block: Block, vf: VarFactory) -> None:
 def get_generator_sauer_pai_type_emt_multilinear_template(
     vf: VarFactory,
     name: str = "sauer_pai_generator_emt_multilinear",
-    conventional_three_phase_base: bool = False,
-    mechanical_damping: float = 0.0,
-    freeze_e_qp: bool = False,
 ) -> EmtModelTemplate:
     """Return the standalone Sauer-Pai machine with multilinear Park transforms."""
     template = get_generator_sauer_pai_type_emt_template(
         vf=vf,
         name=name,
-        conventional_three_phase_base=conventional_three_phase_base,
-        mechanical_damping=mechanical_damping,
-        freeze_e_qp=freeze_e_qp,
     )
     _make_sauer_pai_trig_multilinear(template.block, vf)
     return template
@@ -115,23 +109,11 @@ def get_generator_sauer_pai_type_emt_multilinear_template(
 def get_complete_generator_template_emt_multilinear(
     vf: VarFactory,
     name: str = "complete_generator_emt_multilinear",
-    conventional_three_phase_base: bool = False,
-    mechanical_damping: float = 0.0,
-    frozen_controls: bool = False,
-    frozen_excitation: bool = False,
-    freeze_e_qp: bool = False,
-    multilinear_controls: bool = True,
 ) -> EmtModelTemplate:
     """Return the complete controlled generator with a multilinear Sauer-Pai core."""
     template = get_complete_generator_template_emt(
         vf=vf,
         name=name,
-        conventional_three_phase_base=conventional_three_phase_base,
-        mechanical_damping=mechanical_damping,
-        frozen_controls=frozen_controls,
-        frozen_excitation=frozen_excitation,
-        freeze_e_qp=freeze_e_qp,
-        multilinear_controls=multilinear_controls,
     )
     if not template.block.children:
         raise RuntimeError("Complete Sauer-Pai generator has no machine child")

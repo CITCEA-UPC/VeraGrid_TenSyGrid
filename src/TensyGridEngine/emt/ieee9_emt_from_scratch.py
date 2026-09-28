@@ -138,7 +138,6 @@ def build_emt_options() -> EmtOptions:
         # SciPy/SuperLU's sparse spsolve path. The dense reduced system is small
         # and converges to below 1e-8; time stepping remains symbolic/sparse.
         init_dense_threshold=10_000,
-        conventional_three_phase_base=USE_CONVENTIONAL_THREE_PHASE_BASE,
         verbose=0,
     )
 
@@ -170,11 +169,6 @@ def attach_baseline_emt_models(
                 model = get_complete_generator_template_emt(
                     vf=grid.var_factory,
                     name=f"emt_complete_generator_{idx}",
-                    conventional_three_phase_base=USE_CONVENTIONAL_THREE_PHASE_BASE,
-                    mechanical_damping=generator_mechanical_damping,
-                    frozen_controls=frozen_generator_controls,
-                    frozen_excitation=frozen_generator_excitation,
-                    freeze_e_qp=frozen_generator_e_qp,
                 ).block
             else:
                 model = dynamic_generator_builder(

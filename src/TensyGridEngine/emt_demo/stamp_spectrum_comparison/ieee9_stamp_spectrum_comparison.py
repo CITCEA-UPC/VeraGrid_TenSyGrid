@@ -51,7 +51,6 @@ def run_case(multilinear: bool, krylov_modes: int):
         solver_type=EmtSolverTypes.StructuralCompiled,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
-        conventional_three_phase_base=True,
         verbose=0,
     )
     problem = EmtProblemMultilinear(

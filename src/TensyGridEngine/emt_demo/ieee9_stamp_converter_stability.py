@@ -90,9 +90,6 @@ def main() -> None:
         solver_type=EmtSolverTypes.StructuralCompiled,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
-        # STAMP's q-d/abc interface and its sqrt(3) inverse-Park factor are
-        # formulated on VeraGrid's conventional total-three-phase power base.
-        conventional_three_phase_base=True,
         verbose=0,
     )
     problem = EmtProblemDae(grid=grid, options=options,

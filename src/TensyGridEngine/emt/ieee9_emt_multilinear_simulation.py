@@ -40,8 +40,6 @@ def get_ieee9_multilinear_generator(vf: Any, name: str) -> Block:
     return get_complete_generator_template_emt_multilinear(
         vf=vf,
         name=name,
-        conventional_three_phase_base=USE_CONVENTIONAL_THREE_PHASE_BASE,
-        frozen_excitation=True,
     ).block
 
 

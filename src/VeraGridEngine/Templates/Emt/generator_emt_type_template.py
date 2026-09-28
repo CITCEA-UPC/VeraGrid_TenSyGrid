@@ -7,7 +7,6 @@
 import numpy as np
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Utils.Symbolic import symbolic as sym
-from VeraGridEngine.Utils.Symbolic import symbolic_ml as sym_ml
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Utils.Symbolic.block import Block, find_name_in_block, Const
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType, DeviceType, ParamPowerFlowReferenceType
@@ -418,7 +417,10 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
         q_B: vf.add_const(None),
         p_C: vf.add_const(None),
         q_C: vf.add_const(None),
-        delta: vf.add_const(None),
+        delta: sym.atan(
+            (Ra * ipk_init * sym.sin(phi_init) - omega * (Lmq + La) * ipk_init * sym.cos(phi_init)) /
+            (vpk_init + Ra * ipk_init * sym.cos(phi_init) + omega * (Lmq + La) * ipk_init * sym.sin(phi_init))
+        ),
     }
     templ.block.api_obj_mapping = {
         ParamPowerFlowReferenceType.omega_base : omega_base,
@@ -434,10 +436,6 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
 
     templ.block.init_eqs = {
         omega: omega_ref,
-        delta: sym.atan(
-            (Ra * ipk_init * sym.sin(phi_init) - omega * (Lmq + La) * ipk_init * sym.cos(phi_init)) /
-            (vpk_init + Ra * ipk_init * sym.cos(phi_init) + omega * (Lmq + La) * ipk_init * sym.sin(phi_init))
-        ),
         theta: phi_v_init + delta,
 
         v_d: 2 / 3 * (sym.sin(theta) * inputs[0] +
@@ -859,7 +857,8 @@ def get_generator_emt_type_template(vf: VarFactory, name: str = "emt_type_genera
         # --------------------------------------------------------------------------
         # Initialization auxiliaries obtained from PF
         # --------------------------------------------------------------------------
-        delta: vf.add_const(None),
+        delta: sym.atan((Ra * ipk_init * sym.sin(phi_init) - w_elec * Lq * ipk_init * sym.cos(phi_init)) / (
+                    vpk_init + Ra * ipk_init * sym.cos(phi_init) + w_elec * Lq * ipk_init * sym.sin(phi_init))),
         d_v_A: vf.add_const(None),
         d_v_B: vf.add_const(None),
         d_v_C: vf.add_const(None),
@@ -888,9 +887,7 @@ def get_generator_emt_type_template(vf: VarFactory, name: str = "emt_type_genera
         w_mec_base: omega_base,
         w_mec: c1,
         w_elec: (0.5 * p_poles) * w_mec,
-        # Rotor angle initialization based on Load Angle (delta)
-        delta: sym.atan((Ra * ipk_init * sym.sin(phi_init) - w_elec * Lq * ipk_init * sym.cos(phi_init)) / (
-                    vpk_init + Ra * ipk_init * sym.cos(phi_init) + w_elec * Lq * ipk_init * sym.sin(phi_init))),
+        # Rotor angle is owned and initialized by the event dictionary.
         theta_elec: phi_v_init + delta,
 
         # Terminal dq voltages and currents
@@ -944,13 +941,8 @@ def get_generator_emt_type_template(vf: VarFactory, name: str = "emt_type_genera
     return templ
 
 
-def get_generator_sauer_pai_type_emt_template(
-        vf: VarFactory,
-        name: str = "sauer_pai_generator_emt_template",
-        conventional_three_phase_base: bool = False,
-        mechanical_damping: float = 0.0,
-        freeze_e_qp: bool = False,
-) -> EmtModelTemplate:
+def get_generator_sauer_pai_type_emt_template(vf: VarFactory, name: str = "sauer_pai_generator_emt_template"
+                                              ) -> EmtModelTemplate:
     """
     Sauer-Pai synchronous generator model embedded in the EMT architecture,
     including explicit zero-sequence dynamics.
@@ -1068,8 +1060,8 @@ def get_generator_sauer_pai_type_emt_template(
     c0 = vf.add_const(0.0)
     c1 = vf.add_const(1.0)
     two_pi_over_3 = 2.0 * np.pi / 3.0
-    torque_scale = 0.5 if conventional_three_phase_base else 1.5
-    power_scale = 1.0 / 3.0 if conventional_three_phase_base else 1.0
+    torque_scale = 0.5
+    power_scale = 1.0 / 3.0
 
     # ------------------------------------------------------------------
     # Inputs: abc terminal voltages + controller inputs
@@ -1188,19 +1180,7 @@ def get_generator_sauer_pai_type_emt_template(
         q_c=q_C,
         omega_base=omega_b,
     )
-    if conventional_three_phase_base:
-        # P_A/P_B/P_C are per-phase powers expressed on the total three-phase
-        # Sbase, so the conventional phase-current pu value is three times the
-        # legacy S_phase_pu/V_phase_pu result.
-        ipk_init = 3.0 * ipk_init
-
-    # The shared helper returns the current angle relative to the terminal
-    # voltage. The Sauer-Pai abc/dq initialization formulas require its
-    # absolute phasor angle under both per-unit conventions.
-    phi_i_init = sym.atan2(
-        sym.sin(phi_init + phi_v_init),
-        sym.cos(phi_init + phi_v_init),
-    )
+    ipk_init = 3.0 * ipk_init
 
 
     # ------------------------------------------------------------------
@@ -1220,7 +1200,7 @@ def get_generator_sauer_pai_type_emt_template(
             omega_b * (ra * i_0 + v_0),
 
             # Sauer-Pai magnetic equations
-            c0 if freeze_e_qp else (-IRPu + v_f) / Td0p,
+            (-IRPu + v_f) / Td0p,
 
             ( -e_dp + (xq - xqp) * (gamma_q1 * i_q - gamma_q2 * psi_pp_q - gamma_q2 * e_dp)) / Tq0p,
 
@@ -1334,7 +1314,7 @@ def get_generator_sauer_pai_type_emt_template(
         Tq0pp: vf.add_const(0.05),
 
         H: vf.add_const(5.0),
-        D: vf.add_const(mechanical_damping),
+        D: vf.add_const(0.0),
         omega_s: vf.add_const(1.0),
 
         gamma_d1: (xdpp - xl) / (xdp - xl),
@@ -1362,10 +1342,8 @@ def get_generator_sauer_pai_type_emt_template(
     # ------------------------------------------------------------------
     # INITIALIZATION
     # ------------------------------------------------------------------
-    # Full steady-state rotor angle.  The q-axis rotor equations reduce to
-    # psi_q = -xq*i_q at equilibrium, so the phasor construction must use the
-    # synchronous q-axis reactance.  Using xqp can match the terminal snapshot
-    # at one instant but leaves the q-axis subtransient states off equilibrium.
+    phi_i_init = phi_v_init + phi_init
+    # Rotor angle estimate from transient internal emf phasor
     E_re = (
         vpk_init * sym.cos(phi_v_init)
         + ra * ipk_init * sym.cos(phi_i_init)
@@ -1376,12 +1354,6 @@ def get_generator_sauer_pai_type_emt_template(
         + ra * ipk_init * sym.sin(phi_i_init)
         + xq * ipk_init * sym.cos(phi_i_init)
     )
-    q_axis_span = xq - xqp
-    e_dp_init = q_axis_span * (
-        gamma_q1 + gamma_q2 * (xqp - xl)
-    ) * i_q
-    psi_pp_q_init = -e_dp_init - (xqp - xl) * i_q
-
     templ.block.init_eqs = {
 
         omega: omega_s,
@@ -1405,14 +1377,14 @@ def get_generator_sauer_pai_type_emt_template(
         # zero-sequence magnetic initialization
         psi_0: -x0 * i_0,
 
-        # Sauer-Pai q-axis periodic steady state.  With theta chosen using xq,
-        # these expressions satisfy the magnetic algebraic equation together
-        # with d_e_dp = d_psi_pp_q = 0.
+        # Sauer-Pai q-axis steady-state initialization. These expressions are
+        # chosen to satisfy both d_psi_pp_q = 0 and d_e_dp = 0 for the
+        # implemented model equations.
         e_qp: psi_d + xdp * i_d,
-        e_dp: e_dp_init,
+        e_dp: (xq - xqp) * i_q,
 
         psi_pp_d: (psi_d + xdpp * i_d - gamma_d1 * e_qp) / (c1 - gamma_d1),
-        psi_pp_q: psi_pp_q_init,
+        psi_pp_q: -(xq - xl) * i_q,
 
         # abc current injection
         i_A: i_q * sym.sin(theta_abs) - i_d * sym.cos(theta_abs) + i_0,
@@ -1438,7 +1410,6 @@ def get_generator_sauer_pai_type_emt_template(
             (v_C - v_A) * i_B
         ),
     }
-
 
     templ.block.diff_init_eqs = {
         d_theta_abs: omega_b * c1,
@@ -1487,7 +1458,7 @@ def get_generator_sauer_pai_type_emt_template(
 
 
 
-def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool = False) -> EmtModelTemplate:
+def get_governor_emt(vf: VarFactory, name: str = "Governor") -> EmtModelTemplate:
     templ = EmtModelTemplate(name=name)
     inputs = [vf.add_var(name=f"omega", shared_reference = "omega_reference"), vf.add_var(name=f'Te', shared_reference = "Te_reference")]
     Tm = vf.add_var(name=f"Tm", shared_reference = "Tm_reference")  # Mechanical power input (pu
@@ -1517,7 +1488,7 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool =
         # The complete generator wrapper may replace this placeholder with a
         # model-level shared-power reference. The standalone governor keeps a
         # neutral default until the wrapper or initialization layer provides it.
-        Pm_ref: vf.add_const(None),
+        # Pm_ref: vf.add_const(None),
         Kp: vf.add_const(-0.01),
         Ki: vf.add_const(-0.01),
         p0: vf.add_const(1.0),
@@ -1535,24 +1506,14 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool =
     }
     speed_error = omega_ref - inputs[0]
     # The governor regulates around the assigned mechanical-power reference so a
-    # shared initialization can prescribe one target per generator.  Do not add
-    # ``Te - Pm_ref`` to this state equation: at synchronous speed that term
-    # makes the steady-state governor output equal ``Te`` for every possible
-    # rotor angle, effectively eliminating the scheduled mechanical-power
-    # reference and allowing the machine to settle at an arbitrary active power.
+    # shared slack-bus initialization can prescribe one target per generator.
     torque_order = Pm_ref + y_gov0
-    if multilinear:
-        # Small-signal multilinearization keeps the initialized limiter mode.
-        # IEEE9 starts strictly inside Pmin/Pmax, so this branch is the identity.
-        torque_sat_block = Block()
-        ramped_torque_order = torque_order
-    else:
-        torque_sat_block = Block()
-        ramped_torque_order = sym.hard_sat(torque_order, Pmin, Pmax)
+    torque_tracking_error = inputs[1] - Pm_ref
+    ramped_torque_order = sym.hard_sat(torque_order, Pmin, Pmax)
 
     templ.block = Block(
         state_eqs=[
-            (K * speed_error - y_gov0) / T1,
+            (K * speed_error + torque_tracking_error - y_gov0) / T1,
         ],
         state_vars=[y_gov0],
         diff_vars=[d_y_gov0],
@@ -1567,15 +1528,10 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool =
         name=name,
 
         init_eqs={
-            # Follow the RMS initialization chain: the machine electrical
-            # equations establish Te first, then the governor reference and
-            # output are initialized from that equilibrium torque.
-            Pm_ref: inputs[1],
             y_gov0: vf.add_const(0.0),
-            y2_3: Pm_ref,
-            Tm: Pm_ref,
+            y2_3: ramped_torque_order,
+            Tm: ramped_torque_order
         },
-        children=[torque_sat_block],
         api_obj_mapping={
             # Gains and limits
             ParamPowerFlowReferenceType.K: K,  # governor gain (inverse droop)
@@ -1591,6 +1547,9 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool =
             ParamPowerFlowReferenceType.omega_ref: omega_ref,
             ParamPowerFlowReferenceType.p0: p0,
             ParamPowerFlowReferenceType.P0: P0,
+
+            # shared ref
+            ParamPowerFlowReferenceType.generator_share_p_ref: Pm_ref
         }
 
     )
@@ -1598,7 +1557,7 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor", multilinear: bool =
     return templ
 
 
-def get_stabilizer_emt(vf: VarFactory, name: str = "stabilizer", multilinear: bool = False) -> EmtModelTemplate:
+def get_stabilizer_emt(vf: VarFactory, name: str = "stabilizer") -> EmtModelTemplate:
     templ = EmtModelTemplate(name=name)
 
     parameters = {
@@ -1648,15 +1607,6 @@ def get_stabilizer_emt(vf: VarFactory, name: str = "stabilizer", multilinear: bo
     lead_lag_1 = y4 + (parameters["t1"].value / parameters["t2"].value) * (y3 - y4)
     lead_lag_2 = y5 + (parameters["t3"].value / parameters["t4"].value) * (lead_lag_1 - y5)
 
-    if multilinear:
-        # The initialized PSS output is strictly inside its limits.  Holding
-        # that active set makes the local model exact and nonsingular.
-        pss_sat_block = Block()
-        vpss_limited = lead_lag_2
-    else:
-        pss_sat_block = Block()
-        vpss_limited = sym.hard_sat(lead_lag_2, VPssMinPu, VPssMaxPu)
-
     templ.block = Block(
         state_eqs=[
             (speed_deviation - y1) / parameters["t6"].value,
@@ -1668,7 +1618,7 @@ def get_stabilizer_emt(vf: VarFactory, name: str = "stabilizer", multilinear: bo
         diff_vars=[d_y1, d_y2, d_y4, d_y5],
         algebraic_eqs=[
             y3 - washout_output,
-            Vpss - vpss_limited,
+            Vpss - sym.hard_sat(lead_lag_2, VPssMinPu, VPssMaxPu),
         ],
         algebraic_vars=[y3, Vpss],
         in_vars=inputs,
@@ -1683,14 +1633,13 @@ def get_stabilizer_emt(vf: VarFactory, name: str = "stabilizer", multilinear: bo
             y3: vf.add_const(0.0),
             y4: vf.add_const(0.0),
             y5: vf.add_const(0.0),
-        },
-        children=[pss_sat_block],
+        }
     )
 
     return templ
 
 
-def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = False) -> EmtModelTemplate:
+def get_exciter_emt(vf: VarFactory, name: str = "exciter") -> EmtModelTemplate:
     """
 
     :param vf:
@@ -1777,7 +1726,6 @@ def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = F
 
     events_dict = {
         # Exciter (AVR) parameters
-        UsRefPu: vf.add_const(None),  # reference voltage (pu)
         AEz: vf.add_const(0.02),  # saturation gain
         BEz: vf.add_const(1.5),  # saturation exponential coefficient
         Se_threshold: vf.add_const(1.0),  # saturation threshold
@@ -1802,81 +1750,29 @@ def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = F
     }
 
     min_const = max(events_dict[VaMinPu].value, events_dict[EfeMinPu].value)
+    i_field_abs = sym.abs(inputs[0])
     measured_vm = sym.sqrt((1.0 / 3.0) * (v_A * v_A + v_B * v_B + v_C * v_C))
     exciter_error = UsRefPu + inputs[4] - y1 - y2
     lead_lag_output = y3 + (parameters["tC"].value / parameters["tB"].value) * (exciter_error - y3)
-    multilinear_children: list[Block] = []
-    if multilinear:
-        v_a_aux = vf.add_var(f"v_A_aux_{name}")
-        v_b_aux = vf.add_var(f"v_B_aux_{name}")
-        v_c_aux = vf.add_var(f"v_C_aux_{name}")
-        vm_aux = vf.add_var(f"Vm_aux_{name}")
-        voltage_magnitude_block = Block(
-            algebraic_eqs=[
-                v_a_aux - v_A,
-                v_b_aux - v_B,
-                v_c_aux - v_C,
-                Vm * vm_aux - (v_A * v_a_aux + v_B * v_b_aux + v_C * v_c_aux) / vf.add_const(3.0),
-                Vm - vm_aux,
-            ],
-            algebraic_vars=[v_a_aux, v_b_aux, v_c_aux, vm_aux],
-            init_eqs={v_a_aux: v_A, v_b_aux: v_B, v_c_aux: v_C, vm_aux: measured_vm},
-        )
-        # At this operating point IRPu and Vf are positive and every limiter is
-        # inactive.  A Floquet linearization must retain this active set; using
-        # complementarity variables here would be singular at the zero slacks.
-        i_field_abs = inputs[0]
-        vf_positive = Vf
-        # Exact differential lift of exp(BEx*(Vf-Se_threshold)).  The lifted
-        # exponential is a true state: d(exp)/dt = BEx*dVf/dt*exp.  Keeping it
-        # algebraic would introduce untracked history into the Floquet map.
-        saturation_exp = vf.add_var(f"exp_{name}_sat")
-        d_saturation_exp = vf.add_diff_var(
-            f"d_exp_{name}_sat", base_var=saturation_exp
-        )
-        exp_block = Block(
-            state_eqs=[BEx * d_Vf * saturation_exp],
-            state_vars=[saturation_exp],
-            diff_vars=[d_saturation_exp],
-            init_eqs={saturation_exp: sym.exp(BEx * (Vf - Se_threshold))},
-        )
-        saturation_active = vf.add_const(1.0)
-        saturation_term = AEx * vf_positive * (saturation_exp - vf.add_const(1.0)) * saturation_active
-        field_feedback = parameters['Ke'].value * Vf + saturation_term
-        field_ceiling = VfeMaxPu - parameters['Kd'].value * i_field_abs
-        field_voltage_ref = y4
-        multilinear_children.extend([
-            voltage_magnitude_block,
-            exp_block,
-        ])
-        voltage_measurement_equations: list[sym.Expr] = []
-    else:
-        i_field_abs = sym.abs(inputs[0])
-        vf_positive = sym.hard_sat(Vf, vf.add_const(0.0), vf.add_const(1e6))
-        saturation_term = AEx * vf_positive * (
-            sym.exp(BEx * (vf_positive - Se_threshold)) - vf.add_const(1.0)
-        ) * sym.heaviside(vf_positive - Se_threshold)
-        field_feedback = parameters['Ke'].value * Vf + saturation_term
-        field_ceiling = sym.hard_sat(VfeMaxPu - parameters['Kd'].value * i_field_abs,
-                                     VeMinPu_submodel,
-                                     VfeMaxPu_submodel)
-        field_voltage_ref = sym.hard_sat(y4, min_const, field_ceiling)
-        voltage_measurement_equations = [Vm - measured_vm]
-    # The connected Sauer--Pai machine exposes ``IRPu`` as the field-voltage
-    # requirement in d(e'_q)/dt = (-IRPu + Vf) / Td0p.  Therefore its steady
-    # exciter output is IRPu itself; applying Kfd here initializes the AVR and
-    # machine to two different field voltages.
-    vf_init = inputs[0]
-    if multilinear:
-        # Use the very same lifted exponential and suffixed runtime parameters
-        # as the algebraic/state equations. Reconstructing the exponential a
-        # second time in init_eqs can bind pre-unification parameter UIDs and
-        # initialize u_aux/Efe to a different value than field_feedback.
-        field_feedback_init = field_feedback
-    else:
-        field_feedback_init = parameters['Ke'].value * vf_init + AEx * sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) * (
-            sym.exp(BEx * (sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)) - vf.add_const(1.0)
-        ) * sym.heaviside(sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6)) - Se_threshold)
+    vf_positive = sym.hard_sat(Vf, vf.add_const(0.0), vf.add_const(1e6))
+    saturation_term = AEx * vf_positive * (
+        sym.exp(BEx * (vf_positive - Se_threshold)) - vf.add_const(1.0)
+    ) * sym.heaviside(vf_positive - Se_threshold)
+    field_feedback = parameters['Ke'].value * Vf + saturation_term
+    field_ceiling = sym.hard_sat(VfeMaxPu - parameters['Kd'].value * i_field_abs,
+                                 VeMinPu_submodel,
+                                 VfeMaxPu_submodel)
+    field_voltage_ref = sym.hard_sat(y4, min_const, field_ceiling)
+    vf_init = parameters['Kfd'].value * inputs[0]
+    vf_init_positive = sym.hard_sat(vf_init, vf.add_const(0.0), vf.add_const(1e6))
+    field_feedback_init = parameters['Ke'].value * vf_init + AEx * vf_init_positive * (
+        sym.exp(BEx * (vf_init_positive - Se_threshold)) - vf.add_const(1.0)
+    ) * sym.heaviside(vf_init_positive - Se_threshold)
+    y2_init = parameters["Kf"].value * vf_init
+    y4_init = field_feedback_init
+    y3_init = field_feedback_init / parameters["Ka"].value
+    us_ref_init = measured_vm + y2_init + y3_init
+    events_dict[UsRefPu] = us_ref_init
     templ.block = Block(
         state_eqs=[
             (Vm - y1) / parameters["tR"].value,
@@ -1888,7 +1784,8 @@ def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = F
         state_vars=[y1, y2, y3, y4, Vf],
         diff_vars=[d_y1, d_y2, d_y3, d_y4, d_Vf],
         out_vars=[Vf],
-        algebraic_eqs=voltage_measurement_equations + [
+        algebraic_eqs=[
+            Vm - measured_vm,
             VeMaxPu - field_ceiling,
             u_aux - field_feedback,
             Efe - field_voltage_ref,
@@ -1900,88 +1797,20 @@ def get_exciter_emt(vf: VarFactory, name: str = "exciter", multilinear: bool = F
             Vm: measured_vm,
             y1: Vm,
             Vf: vf_init,
-            y2: parameters["Kf"].value * Vf,
+            y2: y2_init,
             u_aux: field_feedback_init,
             VeMaxPu: field_ceiling,
             Efe: field_feedback_init,
-            y4: Efe,
-            y3: Efe / parameters["Ka"].value,
-            UsRefPu: y1 + y2 - inputs[4] + y3,
+            y4: y4_init,
+            y3: y3_init,
         },
         name=name,
-        children=multilinear_children,
     )
 
     return templ
 
 
-def get_frozen_generator_controls_emt(
-        vf: VarFactory,
-        name: str = "frozen_generator_controls",
-) -> EmtModelTemplate:
-    """Hold mechanical torque and field voltage at their initialized values.
-
-    This diagnostic block deliberately contains no governor, exciter, or PSS.
-    Its two constant states are initialized from the machine's electrical
-    torque and field-current signal and then have zero runtime derivatives.
-    It is useful for separating electromagnetic-machine behaviour from
-    controller behaviour without hard-coding operating-point values.
-    """
-    templ = EmtModelTemplate(name=name)
-    te = vf.add_var(f"Te_{name}", shared_reference="Te_reference")
-    irpu = vf.add_var(f"IRPu_{name}", shared_reference="IRPu_reference")
-    tm = vf.add_var(f"Tm_{name}", shared_reference="Tm_reference")
-    vf_hold = vf.add_var(f"Vf_{name}", shared_reference="v_f_reference")
-    d_tm = vf.add_diff_var(name=f"d_Tm_{name}", base_var=tm)
-    d_vf_hold = vf.add_diff_var(name=f"d_Vf_{name}", base_var=vf_hold)
-    zero = vf.add_const(0.0)
-
-    templ.block = Block(
-        state_eqs=[zero, zero],
-        state_vars=[tm, vf_hold],
-        diff_vars=[d_tm, d_vf_hold],
-        in_vars=[te, irpu],
-        out_vars=[tm, vf_hold],
-        init_eqs={tm: te, vf_hold: irpu},
-        diff_init_eqs={d_tm: zero, d_vf_hold: zero},
-        name=name,
-    )
-    return templ
-
-
-def get_frozen_generator_excitation_emt(
-        vf: VarFactory,
-        name: str = "frozen_generator_excitation",
-) -> EmtModelTemplate:
-    """Hold only field voltage while leaving the governor active."""
-    templ = EmtModelTemplate(name=name)
-    irpu = vf.add_var(f"IRPu_{name}", shared_reference="IRPu_reference")
-    vf_hold = vf.add_var(f"Vf_{name}", shared_reference="v_f_reference")
-    d_vf_hold = vf.add_diff_var(name=f"d_Vf_{name}", base_var=vf_hold)
-    zero = vf.add_const(0.0)
-    templ.block = Block(
-        state_eqs=[zero],
-        state_vars=[vf_hold],
-        diff_vars=[d_vf_hold],
-        in_vars=[irpu],
-        out_vars=[vf_hold],
-        init_eqs={vf_hold: irpu},
-        diff_init_eqs={d_vf_hold: zero},
-        name=name,
-    )
-    return templ
-
-
-def get_complete_generator_template_emt(
-        vf: VarFactory,
-        name="complete_generator_emt_template",
-        conventional_three_phase_base: bool = False,
-        mechanical_damping: float = 0.0,
-        frozen_controls: bool = False,
-        frozen_excitation: bool = False,
-        freeze_e_qp: bool = False,
-        multilinear_controls: bool = False,
-) -> EmtModelTemplate:
+def get_complete_generator_template_emt(vf: VarFactory, name="complete_generator_emt_template") -> EmtModelTemplate:
     """
 
     :return:
@@ -2004,13 +1833,11 @@ def get_complete_generator_template_emt(
     # Sauer-Pai EMT generator semantics directly.
     # gen_mdl = get_simple_generator_emt_template(vf = vf).block
     # gen_mdl = get_generator_emt_type_template(vf = vf).block
-    gen_mdl = get_generator_sauer_pai_type_emt_template(
-        vf=vf,
-        name=f"{name}_gen",
-        conventional_three_phase_base=conventional_three_phase_base,
-        mechanical_damping=mechanical_damping,
-        freeze_e_qp=freeze_e_qp,
-    ).block
+    gen_mdl = get_generator_sauer_pai_type_emt_template(vf=vf, name=f"{name}_gen").block
+
+    exciter_mdl = get_exciter_emt(vf=vf, name=f"{name}_exciter").block
+    governor_mdl = get_governor_emt(vf=vf, name=f"{name}_governor").block
+    stabilizer_mdl = get_stabilizer_emt(vf=vf, name=f"{name}_stabilizer").block
 
     # connect models
     # The wrapper boundary must substitute the internal voltage placeholders by
@@ -2021,59 +1848,33 @@ def get_complete_generator_template_emt(
     gen_mdl.update_model(gen_mdl.in_vars[1], v_b_in)
     gen_mdl.update_model(gen_mdl.in_vars[2], v_c_in)
 
+    vf.add_connections([gen_mdl.in_vars[4]], [exciter_mdl.out_vars[0]]) # v_f
+    vf.add_connections([exciter_mdl.in_vars[0]], [gen_mdl.out_vars[4]]) # IRPu / i_f
+
+    # gen_mdl.connect([gen_mdl.in_vars[4]], [exciter_mdl.out_vars[0]])  # v_f
+    # exciter_mdl.connect([exciter_mdl.in_vars[0]], [gen_mdl.out_vars[4]])  # IRPu / i_f
+
+    exciter_mdl.update_model(exciter_mdl.in_vars[1], v_a_in)  # v_A
+    exciter_mdl.update_model(exciter_mdl.in_vars[2], v_b_in)  # v_B
+    exciter_mdl.update_model(exciter_mdl.in_vars[3], v_c_in)  # v_C
+
+    vf.add_connections([exciter_mdl.in_vars[4]], [stabilizer_mdl.out_vars[0]]) # Vpps
+    vf.add_connections([stabilizer_mdl.in_vars[0]], [gen_mdl.out_vars[3]]) # omega
+    vf.add_connections([gen_mdl.in_vars[3]], [governor_mdl.out_vars[0]]) # Tm
+    vf.add_connections([governor_mdl.in_vars[0]], [gen_mdl.out_vars[3]]) # omega
+    vf.add_connections([governor_mdl.in_vars[1]], [gen_mdl.out_vars[5]]) # Te
+
+    # exciter_mdl.connect([exciter_mdl.in_vars[4]], [stabilizer_mdl.out_vars[0]])  # Vpps
+    # stabilizer_mdl.connect([stabilizer_mdl.in_vars[0]], [gen_mdl.out_vars[3]])  # omega
+    # gen_mdl.connect([gen_mdl.in_vars[3]], [governor_mdl.out_vars[0]])  # Tm
+    # governor_mdl.connect([governor_mdl.in_vars[0]], [gen_mdl.out_vars[3]])  # omega
+    # governor_mdl.connect([governor_mdl.in_vars[1]], [gen_mdl.out_vars[5]])  # Te
+
+
     templ.block.children.append(gen_mdl)
-    if frozen_controls:
-        frozen_mdl = get_frozen_generator_controls_emt(
-            vf=vf,
-            name=f"{name}_frozen_controls",
-        ).block
-        vf.add_connections(
-            [gen_mdl.in_vars[3], gen_mdl.in_vars[4]],
-            [frozen_mdl.out_vars[0], frozen_mdl.out_vars[1]],
-        )
-        vf.add_connections(
-            [frozen_mdl.in_vars[0], frozen_mdl.in_vars[1]],
-            [gen_mdl.out_vars[5], gen_mdl.out_vars[4]],
-        )
-        templ.block.children.append(frozen_mdl)
-    elif frozen_excitation:
-        frozen_excitation_mdl = get_frozen_generator_excitation_emt(
-            vf=vf,
-            name=f"{name}_frozen_excitation",
-        ).block
-        governor_mdl = get_governor_emt(vf=vf, name=f"{name}_governor").block
-        vf.add_connections([gen_mdl.in_vars[4]], [frozen_excitation_mdl.out_vars[0]])
-        vf.add_connections([frozen_excitation_mdl.in_vars[0]], [gen_mdl.out_vars[4]])
-        vf.add_connections([gen_mdl.in_vars[3]], [governor_mdl.out_vars[0]])
-        vf.add_connections([governor_mdl.in_vars[0]], [gen_mdl.out_vars[3]])
-        vf.add_connections([governor_mdl.in_vars[1]], [gen_mdl.out_vars[5]])
-        templ.block.children.append(governor_mdl)
-        templ.block.children.append(frozen_excitation_mdl)
-    else:
-        exciter_mdl = get_exciter_emt(
-            vf=vf, name=f"{name}_exciter", multilinear=multilinear_controls
-        ).block
-        governor_mdl = get_governor_emt(
-            vf=vf, name=f"{name}_governor", multilinear=multilinear_controls
-        ).block
-        stabilizer_mdl = get_stabilizer_emt(
-            vf=vf, name=f"{name}_stabilizer", multilinear=multilinear_controls
-        ).block
-
-        vf.add_connections([gen_mdl.in_vars[4]], [exciter_mdl.out_vars[0]])
-        vf.add_connections([exciter_mdl.in_vars[0]], [gen_mdl.out_vars[4]])
-        exciter_mdl.update_model(exciter_mdl.in_vars[1], v_a_in)
-        exciter_mdl.update_model(exciter_mdl.in_vars[2], v_b_in)
-        exciter_mdl.update_model(exciter_mdl.in_vars[3], v_c_in)
-        vf.add_connections([exciter_mdl.in_vars[4]], [stabilizer_mdl.out_vars[0]])
-        vf.add_connections([stabilizer_mdl.in_vars[0]], [gen_mdl.out_vars[3]])
-        vf.add_connections([gen_mdl.in_vars[3]], [governor_mdl.out_vars[0]])
-        vf.add_connections([governor_mdl.in_vars[0]], [gen_mdl.out_vars[3]])
-        vf.add_connections([governor_mdl.in_vars[1]], [gen_mdl.out_vars[5]])
-
-        templ.block.children.append(governor_mdl)
-        templ.block.children.append(stabilizer_mdl)
-        templ.block.children.append(exciter_mdl)
+    templ.block.children.append(governor_mdl)
+    templ.block.children.append(stabilizer_mdl)
+    templ.block.children.append(exciter_mdl)
     templ.block.in_vars = [v_a_in, v_b_in, v_c_in]
     # templ.block.unify_blocks()
 
@@ -2112,6 +1913,7 @@ def get_complete_generator_template_emt(
             gen_mdl.api_obj_mapping[ParamPowerFlowReferenceType.X1],
         ParamPowerFlowReferenceType.X0:
             gen_mdl.api_obj_mapping[ParamPowerFlowReferenceType.X0],
+        ParamPowerFlowReferenceType.generator_share_p_ref: governor_mdl.api_obj_mapping[ParamPowerFlowReferenceType.generator_share_p_ref],
     }
 
     templ.block.in_vars = [v_a_in, v_b_in, v_c_in] # v_abc
