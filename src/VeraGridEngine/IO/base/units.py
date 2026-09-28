@@ -135,6 +135,11 @@ class Unit:
     General unit
     """
 
+    __slots__ = (
+        "multiplier",
+        "symbol",
+    )
+
     def __init__(self,
                  multiplier: UnitMultiplier = UnitMultiplier.none,
                  symbol: UnitSymbol = UnitSymbol.none):

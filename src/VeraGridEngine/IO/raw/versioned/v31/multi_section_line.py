@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v30.multi_section_line import RawMultiLineS
 
 class RawMultiLineSectionV31(RawMultiLineSectionV30):
     """PSSE v31 typed object inheriting v30."""
+    __slots__ = ()
     pass

@@ -7,9 +7,6 @@ from __future__ import annotations
 import numpy as np
 from typing import Union, List, Set, Tuple, Dict
 from PySide6 import QtGui, QtCore, QtWidgets
-from matplotlib import pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.figure import Figure
 
 from VeraGrid.Gui.associations_model import AssociationsModel
 from VeraGrid.Gui.table_view_header_wrap import HeaderViewWithWordWrap, VerticalHeaderWidthResizer
@@ -32,8 +29,10 @@ from VeraGrid.Gui.Analysis.object_plot_analysis import object_histogram_analysis
 from VeraGrid.Gui.messages import yes_no_question, warning_msg, info_msg
 from VeraGrid.Gui.Main.SubClasses.Model.diagrams import DiagramsMain
 from VeraGrid.Gui.DeviceEditors.TowerBuilder.LineBuilderDialogue import TowerBuilderGUI
+from VeraGrid.Gui.DeviceEditors.UndergroundCableBuilder.underground_cable_builder import UndergroundCableBuilderGUI
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely, is_dialog_available
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.Visualization.visualization import NativeColorMap
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGrid.Gui.FmuTemplateEditor.fmu_template_editor import FmuTemplateEditorDialog
 from VeraGrid.Gui.SystemScaler.system_scaler import SystemScaler
 from VeraGrid.Gui.Diagrams.MapWidget.grid_map_widget import GridMapWidget, generate_map_diagram
@@ -66,9 +65,6 @@ class DataBaseTableMain(DiagramsMain):
         # Tree proxy used to filter the visible database device tree while preserving source item payloads.
         self.device_tree_proxy_model: QtCore.QSortFilterProxyModel | None = None
 
-        # Current column filter popup, kept alive while it is shown.
-        self.object_column_filter_dialog: ObjectColumnFilterDialog | None = None
-
         # Width-resize controller for the object table index/name header.
         self.db_table_index_resizer: VerticalHeaderWidthResizer | None = None
 
@@ -91,18 +87,18 @@ class DataBaseTableMain(DiagramsMain):
 
         prop_filter_mdl = gf.ComboModel(
             icon_enum_values=[
-                (PrpCat.All,":/Icons/icons/edit.png"),
-                (PrpCat.TP,":/Icons/icons/automatic_layout.png"),
-                (PrpCat.PF,":/Icons/icons/pf.png"),
-                (PrpCat.PF3,":/Icons/icons/pf3.png"),
-                (PrpCat.SC,":/Icons/icons/short_circuit.png"),
-                (PrpCat.OPF,":/Icons/icons/dcopf.png"),
-                (PrpCat.CON,":/Icons/icons/otdf.png"),
-                (PrpCat.REL,":/Icons/icons/reliability.png"),
-                (PrpCat.NTC,":/Icons/icons/ntc_opf.png"),
-                (PrpCat.INV,":/Icons/icons/expansion_planning.png"),
-                (PrpCat.RMS,":/Icons/icons/dyn.png"),
-                (PrpCat.EMT,":/Icons/icons/dyn_emt.png"),
+                (PrpCat.All, ":/Icons/icons/edit.png"),
+                (PrpCat.TP, ":/Icons/icons/automatic_layout.png"),
+                (PrpCat.PF, ":/Icons/icons/pf.png"),
+                (PrpCat.PF3, ":/Icons/icons/pf3.png"),
+                (PrpCat.SC, ":/Icons/icons/short_circuit.png"),
+                (PrpCat.OPF, ":/Icons/icons/dcopf.png"),
+                (PrpCat.CON, ":/Icons/icons/otdf.png"),
+                (PrpCat.REL, ":/Icons/icons/reliability.png"),
+                (PrpCat.NTC, ":/Icons/icons/ntc_opf.png"),
+                (PrpCat.INV, ":/Icons/icons/expansion_planning.png"),
+                (PrpCat.RMS, ":/Icons/icons/dyn.png"),
+                (PrpCat.EMT, ":/Icons/icons/dyn_emt.png"),
             ],
             translate=self.tr
         )
@@ -133,6 +129,9 @@ class DataBaseTableMain(DiagramsMain):
 
         # line edit enter
         self.ui.smart_search_lineEdit.returnPressed.connect(self.objects_smart_search)
+
+        # table click
+        self.ui.dataStructureTableView.clicked.connect(self.on_data_structure_table_clicked)
 
         # context menu
         self.ui.dataStructureTableView.customContextMenuRequested.connect(self.show_objects_context_menu)
@@ -195,7 +194,8 @@ class DataBaseTableMain(DiagramsMain):
 
                 group_item.appendRow(device_item)
 
-        device_tree_proxy_model: QtCore.QSortFilterProxyModel = QtCore.QSortFilterProxyModel(self.ui.dataStructuresTreeView)
+        device_tree_proxy_model: QtCore.QSortFilterProxyModel = QtCore.QSortFilterProxyModel(
+            self.ui.dataStructuresTreeView)
         device_tree_proxy_model.setSourceModel(db_tree_model)
         device_tree_proxy_model.setRecursiveFilteringEnabled(True)
         device_tree_proxy_model.setAutoAcceptChildRows(True)
@@ -477,20 +477,17 @@ class DataBaseTableMain(DiagramsMain):
         source_column: int = header.logicalIndexAt(position)
 
         if model is not None and source_column > -1:
-            old_dialog: ObjectColumnFilterDialog | None = self.object_column_filter_dialog
-            if is_dialog_available(dialog=old_dialog):
-                delete_dialog_safely(dialog=old_dialog)
-            else:
-                pass
 
-            self.object_column_filter_dialog = ObjectColumnFilterDialog(
-                proxy_model=model,
-                source_column=source_column,
-                table_view=self.ui.dataStructureTableView,
-                parent=self,
+            exec_dialog_safely(
+                dialog=ObjectColumnFilterDialog(
+                    proxy_model=model,
+                    source_column=source_column,
+                    table_view=self.ui.dataStructureTableView,
+                    refresh_object_table_dependants_ptr=self.refresh_object_table_dependants,
+                    global_position=header.mapToGlobal(position),
+                    parent=self,
+                )
             )
-            self.object_column_filter_dialog.filters_changed.connect(self.refresh_object_table_dependants)
-            self.object_column_filter_dialog.show_at(global_position=header.mapToGlobal(position))
         else:
             pass
 
@@ -526,7 +523,6 @@ class DataBaseTableMain(DiagramsMain):
             if len(objects) > 0:
 
                 if len(sel_idx) > 0:
-
                     unique = {idx.row() for idx in sel_idx}
                     selected_objects = proxy_model.get_objects_at_proxy_rows(proxy_rows=sorted(unique))
 
@@ -581,7 +577,8 @@ class DataBaseTableMain(DiagramsMain):
 
         if len(selected_objects):
 
-            ok = yes_no_question(self.tr('Are you sure that you want to delete_with_dialogue the selected elements?'), self.tr('Delete'))
+            ok = yes_no_question(self.tr('Are you sure that you want to delete_with_dialogue the selected elements?'),
+                                 self.tr('Delete'))
             if ok:
                 for obj in selected_objects:
 
@@ -691,7 +688,8 @@ class DataBaseTableMain(DiagramsMain):
                     diagram.add_object_to_the_schematic(elm=device, logger=logger)
 
             if len(logger):
-                dlg = LogsDialogue(name=self.tr("Add selected DB objects to current diagram"), logger=logger)
+                dlg = LogsDialogue(name=self.tr("Add selected DB objects to current diagram"),
+                                   logger=logger, parent=self)
                 dlg.setModal(True)
                 exec_dialog_safely(dialog=dlg)
 
@@ -823,8 +821,8 @@ class DataBaseTableMain(DiagramsMain):
 
             ok = yes_no_question(
                 text=self.tr("This will delete all buses and their connected elements that were not selected."
-                     "This cannot be undone and it is dangerous if you don't know"
-                     "what you are doing. \nAre you sure?"),
+                             "This cannot be undone and it is dangerous if you don't know"
+                             "what you are doing. \nAre you sure?"),
                 title=self.tr("Crop model to buses selection?"))
 
             if ok:
@@ -869,14 +867,16 @@ class DataBaseTableMain(DiagramsMain):
                 self.update_date_dependent_combos()
 
                 if reduction_logger.has_logs():
-                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"), logger=reduction_logger)
+                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"),
+                                                               logger=reduction_logger, parent=self)
                     exec_dialog_safely(dialog=logs_dialogue)
                 else:
                     pass
             else:
                 self.show_warning_toast("No reduction done")
                 if reduction_logger.has_logs():
-                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"), logger=reduction_logger)
+                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"),
+                                                               logger=reduction_logger, parent=self)
                     exec_dialog_safely(dialog=logs_dialogue)
                 else:
                     pass
@@ -921,14 +921,16 @@ class DataBaseTableMain(DiagramsMain):
                 self.show_info_toast("Done!")
 
                 if reduction_logger.has_logs():
-                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"), logger=reduction_logger)
+                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"),
+                                                               logger=reduction_logger, parent=self)
                     exec_dialog_safely(dialog=logs_dialogue)
                 else:
                     pass
             else:
                 self.show_warning_toast("No reduction done")
                 if reduction_logger.has_logs():
-                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"), logger=reduction_logger)
+                    logs_dialogue: LogsDialogue = LogsDialogue(name=self.tr("Grid reduction"),
+                                                               logger=reduction_logger, parent=self)
                     exec_dialog_safely(dialog=logs_dialogue)
                 else:
                     pass
@@ -1203,7 +1205,8 @@ class DataBaseTableMain(DiagramsMain):
                     )
                     if exec_dialog_safely(dialog=dlg) == QtWidgets.QDialog.DialogCode.Accepted:
                         selected_buses: List[ALL_DEV_TYPES | None] = dlg.get_buses()
-                        if selected_buses[0] is not None and selected_buses[1] is not None and selected_buses[2] is not None:
+                        if selected_buses[0] is not None and selected_buses[1] is not None and selected_buses[
+                            2] is not None:
                             obj: dev.Transformer3W = dev.Transformer3W(name=dlg.get_name(),
                                                                        bus1=selected_buses[0],
                                                                        bus2=selected_buses[1],
@@ -1227,7 +1230,8 @@ class DataBaseTableMain(DiagramsMain):
                     )
                     if exec_dialog_safely(dialog=dlg) == QtWidgets.QDialog.DialogCode.Accepted:
                         selected_buses: List[ALL_DEV_TYPES | None] = dlg.get_buses()
-                        if selected_buses[0] is not None and selected_buses[1] is not None and selected_buses[2] is not None:
+                        if selected_buses[0] is not None and selected_buses[1] is not None and selected_buses[
+                            2] is not None:
                             obj: dev.TransformerNW = dev.TransformerNW(name=dlg.get_name(),
                                                                        winding_count=len(selected_buses),
                                                                        buses=selected_buses)
@@ -1631,6 +1635,12 @@ class DataBaseTableMain(DiagramsMain):
                 obj = dev.UndergroundLineType(name=name)
                 self.circuit.add_underground_line(obj)
 
+            elif elm_type == DeviceType.UndergroundCableTypeDevice:
+
+                name = f'Underground cable {len(self.circuit.underground_cable_constructions) + 1}'
+                obj = dev.UndergroundCableType(name=name)
+                self.circuit.add_underground_cable(obj)
+
             elif elm_type == DeviceType.DcCableTypeDevice:
 
                 name = f'DC cable {len(self.circuit.dc_cable_types) + 1}'
@@ -1694,11 +1704,11 @@ class DataBaseTableMain(DiagramsMain):
                 obj = dev.MarketUnit(name=name)
                 self.circuit.add_market_unit(obj)
 
-            # elif elm_type == DeviceType.DynamicModelHostDevice:
-            #
-            #     name = f'RMS model {self.circuit.get_rms_models_number()}'
-            #     obj = dev.DynamicModelHost(name=name)
-            #     self.circuit.add_rms_model(obj)
+            elif elm_type == DeviceType.MarketUnitsGroupDevice:
+
+                name = f'Market unit group{self.circuit.get_market_unit_group_number()}'
+                obj = dev.MarketUnitsGroup(name=name)
+                self.circuit.add_market_unit_group(obj)
 
             elif elm_type == DeviceType.EmtModelTemplateDevice:
 
@@ -1802,6 +1812,16 @@ class DataBaseTableMain(DiagramsMain):
             tower_builder_window.resize(int(1.81 * 700.0), 700)
             exec_dialog_safely(dialog=tower_builder_window)
 
+        elif elm.device_type == DeviceType.UnderGroundLineDevice:
+            cable_builder_window: UndergroundCableBuilderGUI = UndergroundCableBuilderGUI(
+                system=elm,
+                cables_catalogue=self.circuit.underground_cable_constructions,
+                parent=self,
+            )
+            cable_builder_window.setModal(True)
+            cable_builder_window.resize(int(1.81 * 700.0), 700)
+            exec_dialog_safely(dialog=cable_builder_window)
+
         elif elm.device_type == DeviceType.RmsModelTemplateDevice:
             self.open_dynamic_editor(api_object=elm, circuit=self.circuit,
                                      preferred_mode=DynamicSimulationMode.RMS)
@@ -1854,8 +1874,8 @@ class DataBaseTableMain(DiagramsMain):
                     else:
 
                         warning_msg(self.tr('No editor available.\n'
-                                    'The values can be changed from the table or '
-                                    'via context menus in the graphical interface.'),
+                                            'The values can be changed from the table or '
+                                            'via context menus in the graphical interface.'),
                                     self.tr('Edit'))
                 else:
                     info_msg(self.tr('Choose an element from the table'))
@@ -1928,6 +1948,19 @@ class DataBaseTableMain(DiagramsMain):
                           function_ptr=self.set_db_table_index_width)
 
         context_menu.exec(self.ui.dataStructureTableView.verticalHeader().mapToGlobal(pos))
+
+    def on_data_structure_table_clicked(self, proxy_index: QtCore.QModelIndex) -> None:
+        """
+        Handle clicks on the data structure table.
+        Open the hosted device editor when the click is accompanied by the Ctrl modifier.
+
+        :param proxy_index: Clicked index in the visible table model.
+        :return: None.
+        """
+        if bool(QtWidgets.QApplication.keyboardModifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
+            self.open_hosted_device_editor_at_proxy_index(proxy_index=proxy_index)
+        else:
+            pass
 
     def open_hosted_device_editor_at_proxy_index(self, proxy_index: QtCore.QModelIndex) -> bool:
         """
@@ -2096,7 +2129,7 @@ class DataBaseTableMain(DiagramsMain):
                         seq = [(0.0, 'gray'),
                                (0.5, 'orange'),
                                (1, 'red')]
-                        cmap = LinearSegmentedColormap.from_list('lcolors', seq)
+                        cmap: NativeColorMap = NativeColorMap(stops=seq)
                         mx = max(values)
 
                         if mx != 0:
@@ -2151,7 +2184,7 @@ class DataBaseTableMain(DiagramsMain):
                         logger.add_error("No object found for selected row", device=str(i))
 
                 if logger.size():
-                    logs_window = LogsDialogue(self.tr("Assign to profile"), logger=logger)
+                    logs_window = LogsDialogue(self.tr("Assign to profile"), logger=logger, parent=self)
                     exec_dialog_safely(dialog=logs_window)
                 else:
                     lst = ", ".join(attr_list)
@@ -2159,24 +2192,71 @@ class DataBaseTableMain(DiagramsMain):
         else:
             info_msg(self.tr("Select a cell or a column first"), self.tr("Assign to profile"))
 
-    def objects_histogram_analysis_plot(self):
-        """
-        Histogram analysis
-        :return:
+    def objects_histogram_analysis_plot(self) -> None:
+        """Open native histogram tabs for the selected device properties.
+
+        :return: None.
         """
         elm_type: DeviceType | None = self.get_db_object_selected_type()
 
         if elm_type is not None:
             if len(self.circuit.get_elements_by_type(device_type=elm_type)):
-                fig: Figure = plt.figure(figsize=(12, 6))
-                object_histogram_analysis(circuit=self.circuit,
-                                          object_type=elm_type.value,
-                                          t_idx=self.get_db_slider_index(),
-                                          fig=fig)
-                show_matplotlib_figure(figure=fig,
-                                       parent=self,
-                                       open_dialogs=self._open_plot_dialogs,
-                                       title=self.tr("Object histogram"))
+                histogram_data: tuple[list[str], list[np.ndarray]] | None = object_histogram_analysis(
+                    circuit=self.circuit,
+                    object_type=elm_type.value,
+                    t_idx=self.get_db_slider_index(),
+                )
+                if histogram_data is not None:
+                    property_names: list[str] = histogram_data[0]
+                    property_values: list[np.ndarray] = histogram_data[1]
+                    dialog_title: str = self.tr("{device_type} distributions").format(device_type=elm_type.value)
+                    plot_dialogue: PlotDialogue = PlotDialogue(title=dialog_title, parent=self)
+                    has_histogram: bool = False
+                    property_index: int
+                    for property_index in range(len(property_names)):
+                        values: np.ndarray = property_values[property_index]
+                        finite_values: np.ndarray = values[np.isfinite(values)]
+                        if len(finite_values) > 0:
+                            bin_count: int = min(max(int(np.sqrt(len(finite_values))), 4), 32)
+                            chart_title: str = self.tr("{device_type} {property_name} distribution").format(
+                                device_type=elm_type.value,
+                                property_name=property_names[property_index],
+                            )
+                            accepted: bool
+                            if has_histogram:
+                                accepted = plot_dialogue.add_histogram_tab(
+                                    tab_title=property_names[property_index],
+                                    values=finite_values,
+                                    bin_count=bin_count,
+                                    title=chart_title,
+                                    x_axis_title=property_names[property_index],
+                                    y_axis_title=self.tr("Count"),
+                                )
+                            else:
+                                accepted = plot_dialogue.set_histogram(
+                                    values=finite_values,
+                                    bin_count=bin_count,
+                                    title=chart_title,
+                                    x_axis_title=property_names[property_index],
+                                    y_axis_title=self.tr("Count"),
+                                )
+                                if accepted:
+                                    plot_dialogue.set_current_tab_title(property_names[property_index])
+                                else:
+                                    pass
+                            if accepted:
+                                has_histogram = True
+                            else:
+                                pass
+                        else:
+                            pass
+                    if has_histogram:
+                        self.register_open_plot_dialog(plot_dialogue)
+                        plot_dialogue.show()
+                    else:
+                        plot_dialogue.reject()
+                else:
+                    self.show_warning_toast(self.tr("This device type has no numeric histogram data."))
             else:
                 pass
         else:
@@ -2227,7 +2307,7 @@ class DataBaseTableMain(DiagramsMain):
             logger = self.delete_shit()
 
             if len(logger) > 0:
-                dlg: LogsDialogue = LogsDialogue(self.tr("Delete inconsistencies"), logger)
+                dlg: LogsDialogue = LogsDialogue(self.tr("Delete inconsistencies"), logger, parent=self)
                 dlg.setModal(True)
                 exec_dialog_safely(dialog=dlg)
             else:
@@ -2286,14 +2366,15 @@ class DataBaseTableMain(DiagramsMain):
         Clean the DataBase
         """
 
-        ok = yes_no_question(self.tr("This action may delete_with_dialogue unused objects and references, \nAre you sure?"),
-                             title=self.tr("DB clean"))
+        ok = yes_no_question(
+            self.tr("This action may delete_with_dialogue unused objects and references, \nAre you sure?"),
+            title=self.tr("DB clean"))
 
         if ok:
             logger = self.circuit.clean()
 
             if len(logger) > 0:
-                dlg: LogsDialogue = LogsDialogue(self.tr('DB clean logger'), logger)
+                dlg: LogsDialogue = LogsDialogue(self.tr('DB clean logger'), logger, parent=self)
                 exec_dialog_safely(dialog=dlg)
             else:
                 pass
@@ -2345,8 +2426,11 @@ class DataBaseTableMain(DiagramsMain):
             else:
                 pass
 
-            if self.open_hosted_device_editor_at_proxy_index(proxy_index=context_index):
-                return
+            if bool(QtWidgets.QApplication.keyboardModifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
+                if self.open_hosted_device_editor_at_proxy_index(proxy_index=context_index):
+                    return
+                else:
+                    pass
             else:
                 pass
 
@@ -2560,8 +2644,8 @@ class DataBaseTableMain(DiagramsMain):
         :return:
         """
         ok = yes_no_question(text=self.tr("Setting the database buses x,y position from their latitude and longitude "
-                                  "values will change the buses values but not the current diagrams. "
-                                  "New diagrams will use the new values"),
+                                          "values will change the buses values but not the current diagrams. "
+                                          "New diagrams will use the new values"),
                              title="")
 
         if ok:
@@ -2577,9 +2661,10 @@ class DataBaseTableMain(DiagramsMain):
         Restore investments to the circuit
         :return:
         """
-        ok = yes_no_question(text=self.tr("This action will restore the circuit to the state before the last investment "
-                                  "modification. Do you want to proceed?"),
-                             title=self.tr("Restore investments"))
+        ok = yes_no_question(
+            text=self.tr("This action will restore the circuit to the state before the last investment "
+                         "modification. Do you want to proceed?"),
+            title=self.tr("Restore investments"))
 
         if ok:
             self.circuit.restore_investments()

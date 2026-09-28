@@ -349,12 +349,24 @@
                             </widget>
                            </item>
                            <item>
-                            <widget class="QListView" name="diagramsListView">
+                            <widget class="QTreeView" name="diagramsTreeView">
                              <property name="toolTip">
-                              <string>List of available diagrams</string>
+                              <string>Tree of available diagrams and categories</string>
                              </property>
                              <property name="frameShape">
                               <enum>QFrame::Shape::NoFrame</enum>
+                             </property>
+                             <property name="dragEnabled">
+                              <bool>true</bool>
+                             </property>
+                             <property name="dragDropMode">
+                              <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+                             </property>
+                             <property name="defaultDropAction">
+                              <enum>Qt::DropAction::MoveAction</enum>
+                             </property>
+                             <property name="headerHidden">
+                              <bool>true</bool>
                              </property>
                             </widget>
                            </item>
@@ -1013,20 +1025,6 @@
                                 </property>
                                 <property name="value">
                                  <number>30</number>
-                                </property>
-                               </widget>
-                              </item>
-                              <item>
-                               <widget class="QLabel" name="label_40">
-                                <property name="text">
-                                 <string>Plotting style</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item>
-                               <widget class="QComboBox" name="plt_style_comboBox">
-                                <property name="toolTip">
-                                 <string>MatPlotlib plot styles to choose from</string>
                                 </property>
                                </widget>
                               </item>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.EMT.problems.emt_problem_mti &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.EMT.problems.emt_problem_mti &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -127,6 +127,52 @@
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.EMT.problems.html#VeraGridEngine.Simulations.EMT.problems.emt_problem_mti.EmtProblemMTI">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EmtProblemMTI</span><span class="p">(</span><span class="n">EmtProblemDae</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;EMT problem exposing the MTI API consumed by ``BackEulerImplicitIntegrationMTI``.&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;_constant_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_derivative_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_ineq_var_positions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j11_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j12_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j21_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j22_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_eq_dx_static_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_eq_x_static_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_ineq_dx_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_ineq_dx_static_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_ineq_x_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j_ineq_x_static_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_alg_uid_to_y_col&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_base_uid_to_xp_col&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_base_xp_incidence_mask&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_bool_guard_compiled_by_param_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_bool_guard_var_positions_by_param_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_bool_param_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_bool_uid2param_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_bool_uid_to_local_col&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_boolean_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_col_meta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_col_to_continuous_var_idx_map&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_continuous_var_idx_to_col&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_diff_uid_to_xp_col&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_incidence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_incidence_bool_param_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_incidence_includes_inequalities&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_inequalities_compiled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_inequalities_raw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_row_meta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_solving_order&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_xp_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mti_y_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_algeb_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_ineq_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_state_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_algeb_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;disable_mti_first_step_zero_dx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_full_dae_event_candidates&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

@@ -910,6 +910,7 @@ def get_xfmr_emt_template(
 
 
 class XfmrEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

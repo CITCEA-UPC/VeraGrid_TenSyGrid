@@ -20,6 +20,25 @@ from VeraGridEngine.basic_structures import Vec, Mat
 
 
 class BackEulerImplicitIntegrationFullVec:
+    """
+    Backward Euler implicit integration solver (full vectorized).
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+        "tol",
+        "_cancel_checker",
+        "_timings",
+        "_jacobian_may_reuse_residual_gather",
+        "_residual_gather_dx_reference",
+        "_residual_gather_x_reference",
+        "_state_identity",
+    )
 
     def __init__(self,
                  problem: RmsProblemDaeFullVec,

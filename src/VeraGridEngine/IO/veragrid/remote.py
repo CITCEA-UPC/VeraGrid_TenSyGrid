@@ -30,6 +30,12 @@ class RemoteInstruction:
     Remote instruction class
     """
 
+    __slots__ = (
+        "operation",
+        "user",
+        "mac",
+    )
+
     def __init__(self,
                  operation: Union[None, SimulationTypes] = None,
                  data: Union[None, Dict[str, Dict[str, str]]] = None):
@@ -82,6 +88,15 @@ class RemoteJob:
     """
     Remote job class
     """
+
+    __slots__ = (
+        "id_tag",
+        "__grid",
+        "grid_name",
+        "instruction",
+        "status",
+        "progress",
+    )
 
     def __init__(self,
                  grid: Union[None, MultiCircuit] = None,

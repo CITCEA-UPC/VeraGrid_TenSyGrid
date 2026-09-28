@@ -6,6 +6,12 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class IidmSubstation(IidmObject):
+    __slots__ = (
+        "id",
+        "country",
+        "tso",
+        "geographicalTags",
+    )
     def __init__(self, id, country, tso, geographicalTags):
         super().__init__("Substation")
         self.id = id

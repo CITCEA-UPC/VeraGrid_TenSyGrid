@@ -26,47 +26,36 @@ def is_dialog_available(dialog: QtWidgets.QWidget | None) -> bool:
 
 def delete_dialog_safely(dialog: object) -> None:
     """
-    Schedule one Qt dialog/widget and its children for deferred deletion.
+    Schedule one Qt widget for deferred deletion if it is still valid.
 
     :param dialog: Qt widget to delete.
     :return: None.
     """
-    if isinstance(dialog, QtWidgets.QWidget):
-        if shiboken6.isValid(dialog):
-            delete_child_widgets_safely(widget=dialog)
-            try:
-                dialog.deleteLater()
-            except Exception:
-                pass
-            else:
-                pass
-        else:
+    if isinstance(dialog, QtWidgets.QWidget) and shiboken6.isValid(dialog):
+        delete_child_widgets_safely(widget=dialog)
+        try:
+            dialog.deleteLater()
+        except Exception:
             pass
-    else:
-        pass
 
 
 def delete_child_widgets_safely(widget: QtWidgets.QWidget) -> None:
     """
-    Schedule every child widget owned by a Qt widget for deferred deletion.
+    Schedule floating or window children for closure before parent deletion.
+    Embedded child widgets are safely destroyed by Qt's C++ parent ownership.
 
     :param widget: Parent widget whose owned children must be released.
     :return: None.
     """
-    children: list[QtWidgets.QWidget] = widget.findChildren(QtWidgets.QWidget)
-    child: QtWidgets.QWidget
-
-    for child in children:
-        if shiboken6.isValid(child):
-            child.close()
-            try:
-                child.deleteLater()
-            except Exception:
-                pass
-            else:
-                pass
-        else:
-            pass
+    if isinstance(widget, QtWidgets.QWidget) and shiboken6.isValid(widget):
+        children: list[QtWidgets.QWidget] = widget.findChildren(QtWidgets.QWidget)
+        child: QtWidgets.QWidget
+        for child in children:
+            if shiboken6.isValid(child) and child.isWindow():
+                try:
+                    child.close()
+                except Exception:
+                    pass
 
 
 def delete_dialogs_safely(dialogs: list[QtWidgets.QDialog]) -> None:
@@ -96,8 +85,9 @@ def exec_dialog_safely(dialog: QtWidgets.QDialog) -> int:
         # by the dialog. Qt will perform the deferred deletion on the GUI loop.
         if isinstance(dialog, QtWidgets.QWidget) and shiboken6.isValid(dialog):
             delete_child_widgets_safely(widget=dialog)
-            dialog.deleteLater()
-        else:
-            pass
+            try:
+                dialog.deleteLater()
+            except Exception:
+                pass
 
     return result

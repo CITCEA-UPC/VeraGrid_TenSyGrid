@@ -5,16 +5,12 @@
 from __future__ import annotations
 import sys
 import os
-import json
 import numpy as np
-import pandas as pd
 import shiboken6
 from typing import Any, List, Set, Dict, Union, Tuple, TYPE_CHECKING, Iterable, TypeVar
 from collections.abc import Callable
 from collections import defaultdict
 from warnings import warn
-import networkx as nx
-from matplotlib import pyplot as plt
 
 from PySide6.QtCore import (Qt, QPoint, QSize, QPointF, QRect, QRectF, QMimeData, QIODevice, QByteArray,
                             QDataStream, QModelIndex, QTimer, QCoreApplication)
@@ -39,7 +35,6 @@ from VeraGridEngine.Devices.Branches.transformer3w import Transformer3W, Winding
 from VeraGridEngine.Devices.Branches.transformerNw import TransformerNW
 from VeraGridEngine.Devices.Injections.generator import Generator
 from VeraGridEngine.Devices.Injections.battery import Battery
-from VeraGridEngine.Devices.Injections.shunt import Shunt
 from VeraGridEngine.Devices.Injections.controllable_shunt import ControllableShunt
 from VeraGridEngine.Devices.Injections.static_generator import StaticGenerator
 from VeraGridEngine.Devices.Injections.load import Load
@@ -48,10 +43,8 @@ from VeraGridEngine.Devices.Injections.current_injection import CurrentInjection
 from VeraGridEngine.Devices.Fluid import FluidNode, FluidPath
 from VeraGridEngine.Devices.Diagrams.schematic_diagram import SchematicDiagram
 from VeraGridEngine.Devices.Diagrams.graphic_location import GraphicLocation
-from VeraGridEngine.Simulations.OPF.opf_ts_results import OptimalPowerFlowTimeSeriesResults
-from VeraGridEngine.Simulations.PowerFlow.power_flow_ts_results import PowerFlowTimeSeriesResults
 from VeraGridEngine.Topology.VoltageLevels.vl_creation_common_functions import transform_bus_to_connectivity_grid
-from VeraGridEngine.enumerations import DeviceType, ResultTypes, BusGraphicType, SchematicAutoRouteStyle
+from VeraGridEngine.enumerations import DeviceType, BusGraphicType, SchematicAutoRouteStyle
 from VeraGridEngine.basic_structures import Vec, CxVec, IntVec, Logger
 import VeraGridEngine.Devices.Diagrams.palettes as palettes
 from VeraGridEngine.Topology.VoltageLevels import vl_creation_common_functions as substation_wizards
@@ -81,7 +74,8 @@ from VeraGrid.Gui.Diagrams.graphics_manager import ALL_GRAPHICS
 from VeraGrid.Gui.Diagrams.base_diagram_widget import BaseDiagramWidget
 from VeraGrid.Gui.general_dialogues import InputNumberDialogue
 from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 import VeraGrid.Gui.Visualization.visualization as viz
 from VeraGrid.Gui.messages import error_msg, warning_msg, yes_no_question
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.line_graphics_template import LineGraphicTemplateItem
@@ -1103,12 +1097,14 @@ class SchematicWidget(BaseDiagramWidget):
 
     def draw_additional_diagram(self,
                                 diagram: SchematicDiagram,
-                                logger: Logger = Logger()) -> None:
+                                logger: Logger | None = None) -> None:
         """
         Draw a new diagram
         :param diagram: SchematicDiagram
         :param logger: Logger
         """
+        if logger is None:
+            logger = Logger()
         self._is_loading_diagram = True
         self.suspend_viewport_updates_for_loading()
         inj_dev_by_bus = self.circuit.get_injection_devices_grouped_by_bus()
@@ -2555,35 +2551,41 @@ class SchematicWidget(BaseDiagramWidget):
         # Fit the view
         self.editor_graphics_view.fitInView(boundaries, Qt.AspectRatioMode.KeepAspectRatio)
 
-    def center_nodes(self, margin_factor: float = 0.1, elements: Union[None, List[Union[Bus, FluidNode]]] = None):
+    def center_nodes(self, margin_factor: float = 0.1, elements: Union[None, List[Union[Bus, FluidNode]]] = None) -> None:
         """
-        Center the view in the nodes
-        :param margin_factor:
-        :param elements: list of API
+        Center the view in the nodes.
+
+        :param margin_factor: Margin factor around bounding rectangle
+        :param elements: List of API objects to center on, or None to center all
         """
 
         if elements is None:
-            boundaries = self.diagram_scene.itemsBoundingRect()
+            boundaries: QRectF = self.diagram_scene.itemsBoundingRect()
 
             if boundaries.isNull():
                 return
+            else:
+                pass
 
-            mx = boundaries.width() * margin_factor
-            my = boundaries.height() * margin_factor
+            mx: float = boundaries.width() * margin_factor
+            my: float = boundaries.height() * margin_factor
             boundaries.adjust(-mx, -my, mx, my)
             self.diagram_scene.setSceneRect(boundaries)
             self.editor_graphics_view.fitInView(boundaries, Qt.AspectRatioMode.KeepAspectRatio)
             self.editor_graphics_view.scale(1.0, 1.0)
             return
+        else:
+            pass
 
-        min_x = sys.maxsize
-        min_y = sys.maxsize
-        max_x = -sys.maxsize
-        max_y = -sys.maxsize
-        max_w = 100
-        max_h = 60
+        min_x: float = sys.maxsize
+        min_y: float = sys.maxsize
+        max_x: float = -sys.maxsize
+        max_y: float = -sys.maxsize
+        max_w: float = 100.0
+        max_h: float = 60.0
+        found_any: bool = False
 
-        elements_s = set(elements)
+        elements_s: set = set(elements)
         for item in self.diagram_scene.items():
             if isinstance(item, (BusGraphicItem,
                                  FluidNodeGraphicItem,
@@ -2591,8 +2593,8 @@ class SchematicWidget(BaseDiagramWidget):
                                  TransformerNWGraphicItem)):
 
                 if item.api_object in elements_s:
-                    x = item.pos().x()
-                    y = item.pos().y()
+                    x: float = item.pos().x()
+                    y: float = item.pos().y()
 
                     max_x = max(max_x, x)
                     min_x = min(min_x, x)
@@ -2600,16 +2602,28 @@ class SchematicWidget(BaseDiagramWidget):
                     min_y = min(min_y, y)
                     max_w = max(max_w, item.rect().width())
                     max_h = max(max_h, item.rect().height())
+                    found_any = True
+                else:
+                    pass
+            else:
+                pass
+
+        if not found_any:
+            # Fall back to centering on all items when no specified elements match visible scene items
+            self.center_nodes(margin_factor=margin_factor, elements=None)
+            return
+        else:
+            pass
 
         # set the limits of the view
-        dx = max_x - min_x
-        dy = max_y - min_y
-        mx = margin_factor * dx
-        my = margin_factor * dy
+        dx: float = max_x - min_x
+        dy: float = max_y - min_y
+        mx: float = margin_factor * dx
+        my: float = margin_factor * dy
 
-        h = dy + 2 * my + max_h
-        w = dx + 2 * mx + max_w
-        boundaries = QRectF(min_x - mx, min_y - my, w, h)
+        h: float = dy + 2 * my + max_h
+        w: float = dx + 2 * mx + max_w
+        boundaries: QRectF = QRectF(min_x - mx, min_y - my, w, h)
 
         self.diagram_scene.setSceneRect(boundaries)
         self.editor_graphics_view.fitInView(boundaries, Qt.AspectRatioMode.KeepAspectRatio)
@@ -2957,7 +2971,7 @@ class SchematicWidget(BaseDiagramWidget):
                        from_port: OPTIONAL_PORT = None,
                        to_port: OPTIONAL_PORT = None,
                        draw_labels: bool = True,
-                       logger: Logger = Logger()) -> _LINE_GRAPHIC_T | None:
+                       logger: Logger | None = None) -> _LINE_GRAPHIC_T | None:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -2967,6 +2981,8 @@ class SchematicWidget(BaseDiagramWidget):
         :param draw_labels: Draw labels by default?
         :param logger: Logger
         """
+        if logger is None:
+            logger = Logger()
 
         # search for the api object, because it may be created already
         graphic_object = self._query_graphic_of_type(elm=branch, graphic_type=new_graphic_func)
@@ -3012,7 +3028,7 @@ class SchematicWidget(BaseDiagramWidget):
                      from_port: OPTIONAL_PORT = None,
                      to_port: OPTIONAL_PORT = None,
                      draw_labels: bool = True,
-                     logger: Logger = Logger()) -> Union[LineGraphicItem, None]:
+                     logger: Logger | None = None) -> Union[LineGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3035,7 +3051,7 @@ class SchematicWidget(BaseDiagramWidget):
                         from_port: OPTIONAL_PORT = None,
                         to_port: OPTIONAL_PORT = None,
                         draw_labels: bool = True,
-                        logger: Logger = Logger()) -> Union[DcLineGraphicItem, None]:
+                        logger: Logger | None = None) -> Union[DcLineGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3058,7 +3074,7 @@ class SchematicWidget(BaseDiagramWidget):
                      from_port: OPTIONAL_PORT = None,
                      to_port: OPTIONAL_PORT = None,
                      draw_labels: bool = True,
-                     logger: Logger = Logger()) -> Union[HvdcGraphicItem, None]:
+                     logger: Logger | None = None) -> Union[HvdcGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3081,7 +3097,7 @@ class SchematicWidget(BaseDiagramWidget):
                     x: float | None = None,
                     y: float | None = None,
                     r: float = 0.0,
-                    logger: Logger = Logger()) -> Union[VscGraphicItem, VscGraphicItem3Term, None]:
+                    logger: Logger | None = None) -> Union[VscGraphicItem, VscGraphicItem3Term, None]:
         """
         add API VSC to the Scene
         :param elm: VSC instance
@@ -3091,6 +3107,8 @@ class SchematicWidget(BaseDiagramWidget):
         :param logger: Logger
         :return: VscGraphicItem or None
         """
+        if logger is None:
+            logger = Logger()
 
         # search for the api object, because it may be created already
         graphic_object = self.graphics_manager.query(elm=elm)
@@ -3189,7 +3207,7 @@ class SchematicWidget(BaseDiagramWidget):
                      from_port: OPTIONAL_PORT = None,
                      to_port: OPTIONAL_PORT = None,
                      draw_labels: bool = True,
-                     logger: Logger = Logger()) -> Union[UpfcGraphicItem, None]:
+                     logger: Logger | None = None) -> Union[UpfcGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3212,7 +3230,7 @@ class SchematicWidget(BaseDiagramWidget):
                                  from_port: OPTIONAL_PORT = None,
                                  to_port: OPTIONAL_PORT = None,
                                  draw_labels: bool = True,
-                                 logger: Logger = Logger()) -> Union[SeriesReactanceGraphicItem, None]:
+                                 logger: Logger | None = None) -> Union[SeriesReactanceGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3235,7 +3253,7 @@ class SchematicWidget(BaseDiagramWidget):
                             from_port: OPTIONAL_PORT = None,
                             to_port: OPTIONAL_PORT = None,
                             draw_labels: bool = True,
-                            logger: Logger = Logger()) -> Union[TransformerGraphicItem, None]:
+                            logger: Logger | None = None) -> Union[TransformerGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3258,7 +3276,7 @@ class SchematicWidget(BaseDiagramWidget):
                         from_port: OPTIONAL_PORT = None,
                         to_port: OPTIONAL_PORT = None,
                         draw_labels: bool = True,
-                        logger: Logger = Logger()) -> Union[WindingGraphicItem, None]:
+                        logger: Logger | None = None) -> Union[WindingGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3287,7 +3305,7 @@ class SchematicWidget(BaseDiagramWidget):
                        from_port: OPTIONAL_PORT = None,
                        to_port: OPTIONAL_PORT = None,
                        draw_labels: bool = True,
-                       logger: Logger = Logger()) -> Union[SwitchGraphicItem, None]:
+                       logger: Logger | None = None) -> Union[SwitchGraphicItem, None]:
         """
         add API branch to the Scene
         :param branch: Branch instance
@@ -3693,7 +3711,7 @@ class SchematicWidget(BaseDiagramWidget):
             injections_by_bus: Union[None, Dict[Bus, Dict[DeviceType, List[INJECTION_DEVICE_TYPES]]]] = None,
             injections_by_fluid_node: Union[None, Dict[FluidNode, Dict[DeviceType, List[FLUID_TYPES]]]] = None,
             injections_by_cn: Union[None, Dict[Bus, Dict[DeviceType, List[INJECTION_DEVICE_TYPES]]]] = None,
-            logger: Logger = Logger()):
+            logger: Logger | None = None):
         """
 
         :param elm:
@@ -3703,6 +3721,8 @@ class SchematicWidget(BaseDiagramWidget):
         :param logger:
         :return:
         """
+        if logger is None:
+            logger = Logger()
 
         if self.graphics_manager.query(elm=elm) is None:
 
@@ -6225,141 +6245,96 @@ class SchematicWidget(BaseDiagramWidget):
 
         return min_x, max_x, min_y, max_y
 
-    def plot_bus(self, i: int, api_object: Bus):
+    def plot_bus(self, i: int, api_object: Bus) -> None:
+        """Open bus injection profiles and all available time-series results.
+
+        :param i: Legacy result-column index retained for graphic callbacks.
+        :param api_object: Bus represented by the selected schematic graphic.
+        :return: None.
         """
-        Plot branch results
-        :param i: bus index
-        :param api_object: Bus API object
-        :return:
-        """
-        fig = plt.figure(figsize=(12, 8))
-        ax_1 = fig.add_subplot(211)
-        ax_1.set_title('Power', fontsize=14)
-        ax_1.set_ylabel('Injections [MW]', fontsize=11)
+        _ = i
+        time_values: np.ndarray | None = self.circuit.get_time_array()
+        dialog_title: str = self.tr("{device_name} profiles plot").format(device_name=api_object.name)
+        plot_dialogue: PlotDialogue = PlotDialogue(title=dialog_title, parent=self.gui)
+        plotted_units: list[str] = list()
+        plotted_charts: list[GraphsWidget] = list()
+        has_profiles: bool = False
+        if time_values is not None and len(time_values) > 0:
+            all_devices: Dict[Bus, Dict[DeviceType, List[INJECTION_DEVICE_TYPES]]]
+            all_devices = self.circuit.get_injection_devices_grouped_by_bus()
+            bus_devices: Dict[DeviceType, List[INJECTION_DEVICE_TYPES]] | None = all_devices.get(api_object, None)
+            power_names: list[str] = list()
+            power_values: list[np.ndarray] = list()
+            if bus_devices is not None:
+                device_group: list[object]
+                for device_group in bus_devices.values():
+                    device: object
+                    for device in device_group:
+                        profile_values: np.ndarray | None = None
+                        if device.device_type == DeviceType.LoadDevice:
+                            profile_values = -device.P_prof.toarray()
+                        elif device.device_type == DeviceType.GeneratorDevice:
+                            profile_values = device.P_prof.toarray()
+                        elif device.device_type == DeviceType.ShuntDevice:
+                            profile_values = -device.G_prof.toarray()
+                        elif device.device_type == DeviceType.StaticGeneratorDevice:
+                            profile_values = device.P_prof.toarray()
+                        elif device.device_type == DeviceType.ExternalGridDevice:
+                            profile_values = device.P_prof.toarray()
+                        elif device.device_type == DeviceType.BatteryDevice:
+                            profile_values = device.P_prof.toarray()
+                        else:
+                            pass
+                        if profile_values is not None and len(profile_values) == len(time_values):
+                            power_names.append(str(device.name))
+                            power_values.append(np.asarray(profile_values, dtype=float))
+                        else:
+                            pass
+            else:
+                pass
 
-        ax_2 = fig.add_subplot(212, sharex=ax_1)
-        ax_2.set_title('Time', fontsize=14)
-        ax_2.set_ylabel('Voltage [p.u]', fontsize=11)
-
-        # set time
-        x = self.circuit.get_time_array()
-
-        if x is not None:
-            if len(x) > 0:
-
-                # Get all devices grouped by bus
-                all_data = self.circuit.get_injection_devices_grouped_by_bus()
-
-                # search drivers for voltage data
-                for driver, results in self.gui.session.drivers_results_iter():
-                    if results is not None:
-                        if isinstance(results, PowerFlowTimeSeriesResults):
-                            table = results.mdl(result_type=ResultTypes.BusVoltageModule)
-                            table.plot_device(ax=ax_2, device_idx=i, title="Power flow")
-                        elif isinstance(results, OptimalPowerFlowTimeSeriesResults):
-                            table = results.mdl(result_type=ResultTypes.BusVoltageModule)
-                            table.plot_device(ax=ax_2, device_idx=i, title="Optimal power flow")
-
-                # Injections
-                # filter injections by bus
-                bus_devices = all_data.get(api_object, None)
-                if bus_devices:
-
-                    power_data = dict()
-                    for tpe_name, devices in bus_devices.items():
-                        for device in devices:
-                            if device.device_type == DeviceType.LoadDevice:
-                                power_data[device.name] = -device.P_prof.toarray()
-                            elif device.device_type == DeviceType.GeneratorDevice:
-                                power_data[device.name] = device.P_prof.toarray()
-                            elif device.device_type == DeviceType.ShuntDevice:
-                                power_data[device.name] = -device.G_prof.toarray()
-                            elif device.device_type == DeviceType.StaticGeneratorDevice:
-                                power_data[device.name] = device.P_prof.toarray()
-                            elif device.device_type == DeviceType.ExternalGridDevice:
-                                power_data[device.name] = device.P_prof.toarray()
-                            elif device.device_type == DeviceType.BatteryDevice:
-                                power_data[device.name] = device.P_prof.toarray()
-                            else:
-                                raise Exception("Missing shunt device for plotting")
-
-                    df = pd.DataFrame(data=power_data, index=x)
-
-                    try:
-                        # yt area plots
-                        df.plot.area(ax=ax_1)
-                    except ValueError:
-                        # use regular plots
-                        df.plot(ax=ax_1)
-
-                plt.legend()
-                fig.suptitle(api_object.name, fontsize=20)
-
-                # plot the profiles
-                show_matplotlib_figure(figure=fig,
-                                       parent=self.gui,
-                                       open_dialogs=self.gui._open_plot_dialogs,
-                                       title=self.tr("{device_name} profiles plot").format(device_name=api_object.name))
+            if len(power_names) > 0:
+                plot_dialogue.register_time_series(
+                    group=self.tr("Profile Inputs"),
+                    unit="MW",
+                    x_values=time_values,
+                    series_names=power_names,
+                    series_values=power_values,
+                )
+                if len(power_values) > 0:
+                    has_profiles = True
+                    plotted_units.append("MW")
+                else:
+                    pass
+            else:
+                pass
         else:
-            self.gui.show_error_toast("There are no time series, so nothing to plot :/")
+            pass
 
-    def plot_fluid_node(self, i: int, api_object: FluidNode):
-        """
-        Plot branch results
-        :param i: bus index
-        :param api_object: Bus API object
-        :return:
-        """
-        fig = plt.figure(figsize=(12, 8))
-        ax_1 = fig.add_subplot(211)
-        ax_1.set_title('Capacity', fontsize=14)
-        ax_1.set_ylabel('State [m3]', fontsize=11)
-
-        ax_2 = fig.add_subplot(212, sharex=ax_1)
-        ax_2.set_title('Time', fontsize=14)
-        ax_2.set_ylabel('Flow [m3/s]', fontsize=11)
-
-        # set time
-        x = self.circuit.get_time_array()
-
-        if x is not None:
-            if len(x) > 0:
-
-                # search drivers for voltage data
-                for driver, results in self.gui.session.drivers_results_iter():
-                    if results is not None:
-                        if isinstance(results, OptimalPowerFlowTimeSeriesResults):
-
-                            # plot the nodal fluid level
-                            table = results.mdl(result_type=ResultTypes.FluidCurrentLevel)
-                            table.plot_device(ax=ax_1, device_idx=i, title="Optimal power flow")
-
-                            # plot the nodal flows
-                            data = np.empty((len(table.index_c), 4))
-                            data[:, 0] = results.fluid_node_flow_in[:, i]
-                            data[:, 1] = results.fluid_node_flow_out[:, i]
-                            data[:, 2] = results.fluid_node_p2x_flow[:, i]
-                            data[:, 3] = results.fluid_node_spillage[:, i]
-                            df = pd.DataFrame(
-                                data=data,
-                                index=table.index_c,
-                                columns=['Flow in', 'Flow out', 'P2X', 'Spillage']
-                            )
-                            try:
-                                df.plot(ax=ax_2, legend=True, stacked=False)
-                            except TypeError:
-                                print('No numeric data to plot...')
-
-                plt.legend()
-                fig.suptitle(api_object.name, fontsize=20)
-
-                # plot the profiles
-                show_matplotlib_figure(figure=fig,
-                                       parent=self.gui,
-                                       open_dialogs=self.gui._open_plot_dialogs,
-                                       title=self.tr("{device_name} profiles plot").format(device_name=api_object.name))
+        has_results: bool = self._add_device_result_tabs(
+            plot_dialogue=plot_dialogue,
+            api_object=api_object,
+            plotted_units=plotted_units,
+            plotted_charts=plotted_charts,
+        )
+        if has_profiles or has_results:
+            plot_dialogue.select_default_catalog_series()
+            plot_dialogue.set_series_selector_visible(visible=True)
+            self.gui.register_open_plot_dialog(plot_dialogue)
+            plot_dialogue.show()
         else:
-            self.gui.show_error_toast("There are no time series, so nothing to plot :/")
+            plot_dialogue.reject()
+            self.gui.show_error_toast(self.tr("There are no finite time-series values to plot."))
+
+    def plot_fluid_node(self, i: int, api_object: FluidNode) -> None:
+        """Open node profiles and all available time-series result curves.
+
+        :param i: Legacy result-column index retained for graphic callbacks.
+        :param api_object: Fluid node represented by the selected graphic.
+        :return: None.
+        """
+        _ = i
+        self.plot_device(api_object=api_object)
 
     def split_line_now(self, line_graphics: LineGraphicItem, position: float, extra_km: float):
         """

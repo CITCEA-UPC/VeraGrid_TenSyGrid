@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Utils.Symbolic.templates_common_functions &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Utils.Symbolic.templates_common_functions &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -3484,7 +3484,12 @@
     <span class="c1">#     var_factory.register_var(device, vr)</span>
 
     <span class="c1"># set the model to the device</span>
-    <span class="n">device</span><span class="o">.</span><span class="n">rms_model</span> <span class="o">=</span> <span class="n">model</span></div>
+    <span class="n">device</span><span class="o">.</span><span class="n">rms_model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="c1"># The RMS assembler reads power-flow mappings from the saved model root.</span>
+    <span class="c1"># Promote mappings owned by complete-template descendants so scripted</span>
+    <span class="c1"># assignment follows the same persistence contract as the Dynamic Editor.</span>
+    <span class="n">synchronize_saved_rms_root_mappings_from_children</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span></div>
 
 
 

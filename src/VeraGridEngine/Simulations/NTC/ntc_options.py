@@ -19,6 +19,24 @@ class OptimalNetTransferCapacityOptions(OptionsTemplate):
     OptimalNetTransferCapacityOptions
     """
 
+    __slots__ = (
+        "sending_bus_idx",
+        "receiving_bus_idx",
+        "transfer_method",
+        "loading_threshold_to_report",
+        "skip_generation_limits",
+        "transmission_reliability_margin",
+        "branch_exchange_sensitivity",
+        "use_branch_exchange_sensitivity",
+        "branch_rating_contribution",
+        "monitor_only_ntc_load_rule_branches",
+        "consider_contingencies",
+        "corrective_contingencies",
+        "strict_formulation",
+        "opf_options",
+        "lin_options",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="sending_bus_idx", tpe=SubObjectType.Array),
         GCProp(key="receiving_bus_idx", tpe=SubObjectType.Array),

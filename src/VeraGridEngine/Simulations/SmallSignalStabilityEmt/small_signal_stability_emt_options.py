@@ -58,6 +58,28 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
         Upper cap for adaptive Krylov dimension expansion.
     """
 
+    __slots__ = (
+        "k",
+        "target_period",
+        "target_frequency_hz",
+        "max_krylov_dim",
+        "ss_assessment_time",
+        "verbose",
+        "max_restarts",
+        "restart_tol",
+        "use_refined_ritz",
+        "adaptive_restart",
+        "stagnation_improve_ratio",
+        "stagnation_patience",
+        "deflation_tol",
+        "prefer_ak_operator",
+        "use_numba_kernels",
+        "min_block_size",
+        "max_block_size",
+        "max_krylov_dim_cap",
+        "build_type",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="k", tpe=int),
         GCProp(key="target_period", tpe=float),

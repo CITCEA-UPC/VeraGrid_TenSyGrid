@@ -1060,6 +1060,7 @@ def get_induction_motor_double_cage_emt_template(
 # INDUCTION MOTOR
 # ----------------------------------------------------------------------------------------------------------------------
 class InductionMotorEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

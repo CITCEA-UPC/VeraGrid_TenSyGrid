@@ -18,6 +18,27 @@ class BranchParentData:
     Structure to host all branches data for calculation
     """
 
+    __slots__ = (
+        "nelm",
+        "nbus",
+        "names",
+        "idtag",
+        "dc",
+        "active",
+        "rates",
+        "contingency_rates",
+        "protection_rates",
+        "F",
+        "T",
+        "mttf",
+        "mttr",
+        "contingency_enabled",
+        "monitor_loading",
+        "overload_cost",
+        "original_idx",
+        "reducible",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Branch data arrays
@@ -142,7 +163,7 @@ class BranchParentData:
         :return: new BranchData instance
         """
 
-        data = BranchParentData(nelm=len(elm_idx), nbus=len(bus_idx))
+        data = self.__class__(nelm=len(elm_idx), nbus=len(bus_idx))
 
         if data.nelm == 0:
             return data, np.zeros(0, dtype=int)
@@ -194,7 +215,7 @@ class BranchParentData:
         :return: new BranchData instance
         """
 
-        data = BranchParentData(nelm=self.nelm, nbus=self.nbus)
+        data: BranchParentData = self.__class__(nelm=self.nelm, nbus=self.nbus)
 
         data.names = self.names.copy()
         data.idtag = self.idtag.copy()

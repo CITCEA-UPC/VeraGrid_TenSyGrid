@@ -18,6 +18,13 @@ class ResolvedStorage:
 
 
 class CVariableResolver:
+    __slots__ = (
+        "export_model",
+        "cfg",
+        "by_uid",
+        "by_name",
+    )
+
     def __init__(self, export_model: ExportModel, cfg: ExportConfig):
         self.export_model = export_model
         self.cfg = cfg

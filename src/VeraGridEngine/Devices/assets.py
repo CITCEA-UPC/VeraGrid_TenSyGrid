@@ -118,6 +118,7 @@ class Assets:
         '_it_measurements',
         '_overhead_line_types',
         '_wire_types',
+        '_underground_cable_constructions',
         '_underground_cable_types',
         '_dc_cable_types',
         '_sequence_line_types',
@@ -143,6 +144,7 @@ class Assets:
         '_fuels',
         '_emission_gases',
         '_facilities',
+        '_market_unit_groups',
         '_market_units',
         '_fluid_nodes',
         '_fluid_paths',
@@ -268,6 +270,9 @@ class Assets:
         # list of wire types
         self._wire_types: List[dev.Wire] = list()
 
+        # physical single-core underground cable constructions
+        self._underground_cable_constructions: List[dev.UndergroundCableType] = list()
+
         # underground cable lines
         self._underground_cable_types: List[dev.UndergroundLineType] = list()
 
@@ -341,6 +346,9 @@ class Assets:
         self._facilities: List[dev.Facility] = list()
 
         # list of market units
+        self._market_unit_groups: List[dev.MarketUnitsGroup] = list()
+
+        # list of market units
         self._market_units: List[dev.MarketUnit] = list()
 
         # fluids
@@ -371,7 +379,7 @@ class Assets:
         self._control_pcs: List[dev.ControlPc] = list()
 
         # list of declared diagrams
-        self._diagrams: List[Union[dev.MapDiagram, dev.SchematicDiagram]] = list()
+        self._diagrams: dev.DiagramTree = dev.DiagramTree()
 
         # Class to handle the dynamic Vars and Consts
         self._var_factory: dev.VarFactory = dev.VarFactory()
@@ -445,6 +453,7 @@ class Assets:
                 dev.Investment(),
             ],
             "Market": [
+                dev.MarketUnitsGroup(),
                 dev.MarketUnit()
             ],
             "Dynamic": [
@@ -464,6 +473,7 @@ class Assets:
             "Catalogue": [
                 dev.Wire(),
                 dev.OverheadLineType(),
+                dev.UndergroundCableType(),
                 dev.UndergroundLineType(),
                 dev.DcCableType(),
                 dev.SequenceLineType(),
@@ -3718,6 +3728,57 @@ class Assets:
             pass
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Underground cable physical types
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def underground_cable_constructions(self) -> List[dev.UndergroundCableType]:
+        """Return the physical single-core cable catalogue.
+
+        :return: Physical cable catalogue.
+        """
+        return self._underground_cable_constructions
+
+    @underground_cable_constructions.setter
+    def underground_cable_constructions(self, value: List[dev.UndergroundCableType]) -> None:
+        """Replace the physical single-core cable catalogue.
+
+        :param value: New physical cable catalogue.
+        :return: None.
+        """
+        self._underground_cable_constructions = value
+
+    def add_underground_cable(self, obj: dev.UndergroundCableType) -> None:
+        """Add one physical cable construction.
+
+        :param obj: Cable construction to add.
+        :return: None.
+        """
+        if isinstance(obj, dev.UndergroundCableType):
+            self._underground_cable_constructions.append(obj)
+        else:
+            print('The catalogue entry is not an underground cable type!')
+
+    def delete_underground_cable(self, obj: dev.UndergroundCableType) -> None:
+        """Delete one physical cable and clear system references to it.
+
+        :param obj: Cable construction to delete.
+        :return: None.
+        """
+        system: dev.UndergroundLineType
+        relationship: dev.CableInSystem
+        for system in self._underground_cable_types:
+            for relationship in system.cables_in_system.data:
+                if relationship.cable == obj:
+                    relationship.cable = None
+                else:
+                    pass
+        try:
+            self._underground_cable_constructions.remove(obj)
+        except ValueError:
+            pass
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Underground cable
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -5897,6 +5958,141 @@ class Assets:
             pass
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Market unit groups
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def market_unit_groups(self) -> List[dev.MarketUnitsGroup]:
+        """
+        Get the list of market unit groups
+        :return:
+        """
+        return self._market_unit_groups
+
+    @market_unit_groups.setter
+    def market_unit_groups(self, value: List[dev.MarketUnitsGroup]):
+        self._market_unit_groups = value
+
+    def get_market_unit_groups(self) -> List[dev.MarketUnitsGroup]:
+        """
+        Get list of market unit groups
+        :return: List[dev.MarketUnitsGroup]
+        """
+        return self._market_unit_groups
+
+    def get_market_unit_group_names(self) -> StrVec:
+        """
+        Get array of market unit group names
+        :return: StrVec
+        """
+        return np.array([a.name for a in self._market_unit_groups])
+
+    def get_market_unit_groups_names(self) -> StrVec:
+        """
+        Get array of market unit group names
+        :return: StrVec
+        """
+        return self.get_market_unit_group_names()
+
+    def get_market_unit_group_number(self) -> int:
+        """
+        Get number of market unit groups
+        :return: number of market unit groups
+        """
+        return len(self._market_unit_groups)
+
+    def get_market_unit_groups_number(self) -> int:
+        """
+        Get number of market unit groups
+        :return: number of market unit groups
+        """
+        return len(self._market_unit_groups)
+
+    def add_market_unit_group(self, obj: dev.MarketUnitsGroup):
+        """
+        Add market unit group
+        :param obj: MarketUnitsGroup object
+        """
+        self._market_unit_groups.append(obj)
+
+    def delete_market_unit_group(self, obj: dev.MarketUnitsGroup):
+        """
+        Delete market unit group
+        :param obj: MarketUnitsGroup
+        """
+        for elm in self._market_units:
+            if elm.group == obj:
+                elm.group = None
+
+        try:
+            self._market_unit_groups.remove(obj)
+        except ValueError:
+            pass
+
+    def delete_market_unit_groups(self, obj: dev.MarketUnitsGroup):
+        """
+        Delete market unit group
+        :param obj: MarketUnitsGroup
+        """
+        self.delete_market_unit_group(obj)
+
+    def get_market_units_by_groups(self) -> List[Tuple[dev.MarketUnitsGroup, List[dev.MarketUnit]]]:
+        """
+        Get a list of market unit groups and their associated market units
+        :return: list of market unit groups and their list of associated market units
+        """
+        d = {e: list() for e in self._market_unit_groups}
+
+        for mu in self._market_units:
+            mu_list = d.get(mu.group, None)
+            if mu_list is not None:
+                mu_list.append(mu)
+
+        res = list()
+        for mu_group in self._market_unit_groups:
+            mu_list = d.get(mu_group, None)
+            if mu_list is not None:
+                res.append((mu_group, mu_list))
+            else:
+                res.append((mu_group, list()))
+
+        return res
+
+    def get_market_units_by_groups_index_dict(self) -> Dict[int, List[dev.MarketUnit]]:
+        """
+        Get a dictionary of market unit groups index to list of market units
+        :return: Dict[market unit group index] = list of market units
+        """
+        d = {e: idx for idx, e in enumerate(self._market_unit_groups)}
+
+        res = dict()
+        for mu in self._market_units:
+            group_idx = d.get(mu.group, None)
+            if group_idx is not None:
+                mu_list = res.get(group_idx, None)
+                if mu_list is None:
+                    res[group_idx] = [mu]
+                else:
+                    mu_list.append(mu)
+
+        return res
+
+    def get_market_unit_group_dict(self) -> Dict[str, List[dev.MarketUnit]]:
+        """
+        Get a dictionary of group idtags related to list of market units
+        :return: Dict[str, List[dev.MarketUnit]]
+        """
+        d = {e.idtag: list() for e in self._market_unit_groups}
+
+        for mu in self._market_units:
+            if mu.group is not None:
+                mu_list = d.get(mu.group.idtag, None)
+                if mu_list is not None:
+                    mu_list.append(mu)
+
+        return d
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Market units
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -6422,16 +6618,35 @@ class Assets:
     @property
     def diagrams(self) -> List[Union[dev.MapDiagram, dev.SchematicDiagram]]:
         """
-        Get the list of diagrams
+        Get the list/tree of diagrams
         :return:
         """
         return self._diagrams
 
     @diagrams.setter
-    def diagrams(self, value: List[Union[dev.MapDiagram, dev.SchematicDiagram]]):
-        self._diagrams = value
+    def diagrams(self, value: Union[dev.DiagramTree, List[Union[dev.MapDiagram, dev.SchematicDiagram]]]):
+        if isinstance(value, dev.DiagramTree):
+            self._diagrams = value
+        elif isinstance(value, (list, tuple)):
+            self._diagrams = dev.DiagramTree()
+            for d in value:
+                self._diagrams.append(d)
+        else:
+            self._diagrams = value
 
-    def get_diagrams(self) -> List[Union[dev.MapDiagram, dev.SchematicDiagram]]:
+    @property
+    def diagram_tree(self) -> dev.DiagramTree:
+        """
+        Explicit property to access the diagram tree
+        :return: DiagramTree
+        """
+        return self._diagrams
+
+    @diagram_tree.setter
+    def diagram_tree(self, value: dev.DiagramTree):
+        self.diagrams = value
+
+    def get_diagrams(self) -> dev.DiagramTree:
         """
         Get list of diagrams
         :return: MapDiagram, SchematicDiagram device
@@ -6445,13 +6660,16 @@ class Assets:
         """
         return len(self.diagrams) > 0
 
-    def add_diagram(self, diagram: Union[dev.MapDiagram, dev.SchematicDiagram]):
+    def add_diagram(self,
+                    diagram: Union[dev.MapDiagram, dev.SchematicDiagram],
+                    folder: Optional[dev.DiagramFolder] = None):
         """
         Add diagram
         :param diagram: MapDiagram, SchematicDiagram device
+        :param folder: Optional DiagramFolder
         :return:
         """
-        self.diagrams.append(diagram)
+        self._diagrams.add_diagram(diagram, folder=folder)
 
     def remove_diagram(self, diagram: Union[dev.MapDiagram, dev.SchematicDiagram]):
         """
@@ -6459,7 +6677,7 @@ class Assets:
         :param diagram: MapDiagram, SchematicDiagram device
         """
         try:
-            self.diagrams.remove(diagram)
+            self._diagrams.remove_diagram(diagram)
         except ValueError as e:
             print(e)
 
@@ -7586,6 +7804,9 @@ class Assets:
         elif device_type == DeviceType.UnderGroundLineDevice:
             return self._underground_cable_types
 
+        elif device_type == DeviceType.UndergroundCableTypeDevice:
+            return self._underground_cable_constructions
+
         elif device_type == DeviceType.DcCableTypeDevice:
             return self._dc_cable_types
 
@@ -7736,6 +7957,9 @@ class Assets:
         elif device_type == DeviceType.FacilityDevice:
             return self.facilities
 
+        elif device_type == DeviceType.MarketUnitsGroupDevice:
+            return self.market_unit_groups
+
         elif device_type == DeviceType.MarketUnitDevice:
             return self.market_units
 
@@ -7842,8 +8066,9 @@ class Assets:
 
 
         elif device_type == DeviceType.TransformerNwDevice:
-            for d in devices:
-                d.set_var_factory(self._var_factory)
+            # TODO: TransformerNwDevice is not a DynamicDevice (for now). We must inspect how to model it dynamically
+            # for d in devices:
+            #     d.set_var_factory(self._var_factory)
             self._transformers_nw = devices
 
 
@@ -7896,6 +8121,9 @@ class Assets:
             for d in devices:
                 d.set_var_factory(self._var_factory)
             self._underground_cable_types = devices
+
+        elif device_type == DeviceType.UndergroundCableTypeDevice:
+            self._underground_cable_constructions = devices
 
         elif device_type == DeviceType.DcCableTypeDevice:
             for d in devices:
@@ -8041,6 +8269,9 @@ class Assets:
         elif device_type == DeviceType.FacilityDevice:
             self._facilities = devices
 
+        elif device_type == DeviceType.MarketUnitsGroupDevice:
+            self._market_unit_groups = devices
+
         elif device_type == DeviceType.MarketUnitDevice:
             self._market_units = devices
 
@@ -8152,6 +8383,9 @@ class Assets:
 
         elif obj.device_type == DeviceType.UnderGroundLineDevice:
             self.add_underground_line(obj=obj)
+
+        elif obj.device_type == DeviceType.UndergroundCableTypeDevice:
+            self.add_underground_cable(obj=obj)
 
         elif obj.device_type == DeviceType.DcCableTypeDevice:
             self.add_dc_cable_type(obj=obj)
@@ -8276,6 +8510,9 @@ class Assets:
         elif obj.device_type == DeviceType.FacilityDevice:
             self.add_facility(obj=obj)
 
+        elif obj.device_type == DeviceType.MarketUnitsGroupDevice:
+            self.add_market_unit_group(obj=obj)
+
         elif obj.device_type == DeviceType.MarketUnitDevice:
             self.add_market_unit(obj=obj)
 
@@ -8392,6 +8629,9 @@ class Assets:
 
         elif obj.device_type == DeviceType.UnderGroundLineDevice:
             self.delete_underground_line(obj)
+
+        elif obj.device_type == DeviceType.UndergroundCableTypeDevice:
+            self.delete_underground_cable(obj)
 
         elif obj.device_type == DeviceType.DcCableTypeDevice:
             self.delete_dc_cable_type(obj)
@@ -8518,6 +8758,9 @@ class Assets:
 
         elif obj.device_type == DeviceType.FacilityDevice:
             self.delete_facility(obj)
+
+        elif obj.device_type == DeviceType.MarketUnitsGroupDevice:
+            self.delete_market_unit_group(obj)
 
         elif obj.device_type == DeviceType.MarketUnitDevice:
             self.delete_market_unit(obj)
@@ -9098,6 +9341,9 @@ class Assets:
         elif elm_type == DeviceType.WireDevice:
             elm = dev.Wire()
 
+        elif elm_type == DeviceType.UndergroundCableTypeDevice:
+            elm = dev.UndergroundCableType()
+
         elif elm_type == DeviceType.OverheadLineTypeDevice:
             elm = dev.OverheadLineType()
             dictionary_of_lists = {
@@ -9192,9 +9438,16 @@ class Assets:
             elm = dev.Facility()
             dictionary_of_lists = dict()
 
+        elif elm_type == DeviceType.MarketUnitsGroupDevice:
+            elm = dev.MarketUnitsGroup()
+            dictionary_of_lists = dict()
+
         elif elm_type == DeviceType.MarketUnitDevice:
             elm = dev.MarketUnit()
-            dictionary_of_lists = dict()
+            dictionary_of_lists = {
+                DeviceType.FacilityDevice: self.facilities,
+                DeviceType.MarketUnitsGroupDevice: self.market_unit_groups,
+            }
 
         elif elm_type == DeviceType.RmsModelTemplateDevice:
             elm = dev.RmsModelTemplate()

@@ -32,6 +32,33 @@ class BackEulerImplicitIntegrationMTI(BackEulerImplicitIntegration):
     ``BackEulerImplicitIntegration`` and adds a post-Newton MTI feasibility
     gate based on inequality residuals ``G <= tol``.
     """
+    __slots__ = (
+        "inequality_tolerance",
+        "z",
+        "debug",
+        "debug_solve",
+        "debug_newton",
+        "debug_residuals",
+        "compare",
+        "iteration_summary",
+        "_iteration_stats",
+        "debug_max_cands",
+        "polish_candidates",
+        "event_bisect_iter",
+        "mti_max_iter",
+        "mti_solve_tol",
+        "mti_newton_tol",
+        "mti_lsqr_iter_lim",
+        "use_nonlinear_subproblem_lsq",
+        "use_full_fixed_z_mti_rows",
+        "use_direct_xp_subproblem",
+        "use_subproblem_line_search",
+        "_debug_x0_ref",
+        "_debug_first_eval_done",
+        "_debug_subproblem_label_prints",
+        "_last_subproblem_context",
+        "_last_subproblem_fail_reason",
+    )
 
     def __init__(
         self,
@@ -42,7 +69,7 @@ class BackEulerImplicitIntegrationMTI(BackEulerImplicitIntegration):
         max_iter: int,
         tolerance: float = 1e-7,
         inequality_tolerance: float = 1e-9,
-    ):
+    ) -> None:
         super().__init__(
             problem=problem,
             t0=t0,

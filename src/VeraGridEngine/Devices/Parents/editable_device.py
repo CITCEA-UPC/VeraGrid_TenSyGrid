@@ -448,6 +448,7 @@ class EditableDeviceMeta(type):
 
 
 class PropertyChanges:
+    __slots__ = ("__property_merge_selections",)
 
     def __init__(self):
         # This per-instance map stores merge toggles to avoid mutating shared schema objects.

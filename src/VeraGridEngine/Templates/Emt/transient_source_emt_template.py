@@ -280,6 +280,7 @@ def _build_voltage_source_template_from_waveform(vf: VarFactory,
 
 
 class StepCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -359,6 +360,7 @@ def get_step_current_source_emt_template(vf: VarFactory,
 
 
 class StepVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -445,6 +447,7 @@ def get_step_voltage_source_emt_template(vf: VarFactory,
 
 
 class RampCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -519,6 +522,7 @@ def get_ramp_current_source_emt_template(vf: VarFactory,
 
 
 class RampVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -598,6 +602,7 @@ def get_ramp_voltage_source_emt_template(vf: VarFactory,
 
 
 class DoubleExponentialCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -672,6 +677,7 @@ def get_double_exponential_current_source_emt_template(vf: VarFactory,
 
 
 class HeidlerCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -751,6 +757,7 @@ def get_heidler_current_source_emt_template(vf: VarFactory,
 
 
 class CigreSurgeCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

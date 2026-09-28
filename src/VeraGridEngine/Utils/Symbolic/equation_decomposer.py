@@ -33,6 +33,14 @@ class EquationDecomposer:
     be visually rendered in the DynamicBlockEditorGUI.
     """
 
+    __slots__ = (
+        'vf',
+        '_counter',
+        '_param_uids',
+        '_orig_block',
+        'block2blocktype',
+    )
+
     def __init__(self, var_factory: VarFactory):
         self.vf = var_factory
         self._counter: int = 0

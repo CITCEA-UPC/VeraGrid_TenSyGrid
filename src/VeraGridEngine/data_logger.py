@@ -48,6 +48,18 @@ class DataLogEntry:
     DataLogEntry
     """
 
+    __slots__ = (
+        "time",
+        "msg",
+        "severity",
+        "device",
+        "device_class",
+        "property_name",
+        "value",
+        "expected_value",
+        "comment",
+    )
+
     def __init__(self, msg="", severity: DataLogSeverity = DataLogSeverity.Information, device="", device_class="",
                  property_name='', value="", expected_value="", comment=""):
         self.time = "{date:%H:%M:%S}".format(date=datetime.datetime.now())  # might use %Y/%m/%d %H:%M:%S
@@ -96,6 +108,8 @@ class DataLogger:
     """
     DataLogger
     """
+
+    __slots__ = ("entries", "debug_entries")
 
     def __init__(self) -> None:
         """

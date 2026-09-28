@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Templates.Emt.generator_emt_type_template &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Templates.Emt.generator_emt_type_template &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -1175,6 +1175,8 @@
     <span class="n">c0</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
     <span class="n">c1</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">two_pi_over_3</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">3.0</span>
+    <span class="n">torque_scale</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">power_scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span>
 
     <span class="c1"># ------------------------------------------------------------------</span>
     <span class="c1"># Inputs: abc terminal voltages + controller inputs</span>
@@ -1293,6 +1295,7 @@
         <span class="n">q_c</span><span class="o">=</span><span class="n">q_C</span><span class="p">,</span>
         <span class="n">omega_base</span><span class="o">=</span><span class="n">omega_b</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">ipk_init</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">ipk_init</span>
 
 
     <span class="c1"># ------------------------------------------------------------------</span>
@@ -1376,12 +1379,12 @@
             <span class="p">),</span>
 
             <span class="c1"># electromagnetic torque</span>
-            <span class="n">Te</span> <span class="o">-</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi_d</span> <span class="o">*</span> <span class="n">i_q</span> <span class="o">-</span> <span class="n">psi_q</span> <span class="o">*</span> <span class="n">i_d</span><span class="p">),</span>
+            <span class="n">Te</span> <span class="o">-</span> <span class="n">torque_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi_d</span> <span class="o">*</span> <span class="n">i_q</span> <span class="o">-</span> <span class="n">psi_q</span> <span class="o">*</span> <span class="n">i_d</span><span class="p">),</span>
 
             <span class="c1"># terminal powers</span>
-            <span class="n">p_e</span> <span class="o">-</span> <span class="p">(</span><span class="n">v_A</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span> <span class="n">v_B</span> <span class="o">*</span> <span class="n">i_B</span> <span class="o">+</span> <span class="n">v_C</span> <span class="o">*</span> <span class="n">i_C</span><span class="p">),</span>
+            <span class="n">p_e</span> <span class="o">-</span> <span class="n">power_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_A</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span> <span class="n">v_B</span> <span class="o">*</span> <span class="n">i_B</span> <span class="o">+</span> <span class="n">v_C</span> <span class="o">*</span> <span class="n">i_C</span><span class="p">),</span>
 
-            <span class="n">q_e</span> <span class="o">-</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">q_e</span> <span class="o">-</span> <span class="n">power_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">v_A</span> <span class="o">-</span> <span class="n">v_B</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_C</span> <span class="o">+</span>
                 <span class="p">(</span><span class="n">v_B</span> <span class="o">-</span> <span class="n">v_C</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span>
                 <span class="p">(</span><span class="n">v_C</span> <span class="o">-</span> <span class="n">v_A</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_B</span>
@@ -1454,28 +1457,18 @@
     <span class="c1"># ------------------------------------------------------------------</span>
     <span class="c1"># INITIALIZATION</span>
     <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="n">phi_i_init</span> <span class="o">=</span> <span class="n">phi_v_init</span> <span class="o">+</span> <span class="n">phi_init</span>
     <span class="c1"># Rotor angle estimate from transient internal emf phasor</span>
     <span class="n">E_re</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">vpk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_v_init</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">ra</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_init</span><span class="p">)</span>
-        <span class="o">-</span> <span class="n">xqp</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_init</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">ra</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_i_init</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">xq</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_i_init</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">E_im</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">vpk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_v_init</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">ra</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_init</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">xqp</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_init</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">ra</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_i_init</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xq</span> <span class="o">*</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_i_init</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">q_axis_span</span> <span class="o">=</span> <span class="n">xq</span> <span class="o">-</span> <span class="n">xqp</span>
-    <span class="n">q_axis_det</span> <span class="o">=</span> <span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">gamma_q1</span><span class="p">)</span> <span class="o">+</span> <span class="n">q_axis_span</span> <span class="o">*</span> <span class="n">gamma_q2</span>
-    <span class="n">e_dp_init</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="o">-</span><span class="p">(</span><span class="n">psi_q</span> <span class="o">+</span> <span class="n">xqpp</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_axis_span</span> <span class="o">*</span> <span class="n">gamma_q2</span>
-        <span class="o">+</span> <span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">gamma_q1</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_axis_span</span> <span class="o">*</span> <span class="n">gamma_q1</span> <span class="o">*</span> <span class="n">i_q</span>
-    <span class="p">)</span> <span class="o">/</span> <span class="n">q_axis_det</span>
-    <span class="n">psi_pp_q_init</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">gamma_q1</span> <span class="o">*</span> <span class="n">q_axis_span</span> <span class="o">*</span> <span class="n">gamma_q1</span> <span class="o">*</span> <span class="n">i_q</span>
-        <span class="o">+</span> <span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">q_axis_span</span> <span class="o">*</span> <span class="n">gamma_q2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi_q</span> <span class="o">+</span> <span class="n">xqpp</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">)</span>
-    <span class="p">)</span> <span class="o">/</span> <span class="n">q_axis_det</span>
-
     <span class="n">templ</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">init_eqs</span> <span class="o">=</span> <span class="p">{</span>
 
         <span class="n">omega</span><span class="p">:</span> <span class="n">omega_s</span><span class="p">,</span>
@@ -1486,8 +1479,8 @@
         <span class="n">v_q</span><span class="p">:</span> <span class="n">vpk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_abs</span> <span class="o">-</span> <span class="n">phi_v_init</span><span class="p">),</span>
         <span class="n">v_0</span><span class="p">:</span> <span class="n">c0</span><span class="p">,</span>
 
-        <span class="n">i_d</span><span class="p">:</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_abs</span> <span class="o">-</span> <span class="n">phi_init</span><span class="p">),</span>
-        <span class="n">i_q</span><span class="p">:</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_abs</span> <span class="o">-</span> <span class="n">phi_init</span><span class="p">),</span>
+        <span class="n">i_d</span><span class="p">:</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_abs</span> <span class="o">-</span> <span class="n">phi_i_init</span><span class="p">),</span>
+        <span class="n">i_q</span><span class="p">:</span> <span class="n">ipk_init</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_abs</span> <span class="o">-</span> <span class="n">phi_i_init</span><span class="p">),</span>
 
         <span class="c1"># PF initialization is typically balanced; keep zero-seq explicit but zero initially</span>
         <span class="n">i_0</span><span class="p">:</span> <span class="n">c0</span><span class="p">,</span>
@@ -1503,13 +1496,10 @@
         <span class="c1"># chosen to satisfy both d_psi_pp_q = 0 and d_e_dp = 0 for the</span>
         <span class="c1"># implemented model equations.</span>
         <span class="n">e_qp</span><span class="p">:</span> <span class="n">psi_d</span> <span class="o">+</span> <span class="n">xdp</span> <span class="o">*</span> <span class="n">i_d</span><span class="p">,</span>
-        <span class="n">e_dp</span><span class="p">:</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">xq</span> <span class="o">-</span> <span class="n">xqp</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma_q1</span> <span class="o">+</span> <span class="n">gamma_q2</span> <span class="o">*</span> <span class="p">(</span><span class="n">xqp</span> <span class="o">-</span> <span class="n">xl</span><span class="p">))</span>
-            <span class="o">/</span> <span class="p">(</span><span class="n">c1</span> <span class="o">-</span> <span class="p">(</span><span class="n">xq</span> <span class="o">-</span> <span class="n">xqp</span><span class="p">)</span> <span class="o">*</span> <span class="n">gamma_q2</span><span class="p">)</span>
-        <span class="p">)</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">,</span>
+        <span class="n">e_dp</span><span class="p">:</span> <span class="p">(</span><span class="n">xq</span> <span class="o">-</span> <span class="n">xqp</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">,</span>
 
         <span class="n">psi_pp_d</span><span class="p">:</span> <span class="p">(</span><span class="n">psi_d</span> <span class="o">+</span> <span class="n">xdpp</span> <span class="o">*</span> <span class="n">i_d</span> <span class="o">-</span> <span class="n">gamma_d1</span> <span class="o">*</span> <span class="n">e_qp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">c1</span> <span class="o">-</span> <span class="n">gamma_d1</span><span class="p">),</span>
-        <span class="n">psi_pp_q</span><span class="p">:</span> <span class="o">-</span><span class="n">e_dp</span> <span class="o">-</span> <span class="p">(</span><span class="n">xqp</span> <span class="o">-</span> <span class="n">xl</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">,</span>
+        <span class="n">psi_pp_q</span><span class="p">:</span> <span class="o">-</span><span class="p">(</span><span class="n">xq</span> <span class="o">-</span> <span class="n">xl</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_q</span><span class="p">,</span>
 
         <span class="c1"># abc current injection</span>
         <span class="n">i_A</span><span class="p">:</span> <span class="n">i_q</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_abs</span><span class="p">)</span> <span class="o">-</span> <span class="n">i_d</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_abs</span><span class="p">)</span> <span class="o">+</span> <span class="n">i_0</span><span class="p">,</span>
@@ -1521,15 +1511,15 @@
         <span class="p">),</span>
 
         <span class="c1"># electromagnetic torque</span>
-        <span class="n">Te</span><span class="p">:</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi_d</span> <span class="o">*</span> <span class="n">i_q</span> <span class="o">-</span> <span class="n">psi_q</span> <span class="o">*</span> <span class="n">i_d</span><span class="p">),</span>
+        <span class="n">Te</span><span class="p">:</span> <span class="n">torque_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi_d</span> <span class="o">*</span> <span class="n">i_q</span> <span class="o">-</span> <span class="n">psi_q</span> <span class="o">*</span> <span class="n">i_d</span><span class="p">),</span>
 
         <span class="n">v_f</span><span class="p">:</span> <span class="n">e_qp</span> <span class="o">+</span> <span class="p">(</span><span class="n">xd</span> <span class="o">-</span> <span class="n">xdp</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
             <span class="n">gamma_d1</span> <span class="o">*</span> <span class="n">i_d</span> <span class="o">-</span> <span class="n">gamma_d2</span> <span class="o">*</span> <span class="n">psi_pp_d</span> <span class="o">+</span> <span class="n">gamma_d2</span> <span class="o">*</span> <span class="n">e_qp</span>
         <span class="p">),</span>
 
-        <span class="n">p_e</span><span class="p">:</span> <span class="n">v_A</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span> <span class="n">v_B</span> <span class="o">*</span> <span class="n">i_B</span> <span class="o">+</span> <span class="n">v_C</span> <span class="o">*</span> <span class="n">i_C</span><span class="p">,</span>
+        <span class="n">p_e</span><span class="p">:</span> <span class="n">power_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_A</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span> <span class="n">v_B</span> <span class="o">*</span> <span class="n">i_B</span> <span class="o">+</span> <span class="n">v_C</span> <span class="o">*</span> <span class="n">i_C</span><span class="p">),</span>
 
-        <span class="n">q_e</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">q_e</span><span class="p">:</span> <span class="n">power_scale</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
             <span class="p">(</span><span class="n">v_A</span> <span class="o">-</span> <span class="n">v_B</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_C</span> <span class="o">+</span>
             <span class="p">(</span><span class="n">v_B</span> <span class="o">-</span> <span class="n">v_C</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_A</span> <span class="o">+</span>
             <span class="p">(</span><span class="n">v_C</span> <span class="o">-</span> <span class="n">v_A</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_B</span>
@@ -1902,10 +1892,10 @@
     <span class="n">field_feedback_init</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Ke&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">vf_init</span> <span class="o">+</span> <span class="n">AEx</span> <span class="o">*</span> <span class="n">vf_init_positive</span> <span class="o">*</span> <span class="p">(</span>
         <span class="n">sym</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">BEx</span> <span class="o">*</span> <span class="p">(</span><span class="n">vf_init_positive</span> <span class="o">-</span> <span class="n">Se_threshold</span><span class="p">))</span> <span class="o">-</span> <span class="n">vf</span><span class="o">.</span><span class="n">add_const</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">sym</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span><span class="n">vf_init_positive</span> <span class="o">-</span> <span class="n">Se_threshold</span><span class="p">)</span>
-    <span class="n">us_ref_init</span> <span class="o">=</span> <span class="n">measured_vm</span>
     <span class="n">y2_init</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;Kf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">vf_init</span>
     <span class="n">y4_init</span> <span class="o">=</span> <span class="n">field_feedback_init</span>
     <span class="n">y3_init</span> <span class="o">=</span> <span class="n">field_feedback_init</span> <span class="o">/</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;Ka&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">us_ref_init</span> <span class="o">=</span> <span class="n">measured_vm</span> <span class="o">+</span> <span class="n">y2_init</span> <span class="o">+</span> <span class="n">y3_init</span>
     <span class="n">events_dict</span><span class="p">[</span><span class="n">UsRefPu</span><span class="p">]</span> <span class="o">=</span> <span class="n">us_ref_init</span>
     <span class="n">templ</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">Block</span><span class="p">(</span>
         <span class="n">state_eqs</span><span class="o">=</span><span class="p">[</span>

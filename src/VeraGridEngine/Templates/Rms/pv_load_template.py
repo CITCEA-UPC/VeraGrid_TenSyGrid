@@ -12,6 +12,7 @@ import VeraGridEngine.Utils.Symbolic.symbolic as sym
 
 
 class PvLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

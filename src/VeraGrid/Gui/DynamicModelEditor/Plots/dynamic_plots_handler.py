@@ -2,23 +2,18 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-import colorsys
 import json
 from enum import Enum
 from typing import Dict, List, Sequence, Set, Optional, Protocol, Union
 import numpy as np
 import pandas as pd
-from matplotlib.axes import Axes
-from matplotlib.collections import Collection
-from matplotlib.colors import to_hex, to_rgba
-from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from VeraGrid.Gui.Icons.icon_associations import device_type_icons
 from VeraGrid.Gui.DynamicModelEditor.Events.dynamic_events_support import create_dynamic_events_group_with_dialog
-from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely, exec_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely, is_dialog_available
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Devices.Events.dynamic_plot import DynamicPlot
 from VeraGridEngine.Devices.Events.dynamic_plot_entry import DynamicPlotEntry
@@ -1494,13 +1489,13 @@ def _build_relative_time_axis(time_array: np.ndarray | pd.DatetimeIndex) -> np.n
     :return: Relative time samples in seconds as evenly spaced floats whenever the input is evenly spaced.
 
     The dynamic results drivers store simulation time as a datetime-like array.
-    Matplotlib then formats those absolute timestamps as wall-clock values, which
+    Absolute timestamps otherwise appear as wall-clock values, which
     hides the simulation progression when the timestamps are anchored close to one
     day boundary. The plotting code only needs elapsed simulation time, so this
     helper converts every sample into seconds relative to the first sample.
     """
     # The plotting path requires a NumPy array so downstream code can pass the
-    # x-axis directly to Matplotlib without any additional conversions.
+    # x-axis directly to the native chart without additional conversions.
     resolved_time_array: np.ndarray = np.asarray(time_array)
 
     # The result must preserve the original sample count so the x-axis always
@@ -1516,7 +1511,7 @@ def _build_relative_time_axis(time_array: np.ndarray | pd.DatetimeIndex) -> np.n
         pass
 
     # Datetime indexes expose their storage as integer nanoseconds through
-    # ``asi8``. Converting to elapsed seconds here prevents Matplotlib from
+    # ``asi8``. Converting to elapsed seconds here prevents the native chart from
     # showing a scientific-notation nanosecond axis such as ``1e9``.
     if isinstance(resolved_time_array, pd.DatetimeIndex):
         time_ns: np.ndarray = np.asarray(resolved_time_array.asi8, dtype=np.int64)
@@ -1547,90 +1542,6 @@ def _build_relative_time_axis(time_array: np.ndarray | pd.DatetimeIndex) -> np.n
                 pass
 
     return relative_time_axis
-
-
-def _get_next_available_plot_colour(axis: Axes) -> str:
-    """Return a curve colour not already used by an axis.
-
-    Matplotlib advances separate colour cycles for lines and collections.
-    Dynamic parameters use both kinds of artist, so relying on those implicit
-    cycles can assign the same first colour to curves created through different
-    rendering paths. The occupied colours are therefore normalized and checked
-    together before selecting the next default colour.
-
-    :param axis: Plot axis whose existing curve colours must be respected.
-    :return: Matplotlib-compatible colour absent from the current axis.
-    """
-    used_colours: Set[tuple[float, float, float, float]] = set()
-
-    # Lines cover regular variables and ramp segments.
-    line: Line2D
-    for line in axis.lines:
-        line_colour: tuple[float, float, float, float] = to_rgba(line.get_color())
-        used_colours.add(line_colour)
-
-    # Collections cover horizontal holds, vertical steps, and scatter-like
-    # artists. Both edge and face colours are inspected because the active
-    # representation depends on the collection subtype.
-    collection: Collection
-    for collection in axis.collections:
-        edge_colours: np.ndarray = collection.get_edgecolors()
-        edge_index: int
-        for edge_index in range(len(edge_colours)):
-            edge_rgba: np.ndarray = edge_colours[edge_index]
-            edge_colour: tuple[float, float, float, float] = (
-                float(edge_rgba[0]),
-                float(edge_rgba[1]),
-                float(edge_rgba[2]),
-                float(edge_rgba[3]),
-            )
-            used_colours.add(edge_colour)
-
-        face_colours: np.ndarray = collection.get_facecolors()
-        face_index: int
-        for face_index in range(len(face_colours)):
-            face_rgba: np.ndarray = face_colours[face_index]
-            face_colour: tuple[float, float, float, float] = (
-                float(face_rgba[0]),
-                float(face_rgba[1]),
-                float(face_rgba[2]),
-                float(face_rgba[3]),
-            )
-            used_colours.add(face_colour)
-
-    # Prefer Matplotlib's ten standard curve colours while each remains free.
-    default_colour_index: int
-    for default_colour_index in range(10):
-        default_colour: str = "C" + str(default_colour_index)
-        default_rgba: tuple[float, float, float, float] = to_rgba(default_colour)
-        if default_rgba not in used_colours:
-            return default_colour
-        else:
-            pass
-
-    # More than ten simultaneous curves need additional deterministic colours.
-    # Golden-angle hue spacing prevents exact repetitions without storing a
-    # process-wide palette or coupling colour choice to the addition source.
-    generated_colour_index: int = 0
-    generated_colour: str = ""
-    colour_is_available: bool = False
-    while not colour_is_available:
-        hue: float = (float(generated_colour_index) * 0.6180339887498949) % 1.0
-        rgb_colour: tuple[float, float, float] = colorsys.hsv_to_rgb(hue, 0.72, 0.85)
-        generated_rgba: tuple[float, float, float, float] = (
-            rgb_colour[0],
-            rgb_colour[1],
-            rgb_colour[2],
-            1.0,
-        )
-        if generated_rgba not in used_colours:
-            generated_colour = to_hex(generated_rgba, keep_alpha=False)
-            colour_is_available = True
-        else:
-            pass
-        generated_colour_index += 1
-
-    return generated_colour
 
 
 def collect_dynamic_model_plot_variables(model: Block,
@@ -2935,7 +2846,7 @@ class DynamicsResultsHandler:
     __slots__ = ("results", "circuit", "dialog_parent", "plot_simulation_type",
                   "pre_simulation_mode", "tree_data", "tree_model", "proxy_model", "plots_model", "group_idx",
                   "var_role", "group_name_role", "tree_state_role", "drag_mime_type", "drop_target_role", "entry_role_role", "plot_groups", "series_by_key",
-                  "series_by_var_uid", "candidates_by_parameter_key", "source_labels", "_open_plot_dialogs")
+                  "series_by_var_uid", "candidates_by_parameter_key", "source_labels", "_open_plot_dialogues")
 
     def __init__(self,
                  results: RmsResults | EmtResults | None,
@@ -2980,9 +2891,9 @@ class DynamicsResultsHandler:
         self.candidates_by_parameter_key: Dict[str, List[DynamicPlotCandidate]] = dict()
         self.source_labels: List[str] = list()
 
-        # Open plot windows are kept referenced so they are not garbage collected
-        # while still visible; entries are pruned when the user closes them.
-        self._open_plot_dialogs: List[QtWidgets.QDialog] = list()
+        # Qt owns each child chart; retaining dialogs keeps the Python wrappers
+        # alive until this handler closes and disposes their chart buffers.
+        self._open_plot_dialogues: List[PlotDialogue] = list()
 
         # The proxy model owns the reversible filtering state used by the device tree view.
         self.proxy_model: QtCore.QSortFilterProxyModel = QtCore.QSortFilterProxyModel()
@@ -5409,285 +5320,101 @@ class DynamicsResultsHandler:
         """
         return len(self.source_labels) > 1
 
-    def close_plot_dialogs(self) -> None:
+    def _cleanup_plot_dialogue(self, destroyed_obj: QtCore.QObject | None = None) -> None:
+        """Remove destroyed plot dialogues from the active list.
+
+        :param destroyed_obj: Qt object being destroyed, or None.
+        :return: None.
         """
-        Schedule all modeless plots owned by this handler for deletion.
+        self._open_plot_dialogues = [
+            dlg for dlg in self._open_plot_dialogues
+            if dlg is not destroyed_obj and is_dialog_available(dlg)
+        ]
+
+    def close_plot_dialogs(self) -> None:
+        """Close and release every native plot dialog owned by this handler.
 
         :return: None.
         """
-        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        plot_dialogue: PlotDialogue
+        for plot_dialogue in list(self._open_plot_dialogues):
+            if is_dialog_available(plot_dialogue):
+                try:
+                    plot_dialogue.reject()
+                except Exception:
+                    pass
+                try:
+                    plot_dialogue.deleteLater()
+                except Exception:
+                    pass
+        self._open_plot_dialogues.clear()
 
-    def _show_figure(self, figure: Figure, title: str) -> None:
+    def _show_plot_dialogue(self, plot_dialogue: PlotDialogue) -> None:
+        """Retain and show one native dialog with its Qt parent ownership.
+
+        :param plot_dialogue: Prepared dialog whose child chart owns copied data.
+        :return: None.
         """
-        Display a Matplotlib figure in an embedded Qt window.
-
-        The figure is embedded in a ``FigureCanvasQTAgg`` inside a modeless
-        ``QDialog`` instead of being shown with ``pyplot.show()``. 
-        Before ``pyplot.show()`` was starting starts a second GUI event loop
-        on top of the already-running Qt application which is a hard
-        crash on the macOS backend.
-
-        :param figure: Figure to display (built with ``matplotlib.figure.Figure``).
-        :param title: Window title.
-        :return: Nothing.
-        """
-        show_matplotlib_figure(figure=figure,
-                               parent=self.dialog_parent,
-                               open_dialogs=self._open_plot_dialogs,
-                               title=title)
+        self._open_plot_dialogues.append(plot_dialogue)
+        plot_dialogue.destroyed.connect(self._cleanup_plot_dialogue)
+        plot_dialogue.show()
 
     def plot_series(self, series: DynamicResultSeries) -> None:
-        """
-        Plot one source-specific series.
+        """Plot one source-specific dynamic series in a native dialog.
 
         :param series: Series to plot.
-        :return: Nothing.
+        :return: None.
         """
-        figure = Figure(figsize=(12, 8))
-        axis = figure.add_subplot(111)
+        x_values: np.ndarray
+        y_values: np.ndarray
         x_values, y_values = self._get_series_plot_data(series=series)
-        axis.plot(x_values, y_values, label=series.get_plot_label(has_multiple_sources=self.has_multiple_sources()))
-        axis.set_title(series.get_var().name)
-        axis.set_xlabel("Time [s]")
-        axis.legend()
-        self._show_figure(figure=figure, title=series.get_var().name)
+        title: str = series.get_var().name
+        plot_dialogue: PlotDialogue = PlotDialogue(title=title, parent=self.dialog_parent)
+        accepted: bool = plot_dialogue.set_line_series(
+            x_values=x_values,
+            series_names=(series.get_plot_label(has_multiple_sources=self.has_multiple_sources()),),
+            series_values=(y_values,),
+            title=title,
+            x_axis_title="Time [s]",
+            y_axis_title="",
+        )
+        if accepted:
+            self._show_plot_dialogue(plot_dialogue=plot_dialogue)
+        else:
+            plot_dialogue.reject()
 
     def plot_var(self, var: Var, group_name: str) -> None:
-        """
-        Plot one variable for one RMS events group.
+        """Plot a legacy variable when it resolves to one current source.
 
         :param var: Variable to plot.
-        :param group_name: RMS events group name.
-        :return: Nothing.
+        :param group_name: Dynamic event-group name that owns the variable.
+        :return: None.
         """
-        gr_idx: int = self.group_idx[group_name]
-        self.results.plot_var(var=var, group_idx=gr_idx)
-
-    def _plot_parameter_entry_on_axis(self,
-                                      axis: Axes,
-                                      entry: DynamicPlotEntry,
-                                      label: str,
-                                      series_colour: str) -> bool:
-        """Render one parameter with explicit constant, step, and ramp segments.
-
-        Matplotlib line interpolation is unsuitable for discontinuous parameter
-        changes because it draws a diagonal between adjacent samples. Constants
-        and holds are therefore rendered with ``hlines``, steps with ``vlines``,
-        and ramps with an explicit diagonal segment.
-
-        :param axis: Matplotlib axis receiving the parameter trace.
-        :param entry: Persistent parameter plot entry.
-        :param label: Legend label for the trace.
-        :param series_colour: Colour shared by every segment of the trace.
-        :return: ``True`` when a numerical trace was rendered.
-        """
-        parameter_plot_data: tuple[np.ndarray, np.ndarray] | None = self._get_parameter_plot_data(entry=entry)
-        if parameter_plot_data is None:
-            return False
-        else:
-            pass
-
-        time_values: np.ndarray = parameter_plot_data[0]
-        sampled_values: np.ndarray = parameter_plot_data[1]
-        if len(time_values) == 0 or len(sampled_values) == 0:
-            return False
-        else:
-            pass
-
-        if self.circuit is not None:
-            matching_events: List[RmsEvent | EmtEvent] = _get_dynamic_events_for_plot_entry(
-                circuit=self.circuit,
-                entry=entry,
-            )
-        else:
-            matching_events = list()
-
-        minimum_time: float = float(time_values[0])
-        maximum_time: float = float(time_values[-1])
-        if len(matching_events) == 0:
-            if maximum_time > minimum_time:
-                axis.hlines(
-                    y=float(sampled_values[0]),
-                    xmin=minimum_time,
-                    xmax=maximum_time,
-                    colors=series_colour,
-                    label=label,
-                )
-            else:
-                axis.plot(time_values, sampled_values, marker="o", color=series_colour, label=label)
-            return True
-        else:
-            pass
-
-        initial_value: float | None = None
-        if self.results is not None:
-            event_group_index: int | None = _find_matching_event_group_index(
-                group_idtags=self._get_group_idtags(results=self.results),
-                group_names=self._get_group_names(results=self.results),
-                entry=entry,
-            )
-            if event_group_index is not None:
-                initial_value = self.results.get_initial_parameter_value(
-                    group_idx=event_group_index,
-                    device_idtag=entry.device_idtag,
-                    parameter_name=entry.variable_name,
-                )
+        group_index: int | None = self.group_idx.get(group_name, None)
+        compatible_series: List[DynamicResultSeries | DynamicPlotCandidate] = self.series_by_var_uid.get(var.uid, list())
+        selected_series: DynamicResultSeries | None = None
+        candidate: DynamicResultSeries | DynamicPlotCandidate
+        for candidate in compatible_series:
+            if isinstance(candidate, DynamicResultSeries) and candidate.get_group_idx() == group_index:
+                selected_series = candidate
             else:
                 pass
+        if selected_series is not None:
+            self.plot_series(series=selected_series)
         else:
             pass
-
-        if initial_value is None:
-            initial_value = float(sampled_values[0])
-        else:
-            pass
-
-        # The caller allocates one colour against every artist already present
-        # on the axis. Reusing it here keeps holds, steps, and ramps visually
-        # grouped as one parameter series.
-        current_time: float = minimum_time
-        current_value: float = float(initial_value)
-        label_attached: bool = False
-        event_item: RmsEvent | EmtEvent
-
-        for event_item in matching_events:
-            raw_start_time: float = float(event_item.time)
-            if raw_start_time <= maximum_time:
-                start_time: float = max(minimum_time, raw_start_time)
-
-                if start_time > current_time:
-                    segment_label: str = "_nolegend_"
-                    if not label_attached:
-                        segment_label = label
-                        label_attached = True
-                    else:
-                        pass
-                    axis.hlines(
-                        y=current_value,
-                        xmin=current_time,
-                        xmax=start_time,
-                        colors=series_colour,
-                        label=segment_label,
-                    )
-                else:
-                    pass
-
-                if event_item.transition_type == DynamicEventTransitionType.Ramp and event_item.end_time is not None:
-                    raw_end_time: float = float(event_item.end_time)
-                    if raw_end_time > raw_start_time:
-                        end_time: float = min(maximum_time, raw_end_time)
-                        if end_time > start_time:
-                            ramp_fraction: float = (end_time - raw_start_time) / (raw_end_time - raw_start_time)
-                            ramp_fraction = min(1.0, max(0.0, ramp_fraction))
-                            end_value: float = current_value + ramp_fraction * (
-                                float(event_item.value) - current_value
-                            )
-                            segment_label = "_nolegend_"
-                            if not label_attached:
-                                segment_label = label
-                                label_attached = True
-                            else:
-                                pass
-                            axis.plot(
-                                np.array([start_time, end_time], dtype=float),
-                                np.array([current_value, end_value], dtype=float),
-                                color=series_colour,
-                                label=segment_label,
-                            )
-                            current_time = end_time
-                            current_value = end_value
-                        else:
-                            pass
-
-                        if raw_end_time <= maximum_time:
-                            current_value = float(event_item.value)
-                            current_time = max(current_time, raw_end_time)
-                        else:
-                            pass
-                    else:
-                        target_value: float = float(event_item.value)
-                        segment_label = "_nolegend_"
-                        if not label_attached:
-                            segment_label = label
-                            label_attached = True
-                        else:
-                            pass
-                        axis.vlines(
-                            x=start_time,
-                            ymin=current_value,
-                            ymax=target_value,
-                            colors=series_colour,
-                            label=segment_label,
-                        )
-                        current_time = start_time
-                        current_value = target_value
-                else:
-                    target_value = float(event_item.value)
-                    segment_label = "_nolegend_"
-                    if not label_attached:
-                        segment_label = label
-                        label_attached = True
-                    else:
-                        pass
-                    axis.vlines(
-                        x=start_time,
-                        ymin=current_value,
-                        ymax=target_value,
-                        colors=series_colour,
-                        label=segment_label,
-                    )
-                    current_time = start_time
-                    current_value = target_value
-            else:
-                break
-
-        if current_time < maximum_time:
-            segment_label = "_nolegend_"
-            if not label_attached:
-                segment_label = label
-                label_attached = True
-            else:
-                pass
-            axis.hlines(
-                y=current_value,
-                xmin=current_time,
-                xmax=maximum_time,
-                colors=series_colour,
-                label=segment_label,
-            )
-        else:
-            pass
-
-        if not label_attached:
-            axis.plot(time_values, sampled_values, color=series_colour, label=label)
-        else:
-            pass
-
-        return True
-
     def plot_group(self, plot_group_name: str) -> bool:
-        """
-        Plot all variables stored in one plot group.
+        """Plot every resolved time series in one native dynamic-results dialog.
 
         :param plot_group_name: Plot-group name selected by the user.
-        :return: ``True`` when the plot group existed and was plotted.
-
-        Each stored dynamic series already knows its event-group source, so the
-        group plot no longer depends on any global event-group selector.
+        :return: Whether at least one finite series was shown.
         """
         plot_group: DynamicsPlotGroup | None = self.plot_groups.get_group(name=plot_group_name)
         if plot_group is None:
             return False
-        else:
-            pass
-
-        if plot_group.get_mode() == DynamicPlotMode.XY:
+        elif plot_group.get_mode() == DynamicPlotMode.XY:
             return self._plot_xy_group(plot_group=plot_group)
-        else:
-            pass
-
-        # plot timeseries results
-        if self.results is None:
+        elif self.results is None:
             return False
         else:
             pass
@@ -5698,78 +5425,60 @@ class DynamicsResultsHandler:
         else:
             pass
 
-        figure = Figure(figsize=(12, 8))
-        axis = figure.add_subplot(111)
+        plot_dialogue: PlotDialogue = PlotDialogue(title=plot_group_name, parent=self.dialog_parent)
+        chart: GraphsWidget = plot_dialogue.chart
+        chart.set_tight_axis_layout(enabled=True)
         plotted_anything: bool = False
-
         variable: DynamicResultSeries | DynamicPlotEntry | Var
         for variable in variables:
-            x_values: Optional[np.ndarray] = None
-            y_values: Optional[np.ndarray] = None
-            label: str = ""
-            variable_plotted: bool = False
-
-            # Allocate from the artists already rendered, so additions from
-            # variables, parameters, and legacy paths share one colour space.
-            series_colour: str = _get_next_available_plot_colour(axis=axis)
-
+            x_values: np.ndarray | None = None
+            y_values: np.ndarray | None = None
+            label: str = ''
             if isinstance(variable, DynamicResultSeries):
                 x_values, y_values = self._get_series_plot_data(series=variable)
                 label = variable.get_plot_label(has_multiple_sources=self.has_multiple_sources())
-
             elif isinstance(variable, DynamicPlotEntry):
-                label = variable.variable_custom_name
-                if label == "":
-                    label = variable.variable_name
+                if variable.entry_kind == DynamicPlotEntryKind.PARAMETER:
+                    parameter_data: tuple[np.ndarray, np.ndarray] | None = self._get_parameter_plot_data(entry=variable)
+                    if parameter_data is not None:
+                        x_values = parameter_data[0]
+                        y_values = parameter_data[1]
+                        label = self._build_runtime_entry_label(entry=variable)
+                    else:
+                        pass
                 else:
                     pass
-
-                if variable.entry_kind == DynamicPlotEntryKind.PARAMETER:
-                    variable_plotted = self._plot_parameter_entry_on_axis(
-                        axis=axis,
-                        entry=variable,
-                        label=label,
-                        series_colour=series_colour,
-                    )
-                else:
-                    x_values = self.results.time_array
-                    y_values = None
-
             elif isinstance(variable, Var):
-                x_values = self.results.time_array
-
-                # Legacy raw ``Var`` entries are still tolerated, but only when
-                # they resolve to exactly one current series.
-                compatible_series: List[DynamicResultSeries] = self.series_by_var_uid.get(variable.uid, list())
-                if len(compatible_series) == 1:
-                    _, y_values = self._get_series_plot_data(series=compatible_series[0])
-                    label = compatible_series[0].get_plot_label(
-                        has_multiple_sources=self.has_multiple_sources()
-                    )
+                compatible_series: List[DynamicResultSeries | DynamicPlotCandidate] = self.series_by_var_uid.get(
+                    variable.uid,
+                    list(),
+                )
+                if len(compatible_series) == 1 and isinstance(compatible_series[0], DynamicResultSeries):
+                    resolved_series: DynamicResultSeries = compatible_series[0]
+                    x_values, y_values = self._get_series_plot_data(series=resolved_series)
+                    label = resolved_series.get_plot_label(has_multiple_sources=self.has_multiple_sources())
                 else:
-                    y_values = None
-
-            else:
-                y_values = None
-
-            if x_values is not None and y_values is not None:
-                axis.plot(x_values, y_values, color=series_colour, label=label)
-                variable_plotted = True
+                    pass
             else:
                 pass
 
-            if variable_plotted:
-                plotted_anything = True
+            if x_values is not None and y_values is not None and len(x_values) == len(y_values):
+                finite_values: np.ndarray = np.isfinite(x_values) & np.isfinite(y_values)
+                if bool(np.any(finite_values)):
+                    chart.add_line_series(name=label, x_values=x_values, y_values=y_values)
+                    plotted_anything = True
+                else:
+                    pass
             else:
                 pass
 
         if plotted_anything:
-            axis.legend()
-            axis.set_xlabel("Time [s]")
-            axis.set_title(plot_group_name)
-            self._show_figure(figure=figure, title=plot_group_name)
+            chart.setTitle(plot_group_name)
+            chart.set_axis_titles('Time [s]', '')
+            self._show_plot_dialogue(plot_dialogue=plot_dialogue)
             return True
         else:
+            plot_dialogue.reject()
             return False
 
     def _resolve_entry_signal(self,
@@ -5810,101 +5519,90 @@ class DynamicsResultsHandler:
                     return None, None, None, None, None
 
     def _plot_xy_group(self, plot_group: DynamicsPlotGroup) -> bool:
-        """
-        Plot one XY dynamic plot after resolving both explicit slots.
+        """Plot one resolved XY group with a native line or circular marker.
 
-        :param plot_group: XY plot group.
-        :return: ``True`` when plotted successfully.
+        :param plot_group: XY plot group with explicit X and Y entries.
+        :return: Whether the group contained finite paired coordinates.
         """
         if self.results is None:
             return False
         else:
             pass
 
-        x_entry: DynamicResultSeries | DynamicPlotEntry | Var | None = plot_group.get_entry_for_role(role=DynamicPlotEntryRole.X_AXIS)
-        y_entry: DynamicResultSeries | DynamicPlotEntry | Var | None = plot_group.get_entry_for_role(role=DynamicPlotEntryRole.Y_AXIS)
+        x_entry: DynamicResultSeries | DynamicPlotEntry | Var | None = plot_group.get_entry_for_role(
+            role=DynamicPlotEntryRole.X_AXIS,
+        )
+        y_entry: DynamicResultSeries | DynamicPlotEntry | Var | None = plot_group.get_entry_for_role(
+            role=DynamicPlotEntryRole.Y_AXIS,
+        )
         if x_entry is None or y_entry is None:
             return False
         else:
             pass
 
-        x_time: Optional[np.ndarray]
-        x_values: Optional[np.ndarray]
+        x_time: np.ndarray | None
+        x_values: np.ndarray | None
         x_label: str | None
         x_simulation_type: PlotSimulationType | None
         x_identity: str | None
         x_time, x_values, x_label, x_simulation_type, x_identity = self._resolve_entry_signal(entry=x_entry)
-        y_time: Optional[np.ndarray]
-        y_values: Optional[np.ndarray]
+        y_time: np.ndarray | None
+        y_values: np.ndarray | None
         y_label: str | None
         y_simulation_type: PlotSimulationType | None
         y_identity: str | None
         y_time, y_values, y_label, y_simulation_type, y_identity = self._resolve_entry_signal(entry=y_entry)
-
-        if x_values is None or y_values is None or x_label is None or y_label is None:
+        if (x_values is None or y_values is None or x_label is None or y_label is None
+                or x_simulation_type != y_simulation_type or x_identity != y_identity
+                or len(x_values) != len(y_values)):
             return False
         else:
             pass
 
-        if x_simulation_type != y_simulation_type:
+        finite_values: np.ndarray = np.isfinite(x_values) & np.isfinite(y_values)
+        if bool(np.any(finite_values)):
+            x_plot: np.ndarray = x_values[finite_values]
+            y_plot: np.ndarray = y_values[finite_values]
+            plot_dialogue: PlotDialogue = PlotDialogue(title=plot_group.get_name(), parent=self.dialog_parent)
+            chart = plot_dialogue.chart
+            x_is_constant: bool = bool(np.allclose(x_plot, x_plot[0]))
+            y_is_constant: bool = bool(np.allclose(y_plot, y_plot[0]))
+            if x_is_constant and y_is_constant:
+                chart.add_scatter_series(name='', x_values=x_plot, y_values=y_plot, color='#2563eb')
+            else:
+                chart.add_line_series(name='', x_values=x_plot, y_values=y_plot, color='#2563eb')
+
+            # Dynamic XY coordinates can occupy a very small numeric interval.
+            # The generic chart keeps a half-unit minimum margin for ordinary
+            # plots, which can leave more empty space than visible data here.
+            # Use a proportional margin so centring the view restores a tight,
+            # symmetric frame around every available XY coordinate.
+            x_minimum: float = float(np.min(x_plot))
+            x_maximum: float = float(np.max(x_plot))
+            x_span: float = x_maximum - x_minimum
+            x_padding: float
+            if x_span > 0.0:
+                x_padding = x_span * 0.05
+            else:
+                x_padding = max(abs(x_minimum), 1.0) * 0.05
+
+            y_minimum: float = float(np.min(y_plot))
+            y_maximum: float = float(np.max(y_plot))
+            y_span: float = y_maximum - y_minimum
+            y_padding: float
+            if y_span > 0.0:
+                y_padding = y_span * 0.05
+            else:
+                y_padding = max(abs(y_minimum), 1.0) * 0.05
+
+            chart.axis_x.set_range(x_minimum - x_padding, x_maximum + x_padding)
+            chart.axis_y.set_range(y_minimum - y_padding, y_maximum + y_padding)
+            chart.setTitle(plot_group.get_name())
+            chart.set_axis_titles(x_label, y_label)
+            self._show_plot_dialogue(plot_dialogue=plot_dialogue)
+            return True
+        else:
             return False
-        else:
-            pass
-
-        if x_identity != y_identity:
-            return False
-        else:
-            pass
-
-        if len(x_values) != len(y_values):
-            return False
-        else:
-            pass
-
-        figure = Figure(figsize=(12, 8))
-        axis = figure.add_subplot(111)
-
-        finite_mask: np.ndarray = np.isfinite(x_values) & np.isfinite(y_values)
-        x_plot: np.ndarray = x_values[finite_mask]
-        y_plot: np.ndarray = y_values[finite_mask]
-
-        if len(x_plot) == 0:
-            return False
-        else:
-            pass
-
-        x_is_constant: bool = bool(np.allclose(x_plot, x_plot[0]))
-        y_is_constant: bool = bool(np.allclose(y_plot, y_plot[0]))
-
-        if x_is_constant and y_is_constant:
-            axis.scatter(x_plot[0], y_plot[0])
-        else:
-            axis.plot(x_plot, y_plot)
-
-        axis.set_title(plot_group.get_name())
-        axis.set_xlabel(x_label)
-        axis.set_ylabel(y_label)
-        axis.grid(True)
-
-        # Give visibility to constant axes.
-        if x_is_constant:
-            x_center: float = float(x_plot[0])
-            x_padding: float = max(abs(x_center) * 0.05, 1e-6)
-            axis.set_xlim(x_center - x_padding, x_center + x_padding)
-        else:
-            pass
-
-        if y_is_constant:
-            y_center: float = float(y_plot[0])
-            y_padding: float = max(abs(y_center) * 0.05, 1e-6)
-            axis.set_ylim(y_center - y_padding, y_center + y_padding)
-        else:
-            pass
-
-        self._show_figure(figure=figure, title=plot_group.get_name())
-        return True
-
-
 
     def plot_entry_from_index(self, index: QtCore.QModelIndex) -> bool:
         """
@@ -6035,7 +5733,7 @@ class DynamicsResultsHandler:
                     xlabel="Time [s]",
                     ylabel="",
                     cols_device_type=DeviceType.NoDevice,
-                    idx_device_type=DeviceType.NoDevice
+                    idx_device_type=DeviceType.NoDevice,
                 )
 
                 mdl = ResultsModel(table=table)
@@ -6473,28 +6171,35 @@ class DynamicsResultsHandler:
             return None
 
     def plot_parameter_entry(self, entry: DynamicPlotEntry) -> bool:
-        """
-        Plot one persistent parameter entry when its value can be resolved.
+        """Plot one resolved parameter trace in a native time-series dialog.
 
-        :param entry: Persistent parameter plot entry.
-        :return: ``True`` when the parameter was resolved and plotted.
+        :param entry: Persistent parameter entry to resolve against current results.
+        :return: Whether a finite parameter trace was shown.
         """
-        label: str = _build_parameter_plot_entry_label(entry=entry)
-        figure = Figure(figsize=(12, 8))
-        axis = figure.add_subplot(111)
-        series_colour: str = _get_next_available_plot_colour(axis=axis)
-        plotted: bool = self._plot_parameter_entry_on_axis(
-            axis=axis,
-            entry=entry,
-            label=label,
-            series_colour=series_colour,
-        )
-        if plotted:
-            axis.set_title(entry.variable_name)
-            axis.set_xlabel("Time [s]")
-            axis.legend()
-            self._show_figure(figure=figure, title=entry.variable_name)
-            return True
+        parameter_data: tuple[np.ndarray, np.ndarray] | None = self._get_parameter_plot_data(entry=entry)
+        if parameter_data is not None:
+            time_values: np.ndarray = parameter_data[0]
+            parameter_values: np.ndarray = parameter_data[1]
+            if len(time_values) == len(parameter_values) and bool(np.any(np.isfinite(parameter_values))):
+                title: str = entry.variable_name
+                label: str = _build_parameter_plot_entry_label(entry=entry)
+                plot_dialogue: PlotDialogue = PlotDialogue(title=title, parent=self.dialog_parent)
+                accepted: bool = plot_dialogue.set_line_series(
+                    x_values=time_values,
+                    series_names=(label,),
+                    series_values=(parameter_values,),
+                    title=title,
+                    x_axis_title='Time [s]',
+                    y_axis_title='',
+                )
+                if accepted:
+                    self._show_plot_dialogue(plot_dialogue=plot_dialogue)
+                    return True
+                else:
+                    plot_dialogue.reject()
+                    return False
+            else:
+                return False
         else:
             return False
 
@@ -6569,7 +6274,7 @@ class DynamicsResultsHandler:
         :return: Tuple ``(x_values, y_values)`` with a relative float time axis and the matching signal values.
 
         The plotting layer works best with an elapsed-time axis because absolute
-        datetime stamps are rendered as wall-clock labels by Matplotlib. This
+        datetime stamps would otherwise render as wall-clock labels. This
         method therefore converts the stored simulation timestamps into a float
         axis that starts at ``0.0`` while preserving the original sample count.
         """

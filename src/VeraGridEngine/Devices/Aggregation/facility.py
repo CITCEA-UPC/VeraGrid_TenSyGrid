@@ -13,6 +13,8 @@ class Facility(GenericAreaGroup):
     This is an aggregation of Injection devices
     """
 
+    __slots__ = ()
+
     def __init__(self, name='', code='', idtag: Union[str, None] = None, latitude=0.0, longitude=0.0):
         """
         Constructor

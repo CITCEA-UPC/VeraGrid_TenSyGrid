@@ -6,6 +6,19 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class IidmLine(IidmObject):
+    __slots__ = (
+        "id",
+        "voltageLevelId1",
+        "bus1",
+        "voltageLevelId2",
+        "bus2",
+        "r",
+        "x",
+        "g1",
+        "b1",
+        "g2",
+        "b2",
+    )
     def __init__(self, 
                  id: str, 
                  voltageLevelId1: str, 

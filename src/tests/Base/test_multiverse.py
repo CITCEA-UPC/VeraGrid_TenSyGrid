@@ -1145,3 +1145,138 @@ def test_multiverse_merge_children_into_parent_noop_without_children() -> None:
     assert mv.current_node is leaf
     _assert_circuits_equal(mv.current_model, leaf_model)
     _assert_circuits_equal(mv.checkout(leaf), before_leaf)
+
+
+def test_multiverse_diagram_tree_folder_hierarchy_inheritance_and_isolation() -> None:
+    """
+    Verify child scenarios inherit diagram folders and that subsequent changes remain isolated.
+    """
+    grid = _build_grid_with_schematic_and_map_diagrams()
+    d_schematic = grid.diagrams[0]
+    d_map = grid.diagrams[1]
+
+    # Create folder hierarchy on base grid: F1 (with subfolder S1) and F2
+    f1 = grid.diagrams.add_folder("Region North")
+    s1 = f1.add_folder("Zone 1")
+    f2 = grid.diagrams.add_folder("Region South")
+
+    grid.diagrams.move_diagram(d_schematic, target_folder=s1)
+    grid.diagrams.move_diagram(d_map, target_folder=f2)
+    d_root = vge.SchematicDiagram(name="Root Diagram")
+    grid.add_diagram(d_root)
+
+    mv = vge.MultiVerse(grid)
+    root = mv.root_nodes[0]
+
+    child = mv.create_node(
+        data=vge.MultiCircuit(name="child_scenario"),
+        parent_id=root.node_id,
+        position=root.child_count(),
+    )
+
+    # 1. Verify child inherits exact folder tree
+    assert len(child.diagrams.folders) == 2
+    c_f1 = child.diagrams.find_folder(f1.idtag)
+    c_s1 = child.diagrams.find_folder(s1.idtag)
+    c_f2 = child.diagrams.find_folder(f2.idtag)
+    assert c_f1 is not None and c_s1 is not None and c_f2 is not None
+    assert c_s1.parent is c_f1
+    assert len(c_s1.diagrams) == 1 and c_s1.diagrams[0].name == d_schematic.name
+    assert len(c_f2.diagrams) == 1 and c_f2.diagrams[0].name == d_map.name
+    assert len(child.diagrams.diagrams) == 1 and child.diagrams.diagrams[0].name == "Root Diagram"
+
+    # Objects are deep copies
+    assert c_f1 is not f1
+    assert c_s1 is not s1
+    assert c_s1.diagrams[0] is not d_schematic
+
+    # 2. Activate child, mutate diagrams tree
+    child_grid = mv.activate_scenario(child.node_id)
+    c_active_s1 = child_grid.diagrams.find_folder(s1.idtag)
+    c_active_f2 = child_grid.diagrams.find_folder(f2.idtag)
+
+    # Move schematic from s1 to f2 in child
+    child_grid.diagrams.move_diagram(c_active_s1.diagrams[0], target_folder=c_active_f2)
+    # Add a new folder in child
+    f3 = child_grid.diagrams.add_folder("New Child Folder")
+    # Add a new diagram in f3
+    d_new = vge.SchematicDiagram(name="Child Only Diagram")
+    child_grid.add_diagram(d_new, folder=f3)
+
+    mv.commit_current()
+
+    # 3. Check root isolation
+    root_grid = mv.checkout(root)
+    r_s1 = root_grid.diagrams.find_folder(s1.idtag)
+    r_f2 = root_grid.diagrams.find_folder(f2.idtag)
+    assert len(r_s1.diagrams) == 1 and r_s1.diagrams[0].name == d_schematic.name
+    assert len(r_f2.diagrams) == 1 and r_f2.diagrams[0].name == d_map.name
+    assert root_grid.diagrams.find_folder(f3.idtag) is None
+    assert all(d.name != "Child Only Diagram" for d in root_grid.diagrams.get_all_diagrams())
+
+    # 4. Check child has all edits
+    assert len(c_active_s1.diagrams) == 0
+    assert len(c_active_f2.diagrams) == 2
+    assert child_grid.diagrams.find_folder(f3.idtag) is not None
+
+    # 5. Switching back and forth preserves both
+    mv.activate_scenario(root.node_id)
+    assert mv.current_model.diagrams.find_folder(f3.idtag) is None
+    mv.activate_scenario(child.node_id)
+    assert mv.current_model.diagrams.find_folder(f3.idtag) is not None
+    assert len(mv.current_model.diagrams.find_folder(f2.idtag).diagrams) == 2
+
+
+def test_multiverse_diagram_tree_save_load_roundtrip(tmp_path: Path) -> None:
+    """
+    Verify multiverse scenarios with distinct diagram tree folder hierarchies survive save/load.
+    """
+    grid = _build_grid_with_schematic_and_map_diagrams()
+    d_schematic = grid.diagrams[0]
+    d_map = grid.diagrams[1]
+
+    f_root = grid.diagrams.add_folder("Root Folder")
+    grid.diagrams.move_diagram(d_schematic, target_folder=f_root)
+
+    mv = vge.MultiVerse(grid)
+    root = mv.root_nodes[0]
+    child = mv.create_node(
+        data=vge.MultiCircuit(name="child_scenario"),
+        parent_id=root.node_id,
+        position=root.child_count(),
+    )
+
+    mv.activate_scenario(child.node_id)
+    child_f_root = mv.current_model.diagrams.find_folder(f_root.idtag)
+    child_f_sub = child_f_root.add_folder("Child Subfolder")
+    mv.current_model.diagrams.move_diagram(child_f_root.diagrams[0], target_folder=child_f_sub)
+    mv.commit_current()
+
+    archive_path = tmp_path / "diagram_tree_multiverse.veragrid"
+    save_veragrid_multiverse(
+        file_name=str(archive_path),
+        multiverse=mv,
+        options=FileSavingOptions(),
+    )
+
+    drv = FileOpen(str(archive_path))
+    drv.open()
+    loaded_mv = drv.multiverse
+    assert loaded_mv is not None
+
+    loaded_root = loaded_mv.get_node(root.node_id)
+    loaded_root_f = loaded_root.diagrams.find_folder(f_root.idtag)
+    assert loaded_root_f is not None
+    assert len(loaded_root_f.folders) == 0
+    assert len(loaded_root_f.diagrams) == 1
+    assert loaded_root_f.diagrams[0].name == d_schematic.name
+
+    loaded_child = loaded_mv.get_node(child.node_id)
+    loaded_child_f = loaded_child.diagrams.find_folder(f_root.idtag)
+    assert loaded_child_f is not None
+    assert len(loaded_child_f.folders) == 1
+    loaded_child_sub = loaded_child.diagrams.find_folder(child_f_sub.idtag)
+    assert loaded_child_sub is not None
+    assert len(loaded_child_sub.diagrams) == 1
+    assert loaded_child_sub.diagrams[0].name == d_schematic.name
+

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.Rms.initialization &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.Rms.initialization &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -923,7 +923,53 @@
 <span class="sd">    Lightweight problem class for pseudo-transient initialization of a single device block.</span>
 <span class="sd">    Similar interface to RmsProblemDae but for initialization only.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;x_global&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;block&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;compiler_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alias_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_vars_global&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_params_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_update_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_ordered_init_update_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pseudo_transient_options&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;equilibrium_references_as_equations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;equilibrium_references_as_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;equilibrium_inputs_as_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_all_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_compiler_names_dict_local&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_alias_names_dict_local&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_has_full_numerical_jacobian&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_derivative_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jacobian_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_update_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_update_expressions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_update_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_reference_update_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_input_update_expressions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_input_param_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_input_update_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_equilibrium_input_update_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_states&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_event_params&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">block</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span>
                  <span class="n">x_global</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
@@ -941,6 +987,20 @@
                  <span class="n">CONSTANT_PARAMS_NAME</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cprms&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize problem for pseudo-transient initialization.</span>
+<span class="sd">        :param block:</span>
+<span class="sd">        :param x_global:</span>
+<span class="sd">        :param compiler_names_dict:</span>
+<span class="sd">        :param alias_names_dict:</span>
+<span class="sd">        :param uid2idx_vars:</span>
+<span class="sd">        :param variable_parameters:</span>
+<span class="sd">        :param constant_parameters:</span>
+<span class="sd">        :param equilibrium_reference_update_eqs:</span>
+<span class="sd">        :param ordered_init_update_eqs:</span>
+<span class="sd">        :param pseudo_transient_options:</span>
+<span class="sd">        :param VARS_NAME:</span>
+<span class="sd">        :param DIFF_NAME:</span>
+<span class="sd">        :param VARIABLE_PARAMS_NAME:</span>
+<span class="sd">        :param CONSTANT_PARAMS_NAME:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x_global</span> <span class="o">=</span> <span class="n">x_global</span>
@@ -1156,7 +1216,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variable_params</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variable_params</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_event_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_ensure_variable_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="n">Var</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param var:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">Var</span><span class="p">)</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="n">var</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">i</span>
@@ -1244,6 +1312,11 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.update_equilibrium_parameters">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.update_equilibrium_parameters">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_equilibrium_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibrium_references_as_equations</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1290,7 +1363,14 @@
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_compile_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VARS_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">DIFF_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                            <span class="n">VARIABLE_PARAMS_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">CONSTANT_PARAMS_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compile RHS and derivative functions for the block.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compile RHS and derivative functions for the block.</span>
+<span class="sd">        :param VARS_NAME:</span>
+<span class="sd">        :param DIFF_NAME:</span>
+<span class="sd">        :param VARIABLE_PARAMS_NAME:</span>
+<span class="sd">        :param CONSTANT_PARAMS_NAME:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Collect all equations</span>
         <span class="n">all_eqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">state_eqs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">algebraic_eqs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_equilibrium_reference_eqs</span><span class="p">)</span>
         
@@ -1329,6 +1409,12 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_compile_event_params_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VARIABLE_PARAMS_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">TIME_NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param VARIABLE_PARAMS_NAME:</span>
+<span class="sd">        :param TIME_NAME:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">param_eqs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters</span><span class="p">):</span>
             <span class="n">eq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">mode_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
@@ -1393,7 +1479,12 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.rhs_algebraic">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.rhs_algebraic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">rhs_algebraic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate RHS for algebraic equations.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate RHS for algebraic equations.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
@@ -1408,7 +1499,12 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.rhs_state">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.rhs_state">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">rhs_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate RHS for state equations.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate RHS for state equations.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_states</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
@@ -1420,14 +1516,25 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.get_dx">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.get_dx">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute derivatives.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute derivatives.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param xn:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xn</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="PseudoTransientInitProblem.update_variable_params">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.update_variable_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_variable_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update variable parameters at time t.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update variable parameters at time t.</span>
+<span class="sd">        :param t:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -1438,7 +1545,13 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_compute_numerical_jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute Jacobian with compiled symbolic fallback to finite differences.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute Jacobian with compiled symbolic fallback to finite differences.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_vars</span>
         <span class="k">if</span> <span class="n">n_total</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -1447,7 +1560,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant_params</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>   <span class="c1"># TODO: Except what?</span>
                 <span class="k">pass</span>
 
         <span class="c1"># Compute RHS at current point</span>
@@ -1467,7 +1580,13 @@
         <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">J_dense</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_compute_rhs_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute full RHS (state + algebraic) for Jacobian computation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute full RHS (state + algebraic) for Jacobian computation.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant_params</span><span class="p">)</span>
@@ -1475,7 +1594,13 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.get_j11">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.get_j11">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j11</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Jacobian of state equations w.r.t. state variables.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian of state equations w.r.t. state variables.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_states</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">J_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_numerical_jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
@@ -1485,7 +1610,13 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.get_j12">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.get_j12">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j12</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Jacobian of state equations w.r.t. algebraic variables.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian of state equations w.r.t. algebraic variables.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_states</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()))</span>
         <span class="n">J_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_numerical_jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
@@ -1496,7 +1627,13 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.get_j21">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.get_j21">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j21</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Jacobian of algebraic equations w.r.t. state variables.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian of algebraic equations w.r.t. state variables.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_alg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_states</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_alg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="n">n_alg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_states</span><span class="p">))</span>
@@ -1507,7 +1644,13 @@
 <div class="viewcode-block" id="PseudoTransientInitProblem.get_j22">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.html#VeraGridEngine.Simulations.Rms.initialization.PseudoTransientInitProblem.get_j22">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j22</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Jacobian of algebraic equations w.r.t. algebraic variables.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian of algebraic equations w.r.t. algebraic variables.</span>
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_alg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">n_alg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -1548,9 +1691,31 @@
                           <span class="n">pseudo_transient_options</span><span class="p">:</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize model using pseudo-transient method.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Similar interface to init_explicit but uses pseudo-transient simulation</span>
 <span class="sd">    instead of explicit equation evaluation.</span>
+<span class="sd">    :param mdl:</span>
+<span class="sd">    :param sys_vars:</span>
+<span class="sd">    :param variable_parameters:</span>
+<span class="sd">    :param event_parameters_eqs:</span>
+<span class="sd">    :param constant_parameters:</span>
+<span class="sd">    :param init_guess:</span>
+<span class="sd">    :param uid2idx_vars:</span>
+<span class="sd">    :param uid2idx_params:</span>
+<span class="sd">    :param uid2idx_event_params:</span>
+<span class="sd">    :param compiler_names_dict:</span>
+<span class="sd">    :param alias_names_dict:</span>
+<span class="sd">    :param VARIABLE_PARAMS_NAME:</span>
+<span class="sd">    :param TIME_NAME:</span>
+<span class="sd">    :param VARS_NAME:</span>
+<span class="sd">    :param DIFF_NAME:</span>
+<span class="sd">    :param CONSTANT_PARAMS_NAME:</span>
+<span class="sd">    :param dtau0:</span>
+<span class="sd">    :param max_iter:</span>
+<span class="sd">    :param tol:</span>
+<span class="sd">    :param verbose:</span>
+<span class="sd">    :param pseudo_transient_options:</span>
+<span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Import here to avoid circular imports</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.Rms.numerical.pseudo_transient</span><span class="w"> </span><span class="kn">import</span> <span class="n">PseudoTransient</span><span class="p">,</span> <span class="n">PseudoTransientOptions</span>
@@ -2083,7 +2248,7 @@
             <span class="k">continue</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eval_expr_uid</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span> <span class="n">uid_bindings</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># TODO: except what?</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
             <span class="n">event_parameters_eqs</span><span class="p">[</span><span class="n">ep_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.Rms.problems.rms_problem_dae_full_vectorized &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.Rms.problems.rms_problem_dae_full_vectorized &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -981,6 +981,147 @@
     <span class="n">DIFF_NAME</span> <span class="o">=</span> <span class="s2">&quot;diff&quot;</span>
     <span class="n">TIME_NAME</span> <span class="o">=</span> <span class="s2">&quot;glob_time&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Sf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;St&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;options&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;init_guess&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;event_params_init_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sys_block&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sys_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_vars_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_eqs_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_vars_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_eqs_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_vars_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_parameters_eqs0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_parameters_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_parameters_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_static_parameters_values_mapping&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_all_parameters_source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_all_eqs_source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_parameter_device_idtags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_all_eqs_source0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_slice&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_slice&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_continuous_event_parameter_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_discrete_event_parameter_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_continuous_runtime_events&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_scheduled_mode_events&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mode_event_cursor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_active_events_group&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mode_runtime_expression_by_uid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_mode_runtime_initialized_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_procedural_logic_updater&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_derivative_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_params_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_algeb_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_state_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_algeb_energy_balance_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j11_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j12_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j21_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j22_fn_by_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jbalance_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jbalance_state_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_balance_equations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_last_variable_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_block_boundary_updater&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_fmu_cs_adapters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_fmu_cs_initialized&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_fmu_me_adapters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_fmu_me_initialized&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_fmu_me_evaluation_budget&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_alg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_algebraic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_event_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_class_n_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_class_n_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_class_n_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_class_n_event_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_event_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_vars_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_diff_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_params_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_event_params_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_vars_glob_name2uid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_compiler_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_compiler_names_dict_vect&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_alias_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_alias_names_dict_vect&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_vars_info&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_glob_time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_delta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_algeb_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_x_gather_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_dx_gather_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_vp_gather_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_cp_gather_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_input_matrices_by_model&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_model_algebraic_eq_start_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_model_state_eq_start_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jac_algeb_col_off&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jac_state_col_off&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jac_global_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_prof_timings&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;block_composition_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;equivalence_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reference_class_for_all_blocks_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;variables_equivalence_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;P_used_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;P_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Q_used_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Q_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_balance_eqs_p_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_balance_eqs_q_equiv_class_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_device_algebraic_rows_by_model_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_external_time_parameter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_external_time_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j22_global_cols&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_j22_global_rows&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jbalance_state_template&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jbalance_template&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_legacy_balance_layout_by_model_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_legacy_registered_model_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_nodal_balance_layout&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_algeb_scatter_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_algeb_source_rows&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_state_scatter_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_terminal_balance_layout_by_model_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch_bus_p_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch_bus_q_vec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_model_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mdl_index2bus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mdl_index2busfrom&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mdl_index2busto&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_t&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span>
                  <span class="n">options</span><span class="p">:</span> <span class="n">RmsOptions</span><span class="p">,</span>
@@ -1641,6 +1782,17 @@
                     <span class="k">pass</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">bus_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus_dict</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">bus</span><span class="p">]</span>
+
+                <span class="c1"># Static values must be resolved before parameter registration;</span>
+                <span class="c1"># explicit initialization then sees physical values rather than</span>
+                <span class="c1"># template defaults (notably for shunt conductance/susceptance).</span>
+                <span class="n">assign_static_api_object_mapping_for_device</span><span class="p">(</span>
+                    <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
+                    <span class="n">device</span><span class="o">=</span><span class="n">elm</span><span class="p">,</span>
+                    <span class="n">mdl</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">rms_model</span><span class="p">,</span>
+                    <span class="n">problem_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_static_parameters_values_mapping</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_variables_to_compilation_dicts</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">rms_model</span><span class="p">)</span>
 
@@ -2864,28 +3016,13 @@
 <span class="sd">        :param t: Simulation time.</span>
 <span class="sd">        :return: Updated runtime parameter vector.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">runtime_continuous_eqs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span><span class="p">]</span>
-        <span class="n">runtime_mode_slice</span><span class="p">:</span> <span class="nb">slice</span>
-
-        <span class="k">if</span> <span class="s2">&quot;_runtime_continuous_eqs&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="n">runtime_continuous_eqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_continuous_eqs</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ev_param</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_fn</span><span class="p">(</span><span class="n">ev_param</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-                <span class="n">updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_fn</span><span class="p">(</span><span class="n">updated</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">updated</span>
+        <span class="n">runtime_continuous_eqs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_continuous_eqs</span>
+        <span class="n">runtime_mode_slice</span><span class="p">:</span> <span class="nb">slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_mode_slice</span>
 
         <span class="n">n_continuous</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">runtime_continuous_eqs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">n_continuous</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ev_param</span>
-
-        <span class="k">if</span> <span class="s2">&quot;_runtime_mode_slice&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="n">runtime_mode_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_mode_slice</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">runtime_mode_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="n">mode_snapshot</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Vec</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">runtime_mode_slice</span><span class="o">.</span><span class="n">start</span> <span class="o">!=</span> <span class="n">runtime_mode_slice</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
@@ -3538,8 +3675,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_alias_names_dict</span><span class="p">[</span><span class="n">ep</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">VARIABLE_PARAMS_NAME</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_event_params</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_event_params</span><span class="p">[</span><span class="n">ep</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_event_params</span>
 
-            <span class="n">effective_eq</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span> <span class="o">=</span> <span class="n">eq</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="ow">and</span> <span class="n">eq</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">effective_eq</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_parameters_values_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">eq</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_parameters_values_mapping</span><span class="p">:</span>
+                <span class="n">mapped_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_parameters_values_mapping</span><span class="p">[</span><span class="n">ep</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="k">if</span> <span class="n">mapped_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">event_params_init_dict</span><span class="p">[</span><span class="n">ep</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mapped_value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">effective_eq</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="ow">and</span> <span class="n">effective_eq</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">init_eq_for_ep</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">init_var</span><span class="p">,</span> <span class="n">init_eq</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">init_eqs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">init_var</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="n">ep</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span>
@@ -3556,8 +3698,8 @@
             <span class="n">runtime_expression</span><span class="p">:</span> <span class="n">Expr</span> <span class="o">|</span> <span class="n">Const</span> <span class="o">=</span> <span class="n">effective_eq</span> <span class="k">if</span> <span class="n">runtime_eq</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">runtime_eq</span>
 
             <span class="k">if</span> <span class="n">runtime_eq</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ep</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_event_parameter_uids</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="ow">and</span> <span class="n">eq</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">runtime_expression</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">effective_eq</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="ow">and</span> <span class="n">effective_eq</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">runtime_expression</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">effective_eq</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">runtime_expression</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_mode_runtime_expression_by_uid</span><span class="p">[</span><span class="n">ep</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">effective_eq</span>
@@ -3986,20 +4128,27 @@
 
 <div class="viewcode-block" id="RmsProblemDaeFullVec.advance_fmu_cs_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.rms_problem_dae_full_vectorized.RmsProblemDaeFullVec.advance_fmu_cs_devices">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">advance_fmu_cs_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">advance_fmu_cs_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Advance imported FMU Co-Simulation devices for one RMS communication step.</span>
 
 <span class="sd">        :param t: Current simulation time.</span>
 <span class="sd">        :param x_snapshot: Current accepted state vector.</span>
 <span class="sd">        :param h: RMS communication step.</span>
-<span class="sd">        :return: None.</span>
+<span class="sd">        :return: Whether at least one registered CS adapter advanced.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">co_simulation_advanced</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fmu_cs_adapters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">advance_rms_fmu_cs_devices</span><span class="p">(</span><span class="n">problem</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_value</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="o">=</span><span class="n">x_snapshot</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">co_simulation_advanced</span> <span class="o">=</span> <span class="n">advance_rms_fmu_cs_devices</span><span class="p">(</span>
+                <span class="n">problem</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">time_value</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">x_snapshot</span><span class="o">=</span><span class="n">x_snapshot</span><span class="p">,</span>
+                <span class="n">step_size</span><span class="o">=</span><span class="n">h</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span></div>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">co_simulation_advanced</span></div>
 
 
 <div class="viewcode-block" id="RmsProblemDaeFullVec.close_fmu_cs_devices">

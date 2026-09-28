@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.bus_data &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.DataStructures.bus_data &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -211,6 +211,36 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BusData</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idtag&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;names&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vmin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vmax&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Vnom&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cost_v&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;angle_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;angle_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_p_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_q_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_vm_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_va_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;installed_power&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;srap_available_power&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_dc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_grounded&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;areas&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;substations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;q_shared_total&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;q_fixed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ii_fixed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b_fixed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;original_idx&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

@@ -94,6 +94,16 @@ class BusVars:
     Struct to store the bus related vars
     """
 
+    __slots__ = (
+        'Va',
+        'Vm',
+        'Pinj',
+        'Pgen',
+        'Pbalance',
+        'kirchhoff',
+        'shadow_prices',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BusVars structure
@@ -142,6 +152,10 @@ class NodalCapacityVars:
     Struct to store the nodal capacity related vars
     """
 
+    __slots__ = (
+        'P',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BusVars structure
@@ -173,6 +187,12 @@ class LoadVars:
     """
     Struct to store the load related vars
     """
+
+    __slots__ = (
+        'shedding',
+        'p',
+        'shedding_cost',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -212,6 +232,18 @@ class GenerationVars:
     """
     Struct to store the generation vars
     """
+
+    __slots__ = (
+        'p',
+        'dp',
+        'shedding',
+        'reserve',
+        'producing',
+        'starting_up',
+        'shutting_down',
+        'cost',
+        'invested',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -276,6 +308,10 @@ class BatteryVars(GenerationVars):
     struct extending the generation vars to handle the battery vars
     """
 
+    __slots__ = (
+        'e',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BatteryVars structure
@@ -324,6 +360,21 @@ class BranchVars:
     """
     Struct to store the branch related vars
     """
+
+    __slots__ = (
+        'flows',
+        'z_flows',
+        'losses',
+        'flow_slacks_pos',
+        'flow_slacks_neg',
+        'tap_angles',
+        'flow_constraints_ub',
+        'flow_constraints_lb',
+        'overload_cost',
+        'rates',
+        'loading',
+        'contingency_flow_data',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -407,6 +458,8 @@ class HvdcVars:
     Struct to store the generation vars
     """
 
+    __slots__ = ("flows", "rates", "loading")
+
     def __init__(self, nt: int, n_elm: int):
         """
         GenerationVars structure
@@ -444,6 +497,8 @@ class VscVars:
     Struct to store the generation vars
     """
 
+    __slots__ = ("flows", "rates", "loading")
+
     def __init__(self, nt: int, n_elm: int):
         """
         GenerationVars structure
@@ -455,13 +510,13 @@ class VscVars:
         self.rates = np.zeros((nt, n_elm), dtype=float)
         self.loading = np.zeros((nt, n_elm), dtype=float)
 
-    def get_values(self, Sbase: float, model: LpModel) -> "HvdcVars":
+    def get_values(self, Sbase: float, model: LpModel) -> "VscVars":
         """
         Return an instance of this class where the arrays content are not LP vars but their value
-        :return: HvdcVars
+        :return: VscVars
         """
         nt, n_elm = self.flows.shape
-        data = HvdcVars(nt=nt, n_elm=n_elm)
+        data = VscVars(nt=nt, n_elm=n_elm)
         data.rates = self.rates
 
         for t in range(nt):
@@ -480,6 +535,8 @@ class FluidNodeVars:
     """
     Struct to store the vars of nodes of fluid type
     """
+
+    __slots__ = ("p2x_flow", "current_level", "spillage", "flow_in", "flow_out", "water_balance", "fluid_value")
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -552,6 +609,8 @@ class FluidPathVars:
     Struct to store the vars of paths of fluid type
     """
 
+    __slots__ = ("flow",)
+
     def __init__(self, nt: int, n_elm: int):
         """
         FluidPathVars structure
@@ -592,6 +651,8 @@ class FluidInjectionVars:
     Struct to store the vars of injections of fluid type
     """
 
+    __slots__ = ("flow",)
+
     def __init__(self, nt: int, n_elm: int):
         """
         FluidInjectionVars structure
@@ -624,6 +685,14 @@ class SystemVars:
     """
     Struct to store the system vars
     """
+
+    __slots__ = (
+        "system_fuel",
+        "system_emissions",
+        "system_unit_energy_cost",
+        "system_total_energy_cost",
+        "power_by_technology",
+    )
 
     def __init__(self, nt: int):
         """
@@ -675,6 +744,34 @@ class OpfVars:
     """
     Structure to host the opf variables
     """
+
+    __slots__ = (
+        "nt",
+        "nbus",
+        "ng",
+        "nb",
+        "nl",
+        "nbr",
+        "n_hvdc",
+        "n_vsc",
+        "n_fluid_node",
+        "n_fluid_path",
+        "n_fluid_inj",
+        "n_cap_buses",
+        "acceptable_solution",
+        "bus_vars",
+        "nodal_capacity_vars",
+        "load_vars",
+        "gen_vars",
+        "batt_vars",
+        "branch_vars",
+        "hvdc_vars",
+        "vsc_vars",
+        "fluid_node_vars",
+        "fluid_path_vars",
+        "fluid_inject_vars",
+        "sys_vars",
+    )
 
     def __init__(self, nt: int, nbus: int, ng: int, nb: int, nl: int, nbr: int, n_hvdc: int, n_vsc: int,
                  n_fluid_node: int,

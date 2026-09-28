@@ -20,31 +20,51 @@ class AiIterable:
     """
     AI-ready power flow stochastic iterable
     """
+    __slots__ = (
+        "grid",
+        "logger",
+        "pf_options",
+        "modify_injections",
+        "modify_branches_state",
+        "p_up_branches",
+        "p_dwn_branches",
+        "p_up_gen",
+        "p_dwn_gen",
+        "mc_input",
+        "nc",
+        "base_branch_active",
+    )
 
-    def __init__(self, grid: MultiCircuit,
-                 forced_mttf: Union[None, float] = None,
-                 forced_mttr: Union[None, float] = None,
-                 pf_options=PowerFlowOptions(),
-                 modify_injections: bool = True,
-                 modify_branches_state: bool = True,
-                 opf_results: Union[OptimalPowerFlowResults, None] = None,
-                 t_idx: int | None = None,
-                 logger: Logger = Logger()):
+    def __init__(
+        self,
+        grid: MultiCircuit,
+        forced_mttf: Union[None, float] = None,
+        forced_mttr: Union[None, float] = None,
+        pf_options: PowerFlowOptions = PowerFlowOptions(),
+        modify_injections: bool = True,
+        modify_branches_state: bool = True,
+        opf_results: Union[OptimalPowerFlowResults, None] = None,
+        t_idx: int | None = None,
+        logger: Logger = Logger(),
+    ) -> None:
         """
+        AiIterable constructor.
 
-        :param grid: MultiCircuit
-        :param forced_mttf: override the branches MTTF with this value
-        :param forced_mttr: override the branches MTTR with this value
+        :param grid: MultiCircuit instance
+        :param forced_mttf: Override the branches MTTF with this value
+        :param forced_mttr: Override the branches MTTR with this value
+        :param pf_options: Power flow options
+        :param modify_injections: Flag to randomize injections
+        :param modify_branches_state: Flag to randomize branch states
+        :param opf_results: Optional OPF results for initialization
+        :param t_idx: Optional time step index
+        :param logger: Logger instance
         """
-        self.grid = grid
-
-        self.logger = logger
-
-        # declare the power flow options
-        self.pf_options = pf_options
-
-        self.modify_injections = modify_injections
-        self.modify_branches_state = modify_branches_state
+        self.grid: MultiCircuit = grid
+        self.logger: Logger = logger
+        self.pf_options: PowerFlowOptions = pf_options
+        self.modify_injections: bool = modify_injections
+        self.modify_branches_state: bool = modify_branches_state
 
         # compile the time step
         nc = compile_numerical_circuit_at(self.grid,
@@ -65,6 +85,8 @@ class AiIterable:
 
         if not grid.has_time_series:
             raise ValueError("The grid must have time series declared!")
+        else:
+            pass
 
         self.mc_input = StochasticPowerFlowInput(self.grid)
 
@@ -84,6 +106,8 @@ class AiIterable:
 
             # apply the transitioning states
             self.nc.passive_branch_data.active = br_active
+        else:
+            pass
 
         if self.modify_injections:
             # sample monte-carlo injections
@@ -98,7 +122,7 @@ class AiIterable:
 
         return pf_res
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the iterable
         """

@@ -100,6 +100,7 @@ def _get_to_current_reference(phase_label: str) -> VarPowerFlowReferenceType:
 
 
 class SwitchEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

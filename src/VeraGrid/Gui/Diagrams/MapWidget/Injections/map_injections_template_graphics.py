@@ -205,11 +205,7 @@ class MapInjectionTemplateGraphicItem(NodeTemplate, QGraphicsEllipseItem):
         """
         Plot API objects profiles
         """
-        # time series object from the last simulation
-        ts = self.editor.circuit.time_profile
-
-        # plot the profiles
-        self.api_object.plot_profiles(time=ts)
+        self.editor.plot_device(api_object=self.api_object)
 
     def open_device_editor(self) -> bool:
         """

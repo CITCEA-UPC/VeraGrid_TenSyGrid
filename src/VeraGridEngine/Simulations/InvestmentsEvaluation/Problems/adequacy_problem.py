@@ -72,16 +72,44 @@ def determine_starting_index_of_every_year(index) -> IntVec:
 
 
 class AdequacyInvestmentProblem(BlackBoxProblemTemplate):
+    """
+    Adequacy investment optimization problem.
+    """
+    __slots__ = (
+        "n_monte_carlo_sim",
+        "use_monte_carlo",
+        "minimum_firm_share",
+        "use_firm_capacity_penalty",
+        "save_file",
+        "clustering_results",
+        "time_indices",
+        "output_f",
+        "greedy_dispatch_inputs",
+        "years_starts_indices",
+        "total_load",
+        "inv_group_capex",
+        "gen_mttf",
+        "gen_mttr",
+        "gen_capex",
+        "batt_capex",
+        "dim",
+        "dt",
+        "dim2gen",
+        "dim2batt",
+        "inv_gen_idx",
+        "inv_batt_idx",
+        "branches_cost",
+    )
 
     def __init__(self,
                  grid: MultiCircuit,
-                 n_monte_carlo_sim=10000,
+                 n_monte_carlo_sim: int = 10000,
                  use_monte_carlo: bool = True,
                  minimum_firm_share: float = 0.2,
                  use_firm_capacity_penalty: bool = True,
                  save_file: bool = True,
                  time_indices: IntVec | None = None,
-                 clustering_results: ClusteringResults | None = None):
+                 clustering_results: ClusteringResults | None = None) -> None:
         """
 
         :param grid:

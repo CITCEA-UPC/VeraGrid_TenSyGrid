@@ -11,6 +11,9 @@ from VeraGridEngine.IO.raw.versioned.v35.fixed_shunt import RawFixedShuntV35
 
 class RawFixedShuntV36(RawFixedShuntV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = (
+        "NAME",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='NAME', rawx_key='name', class_type=str, description='Fixed shunt name', max_chars=40),

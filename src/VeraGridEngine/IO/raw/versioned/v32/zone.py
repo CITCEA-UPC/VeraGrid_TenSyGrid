@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v31.zone import RawZoneV31
 
 class RawZoneV32(RawZoneV31):
     """PSSE v32 typed object inheriting v31."""
+    __slots__ = ()
     pass

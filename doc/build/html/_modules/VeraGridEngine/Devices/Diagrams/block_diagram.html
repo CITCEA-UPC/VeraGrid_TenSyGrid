@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Diagrams.block_diagram &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Diagrams.block_diagram &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -210,7 +210,7 @@
 
 <div class="viewcode-block" id="BlockDiagramNode">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Diagrams.html#VeraGridEngine.Devices.Diagrams.block_diagram.BlockDiagramNode">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BlockDiagramNode</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BlockDiagramNode</span>
@@ -284,7 +284,7 @@
 
 <div class="viewcode-block" id="BlockDiagramConnection">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Diagrams.html#VeraGridEngine.Devices.Diagrams.block_diagram.BlockDiagramConnection">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BlockDiagramConnection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BlockDiagramConnection</span>
@@ -352,6 +352,13 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Diagram</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;status&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;node_data&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;con_data&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;projection_node_data&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># Todo: add parse and to_dict functions</span>
 

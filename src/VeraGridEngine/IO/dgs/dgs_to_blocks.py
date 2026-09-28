@@ -1612,6 +1612,19 @@ def _predeclare_statement_lhs_symbols(blkdef: BlkDef, symbol_table: Dict[str, Va
 
 
 class DgsExpressionParser(ast.NodeVisitor):
+    __slots__ = (
+        "symbol_table",
+        "block_name",
+        "simulation_domain",
+        "_boundary_parameter_uids",
+        "_boundary_expression_by_name",
+        "_replacement_map",
+        "_procedural_mode_defaults",
+        "_procedural_logic_entries",
+        "_procedural_counter",
+        "_time_var",
+    )
+
     def __init__(self,
                  symbol_table: Dict[str, Var],
                  block_name: str = "",

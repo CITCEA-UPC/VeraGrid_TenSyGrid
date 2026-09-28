@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, List, Any, Union
 from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QPen, QCursor, QPainter, QPainterPath, QColor, QBrush, QPainterPathStroker
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsItemGroup, QMenu,
                                QGraphicsSceneContextMenuEvent, QGraphicsPathItem,
-                               QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsSceneMouseEvent,
+                               QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsLineItem, QGraphicsSceneMouseEvent,
                                QGraphicsSceneHoverEvent, QGraphicsTextItem, QStyleOptionGraphicsItem, QWidget)
 from VeraGrid.Gui.messages import yes_no_question, error_msg
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
@@ -547,7 +547,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         self.parent.delete_child(self)
 
-    def get_associated_widgets(self) -> List["GenericDiagramWidget" | "QGraphicsLineItem"]:
+    def get_associated_widgets(self) -> List[Union[GenericDiagramWidget, QGraphicsLineItem]]:
         """
         Get a list of all associated graphics
         :return:
@@ -1412,11 +1412,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         Plot API objects profiles
         """
-        # time series object from the last simulation
-        ts = self.editor.circuit.time_profile
-
-        # plot the profiles
-        self.api_object.plot_profiles(time=ts)
+        self.editor.plot_device(api_object=self.api_object)
 
     def open_device_editor(self) -> bool:
         """

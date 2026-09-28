@@ -16,6 +16,16 @@ class RawSubstationSwitchingDevice(RawObject):
 
     The version-specific children own the actual RAW field layouts.
     """
+    __slots__ = (
+        "_ISUB",
+        "_NI",
+        "_NJ",
+        "_NAME",
+        "_TYPE",
+        "_STATUS",
+        "_NSTAT",
+        "_X",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='ISUB', rawx_key='isub', class_type=int,

@@ -3,6 +3,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block
 
 
 class NativeBlockCompiler:
+    __slots__ = ("hash_code",)
 
     def __init__(self, bl: Block, folder: str):
         pass
@@ -13,6 +14,7 @@ class NativeBlockCompiler:
 
 
 class NativeBlockInterpreter:
+    __slots__ = ()
 
     def __init__(self, hash_code: str, folder: str):
         pass

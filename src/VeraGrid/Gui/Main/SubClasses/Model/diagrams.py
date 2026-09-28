@@ -6,14 +6,12 @@ from __future__ import annotations
 
 import os
 from time import perf_counter
-from typing import List, Tuple, Union, Callable, Iterable
+from typing import List, Tuple, Union, Callable, Iterable, Any
 
 import networkx as nx
 import numpy as np
 import shiboken6
 from PySide6 import QtGui, QtWidgets, QtCore
-from matplotlib import pyplot as plt
-from pandas.plotting import register_matplotlib_converters
 
 import VeraGridEngine.Devices.Diagrams.palettes as palettes
 from VeraGridEngine import ContingencyOperationTypes, MapDiagram
@@ -44,7 +42,7 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import (SchematicWid
 from VeraGrid.Gui.Diagrams.MapWidget.grid_map_widget import GridMapWidget, generate_map_diagram
 from VeraGrid.Gui.Diagrams.base_diagram_widget import BaseDiagramWidget
 from VeraGrid.Gui.Diagrams.SchematicWidget.diagram_bus_selection_dialogue import DiagramBusSelectorDialogue
-from VeraGrid.Gui.Diagrams.diagrams_model import DiagramsModel
+from VeraGrid.Gui.Diagrams.diagrams_model import DiagramsTreeModel
 from VeraGrid.Gui.messages import yes_no_question, error_msg, info_msg
 from VeraGrid.Gui.Main.SubClasses.Model.compiled_arrays import CompiledArraysMain
 from VeraGrid.Gui.Main.object_select_window import ObjectSelectWindow, ListSelectWindow
@@ -265,19 +263,7 @@ class DiagramsMain(CompiledArraysMain):
 
         self.available_results_steps_dict = None
 
-        # list of styles
-        self.ui.plt_style_comboBox.setModel(
-            gf.ComboModel(text_items=[(style, style) for style in plt.style.available])
-        )
-        if 'fivethirtyeight' in plt.style.available:
-            idx = self.ui.plt_style_comboBox.findData('fivethirtyeight')
-            if idx > -1:
-                self.ui.plt_style_comboBox.setCurrentIndex(idx)
-
         self.ui.diagramSearchLineEdit.setPlaceholderText(self.tr("Type to search in the current diagram"))
-
-        # configure matplotlib for pandas time series
-        register_matplotlib_converters()
 
         # task watcher for video export
         self.video_thread: VideoExportWorker | None = None
@@ -336,11 +322,14 @@ class DiagramsMain(CompiledArraysMain):
         self.ui.preset3_pushButton.clicked.connect(self.preset_3)
         self.ui.preset4_pushButton.clicked.connect(self.preset_4)
 
-        # list clicks
-        self.ui.diagramsListView.clicked.connect(self.set_selected_diagram_on_click)
+        # list / tree clicks
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is not None:
+            diagrams_view.clicked.connect(self.set_selected_diagram_on_click)
+            if hasattr(diagrams_view, 'doubleClicked'):
+                diagrams_view.doubleClicked.connect(self.set_selected_diagram_on_click)
 
         # combobox change
-        self.ui.plt_style_comboBox.currentIndexChanged.connect(self.plot_style_change)
         self.ui.palette_comboBox.currentIndexChanged.connect(self.set_diagrams_palette)
         self.ui.tile_provider_comboBox.currentIndexChanged.connect(self.set_diagrams_map_tile_provider)
 
@@ -369,12 +358,16 @@ class DiagramsMain(CompiledArraysMain):
         # TreeView
         self.ui.combinationsTreeView.clicked.connect(self.combinations_tree_clicked)
 
-        # context menu
-        self.ui.diagramsListView.customContextMenuRequested.connect(self.show_diagrams_context_menu)
-
-        # Set context menu policy to CustomContextMenu
-        self.ui.diagramsListView.setContextMenuPolicy(QtGui.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.ui.diagramsListView.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
+        # context menu and drag-and-drop
+        if diagrams_view is not None:
+            diagrams_view.customContextMenuRequested.connect(self.show_diagrams_context_menu)
+            diagrams_view.setContextMenuPolicy(QtGui.Qt.ContextMenuPolicy.CustomContextMenu)
+            diagrams_view.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
+            diagrams_view.setDragEnabled(True)
+            diagrams_view.setAcceptDrops(True)
+            diagrams_view.setDropIndicatorShown(True)
+            diagrams_view.setDragDropMode(QtWidgets.QAbstractItemView.DragDropMode.DragDrop)
+            diagrams_view.setDefaultDropAction(QtCore.Qt.DropAction.MoveAction)
 
     def shutdown_tile_sources(self) -> bool:
         """
@@ -2261,12 +2254,129 @@ class DiagramsMain(CompiledArraysMain):
             if isinstance(diagram_widget, SchematicWidget):
                 diagram_widget.recolour(use_api_color=use_api_color)
 
+    def set_diagrams_tree_view(self) -> None:
+        """
+        Create the diagrams' tree view
+        """
+        mdl = DiagramsTreeModel(self.circuit.diagrams, self.diagram_widgets_list)
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is not None:
+            diagrams_view.setModel(mdl)
+            if hasattr(diagrams_view, 'expandAll'):
+                diagrams_view.expandAll()
+            if hasattr(mdl, 'item_dropped'):
+                mdl.item_dropped.connect(self._on_diagram_tree_item_dropped)
+
+    def _on_diagram_tree_item_dropped(self, item: Any) -> None:
+        """
+        Handle post-drop UI updates: expand ancestors and select moved item.
+        """
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
+            return
+
+        model = diagrams_view.model() if hasattr(diagrams_view, 'model') else None
+        if model is None or not hasattr(model, 'index_for_item'):
+            return
+
+        index = model.index_for_item(item)
+        if index.isValid():
+            p_idx = index.parent()
+            while p_idx.isValid():
+                if hasattr(diagrams_view, 'expand'):
+                    diagrams_view.expand(p_idx)
+                p_idx = p_idx.parent()
+            diagrams_view.setCurrentIndex(index)
+            if hasattr(diagrams_view, 'scrollTo'):
+                diagrams_view.scrollTo(index)
+
     def set_diagrams_list_view(self) -> None:
         """
-        Create the diagrams' list view
+        Backward-compatible alias for set_diagrams_tree_view
         """
-        mdl = DiagramsModel(self.diagram_widgets_list)
-        self.ui.diagramsListView.setModel(mdl)
+        self.set_diagrams_tree_view()
+
+    def get_selected_diagram_folder(self) -> dev.DiagramFolder | None:
+        """
+        Get the currently selected diagram folder, or the parent folder of the selected diagram,
+        or None if at root.
+        """
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
+            return None
+
+        model = diagrams_view.model() if hasattr(diagrams_view, 'model') else None
+        if model is None or not hasattr(model, 'get_item'):
+            return None
+
+        indices = diagrams_view.selectedIndexes() if hasattr(diagrams_view, 'selectedIndexes') else []
+        selected_index = indices[0] if len(indices) else (diagrams_view.currentIndex() if hasattr(diagrams_view, 'currentIndex') else QtCore.QModelIndex())
+        if not selected_index.isValid():
+            return None
+
+        item = model.get_item(selected_index)
+        if isinstance(item, dev.DiagramFolder):
+            return item
+        elif isinstance(item, dev.BaseDiagram):
+            return item.group
+        return None
+
+    def add_diagram_folder(self,
+                           parent_folder: dev.DiagramFolder | bool | None = False,
+                           folder_name: str | None = None) -> dev.DiagramFolder | None:
+        """
+        Prompt user for a folder name and create a new DiagramFolder.
+        """
+        if parent_folder is False:
+            parent_folder = self.get_selected_diagram_folder()
+        elif not isinstance(parent_folder, dev.DiagramFolder):
+            parent_folder = None
+
+        if folder_name is None:
+            parent_widget = self if isinstance(self, QtWidgets.QWidget) else None
+            name, ok = QtWidgets.QInputDialog.getText(
+                parent_widget,
+                self.tr("New Folder"),
+                self.tr("Folder name:"),
+                QtWidgets.QLineEdit.EchoMode.Normal,
+                self.tr("New Folder")
+            )
+            if not ok or not name.strip():
+                return None
+            folder_name = name.strip()
+
+        new_folder = self.circuit.diagrams.add_folder(folder_or_name=folder_name, parent=parent_folder)
+        self.set_diagrams_list_view()
+
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is not None:
+            model = diagrams_view.model() if hasattr(diagrams_view, 'model') else None
+            if model is not None and hasattr(model, 'index_for_item'):
+                idx = model.index_for_item(new_folder)
+                if idx.isValid():
+                    p_idx = idx.parent()
+                    while p_idx.isValid():
+                        if hasattr(diagrams_view, 'expand'):
+                            diagrams_view.expand(p_idx)
+                        p_idx = p_idx.parent()
+                    diagrams_view.setCurrentIndex(idx)
+                    if hasattr(diagrams_view, 'scrollTo'):
+                        diagrams_view.scrollTo(idx)
+
+        return new_folder
+
+    def rename_diagram_or_folder(self) -> None:
+        """
+        Trigger inline rename of the selected diagram or folder in the tree view.
+        """
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
+            return
+
+        indices = diagrams_view.selectedIndexes()
+        selected_index = indices[0] if len(indices) else diagrams_view.currentIndex()
+        if selected_index.isValid():
+            diagrams_view.edit(selected_index)
 
     @staticmethod
     def _validate_diagram_widget_entry(diagram_widget: object) -> DIAGRAM_WIDGETS:
@@ -2362,18 +2472,32 @@ class DiagramsMain(CompiledArraysMain):
         Get the currently selected diagram
         :return: None, DiagramEditorWidget, GridMapWidget, BusViewerGUI
         """
-        indices = self.ui.diagramsListView.selectedIndexes()
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
+            return None
 
-        if len(indices):
-            idx = indices[0].row()
+        indices = diagrams_view.selectedIndexes() if hasattr(diagrams_view, 'selectedIndexes') else []
+        selected_index = indices[0] if len(indices) else (diagrams_view.currentIndex() if hasattr(diagrams_view, 'currentIndex') else QtCore.QModelIndex())
+
+        if selected_index.isValid():
+            model = diagrams_view.model() if hasattr(diagrams_view, 'model') else None
+            if model is not None and hasattr(model, 'get_item'):
+                item = model.get_item(selected_index)
+                if isinstance(item, dev.BaseDiagram):
+                    if hasattr(model, 'get_widget_for_diagram'):
+                        w = model.get_widget_for_diagram(item)
+                        if w is not None:
+                            return w
+                    for w in self.diagram_widgets_list:
+                        if getattr(w, 'diagram', None) is item:
+                            return w
+                elif isinstance(item, dev.DiagramFolder):
+                    return None
+
+            idx = selected_index.row()
             return self._ensure_diagram_widget_at_index(index=idx)
         else:
-            current_index: QtCore.QModelIndex = self.ui.diagramsListView.currentIndex()
-            if current_index.isValid():
-                idx = current_index.row()
-                return self._ensure_diagram_widget_at_index(index=idx)
-            else:
-                return None
+            return None
 
     def create_blank_schematic_diagram(self, name: str = "") -> SchematicWidget:
         """
@@ -2431,10 +2555,32 @@ class DiagramsMain(CompiledArraysMain):
             elif isinstance(diagram_widget, GridMapWidget):
                 diagram_widget.update_device_sizes(asynchronously=False)
 
-    def set_selected_diagram_on_click(self):
+    def set_selected_diagram_on_click(self, index: QtCore.QModelIndex | None = None):
         """
-        on list-view click, set the currently selected diagram widget
+        on list/tree-view click, set the currently selected diagram widget
         """
+        if index is not None and isinstance(index, QtCore.QModelIndex) and index.isValid():
+            diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+            if diagrams_view is not None:
+                model = diagrams_view.model()
+                if model is not None and hasattr(model, 'get_item'):
+                    item = model.get_item(index)
+                    if isinstance(item, dev.DiagramFolder):
+                        # Folder clicked, do not switch current diagram view
+                        return
+                    elif isinstance(item, dev.BaseDiagram):
+                        widget = None
+                        if hasattr(model, 'get_widget_for_diagram'):
+                            widget = model.get_widget_for_diagram(item)
+                        if widget is None:
+                            for w in self.diagram_widgets_list:
+                                if getattr(w, 'diagram', None) is item:
+                                    widget = w
+                                    break
+                        if widget is not None:
+                            self.set_diagram_widget(widget)
+                        return
+
         diagram = self.get_selected_diagram_widget()
 
         if diagram:
@@ -2801,59 +2947,101 @@ class DiagramsMain(CompiledArraysMain):
 
     def add_diagram_widget_and_diagram(self,
                                        diagram_widget: DIAGRAM_WIDGETS,
-                                       diagram: Union[dev.SchematicDiagram, dev.MapDiagram]):
+                                       diagram: Union[dev.SchematicDiagram, dev.MapDiagram],
+                                       folder: dev.DiagramFolder | None = None):
         """
         Add diagram widget, it also adds the diagram to the circuit for later
         :param diagram_widget: Diagram widget object
         :param diagram: SchematicDiagram or MapDiagram
+        :param folder: Optional parent DiagramFolder
         """
+        if folder is None and getattr(diagram, 'group', None) is not None:
+            folder = diagram.group
 
         # add the widget pointer
         self._append_diagram_widget(diagram_widget)
 
         # add the diagram to the circuit
-        self.circuit.add_diagram(diagram)
+        self.circuit.add_diagram(diagram, folder=folder)
 
     def remove_diagram(self):
         """
-        Remove one or more selected diagrams
+        Remove one or more selected diagrams or folders
         """
-        selected_rows = sorted({idx.row() for idx in self.ui.diagramsListView.selectedIndexes()})
-        if len(selected_rows) == 0:
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
             return
 
-        if len(selected_rows) == 1:
-            entry: SchematicWidget | GridMapWidget = self.diagram_widgets_list[selected_rows[0]]
+        model = diagrams_view.model()
+        if model is None:
+            return
 
-            question = "Are you sure that you want to delete " + str(entry.name) + "?"
+        selected_indexes = diagrams_view.selectedIndexes()
+        if not selected_indexes:
+            return
+
+        # Gather unique selected items
+        selected_items = []
+        if hasattr(model, 'get_item'):
+            seen_idtags = set()
+            for idx in selected_indexes:
+                if idx.isValid():
+                    item = model.get_item(idx)
+                    if item is not None and getattr(item, 'idtag', None) not in seen_idtags:
+                        seen_idtags.add(getattr(item, 'idtag', None))
+                        selected_items.append(item)
         else:
-            question = f"Are you sure that you want to delete {len(selected_rows)} selected diagrams?"
+            selected_rows = sorted({idx.row() for idx in selected_indexes})
+            for r in selected_rows:
+                if 0 <= r < len(self.diagram_widgets_list):
+                    selected_items.append(self.diagram_widgets_list[r].diagram)
+
+        if not selected_items:
+            return
+
+        if len(selected_items) == 1:
+            item = selected_items[0]
+            if isinstance(item, dev.DiagramFolder):
+                question = self.tr("Are you sure that you want to delete folder '{0}' and all its contents?").format(item.name)
+            else:
+                question = "Are you sure that you want to delete " + str(item.name) + "?"
+        else:
+            question = f"Are you sure that you want to delete {len(selected_items)} selected items?"
 
         ok = yes_no_question(question, self.tr("Remove diagram"))
         if not ok:
             return
 
-        # Remember a candidate row to select after deletion.
-        next_row = selected_rows[0]
+        diagrams_to_delete = set()
+        folders_to_delete = set()
 
-        # Delete from highest row to lowest to avoid index shifts.
-        for row in sorted(selected_rows, reverse=True):
-            widget = self.diagram_widgets_list.pop(row)
-            if isinstance(widget, (SchematicWidget, GridMapWidget)):
-                self.circuit.remove_diagram(widget.diagram)
+        for item in selected_items:
+            if isinstance(item, dev.DiagramFolder):
+                folders_to_delete.add(item)
+                for d in item.get_all_diagrams():
+                    diagrams_to_delete.add(d)
+            elif isinstance(item, dev.BaseDiagram):
+                diagrams_to_delete.add(item)
+
+        remaining_widgets = []
+        for widget in self.diagram_widgets_list:
+            if getattr(widget, 'diagram', None) in diagrams_to_delete:
                 self.dispose_diagram_widget(widget)
+            else:
+                remaining_widgets.append(widget)
+        self.diagram_widgets_list = remaining_widgets
 
-        # Remove currently shown widget and rebuild list view selection.
+        for folder in folders_to_delete:
+            self.circuit.diagrams.remove_folder(folder)
+        for d in diagrams_to_delete:
+            self.circuit.remove_diagram(d)
+
         self.remove_all_diagram_widgets()
         self.set_diagrams_list_view()
 
         if len(self.diagram_widgets_list) > 0:
-            target_row = min(next_row, len(self.diagram_widgets_list) - 1)
-            widget = self._ensure_diagram_widget_at_index(index=target_row)
-            if widget is not None:
-                self.set_diagram_widget(widget)
-        else:
-            pass
+            target_widget = self.diagram_widgets_list[0]
+            self.set_diagram_widget(target_widget)
 
     def duplicate_diagram(self):
         """
@@ -2861,14 +3049,16 @@ class DiagramsMain(CompiledArraysMain):
         """
         diagram_widget = self.get_selected_diagram_widget()
         if diagram_widget is not None:
-
+            parent_folder = getattr(diagram_widget.diagram, 'group', None)
             new_diagram_widget = diagram_widget.copy()
 
             self.add_diagram_widget_and_diagram(diagram_widget=new_diagram_widget,
-                                                diagram=new_diagram_widget.diagram)
+                                                diagram=new_diagram_widget.diagram,
+                                                folder=parent_folder)
 
             # refresh the list view
             self.set_diagrams_list_view()
+            self.set_diagram_widget(widget=new_diagram_widget)
         else:
             info_msg(text=self.tr("Select a valid diagram"), title=self.tr("Duplicate diagram"))
 
@@ -2881,7 +3071,9 @@ class DiagramsMain(CompiledArraysMain):
 
         self.diagram_widgets_list.clear()
         self.remove_all_diagram_widgets()
-        self.ui.diagramsListView.setModel(None)
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is not None:
+            diagrams_view.setModel(None)
 
     def remove_all_diagram_widgets(self) -> None:
         """
@@ -2917,9 +3109,22 @@ class DiagramsMain(CompiledArraysMain):
         self.ui.diagram_selection_splitter.setStretchFactor(1, 1)
 
         # set the selected index
-        row = self.diagram_widgets_list.index(widget)
-        index = self.ui.diagramsListView.model().index(row, 0)
-        self.ui.diagramsListView.setCurrentIndex(index)
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is not None:
+            model = diagrams_view.model()
+            if model is not None:
+                if hasattr(model, 'index_for_item') and hasattr(widget, 'diagram'):
+                    index = model.index_for_item(widget.diagram)
+                else:
+                    try:
+                        row = self.diagram_widgets_list.index(widget)
+                        index = model.index(row, 0)
+                    except (ValueError, Exception):
+                        index = QtCore.QModelIndex()
+                if index.isValid():
+                    diagrams_view.setCurrentIndex(index)
+                    if hasattr(diagrams_view, 'scrollTo'):
+                        diagrams_view.scrollTo(index)
 
         # set the properties
         self._enable_setting_auto_upgrade = False
@@ -2940,13 +3145,6 @@ class DiagramsMain(CompiledArraysMain):
 
         self.ui.defaultBusVoltageSpinBox.setValue(widget.diagram.default_bus_voltage)
         self._enable_setting_auto_upgrade = True
-
-    def plot_style_change(self):
-        """
-        Change the style
-        """
-        style = self.ui.plt_style_comboBox.currentData()
-        plt.style.use(style)
 
     def diagrams_time_slider_change(self) -> None:
         """
@@ -3782,10 +3980,24 @@ class DiagramsMain(CompiledArraysMain):
 
     def show_diagrams_context_menu(self, pos: QtCore.QPoint):
         """
-        Show diagrams list view context menu
+        Show diagrams tree view context menu
         :param pos: Relative click position
         """
-        context_menu = QtWidgets.QMenu(parent=self.ui.diagramsListView)
+        diagrams_view = getattr(self.ui, 'diagramsTreeView', getattr(self.ui, 'diagramsListView', None))
+        if diagrams_view is None:
+            return
+
+        context_menu = QtWidgets.QMenu(parent=diagrams_view)
+        index = diagrams_view.indexAt(pos)
+        model = diagrams_view.model() if hasattr(diagrams_view, 'model') else None
+        item = model.get_item(index) if (model is not None and hasattr(model, 'get_item')) else None
+
+        target_folder = None
+        if index.isValid() and item is not None:
+            if isinstance(item, dev.DiagramFolder):
+                target_folder = item
+            elif isinstance(item, dev.BaseDiagram):
+                target_folder = item.group
 
         gf.add_menu_entry(menu=context_menu,
                           text=self.tr("New schematic"),
@@ -3802,19 +4014,44 @@ class DiagramsMain(CompiledArraysMain):
                           icon_path=":/Icons/icons/map (add).png",
                           function_ptr=self.add_map_diagram)
 
-        gf.add_menu_entry(menu=context_menu,
-                          text=self.tr("Duplicate"),
-                          icon_path=":/Icons/icons/copy.png",
-                          function_ptr=self.duplicate_diagram)
-
         context_menu.addSeparator()
-        gf.add_menu_entry(menu=context_menu,
-                          text=self.tr("Remove"),
-                          icon_path=":/Icons/icons/delete3.png",
-                          function_ptr=self.remove_diagram)
 
-        # Convert global position to local position of the list widget
-        mapped_pos = self.ui.diagramsListView.viewport().mapToGlobal(pos)
+        gf.add_menu_entry(menu=context_menu,
+                          text=self.tr("New folder"),
+                          icon_path=":/Icons/icons/tree.png",
+                          function_ptr=lambda checked=False, p=target_folder: self.add_diagram_folder(parent_folder=p))
+
+        if index.isValid() and item is not None:
+            gf.add_menu_entry(menu=context_menu,
+                              text=self.tr("Rename"),
+                              icon_path=":/Icons/icons/edit.png",
+                              function_ptr=self.rename_diagram_or_folder)
+
+            if isinstance(item, dev.BaseDiagram):
+                gf.add_menu_entry(menu=context_menu,
+                                  text=self.tr("Duplicate"),
+                                  icon_path=":/Icons/icons/copy.png",
+                                  function_ptr=self.duplicate_diagram)
+
+            context_menu.addSeparator()
+            gf.add_menu_entry(menu=context_menu,
+                              text=self.tr("Remove"),
+                              icon_path=":/Icons/icons/delete3.png",
+                              function_ptr=self.remove_diagram)
+        else:
+            if len(diagrams_view.selectedIndexes()) > 0:
+                gf.add_menu_entry(menu=context_menu,
+                                  text=self.tr("Duplicate"),
+                                  icon_path=":/Icons/icons/copy.png",
+                                  function_ptr=self.duplicate_diagram)
+                context_menu.addSeparator()
+                gf.add_menu_entry(menu=context_menu,
+                                  text=self.tr("Remove"),
+                                  icon_path=":/Icons/icons/delete3.png",
+                                  function_ptr=self.remove_diagram)
+
+        # Convert local position of the view viewport to global screen position
+        mapped_pos = diagrams_view.viewport().mapToGlobal(pos)
         context_menu.exec(mapped_pos)
 
     def disable_all_results_tags(self):

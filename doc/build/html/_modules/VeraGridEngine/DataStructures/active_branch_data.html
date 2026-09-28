@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.active_branch_data &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.DataStructures.active_branch_data &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -121,6 +121,27 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ControllableBranchData</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nelm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_controlled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;m_taps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau_taps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_angle&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_angle_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_angle_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_module_control_mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_phase_control_mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tap_controlled_buses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_any_pf_control&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nelm</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nelm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">nelm</span>

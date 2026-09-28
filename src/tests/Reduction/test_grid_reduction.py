@@ -7,6 +7,8 @@ import numpy as np
 import VeraGridEngine.api as gce
 from VeraGridEngine.Topology.GridReduction.ptdf_grid_reduction import (ptdf_reduction,
                                                                        ptdf_reduction_projected,
+                                                                       ptdf_reduction_ree_bad,
+                                                                       ptdf_reduction_ree_less_bad,
                                                                        get_reduced_branch_flows)
 from VeraGridEngine.Topology.GridReduction.ward_equivalents import ward_standard_reduction
 from VeraGridEngine.Topology.GridReduction.di_shi_grid_reduction import di_shi_reduction
@@ -1321,6 +1323,43 @@ def ptdf_projected_large_real_syst_time_series():
         "Compacted generation should match non-compacted"
     assert np.allclose(P_no_compact_load_ts, P_compact_load_ts, atol=1e-4), \
         "Compacted load should match non-compacted"
+
+
+def test_ptdf_reduction_ree_execution() -> None:
+    """
+    Verify ptdf_reduction_ree_bad and ptdf_reduction_ree_less_bad execute.
+    """
+    grid: gce.MultiCircuit = gce.MultiCircuit()
+    b1: gce.Bus = gce.Bus(name="B1", Vnom=110.0)
+    b2: gce.Bus = gce.Bus(name="B2", Vnom=110.0)
+    b3: gce.Bus = gce.Bus(name="B3", Vnom=110.0)
+    grid.add_bus(b1)
+    grid.add_bus(b2)
+    grid.add_bus(b3)
+    l1: gce.Line = gce.Line(bus_from=b1, bus_to=b2, name="L1", x=0.1, r=0.01)
+    l2: gce.Line = gce.Line(bus_from=b2, bus_to=b3, name="L2", x=0.1, r=0.01)
+    grid.add_line(l1)
+    grid.add_line(l2)
+    gen: gce.Generator = gce.Generator(name="G1", P=10.0)
+    load: gce.Load = gce.Load(name="Load1", P=10.0)
+    grid.add_generator(bus=b1, api_obj=gen)
+    grid.add_load(bus=b3, api_obj=load)
+
+    # Reduction using ptdf_reduction_ree_bad
+    g1: gce.MultiCircuit = grid.copy()
+    red1, _log1 = ptdf_reduction_ree_bad(
+        grid=g1,
+        reduction_bus_indices=np.array([2]),
+    )
+    assert red1.get_bus_number() == 2
+
+    # Reduction using ptdf_reduction_ree_less_bad
+    g2: gce.MultiCircuit = grid.copy()
+    red2, _log2 = ptdf_reduction_ree_less_bad(
+        grid=g2,
+        reduction_bus_indices=np.array([2]),
+    )
+    assert red2.get_bus_number() == 2
 
 
 if __name__ == '__main__':

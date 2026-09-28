@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from PySide6 import QtCore, QtWidgets
 
-from VeraGrid.Gui.messages import error_msg
 from VeraGrid.Gui.wrappable_table_model import WrappableTableModel
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Utils.Filtering.results_table_filtering import FilterResultsTable
@@ -349,19 +348,3 @@ class ResultsModel(WrappableTableModel):
         else:
             # there are no elements
             pass
-
-    def plot(self, ax=None, selected_col_idx=None, selected_rows=None, stacked=False):
-        """
-        Plot the data model
-        :param ax: Matplotlib axis
-        :param selected_col_idx: list of selected column indices
-        :param selected_rows: list of rows to plot
-        :param stacked: stack the data?
-        """
-        try:
-            self.table.plot(ax=ax,
-                            selected_col_idx=selected_col_idx,
-                            selected_rows=selected_rows,
-                            stacked=stacked)
-        except ValueError as e:
-            error_msg(text=str(e), title=self.tr("Plotting error"))

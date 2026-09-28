@@ -8,13 +8,11 @@ from __future__ import annotations
 import re
 from typing import Sequence
 
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 
 
 def sort_pair_by_x(point: tuple[float, float] | tuple[float, int]) -> float:
@@ -160,7 +158,7 @@ class LookupArrayLinearDialog(QtWidgets.QDialog):
         "_x_label",
         "_y_label",
         "_preview_title",
-        "_preview_dialog",
+        "_preview_dialogue",
     )
 
     def __init__(self,
@@ -193,7 +191,7 @@ class LookupArrayLinearDialog(QtWidgets.QDialog):
         self._x_label: str = str(x_label)
         self._y_label: str = str(y_label)
         self._preview_title: str = preview_title if preview_title is not None else f"{block_label} Preview"
-        self._preview_dialog: QtWidgets.QDialog | None = None
+        self._preview_dialogue: PlotDialogue | None = None
 
         main_layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout(self)
         description_label: QtWidgets.QLabel = QtWidgets.QLabel(
@@ -491,25 +489,15 @@ class LookupArrayLinearDialog(QtWidgets.QDialog):
         """
         return list(self._x_points), list(self._y_points)
 
-    def _clear_preview_dialog_reference(self, destroyed_obj: QtCore.QObject | None = None) -> None:
-        """
-        Drop the stored preview-dialog reference after the window closes.
-
-        :param destroyed_obj: Destroyed Qt object emitted by the signal.
-        :return: None.
-        """
-        _unused_destroyed_obj: QtCore.QObject | None = destroyed_obj
-        self._preview_dialog = None
-
     def close_preview_dialog(self) -> None:
-        """
-        Schedule the retained plot preview for deferred deletion.
+        """Dispose the retained native plot preview before replacing it.
 
         :return: None.
         """
-        if self._preview_dialog is not None:
-            delete_dialog_safely(dialog=self._preview_dialog)
-            self._preview_dialog = None
+        if self._preview_dialogue is not None:
+            self._preview_dialogue.reject()
+            delete_dialog_safely(dialog=self._preview_dialogue)
+            self._preview_dialogue = None
         else:
             pass
 
@@ -556,29 +544,27 @@ class LookupArrayLinearDialog(QtWidgets.QDialog):
 
         self.close_preview_dialog()
 
-        figure: Figure = Figure(figsize=(7, 4))
-        axis: Axes = figure.add_subplot(111)
-
         # The preview intentionally plots the sorted point sequence because the
         # effective lookup law always depends on the monotonic x-axis ordering.
         x_values: np.ndarray = np.asarray([pair[0] for pair in pairs], dtype=float)
         y_values: np.ndarray = np.asarray([pair[1] for pair in pairs], dtype=float)
-        axis.plot(x_values, y_values, marker="o", color="tab:blue")
-        axis.grid(True)
-        axis.set_xlabel(self._x_label)
-        axis.set_ylabel(self._y_label)
-        axis.set_title(self._preview_title)
-        figure.tight_layout()
-
-        open_dialogs: list[QtWidgets.QDialog] = list()
-        preview_dialog: QtWidgets.QDialog = show_matplotlib_figure(figure=figure,
-                                                                    parent=self,
-                                                                    open_dialogs=open_dialogs,
-                                                                    title=self._preview_title)
-        preview_dialog.destroyed.connect(self._clear_preview_dialog_reference)
-        self._preview_dialog = preview_dialog
-        preview_dialog.raise_()
-        preview_dialog.activateWindow()
+        preview_dialogue: PlotDialogue = PlotDialogue(title=self._preview_title, parent=self)
+        preview_dialogue.chart.clear()
+        preview_dialogue.chart.add_line_series(
+            name=self._preview_title,
+            x_values=x_values,
+            y_values=y_values,
+            color='#2563eb',
+        )
+        preview_dialogue.chart.add_scatter_series(
+            name='',
+            x_values=x_values,
+            y_values=y_values,
+            color='#2563eb',
+        )
+        preview_dialogue.chart.set_axis_titles(self._x_label, self._y_label)
+        self._preview_dialogue = preview_dialogue
+        preview_dialogue.show()
 
     def _read_points_from_table(self) -> tuple[list[float], list[float]]:
         """

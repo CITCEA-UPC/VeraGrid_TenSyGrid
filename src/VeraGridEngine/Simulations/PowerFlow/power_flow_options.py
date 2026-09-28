@@ -16,6 +16,32 @@ class PowerFlowOptions(OptionsTemplate):
     Power flow options
     """
 
+    __slots__ = (
+        'solver_type',
+        'retry_with_other_methods',
+        'tolerance',
+        'controls_start_tolerance',
+        'max_iter',
+        'limit_i_vsc',
+        'control_Q',
+        'verbose',
+        'initialize_with_existing_solution',
+        'control_taps_modules',
+        'control_taps_phase',
+        'control_remote_voltage',
+        'orthogonalize_controls',
+        'apply_temperature_correction',
+        'branch_impedance_tolerance_mode',
+        'distributed_slack',
+        'ignore_single_node_islands',
+        'trust_radius',
+        'backtracking_parameter',
+        'use_stored_guess',
+        'initialize_angles',
+        'use_autodiff_jacobian',
+        'generate_report',
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="solver_type", tpe=SolverType),
         GCProp(key="retry_with_other_methods", tpe=bool),

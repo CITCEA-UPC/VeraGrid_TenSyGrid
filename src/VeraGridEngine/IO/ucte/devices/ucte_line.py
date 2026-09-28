@@ -20,11 +20,23 @@ from VeraGridEngine.basic_structures import Logger
 
 class UcteLine:
     """
-    UcteLine
+    UcteLine device.
     """
 
-    def __init__(self):
-        self.node1 = ""  # 0-7: Node 1 code
+    __slots__ = (
+        "node1",
+        "node2",
+        "order_code",
+        "status",
+        "resistance",
+        "reactance",
+        "susceptance",
+        "current_limit",
+        "name",
+    )
+
+    def __init__(self) -> None:
+        self.node1: str = ""  # 0-7: Node 1 code
         self.node2 = ""  # 9-16: Node 2 code
         self.order_code = ""  # 18: Order code
 

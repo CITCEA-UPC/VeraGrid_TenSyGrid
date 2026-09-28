@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation &mdash; VeraGrid 6.0.20 documentation</title>
+  <title>VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/style.css?v=b3745da1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/style.css?v=ba3a54df" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=f001e538"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -44,9 +44,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/installation.html">💽 Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/user_interface.html">📊 User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/veragrid_scripting_guide.html">📑 VeraGrid scripting guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/grid_analysis.html">🔎 Grid analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/structure.html">🌁 Structure of VeraGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/modelling.html">📐 Grid Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/small_signal_stability.html">🔍 Small-Signal stability analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/model_debugging.html">🪲 Model debugging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/file_operations.html">💾 File loading and saving</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/topology.html">🌵 Topology</a></li>
@@ -59,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/short_circuit.html">⚡ Short-Circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/stochastic_power_flow.html">🎲 Stochastic power flow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/continuation_power_flow.html">➿ Continuation power flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/sigma_analysis.html">🌘 Sigma analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/solar_wizard.html">☀️ Solar power wizard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/contingency_analysis.html">💥 Contingency analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/investment_optimization.html">🏦 Investment optimization</a></li>
@@ -67,10 +69,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/nodal_hosting_capacity.html">🏭 Nodal hosting capacity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/state_estimation.html">🌀 State estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/dynamic_simulations.html">🧲 Dynamic simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/license.html">📜 License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../rst_source/change_log.html">Change log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/data_models.html">Data Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst_source/api/auto/modules.html">VeraGrid</a></li>
 </ul>
@@ -111,43 +113,62 @@
 <div class="viewcode-block" id="PseudoMeasurement">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.StateEstimation.html#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PseudoMeasurement</span><span class="p">(</span><span class="n">MeasurementTemplate</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">api_obj</span><span class="p">:</span> <span class="n">Bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                 <span class="n">idtag</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># If this has to be injected in DB it has to get a object instance of class Device. In order</span>
-        <span class="c1"># to persist it in DB it should be saved in Asset class !</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PseudoMeasurement class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;bus&quot;</span><span class="p">,)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">api_obj</span><span class="p">:</span> <span class="n">Bus</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">idtag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : float</span>
-<span class="sd">            Per-unit value of pseudo measurement</span>
-<span class="sd">        sigma : float</span>
-<span class="sd">            Per-unit standard deviation (large → low weight)</span>
-<span class="sd">        bus : int</span>
-<span class="sd">            Bus index this pseudo measurement belongs to</span>
-<span class="sd">        mtype : str</span>
-<span class="sd">            Measurement type, e.g. &quot;p_inj&quot;, &quot;q_inj&quot;</span>
+<span class="sd">        PseudoMeasurement constructor.</span>
+
+<span class="sd">        :param value: Per-unit value of pseudo measurement</span>
+<span class="sd">        :param sigma: Per-unit standard deviation (large -&gt; low weight)</span>
+<span class="sd">        :param api_obj: Bus object this pseudo measurement belongs to</span>
+<span class="sd">        :param name: Name of the measurement</span>
+<span class="sd">        :param idtag: Unique identifier tag</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">MeasurementTemplate</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                     <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-                                     <span class="n">uncertainty</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
-                                     <span class="n">api_obj</span><span class="o">=</span><span class="n">api_obj</span><span class="p">,</span>
-                                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                     <span class="n">idtag</span><span class="o">=</span><span class="n">idtag</span><span class="p">,</span>
-                                     <span class="n">device_type</span><span class="o">=</span><span class="n">DeviceType</span><span class="o">.</span><span class="n">NoDevice</span><span class="p">)</span>
+        <span class="n">MeasurementTemplate</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">uncertainty</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">api_obj</span><span class="o">=</span><span class="n">api_obj</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">idtag</span><span class="o">=</span><span class="n">idtag</span><span class="p">,</span>
+            <span class="n">device_type</span><span class="o">=</span><span class="n">DeviceType</span><span class="o">.</span><span class="n">NoDevice</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">api_obj</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">:</span> <span class="n">Bus</span> <span class="o">=</span> <span class="n">api_obj</span>
 
 <div class="viewcode-block" id="PseudoMeasurement.get_value_pu">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.StateEstimation.html#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_value_pu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_value_pu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_value_pu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get value in per unit.</span>
+
+<span class="sd">        :param Sbase: Base power</span>
+<span class="sd">        :return: Value per unit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="n">Sbase</span></div>
 
 
 <div class="viewcode-block" id="PseudoMeasurement.get_standard_deviation_pu">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.StateEstimation.html#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_standard_deviation_pu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_standard_deviation_pu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_standard_deviation_pu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get standard deviation in per unit.</span>
+
+<span class="sd">        :param Sbase: Base power</span>
+<span class="sd">        :return: Standard deviation per unit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">Sbase</span></div>
 </div>
 

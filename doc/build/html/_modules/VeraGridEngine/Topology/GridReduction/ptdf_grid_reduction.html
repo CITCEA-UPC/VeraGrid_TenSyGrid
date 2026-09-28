@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Topology.GridReduction.ptdf_grid_reduction &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Topology.GridReduction.ptdf_grid_reduction &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -746,7 +746,7 @@
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
     <span class="c1"># find the boundary set: buses from the internal set the join to the external set</span>
-    <span class="n">e_buses</span><span class="p">,</span> <span class="n">i_buses</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_reduction_sets</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">reduction_bus_indices</span><span class="o">=</span><span class="n">reduction_bus_indices</span><span class="p">)</span>
+    <span class="n">e_buses</span><span class="p">,</span> <span class="n">i_buses</span><span class="p">,</span> <span class="n">i_branches</span> <span class="o">=</span> <span class="n">get_reduction_sets</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">reduction_bus_indices</span><span class="o">=</span><span class="n">reduction_bus_indices</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e_buses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">add_info</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Nothing to reduce&quot;</span><span class="p">)</span>
@@ -839,7 +839,7 @@
     <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
     <span class="c1"># find the boundary set: buses from the internal set the join to the external set</span>
-    <span class="n">e_buses</span><span class="p">,</span> <span class="n">i_buses</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_reduction_sets</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">reduction_bus_indices</span><span class="o">=</span><span class="n">reduction_bus_indices</span><span class="p">)</span>
+    <span class="n">e_buses</span><span class="p">,</span> <span class="n">i_buses</span><span class="p">,</span> <span class="n">i_branches</span> <span class="o">=</span> <span class="n">get_reduction_sets</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">reduction_bus_indices</span><span class="o">=</span><span class="n">reduction_bus_indices</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e_buses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">add_info</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Nothing to reduce&quot;</span><span class="p">)</span>

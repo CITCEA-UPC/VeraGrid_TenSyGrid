@@ -8,6 +8,12 @@ from VeraGridEngine.Devices.Substation.voltage_level import VoltageLevel
 
 
 class IidmVoltageLevel(IidmObject):
+    __slots__ = (
+        "id",
+        "name",
+        "nominalV",
+        "topologyKind",
+    )
     def __init__(self, _id, nominalV, topologyKind, name=""):
         super().__init__("VoltageLevel")
         self.id = _id

@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.multi_section_line import RawMultiLine
 
 class RawMultiLineSectionV29(RawMultiLineSection):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

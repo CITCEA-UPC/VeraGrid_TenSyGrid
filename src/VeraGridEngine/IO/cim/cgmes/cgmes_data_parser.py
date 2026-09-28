@@ -359,6 +359,19 @@ class CgmesDataParser(BaseCircuit):
     Class to read any cgmes-like set of files
     """
 
+    __slots__ = (
+        "text_func",
+        "progress_func",
+        "keep_parsed_data",
+        "log_overwriting_values",
+        "allow_profileless_import",
+        "logger",
+        "parsed_data",
+        "data",
+        "boundary_set",
+        "cgmes_version",
+    )
+
     def __init__(self,
                  text_func: Union[Callable, None] = None,
                  progress_func: Union[Callable, None] = None,

@@ -12,6 +12,12 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_int
 
 
 class RawImpedanceCorrectionTable(RawObject):
+    __slots__ = (
+        "_I",
+        "T",
+        "F_re",
+        "F_im",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='iarea', class_type=int, description='Area number', min_value=1,
                      max_value=9999),

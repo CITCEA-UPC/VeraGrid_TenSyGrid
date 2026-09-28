@@ -7,9 +7,51 @@ class MatpowerBranch:
     """
     Class to parse and write branch data from MATPOWER .m files.
     """
-    def __init__(self):
+
+    __slots__ = (
+        "f_bus",
+        "t_bus",
+        "br_r",
+        "br_x",
+        "br_b",
+        "rate_a",
+        "rate_b",
+        "rate_c",
+        "tap",
+        "shift",
+        "br_status",
+        "angmin",
+        "angmax",
+        "pf",
+        "qf",
+        "pt",
+        "qt",
+        "mu_sf",
+        "mu_st",
+        "mu_angmin",
+        "mu_angmax",
+        "vf_set",
+        "vt_set",
+        "ma_max",
+        "ma_min",
+        "conv_a",
+        "beq",
+        "k2",
+        "beq_min",
+        "beq_max",
+        "sh_min",
+        "sh_max",
+        "gsw",
+        "alpha1",
+        "alpha2",
+        "alpha3",
+        "kdp",
+        "is_fubm",
+    )
+
+    def __init__(self) -> None:
         # Initialize all attributes to default values
-        self.f_bus = 0           # From bus number
+        self.f_bus: int = 0           # From bus number
         self.t_bus = 0           # To bus number
         self.br_r = 0.0          # Resistance (p.u.)
         self.br_x = 0.0          # Reactance (p.u.)

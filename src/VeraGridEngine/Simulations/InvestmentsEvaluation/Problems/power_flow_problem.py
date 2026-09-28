@@ -66,10 +66,25 @@ def power_flow_function(inv_list: List[Investment],
 
 
 class PowerFlowInvestmentProblem(BlackBoxProblemTemplate):
+    """
+    Power flow investment problem definition.
+    """
+    __slots__ = (
+        "pf_options",
+        "get_all_elements_dict",
+        "vm_cost",
+        "vm_max",
+        "vm_min",
+        "va_cost",
+        "va_max",
+        "va_min",
+        "branches_cost",
+    )
 
-    def __init__(self, grid: MultiCircuit, pf_options: PowerFlowOptions):
+    def __init__(self, grid: MultiCircuit, pf_options: PowerFlowOptions) -> None:
         """
         Constructor
+
         :param grid: MultiCircuit
         :param pf_options: PowerFlowOptions
         """

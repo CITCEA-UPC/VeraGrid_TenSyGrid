@@ -16,6 +16,12 @@ from VeraGridEngine.basic_structures import Mat, Vec
 class EmtMtiBackEulerSolver:
     """EMT-facing wrapper around the shared BackEuler MTI integrator."""
 
+    __slots__ = (
+        "problem",
+        "_solver",
+        "z",
+    )
+
     def __init__(
         self,
         problem: EmtProblemMTI,
@@ -42,6 +48,8 @@ class EmtMtiBackEulerSolver:
         env_mti_max_iter = os.getenv("RMS_MTI_MAX_ITER", "").strip()
         if env_mti_max_iter:
             mti_max_iter = int(env_mti_max_iter)
+        else:
+            pass
         self._solver.mti_max_iter = max(1, int(mti_max_iter))
         self.z: Mat = np.zeros((0, 0), dtype=float)
 
@@ -56,9 +64,13 @@ class EmtMtiBackEulerSolver:
         dy = np.zeros_like(y)
         if len(t) < 2:
             return dy
+        else:
+            pass
         dt = np.diff(t)
         valid = dt > 0.0
         if np.any(valid):
             dy[1:][valid, :] = np.diff(y, axis=0)[valid, :] / dt[valid, None]
             dy[0, :] = dy[1, :]
+        else:
+            pass
         return dy

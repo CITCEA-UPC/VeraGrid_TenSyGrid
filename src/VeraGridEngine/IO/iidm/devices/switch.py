@@ -6,6 +6,14 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class Switch(IidmObject):
+    __slots__ = (
+        "id",
+        "bus1",
+        "bus2",
+        "kind",
+        "open",
+        "retained",
+    )
     def __init__(self, id: str, bus1: str, bus2: str, kind: str, open: bool, retained: bool):
         super().__init__("Switch")
         self.id = id

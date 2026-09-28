@@ -212,7 +212,7 @@ class CandidateInvestmentsWindow(QtWidgets.QDialog):
         self._draw_new_devices(new_devices)
 
         if logger.has_logs():
-            exec_dialog_safely(dialog=LogsDialogue('Candidate investment generator log', logger))
+            exec_dialog_safely(dialog=LogsDialogue('Candidate investment generator log', logger, parent=self))
 
         self.close()
 

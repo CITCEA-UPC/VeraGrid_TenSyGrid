@@ -117,8 +117,34 @@ def _customize_indices(obj) -> None:
     set_values("generator_idx", [1, 0, 1, 0])
 
 
+def _attribute_names(obj) -> list[str]:
+    """Return instance attribute names for slotted and regular objects."""
+    names: list[str] = list()
+
+    for cls in type(obj).__mro__:
+        slots = cls.__dict__.get("__slots__", tuple())
+        if isinstance(slots, str):
+            names.append(slots)
+        else:
+            names.extend(slots)
+
+    if any("__dict__" in cls.__dict__ for cls in type(obj).__mro__):
+        names.extend(vars(obj).keys())
+
+    available_names: list[str] = list()
+    for name in dict.fromkeys(names):
+        try:
+            getattr(obj, name)
+            available_names.append(name)
+        except AttributeError:
+            pass
+
+    return available_names
+
+
 def _populate_data_object(obj):
-    for name, value in list(obj.__dict__.items()):
+    for name in _attribute_names(obj):
+        value = getattr(obj, name)
         if isinstance(value, np.ndarray):
             setattr(obj, name, _fill_array(name, value, obj))
         elif isinstance(value, SparseObjectArray):
@@ -156,7 +182,8 @@ def _build_numerical_circuit() -> NumericalCircuit:
         t_idx=7,
     )
 
-    for name, value in list(circuit.__dict__.items()):
+    for name in _attribute_names(circuit):
+        value = getattr(circuit, name)
         if _is_data_structure_instance(value):
             setattr(circuit, name, _populate_data_object(value))
 
@@ -248,7 +275,8 @@ def _assert_value_equal(expected, actual, name: str) -> None:
 def _assert_deep_copy(source, copied) -> None:
     assert type(copied) is type(source)
 
-    for name, value in source.__dict__.items():
+    for name in _attribute_names(source):
+        value = getattr(source, name)
         assert hasattr(copied, name), name
         copied_value = getattr(copied, name)
         _assert_value_equal(value, copied_value, name)
@@ -323,7 +351,8 @@ def _expected_slice_value(source, name: str, value, *, bus_only: bool):
 def _assert_slice_matches_source(source, sliced, *, bus_only: bool) -> None:
     assert type(sliced) is type(source)
 
-    for name, value in source.__dict__.items():
+    for name in _attribute_names(source):
+        value = getattr(source, name)
         assert hasattr(sliced, name), name
         expected = _expected_slice_value(source, name, value, bus_only=bus_only)
         if expected is SKIP:

@@ -83,7 +83,7 @@ class BlockDiagramProjectionNode:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class BlockDiagramNode:
     """
     BlockDiagramNode
@@ -148,7 +148,7 @@ class BlockDiagramNode:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class BlockDiagramConnection:
     """
     BlockDiagramConnection
@@ -204,6 +204,13 @@ class BlockDiagram:
     """
     Diagram
     """
+
+    __slots__ = (
+        'status',
+        'node_data',
+        'con_data',
+        'projection_node_data',
+    )
 
     # Todo: add parse and to_dict functions
 

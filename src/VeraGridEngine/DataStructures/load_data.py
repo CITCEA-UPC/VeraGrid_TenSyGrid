@@ -14,6 +14,36 @@ class LoadData:
     Structure to host the load calculation information
     """
 
+    __slots__ = (
+        "nelm",
+        "nbus",
+        "names",
+        "idtag",
+        "active",
+        "is_static_generator",
+        "S",
+        "I",
+        "Y",
+        "S3_delta",
+        "S3_star",
+        "S3_floatingstar",
+        "A_floatingstar",
+        "B_floatingstar",
+        "C_floatingstar",
+        "I3_delta",
+        "I3_star",
+        "I3_floatingstar",
+        "Y3_delta",
+        "Y3_star",
+        "mttf",
+        "mttr",
+        "bus_idx",
+        "cost",
+        "shift_key",
+        "scalable",
+        "original_idx",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Load data arrays

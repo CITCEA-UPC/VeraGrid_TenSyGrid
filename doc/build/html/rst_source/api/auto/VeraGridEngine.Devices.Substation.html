@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Substation package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Substation package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -648,17 +648,6 @@ back to the substation hierarchy.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.bus.Bus.plot_profiles">
-<span class="sig-name descname"><span class="pre">plot_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_voltage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_series_driver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Devices/Substation/bus.html#Bus.plot_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Devices.Substation.bus.Bus.plot_profiles" title="Link to this definition"></a></dt>
-<dd><p>plot the profiles of this bus
-:param time_profile: Master profile of time steps (stored in the MultiCircuit)
-:param time_series_driver: time series driver
-:param ax_load: Load axis, if not provided one will be created
-:param ax_voltage: Voltage axis, if not provided one will be created
-:param my_index: index of this object in the time series results</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.bus.Bus.set_is_slack_at">
 <span class="sig-name descname"><span class="pre">set_is_slack_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Devices/Substation/bus.html#Bus.set_is_slack_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Devices.Substation.bus.Bus.set_is_slack_at" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -1168,11 +1157,6 @@ back to the substation hierarchy.</p>
 <span class="sig-name descname"><span class="pre">LOCAL_PROPERTY_DECLARATIONS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Parents.html#VeraGridEngine.Devices.Parents.editable_device.GCProp" title="VeraGridEngine.Devices.Parents.editable_device.GCProp"><span class="pre">GCProp</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(prop:vl_type,</span> <span class="pre">prop:voltage,</span> <span class="pre">prop:n_bays,</span> <span class="pre">prop:add_disconnectors)</span></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.LOCAL_PROPERTY_DECLARATIONS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.action">
-<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ActionType" title="VeraGridEngine.enumerations.ActionType"><span class="pre">ActionType</span></a></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.action" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.add_disconnectors">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">add_disconnectors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.add_disconnectors" title="Link to this definition"></a></dt>
@@ -1183,21 +1167,6 @@ back to the substation hierarchy.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.comment" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.device_type">
-<span class="sig-name descname"><span class="pre">device_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.DeviceType" title="VeraGridEngine.enumerations.DeviceType"><span class="pre">DeviceType</span></a></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.device_type" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.diff_changes">
-<span class="sig-name descname"><span class="pre">diff_changes</span></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.diff_changes" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.n_bays">
@@ -1211,8 +1180,8 @@ back to the substation hierarchy.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.selected_to_merge">
-<span class="sig-name descname"><span class="pre">selected_to_merge</span></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.selected_to_merge" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.vl_type">
+<span class="sig-name descname"><span class="pre">vl_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.VoltageLevelTypes" title="VeraGridEngine.enumerations.VoltageLevelTypes"><span class="pre">VoltageLevelTypes</span></a></span><a class="headerlink" href="#VeraGridEngine.Devices.Substation.voltage_level_template.VoltageLevelTemplate.vl_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">

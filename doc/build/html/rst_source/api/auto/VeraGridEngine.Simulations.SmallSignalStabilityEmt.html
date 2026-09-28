@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.SmallSignalStabilityEmt package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.SmallSignalStabilityEmt package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -191,11 +191,31 @@ expose the per-step linearized state map:</p>
 </dl>
 <p>on vectors or blocks. When Numba is available and use_numba=True, the block
 path is JIT-compiled to reduce Python overhead in repeated Arnoldi calls.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.Ak_stack">
+<span class="sig-name descname"><span class="pre">Ak_stack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.Ak_stack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.matmat">
 <span class="sig-name descname"><span class="pre">matmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/SmallSignalStabilityEmt/emt_floquet_operator.html#AkStackBlockEmtFloquetOperator.matmat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.matmat" title="Link to this definition"></a></dt>
 <dd><p>Public alias for matrix-matrix multiplication.</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.n_states">
+<span class="sig-name descname"><span class="pre">n_states</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.n_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.n_steps">
+<span class="sig-name descname"><span class="pre">n_steps</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.n_steps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.use_numba">
+<span class="sig-name descname"><span class="pre">use_numba</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.AkStackBlockEmtFloquetOperator.use_numba" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -221,6 +241,41 @@ n_states (int): Number of differential state variables.
 lu_solvers (list): Cached SuperLU factorizations for the entire trajectory.</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.h">
+<span class="sig-name descname"><span class="pre">h</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.h" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.lu_solvers">
+<span class="sig-name descname"><span class="pre">lu_solvers</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.lu_solvers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.n_states">
+<span class="sig-name descname"><span class="pre">n_states</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.n_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.n_total">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.n_total" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.problem">
+<span class="sig-name descname"><span class="pre">problem</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.problem" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.BlockEmtFloquetOperator.trajectory" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -231,6 +286,41 @@ lu_solvers (list): Cached SuperLU factorizations for the entire trajectory.</p>
 <p>Optimized with LU Factorization Caching to eliminate redundant computations
 during Krylov subspace iterations (Arnoldi). This operator processes single
 perturbation vectors.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.h">
+<span class="sig-name descname"><span class="pre">h</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.h" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.lu_solvers">
+<span class="sig-name descname"><span class="pre">lu_solvers</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.lu_solvers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.n_states">
+<span class="sig-name descname"><span class="pre">n_states</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.n_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.n_total">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.n_total" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.problem">
+<span class="sig-name descname"><span class="pre">problem</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.problem" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator.EmtFloquetOperator.trajectory" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -3294,28 +3384,98 @@ Extracts real and imaginary parts to form a strictly real subspace seed.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.action">
-<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ActionType" title="VeraGridEngine.enumerations.ActionType"><span class="pre">ActionType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.action" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.adaptive_restart">
+<span class="sig-name descname"><span class="pre">adaptive_restart</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.adaptive_restart" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.comment" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.build_type">
+<span class="sig-name descname"><span class="pre">build_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.SmallSignalEmtBuildTypes" title="VeraGridEngine.enumerations.SmallSignalEmtBuildTypes"><span class="pre">SmallSignalEmtBuildTypes</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.build_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.device_type">
-<span class="sig-name descname"><span class="pre">device_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.DeviceType" title="VeraGridEngine.enumerations.DeviceType"><span class="pre">DeviceType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.device_type" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.deflation_tol">
+<span class="sig-name descname"><span class="pre">deflation_tol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.deflation_tol" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.diff_changes">
-<span class="sig-name descname"><span class="pre">diff_changes</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.diff_changes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.k">
+<span class="sig-name descname"><span class="pre">k</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.k" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.selected_to_merge">
-<span class="sig-name descname"><span class="pre">selected_to_merge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.selected_to_merge" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_block_size">
+<span class="sig-name descname"><span class="pre">max_block_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_block_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_krylov_dim">
+<span class="sig-name descname"><span class="pre">max_krylov_dim</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_krylov_dim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_krylov_dim_cap">
+<span class="sig-name descname"><span class="pre">max_krylov_dim_cap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_krylov_dim_cap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_restarts">
+<span class="sig-name descname"><span class="pre">max_restarts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.max_restarts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.min_block_size">
+<span class="sig-name descname"><span class="pre">min_block_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.min_block_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.prefer_ak_operator">
+<span class="sig-name descname"><span class="pre">prefer_ak_operator</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.prefer_ak_operator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.restart_tol">
+<span class="sig-name descname"><span class="pre">restart_tol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.restart_tol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.ss_assessment_time">
+<span class="sig-name descname"><span class="pre">ss_assessment_time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.ss_assessment_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.stagnation_improve_ratio">
+<span class="sig-name descname"><span class="pre">stagnation_improve_ratio</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.stagnation_improve_ratio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.stagnation_patience">
+<span class="sig-name descname"><span class="pre">stagnation_patience</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.stagnation_patience" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.target_frequency_hz">
+<span class="sig-name descname"><span class="pre">target_frequency_hz</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.target_frequency_hz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.target_period">
+<span class="sig-name descname"><span class="pre">target_period</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.target_period" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.use_numba_kernels">
+<span class="sig-name descname"><span class="pre">use_numba_kernels</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.use_numba_kernels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.use_refined_ritz">
+<span class="sig-name descname"><span class="pre">use_refined_ritz</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.use_refined_ritz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options.SmallSignalStabilityEmtOptions.verbose" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

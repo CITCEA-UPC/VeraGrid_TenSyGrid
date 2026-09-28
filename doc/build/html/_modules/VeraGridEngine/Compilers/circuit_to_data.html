@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Compilers.circuit_to_data &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Compilers.circuit_to_data &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1799,8 +1799,16 @@
         <span class="c1"># store for later</span>
         <span class="n">branch_dict</span><span class="p">[</span><span class="n">elm</span><span class="p">]</span> <span class="o">=</span> <span class="n">ii</span>
 
-        <span class="c1"># handle &quot;&quot;&quot;superconductor branches&quot;&quot;&quot;</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">detect_superconductor_at</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+        <span class="c1"># Physical line templates are defined by their phase matrices. A single-phase</span>
+        <span class="c1"># tower or cable can have zero sequence scalars without being an ideal link.</span>
+        <span class="n">is_physical_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">elm</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">OverheadLineType</span><span class="p">,</span> <span class="n">dev</span><span class="o">.</span><span class="n">UndergroundLineType</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_physical_line</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">detect_superconductor_at</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
 
         <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
 

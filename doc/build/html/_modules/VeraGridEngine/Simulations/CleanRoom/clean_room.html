@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.CleanRoom.clean_room &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.CleanRoom.clean_room &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -167,7 +167,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">asdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
@@ -238,7 +237,7 @@
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="TimeGrid">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.TimeGrid">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TimeGrid</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Time grid diagnostics.</span>
@@ -393,7 +392,7 @@
 
 <div class="viewcode-block" id="AggregateBatch">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.AggregateBatch">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AggregateBatch</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Strongly-typed batch for the aggregate model.</span>
@@ -429,7 +428,7 @@
 
 <div class="viewcode-block" id="ShareBatch">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.ShareBatch">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShareBatch</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Strongly-typed batch for the share model.</span>
@@ -1587,134 +1586,17 @@
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
 <span class="c1"># 11) PLOTTING</span>
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
-<div class="viewcode-block" id="plot_losses">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.plot_losses">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_losses</span><span class="p">(</span><span class="n">losses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot training loss curve.</span>
-
-<span class="sd">    :param losses: Loss list.</span>
-<span class="sd">    :param title: Plot title.</span>
-<span class="sd">    :returns: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plot] No losses to plot for: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2"> (likely loaded artifact).&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Step&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Loss&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
 
 
 
-<div class="viewcode-block" id="plot_aggregate_real_vs_syn">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.plot_aggregate_real_vs_syn">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_aggregate_real_vs_syn</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">P_agg_syn</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">max_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot aggregate series real vs synthetic.</span>
-
-<span class="sd">    :param P_agg_real: Real aggregate ``(T,)``.</span>
-<span class="sd">    :param P_agg_syn: Synthetic aggregate ``(T,)``.</span>
-<span class="sd">    :param max_points: Downsample cap.</span>
-<span class="sd">    :param title: Plot title.</span>
-<span class="sd">    :returns: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">P_agg_real</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">):</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">P_agg_real</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;real aggregate&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">P_agg_syn</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;synthetic aggregate&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;time index&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Aggregate power&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="plot_share_sum_sanity">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.plot_share_sum_sanity">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_share_sum_sanity</span><span class="p">(</span><span class="n">P_syn</span><span class="p">:</span> <span class="n">Mat</span><span class="p">,</span>
-                          <span class="n">P_agg_syn</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
-                          <span class="n">max_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                          <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot sanity check: sum_i P_syn(t,i) / P_agg_syn(t). Should be ~1.</span>
-
-<span class="sd">    :param P_syn: Device powers ``(T,N)``.</span>
-<span class="sd">    :param P_agg_syn: Aggregate powers ``(T,)``.</span>
-<span class="sd">    :param max_points: Downsample cap.</span>
-<span class="sd">    :param title: Plot title.</span>
-<span class="sd">    :returns: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P_syn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P_agg_syn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">ratio</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
-
-    <span class="n">T</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ratio</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">):</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">ratio</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;time index&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;sum(P_syn)/P_agg_syn&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
-
-
-
-<div class="viewcode-block" id="plot_devices_real_vs_syn">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.plot_devices_real_vs_syn">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_devices_real_vs_syn</span><span class="p">(</span><span class="n">P_real</span><span class="p">:</span> <span class="n">Mat</span><span class="p">,</span>
-                             <span class="n">P_syn</span><span class="p">:</span> <span class="n">Mat</span><span class="p">,</span>
-                             <span class="n">devices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-                             <span class="n">max_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                             <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot selected devices real vs synthetic.</span>
-
-<span class="sd">    :param P_real: Real device powers ``(T,N)``.</span>
-<span class="sd">    :param P_syn: Synthetic device powers ``(T,N)``.</span>
-<span class="sd">    :param devices: Device indices.</span>
-<span class="sd">    :param max_points: Downsample cap.</span>
-<span class="sd">    :param title: Plot title.</span>
-<span class="sd">    :returns: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-    <span class="n">T</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">P_real</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">):</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_points</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">P_real</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;real d</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">P_syn</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;syn d</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;time index&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Power&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="HierarchicalZipSpec">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.HierarchicalZipSpec">[docs]</a>
-<span class="nd">@dataclass</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalZipSpec</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializable, future-safe spec for training and generation.</span>
@@ -1765,8 +1647,18 @@
 <span class="sd">    - state_dict tensors (.pt)</span>
 <span class="sd">    - JSON specs/meta/losses</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;spec&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;agg_model&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;share_model&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;agg_losses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;share_losses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;agg_meta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;share_meta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;device&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">HierarchicalZipSpec</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">HierarchicalZipSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">agg_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AggregateARModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2014,157 +1906,6 @@
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
 <span class="c1"># 12) DEMO / HOW TO USE (with parameter explanations)</span>
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
-<div class="viewcode-block" id="demo">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.demo">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">demo</span><span class="p">():</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># HOW TO USE WITH YOUR DATA (VeraGrid or otherwise)</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1">#</span>
-    <span class="c1"># You need to provide:</span>
-    <span class="c1">#   timestamps : ndarray (T,) unix seconds (int64)</span>
-    <span class="c1">#   P          : ndarray (T,N) device powers (float), NaNs allowed</span>
-    <span class="c1">#   region_id  : ndarray (N,) region index per device (int64 in [0..R-1])</span>
-    <span class="c1">#   temp       : ndarray (T,R) temperature per region (float)</span>
-    <span class="c1">#</span>
-    <span class="c1"># Then:</span>
-    <span class="c1">#   agg_model, share_model, meta, agg_losses, share_losses = load_or_train_hierarchical(...)</span>
-    <span class="c1">#   y_real, y_syn, sigma_eff, P_agg_syn, P_syn = generate_synthetic(...)</span>
-    <span class="c1">#</span>
-    <span class="c1"># Key parameters:</span>
-    <span class="c1">#   context_len:</span>
-    <span class="c1">#     Aggregate AR context length in samples.</span>
-    <span class="c1">#</span>
-    <span class="c1">#   sigma_damp:</span>
-    <span class="c1">#     Damps sampling noise. Start with 0.15–0.35 for national load.</span>
-    <span class="c1">#</span>
-    <span class="c1">#   anchoring:</span>
-    <span class="c1">#     &#39;none&#39;     -&gt; no mean correction (not recommended for free rollouts)</span>
-    <span class="c1">#     &#39;global&#39;   -&gt; match overall mean of y(t) to real y(t)</span>
-    <span class="c1">#     &#39;monthly&#39;  -&gt; match mean per month (reduces seasonal bias)</span>
-    <span class="c1">#</span>
-    <span class="c1">#   logit_noise_std:</span>
-    <span class="c1">#     Adds noise to share logits before softmax. Controls diversity in splits.</span>
-    <span class="c1">#     Start at 0.02–0.10.</span>
-    <span class="c1">#</span>
-    <span class="c1">#   share_chunk_size:</span>
-    <span class="c1">#     If N is large and you hit memory limits, set e.g. 1000–5000.</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-
-    <span class="c1"># Demo data (replace with your real data)</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">21</span>  <span class="c1"># Number of time steps</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">400</span>  <span class="c1"># Number of loads</span>
-    <span class="n">R</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># region number</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="mi">1704067200</span>  <span class="c1"># Unix datetime</span>
-    <span class="n">dt</span> <span class="o">=</span> <span class="mi">3600</span>  <span class="c1"># Time step increment in seconds</span>
-    <span class="n">timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">T</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">region_id</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-
-    <span class="n">base</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span><span class="p">))</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">base</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">R</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="n">cal</span> <span class="o">=</span> <span class="n">calendar_features_unix</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
-    <span class="n">tod_sin</span> <span class="o">=</span> <span class="n">cal</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">scale</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">region_id</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">P</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">50</span> <span class="o">+</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">tod_sin</span> <span class="o">+</span> <span class="mf">1.8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">temp</span><span class="p">[:,</span> <span class="n">r</span><span class="p">]</span> <span class="o">-</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
-    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-
-    <span class="n">mask_nan</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.01</span>
-    <span class="n">P_nan</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">P_nan</span><span class="p">[</span><span class="n">mask_nan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-    <span class="c1"># Train/load</span>
-    <span class="n">artifact_path</span> <span class="o">=</span> <span class="s2">&quot;./artifacts/hierarchical_country_load_simplex_anchor.pt&quot;</span>
-
-    <span class="n">context_len</span> <span class="o">=</span> <span class="mi">48</span>
-    <span class="n">steps_agg</span> <span class="o">=</span> <span class="mi">2000</span>
-    <span class="n">steps_share</span> <span class="o">=</span> <span class="mi">3000</span>
-    <span class="n">batch_size_agg</span> <span class="o">=</span> <span class="mi">256</span>
-    <span class="n">batch_size_share</span> <span class="o">=</span> <span class="mi">32</span>
-    <span class="n">lr_agg</span> <span class="o">=</span> <span class="mf">2e-3</span>
-    <span class="n">lr_share</span> <span class="o">=</span> <span class="mf">2e-3</span>
-    <span class="n">prefer_cuda</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">eps_agg</span> <span class="o">=</span> <span class="mf">1e-3</span>
-    <span class="n">eps_share_denom</span> <span class="o">=</span> <span class="mf">1e-6</span>
-    <span class="n">jitter_tol</span> <span class="o">=</span> <span class="mf">0.05</span>
-    <span class="n">share_chunk_size</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="n">agg_model</span><span class="p">,</span> <span class="n">share_model</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">agg_losses</span><span class="p">,</span> <span class="n">share_losses</span> <span class="o">=</span> <span class="n">load_or_train_hierarchical</span><span class="p">(</span>
-        <span class="n">artifact_path</span><span class="o">=</span><span class="n">artifact_path</span><span class="p">,</span>
-        <span class="n">timestamps</span><span class="o">=</span><span class="n">timestamps</span><span class="p">,</span>
-        <span class="n">P</span><span class="o">=</span><span class="n">P_nan</span><span class="p">,</span>
-        <span class="n">region_id</span><span class="o">=</span><span class="n">region_id</span><span class="p">,</span>
-        <span class="n">temp</span><span class="o">=</span><span class="n">temp</span><span class="p">,</span>
-        <span class="n">context_len</span><span class="o">=</span><span class="n">context_len</span><span class="p">,</span>
-        <span class="n">steps_agg</span><span class="o">=</span><span class="n">steps_agg</span><span class="p">,</span>
-        <span class="n">steps_share</span><span class="o">=</span><span class="n">steps_share</span><span class="p">,</span>
-        <span class="n">batch_size_agg</span><span class="o">=</span><span class="n">batch_size_agg</span><span class="p">,</span>
-        <span class="n">batch_size_share</span><span class="o">=</span><span class="n">batch_size_share</span><span class="p">,</span>
-        <span class="n">lr_agg</span><span class="o">=</span><span class="n">lr_agg</span><span class="p">,</span>
-        <span class="n">lr_share</span><span class="o">=</span><span class="n">lr_share</span><span class="p">,</span>
-        <span class="n">prefer_cuda</span><span class="o">=</span><span class="n">prefer_cuda</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-        <span class="n">eps_agg</span><span class="o">=</span><span class="n">eps_agg</span><span class="p">,</span>
-        <span class="n">eps_share_denominator</span><span class="o">=</span><span class="n">eps_share_denom</span><span class="p">,</span>
-        <span class="n">jitter_tol</span><span class="o">=</span><span class="n">jitter_tol</span><span class="p">,</span>
-        <span class="n">share_chunk_size</span><span class="o">=</span><span class="n">share_chunk_size</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Generate</span>
-    <span class="n">sigma_damp</span> <span class="o">=</span> <span class="mf">0.25</span>
-    <span class="n">anchoring</span> <span class="o">=</span> <span class="s2">&quot;global&quot;</span>  <span class="c1"># try &quot;monthly&quot; if seasonal drift persists</span>
-    <span class="n">logit_noise_std</span> <span class="o">=</span> <span class="mf">0.05</span>
-
-    <span class="n">y_real</span><span class="p">,</span> <span class="n">y_syn</span><span class="p">,</span> <span class="n">sigma_eff</span><span class="p">,</span> <span class="n">P_agg_syn</span><span class="p">,</span> <span class="n">P_syn</span> <span class="o">=</span> <span class="n">generate_synthetic</span><span class="p">(</span>
-        <span class="n">agg_model</span><span class="o">=</span><span class="n">agg_model</span><span class="p">,</span>
-        <span class="n">share_model</span><span class="o">=</span><span class="n">share_model</span><span class="p">,</span>
-        <span class="n">timestamps</span><span class="o">=</span><span class="n">timestamps</span><span class="p">,</span>
-        <span class="n">P_real</span><span class="o">=</span><span class="n">P_nan</span><span class="p">,</span>
-        <span class="n">region_id</span><span class="o">=</span><span class="n">region_id</span><span class="p">,</span>
-        <span class="n">temp</span><span class="o">=</span><span class="n">temp</span><span class="p">,</span>
-        <span class="n">context_len</span><span class="o">=</span><span class="n">context_len</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-        <span class="n">eps_agg</span><span class="o">=</span><span class="n">eps_agg</span><span class="p">,</span>
-        <span class="n">sigma_damp</span><span class="o">=</span><span class="n">sigma_damp</span><span class="p">,</span>
-        <span class="n">anchoring</span><span class="o">=</span><span class="n">anchoring</span><span class="p">,</span>
-        <span class="n">logit_noise_std</span><span class="o">=</span><span class="n">logit_noise_std</span><span class="p">,</span>
-        <span class="n">share_chunk_size</span><span class="o">=</span><span class="n">share_chunk_size</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Diagnostics</span>
-    <span class="n">P_real_clean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">P_nan</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    <span class="n">P_agg_real</span> <span class="o">=</span> <span class="n">compute_aggregate</span><span class="p">(</span><span class="n">P_real_clean</span><span class="p">)</span>
-
-    <span class="n">ratio_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">P_agg_syn</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">P_agg_real</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">))</span>
-    <span class="n">ratio_std</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">P_agg_syn</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">P_agg_real</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">))</span>
-    <span class="n">ratio_p95</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">P_agg_syn</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aggregate mean ratio syn/real:&quot;</span><span class="p">,</span> <span class="n">ratio_mean</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aggregate std  ratio syn/real:&quot;</span><span class="p">,</span> <span class="n">ratio_std</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aggregate P95  ratio syn/real:&quot;</span><span class="p">,</span> <span class="n">ratio_p95</span><span class="p">)</span>
-
-    <span class="c1"># Plot training losses</span>
-    <span class="n">plot_losses</span><span class="p">(</span><span class="n">agg_losses</span><span class="p">,</span> <span class="s2">&quot;Aggregate model training NLL&quot;</span><span class="p">)</span>
-    <span class="n">plot_losses</span><span class="p">(</span><span class="n">share_losses</span><span class="p">,</span> <span class="s2">&quot;Share model training KL&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Plot aggregate comparison</span>
-    <span class="n">plot_aggregate_real_vs_syn</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">,</span> <span class="n">P_agg_syn</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="s2">&quot;Aggregate real vs synthetic (anchored + corrected)&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Sanity check: reconstruction exactness</span>
-    <span class="n">plot_share_sum_sanity</span><span class="p">(</span><span class="n">P_syn</span><span class="p">,</span> <span class="n">P_agg_syn</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="s2">&quot;Sanity: sum(P_syn)/P_agg_syn (should be 1.0)&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Plot a few devices</span>
-    <span class="n">plot_devices_real_vs_syn</span><span class="p">(</span><span class="n">P_real_clean</span><span class="p">,</span> <span class="n">P_syn</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="mi">5000</span><span class="p">,</span> <span class="s2">&quot;Devices real vs synthetic (simplex shares)&quot;</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
-
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_make_synthetic_demo_data</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">R</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
@@ -2209,147 +1950,6 @@
     <span class="n">P</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
     <span class="k">return</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">region_id</span><span class="p">,</span> <span class="n">temp</span>
-
-
-<div class="viewcode-block" id="demo2">
-<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.CleanRoom.html#VeraGridEngine.Simulations.CleanRoom.clean_room.demo2">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">demo2</span><span class="p">():</span>
-    <span class="c1"># =============================================================================</span>
-    <span class="c1"># Demo: Train / Save / Load / Predict with HierarchicalZipArtifact</span>
-    <span class="c1"># =============================================================================</span>
-    <span class="c1"># How to use this demo:</span>
-    <span class="c1"># - Replace the &quot;INPUT DATA&quot; section with arrays you get from VeraGrid.</span>
-    <span class="c1">#   VeraGrid should provide:</span>
-    <span class="c1">#     timestamps: (T,) int64 unix seconds</span>
-    <span class="c1">#     P:          (T,N) float32 device powers (loads/generation per device)</span>
-    <span class="c1">#     region_id:  (N,) int64 region index per device (0..R-1)</span>
-    <span class="c1">#     temp:       (T,R) float32 temperatures per region (or per weather zone)</span>
-    <span class="c1">#</span>
-    <span class="c1"># Key parameters (HierarchicalZipSpec):</span>
-    <span class="c1"># - context_len:  number of initial timesteps used to seed the aggregate sampler.</span>
-    <span class="c1"># - steps_agg/share: optimisation steps for each model training loop.</span>
-    <span class="c1"># - batch_size_agg/share: training batch sizes (share can be smaller if N large).</span>
-    <span class="c1"># - lr_agg/share: learning rates.</span>
-    <span class="c1"># - prefer_cuda:  if True, training functions will try to use CUDA if available.</span>
-    <span class="c1"># - eps_agg:      small epsilon added inside logs for stability (aggregate).</span>
-    <span class="c1"># - eps_share_denominator: epsilon in share normalisation denom for stability.</span>
-    <span class="c1"># - share_chunk_size: chunk size for share model forward; 0 disables chunking.</span>
-    <span class="c1"># - sigma_damp:   damp aggregate stochasticity when sampling (stability knob).</span>
-    <span class="c1"># - logit_noise_std: optional noise on share logits during sampling (diversity knob).</span>
-    <span class="c1">#</span>
-    <span class="c1"># Outputs:</span>
-    <span class="c1"># - P_syn: (T,N) synthetic device powers, with aggregate matching the sampled</span>
-    <span class="c1">#          aggregate trajectory. You can compare sum(P_syn, axis=1) vs sum(P, axis=1).</span>
-    <span class="c1"># =============================================================================</span>
-
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># INPUT DATA</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># Replace the following with VeraGrid-provided arrays:</span>
-    <span class="c1"># timestamps = ...</span>
-    <span class="c1"># P = ...</span>
-    <span class="c1"># region_id = ...</span>
-    <span class="c1"># temp = ...</span>
-
-    <span class="c1"># Standalone demo fallback:</span>
-    <span class="n">timestamps</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">region_id</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">_make_synthetic_demo_data</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-
-    <span class="c1"># Basic sanity</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">R</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[demo] T=</span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s2">, N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">, R=</span><span class="si">{</span><span class="n">R</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># SPEC + ARTIFACT PATH</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="n">artifact_path</span> <span class="o">=</span> <span class="s2">&quot;./artifacts/hierarchical_country_load.zip&quot;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">artifact_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="n">spec</span> <span class="o">=</span> <span class="n">HierarchicalZipSpec</span><span class="p">(</span>
-        <span class="n">context_len</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>  <span class="c1"># seed length for aggregate sampler (e.g. 2 days if hourly)</span>
-        <span class="n">steps_agg</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>  <span class="c1"># training steps for aggregate model</span>
-        <span class="n">steps_share</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>  <span class="c1"># training steps for share model</span>
-        <span class="n">batch_size_agg</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>  <span class="c1"># aggregate batch size</span>
-        <span class="n">batch_size_share</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># share batch size (often smaller because N is large)</span>
-        <span class="n">lr_agg</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">,</span>  <span class="c1"># aggregate learning rate</span>
-        <span class="n">lr_share</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">,</span>  <span class="c1"># share learning rate</span>
-        <span class="n">prefer_cuda</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># try CUDA if available</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># print training progress</span>
-        <span class="n">eps_agg</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>  <span class="c1"># numerical stability for log transforms</span>
-        <span class="n">eps_share_denominator</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>  <span class="c1"># stability in share normalisation</span>
-        <span class="n">share_chunk_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># 0 disables chunking; set &gt;0 if you need lower peak memory</span>
-        <span class="n">sigma_damp</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># reduces aggregate stochasticity at generation</span>
-        <span class="n">logit_noise_std</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># share diversity; start at 0.0</span>
-    <span class="p">)</span>
-
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># TRAIN OR LOAD</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">artifact_path</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[demo] Loading artifact: </span><span class="si">{</span><span class="n">artifact_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="c1"># Always load to CPU first for maximum portability; move to CUDA later if desired.</span>
-        <span class="n">art</span> <span class="o">=</span> <span class="n">HierarchicalZipArtifact</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">artifact_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[demo] Training new artifact: </span><span class="si">{</span><span class="n">artifact_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">art</span> <span class="o">=</span> <span class="n">HierarchicalZipArtifact</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
-        <span class="n">art</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">timestamps</span><span class="o">=</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">region_id</span><span class="o">=</span><span class="n">region_id</span><span class="p">,</span> <span class="n">temp</span><span class="o">=</span><span class="n">temp</span><span class="p">)</span>
-        <span class="n">art</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">artifact_path</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[demo] Saved: </span><span class="si">{</span><span class="n">artifact_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># GENERATE SYNTHETIC</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># y_agg_init must be a (context_len,) log-aggregate seed.</span>
-    <span class="c1"># Using the REAL aggregate for seeding is typical (you can also seed with a</span>
-    <span class="c1"># previous synthetic run if doing multi-year continuation).</span>
-    <span class="n">P_clean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    <span class="n">P_agg_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_clean</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">y_agg_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">context_len</span><span class="p">)]</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">eps_agg</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="n">P_syn</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
-        <span class="n">timestamps</span><span class="o">=</span><span class="n">timestamps</span><span class="p">,</span>
-        <span class="n">temp</span><span class="o">=</span><span class="n">temp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-        <span class="n">region_id</span><span class="o">=</span><span class="n">region_id</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
-        <span class="n">y_agg_init</span><span class="o">=</span><span class="n">y_agg_init</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># PLOTS: real vs synthetic aggregate</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="n">P_agg_syn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_syn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Real aggregate&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P_agg_syn</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Synthetic aggregate&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;timestep&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Aggregate power&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Aggregate: Real vs Synthetic&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="c1"># Optional: device-level example</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">dev_idx</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P_clean</span><span class="p">[:,</span> <span class="n">dev_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Real dev </span><span class="si">{</span><span class="n">dev_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P_syn</span><span class="p">[:,</span> <span class="n">dev_idx</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Synth dev </span><span class="si">{</span><span class="n">dev_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;timestep&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Device power&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Example device trajectory&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="c1"># Quick numeric check</span>
-    <span class="n">rel_err</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">P_agg_syn</span> <span class="o">-</span> <span class="n">P_agg_real</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">P_agg_real</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[demo] Mean abs aggregate error / mean real = </span><span class="si">{</span><span class="n">rel_err</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">demo2</span><span class="p">()</span>
 </pre></div>
 
            </div>

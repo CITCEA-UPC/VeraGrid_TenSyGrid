@@ -7,4 +7,5 @@ from VeraGridEngine.IO.raw.versioned.v35.equipment_terminal import RawEquipmentT
 
 class RawEquipmentTerminalV36(RawEquipmentTerminalV35):
     """PSSE v36 equipment terminal."""
+    __slots__ = ()
     pass

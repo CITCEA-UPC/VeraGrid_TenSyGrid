@@ -330,8 +330,9 @@ class IoMain(ScenariosMain):
 
         self.ui.grid_name_line_edit.setText("")
 
-        if self.analysis_dialogue is not None:
-            self.analysis_dialogue.close()
+        analysis_dialogue: QtWidgets.QMainWindow | QtWidgets.QDialog | None = self.window_manager.get("analysis_dialogue")
+        if is_dialog_available(dialog=analysis_dialogue):
+            analysis_dialogue.close()
 
         self.clear_stuff_running()
         self.clear_results()
@@ -956,11 +957,15 @@ class IoMain(ScenariosMain):
                                                    text=self.tr("Do you want to open the Rosetta CGMES browser?"))
 
                     if show_rosetta:
-                        self.rosetta_gui = RosetaExplorerGUI()
-                        self.rosetta_gui.set_grid_model(self.open_file_thread_object.cgmes_circuit)
-                        self.rosetta_gui.set_logger(self.open_file_thread_object.cgmes_logger)
-                        self.rosetta_gui.update_combo_boxes()
-                        self.rosetta_gui.show()
+                        rosetta_window: QtWidgets.QWidget | None = self.window_manager.get("rosseta")
+                        if isinstance(rosetta_window, RosetaExplorerGUI) and is_dialog_available(dialog=rosetta_window):
+                            rosetta_gui: RosetaExplorerGUI = rosetta_window
+                        else:
+                            rosetta_gui = RosetaExplorerGUI()
+                        rosetta_gui.set_grid_model(self.open_file_thread_object.cgmes_circuit)
+                        rosetta_gui.set_logger(self.open_file_thread_object.cgmes_logger)
+                        rosetta_gui.update_combo_boxes()
+                        self.show_dialogue(win=rosetta_gui, key="rosseta")
                     else:
                         # else, show the logger if it is necessary
                         if open_logger_requires_dialog(self.open_file_thread_object.logger):

@@ -111,12 +111,19 @@ class SchematicDiagram(BaseDiagram):
     Diagram
     """
 
+    __slots__ = ()
+
     def __init__(self, idtag=None, name=''):
         """
 
         :param name: Diagram name
         """
-        BaseDiagram.__init__(self, idtag=idtag, name=name, diagram_type=DiagramType.Schematic)
+        BaseDiagram.__init__(
+            self,
+            idtag=idtag,
+            name=name,
+            diagram_type=DiagramType.Schematic
+        )
 
     def update_xy(self, api_object: ALL_DEV_TYPES, x: int, y: int) -> None:
         """
@@ -544,9 +551,11 @@ class SchematicDiagram(BaseDiagram):
                 attachment_record.side = explicit_slot_side
             elif explicit_terminal_side is not None:
                 attachment_record.side = explicit_terminal_side
-            elif attachment_record.slot_side is not None and is_canonical_attachment_slot(slot_key=attachment_record.slot_side):
+            elif attachment_record.slot_side is not None and is_canonical_attachment_slot(
+                    slot_key=attachment_record.slot_side):
                 attachment_record.side = attachment_record.slot_side
-            elif attachment_record.terminal_side is not None and is_canonical_attachment_slot(slot_key=attachment_record.terminal_side):
+            elif attachment_record.terminal_side is not None and is_canonical_attachment_slot(
+                    slot_key=attachment_record.terminal_side):
                 attachment_record.side = attachment_record.terminal_side
             else:
                 pass
@@ -645,7 +654,7 @@ class SchematicDiagram(BaseDiagram):
 
     def sync_branch_attachment_records(self,
                                        api_object: ALL_DEV_TYPES) -> Dict[SchematicBranchEndpoint,
-                                                                          SchematicAttachmentRecord]:
+    SchematicAttachmentRecord]:
         """
         Synchronize the standard typed attachment records for branch-like devices.
 
@@ -667,11 +676,11 @@ class SchematicDiagram(BaseDiagram):
             else:
                 return {
                     SchematicBranchEndpoint.FROM: self.sync_attachment_record(api_object=api_object,
-                                                                             endpoint=SchematicBranchEndpoint.FROM,
-                                                                             owner_device=obj_from),
+                                                                              endpoint=SchematicBranchEndpoint.FROM,
+                                                                              owner_device=obj_from),
                     SchematicBranchEndpoint.TO: self.sync_attachment_record(api_object=api_object,
-                                                                           endpoint=SchematicBranchEndpoint.TO,
-                                                                           owner_device=obj_to),
+                                                                            endpoint=SchematicBranchEndpoint.TO,
+                                                                            owner_device=obj_to),
                 }
 
     def sync_injection_dock(self,

@@ -20,6 +20,43 @@ class OptimalPowerFlowOptions(OptionsTemplate):
     OptimalPowerFlowOptions
     """
 
+    __slots__ = (
+        "verbose",
+        "solver",
+        "time_grouping",
+        "zonal_grouping",
+        "mip_solver",
+        "power_flow_options",
+        "skip_generation_limits",
+        "consider_contingencies",
+        "contingency_groups_used",
+        "lodf_tolerance",
+        "inter_aggregation_info",
+        "dispatch_mode",
+        "consider_ramps",
+        "consider_time_up_down",
+        "area_spinning_reserve",
+        "quadratic_costs",
+        "use_glsk_as_cost",
+        "add_losses_approximation",
+        "max_va",
+        "max_vm",
+        "report_formulation",
+        "generate_report",
+        "acopf_mode",
+        "robust",
+        "mip_framework",
+        "ips_method",
+        "ips_tolerance",
+        "ips_iterations",
+        "ips_trust_radius",
+        "ips_init_with_pf",
+        "ips_control_q_limits",
+        "acopf_v0",
+        "acopf_S0",
+        "acopf_pf_converged",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="verbose", tpe=int),
         GCProp(key="solver", tpe=SolverType),

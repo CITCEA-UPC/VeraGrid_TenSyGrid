@@ -55,6 +55,13 @@ class Cn2BusBarLookup:
     Class to properly match the ConnectivityNodes to the BusBars
     """
 
+    __slots__ = (
+        "cn_dict",
+        "bus_dict",
+        "bb_to_cn_dict",
+        "bb_to_tn_dict",
+    )
+
     def __init__(self, cgmes_model: CgmesCircuit):
         """
 

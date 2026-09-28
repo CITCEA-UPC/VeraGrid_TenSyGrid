@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Branches.transformerNw &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Branches.transformerNw &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -120,11 +120,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Profiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProfileBool</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">BuildStatus</span><span class="p">,</span> <span class="n">DeviceType</span><span class="p">,</span> <span class="n">PrpCat</span><span class="p">,</span> <span class="n">SubObjectType</span>
 
+
 <div class="viewcode-block" id="ImpedanceTriplet">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTriplet">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ImpedanceTriplet</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">,</span> <span class="s2">&quot;imp&quot;</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">imp</span><span class="p">:</span><span class="nb">complex</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param i:</span>
+<span class="sd">        :param j:</span>
+<span class="sd">        :param imp:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="n">j</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imp</span> <span class="o">=</span> <span class="n">imp</span>
@@ -132,12 +142,21 @@
 <div class="viewcode-block" id="ImpedanceTriplet.to_list">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTriplet.to_list">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="o">|</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imp</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imp</span><span class="o">.</span><span class="n">imag</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="ImpedanceTriplet.from_list">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTriplet.from_list">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="o">|</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ImpedanceTriplet&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param value:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imp</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
@@ -148,21 +167,43 @@
 <div class="viewcode-block" id="ImpedanceTripletList">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTripletList">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ImpedanceTripletList</span><span class="p">:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;__list&quot;</span><span class="p">,)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ImpedanceTriplet</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
 <div class="viewcode-block" id="ImpedanceTripletList.append">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTripletList.append">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imp</span><span class="p">:</span> <span class="n">ImpedanceTriplet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param imp:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imp</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="ImpedanceTripletList.to_list">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTripletList.to_list">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ImpedanceTripletList</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list</span><span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="ImpedanceTripletList.parse">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformerNw.ImpedanceTripletList.parse">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="o">|</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param data:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ImpedanceTriplet</span><span class="p">()</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span></div>
 </div>

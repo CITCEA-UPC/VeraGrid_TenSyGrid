@@ -54,6 +54,7 @@ def _build_external_mapping(v_a: Var, v_b: Var, v_c: Var, i_a: Var, i_b: Var, i_
 # BALANCED THREE-PHASE CURRENT SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class Balanced3phCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -144,6 +145,7 @@ def get_balanced_3ph_current_source_emt_template(vf: VarFactory,
 # CONTROLLED BALANCED THREE-PHASE CURRENT SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class ControlledBalanced3phCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -229,6 +231,7 @@ def get_controlled_balanced_3ph_current_source_emt_template(vf: VarFactory,
 # BALANCED THREE-PHASE VOLTAGE SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class Balanced3phVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -329,6 +332,7 @@ def get_balanced_3ph_voltage_source_emt_template(vf: VarFactory,
 # CONTROLLED BALANCED THREE-PHASE VOLTAGE SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class ControlledBalanced3phVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

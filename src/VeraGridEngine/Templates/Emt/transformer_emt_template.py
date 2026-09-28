@@ -789,6 +789,7 @@ def get_series_transformer_emt_template(
 
 
 class TransformerEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

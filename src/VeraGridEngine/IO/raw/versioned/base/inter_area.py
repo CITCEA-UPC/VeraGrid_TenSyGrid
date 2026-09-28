@@ -11,6 +11,13 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_float,
 
 
 class RawInterArea(RawObject):
+    __slots__ = (
+        "_I",
+        "_ARNAME",
+        "_ISW",
+        "_PDES",
+        "_PTOL",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='iarea', class_type=int, description='Area number', min_value=1,
                      max_value=9999),

@@ -17,6 +17,19 @@ class ContinuationPowerFlowOptions(OptionsTemplate):
     ContinuationPowerFlowOptions
     """
 
+    __slots__ = (
+        "step",
+        "approximation_order",
+        "adapt_step",
+        "step_min",
+        "step_max",
+        "step_tol",
+        "solution_tol",
+        "max_it",
+        "stop_at",
+        "verbose",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="step", tpe=float),
         GCProp(key="approximation_order", tpe=CpfParametrization),

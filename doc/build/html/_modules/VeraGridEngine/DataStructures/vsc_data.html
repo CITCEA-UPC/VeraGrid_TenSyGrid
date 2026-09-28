@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.vsc_data &mdash; VeraGrid 6.5.6 documentation</title>
+  <title>VeraGridEngine.DataStructures.vsc_data &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=1095f081"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -44,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../md_source/installation.html">💽 Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../md_source/user_interface.html">📊 User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../md_source/veragrid_scripting_guide.html">📑 VeraGrid scripting guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../md_source/grid_analysis.html">🔎 Grid analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../md_source/structure.html">🌁 Structure of VeraGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../md_source/modelling.html">📐 Grid Modelling</a></li>
@@ -120,6 +121,36 @@
 <span class="sd">    Voltage Source Converters (VSC) in power grid simulations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;F_dcn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_int&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_int&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fault_control_int&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_val&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_val&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_val_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_val_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_val_droop&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_droop_val&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_droop_val_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_droop_val_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_val_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_val_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_val_droop&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_droop_val&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_droop_val_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_droop_val_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_bus_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_bus_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control1_branch_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control2_branch_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;min_ac_voltage&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ysvs&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nelm</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Branch data arrays</span>
@@ -177,7 +208,6 @@
 
         <span class="n">data</span><span class="p">,</span> <span class="n">bus_map</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">elm_idx</span><span class="p">,</span> <span class="n">bus_idx</span><span class="p">,</span> <span class="n">bus_map</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">VscData</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">VscData</span>
 
         <span class="c1"># data.F_dcp = self.F_dcp[elm_idx]</span>
         <span class="n">data</span><span class="o">.</span><span class="n">F_dcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">F_dcn</span><span class="p">[</span><span class="n">elm_idx</span><span class="p">]</span>
@@ -246,7 +276,6 @@
 <span class="sd">        :return: new BranchData instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">VscData</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">VscData</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">F_dcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">F_dcn</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 

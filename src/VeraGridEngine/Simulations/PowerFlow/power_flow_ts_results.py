@@ -6,8 +6,6 @@
 import json
 import numpy as np
 import pandas as pd
-import matplotlib.colors as plt_colors
-from matplotlib import pyplot as plt
 from typing import Union
 
 from VeraGridEngine.DataStructures.numerical_circuit import NumericalCircuit
@@ -16,7 +14,7 @@ from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowRes
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
 from VeraGridEngine.basic_structures import DateVec, IntVec, StrVec, CxMat, Mat, Vec, BoolVec
-from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType
+from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType, ResultTablePlotType
 from VeraGridEngine.Simulations.Clustering.clustering_results import ClusteringResults
 
 
@@ -498,7 +496,6 @@ class PowerFlowTimeSeriesResults(ResultsTemplate):
         elif result_type == ResultTypes.BusVoltagePolarPlot:
             vm = np.abs(self.voltage)
             va = np.angle(self.voltage, deg=True)
-            va_rad = np.angle(self.voltage, deg=False)
             module_columns: list[str] = list()
             angle_columns: list[str] = list()
             column_names: np.ndarray
@@ -511,18 +508,6 @@ class PowerFlowTimeSeriesResults(ResultsTemplate):
             column_names = np.array(module_columns + angle_columns)
             data = np.concatenate((vm, va), axis=1)
 
-            if self.plotting_allowed():
-                # Plot every bus-time phasor in one polar cloud to preserve the snapshot plot semantics.
-                vm_flat: np.ndarray = vm.reshape(-1)
-                va_flat: np.ndarray = va_rad.reshape(-1)
-                plt.ion()
-                color_norm = plt_colors.LogNorm()
-                fig = plt.figure(figsize=(8, 6))
-                ax3 = plt.subplot(1, 1, 1, projection='polar')
-                ax3.scatter(va_flat, vm_flat, c=vm_flat, norm=color_norm)
-                fig.suptitle(result_type.value)
-                plt.tight_layout()
-                plt.show(block=False)
 
             return ResultsTable(data=data,
                                 index=pd.to_datetime(self.time_array),
@@ -531,6 +516,7 @@ class PowerFlowTimeSeriesResults(ResultsTemplate):
                                 cols_device_type=DeviceType.NoDevice,
                                 title=result_type.value,
                                 ylabel='(p.u., deg)',
+                                plot_type=ResultTablePlotType.POLAR,
                                 units='(p.u., deg)')
 
         elif result_type == ResultTypes.BusActivePower:

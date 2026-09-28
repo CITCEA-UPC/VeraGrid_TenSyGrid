@@ -16,6 +16,12 @@ class ResolvedStorage:
 
 
 class CVariableResolver:
+    __slots__ = (
+        "export_model",
+        "by_uid",
+        "by_name",
+    )
+
     def __init__(self, export_model: ExportModel):
         self.export_model = export_model
         self.by_uid = {variable.uid: variable for variable in export_model.variables}

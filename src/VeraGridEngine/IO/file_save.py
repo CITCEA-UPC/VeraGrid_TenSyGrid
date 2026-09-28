@@ -47,6 +47,26 @@ class FileSavingOptions:
     Store the extra data required by the richer file-export paths.
     """
 
+    __slots__ = (
+        "file_type",
+        "sessions_data",
+        "dictionary_of_json_files",
+        "cgmes_version",
+        "cgmes_boundary_set",
+        "type_selected",
+        "cgmes_profiles",
+        "cgmes_one_file_per_profile",
+        "cgmes_map_areas_like_raw",
+        "raw_version",
+        "psse_topology_mode",
+        "psse_export_mode",
+        "dgs_export_mode",
+        "matpower_export_mode",
+        "ucte_export_mode",
+        "cgmes_export_mode",
+        "t_idx",
+    )
+
     def __init__(self,
                  file_type: FileType | None = None,
                  sessions_data: List[DriverToSave] = None,
@@ -1092,6 +1112,15 @@ class FileSave:
     """
     FileSave
     """
+
+    __slots__ = (
+        "circuit",
+        "multiverse",
+        "file_name",
+        "options",
+        "text_func",
+        "progress_func",
+    )
 
     def __init__(self,
                  circuit: MultiCircuit,

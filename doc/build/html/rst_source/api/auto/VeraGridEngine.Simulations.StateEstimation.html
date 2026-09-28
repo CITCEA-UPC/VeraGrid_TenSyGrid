@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.StateEstimation package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.StateEstimation package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -175,21 +175,6 @@ Reactive power -&gt; voltage magnitudes</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.observability_analysis.plot_bus_observability">
-<span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.StateEstimation.observability_analysis.</span></span><span class="sig-name descname"><span class="pre">plot_bus_observability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus_status_per_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/observability_analysis.html#plot_bus_observability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.observability_analysis.plot_bus_observability" title="Link to this definition"></a></dt>
-<dd><p>bus_status_per_type: dict of dicts
-Example:
-{</p>
-<blockquote>
-<div><p>‘active’: {‘bus_1’: ‘critical’, ‘bus_2’: ‘globally redundant’, …},
-‘reactive’: {…},
-‘voltage’: {…},
-‘current’: {…}</p>
-</div></blockquote>
-<p>}</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.observability_analysis.profile_measurements">
 <span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.StateEstimation.observability_analysis.</span></span><span class="sig-name descname"><span class="pre">profile_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Hsub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_line_measurements_on_both_ends</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/observability_analysis.html#profile_measurements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.observability_analysis.profile_measurements" title="Link to this definition"></a></dt>
 <dd><p>Condition               System rank             Local rank              Classification
@@ -211,8 +196,9 @@ System rank full           full                     ↓                       Gl
 <span id="veragridengine-simulations-stateestimation-pseudo-measurements-augmentation-module"></span><h2>VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation module<a class="headerlink" href="#module-VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.</span></span><span class="sig-name descname"><span class="pre">PseudoMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idtag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.</span></span><span class="sig-name descname"><span class="pre">PseudoMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idtag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.MeasurementTemplate" title="VeraGridEngine.Devices.measurement.MeasurementTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasurementTemplate</span></code></a></p>
+<p>PseudoMeasurement class.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.CLASS_NON_EDITABLE_PROPERTIES">
 <span class="sig-name descname"><span class="pre">CLASS_NON_EDITABLE_PROPERTIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('idtag',</span> <span class="pre">'selected_to_merge',</span> <span class="pre">'diff_changes',</span> <span class="pre">'device_idtag',</span> <span class="pre">'tpe',</span> <span class="pre">'device_name')</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.CLASS_NON_EDITABLE_PROPERTIES" title="Link to this definition"></a></dt>
@@ -238,15 +224,38 @@ System rank full           full                     ↓                       Gl
 <span class="sig-name descname"><span class="pre">CLASS_REGISTERED_PROPERTIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'action':</span> <span class="pre">prop:action,</span> <span class="pre">'code':</span> <span class="pre">prop:code,</span> <span class="pre">'comment':</span> <span class="pre">prop:comment,</span> <span class="pre">'device_idtag':</span> <span class="pre">prop:device_idtag,</span> <span class="pre">'device_name':</span> <span class="pre">prop:device_name,</span> <span class="pre">'diff_changes':</span> <span class="pre">prop:diff_changes,</span> <span class="pre">'idtag':</span> <span class="pre">prop:idtag,</span> <span class="pre">'name':</span> <span class="pre">prop:name,</span> <span class="pre">'rdfid':</span> <span class="pre">prop:rdfid,</span> <span class="pre">'selected_to_merge':</span> <span class="pre">prop:selected_to_merge,</span> <span class="pre">'sigma':</span> <span class="pre">prop:sigma,</span> <span class="pre">'tpe':</span> <span class="pre">prop:tpe,</span> <span class="pre">'value':</span> <span class="pre">prop:value}</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.CLASS_REGISTERED_PROPERTIES" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_standard_deviation_pu">
-<span class="sig-name descname"><span class="pre">get_standard_deviation_pu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement.get_standard_deviation_pu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_standard_deviation_pu" title="Link to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.bus">
+<span class="sig-name descname"><span class="pre">bus</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.Substation.html#VeraGridEngine.Devices.Substation.bus.Bus" title="VeraGridEngine.Devices.Substation.bus.Bus"><span class="pre">Bus</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.bus" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_standard_deviation_pu">
+<span class="sig-name descname"><span class="pre">get_standard_deviation_pu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement.get_standard_deviation_pu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_standard_deviation_pu" title="Link to this definition"></a></dt>
+<dd><p>Get standard deviation in per unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Sbase</strong> – Base power</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Standard deviation per unit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_value_pu">
-<span class="sig-name descname"><span class="pre">get_value_pu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement.get_value_pu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_value_pu" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">get_value_pu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/pseudo_measurements_augmentation.html#PseudoMeasurement.get_value_pu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation.PseudoMeasurement.get_value_pu" title="Link to this definition"></a></dt>
+<dd><p>Get value in per unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Sbase</strong> – Base power</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Value per unit</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -406,9 +415,114 @@ ordering: Pinj, Pflow, Qinj, Qflow, Iflow, Vm
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.</span></span><span class="sig-name descname"><span class="pre">StateEstimationInput</span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/state_estimation_inputs.html#StateEstimationInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.flags" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.if_idx">
+<span class="sig-name descname"><span class="pre">if_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.if_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.if_value">
+<span class="sig-name descname"><span class="pre">if_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.IfMeasurement" title="VeraGridEngine.Devices.measurement.IfMeasurement"><span class="pre">IfMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.if_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.it_idx">
+<span class="sig-name descname"><span class="pre">it_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.it_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.it_value">
+<span class="sig-name descname"><span class="pre">it_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.ItMeasurement" title="VeraGridEngine.Devices.measurement.ItMeasurement"><span class="pre">ItMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.it_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.p_idx">
+<span class="sig-name descname"><span class="pre">p_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.p_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.p_inj">
+<span class="sig-name descname"><span class="pre">p_inj</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.PiMeasurement" title="VeraGridEngine.Devices.measurement.PiMeasurement"><span class="pre">PiMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.p_inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pf_idx">
+<span class="sig-name descname"><span class="pre">pf_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pf_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pf_value">
+<span class="sig-name descname"><span class="pre">pf_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.PfMeasurement" title="VeraGridEngine.Devices.measurement.PfMeasurement"><span class="pre">PfMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pf_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pg_idx">
+<span class="sig-name descname"><span class="pre">pg_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pg_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pg_inj">
+<span class="sig-name descname"><span class="pre">pg_inj</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.PgMeasurement" title="VeraGridEngine.Devices.measurement.PgMeasurement"><span class="pre">PgMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pg_inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pt_idx">
+<span class="sig-name descname"><span class="pre">pt_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pt_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pt_value">
+<span class="sig-name descname"><span class="pre">pt_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.PtMeasurement" title="VeraGridEngine.Devices.measurement.PtMeasurement"><span class="pre">PtMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.pt_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.q_idx">
+<span class="sig-name descname"><span class="pre">q_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.q_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.q_inj">
+<span class="sig-name descname"><span class="pre">q_inj</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.QiMeasurement" title="VeraGridEngine.Devices.measurement.QiMeasurement"><span class="pre">QiMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.q_inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qf_idx">
+<span class="sig-name descname"><span class="pre">qf_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qf_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qf_value">
+<span class="sig-name descname"><span class="pre">qf_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.QfMeasurement" title="VeraGridEngine.Devices.measurement.QfMeasurement"><span class="pre">QfMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qf_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qg_idx">
+<span class="sig-name descname"><span class="pre">qg_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qg_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qg_inj">
+<span class="sig-name descname"><span class="pre">qg_inj</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.QgMeasurement" title="VeraGridEngine.Devices.measurement.QgMeasurement"><span class="pre">QgMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qg_inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qt_idx">
+<span class="sig-name descname"><span class="pre">qt_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qt_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qt_value">
+<span class="sig-name descname"><span class="pre">qt_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.QtMeasurement" title="VeraGridEngine.Devices.measurement.QtMeasurement"><span class="pre">QtMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.qt_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.size">
-<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/state_estimation_inputs.html#StateEstimationInput.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.size" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/StateEstimation/state_estimation_inputs.html#StateEstimationInput.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.size" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -427,6 +541,26 @@ ordering: Pinj, Pflow, Qinj, Qflow, Iflow, Vm
 :param mask: mask of measurements to keep
 :return: StateEstimationInput</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.va_idx">
+<span class="sig-name descname"><span class="pre">va_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.va_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.va_value">
+<span class="sig-name descname"><span class="pre">va_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.VaMeasurement" title="VeraGridEngine.Devices.measurement.VaMeasurement"><span class="pre">VaMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.va_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.vm_idx">
+<span class="sig-name descname"><span class="pre">vm_idx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.vm_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.vm_value">
+<span class="sig-name descname"><span class="pre">vm_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.measurement.VmMeasurement" title="VeraGridEngine.Devices.measurement.VmMeasurement"><span class="pre">VmMeasurement</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.StateEstimation.state_estimation_inputs.StateEstimationInput.vm_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

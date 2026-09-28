@@ -34,8 +34,41 @@ class RmsProblemMTI(RmsProblemPhasor):
     Inequalities are compiled locally in this MTI class from
     ``Block.inequalities`` and evaluated at runtime via ``rhs_inequalities``.
     """
+    __slots__ = (
+        "_mti_boolean_params",
+        "_mti_bool_uid2param_idx",
+        "_mti_inequalities_raw",
+        "_mti_inequalities_compiled",
+        "_rhs_ineq_fn",
+        "_j_ineq_x_fn",
+        "_j_ineq_dx_fn",
+        "_j_ineq_x_static_fn",
+        "_j_ineq_dx_static_fn",
+        "_j_eq_x_static_fn",
+        "_j_eq_dx_static_fn",
+        "_mti_bool_param_indices",
+        "_mti_bool_guard_compiled_by_param_idx",
+        "_mti_bool_guard_var_positions_by_param_idx",
+        "_mti_incidence_includes_inequalities",
+        "_ineq_bool_positions",
+        "_ineq_var_positions",
+        "_mti_alg_uid_to_y_col",
+        "_mti_base_uid_to_xp_col",
+        "_mti_base_xp_incidence_mask",
+        "_mti_bool_uid_to_local_col",
+        "_mti_col_meta",
+        "_mti_col_to_continuous_var_idx_map",
+        "_mti_continuous_var_idx_to_col",
+        "_mti_diff_uid_to_xp_col",
+        "_mti_incidence",
+        "_mti_incidence_bool_param_indices",
+        "_mti_row_meta",
+        "_mti_solving_order",
+        "_mti_xp_vars",
+        "_mti_y_vars",
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # TODO: *args, **kwargs -> Forbidden
         # Must be defined before super().__init__ because the base constructor
         # calls add_variables_to_compilation_dicts(), which is overridden here.
         self._mti_boolean_params: list[object] = []
@@ -43,6 +76,8 @@ class RmsProblemMTI(RmsProblemPhasor):
         super().__init__(*args, **kwargs)
         self._mti_inequalities_raw: list[Expr | Comparison] = []
         self._mti_inequalities_compiled: list[Expr] = []
+
+        # TODO: what are the types?
         self._rhs_ineq_fn = None
         self._j_ineq_x_fn = None
         self._j_ineq_dx_fn = None
@@ -60,6 +95,8 @@ class RmsProblemMTI(RmsProblemPhasor):
         self._initialize_mti_booleans_at_t0()
         self._mti_incidence: np.ndarray | None = None
         self._mti_solving_order: list[MTISubProblemRow] = []
+
+        # TODO: object is too lazy, what is the actual type?
         self._mti_xp_vars: list[object] = []
         self._mti_y_vars: list[object] = []
         self._mti_incidence_bool_param_indices: list[int] = []
@@ -76,6 +113,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         self._build_inequality_variable_positions()
 
     def add_variables_to_compilation_dicts(self, elm, mdl):
+        """
+
+        :param elm:
+        :param mdl:
+        :return:
+        """
         super().add_variables_to_compilation_dicts(elm=elm, mdl=mdl)
         ineq_uids: set[int] = set()
         for ineq in mdl.inequalities:
@@ -101,15 +144,29 @@ class RmsProblemMTI(RmsProblemPhasor):
             self._event_parameters_eqs.append(Const(0.0))
 
     def get_mti_boolean_parameters(self) -> list[object]:
+        """
+
+        :return:
+        """
         return list(self._mti_boolean_params)
 
     @property
     def non_bool_idx_params(self) -> np.ndarray:
+        """
+
+        :return:
+        """
         n = len(self._variable_parameters)
         bool_idx = set(self.get_mti_boolean_parameter_indices)
         return np.asarray([i for i in range(n) if i not in bool_idx], dtype=int)
 
     def update_variable_params(self, t: float, x_snapshot: Vec | None = None):
+        """
+
+        :param t:
+        :param x_snapshot:
+        :return:
+        """
         # MTI booleans are controlled explicitly by event/candidate logic.
         # Refresh only non-boolean variable parameters here.
         evt_vals = self._event_params_fn(self._variable_parameters_values, t)
@@ -127,6 +184,11 @@ class RmsProblemMTI(RmsProblemPhasor):
         self._initialize_mti_booleans_at_t0()
 
     def _mti_boolean_values(self, x_snapshot: Vec | None = None) -> Vec:
+        """
+
+        :param x_snapshot:
+        :return:
+        """
         # Return currently assigned boolean parameter values. Candidate updates
         # are applied explicitly through set_mti_boolean_state().
         if self._variable_parameters_values is None:
@@ -187,6 +249,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         return 1.0 if val <= 0.0 else 0.0
 
     def _evaluate_boolean_init_from_init_eq(self, bool_position: int, x: Vec) -> float | None:
+        """
+
+        :param bool_position:
+        :param x:
+        :return:
+        """
         idx = self.get_mti_boolean_parameter_indices
         if bool_position < 0 or bool_position >= len(idx):
             return None
@@ -217,11 +285,15 @@ class RmsProblemMTI(RmsProblemPhasor):
                         if e_idx is not None:
                             uid_bindings[vr.uid] = float(self._variable_parameters_values[e_idx])
                     return float(init_eq.eval_uid(uid_bindings))
-                except Exception:
+                except Exception:  # TODO: Except what? why is an exception even possible here
                     return None
         return None
 
     def _compile_mti_inequalities(self) -> None:
+        """
+
+        :return:
+        """
         self._mti_inequalities_raw = []
         for blk in self.sys_block.get_all_blocks():
             if hasattr(blk, "inequalities") and blk.inequalities:
@@ -277,6 +349,10 @@ class RmsProblemMTI(RmsProblemPhasor):
         )
 
     def _compile_mti_equality_jacobians(self) -> None:
+        """
+
+        :return:
+        """
         eqs = list(self._state_eqs) + list(self._algebraic_eqs)
         if len(eqs) == 0:
             self._j_eq_x_static_fn = None
@@ -307,9 +383,13 @@ class RmsProblemMTI(RmsProblemPhasor):
         )
 
     def _compile_mti_boolean_guards(self) -> None:
+        """
+
+        :return:
+        """
         self._mti_bool_param_indices = []
-        self._mti_bool_guard_compiled_by_param_idx = {}
-        self._mti_bool_guard_var_positions_by_param_idx = {}
+        self._mti_bool_guard_compiled_by_param_idx = {}  # TODO: is this a set or a dict? types?
+        self._mti_bool_guard_var_positions_by_param_idx = {}  # TODO: is this a set or a dict? types?
 
         rms_compiler = RMSCompiler(
             variables=self._state_algeb_vars,
@@ -340,7 +420,7 @@ class RmsProblemMTI(RmsProblemPhasor):
                         vidx = self.uid2idx_vars.get(v.uid, None)
                         if vidx is not None:
                             pos.append(int(vidx))
-                except Exception:
+                except Exception:  # TODO: Except what? why is an exception even possible here
                     pass
                 self._mti_bool_guard_var_positions_by_param_idx[int(param_idx)] = np.asarray(sorted(set(pos)), dtype=int)
 
@@ -348,6 +428,11 @@ class RmsProblemMTI(RmsProblemPhasor):
 
     @staticmethod
     def _normalize_inequality_expression(expr: Expr | Comparison) -> Expr:
+        """
+
+        :param expr:
+        :return:
+        """
         if isinstance(expr, Comparison):
             return expr.to_residual()
         if isinstance(expr, Expr):
@@ -355,6 +440,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         raise TypeError(f"Unsupported inequality type: {type(expr).__name__}")
 
     def rhs_inequalities(self, x: Vec, dx: Vec) -> Vec:
+        """
+
+        :param x:
+        :param dx:
+        :return:
+        """
         if self._rhs_ineq_fn is None:
             return np.zeros(0, dtype=float)
         return self._rhs_ineq_fn(x, dx, self._variable_parameters_values, self._constant_params)
@@ -377,9 +468,22 @@ class RmsProblemMTI(RmsProblemPhasor):
         return np.asarray(self.rhs_inequalities(x, dx), dtype=float)
 
     def make_mti_direct_state(self, x_ref: Vec, dx_ref: Vec) -> tuple[Vec, Vec]:
+        """
+
+        :param x_ref:
+        :param dx_ref:
+        :return:
+        """
         return np.asarray(x_ref, dtype=float).copy(), np.asarray(dx_ref, dtype=float).copy()
 
     def mti_direct_pack(self, x: Vec, dx: Vec, var_idx: np.ndarray) -> Vec:
+        """
+
+        :param x:
+        :param dx:
+        :param var_idx:
+        :return:
+        """
         vals: list[float] = []
         for idx in np.asarray(var_idx, dtype=int):
             col = self._mti_continuous_var_idx_to_col.get(int(idx), None)
@@ -395,6 +499,14 @@ class RmsProblemMTI(RmsProblemPhasor):
         return np.asarray(vals, dtype=float)
 
     def mti_direct_apply(self, w: Vec, x_ref: Vec, dx_ref: Vec, var_idx: np.ndarray) -> tuple[Vec, Vec]:
+        """
+
+        :param w:
+        :param x_ref:
+        :param dx_ref:
+        :param var_idx:
+        :return:
+        """
         x = np.asarray(x_ref, dtype=float).copy()
         dx = np.asarray(dx_ref, dtype=float).copy()
         for val, idx in zip(np.asarray(w, dtype=float), np.asarray(var_idx, dtype=int)):
@@ -412,6 +524,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         return x, dx
 
     def compute_mti_direct_equalities(self, x: Vec, dx: Vec) -> Vec:
+        """
+
+        :param x:
+        :param dx:
+        :return:
+        """
         f_algeb = self.rhs_algebraic(x, dx)
         if len(self._state_eqs) > 0:
             f_state = self.rhs_state(x, dx)
@@ -419,6 +537,13 @@ class RmsProblemMTI(RmsProblemPhasor):
         return np.asarray(f_algeb, dtype=float)
 
     def jacobian_mti_direct_equalities(self, x: Vec, dx: Vec, var_idx: np.ndarray) -> sp.csr_matrix:
+        """
+
+        :param x:
+        :param dx:
+        :param var_idx:
+        :return:
+        """
         rows = len(self._state_eqs) + len(self._algebraic_eqs)
         cols: list[sp.spmatrix] = []
         jx = self._j_eq_x_static_fn(x, dx, self._variable_parameters_values, self._constant_params, 0.0).tocsr() if self._j_eq_x_static_fn is not None else None
@@ -476,9 +601,18 @@ class RmsProblemMTI(RmsProblemPhasor):
 
     @property
     def get_mti_boolean_parameter_indices(self) -> list[int]:
+        """
+
+        :return:
+        """
         return list(self._mti_bool_param_indices)
 
     def set_mti_boolean_state(self, z: Vec) -> None:
+        """
+
+        :param z:
+        :return:
+        """
         idx = self.get_mti_boolean_parameter_indices
         if len(idx) == 0 or self._variable_parameters_values is None:
             return
@@ -486,6 +620,13 @@ class RmsProblemMTI(RmsProblemPhasor):
             self._variable_parameters_values[i] = float(z[k])
 
     def evaluate_boolean_guard(self, bool_position: int, x: Vec, dx: Vec) -> float | None:
+        """
+
+        :param bool_position:
+        :param x:
+        :param dx:
+        :return:
+        """
         idx = self.get_mti_boolean_parameter_indices
         if bool_position < 0 or bool_position >= len(idx):
             return None
@@ -501,6 +642,11 @@ class RmsProblemMTI(RmsProblemPhasor):
         return float(out[0])
 
     def has_boolean_guard(self, bool_position: int) -> bool:
+        """
+
+        :param bool_position:
+        :return:
+        """
         idx = self.get_mti_boolean_parameter_indices
         if bool_position < 0 or bool_position >= len(idx):
             return False
@@ -514,6 +660,10 @@ class RmsProblemMTI(RmsProblemPhasor):
         return [], list(range(n_bool))
 
     def enumerate_all_boolean_candidates(self) -> list[np.ndarray]:
+        """
+
+        :return:
+        """
         n_bool = len(self.get_mti_boolean_parameter_indices)
         if n_bool == 0:
             return [np.zeros(0, dtype=float)]
@@ -565,6 +715,13 @@ class RmsProblemMTI(RmsProblemPhasor):
         return dg
 
     def build_mti_incidence_and_order(self, x: Vec, dx: Vec, h: float) -> None:
+        """
+
+        :param x:
+        :param dx:
+        :param h:
+        :return:
+        """
         self._mti_incidence = self._build_incidence_from_equation_structure()
         n_eq, n_var = self._mti_incidence.shape
         nnz = int(np.count_nonzero(self._mti_incidence))
@@ -588,6 +745,10 @@ class RmsProblemMTI(RmsProblemPhasor):
             self.print_mti_incidence_diagnostics()
 
     def print_mti_solving_order_summary(self) -> None:
+        """
+
+        :return:
+        """
         order = list(getattr(self, "_mti_solving_order", []) or [])
         if len(order) == 0:
             print("[MTI-ORDER-DETAIL] empty")
@@ -642,6 +803,10 @@ class RmsProblemMTI(RmsProblemPhasor):
                 )
 
     def print_mti_incidence_diagnostics(self) -> None:
+        """
+
+        :return:
+        """
         inc = self._mti_incidence
         order = list(getattr(self, "_mti_solving_order", []) or [])
         if inc is None or inc.size == 0 or len(order) == 0:
@@ -667,6 +832,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         self._print_mti_diag_bridge_candidates(inc, block_rows, block_cols)
 
     def _print_mti_diag_membership(self, rows: np.ndarray, cols: np.ndarray) -> None:
+        """
+
+        :param rows:
+        :param cols:
+        :return:
+        """
         row_counts: dict[str, int] = {}
         col_counts: dict[str, int] = {}
         row_preview: list[str] = []
@@ -689,6 +860,13 @@ class RmsProblemMTI(RmsProblemPhasor):
         print(f"[MTI-DIAG] cols_head={col_preview}")
 
     def _print_mti_diag_edge_counts(self, inc: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> None:
+        """
+
+        :param inc:
+        :param rows:
+        :param cols:
+        :return:
+        """
         if rows.size == 0 or cols.size == 0:
             return
         block = inc[np.ix_(rows, cols)]
@@ -704,6 +882,11 @@ class RmsProblemMTI(RmsProblemPhasor):
         print(f"[MTI-DIAG] block_edges_by_row_kind={counts_by_row_kind}")
 
     def _print_mti_diag_ablation_summary(self, inc: np.ndarray) -> None:
+        """
+
+        :param inc:
+        :return:
+        """
         ablations: list[tuple[str, np.ndarray]] = [("original", inc.copy())]
 
         if self._mti_base_xp_incidence_mask is not None and self._mti_base_xp_incidence_mask.shape == inc.shape:
@@ -745,6 +928,13 @@ class RmsProblemMTI(RmsProblemPhasor):
             )
 
     def _print_mti_diag_degree_summary(self, inc: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> None:
+        """
+
+        :param inc:
+        :param rows:
+        :param cols:
+        :return:
+        """
         if rows.size == 0 or cols.size == 0:
             return
         block = inc[np.ix_(rows, cols)]
@@ -764,6 +954,13 @@ class RmsProblemMTI(RmsProblemPhasor):
             print(f"[MTI-DIAG]   degree={int(col_deg[idx])} {self._mti_col_label(int(cols[idx]))}")
 
     def _print_mti_diag_bridge_candidates(self, inc: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> None:
+        """
+
+        :param inc:
+        :param rows:
+        :param cols:
+        :return:
+        """
         if rows.size == 0 or cols.size == 0:
             return
         block = inc[np.ix_(rows, cols)]
@@ -808,6 +1005,11 @@ class RmsProblemMTI(RmsProblemPhasor):
             )
 
     def _mti_bipartite_component_summary(self, incidence: np.ndarray) -> dict[str, object]:
+        """
+
+        :param incidence:
+        :return:
+        """
         mat = (np.asarray(incidence) != 0).astype(int)
         n_row, n_col = mat.shape
         if n_row == 0 or n_col == 0:
@@ -838,6 +1040,11 @@ class RmsProblemMTI(RmsProblemPhasor):
         }
 
     def _mti_row_kind_label(self, row: int) -> str:
+        """
+
+        :param row:
+        :return:
+        """
         if 0 <= row < len(self._mti_row_meta):
             kind, local_idx = self._mti_row_meta[row]
             if kind == "eq":
@@ -847,6 +1054,11 @@ class RmsProblemMTI(RmsProblemPhasor):
         return "unknown"
 
     def _mti_row_label(self, row: int) -> str:
+        """
+
+        :param row:
+        :return:
+        """
         if 0 <= row < len(self._mti_row_meta):
             kind, local_idx = self._mti_row_meta[row]
             if kind == "eq":
@@ -858,11 +1070,21 @@ class RmsProblemMTI(RmsProblemPhasor):
         return f"row={row}:unknown"
 
     def _mti_col_kind(self, col: int) -> str:
+        """
+
+        :param col:
+        :return:
+        """
         if 0 <= col < len(self._mti_col_meta):
             return str(self._mti_col_meta[col][0])
         return "unknown"
 
     def _mti_col_label(self, col: int) -> str:
+        """
+
+        :param col:
+        :return:
+        """
         if 0 <= col < len(self._mti_col_meta):
             kind, local_idx, obj = self._mti_col_meta[col]
             return f"col={col}:{kind}[{int(local_idx)}]:{self._mti_obj_name(obj)}"
@@ -870,6 +1092,11 @@ class RmsProblemMTI(RmsProblemPhasor):
 
     @staticmethod
     def _mti_obj_name(obj: object | None) -> str:
+        """
+
+        :param obj:
+        :return:
+        """
         if obj is None:
             return "None"
         for attr in ("name", "idtag", "code", "device", "label"):
@@ -881,6 +1108,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         return type(obj).__name__
 
     def _mti_row_is_network_like(self, row: int, inc: np.ndarray) -> bool:
+        """
+
+        :param row:
+        :param inc:
+        :return:
+        """
         if self._mti_row_kind_label(row) != "alg_eq":
             return False
         cols = np.where(inc[int(row), :] != 0)[0]
@@ -888,6 +1121,12 @@ class RmsProblemMTI(RmsProblemPhasor):
         return any(":Vr" in name or ":Vi" in name or "Vr" in name or "Vi" in name for name in names)
 
     def _mti_row_is_branch_current_like(self, row: int, inc: np.ndarray) -> bool:
+        """
+
+        :param row:
+        :param inc:
+        :return:
+        """
         if self._mti_row_kind_label(row) != "alg_eq":
             return False
         cols = np.where(inc[int(row), :] != 0)[0]
@@ -1035,6 +1274,10 @@ class RmsProblemMTI(RmsProblemPhasor):
         return incidence_matrix
 
     def get_mti_solving_order(self) -> list[MTISubProblemRow]:
+        """
+
+        :return:
+        """
         return list(self._mti_solving_order)
 
     def _mti_state_diff_vars(self) -> list[object]:
@@ -1042,6 +1285,10 @@ class RmsProblemMTI(RmsProblemPhasor):
         return [v for v in self._diff_vars if v.base_var is not None]
 
     def _mti_state_base_uids(self) -> set[int]:
+        """
+
+        :return:
+        """
         return {v.base_var.uid for v in self._mti_state_diff_vars() if v.base_var is not None}
 
     def _mti_algebraic_vars(self) -> list[object]:
@@ -1305,6 +1552,10 @@ class RmsProblemMTI(RmsProblemPhasor):
         return pairs, rest_eq, rest_var
 
     def _build_inequality_variable_positions(self) -> None:
+        """
+
+        :return:
+        """
         self._ineq_var_positions = []
         self._ineq_bool_positions = []
         bool_param_indices = list(self.get_mti_boolean_parameter_indices)

@@ -556,11 +556,6 @@ def solve_se_lm(nc: NumericalCircuit,
         branch_rates=nc.passive_branch_data.rates,
         Sbase=nc.Sbase)
 
-    if verbose > 1:
-        from matplotlib import pyplot as plt
-        plt.plot(error_list)
-        plt.yscale('log')
-        # plt.show()
 
     return NumericStateEstimationResults(V=V,
                                          Scalc=Scalc,
@@ -791,11 +786,6 @@ def solve_se_nr(nc: NumericalCircuit,
         branch_rates=nc.passive_branch_data.rates,
         Sbase=nc.Sbase)
 
-    if verbose > 1:
-        from matplotlib import pyplot as plt
-        plt.plot(error_list)
-        plt.yscale('log')
-        # plt.show()
 
     return NumericStateEstimationResults(V=V,
                                          Scalc=Scalc,
@@ -981,11 +971,6 @@ def solve_se_gauss_newton(nc: NumericalCircuit,
     end_time = time.time()
     logger.add_info(f"State estimation completed in {iter_} iterations, time: {end_time - start_time:.3f}s")
 
-    if verbose > 1:
-        from matplotlib import pyplot as plt
-        plt.plot(error_list)
-        plt.yscale('log')
-        # plt.show()
 
     return NumericStateEstimationResults(V=V,
                                          Scalc=Scalc,

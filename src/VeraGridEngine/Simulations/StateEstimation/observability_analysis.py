@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.sparse import csc_matrix
 from VeraGridEngine.DataStructures.numerical_circuit import NumericalCircuit
 from VeraGridEngine.Simulations.StateEstimation.pseudo_measurements_augmentation import (add_pseudo_measurements,
@@ -123,7 +122,6 @@ def check_for_observability_and_return_unobservable_buses(nc: NumericalCircuit,
             measurement_profile = parallel_measurement_profiling(Ha, Hr, Hv, Hi, measurement_ids, a_idx, r_idx, v_idx,
                                                                  i_idx, True)
             bus_status = bus_observability_profile(measurement_profile)
-            plot_bus_observability(bus_status)
             logger.add_info("Measurement profiling completed")
             return True, [], measurement_profile, V, bus_contrib
         else:
@@ -419,48 +417,6 @@ def bus_observability_profile(measurement_profile):
     return bus_status_per_type
 
 
-def plot_bus_observability(bus_status_per_type):
-    """
-    bus_status_per_type: dict of dicts
-    Example:
-    {
-        'active': {'bus_1': 'critical', 'bus_2': 'globally redundant', ...},
-        'reactive': {...},
-        'voltage': {...},
-        'current': {...}
-    }
-    """
-    measurement_types = list(bus_status_per_type.keys())
-    buses = list(next(iter(bus_status_per_type.values())).keys())
-    n_buses = len(buses)
-    n_types = len(measurement_types)
-
-    # Color map
-    color_map = {
-        "critical": "red",
-        "globally redundant": "orange",
-        "locally redundant": "yellow",
-        "none": "gray"  # add default for missing measurements
-    }
-
-    x = np.arange(n_buses)
-    width = 0.2  # width of each bar
-
-    plt.figure(figsize=(12, 5))
-
-    for i, m_type in enumerate(measurement_types):
-        statuses = [
-            bus_status_per_type[m_type].get(b, "none")  # use .get() with default
-            for b in buses
-        ]
-        colors = [color_map[s] for s in statuses]
-        plt.bar(x + i * width, [1] * n_buses, width=width, color=colors, label=m_type)
-
-    plt.xticks(x + width * (n_types - 1) / 2, buses, rotation=90)
-    plt.ylabel("Observability")
-    plt.title("Bus Observability Profile by Measurement Type")
-    plt.legend()
-    # plt.show()
 
 
 # -------------- we extend measurement classification to check single and mutliple redundancies ----------------------

@@ -2570,6 +2570,46 @@ class Block:
     Class representing a Block
     """
 
+    __slots__ = (
+        'name',
+        '_model_family_name',
+        'uid',
+        'is_decomposable',
+        'tpe_uid',
+        'vars_glob_name2uid',
+        'state_vars',
+        'state_eqs',
+        'algebraic_vars',
+        'algebraic_eqs',
+        'inequalities',
+        'diff_vars',
+        'reformulated_vars',
+        'differential_eqs',
+        'parameters',
+        'init_values',
+        'init_eqs',
+        'diff_init_eqs',
+        'discrete_eqs',
+        'post_init_seed_eqs',
+        'children',
+        'in_vars',
+        'out_vars',
+        'event_dict',
+        'mode_dict',
+        'boolean_guards',
+        'procedural_logic',
+        'connection_intents',
+        'external_mapping',
+        'api_obj_mapping',
+        'var_mapping',
+        '_diagram',
+        'dynamic_model_contract',
+        '_modal_template_kind',
+        '_modal_template_config',
+        '_jmarti_fit_bundle',
+        '_jmarti_runtime_data',
+    )
+
     def __init__(self,
                  state_vars: List[Var] | None = None,
                  state_eqs: List[Expr] | None = None,
@@ -2700,6 +2740,15 @@ class Block:
         # Runtime identity belongs to the canonical block and stores only
         # scalar flags or UIDs into this block's symbolic variables.
         self.dynamic_model_contract: DynamicModelContract = DynamicModelContract()
+        self._modal_template_kind: str | None = None
+
+        # TODO: (SanPen) object is too lazy, put the proper attribute
+        self._modal_template_config: Dict[str, object] | None = None
+
+        # TODO: What is this J-marti stuff doing here?,
+        #  are we going to particularize this stuff in the block? sounds bad
+        self._jmarti_fit_bundle: object | None = None
+        self._jmarti_runtime_data: object | None = None
 
         self._diagram: BlockDiagram = BlockDiagram()
 
@@ -2743,25 +2792,11 @@ class Block:
     def model_family_name(self) -> str:
         """Return the optional user-defined structural model-family label.
 
-        Historical ``.veragrid`` files may restore pickled ``Block`` objects
-        without calling the current constructor. Reading the instance storage
-        directly keeps those objects valid and supplies the same empty default
-        used by the declarative parser.
-
         :return: Persisted family label or an empty string for legacy blocks.
         """
-        # Current instances store the value behind the property. The second
-        # lookup also accepts files produced during the short-lived direct
-        # attribute representation, while the final empty default covers all
-        # older files that predate model-family labels entirely.
-        stored_value: object | None = self.__dict__.get("_model_family_name", None)
-        if stored_value is None:
-            stored_value = self.__dict__.get("model_family_name", "")
-        else:
-            pass
-        if isinstance(stored_value, str):
-            return stored_value
-        else:
+        try:
+            return self._model_family_name
+        except AttributeError:
             return ""
 
     @model_family_name.setter
@@ -2772,9 +2807,77 @@ class Block:
         :return: None.
         """
         if isinstance(name, str):
-            self.__dict__["_model_family_name"] = name
+            self._model_family_name = name
         else:
-            self.__dict__["_model_family_name"] = ""
+            self._model_family_name = ""
+
+    @property
+    def modal_template_kind(self) -> str | None:
+        """Return the optional generated-template kind.
+
+        :return: Template kind or ``None`` when no modal metadata is attached.
+        """
+        return self._modal_template_kind
+
+    @modal_template_kind.setter
+    def modal_template_kind(self, kind: str | None) -> None:
+        """Store the optional generated-template kind.
+
+        :param kind: Template kind, or ``None`` to clear it.
+        :return: None.
+        """
+        self._modal_template_kind = kind
+
+    @property
+    def modal_template_config(self) -> Dict[str, object] | None:
+        """Return optional generated-template configuration.
+
+        :return: Template configuration or ``None`` when it is not attached.
+        """
+        return self._modal_template_config
+
+    @modal_template_config.setter
+    def modal_template_config(self, config: Dict[str, object] | None) -> None:
+        """Store optional generated-template configuration.
+
+        :param config: Template configuration, or ``None`` to clear it.
+        :return: None.
+        """
+        self._modal_template_config = config
+
+    @property
+    def jmarti_fit_bundle(self) -> object | None:
+        """Return the optional JMARTI fit bundle attached to this block.
+
+        :return: Attached fit bundle or ``None``.
+        """
+        return self._jmarti_fit_bundle
+
+    @jmarti_fit_bundle.setter
+    def jmarti_fit_bundle(self, fit_bundle: object | None) -> None:
+        """Store the optional JMARTI fit bundle.
+
+        :param fit_bundle: Fit bundle, or ``None`` to clear it.
+        :return: None.
+        """
+        self._jmarti_fit_bundle = fit_bundle
+
+    @property
+    def jmarti_runtime_data(self) -> object | None:
+        """Return optional JMARTI runtime data attached to this block.
+
+        :return: Attached runtime data or ``None``.
+        """
+        return self._jmarti_runtime_data
+
+    @jmarti_runtime_data.setter
+    def jmarti_runtime_data(self, runtime_data: object | None) -> None:
+        """Store optional JMARTI runtime data.
+
+        :param runtime_data: Runtime data, or ``None`` to clear it.
+        :return: None.
+        """
+        self._jmarti_runtime_data = runtime_data
 
     def to_dict(self) -> Dict[str, Any]:
         """

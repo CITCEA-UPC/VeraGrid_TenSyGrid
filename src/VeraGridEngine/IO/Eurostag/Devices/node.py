@@ -11,13 +11,22 @@ class EurostagNode:
     INITIAL_VOLTAGE = (98, 106)
     INITIAL_ANGLE = (107, 115)
 
-    def __init__(self):
-        self.area = ""
-        self.name = ""
-        self.base_voltage = 0.0
-        self.initial_voltage = 0.0
-        self.initial_angle = 0.0
-        self.is_slack = False
+    __slots__ = (
+        "area",
+        "name",
+        "base_voltage",
+        "initial_voltage",
+        "initial_angle",
+        "is_slack",
+    )
+
+    def __init__(self) -> None:
+        self.area: str = ""
+        self.name: str = ""
+        self.base_voltage: float = 0.0
+        self.initial_voltage: float = 0.0
+        self.initial_angle: float = 0.0
+        self.is_slack: bool = False
 
     def parse_line(self, line: str) -> None:
         self.area = slice_text(line, *self.AREA)

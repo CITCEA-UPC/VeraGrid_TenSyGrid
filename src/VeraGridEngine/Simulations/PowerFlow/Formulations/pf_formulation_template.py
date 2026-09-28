@@ -18,6 +18,18 @@ class PfFormulationTemplate:
     Base Power Flow Formulation class
     """
 
+    __slots__ = (
+        "V",
+        "_Vm",
+        "_Va",
+        "Scalc",
+        "options",
+        "_f",
+        "_error",
+        "_converged",
+        "_controls_tol",
+    )
+
     def __init__(self, V0: CxVec, options: PowerFlowOptions):
         """
 

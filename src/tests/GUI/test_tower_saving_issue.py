@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import faulthandler
+import multiprocessing
+import queue
+import random
 import shutil
 import time
+import traceback
 from pathlib import Path
+from typing import Any
 
+import pytest
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
@@ -11,6 +18,7 @@ import VeraGridEngine as vge
 from VeraGrid.Gui.Main.VeraGridMain import VeraGridMainGUI
 from VeraGrid.Gui.DeviceEditors.TowerBuilder.LineBuilderDialogue import TowerBuilderGUI
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely
+from VeraGridEngine.Devices.Parents.editable_device import EditableDevice
 from VeraGrid.templates import get_cables_catalogue
 from VeraGrid.templates import get_sequence_lines_catalogue
 from VeraGrid.templates import get_transformer_catalogue
@@ -122,6 +130,22 @@ class TowerEditorAutoResponder(QtCore.QObject):
 
         :return: True when the tower editor was accepted.
         """
+        return self._clicked
+
+    def wait_until_clicked(self, timeout_s: float = 10.0) -> bool:
+        """
+        Pump Qt events until the tower editor is accepted or the timeout expires.
+
+        :param timeout_s: Maximum wait time in seconds.
+        :return: True when the tower editor was accepted.
+        """
+        deadline_s: float = time.monotonic() + timeout_s
+
+        while not self._clicked and time.monotonic() < deadline_s:
+            self._app.processEvents()
+            time.sleep(0.01)
+
+        self._app.processEvents()
         return self._clicked
 
     def arm(self) -> None:
@@ -309,9 +333,8 @@ def edit_tower_from_database_row(gui: VeraGridMainGUI, app: QtWidgets.QApplicati
     responder: TowerEditorAutoResponder = TowerEditorAutoResponder(app=app, parent=app)
     responder.arm()
     gui.launch_object_editor()
-    app.processEvents()
 
-    accepted_editor: bool = responder.was_clicked()
+    accepted_editor: bool = responder.wait_until_clicked()
     responder.deleteLater()
     assert accepted_editor
 
@@ -441,40 +464,192 @@ def test_tower_editor_cleanup_survives_forced_gc(qt_app: QtWidgets.QApplication)
     assert active_modal_widget is None
 
 
-def test_original_honduras_tower_edit_save_and_solve(qt_app: QtWidgets.QApplication, tmp_path: Path) -> None:
+def run_original_honduras_tower_flow(working_file_name: str, status_queue: Any) -> None:
     """
-    Reproduce the original tower edit/save crash flow using the checked-in grid.
+    Run the native-crash reproduction in a process that pytest can safely reap.
 
-    :param qt_app: Shared Qt application fixture.
-    :param tmp_path: Temporary output directory.
+    :param working_file_name: Writable copy of the checked-in grid.
+    :param status_queue: Queue for phase updates and Python exception details.
     :return: Nothing.
     """
-    app: QtWidgets.QApplication = qt_app
-    working_file: Path = tmp_path / TOWER_EDIT_CRASH_FIXTURE.name
-    shutil.copyfile(src=TOWER_EDIT_CRASH_FIXTURE, dst=working_file)
+    app: QtWidgets.QApplication | None = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(["tower-clean-crash"])
+    else:
+        pass
 
+    working_file: Path = Path(working_file_name)
     gui: VeraGridMainGUI = VeraGridMainGUI()
     modal_closer: ModalDialogAutoCloser = ModalDialogAutoCloser(app=app, protected_widget=gui, parent=gui)
     modal_closer.start()
 
     try:
+        status_queue.put("opening grid")
         gui.open_file_now(filenames=str(working_file))
         wait_for_file_open(gui=gui, app=app, timeout_s=30.0)
 
         tower_count: int = len(gui.circuit.overhead_line_types)
         assert tower_count >= 2
 
+        status_queue.put("editing towers")
         edit_tower_from_database_row(gui=gui, app=app, row=1)
         app.processEvents()
 
         edit_tower_from_database_row(gui=gui, app=app, row=0)
         app.processEvents()
 
+        status_queue.put("saving grid")
         gui.save_file_now(filename=str(working_file))
         wait_for_file_save(gui=gui, app=app, timeout_s=30.0)
         assert working_file.exists()
 
         app.processEvents()
+    except Exception:
+        status_queue.put(traceback.format_exc())
+        raise
+    finally:
+        modal_closer.stop()
+        close_gui_accepting_exit(gui=gui, app=app)
+        gui.deleteLater()
+        QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+        app.processEvents()
+
+    status_queue.put("reopening saved grid and solving")
+    reopened_circuit: vge.MultiCircuit = FileOpen(str(working_file)).open()
+    power_flow_results: object = vge.power_flow(grid=reopened_circuit, options=vge.PowerFlowOptions())
+    voltage_frame: object = power_flow_results.get_voltage_df()
+    assert voltage_frame is not None
+
+
+def test_original_honduras_tower_edit_save_and_solve(tmp_path: Path) -> None:
+    """
+    Reproduce the original tower edit/save crash flow using the checked-in grid.
+
+    :param tmp_path: Temporary output directory.
+    :return: Nothing.
+    """
+    working_file: Path = tmp_path / TOWER_EDIT_CRASH_FIXTURE.name
+    shutil.copyfile(src=TOWER_EDIT_CRASH_FIXTURE, dst=working_file)
+    context: multiprocessing.context.SpawnContext = multiprocessing.get_context("spawn")
+    status_queue: Any = context.Queue()
+    process: multiprocessing.context.SpawnProcess = context.Process(
+        target=run_original_honduras_tower_flow,
+        args=(str(working_file), status_queue),
+    )
+    process.start()
+
+    deadline_s: float = time.monotonic() + 240.0
+    last_status: str = "child process started"
+    timed_out: bool = False
+    while process.is_alive() and time.monotonic() < deadline_s:
+        try:
+            last_status = status_queue.get(timeout=1.0)
+        except queue.Empty:
+            pass
+
+    if process.is_alive():
+        timed_out = True
+        process.terminate()
+        process.join(timeout=10.0)
+    else:
+        process.join()
+
+    if timed_out:
+        raise AssertionError(f"Tower GUI subprocess timed out after phase: {last_status}")
+    if process.exitcode != 0:
+        detail: str = last_status
+        while True:
+            try:
+                detail = status_queue.get_nowait()
+            except queue.Empty:
+                break
+        raise AssertionError(f"Tower GUI subprocess exited with code {process.exitcode}: {detail}")
+
+    status_queue.close()
+
+
+def run_random_device_editor_flow(working_file_name: str, status_queue: Any, seed: int) -> None:
+    """
+    Randomly open device and tower editors, close them, and save in an isolated GUI process.
+
+    :param working_file_name: Writable copy of the checked-in grid.
+    :param status_queue: Queue for phase updates and Python exception details.
+    :param seed: Deterministic seed for reproducing the editor sequence.
+    :return: Nothing.
+    """
+    faulthandler.enable()
+    status_queue.put(f"seed={seed} starting")
+    app: QtWidgets.QApplication | None = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(["device-editor-gui-fuzz"])
+    else:
+        pass
+
+    working_file: Path = Path(working_file_name)
+    gui: VeraGridMainGUI = VeraGridMainGUI()
+    modal_closer: ModalDialogAutoCloser = ModalDialogAutoCloser(app=app, protected_widget=gui, parent=gui)
+    modal_closer.start()
+    random_generator: random.Random = random.Random(seed)
+    operation_trace: list[str] = list()
+
+    try:
+        gui.open_file_now(filenames=str(working_file))
+        wait_for_file_open(gui=gui, app=app, timeout_s=30.0)
+
+        tower_devices: list[EditableDevice] = list()
+        editable_devices: list[EditableDevice] = list()
+        device: object
+        for device in gui.circuit.get_all_elements_iter():
+            if isinstance(device, EditableDevice):
+                if device.device_type == DeviceType.OverheadLineTypeDevice:
+                    tower_devices.append(device)
+                elif device.device_type in (
+                        DeviceType.GeneratorDevice,
+                        DeviceType.LoadDevice,
+                        DeviceType.LineDevice,
+                        DeviceType.Transformer2WDevice,
+                        DeviceType.BusDevice,
+                ):
+                    editable_devices.append(device)
+                else:
+                    pass
+            else:
+                pass
+
+        assert len(tower_devices) > 0
+        assert len(editable_devices) > 0
+
+        operation_index: int
+        for operation_index in range(30):
+            if random_generator.random() < 0.3:
+                selected_tower: EditableDevice = random_generator.choice(tower_devices)
+                responder: TowerEditorAutoResponder = TowerEditorAutoResponder(app=app, parent=app)
+                modal_closer.stop()
+                responder.arm()
+                gui.launch_device_editor(elm=selected_tower)
+                modal_closer.start()
+                assert responder.wait_until_clicked(), f"seed={seed}, trace={operation_trace}"
+                operation_trace.append(f"tower:{selected_tower.name}")
+            else:
+                selected_device: EditableDevice = random_generator.choice(editable_devices)
+                gui.launch_device_editor(elm=selected_device)
+                operation_trace.append(f"device:{selected_device.device_type.name}:{selected_device.name}")
+
+            app.processEvents()
+            if (operation_index + 1) % 10 == 0:
+                status_queue.put(f"seed={seed}, editors={operation_index + 1}, trace={operation_trace[-5:]}")
+                gui.save_file_now(filename=str(working_file))
+                wait_for_file_save(gui=gui, app=app, timeout_s=30.0)
+                app.processEvents()
+            else:
+                pass
+
+        modal_closer.stop()
+        gui.save_file_now(filename=str(working_file))
+        wait_for_file_save(gui=gui, app=app, timeout_s=30.0)
+    except Exception:
+        status_queue.put(f"seed={seed}, trace={operation_trace}\n{traceback.format_exc()}")
+        raise
     finally:
         modal_closer.stop()
         close_gui_accepting_exit(gui=gui, app=app)
@@ -483,6 +658,57 @@ def test_original_honduras_tower_edit_save_and_solve(qt_app: QtWidgets.QApplicat
         app.processEvents()
 
     reopened_circuit: vge.MultiCircuit = FileOpen(str(working_file)).open()
-    power_flow_results: object = vge.power_flow(grid=reopened_circuit, options=vge.PowerFlowOptions())
-    voltage_frame: object = power_flow_results.get_voltage_df()
-    assert voltage_frame is not None
+    assert len(reopened_circuit.overhead_line_types) == len(tower_devices)
+    status_queue.put(f"seed={seed} completed, editors={len(operation_trace)}")
+
+
+@pytest.mark.parametrize("seed", (20260921, 20260922, 8675309))
+def test_seeded_random_device_editors_can_close_and_save(tmp_path: Path, seed: int) -> None:
+    """
+    Search repeatable device-editor open, close, and save sequences in crash-contained processes.
+
+    :param tmp_path: Temporary output directory.
+    :param seed: Deterministic random operation seed.
+    :return: Nothing.
+    """
+    working_file: Path = tmp_path / TOWER_EDIT_CRASH_FIXTURE.name
+    shutil.copyfile(src=TOWER_EDIT_CRASH_FIXTURE, dst=working_file)
+    process_context: multiprocessing.context.BaseContext = multiprocessing.get_context("spawn")
+    status_queue: Any = process_context.Queue()
+    process: multiprocessing.Process = process_context.Process(
+        target=run_random_device_editor_flow,
+        args=(str(working_file), status_queue, seed),
+    )
+    process.start()
+
+    last_message: str = "no child progress received"
+    last_progress_time_s: float = time.monotonic()
+    timeout_s: float = 180.0
+    while process.is_alive() and time.monotonic() - last_progress_time_s <= timeout_s:
+        try:
+            queued_message: object = status_queue.get(timeout=1.0)
+            last_message = queued_message if isinstance(queued_message, str) else repr(queued_message)
+            last_progress_time_s = time.monotonic()
+        except queue.Empty:
+            pass
+
+    if process.is_alive():
+        process.terminate()
+        process.join(10.0)
+        status_queue.close()
+        status_queue.join_thread()
+        raise AssertionError(f"seed={seed} GUI editor stress timed out: {last_message}")
+    else:
+        process.join(10.0)
+
+    try:
+        while True:
+            queued_message = status_queue.get_nowait()
+            last_message = queued_message if isinstance(queued_message, str) else repr(queued_message)
+    except queue.Empty:
+        pass
+    finally:
+        status_queue.close()
+        status_queue.join_thread()
+
+    assert process.exitcode == 0, f"seed={seed}, exitcode={process.exitcode}, last status={last_message}"

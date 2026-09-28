@@ -6,6 +6,10 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class OperatingStatus(IidmObject):
+    __slots__ = (
+        "id",
+        "inService",
+    )
     def __init__(self, id: str, inService: bool):
         super().__init__("OperatingStatus")
         self.id = id

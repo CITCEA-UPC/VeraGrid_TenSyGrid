@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.NTC.ntc_results &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.NTC.ntc_results &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -151,11 +151,22 @@
                                    <span class="n">flow_n</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                    <span class="n">ntc</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                    <span class="n">contingency_rates</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
-                                   <span class="n">loading_threshold_pct</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultsTable</span><span class="p">:</span>
+                                   <span class="n">loading_threshold_pct</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                   <span class="n">total_slack_mw</span><span class="p">:</span> <span class="n">Vec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">time_percentage</span><span class="p">:</span> <span class="n">Vec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">original_time_indices</span><span class="p">:</span> <span class="n">IntVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">result_type</span><span class="p">:</span> <span class="n">ResultTypes</span> <span class="o">=</span> <span class="n">ResultTypes</span><span class="o">.</span><span class="n">ContingencyFlowsReport</span><span class="p">,</span>
+                                   <span class="n">vsc_names</span><span class="p">:</span> <span class="n">StrVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">vsc_power</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">hvdc_names</span><span class="p">:</span> <span class="n">StrVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">hvdc_power</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">phase_shifter_indices</span><span class="p">:</span> <span class="n">IntVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">phase_shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultsTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build the long form worst-contingency table with one row per kept (time, branch).</span>
 
-<span class="sd">    A row is kept only when its N-1 loading is at least ``loading_threshold_pct``.</span>
+<span class="sd">    A row is kept only when the branch is monitored and its N-1 loading is at</span>
+<span class="sd">    least ``loading_threshold_pct``.</span>
 <span class="sd">    That is the NTC &quot;loading threshold to report&quot; option. It avoids allocating</span>
 <span class="sd">    an object cell for every branch of every hour.</span>
 
@@ -173,6 +184,16 @@
 <span class="sd">    :param ntc: NTC of each time index (MW)</span>
 <span class="sd">    :param contingency_rates: branch contingency ratings (MW)</span>
 <span class="sd">    :param loading_threshold_pct: keep rows whose N-1 loading is at least this percent</span>
+<span class="sd">    :param total_slack_mw: optional total thermal slack per displayed operating point</span>
+<span class="sd">    :param time_percentage: optional cluster probabilities expressed as percentages</span>
+<span class="sd">    :param original_time_indices: optional original-series indices for the displayed hours</span>
+<span class="sd">    :param vsc_names: converter names, in stored power order</span>
+<span class="sd">    :param vsc_power: base operating-point converter powers, MW (time, converter)</span>
+<span class="sd">    :param hvdc_names: HVDC names, in stored power order</span>
+<span class="sd">    :param hvdc_power: base operating-point HVDC powers, MW (time, HVDC)</span>
+<span class="sd">    :param phase_shifter_indices: indices of branches configured for phase-angle control</span>
+<span class="sd">    :param phase_shift: base operating-point branch tap angles, radians (time, branch)</span>
+<span class="sd">    :param result_type: report title to display</span>
 <span class="sd">    :return: results table</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_g</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_names</span><span class="p">)</span>
@@ -185,7 +206,9 @@
 
     <span class="c1"># worst_loading is already p.u. of the contingency rate, including the N-state</span>
     <span class="n">loading_pct</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">worst_loading</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span>
-    <span class="n">keep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">loading_pct</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">loading_threshold_pct</span><span class="p">)</span>
+    <span class="c1"># Apply the same per hour monitoring flags displayed in the monitored column.</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="p">((</span><span class="n">loading_pct</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">loading_threshold_pct</span><span class="p">))</span>
+                        <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">monitor_logic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">))</span>
     <span class="n">kept</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
     <span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kept</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -207,6 +230,38 @@
             <span class="s1">&#39;Flow N (MW)&#39;</span><span class="p">,</span> <span class="s1">&#39;Flow N-1 (MW)&#39;</span><span class="p">,</span> <span class="s1">&#39;Loading N-1 (%)&#39;</span>
         <span class="p">]</span>
 
+    <span class="c1"># Slack is useful for snapshots too. Probability exists only for clusters.</span>
+    <span class="n">detail_column</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;NTC (MW)&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">total_slack_mw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">detail_column</span><span class="p">,</span> <span class="s1">&#39;Total slack (MW)&#39;</span><span class="p">)</span>
+        <span class="n">detail_column</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">n_cols</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">time_percentage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">detail_column</span><span class="p">,</span> <span class="s1">&#39;Time percentage (%)&#39;</span><span class="p">)</span>
+        <span class="n">n_cols</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Controls describe the optimized N operating point, not corrective N-1 settings.</span>
+    <span class="c1"># Keep their columns even when a solved power or angle is zero.</span>
+    <span class="n">control_start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_cols</span>
+    <span class="k">if</span> <span class="n">vsc_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">vsc_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;VSC </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: P N (MW)&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">vsc_names</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">hvdc_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hvdc_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HVDC </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: P N (MW)&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">hvdc_names</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">phase_shifter_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">phase_shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">branch_index</span> <span class="ow">in</span> <span class="n">phase_shifter_indices</span><span class="p">:</span>
+            <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PST </span><span class="si">{</span><span class="n">branch_names</span><span class="p">[</span><span class="n">branch_index</span><span class="p">]</span><span class="si">}</span><span class="s1">: angle N (deg)&#39;</span><span class="p">)</span>
+            <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PST </span><span class="si">{</span><span class="n">branch_names</span><span class="p">[</span><span class="n">branch_index</span><span class="p">]</span><span class="si">}</span><span class="s1">: P N (MW)&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">n_cols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">n_cols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 
@@ -240,7 +295,10 @@
         <span class="n">mon_flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">monitored_flag_from_logic</span><span class="p">(</span><span class="n">monitor_logic</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">include_time</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
+            <span class="k">if</span> <span class="n">original_time_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">original_time_indices</span><span class="p">[</span><span class="n">h</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
             <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_val</span>
             <span class="n">col0</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
@@ -251,18 +309,47 @@
         <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_name</span>
         <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_dev</span>
         <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ntc_h</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">alpha_n1</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">flow_n_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">flow_n1_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">loading_n1_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">next_col</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">col0</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">if</span> <span class="n">total_slack_mw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">total_slack_mw</span><span class="p">[</span><span class="n">h</span><span class="p">]),</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">next_col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">time_percentage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">time_percentage</span><span class="p">[</span><span class="n">h</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="n">next_col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">alpha_n1</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">]),</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">flow_n_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">flow_n1_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">next_col</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">loading_n1_m</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">control_col</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">control_start</span>
+        <span class="k">if</span> <span class="n">vsc_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">vsc_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">control_col</span><span class="p">:</span><span class="n">control_col</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">vsc_names</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">vsc_power</span><span class="p">[</span><span class="n">h</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">control_col</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vsc_names</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">hvdc_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hvdc_power</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">control_col</span><span class="p">:</span><span class="n">control_col</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">hvdc_names</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">hvdc_power</span><span class="p">[</span><span class="n">h</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">control_col</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hvdc_names</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">phase_shifter_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">phase_shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">branch_index</span> <span class="ow">in</span> <span class="n">phase_shifter_indices</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">control_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">phase_shift</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">branch_index</span><span class="p">]),</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">row_i</span><span class="p">,</span> <span class="n">control_col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">flow_n</span><span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">branch_index</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">control_col</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
         <span class="n">index</span><span class="p">[</span><span class="n">row_i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
         <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ResultTypes</span><span class="o">.</span><span class="n">ContingencyFlowsReport</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
         <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -306,6 +393,7 @@
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;overloads&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;loading&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;losses&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;phase_shifter_indices&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">IntVec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;phase_shift&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;rates&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
         <span class="n">ResultsProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;contingency_rates&#39;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">Vec</span><span class="p">,</span> <span class="n">old_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span> <span class="n">expandable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
@@ -354,6 +442,7 @@
         <span class="s2">&quot;loading&quot;</span><span class="p">,</span>
         <span class="s2">&quot;losses&quot;</span><span class="p">,</span>
         <span class="s2">&quot;phase_shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phase_shifter_indices&quot;</span><span class="p">,</span>
         <span class="s2">&quot;rates&quot;</span><span class="p">,</span>
         <span class="s2">&quot;contingency_rates&quot;</span><span class="p">,</span>
         <span class="s2">&quot;alpha&quot;</span><span class="p">,</span>
@@ -454,6 +543,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">overloads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loading</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_shifter_indices</span><span class="p">:</span> <span class="n">IntVec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contingency_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -812,6 +902,7 @@
             <span class="n">flow_n</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sf</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_br</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">worst_contingency_report_table</span><span class="p">(</span>
                 <span class="n">time_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">total_slack_mw</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">get_total_slack_mw</span><span class="p">()],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
                 <span class="n">branch_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">branch_names</span><span class="p">,</span>
                 <span class="n">group_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">contingency_group_names</span><span class="p">,</span>
                 <span class="n">group_device_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">contingency_group_device_names</span><span class="p">,</span>
@@ -824,7 +915,13 @@
                 <span class="n">flow_n</span><span class="o">=</span><span class="n">flow_n</span><span class="p">,</span>
                 <span class="n">ntc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">inter_area_flows</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
                 <span class="n">contingency_rates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">contingency_rates</span><span class="p">,</span>
-                <span class="n">loading_threshold_pct</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loading_threshold_to_report</span>
+                <span class="n">loading_threshold_pct</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loading_threshold_to_report</span><span class="p">,</span>
+                <span class="n">vsc_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vsc_names</span><span class="p">,</span>
+                <span class="n">vsc_power</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vsc_Pf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                <span class="n">hvdc_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hvdc_names</span><span class="p">,</span>
+                <span class="n">hvdc_power</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hvdc_Pf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                <span class="n">phase_shifter_indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_shifter_indices</span><span class="p">,</span>
+                <span class="n">phase_shift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_shift</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>

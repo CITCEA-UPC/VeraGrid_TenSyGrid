@@ -152,8 +152,6 @@ def convert_generator(k: int,
         rr=elm.Rr,
         xr=elm.Xr,
         freq=elm.freq,
-        market_unit=market_unit_dict.get(elm.market_unit, None),
-        market_unit_share=elm.market_unit_share,
         is_static_generator=elm.is_static_generator,
     )
     if elm.control_bus is None:
@@ -209,12 +207,6 @@ def convert_generator(k: int,
     fill_profile(gen.cost, elm.Cost_prof, use_time_series, time_indices, n_time, elm.Cost)
     fill_profile(gen.Cost0, elm.Cost0_prof, use_time_series, time_indices, n_time, elm.Cost0)
     fill_profile(gen.Cost2, elm.Cost2_prof, use_time_series, time_indices, n_time, elm.Cost2)
-    fill_profile(gen.market_unit_share,
-                 elm.market_unit_share_prof,
-                 use_time_series,
-                 time_indices,
-                 n_time,
-                 elm.market_unit_share)
 
     return gen
 

@@ -20,12 +20,28 @@ from VeraGridEngine.basic_structures import Logger
 
 class UcteTransformerRegulation:
     """
-    UcteTransformerRegulation
+    UcteTransformerRegulation device.
     """
 
-    def __init__(self):
-        self.node1 = ""  # 0-7: Node 1 (non-regulated winding) To bus for VeraGrid
-        self.node2 = ""  # 9-16: Node 2 (regulated winding) From bus for VeraGrid
+    __slots__ = (
+        "node1",
+        "node2",
+        "order_code",
+        "delta_u1",
+        "n1",
+        "n1_prime",
+        "u1",
+        "delta_u2",
+        "theta",
+        "n2",
+        "n2_prime",
+        "p",
+        "regulation_type",
+    )
+
+    def __init__(self) -> None:
+        self.node1: str = ""  # 0-7: Node 1 (non-regulated winding) To bus for VeraGrid
+        self.node2: str = ""  # 9-16: Node 2 (regulated winding) From bus for VeraGrid
         self.order_code = ""  # 18: Order code
 
         # Phase regulation

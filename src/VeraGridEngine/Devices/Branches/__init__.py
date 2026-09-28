@@ -17,10 +17,11 @@ from VeraGridEngine.Devices.Branches.upfc import UPFC
 from VeraGridEngine.Devices.Branches.vsc import VSC
 from VeraGridEngine.Devices.Branches.winding import Winding
 from VeraGridEngine.Devices.Branches.wire import Wire
+from VeraGridEngine.Devices.Branches.underground_cable_type import UndergroundCableType
 from VeraGridEngine.Devices.Branches.tap_changer import TapChanger
 from VeraGridEngine.Devices.Branches.transformer_type import TransformerType
 from VeraGridEngine.Devices.Branches.overhead_line_type import (OverheadLineType, WireInTower, ListOfWires,
                                                                 create_known_abc_overhead_template)
 from VeraGridEngine.Devices.Branches.sequence_line_type import SequenceLineType
-from VeraGridEngine.Devices.Branches.underground_line_type import UndergroundLineType
+from VeraGridEngine.Devices.Branches.underground_line_type import UndergroundLineType, CableInSystem, ListOfCables
 from VeraGridEngine.Devices.Branches.line_locations import LineLocations, LineLocation

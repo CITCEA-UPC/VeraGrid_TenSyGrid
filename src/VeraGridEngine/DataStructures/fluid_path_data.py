@@ -11,6 +11,16 @@ class FluidPathData:
     FluidPathData
     """
 
+    __slots__ = (
+        "nelm",
+        "names",
+        "idtag",
+        "source_idx",
+        "target_idx",
+        "min_flow",
+        "max_flow",
+    )
+
     def __init__(self, nelm: int):
         """
         Fluid path data arrays

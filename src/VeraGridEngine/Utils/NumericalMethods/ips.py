@@ -10,7 +10,6 @@ import pandas as pd
 from scipy.sparse import csc_matrix as csc
 from scipy import sparse
 import timeit
-from matplotlib import pyplot as plt
 from VeraGridEngine.basic_structures import Vec, CxVec
 from VeraGridEngine.Utils.Sparse.csc import pack_3_by_4, diags
 from VeraGridEngine.Utils.NumericalMethods.sparse_solve import get_linear_solver
@@ -209,16 +208,6 @@ class IpsSolution:
     iterations: int
     error_evolution: Vec
 
-    def plot_error(self):
-        """
-        Plot the IPS error
-        """
-        plt.figure()
-        plt.plot(self.error_evolution, )
-        plt.xlabel("Iterations")
-        plt.ylabel("Error")
-        plt.yscale('log')
-        plt.show(block=False)
 
 
 def interior_point_solver(x0: Vec,

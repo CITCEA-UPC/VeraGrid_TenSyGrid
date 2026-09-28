@@ -59,6 +59,12 @@ python -c "from VeraGrid.ExecuteVeraGrid import runVeraGrid; runVeraGrid()"
 
 You may save this command in a shortcut for easy future access.
 
+## Update the package from the GUI
+
+If you want to update VeraGrid and its key dependencies from the GUI, you can do this in the About section of the Help bar. The following screen will appear allowing you to easily update to the most recent software version. 
+
+![](figures/Update_VG.png)
+
 ## Install only the engine
 
 Some of you may only need VeraGrid as a library for some other purpose

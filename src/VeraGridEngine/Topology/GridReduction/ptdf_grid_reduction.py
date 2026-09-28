@@ -610,7 +610,7 @@ def ptdf_reduction_ree_bad(grid: MultiCircuit,
     logger = Logger()
 
     # find the boundary set: buses from the internal set the join to the external set
-    e_buses, i_buses, _ = get_reduction_sets(grid=grid, reduction_bus_indices=reduction_bus_indices)
+    e_buses, i_buses, i_branches = get_reduction_sets(grid=grid, reduction_bus_indices=reduction_bus_indices)
 
     if len(e_buses) == 0:
         logger.add_info(msg="Nothing to reduce")
@@ -700,7 +700,7 @@ def ptdf_reduction_ree_less_bad(grid: MultiCircuit,
     logger = Logger()
 
     # find the boundary set: buses from the internal set the join to the external set
-    e_buses, i_buses, _ = get_reduction_sets(grid=grid, reduction_bus_indices=reduction_bus_indices)
+    e_buses, i_buses, i_branches = get_reduction_sets(grid=grid, reduction_bus_indices=reduction_bus_indices)
 
     if len(e_buses) == 0:
         logger.add_info(msg="Nothing to reduce")

@@ -8,10 +8,10 @@ import numpy as np
 from typing import List, Tuple, Dict, Union
 
 # GUI imports
-from PySide6 import QtGui, QtCore
-from matplotlib.colors import LinearSegmentedColormap
+from PySide6 import QtGui, QtCore, QtWidgets
 
 import VeraGrid.Gui.gui_functions as gf
+from VeraGrid.Gui.Visualization.visualization import NativeColorMap
 from VeraGrid.Gui.i18n import translate_tree_label
 from VeraGrid.Gui.general_dialogues import LogsDialogue
 from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import SchematicWidget
@@ -25,6 +25,7 @@ from VeraGrid.Gui.CandidateInvestments.candidate_investments import CandidateInv
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely, is_dialog_available
 from VeraGrid.Session.session import GcThread
 from VeraGrid.Session.server_driver import RemoteJobDriver
+from VeraGrid.Gui.Analysis.AnalysisDialogue import GridAnalysisGUI
 
 # Engine imports
 import VeraGridEngine.Devices as dev
@@ -279,8 +280,6 @@ class SimulationsMain(TimeEventsMain):
                           translate=self.tr)
         )
 
-
-
         self.ui.rms_initialization_method_comboBox.setModel(
             gf.ComboModel(enum_values=[RmsInitializationMethod.Explicit,
                                        RmsInitializationMethod.PseudoTransient],
@@ -374,6 +373,7 @@ class SimulationsMain(TimeEventsMain):
 
         self.ui.actionUse_clustering.triggered.connect(self.activate_clustering)
         self.ui.actionNodal_capacity.triggered.connect(self.nodal_capacity_dispatcher)
+        self.ui.actionLaunch_data_analysis_tool.triggered.connect(self.display_grid_analysis)
 
         # combobox change
         self.ui.engineComboBox.currentIndexChanged.connect(self.modify_ui_options_according_to_the_engine)
@@ -879,7 +879,8 @@ class SimulationsMain(TimeEventsMain):
         :return:
         """
         current_study = self.ui.available_results_to_color_comboBox.currentData()
-        drv_dict: Dict[SimulationTypes, DRIVER_OBJECTS] = {driver.tpe: driver for driver in self.get_available_drivers()}
+        drv_dict: Dict[SimulationTypes, DRIVER_OBJECTS] = {driver.tpe: driver for driver in
+                                                           self.get_available_drivers()}
         if isinstance(current_study, SimulationTypes):
             drv = drv_dict.get(current_study, None)
         else:
@@ -1196,7 +1197,7 @@ class SimulationsMain(TimeEventsMain):
                     opf_results = results
                 else:
                     warning_msg(self.tr('There are no OPF results, '
-                                'therefore this operation will not use OPF information.'))
+                                        'therefore this operation will not use OPF information.'))
                     self.ui.actionOpf_to_Power_flow.setChecked(False)
                     opf_results = None
             else:
@@ -1236,7 +1237,7 @@ class SimulationsMain(TimeEventsMain):
             if opf_time_series_results is None:
                 if use_opf:
                     info_msg(self.tr('There are no OPF time series, '
-                             'therefore this operation will not use OPF information.'))
+                                     'therefore this operation will not use OPF information.'))
                     self.ui.actionOpf_to_Power_flow.setChecked(False)
 
         else:
@@ -1440,7 +1441,7 @@ class SimulationsMain(TimeEventsMain):
                     if logger.has_errors():
                         # Show dialogue
                         dlg = LogsDialogue(name=self.tr("RMS pre simulation check"),
-                                           logger=logger)
+                                           logger=logger, parent=self)
                         dlg.setModal(True)
                         exec_dialog_safely(dialog=dlg)
                         return
@@ -1626,7 +1627,8 @@ class SimulationsMain(TimeEventsMain):
                 self.show_warning_toast(self.tr("Power flow not converged :/"))
 
         else:
-            warning_msg(self.tr('There are no power flow results.\nIs there any slack bus or generator?'), self.tr('Power flow'))
+            warning_msg(self.tr('There are no power flow results.\nIs there any slack bus or generator?'),
+                        self.tr('Power flow'))
 
         if not self.session.is_anything_running():
             self.UNLOCK()
@@ -2260,7 +2262,8 @@ class SimulationsMain(TimeEventsMain):
                         Pf_hvdc = pf_results.Pf_hvdc.real
                         use_provided_flows = True
                     else:
-                        self.show_warning_toast(self.tr('There were no power flow values available. Linear flows will be used.'))
+                        self.show_warning_toast(
+                            self.tr('There were no power flow values available. Linear flows will be used.'))
                         use_provided_flows = False
                         Pf_hvdc = None
                         Pf = None
@@ -2373,7 +2376,8 @@ class SimulationsMain(TimeEventsMain):
                             Pf_hvdc = pf_results.hvdc_Pf.real
                             use_provided_flows = True
                         else:
-                            warning_msg(self.tr('There were no power flow values available. Linear flows will be used.'))
+                            warning_msg(
+                                self.tr('There were no power flow values available. Linear flows will be used.'))
                             use_provided_flows = False
                             Pf_hvdc = None
                             Pf = None
@@ -2521,8 +2525,9 @@ class SimulationsMain(TimeEventsMain):
                         S = self.circuit.get_Sbus()
                         if S[sel_bus_idx].sum() == 0:
                             warning_msg(self.tr('You have selected a group of buses with no power injection.\n'
-                                        'this will result in an infinite continuation, since the loading variation '
-                                        'of buses with zero injection will be infinite.'), self.tr('Continuation Power Flow'))
+                                                'this will result in an infinite continuation, since the loading variation '
+                                                'of buses with zero injection will be infinite.'),
+                                        self.tr('Continuation Power Flow'))
                             return
 
                     pf_options = self.get_selected_power_flow_options()
@@ -2633,12 +2638,13 @@ class SimulationsMain(TimeEventsMain):
                                 else:
                                     pass
                         else:
-                            self.show_warning_toast(self.tr('Check the selected start and finnish time series indices.'))
+                            self.show_warning_toast(
+                                self.tr('Check the selected start and finnish time series indices.'))
                 else:
                     self.show_warning_toast(self.tr('Another voltage collapse simulation is running...'))
             else:
                 info_msg(self.tr('Run a power flow simulation first.\n'
-                         'The results are needed to initialize this simulation.'))
+                                 'The results are needed to initialize this simulation.'))
         else:
             pass
 
@@ -2659,7 +2665,7 @@ class SimulationsMain(TimeEventsMain):
             else:
                 self.session.delete_driver(SimulationTypes.ContinuationPowerFlow_run)
                 self.show_warning_toast(self.tr('The voltage stability did not converge.\n'
-                                        'Is this case already at the collapse limit?'), 5000)
+                                                'Is this case already at the collapse limit?'), 5000)
                 if drv is not None:
                     if drv.logger.has_logs():
                         self.show_logs(logger=drv.logger, name=self.tr("Voltage stability logs"))
@@ -3014,9 +3020,9 @@ class SimulationsMain(TimeEventsMain):
                 self.show_info_toast(self.tr("Optimal power flow converged :)"))
             else:
                 self.show_warning_toast(self.tr('Optimal power flow not converged :/\n'
-                                        'Check that all Branches have rating and \n'
-                                        'that the generator bounds are ok.\n'
-                                        'You may also use the diagnostic tool (F8)'),
+                                                'Check that all Branches have rating and \n'
+                                                'that the generator bounds are ok.\n'
+                                                'You may also use the diagnostic tool (F8)'),
                                         duration=4000)
 
             self.update_available_results()
@@ -3441,7 +3447,7 @@ class SimulationsMain(TimeEventsMain):
                         seq: List[Tuple[float, str]] = [(0, 'green'),
                                                         (0.6, 'orange'),
                                                         (1.0, 'red')]
-                        cmap = LinearSegmentedColormap.from_list(name='vcolors', colors=seq)
+                        cmap: NativeColorMap = NativeColorMap(stops=seq)
 
                         self.buses_for_storage = list()
                         colors = list()
@@ -3492,26 +3498,35 @@ class SimulationsMain(TimeEventsMain):
             if not sigma_driver.results.converged:
                 self.show_error_toast("Sigma coefficients did not converge :(")
 
-            old_dialog: SigmaAnalysisGUI | None = self.sigma_dialogue
-            if is_dialog_available(dialog=old_dialog):
-                delete_dialog_safely(dialog=old_dialog)
+            old_dialog: QtWidgets.QMainWindow | QtWidgets.QDialog | None = self.window_manager.get(
+                "sigma_analysis_dialogue"
+            )
+            if isinstance(old_dialog, SigmaAnalysisGUI) and is_dialog_available(dialog=old_dialog):
+                old_dialog.grid = self.circuit
+                old_dialog.options = options
+                old_dialog.t_idx = t_idx
+                old_dialog.bus_names = bus_names
+                old_dialog.setup_time_slider(t_idx=t_idx)
+                old_dialog.apply_results(results=sigma_driver.results, bus_names=bus_names)
+                old_dialog.resize(int(1.61 * 600.0), 550)
+                self.show_dialogue(win=old_dialog, key="sigma_analysis_dialogue")
             else:
-                pass
-
-            self.sigma_dialogue = SigmaAnalysisGUI(parent=self,
-                                                   results=sigma_driver.results,
-                                                   bus_names=bus_names,
-                                                   grid=self.circuit,
-                                                   options=options,
-                                                   t_idx=t_idx,
-                                                   classical_sigma=False,
-                                                   dpr_use_stored_guess=True,
-                                                   dpr_control_q=options.control_Q,
-                                                   dpr_control_discrete_shunts=True,
-                                                   dpr_control_qv_droop=True,
-                                                   dpr_distributed_slack=options.distributed_slack)
-            self.sigma_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
-            self.sigma_dialogue.show()  # exec leaves the parent on hold
+                sigma_dialogue: SigmaAnalysisGUI = SigmaAnalysisGUI(
+                    parent=self,
+                    results=sigma_driver.results,
+                    bus_names=bus_names,
+                    grid=self.circuit,
+                    options=options,
+                    t_idx=t_idx,
+                    classical_sigma=False,
+                    dpr_use_stored_guess=True,
+                    dpr_control_q=options.control_Q,
+                    dpr_control_discrete_shunts=True,
+                    dpr_control_qv_droop=True,
+                    dpr_distributed_slack=options.distributed_slack,
+                )
+                sigma_dialogue.resize(int(1.61 * 600.0), 550)
+                self.show_dialogue(win=sigma_dialogue, key="sigma_analysis_dialogue")
 
     def run_investments_evaluation(self) -> None:
         """
@@ -3585,7 +3600,8 @@ class SimulationsMain(TimeEventsMain):
                                 engine=self.get_preferred_engine()
                             )
                         else:
-                            self.show_warning_toast(self.tr('Linear OPF and power flow investment studies need time data...'))
+                            self.show_warning_toast(
+                                self.tr('Linear OPF and power flow investment studies need time data...'))
                             return
 
                     elif obj_fn_tpe == InvestmentsEvaluationObjectives.GenerationAdequacy:
@@ -3652,7 +3668,7 @@ class SimulationsMain(TimeEventsMain):
                     self.show_warning_toast(self.tr('Another contingency analysis is being executed now...'))
             else:
                 warning_msg(self.tr("There are no investment groups, "
-                            "you need to create some so that VeraGrid can evaluate them ;)"))
+                                    "you need to create some so that VeraGrid can evaluate them ;)"))
 
         else:
             pass
@@ -3750,7 +3766,7 @@ class SimulationsMain(TimeEventsMain):
 
                 else:
                     warning_msg(self.tr('You cannot find {0} clusters for {1} time steps.\n'
-                                'Modify the number of clusters in the ML settings.').format(n_points, nt),
+                                        'Modify the number of clusters in the ML settings.').format(n_points, nt),
                                 title=self.tr("Clustering"))
 
             else:
@@ -3804,8 +3820,9 @@ class SimulationsMain(TimeEventsMain):
                 n = len(clustering_results.time_indices)
 
                 if n != self.ui.cluster_number_spinBox.value():
-                    error_msg(self.tr("The number of clusters in the stored results is different from the specified :(\n"
-                              "Run another clustering analysis."))
+                    error_msg(
+                        self.tr("The number of clusters in the stored results is different from the specified :(\n"
+                                "Run another clustering analysis."))
                     self.ui.actionUse_clustering.setChecked(False)
                     return None
                 else:
@@ -4068,7 +4085,7 @@ class SimulationsMain(TimeEventsMain):
 
             if pf_results is None:
                 info_msg(self.tr('Run a power flow simulation first.\n'
-                         'The results are needed to initialize this simulation.'))
+                                 'The results are needed to initialize this simulation.'))
             else:
                 if bool(pf_results.converged):
                     self.add_simulation(SimulationTypes.RmsDynamic_run)
@@ -4087,7 +4104,7 @@ class SimulationsMain(TimeEventsMain):
                                      text_func=self.ui.progress_label.setText)
                 else:
                     info_msg(self.tr('The power flow did not converge.\n'
-                             'Resolve the operating point before running this RMS simulation.'))
+                                     'Resolve the operating point before running this RMS simulation.'))
         else:
             info_msg(self.tr('The simulation time is 0. Change it to a proper time in settings.'))
 
@@ -4162,7 +4179,6 @@ class SimulationsMain(TimeEventsMain):
             else:
                 warning_msg(self.tr('There are no rms simulation results.'), self.tr('Rms simulation'))
 
-
         if not self.session.is_anything_running():
             self.UNLOCK()
 
@@ -4221,7 +4237,7 @@ class SimulationsMain(TimeEventsMain):
 
             else:
                 info_msg(self.tr('Run a power flow simulation first.\n'
-                         'The results are needed to initialize this simulation.'))
+                                 'The results are needed to initialize this simulation.'))
 
         else:
             info_msg(self.tr('The simulation time is 0. Change it to a proper time in settings.'))
@@ -4397,7 +4413,7 @@ class SimulationsMain(TimeEventsMain):
                 if logger.has_errors():
                     # Show dialogue
                     dlg = LogsDialogue(name=self.tr("Small-signal stability RMS pre simulation check"),
-                                       logger=logger)
+                                       logger=logger, parent=self)
                     dlg.setModal(True)
                     exec_dialog_safely(dialog=dlg)
                     return
@@ -4433,10 +4449,11 @@ class SimulationsMain(TimeEventsMain):
 
                     else:
                         info_msg(self.tr('Run a power flow simulation first.\n'
-                                 'The results are needed to initialize this simulation.'))
+                                         'The results are needed to initialize this simulation.'))
 
             else:
-                self.show_warning_toast(self.tr('Another Small-Signal stability analysis simulation is running already...'))
+                self.show_warning_toast(
+                    self.tr('Another Small-Signal stability analysis simulation is running already...'))
 
         else:
             pass
@@ -4447,7 +4464,6 @@ class SimulationsMain(TimeEventsMain):
         :return:
         """
         drv, results = self.session.small_signal_stability_simulation
-
 
         # The simulation is no longer part of the active-run list whether it
         # succeeded or failed.  Leaving it there makes subsequent runs appear
@@ -4483,7 +4499,7 @@ class SimulationsMain(TimeEventsMain):
                 if logger.has_errors():
                     # Show dialogue
                     dlg = LogsDialogue(name=self.tr("Small-signal stability EMT pre simulation check"),
-                                       logger=logger)
+                                       logger=logger, parent=self)
                     dlg.setModal(True)
                     exec_dialog_safely(dialog=dlg)
                     return
@@ -4519,9 +4535,10 @@ class SimulationsMain(TimeEventsMain):
 
                     else:
                         info_msg(self.tr('Run a power flow simulation first.\n'
-                                 'The results are needed to initialize this simulation.'))
+                                         'The results are needed to initialize this simulation.'))
             else:
-                self.show_warning_toast(self.tr('Another Small-Signal stability analysis EMT simulation is running already...'))
+                self.show_warning_toast(
+                    self.tr('Another Small-Signal stability analysis EMT simulation is running already...'))
 
         else:
             pass
@@ -4664,7 +4681,7 @@ class SimulationsMain(TimeEventsMain):
         # Empty selection: warn the user and stop. Running the optimization would have nothing to do.
         if len(selected_branches) == 0:
             warning_msg(self.tr("Select at least one AC line or two-winding transformer in the schematic "
-                        "before running the catalogue optimization."),
+                                "before running the catalogue optimization."),
                         self.tr("Catalogue optimization"))
             return
         else:
@@ -4760,3 +4777,26 @@ class SimulationsMain(TimeEventsMain):
             self.colour_diagrams()
         else:
             pass
+
+    def display_grid_analysis(self):
+        """
+        Display the grid analysis GUI
+        """
+
+        old_dialog: GridAnalysisGUI | None = self.window_manager.get("analysis_dialogue")
+        if isinstance(old_dialog, GridAnalysisGUI) and is_dialog_available(dialog=old_dialog):
+            # WindowManager keeps the existing keyed window, so refresh that
+            # instance before asking it to show again.
+            old_dialog.circuit = self.circuit
+            old_dialog.power_flow_options = self.get_selected_power_flow_options()
+            old_dialog.analyze_all()
+            old_dialog.resize(int(1.61 * 600.0), 600)
+            self.show_dialogue(win=old_dialog, key="analysis_dialogue")
+        else:
+            analysis_dialogue: GridAnalysisGUI = GridAnalysisGUI(
+                circuit=self.circuit,
+                power_flow_options=self.get_selected_power_flow_options(),
+                parent=self
+            )
+            analysis_dialogue.resize(int(1.61 * 600.0), 600)
+            self.show_dialogue(win=analysis_dialogue, key="analysis_dialogue")

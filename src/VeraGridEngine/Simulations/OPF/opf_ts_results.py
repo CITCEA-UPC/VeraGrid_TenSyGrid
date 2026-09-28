@@ -7,7 +7,6 @@ from __future__ import annotations
 from typing import Union, TYPE_CHECKING
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from VeraGridEngine.Simulations.OPF.opf_results import OptimalPowerFlowResults
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
@@ -938,16 +937,6 @@ class OptimalPowerFlowTimeSeriesResults(ResultsTemplate):
             generation = self.generator_power.sum(axis=1) + self.battery_power.sum(axis=1)
             load = self.load_power.sum(axis=1) - self.load_shedding.sum(axis=1)
 
-            if self.plotting_allowed():
-                plt.ion()
-                fig = plt.figure(figsize=(8, 6))
-                ax3 = plt.subplot(1, 1, 1)
-                ax3.plot(generation, label='Generation')
-                ax3.plot(load, label='Load')
-                ax3.legend()
-                fig.suptitle(str(result_type.value))
-                plt.tight_layout()
-                plt.show(block=False)
 
             return ResultsTable(data=np.c_[generation, load],
                                 index=pd.to_datetime(self.time_array),

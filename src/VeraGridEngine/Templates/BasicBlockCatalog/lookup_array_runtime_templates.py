@@ -513,6 +513,7 @@ def _build_clipped_lookup_matrix_expression(
 
 
 class LookupArrayLinearRuntimeTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -614,6 +615,7 @@ def build_lookup_array_linear_runtime_template(
 
 # ---
 class InverseLookupArrayLinearRuntimeTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -703,6 +705,7 @@ def build_inverse_lookup_array_linear_runtime_template(
 
 
 class LookupMatrixLinearRuntimeTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -819,6 +822,7 @@ def build_lookup_matrix_linear_runtime_template(
 
 
 class LookupArraySplineRuntimeTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -912,6 +916,7 @@ def build_lookup_array_spline_runtime_template(
 
 
 class LookupMatrixSplineRuntimeTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

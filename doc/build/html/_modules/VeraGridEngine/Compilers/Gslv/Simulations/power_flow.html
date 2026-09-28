@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Compilers.Gslv.Simulations.power_flow &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Compilers.Gslv.Simulations.power_flow &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -117,7 +117,7 @@
     <span class="n">IntVec</span><span class="p">,</span>
     <span class="n">Logger</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">BranchImpedanceMode</span><span class="p">,</span> <span class="n">SolverType</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span>
@@ -142,6 +142,9 @@
                    <span class="n">SolverType</span><span class="o">.</span><span class="n">LACPF</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">LACPF</span><span class="p">,</span>
                    <span class="n">SolverType</span><span class="o">.</span><span class="n">FASTDECOUPLED</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">SolverType</span><span class="o">.</span><span class="n">FASTDECOUPLED</span>
                    <span class="p">}</span>
+    <span class="n">branch_impedance_mode_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Specified</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Specified</span><span class="p">,</span>
+                                  <span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Upper</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Upper</span><span class="p">,</span>
+                                  <span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Lower</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Lower</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">solver_type</span> <span class="ow">in</span> <span class="n">solver_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">solver_type</span> <span class="o">=</span> <span class="n">solver_dict</span><span class="p">[</span><span class="n">opt</span><span class="o">.</span><span class="n">solver_type</span><span class="p">]</span>
@@ -170,7 +173,6 @@
 <span class="sd">    initialize_with_existing_solution: bool = False, </span>
 <span class="sd">    tolerance: float = 1e-06, </span>
 <span class="sd">    max_iter: int = 25, </span>
-<span class="sd">    max_outer_loop_iter: int = 100, </span>
 <span class="sd">    control_Q: bool = True, </span>
 <span class="sd">    control_taps_modules: bool = True, </span>
 <span class="sd">    control_taps_phase: bool = True, </span>
@@ -194,19 +196,23 @@
         <span class="n">initialize_with_existing_solution</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">use_stored_guess</span><span class="p">,</span>
         <span class="n">tolerance</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">tolerance</span><span class="p">,</span>
         <span class="n">max_iter</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span>
-        <span class="n">control_Q</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">control_Q</span><span class="p">,</span>
+        <span class="n">limit_i_vsc</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">limit_i_vsc</span><span class="p">,</span>
+        <span class="n">control_q</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">control_Q</span><span class="p">,</span>
         <span class="n">control_taps_modules</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">control_taps_modules</span><span class="p">,</span>
         <span class="n">control_taps_phase</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">control_taps_phase</span><span class="p">,</span>
         <span class="n">control_remote_voltage</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">control_remote_voltage</span><span class="p">,</span>
         <span class="n">orthogonalize_controls</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">orthogonalize_controls</span><span class="p">,</span>
-        <span class="n">apply_temperature_correction</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">orthogonalize_controls</span><span class="p">,</span>
-        <span class="n">branch_impedance_tolerance_mode</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">BranchImpedanceMode</span><span class="o">.</span><span class="n">Specified</span><span class="p">,</span>
+        <span class="n">apply_temperature_correction</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">apply_temperature_correction</span><span class="p">,</span>
+        <span class="n">branch_impedance_tolerance_mode</span><span class="o">=</span><span class="n">branch_impedance_mode_dict</span><span class="p">[</span><span class="n">opt</span><span class="o">.</span><span class="n">branch_impedance_tolerance_mode</span><span class="p">],</span>
         <span class="n">distributed_slack</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">distributed_slack</span><span class="p">,</span>
         <span class="n">ignore_single_node_islands</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">ignore_single_node_islands</span><span class="p">,</span>
         <span class="n">trust_radius</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">trust_radius</span><span class="p">,</span>
         <span class="n">backtracking_parameter</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">backtracking_parameter</span><span class="p">,</span>
         <span class="n">use_stored_guess</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">use_stored_guess</span><span class="p">,</span>
-        <span class="n">generate_report</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">generate_report</span>
+        <span class="n">initialize_angles</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">initialize_angles</span><span class="p">,</span>
+        <span class="n">generate_report</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">generate_report</span><span class="p">,</span>
+        <span class="n">controls_start_tolerance</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">controls_start_tolerance</span><span class="p">,</span>
+        <span class="n">use_autodiff_jacobian</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">use_autodiff_jacobian</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 

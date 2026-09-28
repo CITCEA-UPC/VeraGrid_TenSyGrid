@@ -146,7 +146,7 @@ def test_legacy_block_instance_without_model_family_name_uses_empty_default() ->
     :return: None.
     """
     legacy_block: Block = Block(name="legacy_without_model_family")
-    legacy_block.__dict__.pop("_model_family_name", None)
+    del legacy_block._model_family_name
 
     assert legacy_block.model_family_name == ""
     assert legacy_block.to_dict()["model_family_name"] == ""

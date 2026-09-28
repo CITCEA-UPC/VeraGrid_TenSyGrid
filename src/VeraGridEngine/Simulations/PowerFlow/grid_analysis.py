@@ -13,6 +13,19 @@ class TimeSeriesResultsAnalysis:
     TimeSeriesResultsAnalysis
     """
 
+    __slots__ = (
+        'grid',
+        'res',
+        'branch_overload_frequency',
+        'bus_under_voltage_frequency',
+        'bus_over_voltage_frequency',
+        'branch_overload_accumulated',
+        'bus_under_voltage_accumulated',
+        'bus_over_voltage_accumulated',
+        'buses_selected_for_storage_frequency',
+        'branches_selected_for_reactance_compensation',
+    )
+
     def __init__(self, grid: MultiCircuit, results: PowerFlowTimeSeriesResults):
         """
         Constructor

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.OPF.Formulations package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.OPF.Formulations package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1167,6 +1167,11 @@ That means that solves the OPF problem for a complete time series at once</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">BatteryVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#BatteryVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenerationVars</span></code></a></p>
 <p>struct extending the generation vars to handle the battery vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.e">
+<span class="sig-name descname"><span class="pre">e</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.e" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_emissions_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_fuel_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars"><span class="pre">BatteryVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#BatteryVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BatteryVars.get_values" title="Link to this definition"></a></dt>
@@ -1193,12 +1198,72 @@ That means that solves the OPF problem for a complete time series at once</p>
 :param pos_slack: positive flow slack variable</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.contingency_flow_data">
+<span class="sig-name descname"><span class="pre">contingency_flow_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">LpVariable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">LpAffineExpression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">LinearExpr</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">LpVariable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">LpVariable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.contingency_flow_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_lb">
+<span class="sig-name descname"><span class="pre">flow_constraints_lb</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_lb" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_ub">
+<span class="sig-name descname"><span class="pre">flow_constraints_ub</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_constraints_ub" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_neg">
+<span class="sig-name descname"><span class="pre">flow_slacks_neg</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_neg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_pos">
+<span class="sig-name descname"><span class="pre">flow_slacks_pos</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flow_slacks_pos" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.flows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars"><span class="pre">BranchVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#BranchVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.get_values" title="Link to this definition"></a></dt>
 <dd><p>Return an instance of this class where the arrays content are not LP vars but their value
 :return: BranchVars</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.loading">
+<span class="sig-name descname"><span class="pre">loading</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.loading" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.losses">
+<span class="sig-name descname"><span class="pre">losses</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.losses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.overload_cost">
+<span class="sig-name descname"><span class="pre">overload_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.overload_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.rates">
+<span class="sig-name descname"><span class="pre">rates</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.rates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.tap_angles">
+<span class="sig-name descname"><span class="pre">tap_angles</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.tap_angles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.z_flows">
+<span class="sig-name descname"><span class="pre">z_flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BranchVars.z_flows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1207,6 +1272,31 @@ That means that solves the OPF problem for a complete time series at once</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">BusVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#BusVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the bus related vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pbalance">
+<span class="sig-name descname"><span class="pre">Pbalance</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pbalance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pgen">
+<span class="sig-name descname"><span class="pre">Pgen</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pgen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pinj">
+<span class="sig-name descname"><span class="pre">Pinj</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Pinj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Va">
+<span class="sig-name descname"><span class="pre">Va</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Va" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Vm">
+<span class="sig-name descname"><span class="pre">Vm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.Vm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars"><span class="pre">BusVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#BusVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.get_values" title="Link to this definition"></a></dt>
@@ -1215,6 +1305,16 @@ is not LP vars but their value
 :return: BusVars</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.kirchhoff">
+<span class="sig-name descname"><span class="pre">kirchhoff</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.kirchhoff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.shadow_prices">
+<span class="sig-name descname"><span class="pre">shadow_prices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.BusVars.shadow_prices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1222,6 +1322,11 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">FluidInjectionVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidInjectionVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the vars of injections of fluid type</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.flow">
+<span class="sig-name descname"><span class="pre">flow</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.flow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars"><span class="pre">FluidInjectionVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidInjectionVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidInjectionVars.get_values" title="Link to this definition"></a></dt>
@@ -1237,6 +1342,26 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">FluidNodeVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidNodeVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the vars of nodes of fluid type</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.current_level">
+<span class="sig-name descname"><span class="pre">current_level</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.current_level" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_in">
+<span class="sig-name descname"><span class="pre">flow_in</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_in" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_out">
+<span class="sig-name descname"><span class="pre">flow_out</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.flow_out" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.fluid_value">
+<span class="sig-name descname"><span class="pre">fluid_value</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.fluid_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars"><span class="pre">FluidNodeVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidNodeVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.get_values" title="Link to this definition"></a></dt>
@@ -1245,6 +1370,21 @@ is not LP vars but their value
 :return: FluidNodeVars</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.p2x_flow">
+<span class="sig-name descname"><span class="pre">p2x_flow</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.p2x_flow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.spillage">
+<span class="sig-name descname"><span class="pre">spillage</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.spillage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.water_balance">
+<span class="sig-name descname"><span class="pre">water_balance</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidNodeVars.water_balance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1252,6 +1392,11 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">FluidPathVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidPathVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the vars of paths of fluid type</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.flow">
+<span class="sig-name descname"><span class="pre">flow</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.flow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars"><span class="pre">FluidPathVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#FluidPathVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.FluidPathVars.get_values" title="Link to this definition"></a></dt>
@@ -1267,6 +1412,16 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">GenerationVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#GenerationVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the generation vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.cost">
+<span class="sig-name descname"><span class="pre">cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.dp">
+<span class="sig-name descname"><span class="pre">dp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.dp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_emissions_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_fuel_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars"><span class="pre">GenerationVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#GenerationVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.get_values" title="Link to this definition"></a></dt>
@@ -1278,6 +1433,41 @@ is not LP vars but their value
 :return: GenerationVars</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.invested">
+<span class="sig-name descname"><span class="pre">invested</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.invested" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.p">
+<span class="sig-name descname"><span class="pre">p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.producing">
+<span class="sig-name descname"><span class="pre">producing</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.producing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.reserve">
+<span class="sig-name descname"><span class="pre">reserve</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.reserve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shedding">
+<span class="sig-name descname"><span class="pre">shedding</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shedding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shutting_down">
+<span class="sig-name descname"><span class="pre">shutting_down</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.shutting_down" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.starting_up">
+<span class="sig-name descname"><span class="pre">starting_up</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.GenerationVars.starting_up" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1285,12 +1475,27 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">HvdcVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#HvdcVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the generation vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.flows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars"><span class="pre">HvdcVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#HvdcVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.get_values" title="Link to this definition"></a></dt>
 <dd><p>Return an instance of this class where the arrays content are not LP vars but their value
 :return: HvdcVars</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.loading">
+<span class="sig-name descname"><span class="pre">loading</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.loading" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.rates">
+<span class="sig-name descname"><span class="pre">rates</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars.rates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1306,6 +1511,21 @@ is not LP vars but their value
 :return: LoadVars</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.p">
+<span class="sig-name descname"><span class="pre">p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding">
+<span class="sig-name descname"><span class="pre">shedding</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding_cost">
+<span class="sig-name descname"><span class="pre">shedding_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.LoadVars.shedding_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1313,6 +1533,11 @@ is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">NodalCapacityVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#NodalCapacityVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the nodal capacity related vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.P">
+<span class="sig-name descname"><span class="pre">P</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.P" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars"><span class="pre">NodalCapacityVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#NodalCapacityVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.NodalCapacityVars.get_values" title="Link to this definition"></a></dt>
@@ -1328,12 +1553,137 @@ content is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">OpfVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hvdc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_vsc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fluid_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fluid_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fluid_inj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cap_buses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#OpfVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Structure to host the opf variables</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.acceptable_solution">
+<span class="sig-name descname"><span class="pre">acceptable_solution</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.acceptable_solution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.batt_vars">
+<span class="sig-name descname"><span class="pre">batt_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.batt_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.branch_vars">
+<span class="sig-name descname"><span class="pre">branch_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.branch_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.bus_vars">
+<span class="sig-name descname"><span class="pre">bus_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.bus_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_inject_vars">
+<span class="sig-name descname"><span class="pre">fluid_inject_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_inject_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_node_vars">
+<span class="sig-name descname"><span class="pre">fluid_node_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_node_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_path_vars">
+<span class="sig-name descname"><span class="pre">fluid_path_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.fluid_path_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.gen_vars">
+<span class="sig-name descname"><span class="pre">gen_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.gen_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.get_values">
 <span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_emissions_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_fuel_rates_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_tech_shares_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batt_tech_shares_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">csc_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars"><span class="pre">OpfVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#OpfVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.get_values" title="Link to this definition"></a></dt>
 <dd><p>Return an instance of this class where the arrays content are not LP vars but their value
 :return: OpfVars instance</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.hvdc_vars">
+<span class="sig-name descname"><span class="pre">hvdc_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.hvdc_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.load_vars">
+<span class="sig-name descname"><span class="pre">load_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.load_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_cap_buses">
+<span class="sig-name descname"><span class="pre">n_cap_buses</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_cap_buses" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_inj">
+<span class="sig-name descname"><span class="pre">n_fluid_inj</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_inj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_node">
+<span class="sig-name descname"><span class="pre">n_fluid_node</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_path">
+<span class="sig-name descname"><span class="pre">n_fluid_path</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_fluid_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_hvdc">
+<span class="sig-name descname"><span class="pre">n_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_vsc">
+<span class="sig-name descname"><span class="pre">n_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.n_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nb">
+<span class="sig-name descname"><span class="pre">nb</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nb" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbr">
+<span class="sig-name descname"><span class="pre">nbr</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbus">
+<span class="sig-name descname"><span class="pre">nbus</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nbus" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.ng">
+<span class="sig-name descname"><span class="pre">ng</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.ng" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nl">
+<span class="sig-name descname"><span class="pre">nl</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nodal_capacity_vars">
+<span class="sig-name descname"><span class="pre">nodal_capacity_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nodal_capacity_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nt">
+<span class="sig-name descname"><span class="pre">nt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.nt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.sys_vars">
+<span class="sig-name descname"><span class="pre">sys_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.sys_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.vsc_vars">
+<span class="sig-name descname"><span class="pre">vsc_vars</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.OpfVars.vsc_vars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1356,6 +1706,31 @@ content is not LP vars but their value
 :param shedding_cost: Shedding cost values (nt, ngen)</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.power_by_technology">
+<span class="sig-name descname"><span class="pre">power_by_technology</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.power_by_technology" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_emissions">
+<span class="sig-name descname"><span class="pre">system_emissions</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_emissions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_fuel">
+<span class="sig-name descname"><span class="pre">system_fuel</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_fuel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_total_energy_cost">
+<span class="sig-name descname"><span class="pre">system_total_energy_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_total_energy_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_unit_energy_cost">
+<span class="sig-name descname"><span class="pre">system_unit_energy_cost</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.SystemVars.system_unit_energy_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1363,12 +1738,27 @@ content is not LP vars but their value
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.</span></span><span class="sig-name descname"><span class="pre">VscVars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#VscVars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Struct to store the generation vars</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.flows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.get_values">
-<span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.HvdcVars"><span class="pre">HvdcVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#VscVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.get_values" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Sbase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel" title="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel"><span class="pre">PulpLpModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Utils.MIP.html#VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel" title="VeraGridEngine.Utils.MIP.ortools_interface.OrToolsLpModel"><span class="pre">OrToolsLpModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars" title="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars"><span class="pre">VscVars</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/OPF/Formulations/linear_opf_ts.html#VscVars.get_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.get_values" title="Link to this definition"></a></dt>
 <dd><p>Return an instance of this class where the arrays content are not LP vars but their value
-:return: HvdcVars</p>
+:return: VscVars</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.loading">
+<span class="sig-name descname"><span class="pre">loading</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.loading" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.rates">
+<span class="sig-name descname"><span class="pre">rates</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.rates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

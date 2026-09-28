@@ -233,6 +233,7 @@ class TrafoRmsTemplate(RmsModelTemplate):
 
 
 class TrafoPhasorRmsTemplate(RmsModelTemplate):
+    __slots__ = ()
 
     def __init__(self, trafo: Transformer2W, vf: VarFactory, name: str = "rms_trafo_phasor_template"):
         """

@@ -281,7 +281,6 @@ class EmtSimulationDriver(DriverTemplate):
                         f"(well_initialized={well_initialized}, converged={converged}).{init_summary}"
                     )
 
-                print(f"results = {y}")
                 print(f"converged ={converged}")
                 print(f"well_initialized ={well_initialized}")
 

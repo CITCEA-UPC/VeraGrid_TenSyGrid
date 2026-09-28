@@ -5,7 +5,6 @@
 import os
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from PySide6.QtGui import Qt
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Qt
@@ -93,7 +92,7 @@ class ScriptingMain(IoMain):
             "  app          active VeraGrid GUI object",
             "  circuit      same object as app.circuit",
             "  vg           VeraGridEngine package",
-            "  np, pd, plt  NumPy, pandas and Matplotlib",
+            "  np, pd       NumPy and pandas",
             "  user_folder  function returning the ~/.VeraGrid folder",
             "",
             "Common app commands",
@@ -106,7 +105,7 @@ class ScriptingMain(IoMain):
             "",
             "Circuit access",
             "  grid = app.circuit                current MultiCircuit model",
-            "  grid.plot_graph(); plt.show(block=False)     plot the graph",
+            "  grid.plot_graph()             create an engine graph representation",
             "  app.numerical_circuit             latest compiled circuit",
             "  app.islands                       latest compiled islands",
             "",
@@ -160,7 +159,7 @@ class ScriptingMain(IoMain):
             "  _, pf = app.session.power_flow",
             "  print(pf.get_bus_df())",
             "  pf.get_branch_df().to_csv('branches.csv')",
-            "  plt.plot(abs(pf.voltage)); plt.show(block=False)",
+            "  print(abs(pf.voltage))",
             "",
             "Full guide: doc/md_source/veragrid_scripting_guide.md",
             "=" * 78,
@@ -180,7 +179,6 @@ class ScriptingMain(IoMain):
             elm.add_var("hlp", self.print_console_help)
             elm.add_var("np", np)
             elm.add_var("pd", pd)
-            elm.add_var("plt", plt)
             elm.add_var("vg", vg)  # veragrid as a library
             elm.add_var('app', self)
             elm.add_var('circuit', self.circuit)

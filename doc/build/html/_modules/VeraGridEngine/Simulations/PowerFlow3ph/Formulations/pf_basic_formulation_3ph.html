@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow3ph.Formulations.pf_basic_formulation_3ph &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow3ph.Formulations.pf_basic_formulation_3ph &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -1163,6 +1163,33 @@
 <div class="viewcode-block" id="PfBasicFormulation3Ph">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.PowerFlow3ph.Formulations.html#VeraGridEngine.Simulations.PowerFlow3ph.Formulations.pf_basic_formulation_3ph.PfBasicFormulation3Ph">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PfBasicFormulation3Ph</span><span class="p">(</span><span class="n">PfFormulationTemplate</span><span class="p">):</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Ybus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Yshunt_bus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_lookup&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch_lookup&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Un_floating_current&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Un_floating_power&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Qmax&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pqv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;no_slack&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dVa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dVm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;idx_dQ&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">V0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>

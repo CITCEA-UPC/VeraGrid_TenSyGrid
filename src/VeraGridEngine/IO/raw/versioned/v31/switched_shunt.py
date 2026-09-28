@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v30.switched_shunt import RawSwitchedShuntV
 
 class RawSwitchedShuntV31(RawSwitchedShuntV30):
     """PSSE v31 typed object inheriting v30."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version
