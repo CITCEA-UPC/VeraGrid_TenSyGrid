@@ -1801,7 +1801,7 @@ def _get_expected_pi_line_terminal_refs(ph_mask: List[bool]) -> List[VarPowerFlo
     return ordered_refs
 
 
-def validate_line_phase_layout(branch: Any, mdl: Block, logger: Logger):
+def validate_line_phase_layout(branch: Any, mdl: Block, logger: Optional[Logger]):
     """
     Validate that a pi-line EMT block matches the physical branch phase layout.
 
@@ -1816,6 +1816,12 @@ def validate_line_phase_layout(branch: Any, mdl: Block, logger: Logger):
     :param mdl: EMT block associated with the branch.
     :param logger: Shared system logger used to report invalid topology states.
     """
+
+    # Inactive branches are excluded from the EMT problem, so they legitimately
+    # carry no model (or an empty one) and expose no terminal references.
+    # Validating them would report a false topology mismatch.
+    if mdl is None or not bool(branch.active):
+        return
 
     # The branch admittance mask is the physical topology source of truth, so it
     # defines which symbolic terminal voltage references must exist on the block.
@@ -1853,13 +1859,14 @@ def validate_line_phase_layout(branch: Any, mdl: Block, logger: Logger):
     # how many branch terminals exist. That state is invalid because later model
     # assembly would bind non-existent phases, so it must be surfaced explicitly.
     if current_refs != expected_refs:
-        logger.add_error(
-            msg="Pi-line template has a different number of phases than the EMT model (topology mismatch).",
-            device=branch.name,
-            device_class=str(branch.device_type),
-            value=str(current_refs),
-            expected_value=str(expected_refs),
-        )
+        if logger is not None:
+            logger.add_error(
+                msg="Pi-line template has a different number of phases than the EMT model (topology mismatch).",
+                device=branch.name,
+                device_class=str(branch.device_type),
+                value=str(current_refs),
+                expected_value=str(expected_refs),
+            )
     else:
         pass
 
