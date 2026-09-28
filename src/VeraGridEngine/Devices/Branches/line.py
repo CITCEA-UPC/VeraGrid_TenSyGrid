@@ -755,9 +755,31 @@ class Line(BranchParent):
             self.emt_template = obj.emt_template
 
         elif isinstance(obj, UndergroundLineType):
+            if obj.has_physical_data() and not obj.is_computed():
+                obj.compute(logger=logger)
+            else:
+                pass
+
+            connected_voltage_kv: float = self.get_max_bus_nominal_voltage()
+            if connected_voltage_kv > 0.0:
+                line_voltage_kv: float = connected_voltage_kv
+            else:
+                line_voltage_kv = obj.Vnom
             (self.R, self.X, self.B,
              self.R0, self.X0, self.B0,
-             self.rate) = obj.get_values(Sbase=Sbase, length=self.length)
+             self.rate) = obj.get_values(Sbase=Sbase,
+                                         length=self.length,
+                                         circuit_index=self.circuit_idx,
+                                         Vnom=line_voltage_kv)
+
+            self.ys = obj.get_ys(circuit_idx=self.circuit_idx,
+                                 Sbase=Sbase,
+                                 length=self.length,
+                                 Vnom=line_voltage_kv)
+            self.ysh = obj.get_ysh(circuit_idx=self.circuit_idx,
+                                   Sbase=Sbase,
+                                   length=self.length,
+                                   Vnom=line_voltage_kv)
 
             self.template = obj
             self.rms_template = obj.rms_template

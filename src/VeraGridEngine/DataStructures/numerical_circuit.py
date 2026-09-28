@@ -223,20 +223,31 @@ def correct_bus_types(gen_idx: IntVec,
                       control_mode_int: IntVec,
                       gen_controllable_bus_idx: IntVec,
                       bus_types: IntVec,
-                      v_ctrl_val: int):
+                      v_ctrl_val: int) -> None:
     """
-    Function to Correct bus types because of generators moving around due to the topology processing
+    Correct remote voltage-controlled bus types after topology processing.
+
     :param gen_idx:
     :param control_mode_int:
     :param gen_controllable_bus_idx:
     :param bus_types:
     :param v_ctrl_val: value for GeneratorControlMode.V
-    :return:
+    :return: None.
     """
-    for i, k in enumerate(gen_idx):
+    for i in range(len(gen_idx)):
+        # A negative index means that the device controls its local bus, whose
+        # type was already assigned during compilation and must not be remapped.
+        controlled_bus_idx: int = gen_controllable_bus_idx[i]
         if control_mode_int[i] == v_ctrl_val:
-            if bus_types[gen_controllable_bus_idx[i]] != 2:
-                bus_types[gen_controllable_bus_idx[i]] = 2
+            if controlled_bus_idx >= 0:
+                if bus_types[controlled_bus_idx] != 2:
+                    bus_types[controlled_bus_idx] = 2
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
 
 
 def select_ac_phase_reference_buses(
@@ -362,6 +373,42 @@ class NumericalCircuit:
     Class storing the calculation information of the devices
     """
 
+    __slots__ = (
+        "nbus",
+        "nbr",
+        "t_idx",
+        "nload",
+        "ngen",
+        "nbatt",
+        "nshunt",
+        "nhvdc",
+        "nvsc",
+        "nfluidnode",
+        "nfluidturbine",
+        "nfluidpump",
+        "nfluidp2x",
+        "nfluidpath",
+        "Sbase",
+        "bus_data",
+        "passive_branch_data",
+        "active_branch_data",
+        "hvdc_data",
+        "vsc_data",
+        "load_data",
+        "battery_data",
+        "generator_data",
+        "shunt_data",
+        "fluid_node_data",
+        "fluid_turbine_data",
+        "fluid_pump_data",
+        "fluid_p2x_data",
+        "fluid_path_data",
+        "__bus_map_arr",
+        "__topology_performed",
+        "structs_idtag_dict",
+        "bus_dict",
+    )
+
     def __init__(self,
                  nbus: int,
                  nbr: int,
@@ -440,6 +487,7 @@ class NumericalCircuit:
         # used during contingency analysis to modify the structures active, etc...
         # based on the device idtag
         self.structs_idtag_dict: Dict[str, Tuple[DataStructType, int]] = dict()
+        self.bus_dict: Dict[Any, int] | None = None
 
     def propagate_bus_result(self, bus_magnitude: Vec | CxVec):
         """

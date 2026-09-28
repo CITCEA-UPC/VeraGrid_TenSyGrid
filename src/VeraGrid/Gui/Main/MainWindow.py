@@ -882,11 +882,15 @@ class Ui_mainWindow(object):
 
         self.verticalLayout_37.addWidget(self.frame_36)
 
-        self.diagramsListView = QListView(self.page)
-        self.diagramsListView.setObjectName(u"diagramsListView")
-        self.diagramsListView.setFrameShape(QFrame.Shape.NoFrame)
+        self.diagramsTreeView = QTreeView(self.page)
+        self.diagramsTreeView.setObjectName(u"diagramsTreeView")
+        self.diagramsTreeView.setFrameShape(QFrame.Shape.NoFrame)
+        self.diagramsTreeView.setDragEnabled(True)
+        self.diagramsTreeView.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
+        self.diagramsTreeView.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.diagramsTreeView.setHeaderHidden(True)
 
-        self.verticalLayout_37.addWidget(self.diagramsListView)
+        self.verticalLayout_37.addWidget(self.diagramsTreeView)
 
         self.toolBox.addItem(self.page, icon49, u"Diagrams")
         self.page_2 = QWidget()
@@ -1187,16 +1191,6 @@ class Ui_mainWindow(object):
         self.fps_spinBox.setValue(30)
 
         self.verticalLayout_4.addWidget(self.fps_spinBox)
-
-        self.label_40 = QLabel(self.frame_51)
-        self.label_40.setObjectName(u"label_40")
-
-        self.verticalLayout_4.addWidget(self.label_40)
-
-        self.plt_style_comboBox = QComboBox(self.frame_51)
-        self.plt_style_comboBox.setObjectName(u"plt_style_comboBox")
-
-        self.verticalLayout_4.addWidget(self.plt_style_comboBox)
 
         self.verticalSpacer_14 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -6078,7 +6072,7 @@ class Ui_mainWindow(object):
         self.diagramSearchLineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"Search diagram by name", None))
         self.diagramSearchButton.setText("")
 #if QT_CONFIG(tooltip)
-        self.diagramsListView.setToolTip(QCoreApplication.translate("mainWindow", u"List of available diagrams", None))
+        self.diagramsTreeView.setToolTip(QCoreApplication.translate("mainWindow", u"Tree of available diagrams and categories", None))
 #endif // QT_CONFIG(tooltip)
         self.toolBox.setItemText(self.toolBox.indexOf(self.page), QCoreApplication.translate("mainWindow", u"Diagrams", None))
         self.label_118.setText(QCoreApplication.translate("mainWindow", u"Map tile provider", None))
@@ -6167,10 +6161,6 @@ class Ui_mainWindow(object):
         self.fps_spinBox.setToolTip(QCoreApplication.translate("mainWindow", u"Video frames per second", None))
 #endif // QT_CONFIG(tooltip)
         self.fps_spinBox.setSuffix(QCoreApplication.translate("mainWindow", u" FPS", None))
-        self.label_40.setText(QCoreApplication.translate("mainWindow", u"Plotting style", None))
-#if QT_CONFIG(tooltip)
-        self.plt_style_comboBox.setToolTip(QCoreApplication.translate("mainWindow", u"MatPlotlib plot styles to choose from", None))
-#endif // QT_CONFIG(tooltip)
         self.toolBox.setItemText(self.toolBox.indexOf(self.page_4), QCoreApplication.translate("mainWindow", u"General settings", None))
 #if QT_CONFIG(tooltip)
         self.available_results_to_color_comboBox.setToolTip(QCoreApplication.translate("mainWindow", u"Available results", None))

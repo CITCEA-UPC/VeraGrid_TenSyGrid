@@ -822,7 +822,7 @@
             </layout>
            </item>
            <item>
-            <widget class="MatplotlibWidget" name="sigmaPlotWidget" native="true"/>
+            <widget class="GraphsWidget" name="sigmaPlotWidget" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1212,9 +1212,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MatplotlibWidget</class>
+   <class>GraphsWidget</class>
    <extends>QWidget</extends>
-   <header>VeraGrid.Gui.Widgets.matplotlibwidget</header>
+   <header>VeraGrid.Gui.PlotDialogue.qt_chart_widget</header>
   </customwidget>
  </customwidgets>
  <resources/>

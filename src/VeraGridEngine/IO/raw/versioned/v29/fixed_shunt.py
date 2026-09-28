@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.fixed_shunt import RawFixedShunt
 
 class RawFixedShuntV29(RawFixedShunt):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

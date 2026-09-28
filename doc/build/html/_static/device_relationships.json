@@ -769,6 +769,18 @@
       "doc_url": "../md_source/modelling.html#upfc"
     },
     {
+      "id": "UndergroundCableType",
+      "label": "UndergroundCableType",
+      "kind": "exposed",
+      "category": "Catalogue",
+      "module_name": "src.VeraGridEngine.Devices.Branches.underground_cable_type",
+      "file_path": "src/VeraGridEngine/Devices/Branches/underground_cable_type.py",
+      "bases": [
+        "EditableDevice"
+      ],
+      "doc_url": "../md_source/modelling.html#undergroundcabletype"
+    },
+    {
       "id": "UndergroundLineType",
       "label": "UndergroundLineType",
       "kind": "exposed",

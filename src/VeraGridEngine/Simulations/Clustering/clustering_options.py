@@ -10,6 +10,11 @@ from VeraGridEngine.Devices.Parents.editable_device import GCProp
 
 
 class ClusteringAnalysisOptions(OptionsTemplate):
+    """
+    ClusteringAnalysisOptions
+    """
+
+    __slots__ = ("n_points",)
 
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="n_points", tpe=int),

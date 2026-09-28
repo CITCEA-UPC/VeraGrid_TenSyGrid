@@ -614,13 +614,31 @@ class Transformer2W(ControllableBranchParent):
 
         return self
 
-    def get_vcc(self) -> float:
+    def get_vcc(self, Sbase: float = 100.0) -> float:
+        """Return the transformer short-circuit voltage in percent.
+
+        :param Sbase: Circuit/system power base in MVA.
+        :return: Short-circuit voltage in percent.
         """
-        Get the short circuit voltage in %
-        This is the value from the short circuit study
-        :return: value in %
-        """
-        return 100.0 * np.sqrt(self.R * self.R + self.X * self.X)
+        if self.Sn > 0.0:
+            nominal_power: float = self.Sn
+        elif self.rate > 0.0:
+            nominal_power = self.rate
+        else:
+            return 0.0
+
+        if Sbase <= 0.0:
+            return 0.0
+
+        _, _, Vsc, _, _ = reverse_transformer_short_circuit_study(
+            R=self.R,
+            X=self.X,
+            G=self.G,
+            B=self.B,
+            rate=nominal_power,
+            Sbase=Sbase,
+        )
+        return float(Vsc)
 
     def get_transformer_type(self, Sbase: float = 100.0) -> TransformerType:
         """
@@ -634,7 +652,7 @@ class Transformer2W(ControllableBranchParent):
                                                                             X=self.X,
                                                                             G=self.G,
                                                                             B=self.B,
-                                                                            rate=self.rate,
+                                                                            rate=self.Sn if self.Sn > 0.0 else self.rate,
                                                                             Sbase=Sbase)
         else:
             Pfe = self.Pfe

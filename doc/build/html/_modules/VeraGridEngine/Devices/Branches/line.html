@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Branches.line &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Branches.line &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -878,9 +878,31 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">emt_template</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">emt_template</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">UndergroundLineType</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">has_physical_data</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">is_computed</span><span class="p">():</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="n">connected_voltage_kv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_max_bus_nominal_voltage</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">connected_voltage_kv</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">line_voltage_kv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">connected_voltage_kv</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">line_voltage_kv</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Vnom</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B0</span><span class="p">,</span>
-             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_values</span><span class="p">(</span><span class="n">Sbase</span><span class="o">=</span><span class="n">Sbase</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_values</span><span class="p">(</span><span class="n">Sbase</span><span class="o">=</span><span class="n">Sbase</span><span class="p">,</span>
+                                         <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                                         <span class="n">circuit_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">circuit_idx</span><span class="p">,</span>
+                                         <span class="n">Vnom</span><span class="o">=</span><span class="n">line_voltage_kv</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ys</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_ys</span><span class="p">(</span><span class="n">circuit_idx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">circuit_idx</span><span class="p">,</span>
+                                 <span class="n">Sbase</span><span class="o">=</span><span class="n">Sbase</span><span class="p">,</span>
+                                 <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                                 <span class="n">Vnom</span><span class="o">=</span><span class="n">line_voltage_kv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ysh</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_ysh</span><span class="p">(</span><span class="n">circuit_idx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">circuit_idx</span><span class="p">,</span>
+                                   <span class="n">Sbase</span><span class="o">=</span><span class="n">Sbase</span><span class="p">,</span>
+                                   <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                                   <span class="n">Vnom</span><span class="o">=</span><span class="n">line_voltage_kv</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">obj</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rms_template</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">rms_template</span>

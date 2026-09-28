@@ -13,6 +13,15 @@ class RawEquipmentTerminal(RawObject):
     """
     Base storage for PSSE substation equipment terminal records.
     """
+    __slots__ = (
+        "_ISUB",
+        "_NI",
+        "_TYPE",
+        "_EQID",
+        "_IBUS",
+        "_JBUS",
+        "_KBUS",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='ISUB', rawx_key='isub', class_type=int,

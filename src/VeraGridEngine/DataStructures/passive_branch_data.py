@@ -17,6 +17,36 @@ class PassiveBranchData(BranchParentData):
     Structure to host all branches data for calculation
     """
 
+    __slots__ = (
+        "R",
+        "X",
+        "G",
+        "B",
+        "R0",
+        "X0",
+        "G0",
+        "B0",
+        "R2",
+        "X2",
+        "G2",
+        "B2",
+        "tau_taps",
+        "m_taps",
+        "virtual_tap_f",
+        "virtual_tap_t",
+        "phA",
+        "phB",
+        "phC",
+        "phN",
+        "conn_f",
+        "conn_t",
+        "conn",
+        "Yff3",
+        "Yft3",
+        "Ytf3",
+        "Ytt3",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Branch data arrays
@@ -79,7 +109,6 @@ class PassiveBranchData(BranchParentData):
         :return: new BranchData instance
         """
         data, bus_map = super().slice(elm_idx, bus_idx, bus_map, logger)
-        data.__class__ = PassiveBranchData
         data: PassiveBranchData = data
 
         data.R = self.R[elm_idx]
@@ -127,7 +156,6 @@ class PassiveBranchData(BranchParentData):
         :return: new BranchData instance
         """
         data: PassiveBranchData = super().copy()
-        data.__class__ = PassiveBranchData
 
         data.R = self.R.copy()
         data.X = self.X.copy()

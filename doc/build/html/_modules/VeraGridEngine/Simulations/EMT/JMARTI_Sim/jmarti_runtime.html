@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.EMT.JMARTI_Sim.jmarti_runtime &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.EMT.JMARTI_Sim.jmarti_runtime &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -642,9 +642,9 @@
 <span class="sd">    :return: None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fit_bundle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">JMARTI_BLOCK_FIT_BUNDLE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">jmarti_fit_bundle</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">JMARTI_BLOCK_FIT_BUNDLE_ATTR</span><span class="p">]</span> <span class="o">=</span> <span class="n">fit_bundle</span></div>
+        <span class="n">block</span><span class="o">.</span><span class="n">jmarti_fit_bundle</span> <span class="o">=</span> <span class="n">fit_bundle</span></div>
 
 
 
@@ -658,7 +658,7 @@
 <span class="sd">    :return: Attached fit bundle or ``None``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
-        <span class="n">fit_bundle</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">JMARTI_BLOCK_FIT_BUNDLE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">fit_bundle</span><span class="p">:</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">jmarti_fit_bundle</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fit_bundle</span><span class="p">,</span> <span class="n">JMartiFitBundle</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">fit_bundle</span>
@@ -680,9 +680,9 @@
 <span class="sd">    :return: None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">runtime_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">JMARTI_BLOCK_RUNTIME_DATA_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">jmarti_runtime_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">JMARTI_BLOCK_RUNTIME_DATA_ATTR</span><span class="p">]</span> <span class="o">=</span> <span class="n">runtime_data</span></div>
+        <span class="n">block</span><span class="o">.</span><span class="n">jmarti_runtime_data</span> <span class="o">=</span> <span class="n">runtime_data</span></div>
 
 
 
@@ -696,7 +696,7 @@
 <span class="sd">    :return: Attached runtime data or ``None``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
-        <span class="n">runtime_data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">JMARTI_BLOCK_RUNTIME_DATA_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">runtime_data</span><span class="p">:</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">jmarti_runtime_data</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runtime_data</span><span class="p">,</span> <span class="n">JMartiRuntimeData</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">runtime_data</span>

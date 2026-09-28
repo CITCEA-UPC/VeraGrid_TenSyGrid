@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.inter_area import RawInterArea
 
 class RawInterAreaV29(RawInterArea):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

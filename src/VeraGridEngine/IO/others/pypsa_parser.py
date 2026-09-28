@@ -35,6 +35,20 @@ class PyPSAParser:
     PyPSAParser
     """
 
+    __slots__ = (
+        "pypsa_grid",
+        "grid",
+        "logger",
+        "nt",
+        "srid",
+        "to_latlon_converter",
+        "to_xy_converter",
+        "countries",
+        "buses",
+        "line_types",
+        "transformer_types",
+    )
+
     def __init__(self, pypsa_grid: 'pypsa.Network', logger: Logger):
         """
 

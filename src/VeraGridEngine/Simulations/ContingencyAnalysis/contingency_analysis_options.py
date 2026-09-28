@@ -17,6 +17,23 @@ class ContingencyAnalysisOptions(OptionsTemplate):
     Contingency analysis options
     """
 
+    __slots__ = (
+        "use_provided_flows",
+        "Pf",
+        "contingency_method",
+        "pf_options",
+        "lin_options",
+        "use_srap",
+        "srap_max_power",
+        "srap_top_n",
+        "srap_deadband",
+        "srap_rever_to_nominal_rating",
+        "srap_revert_to_nominal_rating",
+        "detailed_massive_report",
+        "contingency_deadband",
+        "contingency_groups",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="use_provided_flows", tpe=bool),
         GCProp(key="Pf", tpe=SubObjectType.Array),

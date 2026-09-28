@@ -12,7 +12,7 @@ import scipy.sparse as sp
 from scipy.sparse.csgraph import connected_components, maximum_bipartite_matching
 
 
-@dataclass
+@dataclass(slots=True)
 class MTISubProblemRow:
     var_idx: int
     eq_idx: int

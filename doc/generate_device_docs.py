@@ -53,6 +53,7 @@ DEVICE_DOCS: List[DeviceDoc] = [
     DeviceDoc("Branches", "Switch", "switch.md"),
     DeviceDoc("Catalogue", "Wire", "wire.md"),
     DeviceDoc("Catalogue", "OverheadLineType", "overhead_line_type.md"),
+    DeviceDoc("Catalogue", "UndergroundCableType", "underground_cable_type.md"),
     DeviceDoc("Catalogue", "UndergroundLineType", "underground_line_type.md"),
     DeviceDoc("Catalogue", "SequenceLineType", "sequence_line_type.md"),
     DeviceDoc("Catalogue", "TransformerType", "transformer_type.md"),
@@ -207,8 +208,14 @@ def replace_first_heading(text: str, new_heading: str) -> str:
 
 
 def fix_device_relative_assets(text: str) -> str:
+    """Rebase chapter-relative links for the generated device pages.
+
+    :param text: Device section using chapter-relative asset and modelling links.
+    :return: Section with paths relative to the devices directory.
+    """
     text = text.replace("](figures/", "](../figures/")
     text = text.replace('src="figures/', 'src="../figures/')
+    text = text.replace("](modelling.md#", "](../modelling.md#")
     return text
 
 
@@ -259,8 +266,19 @@ def get_profile_enabled_properties(rows: List[Dict[str, str]]) -> List[str]:
 
 
 def render_property_block(class_name: str, table_info: Dict[str, object]) -> str:
+    """Render registered properties and their profile availability.
+
+    :param class_name: Name of the device class being documented.
+    :param table_info: Parsed property rows and their Markdown table.
+    :return: Registered-property section for the device.
+    """
     rows = table_info["rows"]  # type: ignore[index]
-    table = table_info["table"]  # type: ignore[index]
+    table: str = str(table_info["table"])
+    # Construction descriptions use native property names; omit import-field annotations.
+    if class_name == "UndergroundCableType":
+        table = re.sub(r" \([^)]*\)", "", table)
+    else:
+        pass
     profiles = get_profile_enabled_properties(rows)  # type: ignore[arg-type]
     parts = ["### Registered properties\n"]
     if profiles:
@@ -357,10 +375,15 @@ def write_text(path: Path, text: str) -> None:
 
 
 def generate_device_docs() -> None:
+    """Generate device pages and the combined modelling chapter from authored sources.
+
+    :return: None.
+    """
     DEVICES_DIR.mkdir(parents=True, exist_ok=True)
 
     data_models_text = DATA_MODELS_FILE.read_text(encoding="utf-8")
     source_text = MODELLING_SOURCE_FILE.read_text(encoding="utf-8")
+    cable_source: str = (DEVICES_DIR / "_underground_catalogue_source.md").read_text(encoding="utf-8")
 
     tables = parse_veragrid_tables(data_models_text)
     legacy = build_legacy_sections(source_text)
@@ -373,6 +396,8 @@ def generate_device_docs() -> None:
         "Generator": legacy["generator"],
         "HvdcLine": legacy["hvdc_line"],
         "VSC": legacy["vsc"],
+        "UndergroundCableType": extract_between(cable_source, "## UndergroundCableType", "## UndergroundLineType"),
+        "UndergroundLineType": extract_between(cable_source, "## UndergroundLineType"),
     }
 
     for device in DEVICE_DOCS:

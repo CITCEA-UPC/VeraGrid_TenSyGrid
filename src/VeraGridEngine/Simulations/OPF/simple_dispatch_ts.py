@@ -527,17 +527,47 @@ def greedy_dispatch2(
 
 
 class GreedyDispatchInputs:
+    """
+    Inputs container for greedy dispatch time series.
+    """
+    __slots__ = (
+        "dt",
+        "load_profile",
+        "load_shedding_cost",
+        "gen_profile",
+        "gen_dispatchable",
+        "gen_active",
+        "gen_cost",
+        "gen_p_max",
+        "gen_p_min",
+        "batt_active",
+        "batt_p_max_charge",
+        "batt_p_max_discharge",
+        "batt_energy_max",
+        "batt_eff_charge",
+        "batt_eff_discharge",
+        "batt_cost",
+        "batt_soc0",
+        "batt_soc_min",
+    )
 
-    def __init__(self, grid: MultiCircuit, time_indices: IntVec | None = None, logger: Logger = Logger()):
+    def __init__(
+        self,
+        grid: MultiCircuit,
+        time_indices: IntVec | None = None,
+        logger: Logger = Logger(),
+    ) -> None:
         """
+        GreedyDispatchInputs constructor.
 
-        :param grid:
-        :param time_indices:
-        :param logger:
+        :param grid: MultiCircuit instance
+        :param time_indices: Array of time indices (optional)
+        :param logger: Logger instance
         """
-
         if time_indices is None:
             time_indices = grid.get_all_time_indices()
+        else:
+            pass
 
         nt = len(time_indices)
         nl = grid.get_loads_number()
@@ -604,12 +634,35 @@ class GreedyDispatchInputs:
 
 
 class GreedyDispatchInputsSnapshot:
+    """
+    Inputs container for greedy dispatch snapshot.
+    """
+    __slots__ = (
+        "dt",
+        "load_profile",
+        "gen_profile",
+        "gen_dispatchable",
+        "gen_active",
+        "gen_cost",
+        "gen_p_max",
+        "gen_p_min",
+        "batt_active",
+        "batt_p_max_charge",
+        "batt_p_max_discharge",
+        "batt_energy_max",
+        "batt_eff_charge",
+        "batt_eff_discharge",
+        "batt_cost",
+        "batt_soc0",
+        "batt_soc_min",
+    )
 
-    def __init__(self, grid: MultiCircuit, logger: Logger = Logger()):
+    def __init__(self, grid: MultiCircuit, logger: Logger = Logger()) -> None:
         """
+        GreedyDispatchInputsSnapshot constructor.
 
-        :param grid:
-        :param logger:
+        :param grid: MultiCircuit instance
+        :param logger: Logger instance
         """
 
         nt = 1
@@ -737,19 +790,5 @@ def run_greedy_dispatch_ts(grid: MultiCircuit,
             inpts)
 
 
-if __name__ == '__main__':
-    import VeraGridEngine.api as gce
-    from matplotlib import pyplot as plt
-
-    fname = "/home/santi/Documentos/Git/eRoots/tonga_planning/model_conversion_and_validation/Tongatapu/models/Tongatapu_v4_2024_ts.veragrid"
-
-    grid_ = gce.open_file(fname)
-
-    (load_profile_,
-     gen_dispatch_,
-     batt_dispatch_,
-     batt_energy_,
-     load_shedding_,
-     greedy_inpts_) = run_greedy_dispatch_ts(grid=grid_, time_indices=None, logger=Logger())
 
     # print()

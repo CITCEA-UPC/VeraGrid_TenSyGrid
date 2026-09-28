@@ -267,7 +267,7 @@ class AboutDialogueGuiGUI(QtWidgets.QDialog):
 
         :param parent:
         """
-        QtWidgets.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent=parent)
         self.ui = Ui_AboutDialog()
         self.ui.setupUi(self)
         self.setWindowTitle(self.tr('About VeraGrid'))

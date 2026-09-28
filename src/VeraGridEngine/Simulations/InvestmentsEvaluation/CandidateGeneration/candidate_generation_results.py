@@ -17,6 +17,14 @@ class ViolationRecord:
     """
     A single overloaded branch, either in the base case or under a branch outage.
     """
+    __slots__ = (
+        "monitored_idx",
+        "monitored_name",
+        "flow",
+        "limit",
+        "outage_idx",
+        "outage_name",
+    )
 
     def __init__(self,
                  monitored_idx: int,
@@ -24,7 +32,7 @@ class ViolationRecord:
                  flow: float,
                  limit: float,
                  outage_idx: int = -1,
-                 outage_name: str = ""):
+                 outage_name: str = "") -> None:
         """
         :param monitored_idx: Branch index (compiled order) of the overloaded branch.
         :param monitored_name: Name of the overloaded branch.
@@ -60,7 +68,8 @@ class ViolationRecord:
         pct = self.loading * 100.0
         if self.is_base_case:
             return f"base case -> branch {self.monitored_name} overloaded ({pct:.1f}%)"
-        return f"outage {self.outage_name} -> branch {self.monitored_name} overloaded ({pct:.1f}%)"
+        else:
+            return f"outage {self.outage_name} -> branch {self.monitored_name} overloaded ({pct:.1f}%)"
 
 
 class VoltageViolationRecord:
@@ -68,13 +77,20 @@ class VoltageViolationRecord:
     A single bus voltage-magnitude violation, base case only (see ``CandidateGenerationDriver``
     docstring for why N-1 voltage screening is out of scope).
     """
+    __slots__ = (
+        "bus_idx",
+        "bus_name",
+        "vm",
+        "vmin",
+        "vmax",
+    )
 
     def __init__(self,
                  bus_idx: int,
                  bus_name: str,
                  vm: float,
                  vmin: float,
-                 vmax: float):
+                 vmax: float) -> None:
         """
         :param bus_idx: Bus index (compiled order) of the violated bus.
         :param bus_name: Name of the violated bus.
@@ -123,8 +139,46 @@ class ReinforcementCandidate:
     shunt reactor, a static generator, or a battery. Carries enough to be scored, annotated with the
     violations it relieves, and materialised as an ``Investment``.
     """
+    __slots__ = (
+        "kind",
+        "bus_from",
+        "bus_to",
+        "bus_from_idx",
+        "bus_to_idx",
+        "r",
+        "x",
+        "b",
+        "rate",
+        "name",
+        "target_branch",
+        "branch_idx",
+        "old_rate",
+        "new_rate",
+        "target_bus",
+        "target_bus_idx",
+        "shunt_vset",
+        "shunt_bmax",
+        "injection_bus",
+        "injection_bus_idx",
+        "injection_p",
+        "injection_snom",
+        "battery_pmax",
+        "battery_enom",
+        "relieved_violations",
+        "relieved_voltage_violations",
+        "score",
+        "capex",
+        "verified",
+        "verification_converged",
+        "n_targeted",
+        "n_resolved",
+        "n_new_violations",
+        "n_voltage_targeted",
+        "n_voltage_resolved",
+        "n_new_voltage_violations",
+    )
 
-    def __init__(self, kind: CandidateKind):
+    def __init__(self, kind: CandidateKind) -> None:
         """
         :param kind: Which reinforcement this candidate represents (see ``CandidateKind``).
         """
@@ -369,8 +423,24 @@ class CandidateGenerationResults:
     """
     Results of the candidate-investment generator pipeline.
     """
+    __slots__ = (
+        "base_case_converged",
+        "base_case_feasible",
+        "base_loading_report",
+        "violations",
+        "candidates",
+        "verification_report",
+        "injection_candidates",
+        "voltage_violations",
+        "voltage_candidates",
+        "critical_time_idx",
+        "critical_time_label",
+        "n_overloaded_at_critical",
+        "n_voltage_violated_at_critical",
+        "voltage_violation_report",
+    )
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_case_converged: bool = False
         self.base_case_feasible: bool = False
         self.base_loading_report: List[str] = list()

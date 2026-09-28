@@ -15,6 +15,14 @@ class LineLocation(EditableDevice):
     Line location object
     """
 
+    __slots__ = (
+        'locations',
+        'lat',
+        'long',
+        'alt',
+        'seq',
+    )
+
     def __init__(self,
                  lat: float,
                  lon: float,

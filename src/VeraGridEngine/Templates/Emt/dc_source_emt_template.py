@@ -18,6 +18,7 @@ from VeraGridEngine.enumerations import DeviceType, VarPowerFlowReferenceType
 # DC CURRENT SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class DcCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -76,6 +77,7 @@ def get_dc_current_source_emt_template(vf: VarFactory,
 # CONTROLLED DC CURRENT SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class ControlledDcCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -129,6 +131,7 @@ def get_controlled_dc_current_source_emt_template(vf: VarFactory,
 # DC VOLTAGE SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class DcVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -198,6 +201,7 @@ def get_dc_voltage_source_emt_template(vf: VarFactory,
 # CONTROLLED DC VOLTAGE SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class ControlledDcVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

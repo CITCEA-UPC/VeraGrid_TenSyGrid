@@ -159,6 +159,11 @@ def get_nsga3_initial_population(problem: ElementwiseProblem,
 
 
 class IntegerRandomSamplingVeraGrid(Sampling):
+    """
+    Random integer sampling for VeraGrid bounds.
+    """
+    __slots__ = ()
+
     def _do(self, problem, n_samples, **kwargs):
         xl = np.asarray(problem.xl, dtype=int)
         xu = np.asarray(problem.xu, dtype=int)
@@ -178,6 +183,7 @@ class UniformBinarySampling(Sampling):
     """
     UniformBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         num_ones = np.linspace(0, problem.n_var, n_samples, dtype=int)
@@ -195,6 +201,7 @@ class SkewedBinarySampling(Sampling):
     """
     SkewedBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         max_ones = int(problem.n_var * 1)
@@ -222,6 +229,7 @@ class SkewedIntegerSamplingRange(Sampling):
     SkewedIntegerSampling generates samples skewed toward the lower bounds
     but spread across the full lb–ub range. Works for integer variables.
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         xl = np.asarray(problem.xl, dtype=int)
@@ -250,6 +258,7 @@ class QuadBinarySampling(Sampling):
     """
     QuadBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         max_ones = int(problem.n_var * 1)
@@ -272,6 +281,7 @@ class BitflipMutation(Mutation):
     """
     BitflipMutation
     """
+    __slots__ = ()
 
     def _do(self, problem, x, **kwargs):
         mask = np.random.random(x.shape) < self.get_prob_var(problem)
@@ -283,10 +293,10 @@ class GridNsga(ElementwiseProblem):
     """
     Problem formulation packaging to use the pymoo library
     """
+    __slots__ = ("obj_func",)
 
-    def __init__(self, obj_func, n_var, n_obj, lb: Vec | IntVec, ub: Vec | IntVec):
+    def __init__(self, obj_func, n_var, n_obj, lb: Vec | IntVec, ub: Vec | IntVec) -> None:
         """
-
         :param obj_func:
         :param n_var:
         :param n_obj:

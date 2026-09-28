@@ -21,6 +21,7 @@ WINDING3_FIELDS_3W = ["WINDV3", "NOMV3", "ANG3", "RATA3", "RATB3", "RATC3"]
 
 class RawTransformerV29(RawTransformer):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

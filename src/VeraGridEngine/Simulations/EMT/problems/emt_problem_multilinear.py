@@ -27,10 +27,33 @@ class EmtProblemMultilinear(EmtProblemDae):
     ``_constant_params_values``.
     """
 
+    __slots__ = (
+        "Phi",
+        "S",
+        "_ml_all_vars_sa",
+        "_ml_all_basis_vars",
+        "_ml_idx_vars",
+        "_ml_uid_to_basis_idx",
+        "_ml_uid_to_idx_full",
+    )
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize the multilinear EMT problem."""
+        super().__init__(*args, **kwargs)
+        self.Phi: sparse.csr_matrix | None = None
+        self.S: sparse.csc_matrix | None = None
+        self._ml_all_vars_sa: list[Var] | None = None
+        self._ml_all_basis_vars: list[Var] | None = None
+        self._ml_idx_vars: list[int] | None = None
+        self._ml_uid_to_basis_idx: dict[int, int] | None = None
+        self._ml_uid_to_idx_full: dict[int, int] | None = None
+
     def _ensure_multilinear_index_cache(self) -> None:
         """Build and cache multilinear index maps reused across methods."""
-        if hasattr(self, "_ml_uid_to_idx_full"):
+        if self._ml_all_vars_sa is not None:
             return
+        else:
+            pass
 
         all_vars_sa = list(self._state_vars) + list(self._algebraic_vars)
         all_basis_vars = all_vars_sa + list(self._diff_vars)

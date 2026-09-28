@@ -44,6 +44,7 @@ def _get_current_reference(phase_label: str) -> VarPowerFlowReferenceType:
     return reference
 
 class ExponentialLoadEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[
@@ -110,6 +111,7 @@ def _get_api_power_references(phase_label: str) -> Tuple[ParamPowerFlowReference
 
 # ---
 class ExponentialLoadEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v33.system_switching_device import RawSyste
 
 class RawSystemSwitchingDeviceV34(RawSystemSwitchingDeviceV33):
     """PSSE v34 typed object inheriting v33."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

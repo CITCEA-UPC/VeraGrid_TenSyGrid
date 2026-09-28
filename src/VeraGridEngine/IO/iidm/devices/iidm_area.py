@@ -7,6 +7,12 @@ from VeraGridEngine.Devices.Aggregation.area import Area
 
 
 class IidmArea(IidmObject):
+    __slots__ = (
+        "id",
+        "name",
+        "area_type",
+        "interchange_target",
+    )
     def __init__(self, _id: str,
                  name: str = "",
                  area_type: str = "",

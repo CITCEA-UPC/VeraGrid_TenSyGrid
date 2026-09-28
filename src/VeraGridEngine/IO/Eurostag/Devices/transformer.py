@@ -14,16 +14,28 @@ class EurostagType1Transformer:
     RATED_APPARENT_POWER = (57, 65)
     TRANSFORMATION_RATIO = (66, 74)
 
-    def __init__(self):
-        self.sending_node = ""
-        self.opening_code = ""
-        self.receiving_node = ""
-        self.parallel_index = "1"
-        self.resistance = 0.0
-        self.reactance = 0.0
-        self.rated_apparent_power = 100.0
-        self.transformation_ratio = 1.0
-        self.name = ""
+    __slots__ = (
+        "sending_node",
+        "opening_code",
+        "receiving_node",
+        "parallel_index",
+        "resistance",
+        "reactance",
+        "rated_apparent_power",
+        "transformation_ratio",
+        "name",
+    )
+
+    def __init__(self) -> None:
+        self.sending_node: str = ""
+        self.opening_code: str = ""
+        self.receiving_node: str = ""
+        self.parallel_index: str = "1"
+        self.resistance: float = 0.0
+        self.reactance: float = 0.0
+        self.rated_apparent_power: float = 100.0
+        self.transformation_ratio: float = 1.0
+        self.name: str = ""
 
     @property
     def code(self) -> str:
@@ -48,12 +60,20 @@ class EurostagType8Tap:
     LEAKAGE_IMPEDANCE = (44, 52)
     PHASE_SHIFT_ANGLE = (53, 61)
 
-    def __init__(self):
-        self.tap_number = 0
-        self.sending_side_voltage = 0.0
-        self.receiving_side_voltage = 0.0
-        self.leakage_impedance = 0.0
-        self.phase_shift_angle = 0.0
+    __slots__ = (
+        "tap_number",
+        "sending_side_voltage",
+        "receiving_side_voltage",
+        "leakage_impedance",
+        "phase_shift_angle",
+    )
+
+    def __init__(self) -> None:
+        self.tap_number: int = 0
+        self.sending_side_voltage: float = 0.0
+        self.receiving_side_voltage: float = 0.0
+        self.leakage_impedance: float = 0.0
+        self.phase_shift_angle: float = 0.0
 
     def parse_line(self, line: str) -> None:
         self.tap_number = slice_int(line, *self.TAP_NUMBER)
@@ -87,25 +107,46 @@ class EurostagType8Transformer:
     ACTIVE_FLUX_MAX = (58, 66)
     REGULATING_MODE = (67, 68)
 
-    def __init__(self):
-        self.sending_node = ""
-        self.opening_code = ""
-        self.receiving_node = ""
-        self.parallel_index = "1"
-        self.rated_apparent_power = 100.0
-        self.copper_losses = 0.0
-        self.iron_losses = 0.0
-        self.no_load_current = 0.0
-        self.saturation_exponent = 0.0
-        self.nominal_tap_number = 0
-        self.initial_tap_position = 0
-        self.regulated_node_name = ""
-        self.voltage_target = 0.0
-        self.active_flux_min = 0.0
-        self.active_flux_max = 0.0
-        self.regulating_mode = ""
+    __slots__ = (
+        "sending_node",
+        "opening_code",
+        "receiving_node",
+        "parallel_index",
+        "rated_apparent_power",
+        "copper_losses",
+        "iron_losses",
+        "no_load_current",
+        "saturation_exponent",
+        "nominal_tap_number",
+        "initial_tap_position",
+        "regulated_node_name",
+        "voltage_target",
+        "active_flux_min",
+        "active_flux_max",
+        "regulating_mode",
+        "taps",
+        "name",
+    )
+
+    def __init__(self) -> None:
+        self.sending_node: str = ""
+        self.opening_code: str = ""
+        self.receiving_node: str = ""
+        self.parallel_index: str = "1"
+        self.rated_apparent_power: float = 100.0
+        self.copper_losses: float = 0.0
+        self.iron_losses: float = 0.0
+        self.no_load_current: float = 0.0
+        self.saturation_exponent: float = 0.0
+        self.nominal_tap_number: int = 0
+        self.initial_tap_position: int = 0
+        self.regulated_node_name: str = ""
+        self.voltage_target: float = 0.0
+        self.active_flux_min: float = 0.0
+        self.active_flux_max: float = 0.0
+        self.regulating_mode: str = ""
         self.taps: list[EurostagType8Tap] = []
-        self.name = ""
+        self.name: str = ""
 
     @property
     def code(self) -> str:

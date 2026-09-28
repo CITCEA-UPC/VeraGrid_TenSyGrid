@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import sys
-from calendar import isleap
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Sequence, Tuple, Union
@@ -19,6 +18,7 @@ from PySide6.QtWidgets import QApplication
 
 from VeraGrid.Gui.DeviceEditors.LoadDesigner.load_designer_ui import Ui_Dialog
 from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
+from VeraGrid.Gui.profile_wizard_utils import build_mapped_time_index
 
 
 class LoadArchetype(Enum):
@@ -434,37 +434,7 @@ def get_load_weather_reference_base_year(ts1: pd.Timestamp, ts2: pd.Timestamp) -
         return False, reference_year, message
 
 
-def build_mapped_load_weather_time_index(time_index: pd.DatetimeIndex, base_year: int) -> pd.DatetimeIndex:
-    """
-    Map circuit timestamps to historical weather years while preserving month, day and time.
-
-    :param time_index: Circuit time index.
-    :param base_year: Historical base year used for the mapped timestamps.
-    :return: Historical weather time index.
-    """
-    ts1: pd.Timestamp = time_index[0]
-    mapped_timestamps: List[datetime] = list()
-
-    for ts in time_index:
-        target_year: int = base_year + int(ts.year - ts1.year)
-        target_month: int = int(ts.month)
-        target_day: int = int(ts.day)
-
-        if target_month == 2 and target_day == 29 and not isleap(target_year):
-            target_day = 28
-        else:
-            pass
-
-        mapped_timestamp: datetime = datetime(year=target_year,
-                                              month=target_month,
-                                              day=target_day,
-                                              hour=int(ts.hour),
-                                              minute=int(ts.minute),
-                                              second=int(ts.second),
-                                              microsecond=int(ts.microsecond))
-        mapped_timestamps.append(mapped_timestamp)
-
-    return pd.DatetimeIndex(pd.to_datetime(mapped_timestamps))
+build_mapped_load_weather_time_index = build_mapped_time_index
 
 
 def get_open_meteo_load_weather_df(time_index: pd.DatetimeIndex,
@@ -778,9 +748,28 @@ class LoadDesigner(QtWidgets.QDialog):
         :return: Nothing.
         """
         result_df: pd.DataFrame = pd.DataFrame(data=dict(P=self.P, Q=self.Q), index=self.time_array)
-        self.ui.plotwidget.clear()
-        axis = self.ui.plotwidget.get_axis()
-        result_df.plot(ax=axis)
+        x_values: np.ndarray = np.arange(len(result_df), dtype=float)
+        active_values: np.ndarray = result_df["P"].to_numpy(dtype=float)
+        reactive_values: np.ndarray = result_df["Q"].to_numpy(dtype=float)
+        series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = [
+            (x_values, active_values, "#2563eb"),
+            (x_values, reactive_values, "#f97316"),
+        ]
+        updated: bool = self.ui.plotwidget.replace_xy_series_data(series_data=series_data)
+        if not updated:
+            self.ui.plotwidget.clear()
+            self.ui.plotwidget.add_line_series(name=self.tr("Active power"),
+                                               x_values=x_values,
+                                               y_values=active_values,
+                                               color="#2563eb")
+            self.ui.plotwidget.add_line_series(name=self.tr("Reactive power"),
+                                               x_values=x_values,
+                                               y_values=reactive_values,
+                                               color="#f97316")
+        else:
+            pass
+        self.ui.plotwidget.setTitle(self.tr("Generated load profile"))
+        self.ui.plotwidget.set_axis_titles(self.tr("Time index"), self.tr("Power"))
         self.ui.plotwidget.redraw()
         # Zero-length arrays mean that the circuit has no usable time profile yet,
         # so the designer must remain disabled even though the lengths match.

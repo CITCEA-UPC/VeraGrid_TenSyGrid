@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.OPF.simple_dispatch_ts &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.OPF.simple_dispatch_ts &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -642,17 +642,47 @@
 <div class="viewcode-block" id="GreedyDispatchInputs">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.OPF.html#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputs">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GreedyDispatchInputs</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inputs container for greedy dispatch time series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_profile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_shedding_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_profile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_dispatchable&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_p_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_p_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_p_max_charge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_p_max_discharge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_energy_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_eff_charge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_eff_discharge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_soc0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_soc_min&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span> <span class="n">time_indices</span><span class="p">:</span> <span class="n">IntVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span>
+        <span class="n">time_indices</span><span class="p">:</span> <span class="n">IntVec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GreedyDispatchInputs constructor.</span>
 
-<span class="sd">        :param grid:</span>
-<span class="sd">        :param time_indices:</span>
-<span class="sd">        :param logger:</span>
+<span class="sd">        :param grid: MultiCircuit instance</span>
+<span class="sd">        :param time_indices: Array of time indices (optional)</span>
+<span class="sd">        :param logger: Logger instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="n">time_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">time_indices</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_all_time_indices</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
 
         <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_indices</span><span class="p">)</span>
         <span class="n">nl</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_loads_number</span><span class="p">()</span>
@@ -722,12 +752,35 @@
 <div class="viewcode-block" id="GreedyDispatchInputsSnapshot">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Simulations.OPF.html#VeraGridEngine.Simulations.OPF.simple_dispatch_ts.GreedyDispatchInputsSnapshot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GreedyDispatchInputsSnapshot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inputs container for greedy dispatch snapshot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_profile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_profile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_dispatchable&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_p_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_p_min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_p_max_charge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_p_max_discharge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_energy_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_eff_charge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_eff_discharge&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_soc0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_soc_min&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GreedyDispatchInputsSnapshot constructor.</span>
 
-<span class="sd">        :param grid:</span>
-<span class="sd">        :param logger:</span>
+<span class="sd">        :param grid: MultiCircuit instance</span>
+<span class="sd">        :param logger: Logger instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">nt</span> <span class="o">=</span> <span class="mi">1</span>
@@ -859,20 +912,6 @@
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-
-    <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;/home/santi/Documentos/Git/eRoots/tonga_planning/model_conversion_and_validation/Tongatapu/models/Tongatapu_v4_2024_ts.veragrid&quot;</span>
-
-    <span class="n">grid_</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-
-    <span class="p">(</span><span class="n">load_profile_</span><span class="p">,</span>
-     <span class="n">gen_dispatch_</span><span class="p">,</span>
-     <span class="n">batt_dispatch_</span><span class="p">,</span>
-     <span class="n">batt_energy_</span><span class="p">,</span>
-     <span class="n">load_shedding_</span><span class="p">,</span>
-     <span class="n">greedy_inpts_</span><span class="p">)</span> <span class="o">=</span> <span class="n">run_greedy_dispatch_ts</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid_</span><span class="p">,</span> <span class="n">time_indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">Logger</span><span class="p">())</span>
 
     <span class="c1"># print()</span>
 </pre></div>

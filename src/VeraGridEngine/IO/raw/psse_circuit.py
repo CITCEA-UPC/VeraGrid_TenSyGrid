@@ -69,6 +69,39 @@ class PsseCircuit(RawObject, BaseCircuit):
         PsseProperty(property_name='multi_line_sections', rawx_key='msline', class_type=RawMultiLineSection),
     )
 
+    __slots__ = (
+        "IC",
+        "SBASE",
+        "REV",
+        "XFRRAT",
+        "NXFRAT",
+        "BASFRQ",
+        "date_time",
+        "areas",
+        "inter_areas",
+        "zones",
+        "owners",
+        "buses",
+        "branches",
+        "transformers",
+        "two_terminal_dc_lines",
+        "vsc_dc_lines",
+        "facts",
+        "loads",
+        "generators",
+        "induction_machines",
+        "fixed_shunts",
+        "switched_shunts",
+        "substations",
+        "nodes",
+        "substation_switching_devices",
+        "equipment_terminals",
+        "switches",
+        "gne",
+        "indiction_tables",
+        "multi_line_sections",
+    )
+
     def __init__(self):
         RawObject.__init__(self, "Circuit")
         BaseCircuit.__init__(self)
@@ -166,7 +199,7 @@ class PsseCircuit(RawObject, BaseCircuit):
         for prop in self.get_class_properties():
 
             local_index = dict()
-            lst = self.__dict__[prop.property_name]
+            lst = getattr(self, prop.property_name)
 
             for elm in lst:
                 id_ = elm.get_id()

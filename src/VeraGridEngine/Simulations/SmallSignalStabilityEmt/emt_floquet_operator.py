@@ -61,6 +61,15 @@ class EmtFloquetOperator(spla.LinearOperator):
     during Krylov subspace iterations (Arnoldi). This operator processes single
     perturbation vectors.
     """
+    __slots__ = (
+        "problem",
+        "trajectory",
+        "h",
+        "n_states",
+        "method",
+        "n_total",
+        "lu_solvers",
+    )
 
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
@@ -269,6 +278,15 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         n_states (int): Number of differential state variables.
         lu_solvers (list): Cached SuperLU factorizations for the entire trajectory.
     """
+    __slots__ = (
+        "problem",
+        "trajectory",
+        "h",
+        "n_states",
+        "method",
+        "n_total",
+        "lu_solvers",
+    )
 
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
@@ -461,6 +479,12 @@ class AkStackBlockEmtFloquetOperator(spla.LinearOperator):
     on vectors or blocks. When Numba is available and use_numba=True, the block
     path is JIT-compiled to reduce Python overhead in repeated Arnoldi calls.
     """
+    __slots__ = (
+        "Ak_stack",
+        "n_states",
+        "n_steps",
+        "use_numba",
+    )
 
     def __init__(self, Ak_stack: Mat, use_numba: bool = True, **kwargs):
         """

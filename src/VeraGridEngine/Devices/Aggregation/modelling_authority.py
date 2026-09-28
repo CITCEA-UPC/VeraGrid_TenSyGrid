@@ -9,6 +9,7 @@ from VeraGridEngine.Devices.Parents.editable_device import EditableDevice, Devic
 
 
 class ModellingAuthority(EditableDevice):
+    __slots__ = ()
 
     def __init__(self, name='', code='', idtag: Union[str, None] = None):
         """

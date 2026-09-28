@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.Formulations package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.Formulations package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -141,12 +141,62 @@
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.</span></span><span class="sig-name descname"><span class="pre">PfAdvancedFormulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_advanced_formulation.html#PfAdvancedFormulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate" title="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PfFormulationTemplate</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Cf">
+<span class="sig-name descname"><span class="pre">Cf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Cf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Ct">
+<span class="sig-name descname"><span class="pre">Ct</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Ct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.I0">
+<span class="sig-name descname"><span class="pre">I0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.I0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Jacobian">
 <span class="sig-name descname"><span class="pre">Jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autodiff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="VeraGridEngine.Utils.Sparse.html#VeraGridEngine.Utils.Sparse.csc2.CSC" title="VeraGridEngine.Utils.Sparse.csc2.CSC"><span class="pre">CSC</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_advanced_formulation.html#PfAdvancedFormulation.Jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Jacobian" title="Link to this definition"></a></dt>
 <dd><p>Get the Jacobian
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Qmax">
+<span class="sig-name descname"><span class="pre">Qmax</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Qmax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Qmin">
+<span class="sig-name descname"><span class="pre">Qmin</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Qmin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.S0">
+<span class="sig-name descname"><span class="pre">S0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.S0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Y0">
+<span class="sig-name descname"><span class="pre">Y0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Y0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Ys">
+<span class="sig-name descname"><span class="pre">Ys</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Ys" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Yshunt_bus">
+<span class="sig-name descname"><span class="pre">Yshunt_bus</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.Yshunt_bus" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.adm">
+<span class="sig-name descname"><span class="pre">adm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.adm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.analyze_branch_controls">
@@ -155,6 +205,11 @@
 :return: k_v_m for later comparison with pqv</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.bus_types">
+<span class="sig-name descname"><span class="pre">bus_types</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.bus_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.check_error">
 <span class="sig-name descname"><span class="pre">check_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_advanced_formulation.html#PfAdvancedFormulation.check_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.check_error" title="Link to this definition"></a></dt>
@@ -162,6 +217,11 @@
 :param x: Solution vector
 :return: error</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.discrete_shunt_control">
+<span class="sig-name descname"><span class="pre">discrete_shunt_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.discrete_shunt_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.fx">
@@ -204,12 +264,122 @@
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dP">
+<span class="sig-name descname"><span class="pre">idx_dP</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dPf">
+<span class="sig-name descname"><span class="pre">idx_dPf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dPf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dPt">
+<span class="sig-name descname"><span class="pre">idx_dPt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dPt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQ">
+<span class="sig-name descname"><span class="pre">idx_dQ</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQf">
+<span class="sig-name descname"><span class="pre">idx_dQf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQt">
+<span class="sig-name descname"><span class="pre">idx_dQt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dQt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dVa">
+<span class="sig-name descname"><span class="pre">idx_dVa</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dVa" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dVm">
+<span class="sig-name descname"><span class="pre">idx_dVm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dVm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dm">
+<span class="sig-name descname"><span class="pre">idx_dm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dtau">
+<span class="sig-name descname"><span class="pre">idx_dtau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.idx_dtau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.m">
+<span class="sig-name descname"><span class="pre">m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.nc">
+<span class="sig-name descname"><span class="pre">nc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.nc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.no_slack">
+<span class="sig-name descname"><span class="pre">no_slack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.no_slack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.p">
+<span class="sig-name descname"><span class="pre">p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pq">
+<span class="sig-name descname"><span class="pre">pq</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pqv">
+<span class="sig-name descname"><span class="pre">pqv</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pqv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pv">
+<span class="sig-name descname"><span class="pre">pv</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.pv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.qv_droop_control">
+<span class="sig-name descname"><span class="pre">qv_droop_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.qv_droop_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.size">
 <span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_advanced_formulation.html#PfAdvancedFormulation.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.size" title="Link to this definition"></a></dt>
 <dd><p>Size of the jacobian matrix
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tap_module_control_mode">
+<span class="sig-name descname"><span class="pre">tap_module_control_mode</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tap_module_control_mode" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tap_phase_control_mode">
+<span class="sig-name descname"><span class="pre">tap_phase_control_mode</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tap_phase_control_mode" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.update">
@@ -236,6 +406,11 @@
 <dd><p>Convert the internal decision variables into the vector
 :return: Vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.vd">
+<span class="sig-name descname"><span class="pre">vd</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.vd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_advanced_formulation.PfAdvancedFormulation.x2var">
@@ -307,6 +482,11 @@ tuple where the first argument is a vector and the second.</p></li>
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.</span></span><span class="sig-name descname"><span class="pre">PfBasicFormulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_basic_formulation.html#PfBasicFormulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate" title="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PfFormulationTemplate</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.I0">
+<span class="sig-name descname"><span class="pre">I0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.I0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Jacobian">
 <span class="sig-name descname"><span class="pre">Jacobian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="VeraGridEngine.Utils.Sparse.html#VeraGridEngine.Utils.Sparse.csc2.CSC" title="VeraGridEngine.Utils.Sparse.csc2.CSC"><span class="pre">CSC</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_basic_formulation.html#PfBasicFormulation.Jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Jacobian" title="Link to this definition"></a></dt>
@@ -317,6 +497,31 @@ tuple where the first argument is a vector and the second.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Qmax">
+<span class="sig-name descname"><span class="pre">Qmax</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Qmax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Qmin">
+<span class="sig-name descname"><span class="pre">Qmin</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Qmin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.S0">
+<span class="sig-name descname"><span class="pre">S0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.S0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Y0">
+<span class="sig-name descname"><span class="pre">Y0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.Y0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.adm">
+<span class="sig-name descname"><span class="pre">adm</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Topology.html#VeraGridEngine.Topology.admittance_matrices.AdmittanceMatrices" title="VeraGridEngine.Topology.admittance_matrices.AdmittanceMatrices"><span class="pre">AdmittanceMatrices</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.adm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.check_error">
 <span class="sig-name descname"><span class="pre">check_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_basic_formulation.html#PfBasicFormulation.check_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.check_error" title="Link to this definition"></a></dt>
@@ -324,6 +529,11 @@ tuple where the first argument is a vector and the second.</p></li>
 :param x: Solution vector
 :return: error</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.discrete_shunt_control">
+<span class="sig-name descname"><span class="pre">discrete_shunt_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.discrete_shunt_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.fx">
@@ -357,6 +567,61 @@ tuple where the first argument is a vector and the second.</p></li>
 <dd><p>Names matching x
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dP">
+<span class="sig-name descname"><span class="pre">idx_dP</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dQ">
+<span class="sig-name descname"><span class="pre">idx_dQ</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dQ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dVa">
+<span class="sig-name descname"><span class="pre">idx_dVa</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dVa" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dVm">
+<span class="sig-name descname"><span class="pre">idx_dVm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.idx_dVm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.nc">
+<span class="sig-name descname"><span class="pre">nc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.nc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.no_slack">
+<span class="sig-name descname"><span class="pre">no_slack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.no_slack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.p">
+<span class="sig-name descname"><span class="pre">p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pq">
+<span class="sig-name descname"><span class="pre">pq</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pqv">
+<span class="sig-name descname"><span class="pre">pqv</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pqv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pv">
+<span class="sig-name descname"><span class="pre">pv</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.pv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.qv_droop_control">
+<span class="sig-name descname"><span class="pre">qv_droop_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.qv_droop_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.size">
@@ -399,6 +664,11 @@ tuple where the first argument is a vector and the second.</p></li>
 :return: Vector</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.vd">
+<span class="sig-name descname"><span class="pre">vd</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.vd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.x2var">
 <span class="sig-name descname"><span class="pre">x2var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_basic_formulation.html#PfBasicFormulation.x2var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_basic_formulation.PfBasicFormulation.x2var" title="Link to this definition"></a></dt>
@@ -425,6 +695,16 @@ tuple where the first argument is a vector and the second.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.Scalc">
+<span class="sig-name descname"><span class="pre">Scalc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.Scalc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.V">
+<span class="sig-name descname"><span class="pre">V</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.V" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.Va">
@@ -522,6 +802,11 @@ tuple where the first argument is a vector and the second.</p></li>
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.options">
+<span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.size">
 <span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_formulation_template.html#PfFormulationTemplate.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate.size" title="Link to this definition"></a></dt>
@@ -583,6 +868,16 @@ tuple where the first argument is a vector and the second.</p></li>
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.</span></span><span class="sig-name descname"><span class="pre">PfAcDcWithNegativePoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.html#PfAcDcWithNegativePoles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate" title="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PfFormulationTemplate</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.I0">
+<span class="sig-name descname"><span class="pre">I0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.I0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Ifp_vsc">
+<span class="sig-name descname"><span class="pre">Ifp_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Ifp_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Jacobian">
 <span class="sig-name descname"><span class="pre">Jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autodiff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="VeraGridEngine.Utils.Sparse.html#VeraGridEngine.Utils.Sparse.csc2.CSC" title="VeraGridEngine.Utils.Sparse.csc2.CSC"><span class="pre">CSC</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.html#PfAcDcWithNegativePoles.Jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Jacobian" title="Link to this definition"></a></dt>
@@ -590,6 +885,96 @@ tuple where the first argument is a vector and the second.</p></li>
 :param autodiff: use the finite-difference Jacobian
 :return: Jacobian matrix in CSC format</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pf_hvdc">
+<span class="sig-name descname"><span class="pre">Pf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pt_hvdc">
+<span class="sig-name descname"><span class="pre">Pt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pt_vsc">
+<span class="sig-name descname"><span class="pre">Pt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Pt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qf_hvdc">
+<span class="sig-name descname"><span class="pre">Qf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qmax">
+<span class="sig-name descname"><span class="pre">Qmax</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qmax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qmin">
+<span class="sig-name descname"><span class="pre">Qmin</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qmin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qt_hvdc">
+<span class="sig-name descname"><span class="pre">Qt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qt_vsc">
+<span class="sig-name descname"><span class="pre">Qt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Qt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.S0">
+<span class="sig-name descname"><span class="pre">S0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.S0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.V0">
+<span class="sig-name descname"><span class="pre">V0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.V0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Y0">
+<span class="sig-name descname"><span class="pre">Y0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.Y0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.adm">
+<span class="sig-name descname"><span class="pre">adm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.adm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.bus_grounded">
+<span class="sig-name descname"><span class="pre">bus_grounded</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.bus_grounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.bus_types">
+<span class="sig-name descname"><span class="pre">bus_types</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.bus_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_pf_set">
+<span class="sig-name descname"><span class="pre">cbr_pf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_pf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_pt_set">
+<span class="sig-name descname"><span class="pre">cbr_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_qf_set">
+<span class="sig-name descname"><span class="pre">cbr_qf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_qf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_qt_set">
+<span class="sig-name descname"><span class="pre">cbr_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.cbr_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.check_error">
@@ -607,6 +992,11 @@ tuple where the first argument is a vector and the second.</p></li>
 :param update_class_vars: Update the class vars related to the calculation step
 :return: Residual vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.discrete_shunt_control">
+<span class="sig-name descname"><span class="pre">discrete_shunt_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.discrete_shunt_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.fx">
@@ -638,12 +1028,192 @@ tuple where the first argument is a vector and the second.</p></li>
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.hvdc_droop_idx">
+<span class="sig-name descname"><span class="pre">hvdc_droop_idx</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.hvdc_droop_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_p">
+<span class="sig-name descname"><span class="pre">i_k_p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_p_dc">
+<span class="sig-name descname"><span class="pre">i_k_p_dc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_p_dc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_q">
+<span class="sig-name descname"><span class="pre">i_k_q</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_k_q" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_u_va">
+<span class="sig-name descname"><span class="pre">i_u_va</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_u_va" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_u_vm">
+<span class="sig-name descname"><span class="pre">i_u_vm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.i_u_vm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_p_controlled">
+<span class="sig-name descname"><span class="pre">is_p_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_p_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_q_controlled">
+<span class="sig-name descname"><span class="pre">is_q_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_q_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_va_controlled">
+<span class="sig-name descname"><span class="pre">is_va_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_va_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_vm_controlled">
+<span class="sig-name descname"><span class="pre">is_vm_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.is_vm_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_pf">
+<span class="sig-name descname"><span class="pre">k_cbr_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_pt">
+<span class="sig-name descname"><span class="pre">k_cbr_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_qf">
+<span class="sig-name descname"><span class="pre">k_cbr_qf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_qf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_qt">
+<span class="sig-name descname"><span class="pre">k_cbr_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_cbr_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_has_dc_n">
+<span class="sig-name descname"><span class="pre">k_vsc_has_dc_n</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_has_dc_n" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_i">
+<span class="sig-name descname"><span class="pre">k_vsc_i</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_i" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pdc">
+<span class="sig-name descname"><span class="pre">k_vsc_pdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfn">
+<span class="sig-name descname"><span class="pre">k_vsc_pfn</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfp">
+<span class="sig-name descname"><span class="pre">k_vsc_pfp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfp_droop">
+<span class="sig-name descname"><span class="pre">k_vsc_pfp_droop</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pfp_droop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pt">
+<span class="sig-name descname"><span class="pre">k_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_qt">
+<span class="sig-name descname"><span class="pre">k_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_vmdc_diff">
+<span class="sig-name descname"><span class="pre">k_vsc_vmdc_diff</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.k_vsc_vmdc_diff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.nc">
+<span class="sig-name descname"><span class="pre">nc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.nc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.qv_droop_control">
+<span class="sig-name descname"><span class="pre">qv_droop_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.qv_droop_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.size">
 <span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.html#PfAcDcWithNegativePoles.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.size" title="Link to this definition"></a></dt>
 <dd><p>Size of the jacobian matrix
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_m">
+<span class="sig-name descname"><span class="pre">u_cbr_m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_m_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_m_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_m_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_cbr_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_ifp">
+<span class="sig-name descname"><span class="pre">u_vsc_ifp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_ifp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pfn">
+<span class="sig-name descname"><span class="pre">u_vsc_pfn</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pfn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pfp">
+<span class="sig-name descname"><span class="pre">u_vsc_pfp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pfp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pt">
+<span class="sig-name descname"><span class="pre">u_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_qt">
+<span class="sig-name descname"><span class="pre">u_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.u_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.update">
@@ -654,12 +1224,57 @@ tuple where the first argument is a vector and the second.</p></li>
 :return: error, converged?, x, fx</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.use_autodiff_jacobian">
+<span class="sig-name descname"><span class="pre">use_autodiff_jacobian</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.use_autodiff_jacobian" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.var2x">
 <span class="sig-name descname"><span class="pre">var2x</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.html#PfAcDcWithNegativePoles.var2x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.var2x" title="Link to this definition"></a></dt>
 <dd><p>Convert the internal decision variables into the vector
 :return: Vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_i_set">
+<span class="sig-name descname"><span class="pre">vsc_i_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_i_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pdc_set">
+<span class="sig-name descname"><span class="pre">vsc_pdc_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pdc_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfn_set">
+<span class="sig-name descname"><span class="pre">vsc_pfn_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfn_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfp_droop_side">
+<span class="sig-name descname"><span class="pre">vsc_pfp_droop_side</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfp_droop_side" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfp_set">
+<span class="sig-name descname"><span class="pre">vsc_pfp_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pfp_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pt_set">
+<span class="sig-name descname"><span class="pre">vsc_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_qt_set">
+<span class="sig-name descname"><span class="pre">vsc_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_vmdc_diff_side">
+<span class="sig-name descname"><span class="pre">vsc_vmdc_diff_side</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.vsc_vmdc_diff_side" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles.PfAcDcWithNegativePoles.x2var">
@@ -878,12 +1493,137 @@ the DC bus current-balance residuals
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.</span></span><span class="sig-name descname"><span class="pre">PfAcDcWithNegativePolesSc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">St_vsc_pf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pfp_vsc_pf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pfn_vsc_pf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_async_gen_q_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_async_gen_q_prefault</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles_sc.html#PfAcDcWithNegativePolesSc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate" title="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PfFormulationTemplate</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.I0">
+<span class="sig-name descname"><span class="pre">I0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.I0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Jacobian">
 <span class="sig-name descname"><span class="pre">Jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autodiff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="VeraGridEngine.Utils.Sparse.html#VeraGridEngine.Utils.Sparse.csc2.CSC" title="VeraGridEngine.Utils.Sparse.csc2.CSC"><span class="pre">CSC</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles_sc.html#PfAcDcWithNegativePolesSc.Jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Jacobian" title="Link to this definition"></a></dt>
 <dd><p>Get the Jacobian
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pf_hvdc">
+<span class="sig-name descname"><span class="pre">Pf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfn_vsc">
+<span class="sig-name descname"><span class="pre">Pfn_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfn_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfn_vsc_pf">
+<span class="sig-name descname"><span class="pre">Pfn_vsc_pf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfn_vsc_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfp_vsc">
+<span class="sig-name descname"><span class="pre">Pfp_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfp_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfp_vsc_pf">
+<span class="sig-name descname"><span class="pre">Pfp_vsc_pf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pfp_vsc_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pt_hvdc">
+<span class="sig-name descname"><span class="pre">Pt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pt_vsc">
+<span class="sig-name descname"><span class="pre">Pt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Pt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qf_hvdc">
+<span class="sig-name descname"><span class="pre">Qf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qmax">
+<span class="sig-name descname"><span class="pre">Qmax</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qmax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qmin">
+<span class="sig-name descname"><span class="pre">Qmin</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qmin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qt_hvdc">
+<span class="sig-name descname"><span class="pre">Qt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qt_vsc">
+<span class="sig-name descname"><span class="pre">Qt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Qt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.S0">
+<span class="sig-name descname"><span class="pre">S0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.S0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.St_vsc_pf">
+<span class="sig-name descname"><span class="pre">St_vsc_pf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.St_vsc_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.V0">
+<span class="sig-name descname"><span class="pre">V0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.V0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Y0">
+<span class="sig-name descname"><span class="pre">Y0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.Y0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.adm">
+<span class="sig-name descname"><span class="pre">adm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.adm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.bus_grounded">
+<span class="sig-name descname"><span class="pre">bus_grounded</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.bus_grounded" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.bus_types">
+<span class="sig-name descname"><span class="pre">bus_types</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.bus_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.buses_with_discrete_shunts_control">
+<span class="sig-name descname"><span class="pre">buses_with_discrete_shunts_control</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.buses_with_discrete_shunts_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_pf_set">
+<span class="sig-name descname"><span class="pre">cbr_pf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_pf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_pt_set">
+<span class="sig-name descname"><span class="pre">cbr_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_qf_set">
+<span class="sig-name descname"><span class="pre">cbr_qf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_qf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_qt_set">
+<span class="sig-name descname"><span class="pre">cbr_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.cbr_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.check_error">
@@ -932,12 +1672,177 @@ the DC bus current-balance residuals
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.hvdc_droop_idx">
+<span class="sig-name descname"><span class="pre">hvdc_droop_idx</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.hvdc_droop_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_k_p">
+<span class="sig-name descname"><span class="pre">i_k_p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_k_p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_k_q">
+<span class="sig-name descname"><span class="pre">i_k_q</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_k_q" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_u_va">
+<span class="sig-name descname"><span class="pre">i_u_va</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_u_va" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_u_vm">
+<span class="sig-name descname"><span class="pre">i_u_vm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.i_u_vm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_p_controlled">
+<span class="sig-name descname"><span class="pre">is_p_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_p_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_q_controlled">
+<span class="sig-name descname"><span class="pre">is_q_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_q_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_va_controlled">
+<span class="sig-name descname"><span class="pre">is_va_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_va_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_vm_controlled">
+<span class="sig-name descname"><span class="pre">is_vm_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.is_vm_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_pf">
+<span class="sig-name descname"><span class="pre">k_cbr_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_pt">
+<span class="sig-name descname"><span class="pre">k_cbr_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_qf">
+<span class="sig-name descname"><span class="pre">k_cbr_qf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_qf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_qt">
+<span class="sig-name descname"><span class="pre">k_cbr_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_cbr_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_has_dc_n">
+<span class="sig-name descname"><span class="pre">k_vsc_has_dc_n</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_has_dc_n" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_i">
+<span class="sig-name descname"><span class="pre">k_vsc_i</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_i" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pfn">
+<span class="sig-name descname"><span class="pre">k_vsc_pfn</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pfn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pfp">
+<span class="sig-name descname"><span class="pre">k_vsc_pfp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pfp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pt">
+<span class="sig-name descname"><span class="pre">k_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_qt">
+<span class="sig-name descname"><span class="pre">k_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.k_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.nc">
+<span class="sig-name descname"><span class="pre">nc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.nc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.sc_async_gen_q_mask">
+<span class="sig-name descname"><span class="pre">sc_async_gen_q_mask</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.sc_async_gen_q_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.sc_async_gen_q_prefault">
+<span class="sig-name descname"><span class="pre">sc_async_gen_q_prefault</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.sc_async_gen_q_prefault" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.shunt_step">
+<span class="sig-name descname"><span class="pre">shunt_step</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.shunt_step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.size">
 <span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles_sc.html#PfAcDcWithNegativePolesSc.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.size" title="Link to this definition"></a></dt>
 <dd><p>Size of the jacobian matrix
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_m">
+<span class="sig-name descname"><span class="pre">u_cbr_m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_m_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_m_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_m_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_cbr_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pfn">
+<span class="sig-name descname"><span class="pre">u_vsc_pfn</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pfn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pfp">
+<span class="sig-name descname"><span class="pre">u_vsc_pfp</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pfp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pt">
+<span class="sig-name descname"><span class="pre">u_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_qt">
+<span class="sig-name descname"><span class="pre">u_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.u_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.update">
@@ -954,6 +1859,31 @@ the DC bus current-balance residuals
 <dd><p>Convert the internal decision variables into the vector
 :return: Vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_i_set">
+<span class="sig-name descname"><span class="pre">vsc_i_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_i_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pfn_set">
+<span class="sig-name descname"><span class="pre">vsc_pfn_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pfn_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pfp_set">
+<span class="sig-name descname"><span class="pre">vsc_pfp_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pfp_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pt_set">
+<span class="sig-name descname"><span class="pre">vsc_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_qt_set">
+<span class="sig-name descname"><span class="pre">vsc_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.vsc_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_full_acdc_with_negative_poles_sc.PfAcDcWithNegativePolesSc.x2var">
@@ -1140,12 +2070,107 @@ traditional branches (lines and controllable transformers)
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.</span></span><span class="sig-name descname"><span class="pre">PfGeneralizedFormulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Qmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_generalized_formulation.html#PfGeneralizedFormulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate" title="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template.PfFormulationTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PfFormulationTemplate</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.I0">
+<span class="sig-name descname"><span class="pre">I0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.I0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Jacobian">
 <span class="sig-name descname"><span class="pre">Jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autodiff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="VeraGridEngine.Utils.Sparse.html#VeraGridEngine.Utils.Sparse.csc2.CSC" title="VeraGridEngine.Utils.Sparse.csc2.CSC"><span class="pre">CSC</span></a></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_generalized_formulation.html#PfGeneralizedFormulation.Jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Jacobian" title="Link to this definition"></a></dt>
 <dd><p>Get the Jacobian
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pf_hvdc">
+<span class="sig-name descname"><span class="pre">Pf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pfn_vsc">
+<span class="sig-name descname"><span class="pre">Pfn_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pfn_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pfp_vsc">
+<span class="sig-name descname"><span class="pre">Pfp_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pfp_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pt_hvdc">
+<span class="sig-name descname"><span class="pre">Pt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pt_vsc">
+<span class="sig-name descname"><span class="pre">Pt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Pt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qf_hvdc">
+<span class="sig-name descname"><span class="pre">Qf_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qf_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qmax">
+<span class="sig-name descname"><span class="pre">Qmax</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qmax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qmin">
+<span class="sig-name descname"><span class="pre">Qmin</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qmin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qt_hvdc">
+<span class="sig-name descname"><span class="pre">Qt_hvdc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qt_hvdc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qt_vsc">
+<span class="sig-name descname"><span class="pre">Qt_vsc</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Qt_vsc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.S0">
+<span class="sig-name descname"><span class="pre">S0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.S0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Y0">
+<span class="sig-name descname"><span class="pre">Y0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">complex128</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.Y0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.adm">
+<span class="sig-name descname"><span class="pre">adm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.adm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.bus_types">
+<span class="sig-name descname"><span class="pre">bus_types</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.bus_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_pf_set">
+<span class="sig-name descname"><span class="pre">cbr_pf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_pf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_pt_set">
+<span class="sig-name descname"><span class="pre">cbr_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_qf_set">
+<span class="sig-name descname"><span class="pre">cbr_qf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_qf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_qt_set">
+<span class="sig-name descname"><span class="pre">cbr_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.cbr_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.check_error">
@@ -1163,6 +2188,11 @@ traditional branches (lines and controllable transformers)
 :param update_class_vars: Update the class vars related to the calculation step
 :return: Residual vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.discrete_shunt_control">
+<span class="sig-name descname"><span class="pre">discrete_shunt_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.discrete_shunt_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.fx">
@@ -1194,12 +2224,147 @@ traditional branches (lines and controllable transformers)
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.hvdc_droop_idx">
+<span class="sig-name descname"><span class="pre">hvdc_droop_idx</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.hvdc_droop_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_k_p">
+<span class="sig-name descname"><span class="pre">i_k_p</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_k_p" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_k_q">
+<span class="sig-name descname"><span class="pre">i_k_q</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_k_q" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_u_va">
+<span class="sig-name descname"><span class="pre">i_u_va</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_u_va" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_u_vm">
+<span class="sig-name descname"><span class="pre">i_u_vm</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.i_u_vm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_p_controlled">
+<span class="sig-name descname"><span class="pre">is_p_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_p_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_q_controlled">
+<span class="sig-name descname"><span class="pre">is_q_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_q_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_va_controlled">
+<span class="sig-name descname"><span class="pre">is_va_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_va_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_vm_controlled">
+<span class="sig-name descname"><span class="pre">is_vm_controlled</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.is_vm_controlled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_pf">
+<span class="sig-name descname"><span class="pre">k_cbr_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_pt">
+<span class="sig-name descname"><span class="pre">k_cbr_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_qf">
+<span class="sig-name descname"><span class="pre">k_cbr_qf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_qf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_qt">
+<span class="sig-name descname"><span class="pre">k_cbr_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_cbr_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_pf">
+<span class="sig-name descname"><span class="pre">k_vsc_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_pt">
+<span class="sig-name descname"><span class="pre">k_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_qt">
+<span class="sig-name descname"><span class="pre">k_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.k_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.nc">
+<span class="sig-name descname"><span class="pre">nc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.nc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.qv_droop_control">
+<span class="sig-name descname"><span class="pre">qv_droop_control</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.qv_droop_control" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.size">
 <span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_generalized_formulation.html#PfGeneralizedFormulation.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.size" title="Link to this definition"></a></dt>
 <dd><p>Size of the jacobian matrix
 :return:</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_m">
+<span class="sig-name descname"><span class="pre">u_cbr_m</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_m" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_m_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_m_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_m_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_tau">
+<span class="sig-name descname"><span class="pre">u_cbr_tau</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_cbr_tau" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_pf">
+<span class="sig-name descname"><span class="pre">u_vsc_pf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_pf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_pt">
+<span class="sig-name descname"><span class="pre">u_vsc_pt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_pt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_qt">
+<span class="sig-name descname"><span class="pre">u_vsc_qt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.u_vsc_qt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.update">
@@ -1216,6 +2381,21 @@ traditional branches (lines and controllable transformers)
 <dd><p>Convert the internal decision variables into the vector
 :return: Vector</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_pf_set">
+<span class="sig-name descname"><span class="pre">vsc_pf_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_pf_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_pt_set">
+<span class="sig-name descname"><span class="pre">vsc_pt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_pt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_qt_set">
+<span class="sig-name descname"><span class="pre">vsc_qt_set</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.vsc_qt_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.PowerFlow.Formulations.pf_generalized_formulation.PfGeneralizedFormulation.x2var">

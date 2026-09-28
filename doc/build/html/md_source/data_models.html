@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Models &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>Data Models &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -148,6 +148,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#transformernw">TransformerNW</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#transformertype">TransformerType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upfc">UPFC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#undergroundcabletype">UndergroundCableType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#undergroundlinetype">UndergroundLineType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#vsc">VSC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#vameasurement">VaMeasurement</a></li>
@@ -1622,24 +1623,6 @@
 <td><p></p></td>
 <td><p>List of fuels</p></td>
 <td><p>False</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>market_unit</p></td>
-<td><p>Market unit</p></td>
-<td><p></p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Market unit associated to this generator.</p></td>
-<td><p>True</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>market_unit_share</p></td>
-<td><p>float</p></td>
-<td><p>p.u.</p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Participation share of the generator inside the market unit.</p></td>
-<td><p>True</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>srap_enabled</p></td>
@@ -8977,24 +8960,6 @@
 <td><p>False</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>market_unit</p></td>
-<td><p>Market unit</p></td>
-<td><p></p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Market unit associated to this generator.</p></td>
-<td><p>True</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>market_unit_share</p></td>
-<td><p>float</p></td>
-<td><p>p.u.</p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Participation share of the generator inside the market unit.</p></td>
-<td><p>True</p></td>
-<td><p></p></td>
-</tr>
 <tr class="row-even"><td><p>srap_enabled</p></td>
 <td><p>bool</p></td>
 <td><p></p></td>
@@ -11485,6 +11450,60 @@
 <td><p>False</p></td>
 <td><p></p></td>
 <td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>device_idtag</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Unique ID</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>tpe</p></td>
+<td><p>enum DeviceType</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Device type</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>device_name</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Device name</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>group</p></td>
+<td><p>Market units group</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Investment group</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>commissioning_date</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Date when the investment is commissioned</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>decommissioning_date</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Date when the investment is decommissioned</p></td>
 <td><p>False</p></td>
 <td><p></p></td>
 </tr>
@@ -19285,6 +19304,267 @@
 </tbody>
 </table>
 </section>
+<section id="undergroundcabletype">
+<h3>UndergroundCableType<a class="headerlink" href="#undergroundcabletype" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>class_type</p></th>
+<th class="head"><p>unit</p></th>
+<th class="head"><p>mandatory</p></th>
+<th class="head"><p>max_chars</p></th>
+<th class="head"><p>descriptions</p></th>
+<th class="head"><p>has_profile</p></th>
+<th class="head"><p>comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>idtag</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Unique ID</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Name of the device.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>code</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Secondary ID</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>rdfid</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>RDF ID for further compatibility</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>action</p></td>
+<td><p>enum ActionType</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Object action to perform. Only used for model merging.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>selected_to_merge</p></td>
+<td><p>bool</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Whether this object should be applied during diff merge.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>comment</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>User comment</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>diff_changes</p></td>
+<td><p>MergeInformation</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>nominal_voltage</p></td>
+<td><p>float</p></td>
+<td><p>kV</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Rated cable voltage (PowerFactory uline)</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_dc_resistance</p></td>
+<td><p>float</p></td>
+<td><p>Ohm/km</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Imported core DC resistance at 20 degrees Celsius; informational, not used by the geometric calculation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>core_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core outer diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_internal_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core inner diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>cable_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Overall cable diameter, including outer insulation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>sheath_thickness</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Metallic sheath thickness</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>main_insulation_thickness</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation thickness (PowerFactory thIns[0]); outer insulation is derived from cable_diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>uOhm*cm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core resistivity at 20 degrees Celsius (PowerFactory crho[0])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>uOhm*cm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath resistivity at 20 degrees Celsius (PowerFactory crho[1])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_filling_factor</p></td>
+<td><p>float</p></td>
+<td><p>%</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core conducting filling factor (PowerFactory Cf[0])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_filling_factor</p></td>
+<td><p>float</p></td>
+<td><p>%</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath conducting filling factor (PowerFactory Cf[1])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>main_insulation_permittivity</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation relative permittivity (PowerFactory cepsr[0])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>outer_insulation_permittivity</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Outer insulation relative permittivity (PowerFactory cepsr[1])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>main_insulation_loss_tangent</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation dielectric loss factor (PowerFactory ctand[0])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>outer_insulation_loss_tangent</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Outer insulation dielectric loss factor (PowerFactory ctand[1])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_relative_permeability</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core relative magnetic permeability (PowerFactory my[0])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_relative_permeability</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath relative magnetic permeability (PowerFactory my[1])</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>skin_effect_factor</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core skin-effect factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>proximity_effect_factor</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Imported core proximity-effect factor; informational, not used by this calculation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="undergroundlinetype">
 <h3>UndergroundLineType<a class="headerlink" href="#undergroundlinetype" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
@@ -19531,6 +19811,24 @@
 <td><p>False</p></td>
 <td><p></p></td>
 <td><p>Cable frequency</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>earth_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>Ohm*m</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Earth resistivity</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>cables_in_system</p></td>
+<td><p>ListOfCables</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Physical cables and their positions</p></td>
 <td><p>False</p></td>
 <td><p></p></td>
 </tr>

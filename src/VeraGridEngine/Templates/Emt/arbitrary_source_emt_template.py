@@ -170,6 +170,7 @@ def _build_waveform_parameters(vf: VarFactory,
 # ARBITRARY WAVEFORM CURRENT SOURCE
 # ----------------------------------------------------------------------------------------------------------------------
 class ArbitraryWaveformCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         """
@@ -275,6 +276,7 @@ def get_arbitrary_waveform_current_source_emt_template(vf: VarFactory,
 
 
 class ArbitraryWaveformVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         """

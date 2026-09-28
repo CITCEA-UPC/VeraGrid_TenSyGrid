@@ -11,6 +11,16 @@ class FluidTurbineData:
     FluidTurbineData
     """
 
+    __slots__ = (
+        "nelm",
+        "names",
+        "idtag",
+        "efficiency",
+        "max_flow_rate",
+        "plant_idx",
+        "generator_idx",
+    )
+
     def __init__(self, nelm: int):
         """
         Fluid turbine data arrays
@@ -41,7 +51,7 @@ class FluidTurbineData:
         :return: new FluidTurbineData instance
         """
 
-        data = FluidTurbineData(nelm=self.nelm)
+        data = self.__class__(nelm=self.nelm)
 
         data.names = self.names.copy()
         data.idtag = self.idtag.copy()

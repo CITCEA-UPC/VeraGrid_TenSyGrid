@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-import shiboken6
-
 import numpy as np
 from enum import Enum
 from typing import Callable, Dict, List, Union, Any, Tuple, TYPE_CHECKING, Set, Sequence
@@ -22,7 +20,8 @@ from VeraGridEngine.Devices.Branches.line_locations import LineLocations
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
 from VeraGridEngine.enumerations import SimulationTypes, WindingType, WaveformSequenceType, V_I_CurveSequenceType
 from VeraGrid.Gui.font_config import MENU_FONT_SIZE
-from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 
 if TYPE_CHECKING:
     from VeraGrid.Gui.object_model import ObjectsModel
@@ -1730,35 +1729,11 @@ class WaveformPoint:
         return f"WaveformPoint({self.time}, {self.value})"
 
 
-def dispose_optional_matplotlib_canvas(canvas: Any, figure: Any) -> None:
-    """
-    Release an optional Matplotlib canvas before Qt deletes its widget.
-
-    :param canvas: Optional FigureCanvas instance.
-    :param figure: Optional Matplotlib figure.
-    :return: None.
-    """
-    if canvas is None:
-        pass
-    elif isinstance(canvas, QtWidgets.QWidget) and shiboken6.isValid(canvas):
-        canvas._draw_pending = False
-        canvas.close()
-        canvas.setParent(None)
-        canvas.deleteLater()
-    else:
-        pass
-
-    if figure is None:
-        pass
-    else:
-        figure.clear()
-
-
 class SequenceEditorDialog(QtWidgets.QDialog):
     def __init__(self, parent, sequence_type: WaveformSequenceType | V_I_CurveSequenceType | X_Y_SequenceType ):
         super().__init__(parent)
         self.sequence_type = sequence_type
-        self._plot_disposed: bool = False
+        self._plot_dialogue: PlotDialogue | None = None
         self.setWindowTitle(self.tr("Sequence editor"))
         self.setMinimumSize(600, 500)
 
@@ -1792,18 +1767,9 @@ class SequenceEditorDialog(QtWidgets.QDialog):
         self.table.setSelectionBehavior(QtWidgets.QTableWidget.SelectionBehavior.SelectRows)
         layout.addWidget(self.table)
 
-        self.figure = None
-        self.canvas = None
-        self.ax = None
-        try:
-            from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-            from matplotlib.figure import Figure
-            self.figure = Figure()
-            self.canvas = FigureCanvasQTAgg(self.figure)
-            self.ax = self.figure.add_subplot(111)
-            layout.addWidget(self.canvas)
-        except Exception:
-            pass
+        self.plot_button: QtWidgets.QPushButton = QtWidgets.QPushButton(self.tr("Show plot"), self)
+        self.plot_button.clicked.connect(self.show_plot)
+        layout.addWidget(self.plot_button)
 
         button_box = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel
@@ -1814,31 +1780,45 @@ class SequenceEditorDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """
-        Release Matplotlib resources before closing.
+        Release the retained native plot dialog before closing.
 
         :param event: Qt close event.
         :return: None.
         """
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QtWidgets.QDialog.closeEvent(self, event)
 
     def done(self, result: int) -> None:
         """
-        Release Matplotlib resources before accepting or rejecting the dialog.
+        Release the retained native plot dialog before accepting or rejecting.
 
         :param result: Qt dialog result code.
         :return: None.
         """
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QtWidgets.QDialog.done(self, result)
+
+    def show_plot(self) -> None:
+        """Show the current sequence in one retained native chart dialog.
+
+        :return: None.
+        """
+        self.close_plot_dialogue()
+        self._plot_dialogue = PlotDialogue(title=self.tr("Sequence plot"), parent=self)
+        self.update_plot()
+        self._plot_dialogue.show()
+
+    def close_plot_dialogue(self) -> None:
+        """Dispose the owned modeless chart before this editor is destroyed.
+
+        :return: None.
+        """
+        if self._plot_dialogue is not None:
+            self._plot_dialogue.reject()
+            delete_dialog_safely(dialog=self._plot_dialogue)
+            self._plot_dialogue = None
+        else:
+            pass
 
     def add_point(self):
         row = self.table.rowCount()
@@ -1896,11 +1876,8 @@ class SequenceEditorDialog(QtWidgets.QDialog):
         v2.setText(v1_text)
 
     def update_plot(self):
-        if self.canvas is None:
-            return
-
-        values_0 = []
-        values_1 = []
+        values_0: list[float] = list()
+        values_1: list[float] = list()
         for row in range(self.table.rowCount()):
             item_0 = self.table.item(row, 0)
             item_1 = self.table.item(row, 1)
@@ -1911,17 +1888,38 @@ class SequenceEditorDialog(QtWidgets.QDialog):
                 except ValueError:
                     pass
 
-        self.ax.clear()
-        if values_0:
-            self.ax.plot(values_0, values_1, "o-")
+        if self._plot_dialogue is not None and len(values_0) > 0:
+            x_axis_title: str = "X"
+            y_axis_title: str = "Y"
             if self.sequence_type is V_I_CurveSequenceType:
-                self.ax.set_xlabel("voltage")
-                self.ax.set_ylabel("current")
+                x_axis_title = self.tr("Voltage")
+                y_axis_title = self.tr("Current")
             elif self.sequence_type is WaveformSequenceType:
-                self.ax.set_xlabel("time")
-                self.ax.set_ylabel("value")
-            self.ax.grid(True)
-        self.canvas.draw_idle()
+                x_axis_title = self.tr("Time")
+                y_axis_title = self.tr("Value")
+            else:
+                pass
+            accepted: bool = self._plot_dialogue.set_line_series(
+                x_values=np.asarray(values_0, dtype=float),
+                series_names=(self.tr("Sequence"),),
+                series_values=(np.asarray(values_1, dtype=float),),
+                title=self.tr("Sequence plot"),
+                x_axis_title=x_axis_title,
+                y_axis_title=y_axis_title,
+            )
+            if accepted:
+                self._plot_dialogue.chart.add_scatter_series(
+                    name="",
+                    x_values=np.asarray(values_0, dtype=float),
+                    y_values=np.asarray(values_1, dtype=float),
+                    color="#2563eb",
+                )
+            else:
+                self._plot_dialogue.chart.clear()
+        elif self._plot_dialogue is not None:
+            self._plot_dialogue.chart.clear()
+        else:
+            pass
 
     def accept(self) -> None:
         # points count check
@@ -2008,7 +2006,7 @@ class LookupMatrixEditorDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._plot_disposed: bool = False
+        self._plot_dialogue: PlotDialogue | None = None
         self.setWindowTitle(self.tr("Lookup matrix editor"))
         self.setMinimumSize(750, 650)
 
@@ -2081,19 +2079,11 @@ class LookupMatrixEditorDialog(QtWidgets.QDialog):
 
         main_layout.addWidget(matrix_group)
 
-        # ── Matplotlib plot (optional) ──────────────────────────────────
-        self.figure = None
-        self.canvas = None
-        self.ax = None
-        try:
-            from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-            from matplotlib.figure import Figure
-            self.figure = Figure()
-            self.canvas = FigureCanvasQTAgg(self.figure)
-            self.ax = self.figure.add_subplot(111)
-            main_layout.addWidget(self.canvas)
-        except Exception:
-            pass
+        # The chart dialog is constructed only when requested so table edits
+        # never own a native paint object while this editor is hidden.
+        self.plot_button: QtWidgets.QPushButton = QtWidgets.QPushButton(self.tr("Show plot"), self)
+        self.plot_button.clicked.connect(self.show_plot)
+        main_layout.addWidget(self.plot_button)
 
         # ── Dialog buttons ──────────────────────────────────────────────
         button_box = QtWidgets.QDialogButtonBox(
@@ -2105,31 +2095,45 @@ class LookupMatrixEditorDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """
-        Release Matplotlib resources before closing.
+        Release the retained native plot dialog before closing.
 
         :param event: Qt close event.
         :return: None.
         """
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QtWidgets.QDialog.closeEvent(self, event)
 
     def done(self, result: int) -> None:
         """
-        Release Matplotlib resources before accepting or rejecting the dialog.
+        Release the retained native plot dialog before accepting or rejecting.
 
         :param result: Qt dialog result code.
         :return: None.
         """
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QtWidgets.QDialog.done(self, result)
+
+    def show_plot(self) -> None:
+        """Show the current lookup rows in one retained native chart dialog.
+
+        :return: None.
+        """
+        self.close_plot_dialogue()
+        self._plot_dialogue = PlotDialogue(title=self.tr("Lookup surface plot"), parent=self)
+        self._update_plot()
+        self._plot_dialogue.show()
+
+    def close_plot_dialogue(self) -> None:
+        """Dispose the owned modeless chart before this editor is destroyed.
+
+        :return: None.
+        """
+        if self._plot_dialogue is not None:
+            self._plot_dialogue.reject()
+            delete_dialog_safely(dialog=self._plot_dialogue)
+            self._plot_dialogue = None
+        else:
+            pass
 
     # ── X table helpers ─────────────────────────────────────────────────
 
@@ -2312,26 +2316,39 @@ class LookupMatrixEditorDialog(QtWidgets.QDialog):
     # ── Plot ────────────────────────────────────────────────────────────
 
     def _update_plot(self):
-        if self.ax is None:
-            return
-
         x_vals = self._read_x_values()
         y_vals = self._read_y_values()
         z_matrix = self._read_z_matrix()
-
-        self.ax.clear()
-        if x_vals and y_vals and z_matrix:
-            X, Y = np.meshgrid(x_vals, y_vals)
+        if self._plot_dialogue is not None and len(x_vals) > 0 and len(y_vals) > 0 and len(z_matrix) > 0:
             try:
-                Z = np.array(z_matrix, dtype=np.float64)
-                if Z.shape == (len(y_vals), len(x_vals)):
-                    self.ax.pcolormesh(X, Y, Z, shading="auto")
-                    self.ax.set_xlabel("X")
-                    self.ax.set_ylabel("Y")
-                    self.ax.set_title("Z matrix")
-            except (ValueError, TypeError):
-                pass
-        self.canvas.draw_idle()
+                z_values: np.ndarray = np.asarray(z_matrix, dtype=float)
+                if z_values.shape == (len(y_vals), len(x_vals)):
+                    series_names: list[str] = list()
+                    series_values: list[np.ndarray] = list()
+                    row_index: int
+                    for row_index in range(len(y_vals)):
+                        series_names.append(self.tr("Y = {value}").format(value=y_vals[row_index]))
+                        series_values.append(z_values[row_index])
+                    accepted: bool = self._plot_dialogue.set_line_series(
+                        x_values=np.asarray(x_vals, dtype=float),
+                        series_names=series_names,
+                        series_values=series_values,
+                        title=self.tr("Lookup surface plot"),
+                        x_axis_title=self.tr("X"),
+                        y_axis_title=self.tr("Z"),
+                    )
+                    if accepted:
+                        pass
+                    else:
+                        self._plot_dialogue.chart.clear()
+                else:
+                    self._plot_dialogue.chart.clear()
+            except (TypeError, ValueError):
+                self._plot_dialogue.chart.clear()
+        elif self._plot_dialogue is not None:
+            self._plot_dialogue.chart.clear()
+        else:
+            pass
 
     # ── Data accessors ──────────────────────────────────────────────────
 

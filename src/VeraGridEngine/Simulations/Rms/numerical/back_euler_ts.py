@@ -16,12 +16,25 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProb
 
 
 class BackEulerImplicitTensygrid:
+    """
+    Backward Euler implicit integration using TensyGrid.
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+    )
+
     def __init__(self,
                  problem: RmsProblemDae,
                  t0: float,
                  t_end: float,
                  h: float,
-                 max_iter: int):
+                 max_iter: int) -> None:
         """
 
         :param problem:

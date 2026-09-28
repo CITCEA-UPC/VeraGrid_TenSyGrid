@@ -18,6 +18,26 @@ class RmsOptions(OptionsTemplate):
     Rms simulation options
     """
 
+    __slots__ = (
+        "integration_method",
+        "initialization_method",
+        "problem_type",
+        "time_step",
+        "simulation_time",
+        "tolerance",
+        "use_init_values",
+        "max_iter",
+        "fmi_state_event_time_tolerance",
+        "fmi_state_event_max_iterations",
+        "fmi_me_newton_absolute_tolerance",
+        "fmi_me_newton_relative_tolerance",
+        "fmi_me_newton_max_iterations",
+        "fmi_me_max_continuous_states",
+        "fmi_me_max_runtime_evaluations_per_step",
+        "verbose",
+        "rms_event_groups",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="integration_method", tpe=DynamicIntegrationMethod),
         GCProp(key="initialization_method", tpe=RmsInitializationMethod),

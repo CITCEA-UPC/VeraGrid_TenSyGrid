@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="550" viewBox="0 0 1040 550" role="img" aria-labelledby="title description">
+  <title id="title">Two-layer underground cable construction and burial geometry</title>
+  <desc id="description">Left: a solid core surrounded by main insulation, a metallic sheath, and outer insulation. Radii from the cable axis are r_c, r_si, r_so, and r_o. Right: three identical cables at horizontal positions minus 0.15, zero, and plus 0.15 metres, each buried 0.8 metres below ground. Depth is positive downward. Diagrams are not to scale.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#334155"/>
+    </marker>
+    <g id="buried-cable" stroke-width="1.5">
+      <circle r="29" fill="#e2e8f0" stroke="#64748b"/>
+      <circle r="23" fill="#2563a6" stroke="#174b7a"/>
+      <circle r="19" fill="#dbeeff" stroke="#174b7a"/>
+      <circle r="11" fill="#cb8552" stroke="#804b28"/>
+    </g>
+  </defs>
+  <rect width="1040" height="550" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#1e293b">
+    <text x="32" y="40" font-size="23" font-weight="bold">Cable cross-section</text>
+    <text x="32" y="68" font-size="17" fill="#475569">Core and sheath are the conducting layers</text>
+    <path d="M 534 28 V 504" stroke="#cbd5e1"/>
+    <text x="566" y="40" font-size="23" font-weight="bold">Buried cable arrangement</text>
+    <text x="566" y="68" font-size="17" fill="#475569">Cable positions refer to their centres</text>
+
+    <!-- Concentric layers and leaders identify the physical construction. -->
+    <g stroke-width="2">
+      <circle cx="175" cy="227" r="113" fill="#e2e8f0" stroke="#64748b"/>
+      <circle cx="175" cy="227" r="101" fill="#2563a6" stroke="#174b7a"/>
+      <circle cx="175" cy="227" r="90" fill="#dbeeff" stroke="#174b7a"/>
+      <circle cx="175" cy="227" r="51" fill="#cb8552" stroke="#804b28"/>
+    </g>
+    <g fill="none" stroke="#475569" stroke-width="1.5">
+      <path d="M 184 202 L 306 141 H 321"/>
+      <path d="M 227 191 L 306 197 H 321"/>
+      <path d="M 269 222 L 306 253 H 321"/>
+      <path d="M 270 275 L 306 309 H 321"/>
+    </g>
+    <g fill="#475569">
+      <circle cx="184" cy="202" r="3"/>
+      <circle cx="227" cy="191" r="3"/>
+      <circle cx="269" cy="222" r="3"/>
+      <circle cx="270" cy="275" r="3"/>
+    </g>
+    <g font-size="18">
+      <text x="330" y="147">Solid core</text>
+      <text x="330" y="203">Main insulation</text>
+      <text x="330" y="259">Metallic sheath</text>
+      <text x="330" y="315">Outer insulation</text>
+    </g>
+
+    <!-- Radius dimensions share the same axis; lengths are illustrative. -->
+    <circle cx="175" cy="227" r="3" fill="#1e293b"/>
+    <path d="M 175 233 V 485" fill="none" stroke="#94a3b8" stroke-dasharray="4 5"/>
+    <text x="32" y="369" font-size="16" fill="#475569">Radii from the cable axis</text>
+    <g fill="none" stroke="#334155" stroke-width="1.3" marker-start="url(#arrow)" marker-end="url(#arrow)">
+      <path d="M 175 397 H 226"/>
+      <path d="M 175 423 H 265"/>
+      <path d="M 175 449 H 276"/>
+      <path d="M 175 475 H 288"/>
+    </g>
+    <g font-size="17">
+      <text x="136" y="402">r<tspan baseline-shift="sub" font-size="12">c</tspan></text>
+      <text x="136" y="428">r<tspan baseline-shift="sub" font-size="12">si</tspan></text>
+      <text x="136" y="454">r<tspan baseline-shift="sub" font-size="12">so</tspan></text>
+      <text x="136" y="480">r<tspan baseline-shift="sub" font-size="12">o</tspan></text>
+      <text x="310" y="402">Core outer radius</text>
+      <text x="310" y="428">Sheath inner radius</text>
+      <text x="310" y="454">Sheath outer radius</text>
+      <text x="310" y="480">Cable outer radius</text>
+    </g>
+
+    <!-- The surface is y = 0; positive y is burial depth, not elevation. -->
+    <rect x="580" y="140" width="432" height="243" fill="#f8fafc"/>
+    <path d="M 580 140 H 1010" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M 580 140 V 389" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="598" y="124" font-size="17">Ground surface: y = 0</text>
+    <text x="1001" y="124" font-size="18">x</text>
+    <text x="570" y="415" font-size="18">+y</text>
+    <path d="M 599 300 H 996" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <g stroke="#cbd5e1" stroke-dasharray="4 5">
+      <path d="M 635 140 V 270"/>
+      <path d="M 775 140 V 270"/>
+      <path d="M 915 140 V 270"/>
+    </g>
+    <use href="#buried-cable" x="635" y="300"/>
+    <use href="#buried-cable" x="775" y="300"/>
+    <use href="#buried-cable" x="915" y="300"/>
+    <g font-size="17" text-anchor="middle">
+      <text x="635" y="356">x = −0.15 m</text>
+      <text x="775" y="356">x = 0 m</text>
+      <text x="915" y="356">x = +0.15 m</text>
+    </g>
+    <path d="M 990 144 V 296" stroke="#334155" stroke-width="1.4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <text x="970" y="226" font-size="18" text-anchor="end">h = 0.8 m</text>
+    <text x="610" y="425" font-size="17">All three centres have y = h = 0.8 m.</text>
+    <text x="610" y="454" font-size="17">Burial depth is positive downward.</text>
+    <text x="32" y="530" font-size="16" fill="#64748b">Diagrams are not to scale.</text>
+  </g>
+</svg>

@@ -1016,6 +1016,33 @@ def expand_matrix(magnitude: np.ndarray, lookup: IntVec) -> CxMat:
 
 class PfBasicFormulation3Ph(PfFormulationTemplate):
 
+    __slots__ = (
+        "Ybus",
+        "Yf",
+        "Yt",
+        "Yshunt_bus",
+        "mask",
+        "bus_lookup",
+        "branch_lookup",
+        "Un_floating_current",
+        "Un_floating_power",
+        "logger",
+        "nc",
+        "S0",
+        "Qmin",
+        "Qmax",
+        "vd",
+        "pq",
+        "pv",
+        "pqv",
+        "p",
+        "no_slack",
+        "idx_dVa",
+        "idx_dVm",
+        "idx_dP",
+        "idx_dQ",
+    )
+
     def __init__(self,
                  V0: CxVec,
                  S0: CxVec,

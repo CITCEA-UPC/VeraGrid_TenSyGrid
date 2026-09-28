@@ -89,6 +89,17 @@ of the objects. All the static properties of the objects can be edited here. The
 
 ![](figures/Database_GUI.png)
 
+### Editing table fields
+
+The database editor contains two types of fields: fields that accept values directly and fields that reference other objects in the model. When editing a reference field, select an object from the available options.
+
+The following actions are available for all fields:
+
+- Double-click a field to edit its value.
+- Right-click a field to open its options menu.
+
+For a field that references another object, Ctrl-click the field to open the editor menu for that object.
+
 ### Object Categories
 
 The object tree on the left side of the database editor organizes the model objects by purpose. Expand a category and select an object type to display all objects of that type in the table.

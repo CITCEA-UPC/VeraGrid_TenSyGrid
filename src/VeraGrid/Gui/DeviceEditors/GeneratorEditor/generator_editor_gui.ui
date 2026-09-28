@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>520</height>
+    <width>802</width>
+    <height>545</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <widget class="QFrame" name="leftFrame">
       <layout class="QVBoxLayout" name="leftLayout">
@@ -71,15 +71,36 @@
           </property>
           <item>
            <widget class="QPushButton" name="addRowButton">
+            <property name="toolTip">
+             <string>Add entry</string>
+            </property>
             <property name="text">
-             <string>Add</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../Icons/icons.qrc">
+              <normaloff>:/Icons/icons/plus.png</normaloff>:/Icons/icons/plus.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="delRowButton">
+            <property name="toolTip">
+             <string>Delete selected</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../Icons/icons.qrc">
+              <normaloff>:/Icons/icons/minus.png</normaloff>:/Icons/icons/minus.png</iconset>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -90,9 +111,19 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="delRowButton">
+           <widget class="QPushButton" name="applyButton">
+            <property name="toolTip">
+             <string>Apply curve to Qmin, Qmax, Pmin, Pmax</string>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
             <property name="text">
-             <string>Del</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../Icons/icons.qrc">
+              <normaloff>:/Icons/icons/accept.png</normaloff>:/Icons/icons/accept.png</iconset>
             </property>
            </widget>
           </item>
@@ -116,7 +147,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="MatplotlibWidget" name="plotter" native="true"/>
+        <widget class="GraphsWidget" name="plotter" native="true"/>
        </item>
       </layout>
      </widget>
@@ -126,11 +157,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MatplotlibWidget</class>
+   <class>GraphsWidget</class>
    <extends>QWidget</extends>
-   <header>matplotlibwidget.h</header>
+   <header>VeraGrid.Gui.PlotDialogue.qt_chart_widget</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../Icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

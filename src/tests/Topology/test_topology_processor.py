@@ -11,6 +11,7 @@ from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.api import power_flow
 from VeraGridEngine.Topology.topology import compute_connectivity_flexible
 from VeraGridEngine.Simulations.PowerFlow.power_flow_worker import multi_island_pf_nc
+from VeraGridEngine.DataStructures.numerical_circuit import NumericalCircuit
 from VeraGridEngine.enumerations import BusMode, GeneratorControlMode
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,6 +48,37 @@ def test_topology_control_propagation_vm():
     assert not nc.bus_data.is_q_controlled[0]
     assert nc.bus_data.is_vm_controlled[0]
     assert np.isclose(np.abs(nc.bus_data.Vbus[0]), 1.03)
+
+
+def test_switch_reduction_preserves_last_pq_bus_without_remote_control() -> None:
+    """Keep the last island bus PQ when a local controller uses index ``-1``.
+
+    :return: None.
+    """
+    # The fourth bus is deliberately last because Python interprets an
+    # unguarded ``-1`` control-bus sentinel as this array position.
+    grid: MultiCircuit = MultiCircuit()
+    slack_bus: dev.Bus = grid.add_bus(dev.Bus(name="Slack", is_slack=True))
+    switch_from_bus: dev.Bus = grid.add_bus(dev.Bus(name="Switch from"))
+    switch_to_bus: dev.Bus = grid.add_bus(dev.Bus(name="Switch to"))
+    last_pq_bus: dev.Bus = grid.add_bus(dev.Bus(name="Last PQ"))
+
+    grid.add_generator(
+        bus=slack_bus,
+        api_obj=dev.Generator(name="Local voltage controller", control_mode=GeneratorControlMode.V),
+    )
+    grid.add_line(dev.Line(name="Upstream", bus_from=slack_bus, bus_to=switch_from_bus, r=0.01, x=0.01))
+    grid.add_switch(dev.Switch(name="Closed switch", bus_from=switch_from_bus, bus_to=switch_to_bus, active=True))
+    grid.add_line(dev.Line(name="Downstream", bus_from=switch_to_bus, bus_to=last_pq_bus, r=0.01, x=0.01))
+
+    # Splitting performs the switch reduction and invokes the bus-type correction.
+    numerical_circuit: NumericalCircuit = compile_numerical_circuit_at(grid)
+    islands: list[NumericalCircuit] = numerical_circuit.split_into_islands()
+    main_island: NumericalCircuit = islands[0]
+    last_bus_index: int = int(np.where(main_island.bus_data.names == last_pq_bus.name)[0][0])
+
+    assert numerical_circuit.generator_data.controllable_bus_idx[0] == -1
+    assert main_island.bus_data.bus_types[last_bus_index] == BusMode.PQ_tpe.value
 
 def test_topology_4_nodes_A():
     """

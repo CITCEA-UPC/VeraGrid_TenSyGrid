@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 class BaseCircuit:
+    __slots__ = ()
 
     def __init__(self):
         pass

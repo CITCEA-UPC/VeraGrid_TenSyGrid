@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
 import numba as nb
-from matplotlib import pyplot as plt
 from typing import Union
 
 from VeraGridEngine.basic_structures import Logger
@@ -110,72 +109,6 @@ class SigmaAnalysisResults(ResultsTemplate):
 
         self.converged = self.converged & results.converged
 
-    def plot(self, fig, ax, n_points=1000):
-        """
-        Plot the sigma analysis
-        :param fig: Matplotlib figure. If None, one will be created
-        :param ax: Matplotlib Axis
-        :param n_points: number of points in the curve
-        """
-        if ax is None:
-            fig = plt.figure(figsize=(8, 7))
-            ax = fig.add_subplot(111)
-
-        sx = np.linspace(-0.25, np.max(self.sigma_re) + 0.1, n_points)
-        sy1 = np.sqrt(0.25 + sx)
-        sy2 = -np.sqrt(0.25 + sx)
-        names = self.bus_names
-
-        ax.plot(sx, sy1, 'k', linewidth=2)
-        ax.plot(sx, sy2, 'k', linewidth=2)
-
-        d = np.abs(np.nan_to_num(self.distances))
-        colors = (d / d.max())
-        area = 100.0 * np.power(1.0 + d, 2)
-
-        if self.converged:
-            cmap = 'winter'
-        else:
-            cmap = 'autumn'
-
-        sc = ax.scatter(self.sigma_re, self.sigma_im, c=colors, s=area, cmap=cmap, alpha=0.75)
-
-        annot = ax.annotate("", xy=(0, 0), xytext=(20, 20),
-                            textcoords="offset points",
-                            bbox=dict(boxstyle="round", fc="w"),
-                            arrowprops=dict(arrowstyle="->"),
-                            fontsize=8)
-        annot.set_visible(False)
-
-        ax.set_title(r'$\Sigma$ plot')
-        ax.set_xlabel(r'$\sigma_{re}$')
-        ax.set_ylabel(r'$\sigma_{im}$')
-
-        def update_annotation(ind):
-            """
-
-            :param ind:
-            :return:
-            """
-            pos = sc.get_offsets()[ind["ind"][0]]
-            annot.xy = pos
-            text = "{}".format("\n".join([names[n] for n in ind["ind"]]))
-            annot.set_text(text)
-            annot.get_bbox_patch().set_alpha(0.8)
-
-        def hover(event):
-            if event.inaxes == ax:
-                cont, ind = sc.contains(event)
-                if cont:
-                    update_annotation(ind)
-                    annot.set_visible(True)
-                    fig.canvas.draw_idle()
-                else:
-                    if annot.get_visible():
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
-
-        fig.canvas.mpl_connect("motion_notify_event", hover)
 
     def mdl(self, result_type: ResultTypes, indices=None, names=None) -> ResultsTable | None:
         """

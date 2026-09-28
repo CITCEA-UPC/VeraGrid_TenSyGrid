@@ -230,10 +230,20 @@ def project_initial_algebraic_state(
 
 
 class RmsProblemTemplate(ABC):
+    """
+    Abstract base class for RMS dynamic simulation problems.
+    """
+    __slots__ = (
+        "_is_initialized",
+        "progress_signal",
+        "progress_text",
+        "grid",
+        "power_flow_results",
+    )
 
     def __init__(self,
                  progress_signal: DummySignal | None = None,
-                 progress_text: DummySignal | None = None,):
+                 progress_text: DummySignal | None = None) -> None:
 
         self._is_initialized = False
         self.progress_signal =  DummySignal() if progress_signal is None else progress_signal

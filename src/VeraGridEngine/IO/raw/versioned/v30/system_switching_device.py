@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v29.system_switching_device import RawSyste
 
 class RawSystemSwitchingDeviceV30(RawSystemSwitchingDeviceV29):
     """PSSE v30 typed object inheriting v29."""
+    __slots__ = ()
     pass

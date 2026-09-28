@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.DataStructures.numerical_circuit &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.DataStructures.numerical_circuit &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -335,20 +335,31 @@
                       <span class="n">control_mode_int</span><span class="p">:</span> <span class="n">IntVec</span><span class="p">,</span>
                       <span class="n">gen_controllable_bus_idx</span><span class="p">:</span> <span class="n">IntVec</span><span class="p">,</span>
                       <span class="n">bus_types</span><span class="p">:</span> <span class="n">IntVec</span><span class="p">,</span>
-                      <span class="n">v_ctrl_val</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+                      <span class="n">v_ctrl_val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to Correct bus types because of generators moving around due to the topology processing</span>
+<span class="sd">    Correct remote voltage-controlled bus types after topology processing.</span>
+
 <span class="sd">    :param gen_idx:</span>
 <span class="sd">    :param control_mode_int:</span>
 <span class="sd">    :param gen_controllable_bus_idx:</span>
 <span class="sd">    :param bus_types:</span>
 <span class="sd">    :param v_ctrl_val: value for GeneratorControlMode.V</span>
-<span class="sd">    :return:</span>
+<span class="sd">    :return: None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gen_idx</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gen_idx</span><span class="p">)):</span>
+        <span class="c1"># A negative index means that the device controls its local bus, whose</span>
+        <span class="c1"># type was already assigned during compilation and must not be remapped.</span>
+        <span class="n">controlled_bus_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">gen_controllable_bus_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">control_mode_int</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">v_ctrl_val</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">bus_types</span><span class="p">[</span><span class="n">gen_controllable_bus_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">bus_types</span><span class="p">[</span><span class="n">gen_controllable_bus_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">2</span></div>
+            <span class="k">if</span> <span class="n">controlled_bus_idx</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">bus_types</span><span class="p">[</span><span class="n">controlled_bus_idx</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">bus_types</span><span class="p">[</span><span class="n">controlled_bus_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
 
 
 
@@ -483,6 +494,42 @@
 <span class="sd">    Class storing the calculation information of the devices</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;t_idx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nload&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ngen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbatt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nshunt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nhvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nvsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nfluidnode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nfluidturbine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nfluidpump&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nfluidp2x&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nfluidpath&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbase&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;passive_branch_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;active_branch_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;battery_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shunt_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_node_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_turbine_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_pump_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_p2x_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_path_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__bus_map_arr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__topology_performed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;structs_idtag_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_dict&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">nbr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -561,6 +608,7 @@
         <span class="c1"># used during contingency analysis to modify the structures active, etc...</span>
         <span class="c1"># based on the device idtag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structs_idtag_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataStructType</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="NumericalCircuit.propagate_bus_result">
 <a class="viewcode-back" href="../../../rst_source/api/auto/VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit.propagate_bus_result">[docs]</a>

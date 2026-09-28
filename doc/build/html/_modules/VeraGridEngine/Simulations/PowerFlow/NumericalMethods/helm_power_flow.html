@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.NumericalMethods.helm_power_flow &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.NumericalMethods.helm_power_flow &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -584,6 +584,26 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    HelmPreparation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;sys_mat_factorization&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Uini&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Xini&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Yslack&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Vslack&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;vec_P&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;vec_Q&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Ysh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;vec_W&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pq&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sl&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pqpv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;npqpv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nbus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pqpv_original&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pq_original&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_mat_factorization</span><span class="p">,</span> <span class="n">Uini</span><span class="p">,</span> <span class="n">Xini</span><span class="p">,</span> <span class="n">Yslack</span><span class="p">,</span> <span class="n">Vslack</span><span class="p">,</span>
                  <span class="n">vec_P</span><span class="p">,</span> <span class="n">vec_Q</span><span class="p">,</span> <span class="n">Ysh</span><span class="p">,</span> <span class="n">vec_W</span><span class="p">,</span> <span class="n">pq</span><span class="p">,</span> <span class="n">pv</span><span class="p">,</span> <span class="n">pqpv</span><span class="p">,</span> <span class="n">sl</span><span class="p">,</span>

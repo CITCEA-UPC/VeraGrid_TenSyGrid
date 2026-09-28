@@ -5,7 +5,6 @@
 import json
 import numpy as np
 from typing import Tuple, List
-from matplotlib import pyplot as plt
 from VeraGridEngine.basic_structures import Mat
 
 
@@ -206,29 +205,6 @@ class GeneratorQCurve:
 
         return np.sqrt(pmax * pmax + qfinal * qfinal)
 
-    def plot(self, ax: plt.axis):
-        """
-
-        :param ax:
-        :return:
-        """
-        x = self._q_points[:, 0]
-        y1 = self._q_points[:, 1]
-        y2 = self._q_points[:, 2]
-        ax.plot(x, y1,
-                color='red',
-                marker='o',
-                linestyle='solid',
-                linewidth=2,
-                markersize=4)
-        ax.plot(x, y2,
-                color='red',
-                marker='o',
-                linestyle='solid',
-                linewidth=2,
-                markersize=4)
-        ax.set_xlabel("Q (MVAr)")
-        ax.set_ylabel("P (MW)")
 
     def copy(self) -> "GeneratorQCurve":
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Utils.MIP package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Utils.MIP package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -813,9 +813,10 @@ other solver interface easily</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel.minimize">
-<span class="sig-name descname"><span class="pre">minimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LpAffineExpression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#PulpLpModel.minimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel.minimize" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">minimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LpAffineExpression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Real</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#PulpLpModel.minimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.PulpLpModel.minimize" title="Link to this definition"></a></dt>
 <dd><p>Set the objective function with minimization sense
-:param obj_function: expression to minimize</p>
+:param obj_function: expression to minimize
+:return: None</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -875,6 +876,26 @@ other solver interface easily</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="VeraGridEngine.Utils.MIP.pulp_interface.add_pulp_variable">
+<span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Utils.MIP.pulp_interface.</span></span><span class="sig-name descname"><span class="pre">add_pulp_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LpProblem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LpVariable</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#add_pulp_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.add_pulp_variable" title="Link to this definition"></a></dt>
+<dd><p>Add one PuLP variable using the newest model-owned API when available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – PuLP problem that owns the variable.</p></li>
+<li><p><strong>name</strong> – Variable name.</p></li>
+<li><p><strong>low_bound</strong> – Lower variable bound.</p></li>
+<li><p><strong>up_bound</strong> – Upper variable bound.</p></li>
+<li><p><strong>category</strong> – PuLP variable category.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Created PuLP variable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="VeraGridEngine.Utils.MIP.pulp_interface.get_lp_var_value">
 <span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Utils.MIP.pulp_interface.</span></span><span class="sig-name descname"><span class="pre">get_lp_var_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">LpVariable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#get_lp_var_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.get_lp_var_value" title="Link to this definition"></a></dt>
 <dd><p>Get the value of a variable stored in a numpy array of objects
@@ -887,6 +908,14 @@ other solver interface easily</p>
 <span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Utils.MIP.pulp_interface.</span></span><span class="sig-name descname"><span class="pre">get_pulp_available_mip_solvers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#get_pulp_available_mip_solvers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.get_pulp_available_mip_solvers" title="Link to this definition"></a></dt>
 <dd><p>Get a list of candidate solvers
 :return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="VeraGridEngine.Utils.MIP.pulp_interface.make_highs_solver">
+<span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Utils.MIP.pulp_interface.</span></span><span class="sig-name descname"><span class="pre">make_highs_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_logs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HiGHS</span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Utils/MIP/pulp_interface.html#make_highs_solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Utils.MIP.pulp_interface.make_highs_solver" title="Link to this definition"></a></dt>
+<dd><p>Build a PuLP HiGHS solver with conservative macOS settings.</p>
+<p>The macOS highspy wheel can crash in HiGHS worker/IPM code paths under
+Python 3.14. Linux keeps the default HiGHS settings.</p>
 </dd></dl>
 
 </section>

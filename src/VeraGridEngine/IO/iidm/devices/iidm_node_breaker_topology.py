@@ -6,6 +6,9 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class IidmNodeBreakerTopology(IidmObject):
+    __slots__ = (
+        "id",
+    )
     def __init__(self, id: str):
         super().__init__("NodeBreakerTopology")
         self.id = id

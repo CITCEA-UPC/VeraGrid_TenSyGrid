@@ -1955,6 +1955,7 @@ class DeviceType(Enum):
     ItMeasurementDevice = 'It Measurement'
 
     WireDevice = 'Wire'
+    UndergroundCableTypeDevice = 'Underground cable'
     DcCableTypeDevice = 'DC cable type'
     SequenceLineDevice = 'Sequence line'
     UnderGroundLineDevice = 'Underground line'
@@ -2013,6 +2014,8 @@ class DeviceType(Enum):
     ModellingAuthority = "Modelling Authority"
 
     FacilityDevice = "Facility"
+
+    MarketUnitsGroupDevice = "Market units group"
     MarketUnitDevice = "Market unit"
 
     SimulationOptionsDevice = "SimulationOptionsDevice"
@@ -2078,6 +2081,7 @@ class SubObjectType(Enum):
     ObjectsList = "ObjectsList"
     Associations = "AssociationsList"
     ListOfWires = 'ListOfWires'
+    ListOfCables = 'ListOfCables'
     AdmittanceMatrix = "Admittance Matrix"
     ImpedanceTripletList = "Impedance Triplet List"
     DaeBlockType = "DaeBlock"
@@ -4687,6 +4691,7 @@ class ResultTablePlotType(Enum):
     """
 
     SERIES = "SERIES"
+    POLAR = "POLAR"
     COMPLEX_POINTS = "COMPLEX_POINTS"
     COMPLEX_VECTORS = "COMPLEX_VECTORS"
 

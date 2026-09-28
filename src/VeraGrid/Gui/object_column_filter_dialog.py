@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from functools import partial
-from typing import List, Set
+from typing import List, Set, Callable
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -320,6 +320,8 @@ class ObjectColumnFilterDialog(QtWidgets.QDialog):
                  proxy_model: ObjectModelFilterProxy,
                  source_column: int,
                  table_view: QtWidgets.QTableView,
+                 refresh_object_table_dependants_ptr: Callable[[], None] | None = None,
+                 global_position: QtCore.QPoint | None = None,
                  parent: QtWidgets.QWidget | None = None) -> None:
         """
         Constructor.
@@ -417,6 +419,11 @@ class ObjectColumnFilterDialog(QtWidgets.QDialog):
         layout.addLayout(grip_layout)
 
         self.fill_values()
+
+        if refresh_object_table_dependants_ptr is not None:
+            self.filters_changed.connect(refresh_object_table_dependants_ptr)
+        if global_position is not None:
+            self.show_at(global_position=global_position)
 
     def show_at(self, global_position: QtCore.QPoint) -> None:
         """

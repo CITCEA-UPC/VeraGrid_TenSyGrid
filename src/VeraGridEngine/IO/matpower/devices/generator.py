@@ -10,10 +10,47 @@ class MatpowerGenerator:
     """
     Class to parse and write generator data from MATPOWER .m files.
     """
-    def __init__(self):
+
+    __slots__ = (
+        "gen_bus",
+        "pg",
+        "qg",
+        "qmax",
+        "qmin",
+        "vg",
+        "mbase",
+        "gen_status",
+        "pmax",
+        "pmin",
+        "pc1",
+        "pc2",
+        "qc1min",
+        "qc1max",
+        "qc2min",
+        "qc2max",
+        "ramp_agc",
+        "ramp_10",
+        "ramp_30",
+        "ramp_q",
+        "apf",
+        "mu_pmax",
+        "mu_pmin",
+        "mu_qmax",
+        "mu_qmin",
+        "dispatchable_gen",
+        "fix_power_gen",
+        "name",
+        "StartupCost",
+        "ShutdownCost",
+        "Cost0",
+        "Cost",
+        "Cost2",
+    )
+
+    def __init__(self) -> None:
         # Initialize all attributes to default values
-        self.gen_bus = 0       # Bus number
-        self.pg = 0.0          # Real power output (MW)
+        self.gen_bus: int = 0       # Bus number
+        self.pg: float = 0.0          # Real power output (MW)
         self.qg = 0.0          # Reactive power output (MVAr)
         self.qmax = 0.0        # Maximum reactive power output (MVAr)
         self.qmin = 0.0        # Minimum reactive power output (MVAr)

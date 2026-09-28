@@ -12,6 +12,7 @@ from VeraGridEngine.Utils.Symbolic.block_helpers import tf_to_block
 
 
 class FrequencyLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

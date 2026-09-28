@@ -107,8 +107,8 @@ class HvdcVscGflRmsTemplate(TemplateDefinition):
         configuration["control1"] = control1.name
         configuration["control2"] = control2.name
         configuration["cdc"] = cdc
-        template.block.__dict__["_modal_template_kind"] = "hvdc_vsc_gfl_rms_v2"
-        template.block.__dict__["_modal_template_config"] = configuration
+        template.block.modal_template_kind = "hvdc_vsc_gfl_rms_v2"
+        template.block.modal_template_config = configuration
         return template
 
 

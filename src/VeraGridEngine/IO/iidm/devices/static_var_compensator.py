@@ -6,6 +6,13 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class StaticVarCompensator(IidmObject):
+    __slots__ = (
+        "id",
+        "bus",
+        "bMin",
+        "bMax",
+        "voltageSetPoint",
+    )
     def __init__(self, id: str, bus: str, bMin: float, bMax: float, voltageSetPoint: float):
         super().__init__("StaticVarCompensator")
         self.id = id

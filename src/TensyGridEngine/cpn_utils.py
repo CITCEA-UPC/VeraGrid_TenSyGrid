@@ -21,7 +21,7 @@ where:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import scipy
@@ -265,6 +265,10 @@ class CpnSystem:
         eqs_list: Equation strings (for inspection/export)
         orig_keep_idx: Maps local variable indices back to original problem variables
         x0: Initial guess from power flow (full length)
+        pinned_vars: Variables eliminated during simplification mapped to the
+            constant value they were pinned to (e.g. {'Idc': 0.0, 'Vpv': 1.0}).
+        raw_eqs_list: Equation strings before simplification (after parameter
+            substitution and dx/dt=0), for reporting/documentation.
     """
     S: sparse.csc_matrix
     Phi: sparse.csr_matrix
@@ -272,6 +276,8 @@ class CpnSystem:
     eqs_list: list[str]
     orig_keep_idx: np.ndarray
     x0: np.ndarray
+    pinned_vars: dict[str, float] = field(default_factory=dict)
+    raw_eqs_list: list[str] = field(default_factory=list)
 
 
 def build_var_names(problem_ml) -> tuple[list[str], dict[int, str]]:
@@ -441,7 +447,7 @@ def cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
     return S, Phi, vars_list, eqs_list, orig_keep_idx
 
 
-def simplify_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
+def simplify_system(S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=None):
     """Remove trivially satisfied or redundant equations iteratively.
 
     Detects and removes:
@@ -459,6 +465,9 @@ def simplify_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
 
     Returns:
         Simplified S, Phi, vars_list, eqs_list, orig_keep_idx
+
+    If ``pinned`` is a dict, every variable fixed to zero is recorded there
+    as ``{variable_name: 0.0}``.
     """
     import re
 
@@ -513,7 +522,10 @@ def simplify_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
                 eq_drop.add(i)
                 vn = _extract_var_name(eq_str)
                 if vn and vn in vars_list:
-                    var_drop.add(vars_list.index(vn))
+                    vi = vars_list.index(vn)
+                    var_drop.add(vi)
+                    if pinned is not None:
+                        pinned[vars_list[vi]] = 0.0
             elif is_trivial:
                 eq_drop.add(i)
 
@@ -545,7 +557,7 @@ def simplify_system(S, Phi, vars_list, eqs_list, orig_keep_idx):
     return cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx)
 
 
-def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
+def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=None):
     """Substitute variables pinned to constant values and remove their equations.
 
     Detects equations of the form ``var - constant`` (with or without parentheses,
@@ -555,6 +567,9 @@ def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
 
     Returns:
         Updated S, Phi, vars_list, eqs_list, orig_keep_idx
+
+    If ``pinned`` is a dict, every substituted variable is recorded there as
+    ``{variable_name: constant_value}``.
     """
     import re
 
@@ -569,7 +584,7 @@ def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
         (re.compile(r'^-\(' + _VAR + r'\)\s+-\s+' + _NUM + r'$'), -1),
     ]
 
-    pinned: list[tuple[int | None, float, int]] = []
+    pins: list[tuple[int | None, float, int]] = []
     eq_only_drop: set[int] = set()
 
     for i, eq_str in enumerate(eqs_list):
@@ -581,18 +596,20 @@ def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
                 const_val = sign * float(m.group(2))
                 if var_name in vars_list:
                     var_idx = vars_list.index(var_name)
-                    pinned.append((var_idx, const_val, i))
+                    pins.append((var_idx, const_val, i))
                 else:
                     eq_only_drop.add(i)
                 break
 
-    if not pinned and not eq_only_drop:
+    if not pins and not eq_only_drop:
         return S, Phi, vars_list, eqs_list, orig_keep_idx
 
     S_csc = S.tocsc()
     eq_rows_to_drop: set[int] = set()
 
-    for var_idx, const_val, eq_idx in pinned:
+    for var_idx, const_val, eq_idx in pins:
+        if pinned is not None:
+            pinned[vars_list[var_idx]] = float(const_val)
         monom_cols = S_csc.getrow(var_idx).nonzero()[1]
         for j in monom_cols:
             s_ij = S_csc[var_idx, j]
@@ -607,7 +624,7 @@ def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
     Phi = Phi[eq_keep, :]
     eqs_list = [eqs_list[i] for i in eq_keep]
 
-    var_drop = {pv[0] for pv in pinned}
+    var_drop = {pv[0] for pv in pins}
     var_keep = np.array([i for i in range(S.shape[0]) if i not in var_drop])
     S = S[var_keep, :]
     vars_list = [vars_list[i] for i in var_keep]
@@ -616,7 +633,130 @@ def substitute_pinned_constants(S, Phi, vars_list, eqs_list, orig_keep_idx):
     return cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx)
 
 
-def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
+def merge_duplicate_monomials(S, Phi):
+    """Merge monomial columns that share an identical S vector.
+
+    After parameter substitution and variable pinning, several columns can
+    represent the same monomial function of v (e.g. two different constant
+    columns, or two columns left equal once a variable row is removed). They
+    are combined by summing their Phi coefficients, which exposes algebraic
+    cancellation that would otherwise stay hidden as separate columns, e.g.
+    ``(-1000.0) + (1.0) * (Idc) + (1000.0)`` reduces to ``(1.0) * (Idc)``.
+
+    Returns:
+        S_new, Phi_new with identical monomial columns collapsed.
+    """
+    S_csc = S.tocsc()
+    n_eqs = Phi.shape[0]
+    n_mon = S.shape[1]
+
+    sig_to_new: dict[bytes, int] = {}
+    sig_to_col: dict[bytes, int] = {}
+    col_map = np.empty(n_mon, dtype=np.int64)
+    for j in range(n_mon):
+        start = S_csc.indptr[j]
+        end = S_csc.indptr[j + 1]
+        sig = (S_csc.indices[start:end].tobytes(), S_csc.data[start:end].tobytes())
+        new = sig_to_new.get(sig, -1)
+        if new == -1:
+            new = len(sig_to_new)
+            sig_to_new[sig] = new
+            sig_to_col[sig] = j
+        col_map[j] = new
+
+    n_new = len(sig_to_new)
+    if n_new == n_mon:
+        return S, Phi
+
+    # Keep, for each signature, the ORIGINAL column where it was first seen.
+    # This keeps S_new and Phi_new (built with col_map = new index) aligned:
+    # S_new[:, k] holds the monomial of Phi_new[:, k].
+    first_cols = [sig_to_col[sig] for sig in sig_to_new]
+    S_new = S_csc[:, first_cols]
+
+    rows: list[int] = []
+    cols: list[int] = []
+    data: list[float] = []
+    Phi_csc = Phi.tocsc()
+    for j in range(n_mon):
+        new_j = int(col_map[j])
+        start = Phi_csc.indptr[j]
+        end = Phi_csc.indptr[j + 1]
+        for p in range(start, end):
+            rows.append(int(Phi_csc.indices[p]))
+            cols.append(new_j)
+            data.append(Phi_csc.data[p])
+    Phi_new = sparse.coo_matrix((data, (rows, cols)), shape=(n_eqs, n_new)).tocsr()
+    Phi_new.eliminate_zeros()
+
+    return S_new, Phi_new
+
+
+def pin_vars_from_scaled_equations(S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=None):
+    """Pin to zero variables whose equation collapses to ``c * var = 0``.
+
+    ``simplify_system`` detects ``var = 0`` only from explicit string patterns.
+    Once duplicate monomials are merged, an equation may reduce to a single
+    scaled variable (``(-1000.0) + (1.0) * (Idc) + (1000.0)`` -> ``Idc``) even
+    though no raw string match exists. This step detects that case
+    structurally: a Phi row with exactly one nonzero monomial whose S column
+    contains a single variable with exponent +-1 fixes that variable to zero.
+
+    Runs in a fixpoint because pinning one variable can collapse further
+    equations (e.g. ``Pdc - Idc`` becomes ``Pdc`` once Idc = 0).
+
+    Returns:
+        Updated S, Phi, vars_list, eqs_list, orig_keep_idx
+
+    If ``pinned`` is a dict, every variable fixed to zero here is recorded
+    as ``{variable_name: 0.0}``.
+    """
+    for _ in range(50):
+        pinned_idx: set[int] = set()
+        eq_drop: set[int] = set()
+
+        Phi = Phi.tocsr()
+        S = S.tocsc()
+        for i in range(Phi.shape[0]):
+            row = Phi.getrow(i)
+            nz = row.nonzero()[1]
+            if len(nz) != 1:
+                continue
+            col = S.getcol(int(nz[0]))
+            if col.getnnz() != 1:
+                continue
+            if abs(float(col.data[0])) != 1.0:
+                continue
+            vi = int(col.nonzero()[0][0])
+            pinned_idx.add(vi)
+            if pinned is not None:
+                pinned[vars_list[vi]] = 0.0
+            eq_drop.add(i)
+
+        if not pinned_idx:
+            break
+
+        S_csc = S.tocsc()
+        for vi in pinned_idx:
+            for j in S_csc.getrow(vi).nonzero()[1]:
+                s_ij = S_csc[vi, j]
+                alpha = 1.0 - abs(s_ij)
+                if alpha != 1.0:
+                    Phi[:, j] = Phi[:, j] * alpha
+
+        eq_keep = np.array([i for i in range(Phi.shape[0]) if i not in eq_drop])
+        Phi = Phi[eq_keep, :]
+        eqs_list = [eqs_list[i] for i in eq_keep]
+
+        var_keep = np.array([i for i in range(S.shape[0]) if i not in pinned_idx])
+        S = S[var_keep, :]
+        vars_list = [vars_list[i] for i in var_keep]
+        orig_keep_idx = orig_keep_idx[var_keep]
+
+    return cleanup_system(S, Phi, vars_list, eqs_list, orig_keep_idx)
+
+
+def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0, pinned=None):
     """Handle variables that don't appear in any monomial (free variables).
 
     A variable is "free" if its row in S is all zeros — it doesn't participate
@@ -628,6 +768,9 @@ def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
 
     Returns:
         Updated S, Phi, vars_list, eqs_list, orig_keep_idx
+
+    If ``pinned`` is a dict, the handled variables are recorded there with
+    the value they were fixed to (x0 value or 0.0).
     """
     free_mask = S.getnnz(axis=1) == 0
     free_local = np.where(free_mask)[0]
@@ -647,6 +790,8 @@ def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
             for li in nonzero_free:
                 oi = orig_keep_idx[li]
                 var_name = vars_list[li]
+                if pinned is not None:
+                    pinned[var_name] = float(x0[oi])
                 eq_col = S.shape[1]
                 col_data = sparse.csc_matrix(([1.0], ([li], [0])), shape=(S.shape[0], 1))
                 S = sparse.hstack([S, col_data], format='csc')
@@ -658,6 +803,9 @@ def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
         zero_var_rows = set(free_local) - set(nonzero_free)
 
     if zero_var_rows:
+        for i in zero_var_rows:
+            if pinned is not None:
+                pinned[vars_list[i]] = 0.0
         keep = np.array([i for i in range(S.shape[0]) if i not in zero_var_rows])
         S = S[keep, :]
         vars_list = [vars_list[i] for i in keep]
@@ -666,7 +814,7 @@ def handle_free_variables(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
     return S, Phi, vars_list, eqs_list, orig_keep_idx
 
 
-def pin_vars_without_trivial_monomials(S, Phi, vars_list, eqs_list, orig_keep_idx, x0):
+def pin_vars_without_trivial_monomials(S, Phi, vars_list, eqs_list, orig_keep_idx, x0, pinned=None):
     """Substitute variables that lost their trivial monomial with their x0 value.
 
     After simplification, some variables may not have a trivial monomial (a
@@ -679,6 +827,9 @@ def pin_vars_without_trivial_monomials(S, Phi, vars_list, eqs_list, orig_keep_id
     the variable rows from S. This is the same approach as
     ``substitute_pinned_constants`` but triggered by structural analysis
     (missing trivial monomial) rather than equation pattern matching.
+
+    If ``pinned`` is a dict, each substituted variable is recorded there with
+    its x0 value.
     """
     n_vars, n_mon = S.shape
     if n_vars <= n_mon:
@@ -700,6 +851,8 @@ def pin_vars_without_trivial_monomials(S, Phi, vars_list, eqs_list, orig_keep_id
     S_csc = S.tocsc()
     for vi in orphaned:
         const_val = float(x0[orig_keep_idx[vi]])
+        if pinned is not None:
+            pinned[vars_list[vi]] = const_val
         monom_cols = S_csc.getrow(vi).nonzero()[1]
         for j in monom_cols:
             s_ij = S_csc[vi, j]
@@ -777,6 +930,7 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
 
     vars_list, uid_to_name = build_var_names(problem_ml)
     orig_keep_idx = np.arange(n_sa)
+    pinned_vars: dict[str, float] = {}
 
     if zero_derivatives:
         S_vars = problem_ml.S[:n_sa, :]
@@ -819,6 +973,7 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
         all_raw_eqs = [eq.subs(subs_map).simplify() for eq in problem_ml.get_state_eqs + problem_ml.get_algebraic_eqs]
 
     eqs_list, keep_eq_mask = build_eqs_list(all_raw_eqs, uid_to_name, deduplicate=jaume_flag)
+    raw_eqs_list = list(eqs_list)
 
     n_dropped_eqs = np.sum(~keep_eq_mask)
     print(f"  dedup: {len(eqs_list)} eqs from {len(all_raw_eqs)} raw (dropped {n_dropped_eqs} duplicates)")
@@ -846,12 +1001,20 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
             n_vars_before = S.shape[0]
             n_mon_before = S.shape[1]
 
+            S, Phi = merge_duplicate_monomials(S, Phi)
+
             S, Phi, vars_list, eqs_list, orig_keep_idx = simplify_system(
-                S, Phi, vars_list, eqs_list, orig_keep_idx
+                S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=pinned_vars
             )
 
             S, Phi, vars_list, eqs_list, orig_keep_idx = substitute_pinned_constants(
-                S, Phi, vars_list, eqs_list, orig_keep_idx
+                S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=pinned_vars
+            )
+
+            # Pin variables whose equation reduces to c*var = 0 only AFTER
+            # duplicate monomial columns (e.g. cancelling constants) are merged.
+            S, Phi, vars_list, eqs_list, orig_keep_idx = pin_vars_from_scaled_equations(
+                S, Phi, vars_list, eqs_list, orig_keep_idx, pinned=pinned_vars
             )
 
             n_eqs_after = Phi.shape[0]
@@ -869,7 +1032,7 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
                 break
 
         S, Phi, vars_list, eqs_list, orig_keep_idx = handle_free_variables(
-            S, Phi, vars_list, eqs_list, orig_keep_idx, x0
+            S, Phi, vars_list, eqs_list, orig_keep_idx, x0, pinned=pinned_vars
         )
         print(f"  free-vars: S={S.shape} Phi={Phi.shape}")
 
@@ -879,7 +1042,7 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
         print(f"  rank-reduce: S={S.shape} Phi={Phi.shape}")
 
         S, Phi, vars_list, eqs_list, orig_keep_idx = pin_vars_without_trivial_monomials(
-            S, Phi, vars_list, eqs_list, orig_keep_idx, x0
+            S, Phi, vars_list, eqs_list, orig_keep_idx, x0, pinned=pinned_vars
         )
         print(f"  pin-orphans: S={S.shape} Phi={Phi.shape}")
 
@@ -891,7 +1054,8 @@ def process_cpn_system(problem_ml, jaume_flag=True, zero_derivatives=True) -> Cp
     eqs_list = regenerate_eqs_list(S, Phi, vars_list)
 
     return CpnSystem(S=S, Phi=Phi, vars_list=vars_list, eqs_list=eqs_list,
-                     orig_keep_idx=orig_keep_idx, x0=x0)
+                     orig_keep_idx=orig_keep_idx, x0=x0, pinned_vars=pinned_vars,
+                     raw_eqs_list=raw_eqs_list)
 
 
 def remove_numerically_satisfied(S, Phi, vars_list, eqs_list, orig_keep_idx, x0, tol=1e-10):

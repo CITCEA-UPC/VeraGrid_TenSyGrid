@@ -313,7 +313,8 @@ class GridDiffDialogue(QtWidgets.QDialog):
         _, ok = self._current_grid.get_all_elements_dict(logger=self.logger)
 
         if not ok:
-            dlg = LogsDialogue(self.tr('The circuit has duplicated idtags and cannot be differentiated :('), self.logger)
+            dlg = LogsDialogue(self.tr('The circuit has duplicated idtags and cannot be differentiated :('),
+                               self.logger, parent=self)
             exec_dialog_safely(dialog=dlg)
             return
 
@@ -407,7 +408,7 @@ class GridDiffDialogue(QtWidgets.QDialog):
 
                         if thread.logger.has_logs():
                             dlg = LogsDialogue(self.tr('Errors while computing the differential :('),
-                                               thread.logger)
+                                               thread.logger, parent=self)
                             exec_dialog_safely(dialog=dlg)
                     else:
                         pass

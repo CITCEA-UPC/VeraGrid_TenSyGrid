@@ -28,6 +28,7 @@ WINDING3_FIELDS = [
 
 class RawTransformerV33(RawTransformerV32):
     """PSSE v33 typed object inheriting v32."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📐 Grid Modelling &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>📐 Grid Modelling &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -173,21 +173,38 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#line">Line</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#model">π model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#series-impedance">Series Impedance</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#shunt-admittance">Shunt Admittance</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#krons-reduction">Kron’s reduction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#line-definition-example">Line definition example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#definition-of-a-line-from-the-wire-configuration">Definition of a line from the wire configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id30">Registered properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-electrical-model">Common electrical model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#model">π model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#phase-matrices-length-and-per-unit-conversion">Phase matrices, length and per-unit conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#overhead-lines">Overhead lines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#series-impedance">Series impedance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shunt-admittance">Shunt admittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ground-wire-reduction">Ground-wire reduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#line-definition-example">Line definition example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#definition-of-a-line-from-the-wire-configuration">Definition of a line from the wire configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#underground-lines">Underground lines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cable-construction-and-system-geometry">Cable construction and system geometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id30">Series impedance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id31">Shunt admittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grounded-sheath-reduction">Grounded-sheath reduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#phase-and-sequence-matrices">Phase and sequence matrices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#definition-from-the-gui">Definition from the GUI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#definition-from-python">Definition from Python</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id32">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#dcline">DcLine</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id31">Registered properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id33">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#winding">Winding</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id32">Registered properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id34">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#transformer2w">Transformer2W</a><ul>
@@ -195,19 +212,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#transformer-definition-example">Transformer definition example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#transformer-definition-from-sc-test-values">Transformer definition from SC test values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inverse-definition-of-sc-values-from-model">Inverse definition of SC values from π model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id33">Registered properties</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transformer3w">Transformer3W</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id34">Registered properties</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transformernw">TransformerNW</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id35">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#seriesreactance">SeriesReactance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#transformer3w">Transformer3W</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id36">Registered properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transformernw">TransformerNW</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id37">Registered properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#seriesreactance">SeriesReactance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id38">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#hvdcline">HvdcLine</a><ul>
@@ -215,195 +232,208 @@
 <li class="toctree-l4"><a class="reference internal" href="#controls-available">Controls available</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id37">Registered properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id39">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#vsc">VSC</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#solvability-rules">Solvability rules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id38">Controls available</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id40">Controls available</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#putting-it-all-together">Putting it all together</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bus-example">6-bus example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id39">Registered properties</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#upfc">UPFC</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id40">Registered properties</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#switch">Switch</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id41">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#wire">Wire</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#upfc">UPFC</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id42">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#overheadlinetype">OverheadLineType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#switch">Switch</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id43">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#undergroundlinetype">UndergroundLineType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#wire">Wire</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id44">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#sequencelinetype">SequenceLineType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overheadlinetype">OverheadLineType</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id45">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#transformertype">TransformerType</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#undergroundcabletype">UndergroundCableType</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#identification-and-rating">Identification and rating</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dimensions">Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conducting-materials-and-correction-factors">Conducting materials and correction factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#insulation-materials">Insulation materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-scope-and-catalogue-reuse">Supported scope and catalogue reuse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id46">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#branchgroup">BranchGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#undergroundlinetype">UndergroundLineType</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#system-identification-environment-and-rating">System identification, environment and rating</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#positioned-cable-inputs">Positioned cable inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sequence-only-inputs-and-calculated-results">Sequence-only inputs and calculated results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validation-and-applying-a-template">Validation and applying a template</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id47">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#facility">Facility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sequencelinetype">SequenceLineType</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id48">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#modellingauthority">ModellingAuthority</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#transformertype">TransformerType</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id49">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#technology">Technology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#branchgroup">BranchGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id50">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fuel">Fuel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#facility">Facility</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id51">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#emissiongas">EmissionGas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modellingauthority">ModellingAuthority</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id52">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#owner">Owner</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#technology">Technology</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id53">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#contingencygroup">ContingencyGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fuel">Fuel</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id54">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#contingency">Contingency</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#emissiongas">EmissionGas</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id55">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#remedialactiongroup">RemedialActionGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#owner">Owner</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id56">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#remedialaction">RemedialAction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contingencygroup">ContingencyGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id57">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#shortcircuitevent">ShortCircuitEvent</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contingency">Contingency</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id58">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#investmentsgroup">InvestmentsGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#remedialactiongroup">RemedialActionGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id59">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#investment">Investment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#remedialaction">RemedialAction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id60">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fluidnode">FluidNode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#shortcircuitevent">ShortCircuitEvent</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id61">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fluidpath">FluidPath</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#investmentsgroup">InvestmentsGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id62">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fluidturbine">FluidTurbine</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#investment">Investment</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id63">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fluidpump">FluidPump</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fluidnode">FluidNode</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id64">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fluidp2x">FluidP2x</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fluidpath">FluidPath</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id65">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#rmseventsgroup">RmsEventsGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fluidturbine">FluidTurbine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id66">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#rmsevent">RmsEvent</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fluidpump">FluidPump</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id67">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#emteventsgroup">EmtEventsGroup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fluidp2x">FluidP2x</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id68">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#emtevent">EmtEvent</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rmseventsgroup">RmsEventsGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id69">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#rmsmodeltemplate">RmsModelTemplate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rmsevent">RmsEvent</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id70">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#emtmodeltemplate">EmtModelTemplate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#emteventsgroup">EmtEventsGroup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id71">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fmutemplate">FmuTemplate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#emtevent">EmtEvent</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id72">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#pimeasurement">PiMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rmsmodeltemplate">RmsModelTemplate</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id73">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#qimeasurement">QiMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#emtmodeltemplate">EmtModelTemplate</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id74">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#pfmeasurement">PfMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fmutemplate">FmuTemplate</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id75">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#qfmeasurement">QfMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pimeasurement">PiMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id76">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#ifmeasurement">IfMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qimeasurement">QiMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id77">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#ptmeasurement">PtMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pfmeasurement">PfMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id78">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#qtmeasurement">QtMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qfmeasurement">QfMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id79">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#itmeasurement">ItMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ifmeasurement">IfMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id80">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#vmmeasurement">VmMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ptmeasurement">PtMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id81">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#vameasurement">VaMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qtmeasurement">QtMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id82">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#pgmeasurement">PgMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#itmeasurement">ItMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id83">Registered properties</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#qgmeasurement">QgMeasurement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vmmeasurement">VmMeasurement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id84">Registered properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#vameasurement">VaMeasurement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id85">Registered properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pgmeasurement">PgMeasurement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id86">Registered properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qgmeasurement">QgMeasurement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id87">Registered properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#distribution-grid-example-in-the-sequence-reference-frame">Distribution Grid Example in the Sequence Reference Frame</a><ul>
@@ -2319,7 +2349,7 @@ in parallel with the generator’s impedance, as shown in the schematic bellow:<
 </section>
 <section id="id10">
 <h3>Registered properties<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
-<p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">shift_key</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Pf</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost2</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost0</span></code>, <code class="docutils literal notranslate"><span class="pre">enabled_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">must_run</span></code>, <code class="docutils literal notranslate"><span class="pre">market_unit</span></code>, <code class="docutils literal notranslate"><span class="pre">market_unit_share</span></code>, <code class="docutils literal notranslate"><span class="pre">srap_enabled</span></code>.</p>
+<p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">shift_key</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Pf</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost2</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost0</span></code>, <code class="docutils literal notranslate"><span class="pre">enabled_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">must_run</span></code>, <code class="docutils literal notranslate"><span class="pre">srap_enabled</span></code>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>name</p></th>
@@ -3069,24 +3099,6 @@ in parallel with the generator’s impedance, as shown in the schematic bellow:<
 <td><p></p></td>
 <td><p>List of fuels</p></td>
 <td><p>False</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>market_unit</p></td>
-<td><p>Market unit</p></td>
-<td><p></p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Market unit associated to this generator.</p></td>
-<td><p>True</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>market_unit_share</p></td>
-<td><p>float</p></td>
-<td><p>p.u.</p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Participation share of the generator inside the market unit.</p></td>
-<td><p>True</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>srap_enabled</p></td>
@@ -3126,7 +3138,7 @@ in parallel with the generator’s impedance, as shown in the schematic bellow:<
 <p>This device connects to a bus and contributes power, current, or admittance to the solved network model.</p>
 <section id="id11">
 <h3>Registered properties<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
-<p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">shift_key</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Pf</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost2</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost0</span></code>, <code class="docutils literal notranslate"><span class="pre">enabled_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">must_run</span></code>, <code class="docutils literal notranslate"><span class="pre">market_unit</span></code>, <code class="docutils literal notranslate"><span class="pre">market_unit_share</span></code>, <code class="docutils literal notranslate"><span class="pre">srap_enabled</span></code>.</p>
+<p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">shift_key</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Pmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmin</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmax</span></code>, <code class="docutils literal notranslate"><span class="pre">Pf</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost2</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost0</span></code>, <code class="docutils literal notranslate"><span class="pre">enabled_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">must_run</span></code>, <code class="docutils literal notranslate"><span class="pre">srap_enabled</span></code>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>name</p></th>
@@ -3876,24 +3888,6 @@ in parallel with the generator’s impedance, as shown in the schematic bellow:<
 <td><p></p></td>
 <td><p>List of fuels</p></td>
 <td><p>False</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>market_unit</p></td>
-<td><p>Market unit</p></td>
-<td><p></p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Market unit associated to this generator.</p></td>
-<td><p>True</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>market_unit_share</p></td>
-<td><p>float</p></td>
-<td><p>p.u.</p></td>
-<td><p>False</p></td>
-<td><p></p></td>
-<td><p>Participation share of the generator inside the market unit.</p></td>
-<td><p>True</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>srap_enabled</p></td>
@@ -7893,20 +7887,38 @@ the admittance value for the active phase, for instance phase <img class="math" 
 </section>
 <section id="line">
 <h2>Line<a class="headerlink" href="#line" title="Link to this heading"></a></h2>
-<p>Power lines are essential in delivering electricity from generation to loads. They consist of phase conductors
-positioned above the ground, sometimes using it as a return path, which must be considered in parameter calculations.
-Transmission lines may use bundled conductors and ground wires, while distribution lines can include a neutral return.
-Both types can introduce geometric and electrical unbalances. Accurate modelling aims to calculate voltage drops and
-losses, based on determining the per-unit-length parameters: resistance <img class="math" src="../_images/math/1ebe654cc7b8f2a0d8100aa5825cf2b9021adbbc.svg" alt="R"/>, inductance <img class="math" src="../_images/math/19eef1966f7c545af3ac8c0fa486974d873e3c65.svg" alt="L"/>, conductance <img class="math" src="../_images/math/89878909dbb648acdc4a44ded1bd982d7bddef5d.svg" alt="G"/>,
-and capacitance <img class="math" src="../_images/math/4db5b6e16e06f929ce3f675c5e535d06ffb02ff7.svg" alt="C"/>.</p>
-<div style="text-align: center;">
-    <img src="https://github.com/SanPen/VeraGrid/blob/master/doc/md_source/figures/3ph_power_line.png?raw=true"
-    alt="Power line geometric arrangement"
-    title="Power line geometric arrangement"
-    width="30%"/>
-</div>
+<p>VeraGrid uses the same <code class="docutils literal notranslate"><span class="pre">Line</span></code> branch for overhead and underground AC lines. Both connect two buses and use a
+series impedance and a shunt admittance; their physical construction determines how these parameters are calculated.
+The reusable catalogue objects are distinct from the branch installed in the network:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Overhead lines</p></th>
+<th class="head"><p>Underground lines</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Conductor or cable construction</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Wire</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UndergroundCableType</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Geometry and per-unit-length electrical parameters</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OverheadLineType</span></code> (Tower)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UndergroundLineType</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Connection between buses, length and applied template</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Line</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Line</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The <a class="reference internal" href="#undergroundcabletype"><span class="std std-ref">underground cable construction</span></a> and
+<a class="reference internal" href="#undergroundlinetype"><span class="std std-ref">underground line template</span></a> catalogue entries describe all their input parameters.
+The following sections explain the common electrical model and the calculation specific to each technology.</p>
+<section id="common-electrical-model">
+<h3>Common electrical model<a class="headerlink" href="#common-electrical-model" title="Link to this heading"></a></h3>
 <section id="model">
-<h3>π model<a class="headerlink" href="#model" title="Link to this heading"></a></h3>
+<h4>π model<a class="headerlink" href="#model" title="Link to this heading"></a></h4>
 <p>Transmission lines are mathematically modelled to describe their electrical behaviour. The inductive and resistive
 effects of multiconductor lines are represented by a series impedance matrix, while capacitive effects are modelled as
 a shunt admittance matrix. Together, these form the basis of the <img class="math" src="../_images/math/9cc8517129c87252edd7fe2e4532af9dcf7a54d9.svg" alt="\pi"/>-equivalent model commonly used in power system
@@ -7923,22 +7935,14 @@ studies.</p>
 <li><p>Shunt admittance: <img class="math" src="../_images/math/f8c3c0d183fb47ff71b59c1247182ea594c2c78c.svg" alt="Y_{\text{shunt}} = G + jB"/></p></li>
 </ul>
 <p>In the <img class="math" src="../_images/math/9cc8517129c87252edd7fe2e4532af9dcf7a54d9.svg" alt="\pi"/>-model, <img class="math" src="../_images/math/1ebe654cc7b8f2a0d8100aa5825cf2b9021adbbc.svg" alt="R"/> represents conductor resistance, <img class="math" src="../_images/math/ed38fa24f1c94891bd312012aab3f6673be3eb83.svg" alt="X"/> the self and mutual inductive reactances, <img class="math" src="../_images/math/89878909dbb648acdc4a44ded1bd982d7bddef5d.svg" alt="G"/> the shunt
-conductance through insulation, and <img class="math" src="../_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.svg" alt="B"/> the shunt susceptance from line capacitance. Shunt admittance is divided between
-the ends, with series impedance in the middle. While the single-phase model is common, unbalanced systems require a 5-wire
-representation, the three-phase conductors (<img class="math" src="../_images/math/b3e65e3b6408fcfa00452530b73f55d1755f9965.svg" alt="a"/>, <img class="math" src="../_images/math/68c7c8c65602677ab56cf7fd88002023f0edc575.svg" alt="b"/>, <img class="math" src="../_images/math/d520a12f1579170834c32ad5f656de081bbb36fe.svg" alt="c"/>), the neutral (<img class="math" src="../_images/math/5a939c5280da7202ca4531f175a7780ad5e1f80a.svg" alt="n"/>), and the ground (<img class="math" src="../_images/math/157ba5711de84b4c715a0478fd8ae440e596d96e.svg" alt="g"/>). The neutral returns
-unbalanced current and stabilises voltage, while the ground provides a fault current path for safety. Each conductor
-has its own impedance, and mutual coupling between all conductors requires a <img class="math" src="../_images/math/7d8efe4ed104f4015e7339d9c2a6f9c2978639ae.svg" alt="5\times 5"/> impedance or admittance matrix.</p>
-<div class="math">
-<p><img src="../_images/math/a430d999fcaa140b15c793a8cb63931ee3e05e83.svg" alt="\vec{Z} =
-\begin{bmatrix}
-\vec{Z}_{aa} &amp; \vec{Z}_{ab} &amp; \vec{Z}_{ac} &amp; \vec{Z}_{an} &amp; \vec{Z}_{ag} \\
-\vec{Z}_{ba} &amp; \vec{Z}_{bb} &amp; \vec{Z}_{bc} &amp; \vec{Z}_{bn} &amp; \vec{Z}_{bg} \\
-\vec{Z}_{ca} &amp; \vec{Z}_{cb} &amp; \vec{Z}_{cc} &amp; \vec{Z}_{cn} &amp; \vec{Z}_{cg} \\
-\vec{Z}_{na} &amp; \vec{Z}_{nb} &amp; \vec{Z}_{nc} &amp; \vec{Z}_{nn} &amp; \vec{Z}_{ng} \\
-\vec{Z}_{ga} &amp; \vec{Z}_{gb} &amp; \vec{Z}_{gc} &amp; \vec{Z}_{gn} &amp; \vec{Z}_{gg} \\
-\end{bmatrix}"/></p>
-</div><p>In most transmission lines, the neutral conductor is absent as it is earthed at both ends. The ground return effect can
-be incorporated into the phase impedance, allowing the line to be represented with a simplified <img class="math" src="../_images/math/7356a12d46f4b6eebf0229ca08278f85f541c8d8.svg" alt="3\times 3"/> matrix.</p>
+conductance through insulation, and <img class="math" src="../_images/math/4bc3e94a67870b41b7c20179693e889251e2c136.svg" alt="B"/> the shunt susceptance from line capacitance. Half of the total shunt admittance
+is placed at each end, with series impedance in the middle.</p>
+</section>
+<section id="phase-matrices-length-and-per-unit-conversion">
+<h4>Phase matrices, length and per-unit conversion<a class="headerlink" href="#phase-matrices-length-and-per-unit-conversion" title="Link to this heading"></a></h4>
+<p>Matrix dimensions depend on the conductors represented, not on a universal five-wire assumption. A primitive matrix
+retains individual conductors, including any ground wires or metallic sheaths. After the appropriate grounding
+conditions and reductions, a complete three-phase circuit has a <img class="math" src="../_images/math/63222ab7d3f9b10f77272678400b760488762fe6.svg" alt="3\times3"/> phase matrix:</p>
 <div class="math">
 <p><img src="../_images/math/8ba3440b63bad4e68ab6b411036ff868fe090650.svg" alt="\vec{Z} =
 \begin{bmatrix}
@@ -7946,9 +7950,31 @@ be incorporated into the phase impedance, allowing the line to be represented wi
 \vec{Z}_{ba} &amp; \vec{Z}_{bb} &amp; \vec{Z}_{bc} \\
 \vec{Z}_{ca} &amp; \vec{Z}_{cb} &amp; \vec{Z}_{cc}
 \end{bmatrix}"/></p>
-</div></section>
+</div><p>Single- and two-phase circuits retain only their represented phases. A metallic sheath is not a fourth phase or an
+explicit network neutral. Phase matrices preserve geometrical asymmetry and mutual coupling, which cannot generally
+be replaced by a single positive-sequence impedance.</p>
+<p>Use primes for quantities per unit length: <img class="math" src="../_images/math/1f360609d1924e50e1b95caf88bbdec5543c7449.svg" alt="Z'"/> in <img class="math" src="../_images/math/8b79605e88e6ebb950c74a1319cdc046dae2069c.svg" alt="\Omega"/>/km and <img class="math" src="../_images/math/677d0ca815abff1924b09dc821db5fa5f2b9d8ad.svg" alt="Y'"/> in S/km. For a branch of length <img class="math" src="../_images/math/bfd74f09749ef7fb6d498c407ff2c57d9523e958.svg" alt="\ell"/> in km,
+with voltage base <img class="math" src="../_images/math/eb7412b2f4d6449372043496fdc0fb559164d496.svg" alt="V_b"/> in kV and three-phase power base <img class="math" src="../_images/math/078ca4d015c3c12e497c2e3b8b910cb006d4e2e8.svg" alt="S_b"/> in MVA:</p>
+<div class="math">
+<p><img src="../_images/math/125f6d5d51c79be5f23a936187a4eee671f93e70.svg" alt="Z_b=\frac{V_b^2}{S_b},\qquad Z_{\mathrm{pu}}=\frac{\ell Z'}{Z_b},\qquad
+Y_{\mathrm{sh,pu}}=\ell Y' Z_b,\qquad Y_{\mathrm{s,pu}}=Z_{\mathrm{pu}}^{-1}."/></p>
+</div><p>The two diagonal blocks of the branch nodal admittance are <img class="math" src="../_images/math/bfc5b72ee96e58ea123075d2ae7ed47c3a2c0fda.svg" alt="Y_{\mathrm{s,pu}}+Y_{\mathrm{sh,pu}}/2"/>;
+the off-diagonal blocks are <img class="math" src="../_images/math/ae0b9ac9231328073358e315b89eeaed07d7cf77.svg" alt="-Y_{\mathrm{s,pu}}"/>. The connected-bus voltage supplies the base when applying a template.
+The cable builder displays admittance in <img class="math" src="../_images/math/4a3598141469c2555591e66606a1b86d4ec6dca9.svg" alt="\mu"/>S/km, whereas the template’s numerical admittance matrices use S/km.
+The branch stores <code class="docutils literal notranslate"><span class="pre">ys</span></code> in p.u. and <code class="docutils literal notranslate"><span class="pre">ysh</span></code> in micro-p.u.; the compiler converts the latter before splitting it between ends.</p>
+</section>
+</section>
+<section id="overhead-lines">
+<h3>Overhead lines<a class="headerlink" href="#overhead-lines" title="Link to this heading"></a></h3>
+<p>Overhead lines consist of conductors above ground, possibly with bundled phase conductors, an explicit neutral or
+ground wires. Conductor heights and spacings, internal impedance and the earth-return path determine the parameters.</p>
+<div style="text-align: center;">
+    <img src="https://github.com/SanPen/VeraGrid/blob/master/doc/md_source/figures/3ph_power_line.png?raw=true"
+    alt="Overhead conductor arrangement"
+    width="30%"/>
+</div>
 <section id="series-impedance">
-<h3>Series Impedance<a class="headerlink" href="#series-impedance" title="Link to this heading"></a></h3>
+<h4>Series impedance<a class="headerlink" href="#series-impedance" title="Link to this heading"></a></h4>
 <p>Carson’s equations calculate the series self and mutual impedances of overhead transmission lines, accounting for the
 ground return path. They assume long, horizontally arranged conductors with average height for sag effects, homogeneous
 and lossless free space, uniform earth properties, and conductor spacing much greater than conductor radius to neglect
@@ -7982,21 +8008,24 @@ proximity effects. The impedance matrix elements are derived from the tower geom
 to the earth return path.</p>
 </section>
 <section id="shunt-admittance">
-<h3>Shunt Admittance<a class="headerlink" href="#shunt-admittance" title="Link to this heading"></a></h3>
+<h4>Shunt admittance<a class="headerlink" href="#shunt-admittance" title="Link to this heading"></a></h4>
 <p>Just as series impedance accounts for resistance and inductance, shunt admittance includes capacitance between
 conductors and ground, and between conductors themselves. Under the assumptions of lossless air, uniformly grounded
 earth, and conductor radii much smaller than inter-conductor spacing, these capacitances can be modelled mathematically
 to compute the corresponding shunt admittances.</p>
 <div class="math">
-<p><img src="../_images/math/9c024db82439b64c0254ef746ec85798969a66cc.svg" alt="\vec{Y}_{ii} = j\frac{\omega}{2 \pi \varepsilon_0} \ln{\frac{2 h_i}{r_i}}
-    \label{eq:self_Y}"/></p>
+<p><img src="../_images/math/0e998780cd7fa4520d4e4d6792088e026f72ba31.svg" alt="P_{ii} = \frac{1}{2 \pi \varepsilon_0} \ln{\frac{2 h_i}{r_i}}"/></p>
 </div><div class="math">
-<p><img src="../_images/math/f7baf4da8c8701532ebd479ea6747a8bb5275b39.svg" alt="\vec{Y}_{ij} = j\frac{\omega}{2 \pi \varepsilon_0} \ln{\frac{D_{ij}}{d_{ij}}}
-    \label{eq:mutual_Y}"/></p>
-</div><p>Where <img class="math" src="../_images/math/a3349d8ae750ca7151f04916e4edc8d3c1e6174e.svg" alt="\varepsilon_0 = \dfrac{1}{\mu_0 c^2} \approx 8,85 \cdot 10^{-12}"/> F/m is the free space permittivity.</p>
+<p><img src="../_images/math/79a09672410d9e5d474d026528aedd24d7dce8cf.svg" alt="P_{ij} = \frac{1}{2 \pi \varepsilon_0} \ln{\frac{D_{ij}}{d_{ij}}}"/></p>
+</div><p>These expressions form Maxwell’s potential-coefficient matrix <img class="math" src="../_images/math/c2aa3dff9bffb099e9dff196fd36aed56ec16baf.svg" alt="P"/>, not the admittance matrix itself. With
+<img class="math" src="../_images/math/49fbe1cad6cd7524515ae61b30c678230963c363.svg" alt="\varepsilon_0=8.854187817\cdot10^{-9}"/> F/km, <img class="math" src="../_images/math/c2aa3dff9bffb099e9dff196fd36aed56ec16baf.svg" alt="P"/> is in km/F. After conductor bundling and any grounded-conductor
+elimination in the potential formulation, the shunt admittance is:</p>
+<div class="math">
+<p><img src="../_images/math/87f46895ea57b7834eb20bf8c928017ea416c7f4.svg" alt="C'=P^{-1},\qquad Y'=j\omega P^{-1}\quad[\mathrm{S/km}]."/></p>
+</div><p>The inversion is a matrix inversion, not an element-by-element reciprocal.</p>
 </section>
-<section id="krons-reduction">
-<h3>Kron’s reduction<a class="headerlink" href="#krons-reduction" title="Link to this heading"></a></h3>
+<section id="ground-wire-reduction">
+<h4>Ground-wire reduction<a class="headerlink" href="#ground-wire-reduction" title="Link to this heading"></a></h4>
 <p>Kron’s reduction, or node elimination, is a technique from network theory used to simplify a multi-node electrical
 network by eliminating certain nodes, often called internal or passive nodes, while preserving the electrical
 behaviour at the remaining nodes.</p>
@@ -8044,7 +8073,7 @@ first row of the system:</p>
 incorporating the effect of the eliminated ground nodes <img class="math" src="../_images/math/157ba5711de84b4c715a0478fd8ae440e596d96e.svg" alt="g"/>, which were assumed to be held at 0 V.</p>
 </section>
 <section id="line-definition-example">
-<h3>Line definition example<a class="headerlink" href="#line-definition-example" title="Link to this heading"></a></h3>
+<h4>Line definition example<a class="headerlink" href="#line-definition-example" title="Link to this heading"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -8081,8 +8110,8 @@ incorporating the effect of the eliminated ground nodes <img class="math" src=".
 <span class="c1"># Line Configuration</span>
 <span class="c1"># ----------------------------------------------------------------------------------------------------------------------</span>
 <span class="n">config_601</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">create_known_abc_overhead_template</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Config. 601&#39;</span><span class="p">,</span>
-                                                    <span class="n">z_abc</span><span class="o">=</span><span class="n">z_601</span><span class="p">,</span>
-                                                    <span class="n">ysh_abc</span><span class="o">=</span><span class="n">y_601</span><span class="p">,</span>
+                                                    <span class="n">z_nabc</span><span class="o">=</span><span class="n">z_601</span><span class="p">,</span>
+                                                    <span class="n">ysh_nabc</span><span class="o">=</span><span class="n">y_601</span><span class="p">,</span>
                                                     <span class="n">phases</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
                                                     <span class="n">Vnom</span><span class="o">=</span><span class="mf">4.16</span><span class="p">,</span>
                                                     <span class="n">frequency</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
@@ -8100,7 +8129,7 @@ incorporating the effect of the eliminated ground nodes <img class="math" src=".
 </div>
 </section>
 <section id="definition-of-a-line-from-the-wire-configuration">
-<h3>Definition of a line from the wire configuration<a class="headerlink" href="#definition-of-a-line-from-the-wire-configuration" title="Link to this heading"></a></h3>
+<h4>Definition of a line from the wire configuration<a class="headerlink" href="#definition-of-a-line-from-the-wire-configuration" title="Link to this heading"></a></h4>
 <p><strong>Definition of the exercise</strong></p>
 <p>In this tutorial we are going to define a 3-phase line with 4 wires of two different types.</p>
 <p>The cable types are the following:</p>
@@ -8190,8 +8219,256 @@ be displayed and the results will appear in the following tabs.</p>
 <p><img alt="" src="../_images/editorY.png" /></p>
 <p>When closed, the values are applied to the overhead line catalogue type that we were editing.</p>
 </section>
+</section>
+<section id="underground-lines">
+<h3>Underground lines<a class="headerlink" href="#underground-lines" title="Link to this heading"></a></h3>
+<p>An underground system is built from positioned instances of <code class="docutils literal notranslate"><span class="pre">UndergroundCableType</span></code>. Each instance represents a
+single-core cable with a solid conducting core and one concentric tubular metallic sheath. Main insulation separates
+the two conductors; outer insulation separates the sheath from the surrounding earth. Thus there are two conducting
+layers and two dielectric regions. The model below assumes direct burial in homogeneous, nonmagnetic soil and
+ideal grounding of the sheaths when forming the phase-only equivalent.</p>
+<section id="cable-construction-and-system-geometry">
+<h4>Cable construction and system geometry<a class="headerlink" href="#cable-construction-and-system-geometry" title="Link to this heading"></a></h4>
+<p><img alt="Cable layers and positive burial-depth convention; schematic, not to scale" src="../_images/underground_cable_geometry.svg" /></p>
+<p>Let <img class="math" src="../_images/math/937d2dd6ed453e894690c0f7eced573dffce57ff.svg" alt="r_c"/> denote the core radius, <img class="math" src="../_images/math/f6b60a932ef6c962b6d46673bdab9eea933a767e.svg" alt="r_{si}"/> and <img class="math" src="../_images/math/6780db2e342793c436c05c89a2a89f1c97c980d0.svg" alt="r_{so}"/> the inner and outer sheath radii, and <img class="math" src="../_images/math/6209e135628232779952b01d98552fd58587a58f.svg" alt="r_o"/> the overall
+cable radius. From the construction inputs, expressed in mm:</p>
+<div class="math">
+<p><img src="../_images/math/82b4065db79d6b4fba27c43fc9cfc670bf02be22.svg" alt="r_c=\frac{d_c}{2},\qquad r_{si}=r_c+t_i,\qquad r_{so}=r_{si}+t_s,\qquad
+r_o=\frac{d_{\mathrm{cable}}}{2},\qquad t_o=r_o-r_{so}."/></p>
+</div><p>Here <img class="math" src="../_images/math/07bba9f8139c0f4279b9ebe3afd6683292a10be9.svg" alt="d_c"/> is <code class="docutils literal notranslate"><span class="pre">core_diameter</span></code>, <img class="math" src="../_images/math/f655bd7f2c801f6c308297962160678a2e5f6c20.svg" alt="t_i"/> is <code class="docutils literal notranslate"><span class="pre">main_insulation_thickness</span></code>, <img class="math" src="../_images/math/e0d5eedab4c227de4dcfb98e2481ed57e4867a29.svg" alt="t_s"/> is <code class="docutils literal notranslate"><span class="pre">sheath_thickness</span></code> and
+<img class="math" src="../_images/math/8063a13dffd985f9afc0f5cc6626e7b4fd60a2ff.svg" alt="d_{\mathrm{cable}}"/> is <code class="docutils literal notranslate"><span class="pre">cable_diameter</span></code>. The outer insulation thickness <img class="math" src="../_images/math/5b3a10f7f69f4c7ba154fd73e1e7539391b9033e.svg" alt="t_o"/> is derived, not an independent input.
+The electromagnetic equations below use radii in metres, so these dimensions are multiplied by <img class="math" src="../_images/math/b9de9d024a16d559af1ef48a5811fb1941c527bb.svg" alt="10^{-3}"/> first.
+Physically valid concentric layers require <img class="math" src="../_images/math/9ba345a5441742712c186b34a802652ceb40d95e.svg" alt="0&lt;r_c&lt;r_{si}&lt;r_{so}&lt;r_o"/>.</p>
+<p>Each cable centre has horizontal coordinate <img class="math" src="../_images/math/c67734af70861b2bd4dedf5c41c9aad231466f84.svg" alt="x_i"/> and <strong>positive burial depth</strong> <img class="math" src="../_images/math/b6e2c1bc7d8a8ef8bc3878348c32e442f102d286.svg" alt="h_i"/>, both in metres.
+For two distinct cables:</p>
+<div class="math">
+<p><img src="../_images/math/9d5561b8471decf8c675f002de0ec3e1e27fc0d3.svg" alt="d_{ij}=\sqrt{(x_i-x_j)^2+(h_i-h_j)^2},\qquad
+D_{ij}=\sqrt{(x_i-x_j)^2+(h_i+h_j)^2},\qquad
+\theta_{ij}=\arccos\frac{h_i+h_j}{D_{ij}}."/></p>
+</div><p><img class="math" src="../_images/math/5bdf1fa41ceecdb702cfd02af595cf5039d32194.svg" alt="D_{ij}"/> is the distance to the other cable’s image across the earth surface. For a self term, the earth-return
+calculation uses <img class="math" src="../_images/math/cbc2d275815da3658da2693e5748edaa4a3aa5c2.svg" alt="d_{ii}=r_{o,i}"/>, <img class="math" src="../_images/math/ea6cc8d255e70ee9c00ff9a67c5dec29ad5cdc35.svg" alt="D_{ii}=2h_i"/> and <img class="math" src="../_images/math/d8d987b8d609c396a9e045df9dc7960156acb7d8.svg" alt="\theta_{ii}=0"/>.</p>
+</section>
 <section id="id30">
-<h3>Registered properties<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<h4>Series impedance<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
+<p><strong>Material properties and core.</strong> The effective resistivity of each conducting layer is</p>
+<div class="math">
+<p><img src="../_images/math/72fcef52733c8c456e87750031c9f03a2056df41.svg" alt="\rho=\frac{10^{-8}\rho_{\mu\Omega\mathrm{cm}}}{C_f/100}\quad[\Omega\,\mathrm{m}],\qquad
+\mu=\mu_0\mu_r,\qquad \mu_0=4\pi\,10^{-7}\ \mathrm{H/m},\qquad \omega=2\pi f."/></p>
+</div><p><img class="math" src="../_images/math/5e998cc1e7ab825c2a7af04180dd1ad2ea6892b8.svg" alt="C_f"/> is the conducting filling factor in percent, <strong>not capacitance</strong>. It accounts for the conducting fraction
+of the geometric cross-section. Resistance is calculated from material resistivity and geometry; the informational
+<code class="docutils literal notranslate"><span class="pre">core_dc_resistance</span></code> does not replace it.</p>
+<p>Using modified Bessel functions <img class="math" src="../_images/math/d9e9f12867495c4bbbc81fcec66f5bf6734a89da.svg" alt="I_\nu"/> and <img class="math" src="../_images/math/32a947e28288a0fb4bab662644b189e6882ede27.svg" alt="K_\nu"/>, the solid-core surface impedance is</p>
+<div class="math">
+<p><img src="../_images/math/de85acacae42a8f01904a05b1324d318254dda33.svg" alt="m_c=\sqrt{\frac{j\omega\mu_c}{\rho_c}}\sqrt{k_s},\qquad
+z_c=1000\frac{\rho_c m_c}{2\pi r_c}\frac{I_0(m_c r_c)}{I_1(m_c r_c)}\quad[\Omega/\mathrm{km}]."/></p>
+</div><p>The factor <img class="math" src="../_images/math/91c0f87a76cc87d29a20e04bf1e1429bc458da7b.svg" alt="k_s"/> is <code class="docutils literal notranslate"><span class="pre">skin_effect_factor</span></code>; the factor 1000 converts impedance per metre to impedance per kilometre.
+No proximity-effect correction is applied by this calculation.</p>
+<p><strong>Metallic sheath.</strong> For the sheath propagation constant <img class="math" src="../_images/math/85de3da95ba6343eea27e598ca3136ffbec1ab63.svg" alt="m_s=\sqrt{j\omega\mu_s/\rho_s}"/>, define
+<img class="math" src="../_images/math/3f2dd045b61a6f252de56ea1ed2c3698e0327791.svg" alt="u=m_s r_{si}"/>, <img class="math" src="../_images/math/bb87b75924c0612cafd074de7bb6f185d6ad4e87.svg" alt="v=m_s r_{so}"/> and <img class="math" src="../_images/math/d4a4108abc5013743bd328a9d8dd040ca252d1ae.svg" alt="\Delta=I_1(v)K_1(u)-I_1(u)K_1(v)"/>. Its inner, outer and mutual
+surface impedances, respectively, are</p>
+<div class="math">
+<p><img src="../_images/math/713b8d7bf371903e787d1f18a476fd61e274ff96.svg" alt="z_{si}=1000\frac{\rho_s m_s}{2\pi r_{si}}
+\frac{I_0(u)K_1(v)+K_0(u)I_1(v)}{\Delta},"/></p>
+</div><div class="math">
+<p><img src="../_images/math/11447c5d6b0f04a491e66b8d496e5194d8822022.svg" alt="z_{so}=1000\frac{\rho_s m_s}{2\pi r_{so}}
+\frac{I_0(v)K_1(u)+K_0(v)I_1(u)}{\Delta},\qquad
+z_{sm}=1000\frac{\rho_s}{2\pi r_{si}r_{so}\Delta}."/></p>
+</div><p><strong>Insulating regions and internal matrix.</strong> The longitudinal magnetic-field contribution of an insulating annulus is</p>
+<div class="math">
+<p><img src="../_images/math/69ccd7d1c860fc163b4371bd4809e1c047b9d75f.svg" alt="z_{\mathrm{ins}}(r_1,r_2)=1000\frac{j\omega\mu_0}{2\pi}\ln\frac{r_2}{r_1}."/></p>
+</div><p>This is an inductive contribution to the series model, not a current flowing through the dielectric.
+Set <img class="math" src="../_images/math/7545145b82273c1dc859ad88cfe2f8cf98b72f78.svg" alt="L_{11}=z_c+z_{\mathrm{ins}}(r_c,r_{si})+z_{si}"/>,
+<img class="math" src="../_images/math/0556d4389cb38a192bb3082a4461099ff1d2909d.svg" alt="L_{22}=z_{so}+z_{\mathrm{ins}}(r_{so},r_o)"/> and <img class="math" src="../_images/math/20dc00a9a60c031846f5900d19f04afa8bdb47e6.svg" alt="L_{12}=-z_{sm}"/>.
+Transforming the two coaxial loop equations to core/sheath conductor quantities gives</p>
+<div class="math">
+<p><img src="../_images/math/5cd7b6ec9a56041ba7f9dc1a1e93d0ef7bc1aa68.svg" alt="Z'_{\mathrm{int}}=
+\begin{bmatrix}
+L_{11}+2L_{12}+L_{22}&amp;L_{12}+L_{22}\\
+L_{12}+L_{22}&amp;L_{22}
+\end{bmatrix}."/></p>
+</div><p><strong>Earth return.</strong> With soil resistivity <img class="math" src="../_images/math/161b8e46367ff60eb44127d71294f7cf7a52fcc3.svg" alt="\rho_e"/> in <img class="math" src="../_images/math/8b79605e88e6ebb950c74a1319cdc046dae2069c.svg" alt="\Omega"/> m, conductivity <img class="math" src="../_images/math/daf078e1261eb72de243515b08731df6780ecd4b.svg" alt="\sigma_e=1/\rho_e"/> in S/m and
+<img class="math" src="../_images/math/497d4aa4d3a8f477a41501bd27f6cf27d7263862.svg" alt="m_e=\sqrt{j\omega\mu_0\sigma_e}"/>, the earth-return contribution is</p>
+<div class="math">
+<p><img src="../_images/math/5aa5124c3123e6b09b8126a44b8c7dc022039902.svg" alt="z'_{e,ij}=1000\left[
+\frac{j\omega\mu_0}{2\pi}\left(K_0(m_e d_{ij})-K_0(m_e D_{ij})\right)
++\frac{\omega\mu_0}{\pi}\left(P(\alpha_{ij},\theta_{ij})+jQ(\alpha_{ij},\theta_{ij})\right)
+\right],\qquad \alpha_{ij}=D_{ij}\sqrt{\omega\mu_0\sigma_e}."/></p>
+</div><p><img class="math" src="../_images/math/c2aa3dff9bffb099e9dff196fd36aed56ec16baf.svg" alt="P"/> and <img class="math" src="../_images/math/90cab5ae70bdb6e45756490226ba488f522c4c4e.svg" alt="Q"/> are the Carson correction coefficients. The implementation evaluates their small-argument expansion
+through eighth order in <code class="docutils literal notranslate"><span class="pre">calculate_carson_coefficients()</span></code>; its stated range is <img class="math" src="../_images/math/6882dec627502da8504141fc5f07c7d7e65faff4.svg" alt="\alpha&lt;5"/>. It does not implement a
+separate large-argument branch. See the numerical scope note below for the additional fixed self-term adjustment.</p>
+<p><strong>Primitive assembly.</strong> For <img class="math" src="../_images/math/5a939c5280da7202ca4531f175a7780ad5e1f80a.svg" alt="n"/> cables, order the conductors as
+<img class="math" src="../_images/math/52ced21055f620187a0f695fb957febe02239817.svg" alt="[c_1,\ldots,c_n,s_1,\ldots,s_n]"/>: all cores first, then all sheaths. With the earth-return matrix <img class="math" src="../_images/math/1815f600df7845409443aed470eac2d449e4ddb0.svg" alt="E"/> and each
+cable’s internal matrix entries, the <img class="math" src="../_images/math/706979de95cd6e2c39a6e2de51e0a08505001eaa.svg" alt="2n\times2n"/> series matrix is</p>
+<div class="math">
+<p><img src="../_images/math/7cc6471c78e4c8b26532448ec240e6f098912918.svg" alt="Z'_{\mathrm{primitive}}=
+\begin{bmatrix}
+E+\operatorname{diag}(Z'_{\mathrm{int},11})&amp;E+\operatorname{diag}(Z'_{\mathrm{int},12})\\
+E+\operatorname{diag}(Z'_{\mathrm{int},12})&amp;E+\operatorname{diag}(Z'_{\mathrm{int},22})
+\end{bmatrix}."/></p>
+</div><p>Thus three single-core cables produce a <img class="math" src="../_images/math/d21c1bc0a2579e3fb65212bddf608e3ff825acb4.svg" alt="6\times6"/> primitive matrix, not a six-phase circuit.</p>
+</section>
+<section id="id31">
+<h4>Shunt admittance<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
+<p>The main and outer coaxial capacitances per metre are</p>
+<div class="math">
+<p><img src="../_images/math/fb947c9281b14ca9712a5dc53b5e1e545ad710a5.svg" alt="C'_m=\frac{2\pi\varepsilon_0\varepsilon_{r,m}}{\ln(r_{si}/r_c)},\qquad
+C'_o=\frac{2\pi\varepsilon_0\varepsilon_{r,o}}{\ln(r_o/r_{so})},\qquad
+\varepsilon_0=8.854187817\cdot10^{-12}\ \mathrm{F/m}."/></p>
+</div><p>For each insulating region, relative permittivity controls capacitance and loss tangent controls dielectric losses:</p>
+<div class="math">
+<p><img src="../_images/math/d5f89cf226a47fa552d628fac98bf6e39e830465.svg" alt="y'=1000\,\omega C'(\tan\delta+j)\quad[\mathrm{S/km}]."/></p>
+</div><p>Here <img class="math" src="../_images/math/eb307471190c12752201077046ec3a94305f9c66.svg" alt="\tan\delta"/> is dimensionless, not a percentage. With diagonal matrices <img class="math" src="../_images/math/4f252cd92c0abefd0f7b5c033e73028011e10cea.svg" alt="Y_m"/> and <img class="math" src="../_images/math/4036dd1550fc7f9086a4223cab1f8bbf18c086df.svg" alt="Y_o"/> containing these
+main and outer admittances, the primitive matrix in the same core-then-sheath order is</p>
+<div class="math">
+<p><img src="../_images/math/edf18714f15a542f174c8ca9c034dd8bff4c593b.svg" alt="Y'_{\mathrm{primitive}}=
+\begin{bmatrix}Y_m&amp;-Y_m\\-Y_m&amp;Y_m+Y_o\end{bmatrix}."/></p>
+</div><p>This screened coaxial model has no direct electrostatic coupling between the cores of different cables.
+Both insulating regions are nevertheless present in the primitive matrix.</p>
+</section>
+<section id="grounded-sheath-reduction">
+<h4>Grounded-sheath reduction<a class="headerlink" href="#grounded-sheath-reduction" title="Link to this heading"></a></h4>
+<p>The phase-only model eliminates the sheaths under an ideal-grounding assumption. Partition the primitive series
+matrix into core and sheath blocks, indexed <img class="math" src="../_images/math/d520a12f1579170834c32ad5f656de081bbb36fe.svg" alt="c"/> and <img class="math" src="../_images/math/106b04b320e75010b1d8029e59244f234f75e6f9.svg" alt="s"/>. Setting the longitudinal sheath voltage drop to zero gives</p>
+<div class="math">
+<p><img src="../_images/math/2eaf42f856947b0297f72e16c657448289f50aeb.svg" alt="Z'_{\mathrm{phase}}=Z'_{cc}-Z'_{cs}(Z'_{ss})^{-1}Z'_{sc}."/></p>
+</div><p>For the shunt equations <img class="math" src="../_images/math/6f789d227f93993a1150852ebd480c143e85bbef.svg" alt="I_c=Y'_{cc}U_c+Y'_{cs}U_s"/>, ideal grounding means <img class="math" src="../_images/math/bfc759a664204f84ac9cfa8e9aa6a054a8ab0ce4.svg" alt="U_s=0"/>. Therefore</p>
+<div class="math">
+<p><img src="../_images/math/4b508c855c34a0fef35fa0b31eef7c8a263b2c34.svg" alt="Y'_{\mathrm{phase}}=Y'_{cc}=Y_m."/></p>
+</div><p>The shunt reduction is <strong>not</strong> the Schur complement used for series impedance. In particular, outer-insulation
+permittivity and loss tangent affect the primitive shunt matrix but not the reduced core shunt matrix under this
+grounding assumption. Finite sheath-earthing impedance, single-point bonding and cross-bonding are not represented.</p>
+</section>
+<section id="phase-and-sequence-matrices">
+<h4>Phase and sequence matrices<a class="headerlink" href="#phase-and-sequence-matrices" title="Link to this heading"></a></h4>
+<p>The reduced matrices keep the phase ordering defined by the cable composition. For each complete ABC circuit,
+symmetrical components are obtained without transposing or averaging the physical geometry:</p>
+<div class="math">
+<p><img src="../_images/math/947f363a604ae541079f70c57949e3068d9eac7b.svg" alt="A=\begin{bmatrix}1&amp;1&amp;1\\1&amp;a^2&amp;a\\1&amp;a&amp;a^2\end{bmatrix},\qquad a=e^{j2\pi/3},\qquad
+Z'_{012}=A^{-1}Z'_{abc}A,\qquad Y'_{012}=A^{-1}Y'_{abc}A."/></p>
+</div><p>The sequence order is zero, positive, negative. Multiple complete circuits use a block-diagonal transformation.
+Sequence matrices need not be diagonal for an asymmetric system. A single- or two-phase system retains its valid
+phase matrices but has no complete sequence representation. The scalar <code class="docutils literal notranslate"><span class="pre">R</span></code>, <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">R0</span></code>, <code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">B0</span></code> fields
+summarize diagonal sequence entries when available; they do not replace the full phase matrices in unbalanced studies.</p>
+</section>
+<section id="definition-from-the-gui">
+<h4>Definition from the GUI<a class="headerlink" href="#definition-from-the-gui" title="Link to this heading"></a></h4>
+<p>The following example uses three identical 10 kV cables with the construction defaults listed in
+<a class="reference internal" href="#undergroundcabletype"><span class="std std-ref">UndergroundCableType</span></a>.</p>
+<ol class="arabic">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">Model</span> <span class="pre">/</span> <span class="pre">Database</span> <span class="pre">-&gt;</span> <span class="pre">Catalogue</span> <span class="pre">-&gt;</span> <span class="pre">Underground</span> <span class="pre">cable</span> <span class="pre">type</span></code>, add an entry named <code class="docutils literal notranslate"><span class="pre">Demo</span> <span class="pre">cable</span></code>.
+Set <code class="docutils literal notranslate"><span class="pre">nominal</span> <span class="pre">voltage</span></code> to 10 kV. Keep the default 10 mm core diameter, 5 mm main insulation thickness,
+1 mm sheath thickness and 30 mm overall cable diameter, with the remaining material defaults.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">Catalogue</span> <span class="pre">-&gt;</span> <span class="pre">Underground</span> <span class="pre">line</span></code>, create <code class="docutils literal notranslate"><span class="pre">Buried</span> <span class="pre">circuit</span></code> and open its editor using the edit button.
+Set voltage to 10 kV, frequency to 50 Hz, earth resistivity to 100 <img class="math" src="../_images/math/8b79605e88e6ebb950c74a1319cdc046dae2069c.svg" alt="\Omega"/> m and rated current to 0.4 kA.</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">Demo</span> <span class="pre">cable</span></code> in the cable catalogue and press <code class="docutils literal notranslate"><span class="pre">+</span></code> three times. Set the composition rows to:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Cable</p></th>
+<th class="head text-right"><p>X (m)</p></th>
+<th class="head text-right"><p>Depth (m)</p></th>
+<th class="head text-right"><p>Phase</p></th>
+<th class="head text-right"><p>Derived circuit</p></th>
+<th class="head"><p>Derived phase name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Demo cable</p></td>
+<td class="text-right"><p>-0.15</p></td>
+<td class="text-right"><p>0.8</p></td>
+<td class="text-right"><p>1</p></td>
+<td class="text-right"><p>1</p></td>
+<td><p>A</p></td>
+</tr>
+<tr class="row-odd"><td><p>Demo cable</p></td>
+<td class="text-right"><p>0.00</p></td>
+<td class="text-right"><p>0.8</p></td>
+<td class="text-right"><p>2</p></td>
+<td class="text-right"><p>1</p></td>
+<td><p>B</p></td>
+</tr>
+<tr class="row-even"><td><p>Demo cable</p></td>
+<td class="text-right"><p>0.15</p></td>
+<td class="text-right"><p>0.8</p></td>
+<td class="text-right"><p>3</p></td>
+<td class="text-right"><p>1</p></td>
+<td><p>C</p></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li><p>Press the calculator button. Check the geometry and choose primitive, phase or sequence impedance/admittance
+in the matrix selector. Impedance is displayed in <img class="math" src="../_images/math/8b79605e88e6ebb950c74a1319cdc046dae2069c.svg" alt="\Omega"/>/km and admittance in <img class="math" src="../_images/math/4a3598141469c2555591e66606a1b86d4ec6dca9.svg" alt="\mu"/>S/km.</p></li>
+<li><p>Accept the cable-system editor. Double-click the network line in the schematic and open its <code class="docutils literal notranslate"><span class="pre">Line</span> <span class="pre">editor</span></code> tab.
+Choose <code class="docutils literal notranslate"><span class="pre">Buried</span> <span class="pre">circuit</span></code> under <code class="docutils literal notranslate"><span class="pre">Available</span> <span class="pre">templates</span></code>, then press <code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">template</span> <span class="pre">values</span></code>. Set length to 1 km
+and press the tab’s <code class="docutils literal notranslate"><span class="pre">Accept</span></code> button to apply the template. Selecting a combo-box entry alone does not load it.</p></li>
+</ol>
+<p>The line editor lists templates matching the connected-bus nominal voltage, so use 10 kV buses for this example.
+The current GUI applies circuit 1 for an underground template; it does not offer arbitrary underground circuit selection.</p>
+<p>The construction is shared catalogue data: editing it can affect several templates. Recalculate affected systems
+and reapply their templates to the branches after changing construction, geometry or frequency. Reapply the template
+after changing the branch length as well. An existing branch’s applied matrices must not be assumed to refresh merely
+because its template reference or a construction field changed.</p>
+</section>
+<section id="definition-from-python">
+<h4>Definition from Python<a class="headerlink" href="#definition-from-python" title="Link to this heading"></a></h4>
+<p>This example builds the same geometry without opening the GUI. The frequency of the system and the network agree;
+<code class="docutils literal notranslate"><span class="pre">Imax</span></code> is supplied as a rating, not computed from a thermal model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vg</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">underground_line_example</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a cable construction, calculate its system and apply it to a branch.</span>
+
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">MultiCircuit</span> <span class="o">=</span> <span class="n">vg</span><span class="o">.</span><span class="n">MultiCircuit</span><span class="p">()</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">fBase</span> <span class="o">=</span> <span class="mf">50.0</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">Logger</span> <span class="o">=</span> <span class="n">vg</span><span class="o">.</span><span class="n">Logger</span><span class="p">()</span>
+
+    <span class="c1"># The reusable construction describes layers, not their installation positions.</span>
+    <span class="n">cable</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">UndergroundCableType</span> <span class="o">=</span> <span class="n">vg</span><span class="o">.</span><span class="n">UndergroundCableType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Demo cable&quot;</span><span class="p">,</span> <span class="n">nominal_voltage</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+        <span class="n">core_diameter</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">main_insulation_thickness</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">sheath_thickness</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">cable_diameter</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">add_underground_cable</span><span class="p">(</span><span class="n">cable</span><span class="p">)</span>
+    <span class="n">system</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">UndergroundLineType</span> <span class="o">=</span> <span class="n">vg</span><span class="o">.</span><span class="n">UndergroundLineType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Buried circuit&quot;</span><span class="p">,</span> <span class="n">Vnom</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">Imax</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+        <span class="n">freq</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">earth_resistivity</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># One positioned instance per phase; depth is positive below the earth surface.</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">xpos</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="k">for</span> <span class="n">phase</span><span class="p">,</span> <span class="n">xpos</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">system</span><span class="o">.</span><span class="n">add_cable_relationship</span><span class="p">(</span><span class="n">cable</span><span class="o">=</span><span class="n">cable</span><span class="p">,</span> <span class="n">xpos</span><span class="o">=</span><span class="n">xpos</span><span class="p">,</span> <span class="n">ypos</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">)</span>
+    <span class="n">calculated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">calculated</span><span class="p">:</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_underground_line</span><span class="p">(</span><span class="n">system</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Z phase [ohm/km]:&quot;</span><span class="p">,</span> <span class="n">system</span><span class="o">.</span><span class="n">z_nabc</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Y phase [S/km]:&quot;</span><span class="p">,</span> <span class="n">system</span><span class="o">.</span><span class="n">y_nabc</span><span class="p">)</span>
+
+        <span class="c1"># Applying the template includes the branch length and the network base.</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">Bus</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_bus</span><span class="p">(</span><span class="n">vg</span><span class="o">.</span><span class="n">Bus</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Source&quot;</span><span class="p">,</span> <span class="n">Vnom</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+        <span class="n">destination</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">Bus</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_bus</span><span class="p">(</span><span class="n">vg</span><span class="o">.</span><span class="n">Bus</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Destination&quot;</span><span class="p">,</span> <span class="n">Vnom</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+        <span class="n">line</span><span class="p">:</span> <span class="n">vg</span><span class="o">.</span><span class="n">Line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span>
+            <span class="n">vg</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">bus_from</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">bus_to</span><span class="o">=</span><span class="n">destination</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">apply_template</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">Sbase</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">Sbase</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">fBase</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+
+
+<span class="n">underground_line_example</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>For this example, the primitive matrices are <img class="math" src="../_images/math/d21c1bc0a2579e3fb65212bddf608e3ff825acb4.svg" alt="6\times6"/> and the phase matrices are <img class="math" src="../_images/math/63222ab7d3f9b10f77272678400b760488762fe6.svg" alt="3\times3"/>.
+The reduced self-impedance of phase A is approximately <img class="math" src="../_images/math/c4144f898f549bd8f85d13c9287ed05322c427ee.svg" alt="0.36590254+j0.15735713"/> <img class="math" src="../_images/math/8b79605e88e6ebb950c74a1319cdc046dae2069c.svg" alt="\Omega"/>/km;
+its shunt susceptance is approximately 57.99 <img class="math" src="../_images/math/4a3598141469c2555591e66606a1b86d4ec6dca9.svg" alt="\mu"/>S/km. These are per-kilometre quantities, not per-unit branch values.</p>
+</section>
+</section>
+<section id="id32">
+<h3>Registered properties<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -8808,8 +9085,8 @@ be displayed and the results will appear in the following tabs.</p>
 <h2>DcLine<a class="headerlink" href="#dcline" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">DcLine</span></code> models a physical line inside a detailed DC grid, unlike the aggregated <code class="docutils literal notranslate"><span class="pre">HvdcLine</span></code> transfer model.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id31">
-<h3>Registered properties<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<section id="id33">
+<h3>Registered properties<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -9282,8 +9559,8 @@ be displayed and the results will appear in the following tabs.</p>
 <h2>Winding<a class="headerlink" href="#winding" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Winding</span></code> is one terminal element of a multi-winding transformer representation and is primarily used inside transformer assemblies.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id32">
-<h3>Registered properties<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<section id="id34">
+<h3>Registered properties<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_module</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_module_control_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Qset</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_phase</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_phase_control_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">Pset</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -10346,8 +10623,8 @@ Can only be computed if <img class="math" src="../_images/math/7ae72c8ad77113c5a
 </div><div class="math">
 <p><img src="../_images/math/62c4e09adb7e8bf5ad0478aa0d54128111ddc95a.svg" alt="I0 = 100 \cdot \sqrt{1 / r_{fe}^2 + 1 / xm^2}"/></p>
 </div></section>
-<section id="id33">
-<h3>Registered properties<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
+<section id="id35">
+<h3>Registered properties<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_module</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_module_control_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">vset</span></code>, <code class="docutils literal notranslate"><span class="pre">Qset</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_phase</span></code>, <code class="docutils literal notranslate"><span class="pre">tap_phase_control_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">Pset</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -11108,8 +11385,8 @@ Can only be computed if <img class="math" src="../_images/math/7ae72c8ad77113c5a
 <h2>Transformer3W<a class="headerlink" href="#transformer3w" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Transformer3W</span></code> stores a three-winding transformer and its associated winding objects.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id34">
-<h3>Registered properties<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
+<section id="id36">
+<h3>Registered properties<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -11609,8 +11886,8 @@ Can only be computed if <img class="math" src="../_images/math/7ae72c8ad77113c5a
 <h2>TransformerNW<a class="headerlink" href="#transformernw" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">TransformerNW</span></code> generalizes transformer representation to an arbitrary number of windings.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id35">
-<h3>Registered properties<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
+<section id="id37">
+<h3>Registered properties<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -11822,8 +12099,8 @@ Can only be computed if <img class="math" src="../_images/math/7ae72c8ad77113c5a
 <h2>SeriesReactance<a class="headerlink" href="#seriesreactance" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">SeriesReactance</span></code> is a branch whose main purpose is to model concentrated series reactance between buses.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id36">
-<h3>Registered properties<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
+<section id="id38">
+<h3>Registered properties<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -12379,8 +12656,8 @@ or have more than one cable at a time.</p>
 </div>
 </section>
 </section>
-<section id="id37">
-<h3>Registered properties<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
+<section id="id39">
+<h3>Registered properties<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>, <code class="docutils literal notranslate"><span class="pre">Pset</span></code>, <code class="docutils literal notranslate"><span class="pre">angle_droop</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset_f</span></code>, <code class="docutils literal notranslate"><span class="pre">Vset_t</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -12954,8 +13231,8 @@ add the 2 extra equations needed.</p></li>
 <p>Since we must ensure equal number of unknowns and equations globally,
 there is a control compatibility theory.</p>
 </section>
-<section id="id38">
-<h3>Controls available<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<section id="id40">
+<h3>Controls available<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
 <p>Steaming from the solvability rules, we can introduce the converter controls.
 For every converter we need to choose 2 controls to ensure solvability.</p>
 <table class="docutils align-default">
@@ -13168,8 +13445,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 </tbody>
 </table>
 </section>
-<section id="id39">
-<h3>Registered properties<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+<section id="id41">
+<h3>Registered properties<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>, <code class="docutils literal notranslate"><span class="pre">control1</span></code>, <code class="docutils literal notranslate"><span class="pre">control1_dev</span></code>, <code class="docutils literal notranslate"><span class="pre">control1_val</span></code>, <code class="docutils literal notranslate"><span class="pre">control1_val_droop</span></code>, <code class="docutils literal notranslate"><span class="pre">control1_droop_val</span></code>, <code class="docutils literal notranslate"><span class="pre">control2</span></code>, <code class="docutils literal notranslate"><span class="pre">control2_dev</span></code>, <code class="docutils literal notranslate"><span class="pre">control2_val</span></code>, <code class="docutils literal notranslate"><span class="pre">control2_val_droop</span></code>, <code class="docutils literal notranslate"><span class="pre">control2_droop_val</span></code>, <code class="docutils literal notranslate"><span class="pre">fault_control</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -13921,8 +14198,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>UPFC<a class="headerlink" href="#upfc" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">UPFC</span></code> models a unified power flow controller embedded in the AC network.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id40">
-<h3>Registered properties<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
+<section id="id42">
+<h3>Registered properties<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -14476,8 +14753,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Switch<a class="headerlink" href="#switch" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Switch</span></code> models a topological switching element that can open or close network connectivity.</p>
 <p>This device links terminals or represents a network element between buses.</p>
-<section id="id41">
-<h3>Registered properties<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
+<section id="id43">
+<h3>Registered properties<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>, <code class="docutils literal notranslate"><span class="pre">rate</span></code>, <code class="docutils literal notranslate"><span class="pre">contingency_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">protection_rating_factor</span></code>, <code class="docutils literal notranslate"><span class="pre">Cost</span></code>, <code class="docutils literal notranslate"><span class="pre">temp_oper</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -14950,8 +15227,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Wire<a class="headerlink" href="#wire" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Wire</span></code> stores conductor parameters used by overhead-line templates and geometry-based line calculations.</p>
 <p>This device stores reusable equipment data that can be applied to physical network elements.</p>
-<section id="id42">
-<h3>Registered properties<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
+<section id="id44">
+<h3>Registered properties<a class="headerlink" href="#id44" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -15109,8 +15386,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>OverheadLineType<a class="headerlink" href="#overheadlinetype" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">OverheadLineType</span></code> stores reusable conductor geometry and the derived impedance and admittance matrices for overhead lines.</p>
 <p>This device stores reusable equipment data that can be applied to physical network elements.</p>
-<section id="id43">
-<h3>Registered properties<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
+<section id="id45">
+<h3>Registered properties<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -15390,12 +15667,739 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 </table>
 </section>
 </section>
+<section id="undergroundcabletype">
+<h2>UndergroundCableType<a class="headerlink" href="#undergroundcabletype" title="Link to this heading"></a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">UndergroundCableType</span></code> is a reusable construction for one single-core underground cable. It describes two conducting layers, the core and its metallic sheath, separated by main insulation and surrounded by outer insulation. It does not define a route, burial depth, circuit arrangement or line length. Those belong to an <a class="reference internal" href="#undergroundlinetype"><span class="std std-ref">underground cable system</span></a> and its network line.</p>
+<p>All construction inputs are scalars: core and sheath properties have separate fields. The catalogue tables display Python property names with spaces instead of underscores. Unless marked otherwise below, these fields are editable. Defaults describe an initial construction, not a validated manufacturer’s cable or a calculated current rating.</p>
+<section id="identification-and-rating">
+<h3>Identification and rating<a class="headerlink" href="#identification-and-rating" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Catalogue name</p></td>
+<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Underground</span> <span class="pre">cable</span></code></p></td>
+<td><p>Editable label used when selecting and positioning this construction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">idtag</span></code></p></td>
+<td><p>Persistent identifier</p></td>
+<td><p>—</p></td>
+<td><p>Automatically generated</p></td>
+<td><p>Identifies the object and its references; normally leave the generated identifier unchanged.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">code</span></code></p></td>
+<td><p>User code</p></td>
+<td><p>—</p></td>
+<td><p>Empty</p></td>
+<td><p>Optional catalogue or equipment identifier; does not affect the calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<td><p>User comment</p></td>
+<td><p>—</p></td>
+<td><p>Empty</p></td>
+<td><p>Optional description or modelling notes; does not affect the calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code></p></td>
+<td><p>Rated cable voltage</p></td>
+<td><p>kV</p></td>
+<td><p>1.0</p></td>
+<td><p>Editable catalogue rating; not an input to the geometric impedance/admittance calculation. Set the system voltage separately using <code class="docutils literal notranslate"><span class="pre">UndergroundLineType.Vnom</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dimensions">
+<h3>Dimensions<a class="headerlink" href="#dimensions" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">core_diameter</span></code></p></td>
+<td><p>Core outer diameter</p></td>
+<td><p>mm</p></td>
+<td><p>10.0</p></td>
+<td><p>Outside diameter of the conducting core; used in the electrical geometry.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">core_internal_diameter</span></code></p></td>
+<td><p>Core inner diameter</p></td>
+<td><p>mm</p></td>
+<td><p>0.0</p></td>
+<td><p>Stored and editable, but currently has no effect on the calculated matrices. The implemented core impedance model is solid-core; leave this value at zero.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">main_insulation_thickness</span></code></p></td>
+<td><p>Main insulation thickness</p></td>
+<td><p>mm</p></td>
+<td><p>5.0</p></td>
+<td><p>Radial insulation thickness between the core surface and the inside of the metallic sheath.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sheath_thickness</span></code></p></td>
+<td><p>Metallic sheath thickness</p></td>
+<td><p>mm</p></td>
+<td><p>1.0</p></td>
+<td><p>Radial thickness of the conducting sheath, outside the main insulation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cable_diameter</span></code></p></td>
+<td><p>Overall cable diameter</p></td>
+<td><p>mm</p></td>
+<td><p>30.0</p></td>
+<td><p>Outside diameter including the outer insulation; determines the outer insulation thickness.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Outer insulation thickness is derived, not entered separately:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>outer thickness = (cable_diameter - core_diameter) / 2
+                  - main_insulation_thickness - sheath_thickness
+</pre></div>
+</div>
+<p>All quantities in this expression are in mm. The default dimensions give 4 mm of outer insulation. The main and outer insulation thicknesses must both be positive for a valid layered construction.</p>
+</section>
+<section id="conducting-materials-and-correction-factors">
+<h3>Conducting materials and correction factors<a class="headerlink" href="#conducting-materials-and-correction-factors" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">core_resistivity</span></code></p></td>
+<td><p>Core material resistivity</p></td>
+<td><p>μΩ·cm</p></td>
+<td><p>1.7241</p></td>
+<td><p>Resistivity at 20 °C used to calculate the core impedance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sheath_resistivity</span></code></p></td>
+<td><p>Sheath material resistivity</p></td>
+<td><p>μΩ·cm</p></td>
+<td><p>1.7241</p></td>
+<td><p>Resistivity at 20 °C used to calculate the sheath impedance.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">core_filling_factor</span></code></p></td>
+<td><p>Core conducting filling factor</p></td>
+<td><p>%</p></td>
+<td><p>100.0</p></td>
+<td><p>Percentage of the modelled core section occupied by conducting material. Effective resistivity is divided by this fraction; this is not a capacitance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sheath_filling_factor</span></code></p></td>
+<td><p>Sheath conducting filling factor</p></td>
+<td><p>%</p></td>
+<td><p>100.0</p></td>
+<td><p>Corresponding conducting fraction of the sheath section; applied to sheath resistivity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">core_relative_permeability</span></code></p></td>
+<td><p>Core relative magnetic permeability</p></td>
+<td><p>—</p></td>
+<td><p>1.0</p></td>
+<td><p>Dimensionless permeability relative to vacuum, used in the core internal impedance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sheath_relative_permeability</span></code></p></td>
+<td><p>Sheath relative magnetic permeability</p></td>
+<td><p>—</p></td>
+<td><p>1.0</p></td>
+<td><p>Dimensionless permeability used in the sheath internal impedance.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skin_effect_factor</span></code></p></td>
+<td><p>Core skin-effect factor</p></td>
+<td><p>—</p></td>
+<td><p>1.0</p></td>
+<td><p>Factor used in the frequency-dependent core internal impedance calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">core_dc_resistance</span></code></p></td>
+<td><p>Reference core DC resistance</p></td>
+<td><p>Ω/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Informational value at 20 °C, read-only in the catalogue tables. The geometric calculation uses dimensions, resistivity and filling factor instead.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">proximity_effect_factor</span></code></p></td>
+<td><p>Reference proximity-effect factor</p></td>
+<td><p>—</p></td>
+<td><p>1.0</p></td>
+<td><p>Informational, read-only in the catalogue tables; not used by the current calculation.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Use positive material resistivities and relative permeabilities. Filling factors are percentages, with physically meaningful values greater than zero and no greater than 100. There is no construction-temperature input: these material values are not automatically converted to another operating temperature by the geometric cable calculation.</p>
+</section>
+<section id="insulation-materials">
+<h3>Insulation materials<a class="headerlink" href="#insulation-materials" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">main_insulation_permittivity</span></code></p></td>
+<td><p>Main insulation relative permittivity</p></td>
+<td><p>—</p></td>
+<td><p>2.3</p></td>
+<td><p>Dimensionless dielectric permittivity between core and sheath; determines the main insulation capacitance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outer_insulation_permittivity</span></code></p></td>
+<td><p>Outer insulation relative permittivity</p></td>
+<td><p>—</p></td>
+<td><p>2.5</p></td>
+<td><p>Dimensionless dielectric permittivity between the sheath and the cable exterior.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">main_insulation_loss_tangent</span></code></p></td>
+<td><p>Main insulation loss tangent</p></td>
+<td><p>—</p></td>
+<td><p>0.0</p></td>
+<td><p>Dielectric loss tangent, tan δ, between core and sheath. Enter a fraction, not a percentage; zero represents lossless insulation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outer_insulation_loss_tangent</span></code></p></td>
+<td><p>Outer insulation loss tangent</p></td>
+<td><p>—</p></td>
+<td><p>0.0</p></td>
+<td><p>Corresponding loss tangent for the outer insulation.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The two outer-insulation material fields affect the primitive shunt matrix. With the implemented ideal-grounded-sheath reduction they do not affect the reduced core shunt matrix. See the <a class="reference internal" href="#underground-lines"><span class="std std-ref">underground line model</span></a> for the matrix definitions and grounding assumptions.</p>
+</section>
+<section id="supported-scope-and-catalogue-reuse">
+<h3>Supported scope and catalogue reuse<a class="headerlink" href="#supported-scope-and-catalogue-reuse" title="Link to this heading"></a></h3>
+<p>The construction model supports a solid core and one metallic sheath, not a third conducting layer such as armour or a separate additional screen. An unsupported layer must not be interpreted as another editable core or sheath parameter.</p>
+<p>The GUI and Python API use the same construction objects. Editing a catalogue construction changes that shared object for every system referencing it; it does not create an independent copy. Recalculate each affected system and reapply its template to the affected network lines before solving. The cable builder recalculates the system currently being edited, but does not automatically update every other system that uses the same construction.</p>
+</section>
+<section id="id46">
+<h3>Registered properties<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
+<p>Profile-enabled properties: none.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>class_type</p></th>
+<th class="head"><p>unit</p></th>
+<th class="head"><p>mandatory</p></th>
+<th class="head"><p>max_chars</p></th>
+<th class="head"><p>descriptions</p></th>
+<th class="head"><p>has_profile</p></th>
+<th class="head"><p>comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>idtag</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Unique ID</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Name of the device.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>code</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Secondary ID</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>rdfid</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>RDF ID for further compatibility</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>action</p></td>
+<td><p>enum ActionType</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Object action to perform. Only used for model merging.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>selected_to_merge</p></td>
+<td><p>bool</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Whether this object should be applied during diff merge.</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>comment</p></td>
+<td><p>str</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>User comment</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>diff_changes</p></td>
+<td><p>MergeInformation</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>nominal_voltage</p></td>
+<td><p>float</p></td>
+<td><p>kV</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Rated cable voltage</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_dc_resistance</p></td>
+<td><p>float</p></td>
+<td><p>Ohm/km</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Imported core DC resistance at 20 degrees Celsius; informational, not used by the geometric calculation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>core_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core outer diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_internal_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core inner diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>cable_diameter</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Overall cable diameter, including outer insulation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>sheath_thickness</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Metallic sheath thickness</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>main_insulation_thickness</p></td>
+<td><p>float</p></td>
+<td><p>mm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation thickness; outer insulation is derived from cable_diameter</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>uOhm*cm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core resistivity at 20 degrees Celsius</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>uOhm*cm</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath resistivity at 20 degrees Celsius</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_filling_factor</p></td>
+<td><p>float</p></td>
+<td><p>%</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core conducting filling factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_filling_factor</p></td>
+<td><p>float</p></td>
+<td><p>%</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath conducting filling factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>main_insulation_permittivity</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation relative permittivity</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>outer_insulation_permittivity</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Outer insulation relative permittivity</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>main_insulation_loss_tangent</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core-to-sheath insulation dielectric loss factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>outer_insulation_loss_tangent</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Outer insulation dielectric loss factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>core_relative_permeability</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core relative magnetic permeability</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>sheath_relative_permeability</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Sheath relative magnetic permeability</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>skin_effect_factor</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Core skin-effect factor</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>proximity_effect_factor</p></td>
+<td><p>float</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Imported core proximity-effect factor; informational, not used by this calculation</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
 <section id="undergroundlinetype">
 <h2>UndergroundLineType<a class="headerlink" href="#undergroundlinetype" title="Link to this heading"></a></h2>
-<p>An <code class="docutils literal notranslate"><span class="pre">UndergroundLineType</span></code> stores reusable cable data for underground line modelling.</p>
-<p>This device stores reusable equipment data that can be applied to physical network elements.</p>
-<section id="id44">
-<h3>Registered properties<a class="headerlink" href="#id44" title="Link to this heading"></a></h3>
+<p>An <code class="docutils literal notranslate"><span class="pre">UndergroundLineType</span></code> is a reusable underground line template. It can be defined either from positioned <a class="reference internal" href="#undergroundcabletype"><span class="std std-ref">cable constructions</span></a>, or directly from per-kilometre sequence parameters. A network <code class="docutils literal notranslate"><span class="pre">Line</span></code> then selects this template and supplies its buses, length and circuit index.</p>
+<section id="system-identification-environment-and-rating">
+<h3>System identification, environment and rating<a class="headerlink" href="#system-identification-environment-and-rating" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>System name</p></td>
+<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UndergroundLine</span></code></p></td>
+<td><p>Editable template name displayed in the catalogue and cable builder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">idtag</span></code></p></td>
+<td><p>Persistent identifier</p></td>
+<td><p>—</p></td>
+<td><p>Automatically generated</p></td>
+<td><p>Identifies the template and its references; normally leave unchanged.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">code</span></code></p></td>
+<td><p>User code</p></td>
+<td><p>—</p></td>
+<td><p>Empty</p></td>
+<td><p>Optional inherited identifier; assign after construction if needed. It is not a constructor argument for this class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<td><p>User comment</p></td>
+<td><p>—</p></td>
+<td><p>Empty</p></td>
+<td><p>Optional description or installation notes; does not affect the calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Vnom</span></code></p></td>
+<td><p>System rated voltage</p></td>
+<td><p>kV</p></td>
+<td><p>1.0</p></td>
+<td><p>System voltage rating, distinct from a construction’s <code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code>. Used as the voltage base when no connected-bus voltage is supplied.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Imax</span></code></p></td>
+<td><p>Rated current</p></td>
+<td><p>kA</p></td>
+<td><p>1.0</p></td>
+<td><p>User-supplied current rating, not calculated from cable dimensions or soil data. Applying the template converts this to a line power rating using the applicable voltage.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">freq</span></code></p></td>
+<td><p>Calculation frequency</p></td>
+<td><p>Hz</p></td>
+<td><p>50.0</p></td>
+<td><p>Frequency used in physical impedance and admittance calculations and capacitance-to-susceptance conversion.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">earth_resistivity</span></code></p></td>
+<td><p>Earth resistivity</p></td>
+<td><p>Ω·m</p></td>
+<td><p>100.0</p></td>
+<td><p>Soil resistivity for the earth-return impedance calculation; use a positive value.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cables_in_system</span></code></p></td>
+<td><p>Physical composition</p></td>
+<td><p>—</p></td>
+<td><p>Empty</p></td>
+<td><p>Collection of construction references and positions. Use the builder or <code class="docutils literal notranslate"><span class="pre">add_cable_relationship()</span></code> rather than editing this as a single table cell.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_circuits</span></code></p></td>
+<td><p>Number of circuits</p></td>
+<td><p>—</p></td>
+<td><p>1</p></td>
+<td><p>Stored circuit count, recomputed from global phase numbers when a physical system is calculated. It is not an independent geometry input.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">capex</span></code></p></td>
+<td><p>Capital expenditure</p></td>
+<td><p>currency/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Optional economic data; does not change the electrical matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opex</span></code></p></td>
+<td><p>Operating expenditure</p></td>
+<td><p>currency/MWh</p></td>
+<td><p>0.0</p></td>
+<td><p>Optional economic data; does not change the electrical matrices.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The builder’s top controls edit the system name, voltage, frequency, earth resistivity and rated current. Its construction table edits shared catalogue entries, while its composition table edits their positions and phase ordering.</p>
+</section>
+<section id="positioned-cable-inputs">
+<h3>Positioned cable inputs<a class="headerlink" href="#positioned-cable-inputs" title="Link to this heading"></a></h3>
+<p>Each composition entry is a <code class="docutils literal notranslate"><span class="pre">CableInSystem</span></code> relationship, created through <code class="docutils literal notranslate"><span class="pre">system.add_cable_relationship(cable=...,</span> <span class="pre">xpos=...,</span> <span class="pre">ypos=...,</span> <span class="pre">phase=...)</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Builder column</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>API default</p></th>
+<th class="head"><p>Meaning and role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cable</span></code></p></td>
+<td><p>Cable</p></td>
+<td><p>—</p></td>
+<td><p>Required</p></td>
+<td><p>Reference to an <code class="docutils literal notranslate"><span class="pre">UndergroundCableType</span></code>, not a copy of its parameters. Select a catalogue row and press <code class="docutils literal notranslate"><span class="pre">+</span></code> to add it in the builder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">xpos</span></code></p></td>
+<td><p>X</p></td>
+<td><p>m</p></td>
+<td><p>0.0</p></td>
+<td><p>Horizontal coordinate of the cable centre. Editable in the composition table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ypos</span></code></p></td>
+<td><p>Depth</p></td>
+<td><p>m</p></td>
+<td><p>1.0</p></td>
+<td><p>Positive burial depth of the cable centre below ground. Editable in the composition table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">phase</span></code></p></td>
+<td><p>Phase</p></td>
+<td><p>—</p></td>
+<td><p>1</p></td>
+<td><p>Global, one-based phase number controlling matrix order. Editable in the composition table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">circuit_index</span></code></p></td>
+<td><p>Circuit index</p></td>
+<td><p>—</p></td>
+<td><p>Derived</p></td>
+<td><p>One-based circuit number calculated from <code class="docutils literal notranslate"><span class="pre">phase</span></code>; read-only in the composition table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">phase_type</span></code></p></td>
+<td><p>Phase name</p></td>
+<td><p>—</p></td>
+<td><p>Derived</p></td>
+<td><p>A, B or C within the circuit, calculated from <code class="docutils literal notranslate"><span class="pre">phase</span></code>; read-only in the composition table.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Global phases 1, 2 and 3 mean circuit 1 phases A, B and C; 4, 5 and 6 mean circuit 2 phases A, B and C, and so on. For <code class="docutils literal notranslate"><span class="pre">n</span></code> positioned cables, the global phase numbers must be exactly 1 through <code class="docutils literal notranslate"><span class="pre">n</span></code>, without gaps or duplicates. A one- or two-cable composition is supported even though it has no complete three-phase sequence representation.</p>
+<p>The builder initially places newly added cables at 1 m depth and horizontal coordinates 0.0, 0.1, 0.2 m, and so on. These are editing defaults, not a prescribed cable arrangement. Position and phase changes recalculate the currently edited system. If removing a cable leaves a gap in phase numbering, renumber the remaining entries.</p>
+</section>
+<section id="sequence-only-inputs-and-calculated-results">
+<h3>Sequence-only inputs and calculated results<a class="headerlink" href="#sequence-only-inputs-and-calculated-results" title="Link to this heading"></a></h3>
+<p>Leave the physical composition empty to define an existing cable directly by its sequence parameters. All the following values default to zero and are per kilometre, not per-unit branch quantities.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">R</span></code></p></td>
+<td><p>Positive-sequence series resistance</p></td>
+<td><p>Ω/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">X</span></code></p></td>
+<td><p>Positive-sequence series reactance</p></td>
+<td><p>Ω/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">B</span></code></p></td>
+<td><p>Positive-sequence shunt susceptance</p></td>
+<td><p>μS/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">C</span></code></p></td>
+<td><p>Positive-sequence shunt capacitance</p></td>
+<td><p>μF/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Alternative representation of <code class="docutils literal notranslate"><span class="pre">B</span></code>; calculated in complete physical mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">R0</span></code></p></td>
+<td><p>Zero-sequence series resistance</p></td>
+<td><p>Ω/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">X0</span></code></p></td>
+<td><p>Zero-sequence series reactance</p></td>
+<td><p>Ω/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">B0</span></code></p></td>
+<td><p>Zero-sequence shunt susceptance</p></td>
+<td><p>μS/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Input in sequence-only mode; calculated from the first circuit in complete physical mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">C0</span></code></p></td>
+<td><p>Zero-sequence shunt capacitance</p></td>
+<td><p>μF/km</p></td>
+<td><p>0.0</p></td>
+<td><p>Alternative representation of <code class="docutils literal notranslate"><span class="pre">B0</span></code>; calculated in complete physical mode.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Keep each capacitance/susceptance pair consistent: with these units, <code class="docutils literal notranslate"><span class="pre">B</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">*</span> <span class="pre">freq</span> <span class="pre">*</span> <span class="pre">C</span></code>, and likewise for <code class="docutils literal notranslate"><span class="pre">B0</span></code> and <code class="docutils literal notranslate"><span class="pre">C0</span></code>. Assigning <code class="docutils literal notranslate"><span class="pre">C</span></code> or <code class="docutils literal notranslate"><span class="pre">C0</span></code> through its property updates the corresponding susceptance when automatic updates are enabled. Constructor arguments are stored separately, so do not supply inconsistent pairs or assume that a nonzero constructor <code class="docutils literal notranslate"><span class="pre">C</span></code> also initializes <code class="docutils literal notranslate"><span class="pre">B</span></code>.</p>
+<p>In physical mode, call <code class="docutils literal notranslate"><span class="pre">compute()</span></code> to obtain the primitive core-and-sheath matrices and the reduced phase matrices. Their impedance units are Ω/km and their admittance units are S/km in the API; the builder displays admittances in μS/km. Sequence matrices are available when the phase count forms complete three-phase circuit blocks. They are results, not additional material inputs. For incomplete blocks, use the phase matrices rather than interpreting the scalar sequence fields as calculated equivalents.</p>
+<p>The matrix choices and physical reduction are explained in the <a class="reference internal" href="#underground-lines"><span class="std std-ref">underground line model</span></a>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Read-only result</p></th>
+<th class="head"><p>Meaning in physical mode</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">z_primitive</span></code>, <code class="docutils literal notranslate"><span class="pre">y_primitive</span></code></p></td>
+<td><p>Full core-then-sheath matrices, each of size <code class="docutils literal notranslate"><span class="pre">2n</span> <span class="pre">×</span> <span class="pre">2n</span></code> for <code class="docutils literal notranslate"><span class="pre">n</span></code> cables.</p></td>
+<td><p>Ω/km, S/km</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">z_nabc</span></code>, <code class="docutils literal notranslate"><span class="pre">y_nabc</span></code></p></td>
+<td><p>Reduced core phase matrices, each of size <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">×</span> <span class="pre">n</span></code>. Despite the names, these do not contain an explicit sheath or neutral row.</p></td>
+<td><p>Ω/km, S/km</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">z_phases_nabc</span></code>, <code class="docutils literal notranslate"><span class="pre">y_phases_nabc</span></code></p></td>
+<td><p>Global phase numbers identifying the rows and columns of the phase matrices.</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">z_seq</span></code>, <code class="docutils literal notranslate"><span class="pre">y_seq</span></code></p></td>
+<td><p>Zero-, positive- and negative-sequence matrices for complete ABC circuit blocks; otherwise <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+<td><p>Ω/km, S/km</p></td>
+</tr>
+</tbody>
+</table>
+<p>Without a physical composition, the phase matrices are reconstructed from the scalar sequence values, assuming
+negative sequence equals positive sequence. Physical primitive matrices are not available in this mode.</p>
+</section>
+<section id="validation-and-applying-a-template">
+<h3>Validation and applying a template<a class="headerlink" href="#validation-and-applying-a-template" title="Link to this heading"></a></h3>
+<p>A physical calculation requires at least one construction, consecutive unique phases, distinct cable-centre positions, positive burial depths, positive core diameters and sheath thicknesses, overall diameters larger than the core diameters, and positive filling factors. The current checks do not enforce every physical constraint: also ensure positive main and outer insulation thicknesses, sensible material properties, positive frequency and soil resistivity, and a non-overlapping cable arrangement. Successful input conversion in a table cell is not a full geometry validation.</p>
+<p>The Python workflow is:</p>
+<ol class="arabic simple">
+<li><p>Create the construction entries and register them with <code class="docutils literal notranslate"><span class="pre">grid.add_underground_cable()</span></code>.</p></li>
+<li><p>Create the <code class="docutils literal notranslate"><span class="pre">UndergroundLineType</span></code>, add its cable relationships, and call <code class="docutils literal notranslate"><span class="pre">system.compute(logger=logger)</span></code>. Check its return value and validation log.</p></li>
+<li><p>Register the template with <code class="docutils literal notranslate"><span class="pre">grid.add_underground_line()</span></code> and create a network <code class="docutils literal notranslate"><span class="pre">Line</span></code> with its connected buses, length in km and one-based <code class="docutils literal notranslate"><span class="pre">circuit_idx</span></code>.</p></li>
+<li><p>Apply the calculated template using <code class="docutils literal notranslate"><span class="pre">line.apply_template(obj=system,</span> <span class="pre">Sbase=grid.Sbase,</span> <span class="pre">freq=grid.fBase,</span> <span class="pre">logger=logger)</span></code>.</p></li>
+</ol>
+<p>The system’s own <code class="docutils literal notranslate"><span class="pre">freq</span></code> controls its physical calculation. Set it consistently with the network frequency; the <code class="docutils literal notranslate"><span class="pre">freq</span></code> argument to <code class="docutils literal notranslate"><span class="pre">Line.apply_template()</span></code> does not replace it for an underground template.</p>
+<p>Assigning <code class="docutils literal notranslate"><span class="pre">line.template</span></code> alone does not calculate or copy the electrical parameters. Recompute the system after changing construction, positions or environmental inputs, then reapply it to each affected line. Reapply the template after changing line length as well, so both scalar parameters and phase matrices correspond to the new length. Line length and circuit selection belong to the network branch, not to the reusable construction or system.</p>
+</section>
+<section id="id47">
+<h3>Registered properties<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -15644,6 +16648,24 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <td><p>False</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p>earth_resistivity</p></td>
+<td><p>float</p></td>
+<td><p>Ohm*m</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Earth resistivity</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>cables_in_system</p></td>
+<td><p>ListOfCables</p></td>
+<td><p></p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+<td><p>Physical cables and their positions</p></td>
+<td><p>False</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-even"><td><p>R</p></td>
 <td><p>float</p></td>
 <td><p>Ohm/km</p></td>
@@ -15751,8 +16773,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>SequenceLineType<a class="headerlink" href="#sequencelinetype" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">SequenceLineType</span></code> stores reusable positive-, negative-, and zero-sequence branch data.</p>
 <p>This device stores reusable equipment data that can be applied to physical network elements.</p>
-<section id="id45">
-<h3>Registered properties<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
+<section id="id48">
+<h3>Registered properties<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -16126,8 +17148,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>TransformerType<a class="headerlink" href="#transformertype" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">TransformerType</span></code> stores reusable nameplate and test-sheet data that can be applied to transformer objects.</p>
 <p>This device stores reusable equipment data that can be applied to physical network elements.</p>
-<section id="id46">
-<h3>Registered properties<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
+<section id="id49">
+<h3>Registered properties<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -16546,8 +17568,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>BranchGroup<a class="headerlink" href="#branchgroup" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">BranchGroup</span></code> organizes network branches into study or ownership groupings.</p>
 <p>This device organizes assets for modelling, ownership, filtering, or reporting.</p>
-<section id="id47">
-<h3>Registered properties<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
+<section id="id50">
+<h3>Registered properties<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -16660,8 +17682,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Facility<a class="headerlink" href="#facility" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Facility</span></code> groups assets that belong to the same site or installation.</p>
 <p>This device organizes assets for modelling, ownership, filtering, or reporting.</p>
-<section id="id48">
-<h3>Registered properties<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
+<section id="id51">
+<h3>Registered properties<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -16783,8 +17805,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>ModellingAuthority<a class="headerlink" href="#modellingauthority" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">ModellingAuthority</span></code> identifies the authority responsible for the data model of an asset.</p>
 <p>This device organizes assets for modelling, ownership, filtering, or reporting.</p>
-<section id="id49">
-<h3>Registered properties<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
+<section id="id52">
+<h3>Registered properties<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -16879,8 +17901,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Technology<a class="headerlink" href="#technology" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Technology</span></code> is a reusable association used to tag injections and assets by technology type.</p>
 <p>This device is used as reusable metadata that other assets can reference through associations.</p>
-<section id="id50">
-<h3>Registered properties<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
+<section id="id53">
+<h3>Registered properties<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">reference_cost</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -17020,8 +18042,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Fuel<a class="headerlink" href="#fuel" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Fuel</span></code> is a reusable association used to tag generating assets by fuel type.</p>
 <p>This device is used as reusable metadata that other assets can reference through associations.</p>
-<section id="id51">
-<h3>Registered properties<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
+<section id="id54">
+<h3>Registered properties<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">cost</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -17134,8 +18156,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>EmissionGas<a class="headerlink" href="#emissiongas" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">EmissionGas</span></code> is a reusable association used to tag emitting assets for planning and reporting.</p>
 <p>This device is used as reusable metadata that other assets can reference through associations.</p>
-<section id="id52">
-<h3>Registered properties<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
+<section id="id55">
+<h3>Registered properties<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">cost</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -17248,8 +18270,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Owner<a class="headerlink" href="#owner" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">Owner</span></code> is a reusable association attached to assets through ownership lists.</p>
 <p>This device is used as reusable metadata that other assets can reference through associations.</p>
-<section id="id53">
-<h3>Registered properties<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
+<section id="id56">
+<h3>Registered properties<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -17362,8 +18384,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>ContingencyGroup<a class="headerlink" href="#contingencygroup" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">ContingencyGroup</span></code> groups related contingency actions into a reusable study set.</p>
 <p>This device defines study events, outages, switching actions, or remedial actions.</p>
-<section id="id54">
-<h3>Registered properties<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
+<section id="id57">
+<h3>Registered properties<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -17476,8 +18498,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Contingency<a class="headerlink" href="#contingency" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Contingency</span></code> describes one outage or operational change applied during contingency analysis.</p>
 <p>This device defines study events, outages, switching actions, or remedial actions.</p>
-<section id="id55">
-<h3>Registered properties<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
+<section id="id58">
+<h3>Registered properties<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -17626,8 +18648,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>RemedialActionGroup<a class="headerlink" href="#remedialactiongroup" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">RemedialActionGroup</span></code> groups corrective actions that may be applied after a contingency.</p>
 <p>This device defines study events, outages, switching actions, or remedial actions.</p>
-<section id="id56">
-<h3>Registered properties<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
+<section id="id59">
+<h3>Registered properties<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -17740,8 +18762,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>RemedialAction<a class="headerlink" href="#remedialaction" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">RemedialAction</span></code> defines one corrective control or switching action.</p>
 <p>This device defines study events, outages, switching actions, or remedial actions.</p>
-<section id="id57">
-<h3>Registered properties<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
+<section id="id60">
+<h3>Registered properties<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -17890,8 +18912,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>ShortCircuitEvent<a class="headerlink" href="#shortcircuitevent" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">ShortCircuitEvent</span></code> defines a fault event for short-circuit calculations.</p>
 <p>This device defines study events, outages, switching actions, or remedial actions.</p>
-<section id="id58">
-<h3>Registered properties<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
+<section id="id61">
+<h3>Registered properties<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -18076,8 +19098,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>InvestmentsGroup<a class="headerlink" href="#investmentsgroup" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">InvestmentsGroup</span></code> groups expansion candidates into reusable planning sets.</p>
 <p>This device is used by expansion-planning and candidate-investment workflows.</p>
-<section id="id59">
-<h3>Registered properties<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
+<section id="id62">
+<h3>Registered properties<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -18208,8 +19230,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>Investment<a class="headerlink" href="#investment" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">Investment</span></code> defines one candidate asset action for expansion planning.</p>
 <p>This device is used by expansion-planning and candidate-investment workflows.</p>
-<section id="id60">
-<h3>Registered properties<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
+<section id="id63">
+<h3>Registered properties<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -18394,8 +19416,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FluidNode<a class="headerlink" href="#fluidnode" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FluidNode</span></code> is the nodal storage or hydraulic state point used in fluid-network modelling.</p>
 <p>This device belongs to the fluid and hydro layer that can be modelled alongside the electrical network.</p>
-<section id="id61">
-<h3>Registered properties<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
+<section id="id64">
+<h3>Registered properties<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">min_soc</span></code>, <code class="docutils literal notranslate"><span class="pre">max_soc</span></code>, <code class="docutils literal notranslate"><span class="pre">spillage_cost</span></code>, <code class="docutils literal notranslate"><span class="pre">inflow</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -18616,8 +19638,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FluidPath<a class="headerlink" href="#fluidpath" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FluidPath</span></code> links fluid nodes and represents the transport path of the fluid network.</p>
 <p>This device belongs to the fluid and hydro layer that can be modelled alongside the electrical network.</p>
-<section id="id62">
-<h3>Registered properties<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
+<section id="id65">
+<h3>Registered properties<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -18811,8 +19833,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FluidTurbine<a class="headerlink" href="#fluidturbine" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FluidTurbine</span></code> converts hydraulic or fluid energy into electrical generation within the fluid layer.</p>
 <p>This device belongs to the fluid and hydro layer that can be modelled alongside the electrical network.</p>
-<section id="id63">
-<h3>Registered properties<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
+<section id="id66">
+<h3>Registered properties<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -19006,8 +20028,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FluidPump<a class="headerlink" href="#fluidpump" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FluidPump</span></code> consumes electrical power to move fluid between nodes.</p>
 <p>This device belongs to the fluid and hydro layer that can be modelled alongside the electrical network.</p>
-<section id="id64">
-<h3>Registered properties<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
+<section id="id67">
+<h3>Registered properties<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -19201,8 +20223,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FluidP2x<a class="headerlink" href="#fluidp2x" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FluidP2x</span></code> represents power-to-x conversion between electrical and fluid-energy domains.</p>
 <p>This device belongs to the fluid and hydro layer that can be modelled alongside the electrical network.</p>
-<section id="id65">
-<h3>Registered properties<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
+<section id="id68">
+<h3>Registered properties<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -19396,8 +20418,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>RmsEventsGroup<a class="headerlink" href="#rmseventsgroup" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">RmsEventsGroup</span></code> groups RMS dynamic events into a reusable schedule.</p>
 <p>This device supports RMS or EMT event scheduling and dynamic simulations.</p>
-<section id="id66">
-<h3>Registered properties<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
+<section id="id69">
+<h3>Registered properties<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -19501,8 +20523,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>RmsEvent<a class="headerlink" href="#rmsevent" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">RmsEvent</span></code> defines one event applied during RMS dynamic simulations.</p>
 <p>This device supports RMS or EMT event scheduling and dynamic simulations.</p>
-<section id="id67">
-<h3>Registered properties<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
+<section id="id70">
+<h3>Registered properties<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -19687,8 +20709,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>EmtEventsGroup<a class="headerlink" href="#emteventsgroup" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">EmtEventsGroup</span></code> groups EMT events into a reusable schedule.</p>
 <p>This device supports RMS or EMT event scheduling and dynamic simulations.</p>
-<section id="id68">
-<h3>Registered properties<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
+<section id="id71">
+<h3>Registered properties<a class="headerlink" href="#id71" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -19792,8 +20814,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>EmtEvent<a class="headerlink" href="#emtevent" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">EmtEvent</span></code> defines one event applied during EMT simulations.</p>
 <p>This device supports RMS or EMT event scheduling and dynamic simulations.</p>
-<section id="id69">
-<h3>Registered properties<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
+<section id="id72">
+<h3>Registered properties<a class="headerlink" href="#id72" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -19978,8 +21000,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>RmsModelTemplate<a class="headerlink" href="#rmsmodeltemplate" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">RmsModelTemplate</span></code> stores a reusable RMS dynamic model definition.</p>
 <p>This device stores reusable native or FMU-backed dynamic model templates.</p>
-<section id="id70">
-<h3>Registered properties<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
+<section id="id73">
+<h3>Registered properties<a class="headerlink" href="#id73" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -20110,8 +21132,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>EmtModelTemplate<a class="headerlink" href="#emtmodeltemplate" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">EmtModelTemplate</span></code> stores a reusable EMT dynamic model definition.</p>
 <p>This device stores reusable native or FMU-backed dynamic model templates.</p>
-<section id="id71">
-<h3>Registered properties<a class="headerlink" href="#id71" title="Link to this heading"></a></h3>
+<section id="id74">
+<h3>Registered properties<a class="headerlink" href="#id74" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -20242,8 +21264,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>FmuTemplate<a class="headerlink" href="#fmutemplate" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">FmuTemplate</span></code> stores reusable FMU metadata for RMS or EMT integration.</p>
 <p>This device stores reusable native or FMU-backed dynamic model templates.</p>
-<section id="id72">
-<h3>Registered properties<a class="headerlink" href="#id72" title="Link to this heading"></a></h3>
+<section id="id75">
+<h3>Registered properties<a class="headerlink" href="#id75" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: none.</p>
 <table class="docutils align-default">
 <thead>
@@ -20410,8 +21432,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>PiMeasurement<a class="headerlink" href="#pimeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">PiMeasurement</span></code> stores active-power injection measurements at buses.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id73">
-<h3>Registered properties<a class="headerlink" href="#id73" title="Link to this heading"></a></h3>
+<section id="id76">
+<h3>Registered properties<a class="headerlink" href="#id76" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -20551,8 +21573,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>QiMeasurement<a class="headerlink" href="#qimeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">QiMeasurement</span></code> stores reactive-power injection measurements at buses.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id74">
-<h3>Registered properties<a class="headerlink" href="#id74" title="Link to this heading"></a></h3>
+<section id="id77">
+<h3>Registered properties<a class="headerlink" href="#id77" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -20692,8 +21714,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>PfMeasurement<a class="headerlink" href="#pfmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">PfMeasurement</span></code> stores active-power flow measurements on branch from-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id75">
-<h3>Registered properties<a class="headerlink" href="#id75" title="Link to this heading"></a></h3>
+<section id="id78">
+<h3>Registered properties<a class="headerlink" href="#id78" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -20833,8 +21855,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>QfMeasurement<a class="headerlink" href="#qfmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">QfMeasurement</span></code> stores reactive-power flow measurements on branch from-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id76">
-<h3>Registered properties<a class="headerlink" href="#id76" title="Link to this heading"></a></h3>
+<section id="id79">
+<h3>Registered properties<a class="headerlink" href="#id79" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -20974,8 +21996,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>IfMeasurement<a class="headerlink" href="#ifmeasurement" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">IfMeasurement</span></code> stores current measurements on branch from-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id77">
-<h3>Registered properties<a class="headerlink" href="#id77" title="Link to this heading"></a></h3>
+<section id="id80">
+<h3>Registered properties<a class="headerlink" href="#id80" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21115,8 +22137,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>PtMeasurement<a class="headerlink" href="#ptmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">PtMeasurement</span></code> stores active-power flow measurements on branch to-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id78">
-<h3>Registered properties<a class="headerlink" href="#id78" title="Link to this heading"></a></h3>
+<section id="id81">
+<h3>Registered properties<a class="headerlink" href="#id81" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21256,8 +22278,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>QtMeasurement<a class="headerlink" href="#qtmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">QtMeasurement</span></code> stores reactive-power flow measurements on branch to-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id79">
-<h3>Registered properties<a class="headerlink" href="#id79" title="Link to this heading"></a></h3>
+<section id="id82">
+<h3>Registered properties<a class="headerlink" href="#id82" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21397,8 +22419,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>ItMeasurement<a class="headerlink" href="#itmeasurement" title="Link to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">ItMeasurement</span></code> stores current measurements on branch to-ends.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id80">
-<h3>Registered properties<a class="headerlink" href="#id80" title="Link to this heading"></a></h3>
+<section id="id83">
+<h3>Registered properties<a class="headerlink" href="#id83" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21538,8 +22560,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>VmMeasurement<a class="headerlink" href="#vmmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">VmMeasurement</span></code> stores bus voltage-magnitude measurements.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id81">
-<h3>Registered properties<a class="headerlink" href="#id81" title="Link to this heading"></a></h3>
+<section id="id84">
+<h3>Registered properties<a class="headerlink" href="#id84" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21679,8 +22701,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>VaMeasurement<a class="headerlink" href="#vameasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">VaMeasurement</span></code> stores bus voltage-angle measurements.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id82">
-<h3>Registered properties<a class="headerlink" href="#id82" title="Link to this heading"></a></h3>
+<section id="id85">
+<h3>Registered properties<a class="headerlink" href="#id85" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21820,8 +22842,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>PgMeasurement<a class="headerlink" href="#pgmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">PgMeasurement</span></code> stores active-power generation measurements.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id83">
-<h3>Registered properties<a class="headerlink" href="#id83" title="Link to this heading"></a></h3>
+<section id="id86">
+<h3>Registered properties<a class="headerlink" href="#id86" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>
@@ -21961,8 +22983,8 @@ and further developed in VeraGrid from 2024 to 2025.</p>
 <h2>QgMeasurement<a class="headerlink" href="#qgmeasurement" title="Link to this heading"></a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">QgMeasurement</span></code> stores reactive-power generation measurements.</p>
 <p>This device stores measurement data used by observability and state-estimation workflows.</p>
-<section id="id84">
-<h3>Registered properties<a class="headerlink" href="#id84" title="Link to this heading"></a></h3>
+<section id="id87">
+<h3>Registered properties<a class="headerlink" href="#id87" title="Link to this heading"></a></h3>
 <p>Profile-enabled properties: <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 <table class="docutils align-default">
 <thead>

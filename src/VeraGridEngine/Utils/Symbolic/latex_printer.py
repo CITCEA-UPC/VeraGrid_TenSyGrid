@@ -7,10 +7,10 @@
 LaTeX printer for symbolic expressions.
 
 Converts an :class:`Expr` tree into a LaTeX string suitable for
-rendering with matplotlib's mathtext engine.
+rendering with a standard LaTeX math renderer.
 
 This module lives entirely inside ``VeraGridEngine`` and has **no**
-dependency on Qt, matplotlib, or any GUI library.
+dependency on Qt or any GUI library.
 
 Precedence levels (higher binds tighter):
 
@@ -411,7 +411,7 @@ def symbolic_to_latex(expr: Expr) -> str:
     """
     Convert a symbolic expression into a LaTeX math string.
 
-    The output is intended for matplotlib mathtext rendering (no
+    The output is intended for a standard LaTeX math renderer (no
     ``\\begin{equation}`` wrappers, no ``$`` delimiters).
 
     :param expr: Symbolic expression to convert.

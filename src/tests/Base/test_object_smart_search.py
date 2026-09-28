@@ -1,5 +1,8 @@
-from VeraGridEngine.Devices.Aggregation.market_unit import MarketUnit
+from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.Devices.Injections.generator import Generator
+from VeraGridEngine.Devices.Aggregation.market_unit import MarketUnit
+from VeraGridEngine.Devices.Aggregation.market_units_group import MarketUnitsGroup
+from VeraGridEngine.Devices.Aggregation.facility import Facility
 from VeraGridEngine.Utils.Filtering.objects_filtering import FilterObjects
 
 
@@ -9,31 +12,30 @@ def build_generator_filter_engine() -> FilterObjects:
 
     :return: Initialized object filter.
     """
-    market_unit_1: MarketUnit = MarketUnit(name="MU-1")
-    market_unit_2: MarketUnit = MarketUnit(name="MU-2")
-    generator_without_market: Generator = Generator(
+    bus_1: Bus = Bus(name="Bus-1")
+    bus_2: Bus = Bus(name="Bus-2")
+    generator_without_bus: Generator = Generator(
         name="Alpha",
         P=10.0,
         vset=1.00,
-        market_unit=None,
     )
-    generator_with_market_1: Generator = Generator(
+    generator_with_bus_1: Generator = Generator(
         name="Beta",
         P=25.0,
         vset=1.05,
-        market_unit=market_unit_1,
     )
-    generator_with_market_2: Generator = Generator(
+    generator_with_bus_1.bus = bus_1
+    generator_with_bus_2: Generator = Generator(
         name="Gamma",
         P=40.0,
         vset=1.10,
-        market_unit=market_unit_2,
     )
-    objects: list[Generator] = [
-        generator_without_market,
-        generator_with_market_1,
-        generator_with_market_2,
-    ]
+    generator_with_bus_2.bus = bus_2
+    objects: list[Generator] = list([
+        generator_without_bus,
+        generator_with_bus_1,
+        generator_with_bus_2,
+    ])
 
     return FilterObjects(objects)
 
@@ -46,14 +48,14 @@ def test_object_smart_search_can_filter_none_values() -> None:
     """
     filter_engine: FilterObjects = build_generator_filter_engine()
 
-    filter_engine.filter("market_unit = None")
-    assert list(filter_engine.filtered_indices) == [0]
+    filter_engine.filter("bus = None")
+    assert list(filter_engine.filtered_indices) == list([0])
 
-    filter_engine.filter("market_unit = none")
-    assert list(filter_engine.filtered_indices) == [0]
+    filter_engine.filter("bus = none")
+    assert list(filter_engine.filtered_indices) == list([0])
 
-    filter_engine.filter("market_unit != None")
-    assert list(filter_engine.filtered_indices) == [1, 2]
+    filter_engine.filter("bus != None")
+    assert list(filter_engine.filtered_indices) == list([1, 2])
 
 
 def test_object_smart_search_can_filter_numeric_properties() -> None:
@@ -65,10 +67,10 @@ def test_object_smart_search_can_filter_numeric_properties() -> None:
     filter_engine: FilterObjects = build_generator_filter_engine()
 
     filter_engine.filter("P >= 25")
-    assert list(filter_engine.filtered_indices) == [1, 2]
+    assert list(filter_engine.filtered_indices) == list([1, 2])
 
     filter_engine.filter("Vset < 1.10")
-    assert list(filter_engine.filtered_indices) == [0, 1]
+    assert list(filter_engine.filtered_indices) == list([0, 1])
 
 
 def test_object_smart_search_can_filter_nested_device_names() -> None:
@@ -79,11 +81,11 @@ def test_object_smart_search_can_filter_nested_device_names() -> None:
     """
     filter_engine: FilterObjects = build_generator_filter_engine()
 
-    filter_engine.filter("market_unit.name = MU-1")
-    assert list(filter_engine.filtered_indices) == [1]
+    filter_engine.filter("bus.name = Bus-1")
+    assert list(filter_engine.filtered_indices) == list([1])
 
-    filter_engine.filter("market_unit.name like MU-")
-    assert list(filter_engine.filtered_indices) == [1, 2]
+    filter_engine.filter("bus.name like Bus-")
+    assert list(filter_engine.filtered_indices) == list([1, 2])
 
 
 def test_object_smart_search_can_combine_conditions() -> None:
@@ -94,11 +96,11 @@ def test_object_smart_search_can_combine_conditions() -> None:
     """
     filter_engine: FilterObjects = build_generator_filter_engine()
 
-    filter_engine.filter("market_unit != None and P > 30")
-    assert list(filter_engine.filtered_indices) == [2]
+    filter_engine.filter("bus != None and P > 30")
+    assert list(filter_engine.filtered_indices) == list([2])
 
-    filter_engine.filter("name starts Al or market_unit.name = MU-2")
-    assert list(filter_engine.filtered_indices) == [0, 2]
+    filter_engine.filter("name starts Al or bus.name = Bus-2")
+    assert list(filter_engine.filtered_indices) == list([0, 2])
 
 
 def test_object_smart_search_name_fallback_without_operators() -> None:
@@ -110,7 +112,47 @@ def test_object_smart_search_name_fallback_without_operators() -> None:
     filter_engine: FilterObjects = build_generator_filter_engine()
 
     filter_engine.filter("alp")
-    assert list(filter_engine.filtered_indices) == [0]
+    assert list(filter_engine.filtered_indices) == list([0])
 
     filter_engine.filter("Alpha")
-    assert list(filter_engine.filtered_indices) == [0]
+    assert list(filter_engine.filtered_indices) == list([0])
+
+
+def test_object_smart_search_can_filter_pointer_devices() -> None:
+    """
+    Verify smart filtering on pointer devices like MarketUnit pointing to Facility.
+
+    :return: None.
+    """
+    group_1: MarketUnitsGroup = MarketUnitsGroup(name="Group 1")
+    facility_1: Facility = Facility(name="Facility 1")
+
+    market_unit_with_device: MarketUnit = MarketUnit(
+        name="MU 1",
+        device=facility_1,
+        group=group_1,
+    )
+    market_unit_without_device: MarketUnit = MarketUnit(
+        name="MU 2",
+        device=None,
+        group=None,
+    )
+
+    objects: list[MarketUnit] = list([
+        market_unit_with_device,
+        market_unit_without_device,
+    ])
+    filter_engine: FilterObjects = FilterObjects(objects)
+
+    filter_engine.filter("device = None")
+    assert list(filter_engine.filtered_indices) == list([1])
+
+    filter_engine.filter("group = None")
+    assert list(filter_engine.filtered_indices) == list([1])
+
+    filter_engine.filter("device.name = Facility 1")
+    assert list(filter_engine.filtered_indices) == list([0])
+
+    filter_engine.filter("group.name = Group 1")
+    assert list(filter_engine.filtered_indices) == list([0])
+

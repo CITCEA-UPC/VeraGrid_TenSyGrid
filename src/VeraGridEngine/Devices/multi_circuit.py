@@ -12,7 +12,6 @@ import pandas as pd
 from typing import List, Dict, Tuple, Union, Set, Sequence, TYPE_CHECKING
 from uuid import getnode as get_mac, uuid4
 import networkx as nx
-from matplotlib import pyplot as plt
 from scipy.sparse import csc_matrix, lil_matrix
 
 from VeraGridEngine.Devices.assets import Assets
@@ -806,6 +805,7 @@ class MultiCircuit(Assets):
                 'bus_bars',
                 'overhead_line_types',
                 'wire_types',
+                'underground_cable_constructions',
                 'underground_cable_types',
                 'dc_cable_types',
                 'sequence_line_types',
@@ -857,7 +857,7 @@ class MultiCircuit(Assets):
         cpy.rebind_internal_device_references()
 
         obj_dict = cpy.get_all_elements_dict_by_type(add_locations=True)
-        cpy.diagrams = [diagram.copy(obj_dict=obj_dict) for diagram in self.diagrams]
+        cpy.diagrams = dev.copy_diagrams(self.diagrams, obj_dict=obj_dict)
 
         return cpy
 
@@ -1258,18 +1258,6 @@ class MultiCircuit(Assets):
 
         return ac_bus_1, ac_bus_2, dc_bus_1, dc_bus_2, conv1, conv2, dc_line
 
-    def plot_graph(self, ax=None):
-        """
-        Plot the grid.
-        :param ax: Matplotlib axis object
-        :return:
-        """
-        if ax is None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-
-        graph = self.build_graph()
-        nx.draw_spring(graph, ax=ax)
 
     def export_pf(self, file_name, power_flow_results):
         """
@@ -3473,6 +3461,9 @@ class MultiCircuit(Assets):
 
         for tpe in data.underground_cable_types:
             self.add_underground_line(tpe)
+
+        for tpe in data.underground_cable_constructions:
+            self.add_underground_cable(tpe)
 
         for tpe in data.dc_cable_types:
             self.add_dc_cable_type(tpe)

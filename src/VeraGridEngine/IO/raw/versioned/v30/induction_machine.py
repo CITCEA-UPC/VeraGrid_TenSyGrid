@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v29.induction_machine import RawInductionMa
 
 class RawInductionMachineV30(RawInductionMachineV29):
     """PSSE v30 typed object inheriting v29."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         super().parse(data=data, version=version, logger=logger)

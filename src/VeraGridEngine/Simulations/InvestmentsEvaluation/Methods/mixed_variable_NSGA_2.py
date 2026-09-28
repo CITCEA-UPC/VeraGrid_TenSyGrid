@@ -6,7 +6,6 @@ from typing import Callable, List, Dict, Union
 from pymoo.core.mixed import MixedVariableGA
 from pymoo.algorithms.moo.nsga2 import RankAndCrowding
 # from pymoo.decomposition.asf import ASF
-# import matplotlib.pyplot as plt  # this is going to be in results, here for now to show we need to include plots
 from pymoo.core.mixed import MixedVariableSampling
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -29,8 +28,17 @@ class MixedVariableProblem(ElementwiseProblem):
     """
     Problem formulation packaging to use the pymoo library
     """
+    __slots__ = (
+        "logger",
+        "grid",
+        "device_template_dict",
+        "variables",
+        "devices",
+        "default_template",
+        "obj_func",
+    )
 
-    def __init__(self, grid: MultiCircuit, obj_func, n_obj):
+    def __init__(self, grid: MultiCircuit, obj_func, n_obj) -> None:
         """
         :param obj_func:
         :param n_obj:

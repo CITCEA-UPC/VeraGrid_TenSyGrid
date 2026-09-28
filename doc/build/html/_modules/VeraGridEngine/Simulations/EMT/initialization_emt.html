@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.EMT.initialization_emt &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.EMT.initialization_emt &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -109,7 +109,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">BinaryIO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Set</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nb</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
@@ -2413,6 +2413,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_collect_reduced_initialization_problem</span><span class="p">(</span>
         <span class="n">problem</span><span class="p">:</span> <span class="n">EmtProblemTemplate</span><span class="p">,</span>
         <span class="n">allow_state_equilibrium</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">fixed_algebraic_uids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Var</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Expr</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collect the reduced initialization unknowns and residual equations without compiling them.</span>
@@ -2434,9 +2435,11 @@
     <span class="n">algebraic_eqs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expr</span><span class="p">]</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">get_algebraic_eqs</span><span class="p">()</span>
     <span class="n">alg_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 
+    <span class="n">fixed_uids</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="k">if</span> <span class="n">fixed_algebraic_uids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fixed_algebraic_uids</span>
     <span class="k">while</span> <span class="n">alg_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">algebraic_vars</span><span class="p">):</span>
         <span class="n">algebraic_var</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">algebraic_vars</span><span class="p">[</span><span class="n">alg_idx</span><span class="p">]</span>
-        <span class="n">algebraic_unknown_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algebraic_var</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">algebraic_var</span><span class="o">.</span><span class="n">uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fixed_uids</span><span class="p">:</span>
+            <span class="n">algebraic_unknown_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algebraic_var</span><span class="p">)</span>
         <span class="n">algebraic_residual_eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algebraic_eqs</span><span class="p">[</span><span class="n">alg_idx</span><span class="p">])</span>
         <span class="n">alg_idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -2622,6 +2625,10 @@
 <span class="sd">    :return: Linear-system solution vector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_unknown</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">least_squares_solution</span> <span class="o">=</span> <span class="n">spla</span><span class="o">.</span><span class="n">lsqr</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">least_squares_solution</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">n_unknown</span> <span class="o">&lt;=</span> <span class="n">dense_threshold</span><span class="p">:</span>
         <span class="n">dense_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
@@ -3085,9 +3092,18 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">phase_t0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+            <span class="n">fixed_algebraic_uids</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">init_fix_pf_bus_voltages</span><span class="p">:</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">bus</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;buses&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">bus_model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">bus</span><span class="p">,</span> <span class="s2">&quot;emt_model&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">bus_var</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">bus_model</span><span class="p">,</span> <span class="s2">&quot;algebraic_vars&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bus_var</span><span class="p">,</span> <span class="n">Var</span><span class="p">):</span>
+                            <span class="n">fixed_algebraic_uids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bus_var</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
             <span class="n">reduced_problem_payload</span> <span class="o">=</span> <span class="n">_collect_reduced_initialization_problem</span><span class="p">(</span>
                 <span class="n">problem</span><span class="o">=</span><span class="n">problem</span><span class="p">,</span>
                 <span class="n">allow_state_equilibrium</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">init_allow_state_equilibrium</span><span class="p">),</span>
+                <span class="n">fixed_algebraic_uids</span><span class="o">=</span><span class="n">fixed_algebraic_uids</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">reduced_problem_payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

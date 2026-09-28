@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.InvestmentsEvaluation.investments_evaluation_results &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.InvestmentsEvaluation.investments_evaluation_results &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -106,10 +106,7 @@
 <span class="c1"># License, v. 2.0. If a copy of the MPL was not distributed with this</span>
 <span class="c1"># file, You can obtain one at https://mozilla.org/MPL/2.0/.</span>
 <span class="c1"># SPDX-License-Identifier: MPL-2.0</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt_colors</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_template</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTemplate</span><span class="p">,</span> <span class="n">ResultsProperty</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_table</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTable</span>
@@ -423,89 +420,21 @@
             <span class="n">x_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_x_idx</span><span class="p">]</span>
             <span class="n">y_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_y_idx</span><span class="p">]</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
-            <span class="n">color_norm</span> <span class="o">=</span> <span class="n">plt_colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
 
             <span class="c1"># Match magnitude of technical score with investment score</span>
             <span class="n">color_score</span> <span class="o">=</span> <span class="n">y_vals</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span>
 
             <span class="c1"># Plot 1: Technical vs investment</span>
-            <span class="n">scatter_plot</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color_score</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_x_idx</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_y_idx</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Pareto plot&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-            <span class="n">cbar1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scatter_plot</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
             <span class="n">cbar1</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s1">&#39;Objective function&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-            <span class="n">cbar1</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
             <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
-            <span class="n">annot</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-                                 <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
-                                 <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
-                                 <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">),</span>
-                                 <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-                                 <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Set z-order to a higher value to ensure it&#39;s in front</span>
-            <span class="n">annot</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-            <span class="k">def</span><span class="w"> </span><span class="nf">update_annotation</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">                :param ind:</span>
-<span class="sd">                :return:</span>
-<span class="sd">                &quot;&quot;&quot;</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="s2">&quot;ind&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">annot</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="n">scatter_plot</span><span class="o">.</span><span class="n">get_offsets</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Solution:</span><span class="se">\n</span><span class="si">{</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">wrapped_text</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-                <span class="n">annot</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">wrapped_text</span><span class="p">)</span>
-                <span class="n">annot</span><span class="o">.</span><span class="n">get_bbox_patch</span><span class="p">()</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
 
-            <span class="k">def</span><span class="w"> </span><span class="nf">hover</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">                :param event:</span>
-<span class="sd">                :return:</span>
-<span class="sd">                &quot;&quot;&quot;</span>
-                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">==</span> <span class="n">ax3</span><span class="p">:</span>
-                    <span class="n">cont</span><span class="p">,</span> <span class="n">ind</span> <span class="o">=</span> <span class="n">scatter_plot</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">cont</span><span class="p">:</span>
-                        <span class="n">update_annotation</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-                        <span class="n">annot</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">annot</span><span class="o">.</span><span class="n">get_visible</span><span class="p">():</span>
-                            <span class="n">annot</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                            <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span>
-
-            <span class="k">def</span><span class="w"> </span><span class="nf">click_solution</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">                :param event:</span>
-<span class="sd">                :return:</span>
-<span class="sd">                &quot;&quot;&quot;</span>
-                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
-                    <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">ax3</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ax3</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">offsets</span> <span class="o">=</span> <span class="n">scatter_plot</span><span class="o">.</span><span class="n">get_offsets</span><span class="p">()</span>
-                    <span class="n">scatter_x</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-                    <span class="n">scatter_y</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-                    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">scatter_x</span> <span class="o">-</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">scatter_y</span> <span class="o">-</span> <span class="n">click_y</span><span class="p">)</span>
-                    <span class="n">min_idx</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-
-                    <span class="k">if</span> <span class="n">distances</span><span class="p">[</span><span class="n">min_idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
-                        <span class="n">investment_names</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">min_idx</span><span class="p">]</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Investments made:&quot;</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">min_idx</span><span class="p">,</span> <span class="p">:]):</span>
-                            <span class="k">if</span> <span class="n">x_val</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
-                                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
             <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s2">&quot;motion_notify_event&quot;</span><span class="p">,</span> <span class="n">hover</span><span class="p">)</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">click_solution</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">],</span>
                                 <span class="n">index</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
@@ -527,15 +456,7 @@
             <span class="n">y_label</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-            <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Objective&#39;</span><span class="p">)</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                                 <span class="n">index</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
@@ -550,7 +471,6 @@
         <span class="k">elif</span> <span class="n">result_type</span> <span class="o">==</span> <span class="n">ResultTypes</span><span class="o">.</span><span class="n">InvestmentsWhenToMakePlot</span><span class="p">:</span>
 
             <span class="c1"># Create subplots</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="c1"># _x is (max_eval, n_investments)</span>
             <span class="c1"># X is (pareto solutions, n_investments)</span>
@@ -565,17 +485,7 @@
                     <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">mat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;When to make the investments&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">max_years</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_years</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_names</span><span class="p">)))</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_names</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Year&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">mat</span><span class="p">,</span>
                                 <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_names</span><span class="p">,</span>

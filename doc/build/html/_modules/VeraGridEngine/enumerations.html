@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.enumerations &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.enumerations &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -952,7 +952,15 @@
     <span class="n">ENUMERATION</span> <span class="o">=</span> <span class="s2">&quot;Enumeration&quot;</span>
     <span class="n">FLOAT32</span> <span class="o">=</span> <span class="s2">&quot;Float32&quot;</span>
     <span class="n">FLOAT64</span> <span class="o">=</span> <span class="s2">&quot;Float64&quot;</span>
+    <span class="n">INT8</span> <span class="o">=</span> <span class="s2">&quot;Int8&quot;</span>
+    <span class="n">UINT8</span> <span class="o">=</span> <span class="s2">&quot;UInt8&quot;</span>
+    <span class="n">INT16</span> <span class="o">=</span> <span class="s2">&quot;Int16&quot;</span>
+    <span class="n">UINT16</span> <span class="o">=</span> <span class="s2">&quot;UInt16&quot;</span>
+    <span class="n">INT32</span> <span class="o">=</span> <span class="s2">&quot;Int32&quot;</span>
+    <span class="n">UINT32</span> <span class="o">=</span> <span class="s2">&quot;UInt32&quot;</span>
+    <span class="n">INT64</span> <span class="o">=</span> <span class="s2">&quot;Int64&quot;</span>
     <span class="n">UINT64</span> <span class="o">=</span> <span class="s2">&quot;UInt64&quot;</span>
+    <span class="n">BINARY</span> <span class="o">=</span> <span class="s2">&quot;Binary&quot;</span>
     <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="s2">&quot;Unknown&quot;</span></div>
 
 
@@ -2494,6 +2502,7 @@
     <span class="n">ItMeasurementDevice</span> <span class="o">=</span> <span class="s1">&#39;It Measurement&#39;</span>
 
     <span class="n">WireDevice</span> <span class="o">=</span> <span class="s1">&#39;Wire&#39;</span>
+    <span class="n">UndergroundCableTypeDevice</span> <span class="o">=</span> <span class="s1">&#39;Underground cable&#39;</span>
     <span class="n">DcCableTypeDevice</span> <span class="o">=</span> <span class="s1">&#39;DC cable type&#39;</span>
     <span class="n">SequenceLineDevice</span> <span class="o">=</span> <span class="s1">&#39;Sequence line&#39;</span>
     <span class="n">UnderGroundLineDevice</span> <span class="o">=</span> <span class="s1">&#39;Underground line&#39;</span>
@@ -2552,6 +2561,8 @@
     <span class="n">ModellingAuthority</span> <span class="o">=</span> <span class="s2">&quot;Modelling Authority&quot;</span>
 
     <span class="n">FacilityDevice</span> <span class="o">=</span> <span class="s2">&quot;Facility&quot;</span>
+
+    <span class="n">MarketUnitsGroupDevice</span> <span class="o">=</span> <span class="s2">&quot;Market units group&quot;</span>
     <span class="n">MarketUnitDevice</span> <span class="o">=</span> <span class="s2">&quot;Market unit&quot;</span>
 
     <span class="n">SimulationOptionsDevice</span> <span class="o">=</span> <span class="s2">&quot;SimulationOptionsDevice&quot;</span>
@@ -2626,6 +2637,7 @@
     <span class="n">ObjectsList</span> <span class="o">=</span> <span class="s2">&quot;ObjectsList&quot;</span>
     <span class="n">Associations</span> <span class="o">=</span> <span class="s2">&quot;AssociationsList&quot;</span>
     <span class="n">ListOfWires</span> <span class="o">=</span> <span class="s1">&#39;ListOfWires&#39;</span>
+    <span class="n">ListOfCables</span> <span class="o">=</span> <span class="s1">&#39;ListOfCables&#39;</span>
     <span class="n">AdmittanceMatrix</span> <span class="o">=</span> <span class="s2">&quot;Admittance Matrix&quot;</span>
     <span class="n">ImpedanceTripletList</span> <span class="o">=</span> <span class="s2">&quot;Impedance Triplet List&quot;</span>
     <span class="n">DaeBlockType</span> <span class="o">=</span> <span class="s2">&quot;DaeBlock&quot;</span>
@@ -3745,6 +3757,7 @@
 
     <span class="n">BaseFlowReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Base flow report&#39;</span>
     <span class="n">ContingencyFlowsReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Contingency flow report&#39;</span>
+    <span class="n">ContingencyFlowsRepresentativeReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Representative hours contingency flow report&#39;</span>
     <span class="n">ContingencyFlowsBranchReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Contingency flow report. (Branch)&#39;</span>
     <span class="n">ContingencyFlowsGenerationReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Contingency flow report. (Generation)&#39;</span>
     <span class="n">ContingencyFlowsHvdcReport</span> <span class="o">=</span> <span class="s1">&#39;Ntc: Contingency flow report. (Hvdc)&#39;</span>
@@ -3765,6 +3778,7 @@
 
     <span class="c1"># Clustering</span>
     <span class="n">ClusteringReport</span> <span class="o">=</span> <span class="s1">&#39;Clustering time series report&#39;</span>
+    <span class="n">ClusteringMembershipReport</span> <span class="o">=</span> <span class="s1">&#39;Clustering hour assignments report&#39;</span>
 
     <span class="c1"># RMS Simulation</span>
 
@@ -5572,6 +5586,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">SERIES</span> <span class="o">=</span> <span class="s2">&quot;SERIES&quot;</span>
+    <span class="n">POLAR</span> <span class="o">=</span> <span class="s2">&quot;POLAR&quot;</span>
     <span class="n">COMPLEX_POINTS</span> <span class="o">=</span> <span class="s2">&quot;COMPLEX_POINTS&quot;</span>
     <span class="n">COMPLEX_VECTORS</span> <span class="o">=</span> <span class="s2">&quot;COMPLEX_VECTORS&quot;</span>
 
@@ -5771,6 +5786,53 @@
     <span class="n">PHASE_A</span> <span class="o">=</span> <span class="s2">&quot;phase_a&quot;</span>
     <span class="n">PHASE_B</span> <span class="o">=</span> <span class="s2">&quot;phase_b&quot;</span>
     <span class="n">PHASE_C</span> <span class="o">=</span> <span class="s2">&quot;phase_c&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DynamicDeviceTemplateType">
+<a class="viewcode-back" href="../../rst_source/api/auto/VeraGridEngine.html#VeraGridEngine.enumerations.DynamicDeviceTemplateType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamicDeviceTemplateType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify one built-in complete dynamic-device template.&quot;&quot;&quot;</span>
+
+    <span class="n">RMS_COMPLETE_GENERATOR</span> <span class="o">=</span> <span class="s2">&quot;rms:get_complete_generator_template_rms&quot;</span>
+    <span class="n">RMS_GENQEC</span> <span class="o">=</span> <span class="s2">&quot;rms:get_genqec_rms&quot;</span>
+    <span class="n">RMS_GENROW</span> <span class="o">=</span> <span class="s2">&quot;rms:get_genrow_rms_template&quot;</span>
+    <span class="n">RMS_LINE</span> <span class="o">=</span> <span class="s2">&quot;rms:get_line_rms_template&quot;</span>
+    <span class="n">RMS_DC_LINE</span> <span class="o">=</span> <span class="s2">&quot;rms:build_dc_line_rms_v2&quot;</span>
+    <span class="n">RMS_LOAD</span> <span class="o">=</span> <span class="s2">&quot;rms:get_load_rms_template&quot;</span>
+    <span class="n">RMS_TRANSFORMER_2W</span> <span class="o">=</span> <span class="s2">&quot;rms:get_transformer2w_rms&quot;</span>
+    <span class="n">RMS_SHUNT</span> <span class="o">=</span> <span class="s2">&quot;rms:get_shunt_template&quot;</span>
+    <span class="n">RMS_PVD1</span> <span class="o">=</span> <span class="s2">&quot;rms:get_pvd1_rms_template&quot;</span>
+    <span class="n">RMS_PVD1_COMPLETE</span> <span class="o">=</span> <span class="s2">&quot;rms:get_pvd1_complete_rms_template&quot;</span>
+    <span class="n">RMS_PVD1_DC_MPPT</span> <span class="o">=</span> <span class="s2">&quot;rms:get_pvd1_dc_mppt_rms_template&quot;</span>
+    <span class="n">RMS_PVD1_DC_LINK_MPPT</span> <span class="o">=</span> <span class="s2">&quot;rms:get_pvd1_dc_link_mppt_rms_template&quot;</span>
+    <span class="n">RMS_PVD1_DC_LINK_BESS</span> <span class="o">=</span> <span class="s2">&quot;rms:get_pvd1_dc_link_bess_rms_template&quot;</span>
+    <span class="n">RMS_ESD1</span> <span class="o">=</span> <span class="s2">&quot;rms:get_esd1_rms_template&quot;</span>
+    <span class="n">RMS_VOLTAGE_SOURCE</span> <span class="o">=</span> <span class="s2">&quot;rms:VoltageSourceBuild&quot;</span>
+    <span class="n">RMS_GFL_CONVERTER</span> <span class="o">=</span> <span class="s2">&quot;rms:get_gfl_converter_rms&quot;</span>
+    <span class="n">RMS_HVDC_VSC_GFL</span> <span class="o">=</span> <span class="s2">&quot;rms:build_hvdc_vsc_gfl_rms&quot;</span>
+
+    <span class="n">EMT_COMPLETE_GENERATOR</span> <span class="o">=</span> <span class="s2">&quot;emt:get_complete_generator_template_emt&quot;</span>
+    <span class="n">EMT_THEVENIN_GENERATOR</span> <span class="o">=</span> <span class="s2">&quot;emt:get_generator_thevenin_rl_emt_template_with_ref&quot;</span>
+    <span class="n">EMT_IDEAL_CONVERTER</span> <span class="o">=</span> <span class="s2">&quot;emt:get_emt_ideal_converter&quot;</span>
+    <span class="n">EMT_FULL_PSEUDO_CONVERTER</span> <span class="o">=</span> <span class="s2">&quot;emt:get_full_pseudo_emt_converter&quot;</span>
+    <span class="n">EMT_SWITCHED_CONVERTER</span> <span class="o">=</span> <span class="s2">&quot;emt:get_switched_emt_converter&quot;</span>
+    <span class="n">EMT_DC_LOAD</span> <span class="o">=</span> <span class="s2">&quot;emt:get_dc_load_emt_template&quot;</span>
+    <span class="n">EMT_DC_LINE</span> <span class="o">=</span> <span class="s2">&quot;emt:get_dc_line_emt_template&quot;</span>
+    <span class="n">EMT_TRANSFORMER</span> <span class="o">=</span> <span class="s2">&quot;emt:get_transformer_emt_template&quot;</span>
+    <span class="n">EMT_XFMR</span> <span class="o">=</span> <span class="s2">&quot;emt:get_xfmr_emt_template&quot;</span>
+    <span class="n">EMT_SHUNT_C_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_shunt_c_emt_template:abc&quot;</span>
+    <span class="n">EMT_SHUNT_L_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_shunt_l_emt_template:abc&quot;</span>
+    <span class="n">EMT_SHUNT_R_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_shunt_r_emt_template:abc&quot;</span>
+    <span class="n">EMT_EXPONENTIAL_LOAD_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_exponential_load_emt:abc&quot;</span>
+    <span class="n">EMT_ZIP_LOAD_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_load_ZIP_emt_template:abc&quot;</span>
+    <span class="n">EMT_PI_LINE_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_pi_line_emt_template:abc&quot;</span>
+    <span class="n">EMT_BERGERON_LINE_ABC</span> <span class="o">=</span> <span class="s2">&quot;emt:get_bergeron_line_emt_template:abc&quot;</span>
+    <span class="n">EMT_SINGLE_CAGE_INDUCTION_MOTOR</span> <span class="o">=</span> <span class="s2">&quot;emt:get_induction_motor_single_cage_emt_template:abc&quot;</span>
+    <span class="n">EMT_DOUBLE_CAGE_INDUCTION_MOTOR</span> <span class="o">=</span> <span class="s2">&quot;emt:get_induction_motor_double_cage_emt_template:abc&quot;</span>
+    <span class="n">EMT_BESS</span> <span class="o">=</span> <span class="s2">&quot;emt:get_bess_avm_grid_following_emt_template:abc&quot;</span>
+    <span class="n">EMT_PV_GRID_FOLLOWING</span> <span class="o">=</span> <span class="s2">&quot;emt:get_pv_avm_grid_following_emt_template:abc&quot;</span>
+    <span class="n">EMT_GFM</span> <span class="o">=</span> <span class="s2">&quot;emt:get_gfm_emt_template&quot;</span></div>
 
 
 

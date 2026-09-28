@@ -18,6 +18,13 @@ class NodalCapacityOptions(OptionsTemplate):
     Nodal Capacity Options
     """
 
+    __slots__ = (
+        "opf_options",
+        "capacity_nodes_idx",
+        "method",
+        "nodal_capacity_sign",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="opf_options", tpe=DeviceType.SimulationOptionsDevice),
         GCProp(key="capacity_nodes_idx", tpe=SubObjectType.Array),

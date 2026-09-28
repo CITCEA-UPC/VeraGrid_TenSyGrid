@@ -14,6 +14,13 @@ class LinearAnalysisOptions(OptionsTemplate):
     LinearAnalysisOptions
     """
 
+    __slots__ = (
+        "distribute_slack",
+        "correct_values",
+        "ptdf_threshold",
+        "lodf_threshold",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="distribute_slack", tpe=bool),
         GCProp(key="correct_values", tpe=bool),

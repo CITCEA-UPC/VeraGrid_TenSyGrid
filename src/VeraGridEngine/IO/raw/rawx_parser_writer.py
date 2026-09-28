@@ -51,7 +51,7 @@ def parse_rawx(file_name: str, logger: Logger = Logger()) -> PsseCircuit:
         else:
 
             # get the list of elements where this element belongs
-            elm_lst = psse_grid.__dict__[psse_property.property_name]
+            elm_lst: List[RawObject] = psse_grid.get_prop_value(psse_property)
 
             # get the attribute names
             property_names = type_data['fields']
@@ -85,6 +85,9 @@ class NpEncoder(json.JSONEncoder):
     """
 
     """
+
+    __slots__ = ()
+
     def default(self, obj):
         dtypes = (np.datetime64, np.complexfloating)
         if isinstance(obj, dtypes):
@@ -111,7 +114,7 @@ def write_rawx(file_name: str, circuit: PsseCircuit, logger: Logger = Logger()) 
 
     for circuit_prop in circuit.get_properties():
 
-        circuit_val: List[RawObject] = circuit.__dict__[circuit_prop.property_name]
+        circuit_val: List[RawObject] = circuit.get_prop_value(circuit_prop)
 
         elm_data = list()
         fields = list()

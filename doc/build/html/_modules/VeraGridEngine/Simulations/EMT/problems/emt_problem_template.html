@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.EMT.problems.emt_problem_template &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.EMT.problems.emt_problem_template &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -362,6 +362,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structural protocol implemented by EMT boundary update providers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
 <div class="viewcode-block" id="EmtBoundaryUpdateProtocol.update">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.EMT.problems.html#VeraGridEngine.Simulations.EMT.problems.emt_problem_template.EmtBoundaryUpdateProtocol.update">[docs]</a>
@@ -402,16 +403,7 @@
 <span class="sd">    :param boundary_updater: Boundary updater instance.</span>
 <span class="sd">    :return: ``True`` when the API is implemented.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">updater_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">boundary_updater</span><span class="p">)</span>
-    <span class="n">base_type</span><span class="p">:</span> <span class="nb">type</span>
-
-    <span class="k">for</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="n">updater_type</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;get_next_forced_event_time&quot;</span> <span class="ow">in</span> <span class="n">base_type</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-    <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="s2">&quot;get_next_forced_event_time&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">boundary_updater</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_implements_step_resolution_api</span><span class="p">(</span><span class="n">boundary_updater</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -421,14 +413,7 @@
 <span class="sd">    :return: ``True`` when transactional step resolution is implemented.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">updater_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">boundary_updater</span><span class="p">)</span>
-    <span class="n">base_type</span><span class="p">:</span> <span class="nb">type</span>
-    <span class="k">for</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="n">updater_type</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;resolve_step&quot;</span> <span class="ow">in</span> <span class="n">base_type</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-    <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="s2">&quot;resolve_step&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">boundary_updater</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_emt_event_spec_time_sort_key</span><span class="p">(</span><span class="n">event_spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -609,6 +594,56 @@
     <span class="n">CONSTANT_PARAMS_NAME</span> <span class="o">=</span> <span class="s2">&quot;cprms&quot;</span>
     <span class="n">DIFF_NAME</span> <span class="o">=</span> <span class="s2">&quot;diff&quot;</span>
     <span class="n">TIME_NAME</span> <span class="o">=</span> <span class="s2">&quot;glob_time&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;sys_block&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_glob_time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_newton_trace_collector&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_init_eqs_flat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_init_eqs_flat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_static_parameter_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_parameters_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_uids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_all_parameters_source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_all_eqs_source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_continuous_slice&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_runtime_mode_slice&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_vars_glob_name2uid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;init_guess&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;event_params_init_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;diff_init_guess&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_event_params_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_params_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;progress_signal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;progress_text&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_alg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_algebraic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_n_event_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_event_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_compiler_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_alias_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_t&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">sys_block</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span>
@@ -924,7 +959,11 @@
 
         <span class="k">if</span> <span class="n">n_runtime</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_runtime_parameter_values</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">seed_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_event_params_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_event_params_fn</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_event_params_values</span><span class="p">,</span>
+                <span class="mf">0.0</span><span class="p">,</span>
+                <span class="n">defer_unavailable_dependencies</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
 
@@ -1151,7 +1190,7 @@
             <span class="k">if</span> <span class="n">runtime_parameter</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">runtime_equation_lookup</span><span class="p">:</span>
                 <span class="n">refreshed_equations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">runtime_equation_lookup</span><span class="p">[</span><span class="n">runtime_parameter</span><span class="o">.</span><span class="n">uid</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">runtime_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_event_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">runtime_parameter</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;uid2idx_event_params&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">runtime_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_event_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">runtime_parameter</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">runtime_idx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">runtime_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_parameters_eqs</span><span class="p">):</span>
                     <span class="n">refreshed_equations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Const</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1219,11 +1258,50 @@
             <span class="n">expression</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_parameters_eqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="ow">and</span> <span class="n">expression</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">Expr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_expression_dependencies_available</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+                <span class="c1"># Runtime initialization happens once while the generic problem</span>
+                <span class="c1"># storage is being assembled and again after explicit/native</span>
+                <span class="c1"># initialization.  A model-owned runtime expression may depend</span>
+                <span class="c1"># on algebraic or state values that are intentionally unavailable</span>
+                <span class="c1"># during the first pass.  Preserve its provisional seed here;</span>
+                <span class="c1"># explicit initialization will resolve the expression through</span>
+                <span class="c1"># the full dependency graph and promote the resulting scalar.</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_runtime_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">tm</span><span class="p">)</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_runtime_expression_dependencies_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="n">Expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether a runtime expression can be evaluated at this stage.</span>
+
+<span class="sd">        Runtime and constant parameters are always represented in the problem</span>
+<span class="sd">        vectors. Algebraic, state, and differential variables become available</span>
+<span class="sd">        only after an initialization value has been assigned. Variables owned by</span>
+<span class="sd">        a connected sibling block are deliberately deferred to the explicit</span>
+<span class="sd">        initialization graph, which supplies its external UID bindings.</span>
+
+<span class="sd">        :param expression: Runtime initialization expression to inspect.</span>
+<span class="sd">        :return: ``True`` when every referenced variable has a usable binding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">expression</span><span class="o">.</span><span class="n">get_vars</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glob_time</span><span class="o">.</span><span class="n">uid</span> <span class="ow">or</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIME_NAME</span><span class="p">}:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_event_params</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_params</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_vars</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_guess</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">variable</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_diff</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_init_guess</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_runtime_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">runtime_params</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">tm</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1528,9 +1606,48 @@
         <span class="k">return</span> <span class="n">dx</span></div>
 
 
+<div class="viewcode-block" id="EmtProblemTemplate.set_x0">
+<a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.EMT.problems.html#VeraGridEngine.Simulations.EMT.problems.emt_problem_template.EmtProblemTemplate.set_x0">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_x0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the initial state vector guess from an array.</span>
+
+<span class="sd">        :param x0: Initial state vector.</span>
+<span class="sd">        :type x0: Vec</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">init_guess</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x0</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="EmtProblemTemplate.set_dx0">
+<a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.EMT.problems.html#VeraGridEngine.Simulations.EMT.problems.emt_problem_template.EmtProblemTemplate.set_dx0">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_dx0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx0</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the initial differential vector guess from an array.</span>
+
+<span class="sd">        :param dx0: Initial differential vector.</span>
+<span class="sd">        :type dx0: Vec</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uid2idx_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dx0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diff_init_guess</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dx0</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+
 <div class="viewcode-block" id="EmtProblemTemplate.def_event_params_fn">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.EMT.problems.html#VeraGridEngine.Simulations.EMT.problems.emt_problem_template.EmtProblemTemplate.def_event_params_fn">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">def_event_params_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_param</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">tm</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">def_event_params_fn</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">ev_param</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
+            <span class="n">tm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">defer_unavailable_dependencies</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update only the continuous runtime parameter slice.</span>
 
@@ -1540,6 +1657,8 @@
 
 <span class="sd">        :param ev_param: Current flat runtime parameter vector.</span>
 <span class="sd">        :param tm: Current simulation time.</span>
+<span class="sd">        :param defer_unavailable_dependencies: Preserve the current value when</span>
+<span class="sd">            construction-time algebraic/state dependencies are not initialized.</span>
 <span class="sd">        :return: Updated flat runtime parameter vector.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_continuous</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_runtime_continuous_eqs</span><span class="p">)</span>
@@ -1554,7 +1673,14 @@
                 <span class="n">global_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_continuous_slice</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">i</span>
                 <span class="n">expression</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_continuous_eqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-                <span class="n">out</span><span class="p">[</span><span class="n">global_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_runtime_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">tm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">defer_unavailable_dependencies</span>
+                    <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">Expr</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_expression_dependencies_available</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">out</span><span class="p">[</span><span class="n">global_idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_runtime_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">tm</span><span class="p">)</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">return</span> <span class="n">out</span></div>
@@ -1787,9 +1913,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">event_parameters_eqs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_parameters_eqs</span></div>
-
-
-
 
 </pre></div>
 

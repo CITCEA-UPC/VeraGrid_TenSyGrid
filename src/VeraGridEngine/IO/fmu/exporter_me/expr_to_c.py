@@ -50,6 +50,8 @@ def _number_literal(value: float | int | bool | None) -> str:
 
 
 class ExprToCVisitor:
+    __slots__ = ("resolver",)
+
     def __init__(self, resolver: CVariableResolver):
         self.resolver = resolver
 

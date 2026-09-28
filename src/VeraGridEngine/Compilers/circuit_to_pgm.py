@@ -5,7 +5,7 @@
 
 from warnings import warn
 import numpy as np
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Any
 import json
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.basic_structures import Logger
@@ -615,10 +615,22 @@ def pgm_pf(circuit: MultiCircuit, opt: PowerFlowOptions, logger: Logger, symmetr
 
 
 class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
+    """
+    JSON encoder that serializes NumPy arrays to lists.
+    """
+    __slots__ = ()
+
+    def default(self, obj: Any) -> Any:
+        """
+        Convert numpy arrays to python lists for JSON serialization.
+
+        :param obj: Object to serialize.
+        :return: JSON serializable representation of obj.
+        """
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 def save_pgm(filename: str, circuit: MultiCircuit, logger: Logger = Logger(), time_series=False):

@@ -28,13 +28,6 @@ def pytest_configure(config: pytest.Config) -> None:
 
     _TEST_STATE_ROOT.mkdir(parents=True, exist_ok=True)
 
-    if "MPLCONFIGDIR" in os.environ:
-        pass
-    else:
-        matplotlib_cache_dir: Path = _TEST_STATE_ROOT / "matplotlib"
-        matplotlib_cache_dir.mkdir(parents=True, exist_ok=True)
-        os.environ["MPLCONFIGDIR"] = str(matplotlib_cache_dir)
-
     if "VERAGRID_EMT_INIT_CACHE_DIR" in os.environ:
         pass
     else:

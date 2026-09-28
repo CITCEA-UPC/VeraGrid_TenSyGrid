@@ -7,6 +7,7 @@ import numpy as np
 from PySide6 import QtGui, QtWidgets
 
 from VeraGrid.Gui.SigmaAnalysis.sigma_analysis_gui import Ui_MainWindow
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.results_model import ResultsModel
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -239,12 +240,58 @@ class SigmaAnalysisGUI(QtWidgets.QMainWindow):
         self.results = results
 
         if results is not None and bus_names is not None:
-            ax = self.ui.plotwidget.get_axis()
-            fig = self.ui.plotwidget.get_figure()
-            ax.clear()
-            self.results.plot(fig, ax)
-            fig.tight_layout()
-            fig.canvas.draw_idle()
+            plot_widget: GraphsWidget = self.ui.plotwidget
+            dark_theme: bool = plot_widget.palette().color(QtGui.QPalette.ColorRole.Window).lightness() < 128
+            plot_widget.apply_theme(dark=dark_theme)
+            sigma_x: np.ndarray = np.asarray(self.results.sigma_re, dtype=float)
+            sigma_y: np.ndarray = np.asarray(self.results.sigma_im, dtype=float)
+            if len(sigma_x) > 0:
+                boundary_max: float = float(np.max(sigma_x)) + 0.1
+            else:
+                boundary_max = 0.1
+
+            boundary_x: np.ndarray = np.linspace(-0.25, max(boundary_max, -0.15), 1000)
+            boundary_y: np.ndarray = np.sqrt(np.maximum(0.25 + boundary_x, 0.0))
+            if dark_theme:
+                boundary_color: str = "#d8e3ee"
+            else:
+                boundary_color = "#102235"
+            plot_color: str = "#00a884" if self.results.converged else "#ef6c45"
+            if len(bus_names) == len(sigma_x):
+                sigma_tooltips: list[str] | None = list()
+                bus_index: int
+                for bus_index in range(len(bus_names)):
+                    sigma_tooltips.append(str(bus_names[bus_index]))
+            else:
+                sigma_tooltips = None
+            series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = [
+                (boundary_x, boundary_y, boundary_color),
+                (boundary_x, -boundary_y, boundary_color),
+                (sigma_x, sigma_y, plot_color),
+            ]
+            updated: bool = plot_widget.replace_xy_series_data(series_data=series_data)
+            if not updated:
+                # The first result creates the fixed renderer-owned series set used by every later rerun.
+                plot_widget.clear()
+                plot_widget.add_line_series(name=self.tr("Stability boundary"),
+                                            x_values=boundary_x,
+                                            y_values=boundary_y,
+                                            color=boundary_color)
+                plot_widget.add_line_series(name="",
+                                            x_values=boundary_x,
+                                            y_values=-boundary_y,
+                                            color=boundary_color)
+                plot_widget.add_scatter_series(name=self.tr("Buses"),
+                                               x_values=sigma_x,
+                                               y_values=sigma_y,
+                                               color=plot_color,
+                                               point_tooltips=sigma_tooltips)
+            else:
+                pass
+            plot_widget.set_series_point_tooltips(series_index=2, point_tooltips=sigma_tooltips)
+            plot_widget.setTitle(self.tr("Sigma plot"))
+            plot_widget.set_axis_titles("σre", "σim")
+            plot_widget.redraw()
 
             n: int = len(bus_names)
             self.mdl = ResultsModel(self.results.mdl(result_type=ResultTypes.SigmaPlusDistances,

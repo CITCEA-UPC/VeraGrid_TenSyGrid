@@ -101,6 +101,19 @@ def get_available_cgmes_profiles(cgmes_version: CGMESVersions) -> Dict[str, List
 
 
 class CimExporter:
+    __slots__ = (
+        "cgmes_circuit",
+        "profiles_to_export",
+        "one_file_per_profile",
+        "export_OP",
+        "export_SC",
+        "profile_uris",
+        "namespaces",
+        "enum_dict",
+        "about_dict",
+        "class_filters",
+    )
+
     def __init__(self, cgmes_circuit: CgmesCircuit,
                  profiles_to_export: List[CgmesProfileType],
                  one_file_per_profile: bool):

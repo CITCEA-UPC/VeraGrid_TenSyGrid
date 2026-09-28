@@ -106,6 +106,8 @@ def _read_procedural_integer(
 class ProceduralProblem(Protocol):
     """Declare the EMT surface required by procedural runtime logic."""
 
+    __slots__ = ()
+
     @property
     def uid2idx_vars(self) -> Dict[int, int]:
         """Return compiled state-variable indexes keyed by symbolic UID.

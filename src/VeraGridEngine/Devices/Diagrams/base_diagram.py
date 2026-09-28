@@ -7,7 +7,7 @@ import copy
 import sys
 import uuid
 import networkx as nx
-from typing import Any, Dict, Union, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Union, List, Optional, Tuple, TYPE_CHECKING
 
 from VeraGridEngine.Devices.Diagrams.graphic_location import GraphicLocation
 from VeraGridEngine.Devices.Diagrams.map_location import MapLocation
@@ -240,6 +240,11 @@ class PointsGroup:
     Diagram
     """
 
+    __slots__ = (
+        'name',
+        'locations',
+    )
+
     def __init__(self, name: str = '') -> None:
         """
 
@@ -366,13 +371,31 @@ class BaseDiagram:
     Diagram
     """
 
+    __slots__ = (
+        'idtag',
+        'name',
+        'data',
+        'diagram_type',
+        '_use_flow_based_width',
+        '_min_branch_width',
+        '_max_branch_width',
+        '_min_bus_width',
+        '_max_bus_width',
+        '_arrow_size',
+        '_use_api_colors',
+        '_palette',
+        '_default_bus_voltage',
+        '_group',
+        '_group_idtag',
+    )
+
     def __init__(self,
                  idtag: Union[str, None],
                  name: str,
-                 diagram_type: DiagramType = DiagramType,
+                 diagram_type: DiagramType,
                  use_flow_based_width: bool = False,
-                 min_branch_width: int = 1.0,
-                 max_branch_width=5,
+                 min_branch_width: float = 1.0,
+                 max_branch_width=5.0,
                  min_bus_width=1.0,
                  max_bus_width=20,
                  arrow_size=20,
@@ -416,6 +439,8 @@ class BaseDiagram:
 
         self._palette = palette
         self._default_bus_voltage: float = default_bus_voltage
+        self._group: Optional[Any] = None
+        self._group_idtag: Optional[str] = None
 
     def copy(self, obj_dict: Dict[str, Dict[str, ALL_DEV_TYPES]] | None = None) -> "BaseDiagram":
         """
@@ -425,14 +450,21 @@ class BaseDiagram:
                          locations to objects in a target circuit.
         :return: A copied diagram with detached layout containers.
         """
-        cpy = self.__class__.__new__(self.__class__)
-
-        for attr_name, attr_value in self.__dict__.items():
-            if attr_name == "data":
-                continue
-
-            setattr(cpy, attr_name, copy.deepcopy(attr_value))
-
+        cpy: BaseDiagram = self.__class__.__new__(self.__class__)
+        cpy.idtag = self.idtag
+        cpy.name = self.name
+        cpy.diagram_type = self.diagram_type
+        cpy._use_flow_based_width = self._use_flow_based_width
+        cpy._min_branch_width = self._min_branch_width
+        cpy._max_branch_width = self._max_branch_width
+        cpy._min_bus_width = self._min_bus_width
+        cpy._max_bus_width = self._max_bus_width
+        cpy._arrow_size = self._arrow_size
+        cpy._use_api_colors = self._use_api_colors
+        cpy._palette = self._palette
+        cpy._default_bus_voltage = self._default_bus_voltage
+        cpy._group = None
+        cpy._group_idtag = self._group_idtag
         cpy.data = dict()
         for category, points_group in self.data.items():
             category_obj_dict = None if obj_dict is None else obj_dict.get(category, None)
@@ -502,7 +534,6 @@ class BaseDiagram:
     def min_bus_width(self, value: float):
         self._min_bus_width = value
 
-
     @property
     def max_bus_width(self) -> float:
         """
@@ -540,6 +571,19 @@ class BaseDiagram:
     def palette(self, value: Colormaps):
         assert isinstance(value, Colormaps)
         self._palette = value
+
+    @property
+    def group(self) -> Optional[Any]:
+        """
+        Parent folder/group of this diagram.
+        """
+        return self._group
+
+    @group.setter
+    def group(self, value: Optional[Any]) -> None:
+        self._group = value
+        if value is not None and hasattr(value, 'idtag'):
+            self._group_idtag = value.idtag
 
     # default_bus_voltage property
     @property
@@ -636,19 +680,21 @@ class BaseDiagram:
         """
         data = {category: group.get_dict() for category, group in self.data.items()}
 
-        return {'type': self.diagram_type.value,
-                'idtag': self.idtag,
-                'name': self.name,
-                "use_flow_based_width": self.use_flow_based_width,
-                "min_branch_width": self.min_branch_width,
-                "max_branch_width": self.max_branch_width,
-                "min_bus_width": self.min_bus_width,
-                "max_bus_width": self.max_bus_width,
-                "arrow_size": self.arrow_size,
-                "use_api_colors": self.use_api_colors,
-                "palette": self.palette.value,
-                "default_bus_voltage": self.default_bus_voltage,
-                'data': data}
+        return {
+            'type': self.diagram_type.value,
+            'idtag': self.idtag,
+            'name': self.name,
+            "use_flow_based_width": self.use_flow_based_width,
+            "min_branch_width": self.min_branch_width,
+            "max_branch_width": self.max_branch_width,
+            "min_bus_width": self.min_bus_width,
+            "max_bus_width": self.max_bus_width,
+            "arrow_size": self.arrow_size,
+            "use_api_colors": self.use_api_colors,
+            "palette": self.palette.value,
+            "default_bus_voltage": self.default_bus_voltage,
+            'data': data
+        }
 
     def parse_data(self,
                    data: Dict[str, Dict[str, Dict[str, Union[int, float, bool, List[Tuple[float, float]]]]]],
@@ -661,6 +707,9 @@ class BaseDiagram:
         :param logger: logger
         """
         self.data = dict()
+
+        if 'idtag' in data and data['idtag']:
+            self.idtag = str(data['idtag']).replace('_', '').replace('-', '')
 
         self.name = data['name']
 
@@ -945,13 +994,18 @@ class BaseDiagram:
         self.arrow_size = arrow_size
 
 
-def copy_diagrams(diagrams: List[BaseDiagram],
-                  obj_dict: Dict[str, Dict[str, ALL_DEV_TYPES]] | None = None) -> List[BaseDiagram]:
+def copy_diagrams(diagrams: Any,
+                  obj_dict: Dict[str, Dict[str, ALL_DEV_TYPES]] | None = None) -> Any:
     """
     Copy diagrams while treating API objects as pointers.
 
-    :param diagrams: Diagrams to copy.
+    :param diagrams: Diagrams list or DiagramTree to copy.
     :param obj_dict: Optional target circuit object dictionary used to rebind pointers.
-    :return: Copied diagrams.
+    :return: Copied diagrams or DiagramTree.
     """
-    return [diagram.copy(obj_dict=obj_dict) for diagram in diagrams]
+    if hasattr(diagrams, "copy") and callable(diagrams.copy) and hasattr(diagrams, "folders"):
+        return diagrams.copy(obj_dict=obj_dict)
+    elif isinstance(diagrams, list):
+        return [diagram.copy(obj_dict=obj_dict) for diagram in diagrams]
+    else:
+        return [diagram.copy(obj_dict=obj_dict) for diagram in diagrams]

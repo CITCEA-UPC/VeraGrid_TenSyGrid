@@ -5,15 +5,13 @@
 
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-import matplotlib.colors as plt_colors
 from typing import List, Tuple
 
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
 from VeraGridEngine.Simulations.PowerFlow.power_flow_results import NumericPowerFlowResults
 from VeraGridEngine.basic_structures import IntVec, Vec, StrVec, CxVec, ConvergenceReport, Logger
-from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType
+from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType, ResultTablePlotType
 
 
 def get_3p_indices(length_3p: int) -> Tuple[IntVec, IntVec, IntVec, IntVec]:
@@ -111,6 +109,92 @@ class PowerFlowResults3Ph(ResultsTemplate):
         ResultsProperty(name='shunt_q_C', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='shunt_Vn', tpe=CxVec, old_names=list(), expandable=False),
         ResultsProperty(name='load_Vn', tpe=CxVec, old_names=list(), expandable=False),
+    )
+
+    __slots__ = (
+        "n",
+        "m",
+        "n_hvdc",
+        "n_vsc",
+        "n_gen",
+        "n_batt",
+        "n_sh",
+        "n_load",
+        "bus_names",
+        "branch_names",
+        "hvdc_names",
+        "vsc_names",
+        "gen_names",
+        "batt_names",
+        "sh_names",
+        "load_names",
+        "bus_types",
+        "Sbus_N",
+        "Sbus_A",
+        "Sbus_B",
+        "Sbus_C",
+        "voltage_N",
+        "voltage_A",
+        "voltage_B",
+        "voltage_C",
+        "Sf_A",
+        "Sf_B",
+        "Sf_C",
+        "St_A",
+        "St_B",
+        "St_C",
+        "If_N",
+        "If_A",
+        "If_B",
+        "If_C",
+        "It_N",
+        "It_A",
+        "It_B",
+        "It_C",
+        "tap_module",
+        "tap_angle",
+        "Vbranch_A",
+        "Vbranch_B",
+        "Vbranch_C",
+        "loading_A",
+        "loading_B",
+        "loading_C",
+        "losses_A",
+        "losses_B",
+        "losses_C",
+        "losses_hvdc",
+        # "Pf_hvdc",
+        "Pf_hvdc_A",
+        "Pf_hvdc_B",
+        "Pf_hvdc_C",
+        # "Pt_hvdc",
+        "Pt_hvdc_A",
+        "Pt_hvdc_B",
+        "Pt_hvdc_C",
+        "loading_hvdc",
+        "Pfp_vsc",
+        "St_vsc_A",
+        "St_vsc_B",
+        "St_vsc_C",
+        "If_vsc",
+        "It_vsc_A",
+        "It_vsc_B",
+        "It_vsc_C",
+        "losses_vsc",
+        "loading_vsc",
+        "gen_q_A",
+        "gen_q_B",
+        "gen_q_C",
+        "battery_q_A",
+        "battery_q_B",
+        "battery_q_C",
+        "shunt_q_A",
+        "shunt_q_B",
+        "shunt_q_C",
+        "shunt_Vn",
+        "load_Vn",
+        "plot_bars_limit",
+        "convergence_reports",
     )
 
     def __init__(
@@ -866,18 +950,8 @@ class PowerFlowResults3Ph(ResultsTemplate):
             V = np.c_[self.voltage_A, self.voltage_B, self.voltage_C]
             vm = np.abs(V)
             va = np.angle(V, deg=True)
-            va_rad = np.angle(V, deg=False)
             data = np.c_[vm, va]
 
-            if self.plotting_allowed():
-                plt.ion()
-                color_norm = plt_colors.LogNorm()
-                fig = plt.figure(figsize=(8, 6))
-                ax3 = plt.subplot(1, 1, 1, projection='polar')
-                sc3 = ax3.scatter(va_rad, vm, c=vm, norm=color_norm)
-                fig.suptitle(result_type.value)
-                plt.tight_layout()
-                plt.show(block=False)
 
             return ResultsTable(data=data,
                                 index=self.bus_names,
@@ -886,6 +960,7 @@ class PowerFlowResults3Ph(ResultsTemplate):
                                 cols_device_type=DeviceType.NoDevice,
                                 title=result_type.value,
                                 ylabel='(p.u., deg)',
+                                plot_type=ResultTablePlotType.POLAR,
                                 units='(p.u., deg)')
 
         elif result_type == ResultTypes.BusActivePowerA:

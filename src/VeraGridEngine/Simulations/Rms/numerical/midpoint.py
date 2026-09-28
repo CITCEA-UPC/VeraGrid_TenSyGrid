@@ -12,6 +12,21 @@ from VeraGridEngine.basic_structures import Vec, Mat
 
 
 class MidpointImplicitIntegration:
+    """
+    Implicit midpoint integration solver.
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+        "tol",
+        "dx0_init",
+        "use_fd_jacobian",
+    )
 
     def __init__(self,
                  problem: RmsProblemDae,
@@ -21,7 +36,7 @@ class MidpointImplicitIntegration:
                  max_iter: int,
                  tolerance: float = 1e-7,
                  dx0_init: Vec | None = None,
-                 use_fd_jacobian: bool = True):
+                 use_fd_jacobian: bool = True) -> None:
         self.problem = problem
         self.t0 = t0
         self.h = h

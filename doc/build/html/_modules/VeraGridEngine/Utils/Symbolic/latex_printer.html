@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Utils.Symbolic.latex_printer &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Utils.Symbolic.latex_printer &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -111,10 +111,10 @@
 <span class="sd">LaTeX printer for symbolic expressions.</span>
 
 <span class="sd">Converts an :class:`Expr` tree into a LaTeX string suitable for</span>
-<span class="sd">rendering with matplotlib&#39;s mathtext engine.</span>
+<span class="sd">rendering with a standard LaTeX math renderer.</span>
 
 <span class="sd">This module lives entirely inside ``VeraGridEngine`` and has **no**</span>
-<span class="sd">dependency on Qt, matplotlib, or any GUI library.</span>
+<span class="sd">dependency on Qt or any GUI library.</span>
 
 <span class="sd">Precedence levels (higher binds tighter):</span>
 
@@ -517,7 +517,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a symbolic expression into a LaTeX math string.</span>
 
-<span class="sd">    The output is intended for matplotlib mathtext rendering (no</span>
+<span class="sd">    The output is intended for a standard LaTeX math renderer (no</span>
 <span class="sd">    ``\\begin{equation}`` wrappers, no ``$`` delimiters).</span>
 
 <span class="sd">    :param expr: Symbolic expression to convert.</span>

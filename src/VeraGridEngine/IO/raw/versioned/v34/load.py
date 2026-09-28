@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v33.load import RawLoadV33
 
 class RawLoadV34(RawLoadV33):
     """PSSE v34 typed object inheriting v33."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

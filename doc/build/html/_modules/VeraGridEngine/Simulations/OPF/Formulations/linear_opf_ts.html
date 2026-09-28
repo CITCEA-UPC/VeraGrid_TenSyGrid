@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -203,6 +203,16 @@
 <span class="sd">    Struct to store the bus related vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Va&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Vm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Pinj&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Pgen&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Pbalance&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;kirchhoff&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;shadow_prices&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        BusVars structure</span>
@@ -257,6 +267,10 @@
 <span class="sd">    Struct to store the nodal capacity related vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;P&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        BusVars structure</span>
@@ -294,6 +308,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct to store the load related vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;shedding&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;p&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;shedding_cost&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -339,6 +359,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct to store the generation vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;p&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dp&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;shedding&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;reserve&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;producing&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;starting_up&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;shutting_down&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cost&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;invested&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -409,6 +441,10 @@
 <span class="sd">    struct extending the generation vars to handle the battery vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;e&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        BatteryVars structure</span>
@@ -463,6 +499,21 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct to store the branch related vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;flows&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;z_flows&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;losses&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flow_slacks_pos&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flow_slacks_neg&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;tap_angles&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flow_constraints_ub&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;flow_constraints_lb&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;overload_cost&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;rates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;loading&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;contingency_flow_data&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -555,6 +606,8 @@
 <span class="sd">    Struct to store the generation vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flows&quot;</span><span class="p">,</span> <span class="s2">&quot;rates&quot;</span><span class="p">,</span> <span class="s2">&quot;loading&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        GenerationVars structure</span>
@@ -598,6 +651,8 @@
 <span class="sd">    Struct to store the generation vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flows&quot;</span><span class="p">,</span> <span class="s2">&quot;rates&quot;</span><span class="p">,</span> <span class="s2">&quot;loading&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        GenerationVars structure</span>
@@ -611,13 +666,13 @@
 
 <div class="viewcode-block" id="VscVars.get_values">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.OPF.Formulations.html#VeraGridEngine.Simulations.OPF.Formulations.linear_opf_ts.VscVars.get_values">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">LpModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;HvdcVars&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">LpModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VscVars&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an instance of this class where the arrays content are not LP vars but their value</span>
-<span class="sd">        :return: HvdcVars</span>
+<span class="sd">        :return: VscVars</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nt</span><span class="p">,</span> <span class="n">n_elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flows</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">HvdcVars</span><span class="p">(</span><span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">n_elm</span><span class="o">=</span><span class="n">n_elm</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">VscVars</span><span class="p">(</span><span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">n_elm</span><span class="o">=</span><span class="n">n_elm</span><span class="p">)</span>
         <span class="n">data</span><span class="o">.</span><span class="n">rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rates</span>
 
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
@@ -640,6 +695,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct to store the vars of nodes of fluid type</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;p2x_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;current_level&quot;</span><span class="p">,</span> <span class="s2">&quot;spillage&quot;</span><span class="p">,</span> <span class="s2">&quot;flow_in&quot;</span><span class="p">,</span> <span class="s2">&quot;flow_out&quot;</span><span class="p">,</span> <span class="s2">&quot;water_balance&quot;</span><span class="p">,</span> <span class="s2">&quot;fluid_value&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -718,6 +775,8 @@
 <span class="sd">    Struct to store the vars of paths of fluid type</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">,)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        FluidPathVars structure</span>
@@ -764,6 +823,8 @@
 <span class="sd">    Struct to store the vars of injections of fluid type</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">,)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_elm</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        FluidInjectionVars structure</span>
@@ -802,6 +863,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct to store the system vars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;system_fuel&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;system_emissions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;system_unit_energy_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;system_total_energy_cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;power_by_technology&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -859,6 +928,34 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structure to host the opf variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;nt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ng&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nl&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_hvdc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_vsc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_fluid_node&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_fluid_path&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_fluid_inj&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_cap_buses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;acceptable_solution&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nodal_capacity_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gen_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batt_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_node_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_path_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fluid_inject_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sys_vars&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ng</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nl</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_hvdc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_vsc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">n_fluid_node</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>

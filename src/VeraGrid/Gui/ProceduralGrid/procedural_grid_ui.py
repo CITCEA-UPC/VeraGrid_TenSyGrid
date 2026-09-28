@@ -8,20 +8,15 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QFrame,
-    QGridLayout, QHBoxLayout, QLabel, QListView,
-    QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
-    QSplitter, QVBoxLayout, QWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QSize, Qt)
+from PySide6.QtGui import (QIcon)
+from PySide6.QtWidgets import (QComboBox, QFrame,
+                               QGridLayout, QHBoxLayout, QLabel, QListView,
+                               QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+                               QSplitter, QVBoxLayout)
 
-from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
-from VeraGrid.Gui.Icons.icons_rc import *
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
+
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -110,7 +105,7 @@ class Ui_Dialog(object):
 
         self.plotVerticalLayout.addWidget(self.summaryLabel)
 
-        self.plotWidget = MatplotlibWidget(self.plotFrame)
+        self.plotWidget = GraphsWidget(self.plotFrame)
         self.plotWidget.setObjectName(u"plotWidget")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -186,4 +181,3 @@ class Ui_Dialog(object):
 #endif // QT_CONFIG(tooltip)
         self.acceptButton.setText(QCoreApplication.translate("Dialog", u"Accept", None))
     # retranslateUi
-

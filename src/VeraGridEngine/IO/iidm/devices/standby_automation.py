@@ -6,6 +6,10 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class StandbyAutomaton(IidmObject):
+    __slots__ = (
+        "id",
+        "enabled",
+    )
     def __init__(self, id: str, enabled: bool):
         super().__init__("StandbyAutomaton")
         self.id = id

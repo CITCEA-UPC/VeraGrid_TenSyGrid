@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.LinearFactors package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.LinearFactors package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -141,6 +141,31 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.LinearFactors.linear_analysis.</span></span><span class="sig-name descname"><span class="pre">ContingencyIndices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contingency_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.Devices.Events.html#VeraGridEngine.Devices.Events.contingency_group.ContingencyGroup" title="VeraGridEngine.Devices.Events.contingency_group.ContingencyGroup"><span class="pre">ContingencyGroup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">contingency_group_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Events.html#VeraGridEngine.Devices.Events.contingency.Contingency" title="VeraGridEngine.Devices.Events.contingency.Contingency"><span class="pre">Contingency</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branches_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hvdc_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vsc_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injections_bus_index_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#ContingencyIndices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contingency indices</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.branch_contingency_indices">
+<span class="sig-name descname"><span class="pre">branch_contingency_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.branch_contingency_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.bus_contingency_indices">
+<span class="sig-name descname"><span class="pre">bus_contingency_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.bus_contingency_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.hvdc_contingency_indices">
+<span class="sig-name descname"><span class="pre">hvdc_contingency_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.hvdc_contingency_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.injections_factors">
+<span class="sig-name descname"><span class="pre">injections_factors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.injections_factors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.vsc_contingency_indices">
+<span class="sig-name descname"><span class="pre">vsc_contingency_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.ContingencyIndices.vsc_contingency_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -148,6 +173,56 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.LinearFactors.linear_analysis.</span></span><span class="sig-name descname"><span class="pre">LinearAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distributed_slack</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converters_as_setpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;VeraGridEngine.basic_structures.Logger</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#LinearAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Linear Analysis</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.HvdcDF">
+<span class="sig-name descname"><span class="pre">HvdcDF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.HvdcDF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.HvdcODF">
+<span class="sig-name descname"><span class="pre">HvdcODF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.HvdcODF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.LODF">
+<span class="sig-name descname"><span class="pre">LODF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.LODF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.PTDF">
+<span class="sig-name descname"><span class="pre">PTDF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.PTDF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.PTDF_by_island">
+<span class="sig-name descname"><span class="pre">PTDF_by_island</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.PTDF_by_island" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.Sbase">
+<span class="sig-name descname"><span class="pre">Sbase</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.Sbase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.VscDF">
+<span class="sig-name descname"><span class="pre">VscDF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.VscDF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.VscODF">
+<span class="sig-name descname"><span class="pre">VscODF</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.VscODF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.bus_types">
+<span class="sig-name descname"><span class="pre">bus_types</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.bus_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.distributed_slack">
+<span class="sig-name descname"><span class="pre">distributed_slack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.distributed_slack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.get_corrected_injections">
 <span class="sig-name descname"><span class="pre">get_corrected_injections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#LinearAnalysis.get_corrected_injections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.get_corrected_injections" title="Link to this definition"></a></dt>
@@ -217,6 +292,26 @@
 :param rates: rates in MW
 :return: Max transfer limits vector (n-branch)</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.islands">
+<span class="sig-name descname"><span class="pre">islands</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.DataStructures.html#VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit" title="VeraGridEngine.DataStructures.numerical_circuit.NumericalCircuit"><span class="pre">NumericalCircuit</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.islands" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.basic_structures.Logger" title="VeraGridEngine.basic_structures.Logger"><span class="pre">Logger</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.tau_flows">
+<span class="sig-name descname"><span class="pre">tau_flows</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.tau_flows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.tau_injections">
+<span class="sig-name descname"><span class="pre">tau_injections</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysis.tau_injections" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -304,6 +399,36 @@
 :return: Bus injection time series</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.groups">
+<span class="sig-name descname"><span class="pre">groups</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.groups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.mapping">
+<span class="sig-name descname"><span class="pre">mapping</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.mapping" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nbr">
+<span class="sig-name descname"><span class="pre">nbr</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nbr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nbus">
+<span class="sig-name descname"><span class="pre">nbus</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nbus" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nt">
+<span class="sig-name descname"><span class="pre">nt</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.nt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.time_indices">
+<span class="sig-name descname"><span class="pre">time_indices</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearAnalysisTs.time_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -336,6 +461,16 @@ corrective (N-1) re-dispatch of VSC/HVDC set-points.</p>
 :return: Dict[str, List[Contingency]]</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.contingency_groups_used">
+<span class="sig-name descname"><span class="pre">contingency_groups_used</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.contingency_groups_used" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.contingency_indices_list">
+<span class="sig-name descname"><span class="pre">contingency_indices_list</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.contingency_indices_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.get_contingency_group_names">
 <span class="sig-name descname"><span class="pre">get_contingency_group_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#LinearMultiContingencies.get_contingency_group_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.get_contingency_group_names" title="Link to this definition"></a></dt>
@@ -353,12 +488,52 @@ corrective (N-1) re-dispatch of VSC/HVDC set-points.</p>
 </div></blockquote>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.html#VeraGridEngine.Devices.multi_circuit.MultiCircuit" title="VeraGridEngine.Devices.multi_circuit.MultiCircuit"><span class="pre">MultiCircuit</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.grid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.multi_contingencies">
+<span class="sig-name descname"><span class="pre">multi_contingencies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency" title="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency"><span class="pre">LinearMultiContingency</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingencies.multi_contingencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">VeraGridEngine.Simulations.LinearFactors.linear_analysis.</span></span><span class="sig-name descname"><span class="pre">LinearMultiContingency</span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#LinearMultiContingency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.branch_indices">
+<span class="sig-name descname"><span class="pre">branch_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.branch_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.bus_indices">
+<span class="sig-name descname"><span class="pre">bus_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.bus_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_hvdc_df">
+<span class="sig-name descname"><span class="pre">compensated_hvdc_df</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">csc_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_hvdc_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_ptdf_factors">
+<span class="sig-name descname"><span class="pre">compensated_ptdf_factors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">csc_matrix</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_ptdf_factors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_vsc_df">
+<span class="sig-name descname"><span class="pre">compensated_vsc_df</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">csc_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.compensated_vsc_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.get_alpha_n1">
 <span class="sig-name descname"><span class="pre">get_alpha_n1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dP</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/LinearFactors/linear_analysis.html#LinearMultiContingency.get_alpha_n1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.get_alpha_n1" title="Link to this definition"></a></dt>
@@ -397,6 +572,36 @@ corrective (N-1) re-dispatch of VSC/HVDC set-points.</p>
 <dd><p>Check if this multi-contingency has bus injection modifications
 :return: true / false</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.hvdc_indices">
+<span class="sig-name descname"><span class="pre">hvdc_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.hvdc_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.hvdc_odf">
+<span class="sig-name descname"><span class="pre">hvdc_odf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.hvdc_odf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.injections_factor">
+<span class="sig-name descname"><span class="pre">injections_factor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.injections_factor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.mlodf_factors">
+<span class="sig-name descname"><span class="pre">mlodf_factors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">csc_matrix</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.mlodf_factors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.vsc_indices">
+<span class="sig-name descname"><span class="pre">vsc_indices</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.vsc_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.vsc_odf">
+<span class="sig-name descname"><span class="pre">vsc_odf</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis.LinearMultiContingency.vsc_odf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -655,28 +860,23 @@ P_eff = P - w * sum(P)</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.action">
-<span class="sig-name descname"><span class="pre">action</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.ActionType" title="VeraGridEngine.enumerations.ActionType"><span class="pre">ActionType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.action" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.correct_values">
+<span class="sig-name descname"><span class="pre">correct_values</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.correct_values" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.comment" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.distribute_slack">
+<span class="sig-name descname"><span class="pre">distribute_slack</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.distribute_slack" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.device_type">
-<span class="sig-name descname"><span class="pre">device_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.html#VeraGridEngine.enumerations.DeviceType" title="VeraGridEngine.enumerations.DeviceType"><span class="pre">DeviceType</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.device_type" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.lodf_threshold">
+<span class="sig-name descname"><span class="pre">lodf_threshold</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.lodf_threshold" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.diff_changes">
-<span class="sig-name descname"><span class="pre">diff_changes</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.diff_changes" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.selected_to_merge">
-<span class="sig-name descname"><span class="pre">selected_to_merge</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.selected_to_merge" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.ptdf_threshold">
+<span class="sig-name descname"><span class="pre">ptdf_threshold</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.LinearFactors.linear_analysis_options.LinearAnalysisOptions.ptdf_threshold" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

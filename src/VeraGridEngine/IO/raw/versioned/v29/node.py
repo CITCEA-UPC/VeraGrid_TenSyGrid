@@ -7,4 +7,5 @@ from VeraGridEngine.IO.raw.versioned.base.node import RawNode
 
 class RawNodeV29(RawNode):
     """PSSE v29 typed object."""
+    __slots__ = ()
 

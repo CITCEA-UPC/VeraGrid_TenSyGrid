@@ -7,4 +7,5 @@ from VeraGridEngine.Devices.Diagrams.graphic_location import GraphicLocation
 from VeraGridEngine.Devices.Diagrams.schematic_diagram import SchematicDiagram
 from VeraGridEngine.Devices.Diagrams.map_location import MapLocation
 from VeraGridEngine.Devices.Diagrams.map_diagram import MapDiagram
-
+from VeraGridEngine.Devices.Diagrams.base_diagram import BaseDiagram, copy_diagrams
+from VeraGridEngine.Devices.Diagrams.diagram_tree import DiagramFolder, DiagramTree

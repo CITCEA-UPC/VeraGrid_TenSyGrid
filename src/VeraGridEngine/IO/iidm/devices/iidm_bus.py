@@ -8,6 +8,12 @@ from VeraGridEngine.Devices.Substation.bus import Bus, Area
 
 
 class IidmBus(IidmObject):
+    __slots__ = (
+        "id",
+        "area_number",
+        "status",
+        "nodes",
+    )
     def __init__(self, _id: str, area_number: int, status: str, nodes: List[int]):
         """
 

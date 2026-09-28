@@ -8,7 +8,7 @@ import json
 import os.path
 import sys
 import webbrowser
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,9 @@ import shiboken6
 
 # GUI imports
 from PySide6 import QtGui, QtWidgets, QtCore
+from PySide6.QtWidgets import QDialog
 
+from VeraGrid.Gui.Main.SubClasses.window_manager import WindowManager
 from VeraGrid.Gui.scenario_tree_model import ScenarioTreeModel
 # Engine imports
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -39,12 +41,9 @@ from VeraGrid.Gui.AboutDialogue.about_dialogue import AboutDialogueGuiGUI
 from VeraGrid.Gui.Analysis.AnalysisDialogue import GridAnalysisGUI
 from VeraGrid.Gui.ContingencyPlanner.contingency_planner_dialogue import ContingencyPlannerGUI
 from VeraGrid.Gui.messages import yes_no_question, warning_msg, info_msg, error_msg
-from VeraGrid.Gui.FileDialogues.LoadCatalogue.catalogue_dialogue import CatalogueGUI
 from VeraGrid.Gui.Main.MainWindow import Ui_mainWindow, QMainWindow
 from VeraGrid.Session.session import SimulationSession, GcThread
 from VeraGrid.Session.server_driver import RemoteJobDriver, ServerDriver
-from VeraGrid.Gui.SigmaAnalysis.sigma_analysis_dialogue import SigmaAnalysisGUI
-from VeraGrid.Gui.SyncDialogue.sync_dialogue import SyncDialogueWindow
 from VeraGrid.Gui.DynamicModelEditor.Editor.dynamic_block_editor import DynamicBlockEditorGUI
 from VeraGrid.Gui.DynamicModelEditor.Events.dynamic_events_page import DynamicEventsPage
 from VeraGrid.Gui.DynamicModelEditor.Workspace.Tabs.dynamic_editor_tab import DynamicEditorTab
@@ -61,7 +60,6 @@ from VeraGrid.AI.ollama import OllamaProcessManager
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely, is_dialog_available
 from VeraGrid.Gui.i18n import (
     ActionShortcutState,
-    ApplicationTranslator,
     collect_action_shortcut_states,
     restore_action_shortcut_states,
 )
@@ -69,54 +67,18 @@ from VeraGridEngine.IO.file_system import get_create_veragrid_folder
 from VeraGrid.Gui.general_dialogues import LogsDialogue
 
 
-def traverse_objects(name, obj, lst: list, i=0):
-    """
-
-    :param name:
-    :param obj:
-    :param lst:
-    :param i:
-    """
-    lst.append((name, sys.getsizeof(obj)))
-    if i < 10:
-        if obj.__class__.__dictoffset__ == 0:
-            pass
-        else:
-            for name2, obj2 in obj.__dict__.items():
-                if isinstance(obj2, np.ndarray):
-                    lst.append((name + "/" + name2, sys.getsizeof(obj2)))
-                else:
-                    if isinstance(obj2, list):
-                        # list or
-                        for k, obj3 in enumerate(obj2):
-                            traverse_objects(name=name + "/" + name2 + '[' + str(k) + ']',
-                                             obj=obj3, lst=lst, i=i + 1)
-                    elif isinstance(obj2, dict):
-                        # list or
-                        for name3, obj3 in obj2.items():
-                            traverse_objects(name=name + "/" + name2 + '[' + name3 + ']',
-                                             obj=obj3, lst=lst, i=i + 1)
-                    else:
-                        # normal obj
-                        if obj2 != obj:
-                            traverse_objects(name=name + "/" + name2, obj=obj2, lst=lst, i=i + 1)
-
-
 def get_splitter_section_hint(splitter: QtWidgets.QSplitter, section_index: int) -> int:
-    """
-    Return the current size hint for one splitter section.
+    """Return the current size hint for one splitter section.
 
     :param splitter: Splitter to inspect.
     :param section_index: Section index inside the splitter.
     :returns: Preferred section size along the splitter orientation.
     """
     section_widget: QtWidgets.QWidget | None = splitter.widget(section_index)
-
     if section_widget is None:
         return 0
     else:
         section_widget.updateGeometry()
-
         if splitter.orientation() == QtCore.Qt.Orientation.Horizontal:
             return max(section_widget.minimumSizeHint().width(), section_widget.minimumWidth())
         else:
@@ -124,36 +86,26 @@ def get_splitter_section_hint(splitter: QtWidgets.QSplitter, section_index: int)
 
 
 def refresh_translated_splitter_layouts(root_widget: QtWidgets.QWidget) -> None:
-    """
-    Refresh splitter sections after a language change.
-
-    When translated labels become wider, Qt retranslates the text but can keep
-    old splitter allocations until another layout pass happens. This helper
-    nudges every splitter to re-evaluate its section sizes against the updated
-    widget hints.
+    """Refresh splitter allocations after translated labels change their hints.
 
     :param root_widget: Top-level widget owning the splitters.
     :returns: None.
     """
     splitter: QtWidgets.QSplitter
-
     for splitter in root_widget.findChildren(QtWidgets.QSplitter):
         current_sizes: list[int] = splitter.sizes()
         desired_sizes: list[int] = list(current_sizes)
         section_index: int
-
-        if len(current_sizes) == 0:
-            pass
-        else:
-            for section_index in range(splitter.count()):
-                section_hint: int = get_splitter_section_hint(splitter=splitter, section_index=section_index)
-
-                if desired_sizes[section_index] < section_hint:
-                    desired_sizes[section_index] = section_hint
-                else:
-                    pass
-
+        for section_index in range(splitter.count()):
+            section_hint: int = get_splitter_section_hint(splitter=splitter, section_index=section_index)
+            if desired_sizes[section_index] < section_hint:
+                desired_sizes[section_index] = section_hint
+            else:
+                pass
+        if len(current_sizes) > 0:
             splitter.setSizes(desired_sizes)
+        else:
+            pass
 
 
 class BaseMainGui(QMainWindow):
@@ -200,7 +152,6 @@ class BaseMainGui(QMainWindow):
         self._open_plot_dialogs: List[QtWidgets.QDialog] = list()
 
         # threads ------------------------------------------------------------------------------------------------------
-        self.painter = None
         self.open_file_thread_object = None
         self.save_file_thread_object = None
         self.last_file_driver = None
@@ -265,36 +216,19 @@ class BaseMainGui(QMainWindow):
         self.console = PythonConsole(banner="VeraGrid Python Console!")
         self.ui.consoleLayout.addWidget(self.console)
 
-        self.code_editor = ScriptingPythonEditor(vars_dict={
-
-            # "app": self,
-            # "np": np,
-            # "pd": pd,
-            # "plt": plt,
-        }, )
+        self.code_editor = ScriptingPythonEditor(vars_dict={}, )
         self.ui.codeEditorLayout.addWidget(self.code_editor)
 
         # window pointers ----------------------------------------------------------------------------------------------
-        self.file_sync_window: Union[SyncDialogueWindow, None] = None
-        self.sigma_dialogue: Union[SigmaAnalysisGUI, None] = None
-        self.catalogue_dialogue: Union[CatalogueGUI, None] = None
-        self.analysis_dialogue: Union[GridAnalysisGUI, None] = None
-        self.about_msg_window: Union[AboutDialogueGuiGUI, None] = None
-        self.rms_model_Editor_window: Union[DynamicBlockEditorGUI, None] = None
-        self.ai_chat_dialogue: AiChatDialogue | None = None
+        self.window_manager = WindowManager(main_window=self)
+
         self.ai_mcp_client: VeraGridMcpClient = VeraGridMcpClient(self.ai_mcp_config_file_path())
         self.ai_ollama_manager: OllamaProcessManager = OllamaProcessManager()
-        self.rosetta_gui: QtWidgets.QWidget | None = None
-        self.cgmes_dialogue: QtWidgets.QWidget | None = None
-        self.psse_export_dialogue: QtWidgets.QWidget | None = None
-        self.dgs_export_dialogue: QtWidgets.QWidget | None = None
-        self.matpower_export_dialogue: QtWidgets.QWidget | None = None
-        self.ucte_export_dialogue: QtWidgets.QWidget | None = None
-        self.object_column_filter_dialog: QtWidgets.QWidget | None = None
+
         self.plugin_windows_list: List[QtWidgets.QWidget] = list()
+
         self.ai_backend_state: AiBackendState = self.build_default_ai_backend_state()
         self.ai_restore_visible: bool = False
-        self.translation_controller: ApplicationTranslator | None = None
 
         # available engines --------------------------------------------------------------------------------------------
         engine_lst = [EngineType.VeraGrid]
@@ -325,7 +259,7 @@ class BaseMainGui(QMainWindow):
         self.ui.actionAbout.triggered.connect(self.about_box)
         self.ui.actionAuto_rate_branches.triggered.connect(self.auto_rate_branches)
         self.ui.actionDetect_transformers.triggered.connect(self.detect_transformers)
-        self.ui.actionLaunch_data_analysis_tool.triggered.connect(self.display_grid_analysis)
+
         self.ui.actionShow_dynamic_models_editor.triggered.connect(self.display_dynamic_models_editor)
         self.ui.actionOnline_documentation.triggered.connect(self.show_online_docs)
         self.ui.actionCommunity_chat.triggered.connect(self.show_online_chat)
@@ -354,6 +288,24 @@ class BaseMainGui(QMainWindow):
         self.ui.toComboBox.currentIndexChanged.connect(self.update_from_to_list_views)
         self.ui.engineComboBox.currentIndexChanged.connect(self.refresh_ai_context_if_available)
         self.ui.available_results_to_color_comboBox.currentIndexChanged.connect(self.refresh_ai_context_if_available)
+
+    def show_dialogue(self,
+                      win: QMainWindow | QDialog,
+                      key: str | None = None,
+                      delete_on_close: bool = True) -> QMainWindow | QDialog:
+        """
+        Safely display a managed window or dialogue.
+
+        :param win: Window instance.
+        :param key: Unique key to refer to the window.
+        :param delete_on_close: Whether the window is deleted upon close.
+        :return: Displayed window.
+        """
+        return self.window_manager.show(
+            win=win,
+            key=key,
+            delete_on_close=delete_on_close,
+        )
 
     def changeEvent(self, event: QtCore.QEvent) -> None:
         """
@@ -388,8 +340,7 @@ class BaseMainGui(QMainWindow):
         pass
 
     def refresh_translated_layouts(self) -> None:
-        """
-        Refresh splitter geometry after translated texts have changed widget hints.
+        """Refresh splitter geometry after translated text updates.
 
         :returns: None.
         """
@@ -443,29 +394,6 @@ class BaseMainGui(QMainWindow):
         else:
             pass
 
-    def append_lock_managed_window(self,
-                                   windows: List[QtWidgets.QWidget],
-                                   window: QtWidgets.QWidget | None) -> None:
-        """
-        Append one live window to the lock propagation list.
-
-        :param windows: Mutable list of child windows managed by the main GUI lock.
-        :param window: Candidate child window.
-        :returns: None.
-        """
-        if window is None:
-            pass
-        elif window is self:
-            pass
-        elif isinstance(window, QtWidgets.QMenu):
-            pass
-        elif not shiboken6.isValid(window):
-            pass
-        elif window in windows:
-            pass
-        else:
-            windows.append(window)
-
     def is_qt_child_window(self, window: QtWidgets.QWidget) -> bool:
         """
         Check whether a top-level widget belongs to this main window through Qt parenting.
@@ -483,78 +411,6 @@ class BaseMainGui(QMainWindow):
                 parent_widget = parent_widget.parentWidget()
 
         return is_child_window
-
-    def get_open_lock_managed_windows(self) -> List[QtWidgets.QWidget]:
-        """
-        Collect currently open windows that must follow the main GUI lock state.
-
-        :returns: Live child windows controlled by the main GUI lock.
-        """
-        windows: List[QtWidgets.QWidget] = list()
-        app: QtWidgets.QApplication | None = QtWidgets.QApplication.instance()
-
-        self.append_lock_managed_window(windows=windows, window=self.file_sync_window)
-        self.append_lock_managed_window(windows=windows, window=self.sigma_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.catalogue_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.analysis_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.about_msg_window)
-        self.append_lock_managed_window(windows=windows, window=self.rms_model_Editor_window)
-        self.append_lock_managed_window(windows=windows, window=self.ai_chat_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.rosetta_gui)
-        self.append_lock_managed_window(windows=windows, window=self.cgmes_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.psse_export_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.dgs_export_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.matpower_export_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.ucte_export_dialogue)
-        self.append_lock_managed_window(windows=windows, window=self.object_column_filter_dialog)
-
-        plot_dialog: QtWidgets.QDialog
-        for plot_dialog in self._open_plot_dialogs:
-            self.append_lock_managed_window(windows=windows, window=plot_dialog)
-
-        plugin_window: QtWidgets.QWidget
-        for plugin_window in self.plugin_windows_list:
-            self.append_lock_managed_window(windows=windows, window=plugin_window)
-
-        workspace: DynamicEditorWorkspaceWindow
-        for workspace in self.dynamic_editor_workspace_session.get_open_workspaces():
-            self.append_lock_managed_window(windows=windows, window=workspace)
-
-        if app is None:
-            pass
-        else:
-            top_level_widget: QtWidgets.QWidget
-            for top_level_widget in app.topLevelWidgets():
-                if self.is_qt_child_window(window=top_level_widget):
-                    self.append_lock_managed_window(windows=windows, window=top_level_widget)
-                else:
-                    pass
-
-        return windows
-
-    def close_open_child_windows(self, delete_windows: bool = False) -> bool:
-        """
-        Close every open child window managed by the main GUI.
-
-        :param delete_windows: Delete windows that were successfully closed.
-        :returns: True when every managed child window accepted the close.
-        """
-        all_closed: bool = True
-        windows: List[QtWidgets.QWidget] = self.get_open_lock_managed_windows()
-        window: QtWidgets.QWidget
-
-        for window in windows:
-            if is_dialog_available(dialog=window):
-                closed: bool = window.close()
-                if closed:
-                    if delete_windows:
-                        delete_dialog_safely(dialog=window)
-                else:
-                    all_closed = False
-            else:
-                pass
-
-        return all_closed
 
     @property
     def multiverse(self) -> MultiVerse:
@@ -614,6 +470,34 @@ class BaseMainGui(QMainWindow):
             self.ui.file_information_label.setText(self._file_name)
         else:
             self.ui.file_information_label.setText("")
+
+    def register_open_plot_dialog(self, dialog: QtWidgets.QDialog) -> None:
+        """
+        Track one open plot dialog and clean up its reference upon destruction.
+
+        :param dialog: Plot dialog instance.
+        :return: None.
+        """
+        # Ensure that dialog is only tracked once to prevent duplicate listeners
+        if dialog not in self._open_plot_dialogs:
+            self._open_plot_dialogs.append(dialog)
+            # Connect the destroyed signal directly to the slot without lambdas
+            dialog.destroyed.connect(self._unregister_open_plot_dialog)
+
+    def _unregister_open_plot_dialog(self, dialog_obj: QtCore.QObject | None = None) -> None:
+        """
+        Remove a destroyed plot dialog from active tracking.
+
+        :param dialog_obj: Qt object being destroyed, or None.
+        :return: None.
+        """
+        # Rebuild tracked dialogs list, pruning the destroyed instance and any invalid widgets
+        cleaned_dialogs: list[QtWidgets.QDialog] = list()
+        dialog_item: QtWidgets.QDialog
+        for dialog_item in self._open_plot_dialogs:
+            if dialog_item is not dialog_obj and is_dialog_available(dialog_item):
+                cleaned_dialogs.append(dialog_item)
+        self._open_plot_dialogs = cleaned_dialogs
 
     def create_dynamic_editor_workspace(self, show_tree: bool = False) -> DynamicEditorWorkspaceWindow:
         """
@@ -719,7 +603,6 @@ class BaseMainGui(QMainWindow):
         """
         all_threads: List[QtCore.QThread | None] = [self.open_file_thread_object,
                                                     self.save_file_thread_object,
-                                                    self.painter,
                                                     self.delete_and_reduce_driver,
                                                     self.export_all_thread_object,
                                                     self.find_node_groups_driver,
@@ -795,21 +678,6 @@ class BaseMainGui(QMainWindow):
         Cleaning is useful if a particular thread crashes and you want to retry.
         """
         self.stuff_running_now.clear()
-
-    def get_all_objects_in_memory(self):
-        """
-        Get a list of the objects in memory
-        :return:
-        """
-        objects = []
-        # for name, obj in globals().items():
-        #     objects.append([name, sys.getsizeof(obj)])
-
-        traverse_objects('MainGUI', self, objects)
-
-        df = pd.DataFrame(data=objects, columns=['Name', 'Size (kb)'])
-        df.sort_values(by='Size (kb)', inplace=True, ascending=False)
-        return df
 
     def expand_object_tree_nodes(self) -> None:
         """
@@ -951,20 +819,7 @@ class BaseMainGui(QMainWindow):
         Display about box
         :return:
         """
-
-        dialog: AboutDialogueGuiGUI | None = self.about_msg_window
-        if is_dialog_available(dialog=dialog):
-            pass
-        else:
-            dialog = AboutDialogueGuiGUI(self)
-            self.about_msg_window = dialog
-
-        if dialog is not None:
-            dialog.setVisible(True)
-            dialog.raise_()
-            dialog.activateWindow()
-        else:
-            pass
+        self.show_dialogue(win=AboutDialogueGuiGUI(parent=self), key="about")
 
     @staticmethod
     def ai_config_file_path() -> str:
@@ -1163,21 +1018,50 @@ class BaseMainGui(QMainWindow):
 
         self.start_ai_services_from_config()
 
-    def ensure_ai_dialogue(self) -> None:
+    @property
+    def analysis_dialogue(self) -> GridAnalysisGUI | None:
         """
-        Create the floating AI dialogue lazily and bind it to the live main window.
+        Grid analysis dialogue managed via WindowManager.
 
-        :returns: Nothing.
+        :return: Active GridAnalysisGUI instance or None.
         """
-        if self.ai_chat_dialogue is None:
-            self.ai_chat_dialogue = AiChatDialogue(parent=self, app=self, mcp_client=self.ai_mcp_client)
-            self.ai_chat_dialogue.set_embedded_mode(False)
-            self.ai_chat_dialogue.apply_backend_state(self.ai_backend_state)
-            self.ai_chat_dialogue.dialogue_visibility_changed.connect(
+        dialog: QtWidgets.QMainWindow | QtWidgets.QDialog | None = self.window_manager.get("analysis_dialogue")
+        if isinstance(dialog, GridAnalysisGUI) and is_dialog_available(dialog):
+            return dialog
+        return None
+
+    @property
+    def ai_chat_dialogue(self) -> AiChatDialogue | None:
+        """
+        AI dialogue managed via WindowManager.
+
+        :return: Active AiChatDialogue instance, or None if not registered.
+        """
+        dialog: QMainWindow | QDialog | None = self.window_manager.get("AI_chat")
+        if isinstance(dialog, AiChatDialogue) and shiboken6.isValid(dialog):
+            return dialog
+        else:
+            return None
+
+    def ensure_ai_dialogue(self) -> AiChatDialogue:
+        """
+        Create the floating AI dialogue lazily via WindowManager and bind it to the live main window.
+
+        :returns: The AiChatDialogue instance.
+        """
+        ai_chat: AiChatDialogue | None = self.ai_chat_dialogue
+        if ai_chat is None:
+            ai_chat = AiChatDialogue(parent=self, app=self, mcp_client=self.ai_mcp_client)
+            ai_chat.set_embedded_mode(False)
+            ai_chat.apply_backend_state(self.ai_backend_state)
+            ai_chat.dialogue_visibility_changed.connect(
                 self.handle_ai_dialogue_visibility_changed
             )
+            self.show_dialogue(win=ai_chat, key="AI_chat", delete_on_close=False)
         else:
-            self.ai_chat_dialogue.apply_backend_state(self.ai_backend_state)
+            ai_chat.apply_backend_state(self.ai_backend_state)
+            self.show_dialogue(win=ai_chat, key="AI_chat", delete_on_close=False)
+        return ai_chat
 
     def sync_ai_dialogue_action_state(self, visible: bool) -> None:
         """
@@ -1251,9 +1135,7 @@ class BaseMainGui(QMainWindow):
             pass
         else:
             if visible:
-                self.ai_chat_dialogue.show()
-                self.ai_chat_dialogue.raise_()
-                self.ai_chat_dialogue.activateWindow()
+                self.show_dialogue(win=self.ai_chat_dialogue, key="AI_chat", delete_on_close=False)
                 self.refresh_ai_context_if_available()
                 self.ai_backend_state = self.ai_chat_dialogue.get_backend_state()
                 self.start_ai_services_from_config()
@@ -1397,24 +1279,6 @@ class BaseMainGui(QMainWindow):
                     pass
         else:
             pass
-
-    def display_grid_analysis(self):
-        """
-        Display the grid analysis GUI
-        """
-
-        old_dialog: GridAnalysisGUI | None = self.analysis_dialogue
-        if is_dialog_available(dialog=old_dialog):
-            delete_dialog_safely(dialog=old_dialog)
-        else:
-            pass
-
-        self.analysis_dialogue = GridAnalysisGUI(circuit=self.circuit,
-                                                 power_flow_options=self.get_selected_power_flow_options(),
-                                                 parent=self)
-
-        self.analysis_dialogue.resize(int(1.61 * 600.0), 600)
-        self.analysis_dialogue.show()
 
     def display_dynamic_models_editor(self) -> None:
         """
@@ -1570,6 +1434,6 @@ class BaseMainGui(QMainWindow):
         :param expand_all
         :return:
         """
-        dlg = LogsDialogue(name=name, logger=logger, expand_all=expand_all)
+        dlg = LogsDialogue(name=name, logger=logger, expand_all=expand_all, parent=self)
         dlg.setModal(True)
         exec_dialog_safely(dialog=dlg)

@@ -13,15 +13,14 @@ from difflib import SequenceMatcher
 import numpy as np
 import pandas as pd
 from PySide6 import QtWidgets, QtCore, QtGui
-from matplotlib import pyplot as plt
 
 from VeraGrid.Gui.general_dialogues import LogsDialogue
 from VeraGrid.Gui.gui_functions import ComboModel, get_list_model
 from VeraGrid.Gui.FileDialogues.ProfilesInput.profiles_from_data_gui import Ui_Dialog
 from VeraGrid.Gui.FileDialogues.ProfilesInput.excel_dialog import ExcelDialog
 from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, delete_dialogs_safely, exec_dialog_safely
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
 from VeraGrid.Gui.messages import error_msg, info_msg
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGrid.Gui.toast_widget import ToastManager
 from VeraGridEngine import DeviceType
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
@@ -465,7 +464,6 @@ class ProfileInputGUI(QtWidgets.QDialog):
         )
 
         self.original_data_frame: pd.DataFrame | None = None
-        self.fig = None
 
         self.ui.autolink_slider.setValue(100)  # Set slider to max value
 
@@ -706,28 +704,42 @@ class ProfileInputGUI(QtWidgets.QDialog):
 
         else:
             if logger.has_logs():
-                dlg: LogsDialogue = LogsDialogue(self.tr("Import issues"), logger)
+                dlg: LogsDialogue = LogsDialogue(self.tr("Import issues"), logger, parent=self)
                 dlg.setModal(True)
                 exec_dialog_safely(dialog=dlg)
 
     def plot_selected(self) -> None:
-        """
-        Plot the selected profile
+        """Show the selected input profile in one retained native chart.
+
+        :return: None.
         """
         if self.original_data_frame is not None:
             if len(self.ui.sources_list.selectedIndexes()) > 0:
-                idx = self.ui.sources_list.selectedIndexes()[0].row()
-                col_name = self.original_data_frame.columns[idx]
+                index: int = self.ui.sources_list.selectedIndexes()[0].row()
+                column_name: str = str(self.original_data_frame.columns[index])
                 try:
-                    self.fig = plt.figure(figsize=(8, 6))
-                    ax = self.fig.add_subplot(111)
-                    self.original_data_frame[col_name].plot(ax=ax)
-                    show_matplotlib_figure(figure=self.fig,
-                                           parent=self,
-                                           open_dialogs=self._open_plot_dialogs,
-                                           title=self.tr("Profile plot"))
-                except TypeError as e:
-                    self.toast_manager.show_error_toast(str(e))
+                    time_values: np.ndarray = np.asarray(self.original_data_frame.index)
+                    profile_values: np.ndarray = np.asarray(
+                        self.original_data_frame.iloc[:, index],
+                        dtype=float,
+                    )
+                    delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+                    plot_dialogue: PlotDialogue = PlotDialogue(title=self.tr("Profile plot"), parent=self)
+                    accepted: bool = plot_dialogue.set_time_series(
+                        time_values=time_values,
+                        series_names=(column_name,),
+                        series_values=(profile_values,),
+                        title=self.tr("Profile plot"),
+                        y_axis_title=self.magnitude,
+                    )
+                    if accepted:
+                        self._open_plot_dialogs.append(plot_dialogue)
+                        plot_dialogue.show()
+                    else:
+                        plot_dialogue.reject()
+                        self.toast_manager.show_error_toast(self.tr("Profile data cannot be charted"))
+                except (TypeError, ValueError) as exc:
+                    self.toast_manager.show_error_toast(str(exc))
             else:
                 self.toast_manager.show_warning_toast("No profile selected :/")
         else:
@@ -961,38 +973,45 @@ class ProfileInputGUI(QtWidgets.QDialog):
             self.associations.clear_at(obj_idx)
         self.display_associations()
 
-    def transform_names(self):
+    def transform_names(self) -> None:
         """
-        Transform the names of the inputs
-        :return:
+        Transform the names of the inputs according to the selected substitution mode.
         """
         if self.original_data_frame is not None:
-            mode = self.ui.nameTransformationComboBox.currentData()
+            mode: StringSubstitutions | None = self.ui.nameTransformationComboBox.currentData()
 
             if mode == StringSubstitutions.PSSeBranchName:
-
                 for i, name in enumerate(self.profile_names):
-                    if '_':
-                        vals = name.split('_')
-                        if len(vals) < 7:
-                            pass
+                    if '_' in name:
+                        vals: List[str] = name.split('_')
+                        if len(vals) >= 7:
+                            self.profile_names[i] = f"{vals[0]}_{vals[3]}_{vals[6]}"
                         else:
-                            self.profile_names[i] = vals[0] + '_' + vals[3] + '_' + vals[6]
+                            pass
+                    else:
+                        pass
                 self.original_data_frame.columns = self.profile_names
 
-            if mode == StringSubstitutions.PSSeBusGenerator:
-
+            elif mode == StringSubstitutions.PSSeBusGenerator:
                 for i, name in enumerate(self.profile_names):
-                    if '_':
-                        vals = name.split('_')
+                    if '_' in name:
+                        vals: List[str] = name.split('_')
                         if len(vals) == 3:
-                            self.profile_names[i] = vals[0] + '_1'
+                            self.profile_names[i] = f"{vals[0]}_1"
+                        else:
+                            pass
+                    else:
+                        pass
                 self.original_data_frame.columns = self.profile_names
 
             elif mode == StringSubstitutions.PSSeBusLoad:
                 for i, name in enumerate(self.profile_names):
-                    self.profile_names[i] = name + '_1'
+                    self.profile_names[i] = f"{name}_1"
                 self.original_data_frame.columns = self.profile_names
+            else:
+                pass
+        else:
+            pass
 
     def has_profile(self, i: int) -> bool:
         """

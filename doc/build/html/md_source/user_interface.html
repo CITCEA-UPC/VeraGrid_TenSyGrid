@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📊 User interface &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>📊 User interface &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -55,6 +55,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#tabular-database-editor">Tabular database editor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#editing-table-fields">Editing table fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#object-categories">Object Categories</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#branch-templates">Branch templates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#timeseries-loading">Timeseries loading</a></li>
@@ -220,6 +221,16 @@ of the objects. All the static properties of the objects can be edited here. The
 <li><p>The timeseries editor allows you to visualize, create and manipulate the profiles of the various magnitudes of the program.</p></li>
 </ul>
 <p><img alt="" src="../_images/Database_GUI.png" /></p>
+<section id="editing-table-fields">
+<h3>Editing table fields<a class="headerlink" href="#editing-table-fields" title="Link to this heading"></a></h3>
+<p>The database editor contains two types of fields: fields that accept values directly and fields that reference other objects in the model. When editing a reference field, select an object from the available options.</p>
+<p>The following actions are available for all fields:</p>
+<ul class="simple">
+<li><p>Double-click a field to edit its value.</p></li>
+<li><p>Right-click a field to open its options menu.</p></li>
+</ul>
+<p>For a field that references another object, Ctrl-click the field to open the editor menu for that object.</p>
+</section>
 <section id="object-categories">
 <h3>Object Categories<a class="headerlink" href="#object-categories" title="Link to this heading"></a></h3>
 <p>The object tree on the left side of the database editor organizes the model objects by purpose. Expand a category and select an object type to display all objects of that type in the table.</p>

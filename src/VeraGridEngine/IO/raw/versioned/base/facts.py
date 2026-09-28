@@ -11,6 +11,31 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_float,
 
 
 class RawFACTS(RawObject):
+    __slots__ = (
+        "_NAME",
+        "_I",
+        "_J",
+        "_MODE",
+        "_PDES",
+        "_QDES",
+        "_VSET",
+        "_SHMX",
+        "_TRMX",
+        "_VTMN",
+        "_VTMX",
+        "_VSMX",
+        "_IMX",
+        "_LINX",
+        "_RMPCT",
+        "_OWNER",
+        "_SET1",
+        "_SET2",
+        "_VSREF",
+        "_FCREG",
+        "_NREG",
+        "_REMOT",
+        "_MNAME",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='NAME', rawx_key='name', class_type=str, description='Device name', max_chars=12),

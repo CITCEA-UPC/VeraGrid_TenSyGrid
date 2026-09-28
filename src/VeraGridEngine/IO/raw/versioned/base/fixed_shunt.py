@@ -12,6 +12,13 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_float,
 
 
 class RawFixedShunt(RawObject):
+    __slots__ = (
+        "_I",
+        "_ID",
+        "_STATUS",
+        "_GL",
+        "_BL",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='ibus', class_type=int, description='Bus number', min_value=1,
                      max_value=999997, max_chars=6),

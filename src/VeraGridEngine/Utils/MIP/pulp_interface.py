@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from numbers import Real
 from typing import List, Union, Callable, Any
+import platform
 import subprocess
 import pulp
 from pulp import LpVariable as LpVar, LpConstraint as LpCst, LpAffineExpression as LpExp
@@ -27,6 +28,25 @@ from pulp import LpContinuous, LpInteger
 from VeraGridEngine.enumerations import MIPSolvers
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Utils.MIP.mip_interface_template import AbstractLpModel
+
+
+def make_highs_solver(mip: bool, show_logs: bool) -> HiGHS:
+    """
+    Build a PuLP HiGHS solver with conservative macOS settings.
+
+    The macOS highspy wheel can crash in HiGHS worker/IPM code paths under
+    Python 3.14. Linux keeps the default HiGHS settings.
+    """
+    if platform.system() == "Darwin":
+        return HiGHS(
+            mip=mip,
+            msg=show_logs,
+            threads=1,
+            solver="simplex",
+            parallel="off",
+        )
+    else:
+        return HiGHS(mip=mip, msg=show_logs)
 
 
 def get_lp_var_value(x: Union[float, LpVar]) -> float:
@@ -233,7 +253,7 @@ class PulpLpModel(AbstractLpModel):
         :return:
         """
         if self.solver_type == MIPSolvers.HIGHS:
-            return HiGHS(mip=self.model.isMIP(), msg=show_logs)
+            return make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
 
         elif self.solver_type == MIPSolvers.SCIP:
 
@@ -242,7 +262,7 @@ class PulpLpModel(AbstractLpModel):
                 solver = SCIP_PY(mip=self.model.isMIP(), msg=show_logs)
             else:
                 self.logger.add_error("No version of SCIP (cmd or python package was available)")
-                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+                solver = make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
             return solver
 
         elif self.solver_type == MIPSolvers.CBC:
@@ -258,7 +278,7 @@ class PulpLpModel(AbstractLpModel):
                 solver = CPLEX_PY(mip=self.model.isMIP(), msg=show_logs)
             else:
                 self.logger.add_error("No version of Cplex (cmd or python package was available)")
-                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+                solver = make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
             return solver
 
         elif self.solver_type == MIPSolvers.GUROBI:
@@ -267,7 +287,7 @@ class PulpLpModel(AbstractLpModel):
                 solver = GUROBI_CMD(mip=self.model.isMIP(), msg=show_logs)
             else:
                 self.logger.add_error("No version of Gurobi (cmd or python package was available)")
-                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+                solver = make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
             return solver
 
         elif self.solver_type == MIPSolvers.XPRESS:
@@ -276,7 +296,7 @@ class PulpLpModel(AbstractLpModel):
                 solver = XPRESS_PY(mip=self.model.isMIP(), msg=show_logs)
             else:
                 self.logger.add_error("No version of Xpress (cmd or python package was available)")
-                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+                solver = make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
             return solver
 
         elif self.solver_type == MIPSolvers.COPT:
@@ -285,7 +305,7 @@ class PulpLpModel(AbstractLpModel):
                 solver = COPT(mip=self.model.isMIP(), msg=show_logs)
             else:
                 self.logger.add_error("No version of Copt (cmd or python package was available)")
-                solver = HiGHS(mip=self.model.isMIP(), msg=show_logs)
+                solver = make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs)
             return solver
 
         else:
@@ -309,12 +329,12 @@ class PulpLpModel(AbstractLpModel):
         except pulp.PulpSolverError as e:
             self.logger.add_error(msg=str(e), )
             # Retry with Highs
-            status = self.model.solve(solver=HiGHS(mip=self.model.isMIP(), msg=show_logs))
+            status = self.model.solve(solver=make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs))
 
         except subprocess.CalledProcessError as e:
             self.logger.add_error(msg=str(e), )
             # Retry with Highs
-            status = self.model.solve(solver=HiGHS(mip=self.model.isMIP(), msg=show_logs))
+            status = self.model.solve(solver=make_highs_solver(mip=self.model.isMIP(), show_logs=show_logs))
         except IndexError as e:
             print("Index error:")
             print(e)

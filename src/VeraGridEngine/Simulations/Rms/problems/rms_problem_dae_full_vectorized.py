@@ -824,6 +824,147 @@ class RmsProblemDaeFullVec(RmsProblemTemplate):
     DIFF_NAME = "diff"
     TIME_NAME = "glob_time"
 
+    __slots__ = (
+        "Sf",
+        "St",
+        "options",
+        "logger",
+        "init_guess",
+        "event_params_init_dict",
+        "sys_block",
+        "sys_vars",
+        "_algebraic_vars",
+        "_algebraic_eqs",
+        "_algebraic_vars_equiv_class_dict",
+        "_algebraic_eqs_equiv_class_dict",
+        "_state_vars",
+        "_state_eqs",
+        "_state_vars_equiv_class_dict",
+        "_state_eqs_equiv_class_dict",
+        "_diff_vars",
+        "_diff_vars_equiv_class_dict",
+        "_variable_parameters",
+        "_variable_parameters_equiv_class_dict",
+        "_event_parameters_eqs0",
+        "_event_parameters_eqs",
+        "_constant_parameters",
+        "_constant_parameters_equiv_class_dict",
+        "_parameters_values",
+        "_static_parameters_values_mapping",
+        "_runtime_all_parameters_source",
+        "_runtime_all_eqs_source",
+        "_runtime_continuous_parameters",
+        "_runtime_mode_parameters",
+        "_runtime_continuous_eqs",
+        "_runtime_mode_eqs",
+        "_event_parameter_device_idtags",
+        "_runtime_all_eqs_source0",
+        "_runtime_continuous_slice",
+        "_runtime_mode_slice",
+        "_continuous_event_parameter_uids",
+        "_discrete_event_parameter_uids",
+        "_continuous_runtime_events",
+        "_scheduled_mode_events",
+        "_mode_event_cursor",
+        "_active_events_group",
+        "_mode_runtime_expression_by_uid",
+        "_mode_runtime_initialized_uids",
+        "_procedural_logic_updater",
+        "_derivative_fn",
+        "_event_params_fn",
+        "_rhs_algeb_fn_by_types",
+        "_rhs_state_fn_by_types",
+        "_rhs_algeb_energy_balance_fn",
+        "_j11_fn_by_types",
+        "_j12_fn_by_types",
+        "_j21_fn_by_types",
+        "_j22_fn_by_types",
+        "_jbalance_fn",
+        "_jbalance_state_fn",
+        "_balance_equations",
+        "_variable_parameters_values",
+        "_last_variable_parameters_values",
+        "_constant_params",
+        "_block_boundary_updater",
+        "_fmu_cs_adapters",
+        "_fmu_cs_initialized",
+        "_fmu_me_adapters",
+        "_fmu_me_initialized",
+        "_fmu_me_evaluation_budget",
+        "_n_vars",
+        "_n_state",
+        "_n_alg",
+        "_n_algebraic",
+        "_n_diff",
+        "_n_params",
+        "_n_event_params",
+        "_class_n_vars",
+        "_class_n_diff",
+        "_class_n_params",
+        "_class_n_event_params",
+        "_uid2idx_vars",
+        "_uid2idx_diff",
+        "_uid2idx_params",
+        "_uid2idx_event_params",
+        "_uid2idx_vars_vec",
+        "_uid2idx_diff_vec",
+        "_uid2idx_params_vec",
+        "_uid2idx_event_params_vec",
+        "_vars_glob_name2uid",
+        "_compiler_names_dict",
+        "_compiler_names_dict_vect",
+        "_alias_names_dict",
+        "_alias_names_dict_vect",
+        "_vars_info",
+        "_glob_time",
+        "_delta",
+        "_dt",
+        "_state_algeb_vars",
+        "_x_gather_idx",
+        "_dx_gather_idx",
+        "_vp_gather_idx",
+        "_cp_gather_idx",
+        "_input_matrices_by_model",
+        "_model_algebraic_eq_start_idx",
+        "_model_state_eq_start_idx",
+        "_jac_algeb_col_off",
+        "_jac_state_col_off",
+        "_jac_global_data",
+        "_prof_timings",
+        "block_composition_dict",
+        "equivalence_dict",
+        "reference_class_for_all_blocks_dict",
+        "variables_equivalence_dict",
+        "P_used_vec",
+        "P_vec",
+        "Q_used_vec",
+        "Q_vec",
+        "_balance_eqs_p_equiv_class_dict",
+        "_balance_eqs_q_equiv_class_dict",
+        "_device_algebraic_rows_by_model_type",
+        "_external_time_parameter",
+        "_external_time_uids",
+        "_j22_global_cols",
+        "_j22_global_rows",
+        "_jbalance_state_template",
+        "_jbalance_template",
+        "_legacy_balance_layout_by_model_type",
+        "_legacy_registered_model_uids",
+        "_nodal_balance_layout",
+        "_rhs_algeb_scatter_idx",
+        "_rhs_algeb_source_rows",
+        "_rhs_state_scatter_idx",
+        "_terminal_balance_layout_by_model_type",
+        "branch_bus_p_vec",
+        "branch_bus_q_vec",
+        "bus_dict",
+        "line_model_types",
+        "mdl_index2bus",
+        "mdl_index2busfrom",
+        "mdl_index2busto",
+        "_uid2idx_t",
+    )
+
     def __init__(self,
                  grid: MultiCircuit,
                  options: RmsOptions,
@@ -2707,28 +2848,13 @@ class RmsProblemDaeFullVec(RmsProblemTemplate):
         :param t: Simulation time.
         :return: Updated runtime parameter vector.
         """
-        runtime_continuous_eqs: List[Expr | Const]
-        runtime_mode_slice: slice
-
-        if "_runtime_continuous_eqs" in self.__dict__:
-            runtime_continuous_eqs = self._runtime_continuous_eqs
-        else:
-            if self._event_params_fn is None:
-                return ev_param
-            else:
-                updated = self._event_params_fn(ev_param, t)
-                updated = self._event_params_fn(updated, t)
-                return updated
+        runtime_continuous_eqs: List[Expr | Const] = self._runtime_continuous_eqs
+        runtime_mode_slice: slice = self._runtime_mode_slice
 
         n_continuous = len(runtime_continuous_eqs)
 
         if n_continuous == 0 or self._event_params_fn is None:
             return ev_param
-
-        if "_runtime_mode_slice" in self.__dict__:
-            runtime_mode_slice = self._runtime_mode_slice
-        else:
-            runtime_mode_slice = slice(0, 0)
 
         mode_snapshot: Optional[Vec]= None
         if runtime_mode_slice.start != runtime_mode_slice.stop:

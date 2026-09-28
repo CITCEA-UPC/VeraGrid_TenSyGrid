@@ -10,6 +10,7 @@ from VeraGridEngine.IO.raw.versioned.base.bus import RawBus
 
 class RawBusV29(RawBus):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data: List[List[Any]], version: int, logger: Logger):
         self.version = version

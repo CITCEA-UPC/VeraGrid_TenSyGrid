@@ -67,7 +67,10 @@ class ResultsTemplateMeta(type):
 
         aggregated_declarations: List[ResultsProperty] = list()
         for base in bases:
-            base_declarations: Tuple[ResultsProperty, ...] = base.__dict__.get("CLASS_RESULTS_DECLARATIONS", tuple())
+            base_declarations: Tuple[ResultsProperty, ...] = vars(base).get(
+                "CLASS_RESULTS_DECLARATIONS",
+                tuple(),
+            )
             for declaration in base_declarations:
                 aggregated_declarations.append(declaration)
 
@@ -522,31 +525,6 @@ class ResultsTemplate(metaclass=ResultsTemplateMeta):
         :param result_type: ResultTypes
         """
         pass
-
-    def _iter_instance_items(self):
-        """
-        Iterate over instance attributes stored either in slots or in __dict__.
-        """
-        seen = set()
-
-        for cls in type(self).mro():
-            cls_slots = cls.__dict__.get("__slots__", ())
-
-            if isinstance(cls_slots, str):
-                cls_slots = (cls_slots,)
-
-            for slot in cls_slots:
-                if slot in {"__dict__", "__weakref__"} or slot in seen:
-                    continue
-
-                seen.add(slot)
-
-                if hasattr(self, slot):
-                    yield slot, getattr(self, slot)
-
-        for prop, value in getattr(self, "__dict__", {}).items():
-            if prop not in seen:
-                yield prop, value
 
     def expand_clustered_results(self):
         """

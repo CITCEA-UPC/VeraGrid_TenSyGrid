@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Compilers.Gslv.Devices.vsc &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Compilers.Gslv.Devices.vsc &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -118,7 +118,27 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Compilers.Gslv.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">fill_profile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Branches.vsc</span><span class="w"> </span><span class="kn">import</span> <span class="n">VSC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.multi_circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Parents.branch_parent</span><span class="w"> </span><span class="kn">import</span> <span class="n">BranchParent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Substation.bus</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.basic_structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntVec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConverterFaultControlType</span>
+
+
+<div class="viewcode-block" id="convert_vsc_bus_reference">
+<a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Compilers.Gslv.Devices.html#VeraGridEngine.Compilers.Gslv.Devices.vsc.convert_vsc_bus_reference">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_vsc_bus_reference</span><span class="p">(</span><span class="n">elm</span><span class="p">:</span> <span class="n">Bus</span> <span class="o">|</span> <span class="n">BranchParent</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bus_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;pg.Bus&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;pg.Bus | None&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an optional VeraGrid bus reference to a GSLV bus reference.</span>
+
+<span class="sd">    :param elm: VeraGrid bus reference.</span>
+<span class="sd">    :param bus_dict: GSLV bus lookup by VeraGrid idtag.</span>
+<span class="sd">    :return: Matching GSLV bus or ``None``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">Bus</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bus_dict</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">idtag</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="convert_vsc">
@@ -146,7 +166,7 @@
         <span class="n">idtag</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">idtag</span><span class="p">,</span>
         <span class="n">code</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
         <span class="n">active</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">active</span><span class="p">,</span>
-        <span class="n">rate</span><span class="o">=</span><span class="mf">9999.0</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
         <span class="n">kdp</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_val_droop</span><span class="p">,</span>
         <span class="n">alpha1</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">alpha1</span><span class="p">,</span>
         <span class="n">alpha2</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">alpha2</span><span class="p">,</span>
@@ -156,6 +176,7 @@
         <span class="n">overload_cost</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">Cost</span><span class="p">,</span>
         <span class="n">contingency_factor</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">contingency_factor</span><span class="p">,</span>
         <span class="n">protection_rating_factor</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">protection_rating_factor</span><span class="p">,</span>
+        <span class="n">contingency_enabled</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">contingency_enabled</span><span class="p">,</span>
         <span class="n">monitor_loading</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">monitor_loading</span><span class="p">,</span>
         <span class="n">capex</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">capex</span><span class="p">,</span>
         <span class="n">opex</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">opex</span><span class="p">,</span>
@@ -164,8 +185,28 @@
         <span class="n">control2</span><span class="o">=</span><span class="n">converter_control_type_dict</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">control2</span><span class="p">],</span>
         <span class="n">control1_val</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_val</span><span class="p">,</span>
         <span class="n">control2_val</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_val</span><span class="p">,</span>
-        <span class="n">control1_dev</span><span class="o">=</span><span class="n">bus_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_dev</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-        <span class="n">control2_dev</span><span class="o">=</span><span class="n">bus_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_dev</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">control1_dev</span><span class="o">=</span><span class="n">convert_vsc_bus_reference</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_dev</span><span class="p">,</span> <span class="n">bus_dict</span><span class="p">),</span>
+        <span class="n">control2_dev</span><span class="o">=</span><span class="n">convert_vsc_bus_reference</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_dev</span><span class="p">,</span> <span class="n">bus_dict</span><span class="p">),</span>
+        <span class="n">bus_dc_n</span><span class="o">=</span><span class="n">convert_vsc_bus_reference</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">bus_dc_n</span><span class="p">,</span> <span class="n">bus_dict</span><span class="p">),</span>
+        <span class="n">control1_val_min</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_val_min</span><span class="p">,</span>
+        <span class="n">control1_val_max</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_val_max</span><span class="p">,</span>
+        <span class="n">control1_val_droop</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_val_droop</span><span class="p">,</span>
+        <span class="n">control1_droop_val</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_droop_val</span><span class="p">,</span>
+        <span class="n">control1_droop_val_min</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_droop_val_min</span><span class="p">,</span>
+        <span class="n">control1_droop_val_max</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control1_droop_val_max</span><span class="p">,</span>
+        <span class="n">control2_val_min</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_val_min</span><span class="p">,</span>
+        <span class="n">control2_val_max</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_val_max</span><span class="p">,</span>
+        <span class="n">control2_val_droop</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_val_droop</span><span class="p">,</span>
+        <span class="n">control2_droop_val</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_droop_val</span><span class="p">,</span>
+        <span class="n">control2_droop_val_min</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_droop_val_min</span><span class="p">,</span>
+        <span class="n">control2_droop_val_max</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">control2_droop_val_max</span><span class="p">,</span>
+        <span class="n">min_ac_voltage</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">min_ac_voltage</span><span class="p">,</span>
+        <span class="n">ysvs</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">ysvs</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">fault_control</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">fault_control</span> <span class="o">!=</span> <span class="n">ConverterFaultControlType</span><span class="o">.</span><span class="n">Standard</span><span class="p">,</span>
+        <span class="n">cost</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">Cost</span><span class="p">,</span>
+        <span class="n">design_rate</span><span class="o">=</span><span class="n">elm</span><span class="o">.</span><span class="n">design_rate</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">fill_profile</span><span class="p">(</span><span class="n">vsc</span><span class="o">.</span><span class="n">active</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">active_prof</span><span class="p">,</span> <span class="n">use_time_series</span><span class="p">,</span> <span class="n">time_indices</span><span class="p">,</span> <span class="n">n_time</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">active</span><span class="p">)</span>

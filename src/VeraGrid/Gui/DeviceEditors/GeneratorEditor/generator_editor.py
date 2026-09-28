@@ -14,7 +14,7 @@ from VeraGrid.Gui.DeviceEditors.GeneratorEditor.generator_editor_gui import Ui_G
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.SolarPowerWizard.solar_power_wizzard import SolarPvWizard
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.WindPowerWizard.wind_power_wizzard import WindFarmWizard
-from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 from VeraGrid.Gui.messages import info_msg, warning_msg
 from VeraGrid.Gui.profile_wizard_utils import fill_substation_weather_profiles
 from VeraGridEngine.Devices.Injections.generator import Generator
@@ -40,7 +40,7 @@ def build_safe_single_point_curve(qmin: float, qmax: float) -> Mat:
     return curve_data
 
 
-def draw_styled_qcurve_plot(plotter: MatplotlibWidget, q_curve: GeneratorQCurve, chart_title: str) -> None:
+def draw_styled_qcurve_plot(plotter: GraphsWidget, q_curve: GeneratorQCurve, chart_title: str) -> None:
     """
     Draw a styled generator capability chart.
 
@@ -48,91 +48,52 @@ def draw_styled_qcurve_plot(plotter: MatplotlibWidget, q_curve: GeneratorQCurve,
     :param q_curve: Generator reactive capability curve object.
     :param chart_title: Plot title text.
     """
-    plotter.clear()
-    figure = plotter.canvas.fig
-    axis = plotter.canvas.ax
-    figure.set_tight_layout(True)
+    radius: float = abs(float(q_curve.get_Snom()))
+    theta: np.ndarray = np.linspace(0.0, 2.0 * np.pi, 360)
+    circle_x: np.ndarray = radius * np.cos(theta)
+    circle_y: np.ndarray = radius * np.sin(theta)
 
-    # Configure a clean background that improves contrast for overlays.
-    figure.patch.set_facecolor("#FFFFFF")
-    axis.set_facecolor("#F8FAFC")
-
-    # Draw the apparent-power circle to show the global capability envelope.
-    radius: float = float(q_curve.get_Snom())
-    theta: Vec = np.linspace(0.0, 2.0 * np.pi, 360)
-    circle_x: Vec = radius * np.cos(theta)
-    circle_y: Vec = radius * np.sin(theta)
-    axis.fill(circle_x, circle_y, color="#3B82F6", alpha=0.08, label="Snom envelope")
-    axis.plot(circle_x, circle_y, color="#2563EB", linewidth=1.8, linestyle="--")
-
-    # Draw q-curve limits and the feasible band between Qmin/Qmax.
     curve_data: Mat = q_curve.get_data()
-    max_abs_value: float = abs(radius)
     if curve_data.shape[0] > 0:
-        sorted_indices: Vec = np.argsort(curve_data[:, 0], kind="stable")
-        sorted_curve_data: Mat = curve_data[sorted_indices, :]
-        p_values: np.ndarray = np.asarray(sorted_curve_data[:, 0], dtype=float)
-        qmin_values: np.ndarray = np.asarray(sorted_curve_data[:, 1], dtype=float)
-        qmax_values: np.ndarray = np.asarray(sorted_curve_data[:, 2], dtype=float)
+        sorted_indices: np.ndarray = np.argsort(curve_data[:, 0], kind="stable")
+        sorted_data: Mat = curve_data[sorted_indices, :]
+        p_values: np.ndarray = np.asarray(sorted_data[:, 0], dtype=float)
+        qmin_values: np.ndarray = np.asarray(sorted_data[:, 1], dtype=float)
+        qmax_values: np.ndarray = np.asarray(sorted_data[:, 2], dtype=float)
+    else:
+        p_values = np.zeros(0, dtype=float)
+        qmin_values = np.zeros(0, dtype=float)
+        qmax_values = np.zeros(0, dtype=float)
 
-        axis.fill_between(p_values, qmin_values, qmax_values, color="#10B981", alpha=0.16, label="Feasible band")
-        axis.plot(p_values, qmax_values, color="#0F766E", linewidth=2.2, marker="o", markersize=4, label="Qmax(P)")
-        axis.plot(p_values, qmin_values, color="#F97316", linewidth=2.2, marker="o", markersize=4, label="Qmin(P)")
-        axis.scatter(p_values, qmax_values, color="#0F766E", s=28, alpha=0.95, zorder=3)
-        axis.scatter(p_values, qmin_values, color="#F97316", s=28, alpha=0.95, zorder=3)
-
-        p_abs: float = float(np.max(np.abs(p_values)))
-        qmin_abs: float = float(np.max(np.abs(qmin_values)))
-        qmax_abs: float = float(np.max(np.abs(qmax_values)))
-        max_abs_value = max(max_abs_value, p_abs, qmin_abs, qmax_abs)
+    series_data: list[tuple[np.ndarray, np.ndarray, str | None]] = [
+        (circle_x, circle_y, "#2563eb"),
+        (p_values, qmin_values, "#f97316"),
+        (p_values, qmax_values, "#0f766e"),
+        (p_values, qmin_values, "#f97316"),
+        (p_values, qmax_values, "#0f766e"),
+    ]
+    updated: bool = plotter.replace_xy_series_data(series_data=series_data)
+    if not updated:
+        plotter.clear()
+        plotter.add_line_series(name="Snom envelope",
+                                x_values=circle_x,
+                                y_values=circle_y,
+                                color="#2563eb")
+        plotter.add_line_series(name="Qmin(P)", x_values=p_values, y_values=qmin_values, color="#f97316")
+        plotter.add_line_series(name="Qmax(P)", x_values=p_values, y_values=qmax_values, color="#0f766e")
+        plotter.add_scatter_series(name="Qmin points",
+                                   x_values=p_values,
+                                   y_values=qmin_values,
+                                   color="#f97316")
+        plotter.add_scatter_series(name="Qmax points",
+                                   x_values=p_values,
+                                   y_values=qmax_values,
+                                   color="#0f766e")
     else:
         pass
 
-    # Add coordinate axes and readable limits around the largest value shown.
-    axis.axhline(0.0, color="#94A3B8", linewidth=1.0)
-    axis.axvline(0.0, color="#94A3B8", linewidth=1.0)
-    if max_abs_value > 0.0:
-        span_value: float = max_abs_value * 1.15
-    else:
-        span_value = 1.0
-    axis.set_xlim(-span_value, span_value)
-    axis.set_ylim(-span_value, span_value)
-
-    # Configure labels, grid and styling for better visual tracking.
-    axis.set_title(chart_title)
-    axis.set_xlabel("P [MW]")
-    axis.set_ylabel("Q [MVAr]")
-    axis.set_aspect("equal", adjustable="box")
-    axis.minorticks_on()
-    axis.grid(True, which="major", linestyle="--", linewidth=0.8, color="#CBD5E1", alpha=0.75)
-    axis.grid(True, which="minor", linestyle=":", linewidth=0.6, color="#E2E8F0", alpha=0.65)
-    axis.text(
-        0.02,
-        0.98,
-        f"Snom = {radius:.2f} MVA",
-        transform=axis.transAxes,
-        ha="left",
-        va="top",
-        fontsize=9,
-        bbox=dict(boxstyle="round,pad=0.28", facecolor="#FFFFFF", edgecolor="#D1D5DB", alpha=0.95),
-    )
-
-    # Keep the legend outside the axes so it never hides q-curve points.
-    legend_font_size: float = float(axis.xaxis.label.get_size()) / 3.0 + 4.0
-    axis.legend(
-        loc="upper left",
-        bbox_to_anchor=(1.01, 1.0),
-        borderaxespad=0.0,
-        frameon=True,
-        framealpha=0.95,
-        fancybox=True,
-        fontsize=legend_font_size,
-    )
-    for spine_key in axis.spines.keys():
-        axis.spines[spine_key].set_color("#94A3B8")
-        axis.spines[spine_key].set_linewidth(0.9)
-
-    figure.tight_layout(rect=(0.0, 0.0, 0.82, 1.0))
+    plotter.setTitle(chart_title)
+    plotter.set_axis_titles("P [MW]", "Q [MVAr]")
     plotter.redraw()
 
 
@@ -310,8 +271,6 @@ class GeneratorQCurveEditorWidget(QtWidgets.QWidget):
     Reactive power capability curve editor widget backed by a Qt Designer `.ui`.
     """
 
-    curve_changed = QtCore.Signal()
-
     def __init__(self, q_curve: GeneratorQCurve, Qmin: float, Qmax: float, Pmin: float, Pmax: float, Snom: float) -> None:
         """
         Build the curve editor widget.
@@ -406,10 +365,9 @@ class GeneratorQCurveEditorWidget(QtWidgets.QWidget):
 
     def _on_table_model_changed(self) -> None:
         """
-        React to table edits by redrawing and notifying listeners.
+        Repaint every capability series after table data changes.
         """
         self.plot()
-        self.curve_changed.emit()
 
 
 class GeneratorQCurveEditor(QtWidgets.QDialog):
@@ -437,7 +395,6 @@ class GeneratorQCurveEditor(QtWidgets.QDialog):
             Pmax=Pmax,
             Snom=Snom,
         )
-        self.q_curve_widget.curve_changed.connect(self._sync_from_widget)
         self.setWindowTitle(self.tr("Reactive power curve editor"))
 
         self.q_curve: GeneratorQCurve = q_curve
@@ -471,6 +428,7 @@ class GeneratorQCurveEditor(QtWidgets.QDialog):
         """
         _ = event
         self._sync_from_widget()
+        self.q_curve_widget.ui.plotter.dispose()
 
 
 class EmbeddedSolarPvEditorWidget(SolarPvWizard):
@@ -631,10 +589,9 @@ class GeneratorEditor(TemplateDeviceEditor):
             Snom=self.api_object.Snom,
         )
         self.qcurve_tab_layout.addWidget(self.qcurve_editor_widget)
+        self.qcurve_editor_widget.ui.applyButton.clicked.connect(self._sync_qcurve_to_generator)
         qcurve_tab_index: int = self.tab_widget.addTab(self.qcurve_tab, "Q curve editor")
         self.tab_widget.setTabIcon(qcurve_tab_index, QtGui.QIcon(":/Icons/icons/plot.png"))
-        self.qcurve_editor_widget.curve_changed.connect(self._on_qcurve_data_changed)
-
     def _build_solar_tab(self) -> None:
         """
         Build and configure the embedded solar profile editor tab.
@@ -717,12 +674,6 @@ class GeneratorEditor(TemplateDeviceEditor):
         wind_tab_index: int = self.tab_widget.addTab(self.wind_tab, "Wind farm editor")
         self.tab_widget.setTabIcon(wind_tab_index, QtGui.QIcon(":/Icons/icons/wind_power.png"))
 
-    def _plot_qcurve(self) -> None:
-        """
-        Plot capability envelope and edited q-curve.
-        """
-        self.qcurve_editor_widget.plot()
-
     def _sync_qcurve_to_generator(self) -> None:
         """
         Synchronize q-curve widget data into the generator object.
@@ -738,13 +689,6 @@ class GeneratorEditor(TemplateDeviceEditor):
         # Keep property and profile tabs coherent with scalar updates.
         self.properties_model.set_time_index(time_index=self._get_current_time_index())
         self.refresh_profile_table()
-
-    def _on_qcurve_data_changed(self) -> None:
-        """
-        React to q-curve table changes.
-        """
-        self._sync_qcurve_to_generator()
-        self._plot_qcurve()
 
     def _get_generator_bus(self) -> Bus | None:
         """
@@ -857,7 +801,6 @@ class GeneratorEditor(TemplateDeviceEditor):
         :param event: Qt close event.
         """
         _ = event
-        self._sync_qcurve_to_generator()
         self.qcurve_editor_widget.ui.plotter.dispose()
 
 

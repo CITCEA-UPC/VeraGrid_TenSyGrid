@@ -15,6 +15,18 @@ class GraphicLocation:
     GraphicLocation
     """
 
+    __slots__ = (
+        'x',
+        'y',
+        'h',
+        'w',
+        'r',
+        'poly_line',
+        'layout_metadata',
+        'draw_labels',
+        'api_object',
+    )
+
     def __init__(self,
                  api_object: ALL_DEV_TYPES,
                  x: float = 0,

@@ -10,6 +10,7 @@ from VeraGridEngine.IO.raw.versioned.v31.bus import RawBusV31
 
 class RawBusV32(RawBusV31):
     """PSSE v32 typed object inheriting v31."""
+    __slots__ = ()
 
     def parse(self, data: List[List[Any]], version: int, logger: Logger):
         self.version = version

@@ -11,6 +11,13 @@ from VeraGridEngine.enumerations import DeviceType, VoltageLevelTypes, PrpCat
 
 class VoltageLevelTemplate(EditableDevice):
 
+    __slots__ = (
+        'vl_type',
+        '_voltage',
+        '_n_bays',
+        '_add_disconnectors',
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(
             prop_name='vl_type',

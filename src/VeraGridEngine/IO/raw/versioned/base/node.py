@@ -11,6 +11,15 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_float,
 
 
 class RawNode(RawObject):
+    __slots__ = (
+        "_ISUB",
+        "_NI",
+        "_NAME",
+        "_I",
+        "_STATUS",
+        "_VM",
+        "_VA",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='ISUB', rawx_key='isub', class_type=int, description='Substation number',
                      min_value=1, max_value=99999),

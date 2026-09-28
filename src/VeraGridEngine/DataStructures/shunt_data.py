@@ -17,6 +17,38 @@ class ShuntData:
     ShuntData
     """
 
+    __slots__ = (
+        "nelm",
+        "nbus",
+        "names",
+        "idtag",
+        "active",
+        "grounds_neutral",
+        "control_mode_int",
+        "Y",
+        "Y3_star",
+        "Y3_delta",
+        "A_floating_star",
+        "B_floating_star",
+        "C_floating_star",
+        "qmin",
+        "qmax",
+        "q_share",
+        "cost",
+        "taps",
+        "mttf",
+        "mttr",
+        "bus_idx",
+        "controllable_bus_idx",
+        "original_idx",
+        "vset",
+        "vmin",
+        "vmax",
+        "step",
+        "g_steps",
+        "b_steps",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Shunt data arrays

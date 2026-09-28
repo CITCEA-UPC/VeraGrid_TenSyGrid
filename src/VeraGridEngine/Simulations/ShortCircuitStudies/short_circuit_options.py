@@ -15,6 +15,19 @@ class ShortCircuitOptions(OptionsTemplate):
     Short circuit options
     """
 
+    __slots__ = (
+        "bus_index",
+        "fault_type",
+        "method",
+        "phases",
+        "mid_line_fault",
+        "branch_index",
+        "branch_fault_locations",
+        "branch_fault_r",
+        "branch_fault_x",
+        "verbose",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="bus_index", tpe=int),
         GCProp(key="fault_type", tpe=FaultType),

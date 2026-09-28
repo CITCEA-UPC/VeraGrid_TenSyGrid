@@ -12,6 +12,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block
 
 
 class ExponentialLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

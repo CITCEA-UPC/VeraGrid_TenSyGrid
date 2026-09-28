@@ -93,10 +93,33 @@ def try_parse_voltage(val: str | float, name: str, logger: Logger) -> float:
 
 class UcteNode:
     """
-    UcteNode
+    UcteNode device.
     """
 
-    def __init__(self):
+    __slots__ = (
+        "current_country",
+        "node_code",
+        "geo_name",
+        "status",
+        "node_type",
+        "voltage",
+        "voltage_reference",
+        "active_load",
+        "reactive_load",
+        "active_gen",
+        "reactive_gen",
+        "min_gen_mw",
+        "max_gen_mw",
+        "min_gen_mvar",
+        "max_gen_mvar",
+        "static_primary_control",
+        "nominal_power_primary_control",
+        "short_circuit_power",
+        "xr_ratio",
+        "plant_type",
+    )
+
+    def __init__(self) -> None:
 
         self.current_country = ""
 

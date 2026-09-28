@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.impedance_correction_table import RawI
 
 class RawImpedanceCorrectionTableV29(RawImpedanceCorrectionTable):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

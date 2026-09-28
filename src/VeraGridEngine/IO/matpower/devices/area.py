@@ -4,15 +4,23 @@
 # SPDX-License-Identifier: MPL-2.0
 
 class MatpowerArea:
+    """
+    Class to parse and write area data from MATPOWER .m files.
+    """
 
-    def __init__(self):
+    __slots__ = (
+        "area_i",
+        "bus_i",
+    )
+
+    def __init__(self) -> None:
         """
-
+        Initialize the MatpowerArea instance.
         """
         self.area_i: int = 0
         self.bus_i: int = 0
 
-    def parse_row(self, row):
+    def parse_row(self, row: list) -> None:
         """
 
         :param row:

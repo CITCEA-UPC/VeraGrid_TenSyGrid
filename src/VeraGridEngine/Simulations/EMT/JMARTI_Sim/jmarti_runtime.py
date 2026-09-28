@@ -512,9 +512,9 @@ def set_jmarti_block_fit_bundle(block: Block, fit_bundle: JMartiFitBundle | None
     :return: None.
     """
     if fit_bundle is None:
-        block.__dict__.pop(JMARTI_BLOCK_FIT_BUNDLE_ATTR, None)
+        block.jmarti_fit_bundle = None
     else:
-        block.__dict__[JMARTI_BLOCK_FIT_BUNDLE_ATTR] = fit_bundle
+        block.jmarti_fit_bundle = fit_bundle
 
 
 def get_jmarti_block_fit_bundle(block: Block | None) -> JMartiFitBundle | None:
@@ -525,7 +525,7 @@ def get_jmarti_block_fit_bundle(block: Block | None) -> JMartiFitBundle | None:
     :return: Attached fit bundle or ``None``.
     """
     if isinstance(block, Block):
-        fit_bundle = block.__dict__.get(JMARTI_BLOCK_FIT_BUNDLE_ATTR, None)
+        fit_bundle: object | None = block.jmarti_fit_bundle
 
         if isinstance(fit_bundle, JMartiFitBundle):
             return fit_bundle
@@ -544,9 +544,9 @@ def set_jmarti_block_runtime_data(block: Block, runtime_data: JMartiRuntimeData 
     :return: None.
     """
     if runtime_data is None:
-        block.__dict__.pop(JMARTI_BLOCK_RUNTIME_DATA_ATTR, None)
+        block.jmarti_runtime_data = None
     else:
-        block.__dict__[JMARTI_BLOCK_RUNTIME_DATA_ATTR] = runtime_data
+        block.jmarti_runtime_data = runtime_data
 
 
 def get_jmarti_block_runtime_data(block: Block | None) -> JMartiRuntimeData | None:
@@ -557,7 +557,7 @@ def get_jmarti_block_runtime_data(block: Block | None) -> JMartiRuntimeData | No
     :return: Attached runtime data or ``None``.
     """
     if isinstance(block, Block):
-        runtime_data = block.__dict__.get(JMARTI_BLOCK_RUNTIME_DATA_ATTR, None)
+        runtime_data: object | None = block.jmarti_runtime_data
 
         if isinstance(runtime_data, JMartiRuntimeData):
             return runtime_data

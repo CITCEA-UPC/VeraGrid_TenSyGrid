@@ -15,17 +15,30 @@ class EurostagLine:
     SEMI_SHUNT_SUSCEPTANCE = (48, 56)
     RATED_APPARENT_POWER = (57, 65)
 
-    def __init__(self):
-        self.sending_node = ""
-        self.opening_code = ""
-        self.receiving_node = ""
-        self.parallel_index = "1"
-        self.resistance = 0.0
-        self.reactance = 0.0
-        self.semi_shunt_conductance = 0.0
-        self.semi_shunt_susceptance = 0.0
-        self.rated_apparent_power = 9999.0
-        self.name = ""
+    __slots__ = (
+        "sending_node",
+        "opening_code",
+        "receiving_node",
+        "parallel_index",
+        "resistance",
+        "reactance",
+        "semi_shunt_conductance",
+        "semi_shunt_susceptance",
+        "rated_apparent_power",
+        "name",
+    )
+
+    def __init__(self) -> None:
+        self.sending_node: str = ""
+        self.opening_code: str = ""
+        self.receiving_node: str = ""
+        self.parallel_index: str = "1"
+        self.resistance: float = 0.0
+        self.reactance: float = 0.0
+        self.semi_shunt_conductance: float = 0.0
+        self.semi_shunt_susceptance: float = 0.0
+        self.rated_apparent_power: float = 9999.0
+        self.name: str = ""
 
     @property
     def code(self) -> str:
@@ -51,12 +64,20 @@ class EurostagCouplingDevice:
     RECEIVING_NODE = (11, 19)
     PARALLEL_INDEX = (19, 20)
 
-    def __init__(self):
-        self.sending_node = ""
-        self.opening_code = ""
-        self.receiving_node = ""
-        self.parallel_index = "1"
-        self.name = ""
+    __slots__ = (
+        "sending_node",
+        "opening_code",
+        "receiving_node",
+        "parallel_index",
+        "name",
+    )
+
+    def __init__(self) -> None:
+        self.sending_node: str = ""
+        self.opening_code: str = ""
+        self.receiving_node: str = ""
+        self.parallel_index: str = "1"
+        self.name: str = ""
 
     @property
     def code(self) -> str:

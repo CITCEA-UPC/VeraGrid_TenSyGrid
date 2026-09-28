@@ -1651,8 +1651,16 @@ def get_branch_data(
         # store for later
         branch_dict[elm] = ii
 
-        # handle """superconductor branches"""
-        data.detect_superconductor_at(ii)
+        # Physical line templates are defined by their phase matrices. A single-phase
+        # tower or cable can have zero sequence scalars without being an ideal link.
+        is_physical_line: bool = isinstance(
+            elm.template,
+            (dev.OverheadLineType, dev.UndergroundLineType),
+        )
+        if is_physical_line:
+            pass
+        else:
+            data.detect_superconductor_at(ii)
 
         ii += 1
 

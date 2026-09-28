@@ -4,9 +4,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QListWidget, QDialogButtonBox, QMenu
@@ -14,15 +11,11 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QCloseEvent
 
-from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely
-from VeraGrid.Gui.gui_functions import dispose_optional_matplotlib_canvas
-from VeraGrid.Gui.matplotlib_dialog import show_matplotlib_figure
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
-from VeraGridEngine.Simulations.Rms.rms_results import RmsResults #, ResultsTable
-from VeraGridEngine.Simulations.results_table import ResultsTable
-from VeraGridEngine.enumerations import DeviceType
+from VeraGridEngine.Simulations.Rms.rms_results import RmsResults
 import numpy as np
-import pandas as pd
 
 
 class RmsPlotDialog(QDialog):
@@ -49,22 +42,11 @@ class RmsPlotDialog(QDialog):
         self.vars_glob_name2uid = results.vars_glob_name2uid
         self.devices = devices_options
 
-        # --- ResultsTable ---
-        self.results_table = ResultsTable(
-            data=np.array(results.values),
-            index=np.array(pd.to_datetime(results.time_array).astype(str), dtype=np.str_),
-            columns=results.variable_array,
-            title=self.tr("Rms Simulation Results"),
-            units=results.units,
-            idx_device_type=DeviceType.TimeDevice,
-            cols_device_type=DeviceType.NoDevice,
-            xlabel=self.tr("time (s)"),
-            ylabel="",
-        )
+        self.time_values: np.ndarray = np.asarray(results.time_array)
+        self.result_values: np.ndarray = np.asarray(results.values, dtype=float)
+        self.variable_names: np.ndarray = np.asarray(results.variable_array, dtype=str)
 
         self.selected_vars = []
-        self._open_plot_dialogs: list[QDialog] = list()
-
         # main layout
         layout = QVBoxLayout(self)
 
@@ -95,11 +77,7 @@ class RmsPlotDialog(QDialog):
         self.list_widget.customContextMenuRequested.connect(self.show_variable_context_menu)
         layout.addWidget(self.list_widget)
 
-        # --- Canvas embebido ---
-        self.figure = Figure(figsize=(6, 3))
-        self.ax = self.figure.add_subplot(111)
-        self.canvas = FigureCanvas(self.figure)
-        layout.addWidget(self.canvas)
+        self._plot_dialogue: PlotDialogue | None = None
 
         # accept reject buttons layout
         buttons_layout = QHBoxLayout()
@@ -118,45 +96,26 @@ class RmsPlotDialog(QDialog):
 
         # update variables
         self.update_variables(0)
-        self._plot_disposed: bool = False
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """
-        Release Matplotlib resources before the dialog closes.
+        Release the retained native plot dialog before the dialog closes.
 
         :param event: Qt close event.
         :return: None.
         """
-        self.close_external_plot_dialogs()
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QDialog.closeEvent(self, event)
 
     def done(self, result: int) -> None:
         """
-        Release Matplotlib resources before accepting or rejecting the dialog.
+        Release the retained native plot dialog before accepting or rejecting.
 
         :param result: Qt dialog result code.
         :return: None.
         """
-        self.close_external_plot_dialogs()
-        if self._plot_disposed:
-            pass
-        else:
-            self._plot_disposed = True
-            dispose_optional_matplotlib_canvas(canvas=self.canvas, figure=self.figure)
+        self.close_plot_dialogue()
         QDialog.done(self, result)
-
-    def close_external_plot_dialogs(self) -> None:
-        """
-        Schedule all retained external plot windows for deletion with this owner.
-
-        :return: None.
-        """
-        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
 
     def update_variables(self, index):
 
@@ -195,26 +154,51 @@ class RmsPlotDialog(QDialog):
         self.plot_selected()
 
     def plot_selected(self):
+        """Refresh a visible native RMS plot after the variable selection changes.
 
-        self.ax.clear()
-        if not self.selected_vars:
-            self.canvas.draw()
-            return
-
-        selected_col_idx = [self.uid2idx[uid] for uid in self.selected_vars]
-        self.results_table.plot(ax=self.ax, selected_col_idx=selected_col_idx)
-        self.canvas.draw()
+        :return: None.
+        """
+        if self._plot_dialogue is not None and len(self.selected_vars) > 0:
+            selected_col_idx: list[int] = [self.uid2idx[uid] for uid in self.selected_vars]
+            series_names: list[str] = list()
+            series_values: list[np.ndarray] = list()
+            column_index: int
+            for column_index in selected_col_idx:
+                series_names.append(str(self.variable_names[column_index]))
+                series_values.append(self.result_values[:, column_index])
+            self._plot_dialogue.set_time_series(
+                time_values=self.time_values,
+                series_names=series_names,
+                series_values=series_values,
+                title=self.tr('RMS variables'),
+                y_axis_title='',
+            )
+        elif self._plot_dialogue is not None:
+            self.close_plot_dialogue()
+        else:
+            pass
 
     def show_external_plot(self):
-        if not self.selected_vars:
-            return
+        """Open the selected RMS variables in one retained native plot dialog.
 
-        selected_col_idx = [self.uid2idx[uid] for uid in self.selected_vars]
+        :return: None.
+        """
+        if len(self.selected_vars) > 0:
+            self.close_plot_dialogue()
+            self._plot_dialogue = PlotDialogue(title=self.tr('RMS variables'), parent=self)
+            self.plot_selected()
+            self._plot_dialogue.show()
+        else:
+            pass
 
-        figure = Figure(figsize=(10, 5))
-        ax = figure.add_subplot(111)
-        self.results_table.plot(ax=ax, selected_col_idx=selected_col_idx)
-        show_matplotlib_figure(figure=figure,
-                               parent=self,
-                               open_dialogs=self._open_plot_dialogs,
-                               title=self.tr("Plot Window"))
+    def close_plot_dialogue(self) -> None:
+        """Dispose the owned modeless plot before this selector is destroyed.
+
+        :return: None.
+        """
+        if self._plot_dialogue is not None:
+            self._plot_dialogue.reject()
+            delete_dialog_safely(dialog=self._plot_dialogue)
+            self._plot_dialogue = None
+        else:
+            pass

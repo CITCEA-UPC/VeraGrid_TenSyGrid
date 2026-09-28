@@ -11,6 +11,7 @@ from VeraGridEngine.enumerations import DeviceType
 
 
 class FluidP2x(FluidInjectionTemplate):
+    __slots__ = ()
 
     def __init__(self,
                  name: str = '',

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Devices.Branches.underground_line_type &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Devices.Branches.underground_line_type &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -107,21 +107,290 @@
 <span class="c1"># file, You can obtain one at https://mozilla.org/MPL/2.0/.</span>
 <span class="c1"># SPDX-License-Identifier: MPL-2.0</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.basic_structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">CxMat</span><span class="p">,</span> <span class="n">Logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.admittance_matrix</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdmittanceMatrix</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Parents.editable_device</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeviceType</span><span class="p">,</span> <span class="n">GCProp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Parents.dynamic_parent</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamicDevice</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Branches.overhead_line_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_y_4x4</span><span class="p">,</span> <span class="n">n_circuits</span><span class="p">,</span> <span class="n">phase2circuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Branches.sequence_line_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">sequence_to_phase_matrix</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrpCat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Branches.underground_cable_calculation</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_underground_cable_matrices</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Devices.Branches.underground_cable_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">UndergroundCableType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrpCat</span><span class="p">,</span> <span class="n">SubObjectType</span>
+
+
+<div class="viewcode-block" id="CableInSystem">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.CableInSystem">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CableInSystem</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Association between one physical cable and its system position.&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;cable&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;xpos&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ypos&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_phase&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;circuit_index&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;phase_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;device_type&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span><span class="p">,</span>
+                 <span class="n">xpos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">ypos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+                 <span class="n">phase</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create one positioned cable relationship.</span>
+
+<span class="sd">        :param cable: Physical cable catalogue entry.</span>
+<span class="sd">        :param xpos: Horizontal coordinate in metres.</span>
+<span class="sd">        :param ypos: Positive burial depth in metres.</span>
+<span class="sd">        :param phase: Global phase number, starting at one.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">cable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xpos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xpos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ypos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ypos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_phase</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circuit_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_type</span><span class="p">:</span> <span class="n">DeviceType</span> <span class="o">=</span> <span class="n">DeviceType</span><span class="o">.</span><span class="n">UndergroundCableTypeDevice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_phase</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CableInSystem.set_phase">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.CableInSystem.set_phase">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set phase label and circuit index from a global phase number.</span>
+
+<span class="sd">        :param phase: Global phase number, starting at one.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phase_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="n">circuit_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">phase2circuit</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="n">phase_number</span><span class="p">)</span>
+        <span class="n">phase_remainder</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span><span class="n">phase_number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_phase</span> <span class="o">=</span> <span class="n">phase_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circuit_index</span> <span class="o">=</span> <span class="n">circuit_index</span>
+        <span class="k">if</span> <span class="n">phase_remainder</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_type</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+        <span class="k">elif</span> <span class="n">phase_remainder</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_type</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_type</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">phase</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the global phase number.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_phase</span>
+
+    <span class="nd">@phase</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the global phase number.</span>
+
+<span class="sd">        :param value: Global phase number.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_phase</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CableInSystem.to_dict">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.CableInSystem.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the persistent relation representation.</span>
+
+<span class="sd">        :return: Serializable cable relationship.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cable_idtag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cable</span><span class="o">.</span><span class="n">idtag</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">cable</span><span class="o">=</span><span class="n">cable_idtag</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">xpos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xpos</span><span class="p">,</span>
+            <span class="n">ypos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ypos</span><span class="p">,</span>
+            <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span>
+            <span class="n">circuit_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">circuit_index</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CableInSystem.parse">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.CableInSystem.parse">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">],</span>
+              <span class="n">cable_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UndergroundCableType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load one persistent cable relationship.</span>
+
+<span class="sd">        :param data: Serialized relationship data.</span>
+<span class="sd">        :param cable_dict: Physical cables indexed by persistent identifier.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cable_idtag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cable&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cable</span> <span class="o">=</span> <span class="n">cable_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cable_idtag</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xpos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;xpos&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ypos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ypos&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CableInSystem.copy">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.CableInSystem.copy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CableInSystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy the relationship while preserving its cable reference.</span>
+
+<span class="sd">        :return: Independent relationship object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">copied</span><span class="p">:</span> <span class="n">CableInSystem</span> <span class="o">=</span> <span class="n">CableInSystem</span><span class="p">(</span>
+                <span class="n">cable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cable</span><span class="p">,</span>
+                <span class="n">xpos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xpos</span><span class="p">,</span>
+                <span class="n">ypos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ypos</span><span class="p">,</span>
+                <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">placeholder</span><span class="p">:</span> <span class="n">UndergroundCableType</span> <span class="o">=</span> <span class="n">UndergroundCableType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">copied</span> <span class="o">=</span> <span class="n">CableInSystem</span><span class="p">(</span>
+                <span class="n">cable</span><span class="o">=</span><span class="n">placeholder</span><span class="p">,</span>
+                <span class="n">xpos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xpos</span><span class="p">,</span>
+                <span class="n">ypos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ypos</span><span class="p">,</span>
+                <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">copied</span><span class="o">.</span><span class="n">cable</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">copied</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare complete cable relationships.</span>
+
+<span class="sd">        :param other: Candidate relationship.</span>
+<span class="sd">        :return: Whether both relationships contain the same data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CableInSystem</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cable</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">cable</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">xpos</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">xpos</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ypos</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">ypos</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">phase</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">circuit_index</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">circuit_index</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="ListOfCables">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ListOfCables</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persistent ordered collection of positioned cable relationships.&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an empty cable relationship collection.</span>
+
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CableInSystem</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ListOfCables.append">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables.append">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">CableInSystem</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Append one cable relationship.</span>
+
+<span class="sd">        :param element: Relationship to append.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListOfCables.to_list">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables.to_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a serializable relation list.</span>
+
+<span class="sd">        :return: Serialized cable relationships.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">serialized</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">element</span><span class="p">:</span> <span class="n">CableInSystem</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">serialized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">serialized</span></div>
+
+
+<div class="viewcode-block" id="ListOfCables.parse">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables.parse">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]],</span>
+              <span class="n">cable_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UndergroundCableType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load cable relationships from persistent data.</span>
+
+<span class="sd">        :param data: Serialized relationship entries.</span>
+<span class="sd">        :param cable_dict: Physical cables indexed by persistent identifier.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">entry</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">cable_idtag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cable&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+            <span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">cable_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cable_idtag</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">element</span><span class="p">:</span> <span class="n">CableInSystem</span> <span class="o">=</span> <span class="n">CableInSystem</span><span class="p">(</span><span class="n">cable</span><span class="o">=</span><span class="n">cable</span><span class="p">)</span>
+                <span class="n">element</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">entry</span><span class="p">,</span> <span class="n">cable_dict</span><span class="o">=</span><span class="n">cable_dict</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="n">element</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ListOfCables.get_circuits">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables.get_circuits">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_circuits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return sorted circuit indices represented by the collection.</span>
+
+<span class="sd">        :return: Circuit indices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">circuits</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">element</span><span class="p">:</span> <span class="n">CableInSystem</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">circuits</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">circuit_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">circuits</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListOfCables.copy">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.ListOfCables.copy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ListOfCables</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an independent relationship collection.</span>
+
+<span class="sd">        :return: Copied collection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copied</span><span class="p">:</span> <span class="n">ListOfCables</span> <span class="o">=</span> <span class="n">ListOfCables</span><span class="p">()</span>
+        <span class="n">element</span><span class="p">:</span> <span class="n">CableInSystem</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">copied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">copied</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare ordered cable collections.</span>
+
+<span class="sd">        :param other: Candidate collection.</span>
+<span class="sd">        :return: Whether both collections contain equal relationships.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ListOfCables</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
 
 
 <div class="viewcode-block" id="UndergroundLineType">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UndergroundLineType</span><span class="p">(</span><span class="n">DynamicDevice</span><span class="p">):</span>
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;cables_in_system&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_Imax&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_Vnom&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_freq&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_earth_resistivity&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_R&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_X&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_B&#39;</span><span class="p">,</span>
@@ -133,6 +402,14 @@
         <span class="s1">&#39;_n_circuits&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_capex&#39;</span><span class="p">,</span>
         <span class="s1">&#39;_opex&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_z_primitive&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_y_primitive&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_z_nabc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_y_nabc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_z_seq&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_y_seq&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_z_phases_nabc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_y_phases_nabc&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">LOCAL_PROPERTY_DECLARATIONS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">GCProp</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -157,6 +434,22 @@
             <span class="n">tpe</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
             <span class="n">definition</span><span class="o">=</span><span class="s1">&#39;Cable frequency&#39;</span><span class="p">,</span>
             <span class="n">cat</span><span class="o">=</span><span class="p">[</span><span class="n">PrpCat</span><span class="o">.</span><span class="n">PF</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="n">GCProp</span><span class="p">(</span>
+            <span class="n">prop_name</span><span class="o">=</span><span class="s1">&#39;earth_resistivity&#39;</span><span class="p">,</span>
+            <span class="n">units</span><span class="o">=</span><span class="s1">&#39;Ohm*m&#39;</span><span class="p">,</span>
+            <span class="n">tpe</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="n">definition</span><span class="o">=</span><span class="s1">&#39;Earth resistivity&#39;</span><span class="p">,</span>
+            <span class="n">cat</span><span class="o">=</span><span class="p">[</span><span class="n">PrpCat</span><span class="o">.</span><span class="n">TP</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="n">GCProp</span><span class="p">(</span>
+            <span class="n">prop_name</span><span class="o">=</span><span class="s1">&#39;cables_in_system&#39;</span><span class="p">,</span>
+            <span class="n">units</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">tpe</span><span class="o">=</span><span class="n">SubObjectType</span><span class="o">.</span><span class="n">ListOfCables</span><span class="p">,</span>
+            <span class="n">definition</span><span class="o">=</span><span class="s1">&#39;Physical cables and their positions&#39;</span><span class="p">,</span>
+            <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">display</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">cat</span><span class="o">=</span><span class="p">[</span><span class="n">PrpCat</span><span class="o">.</span><span class="n">TP</span><span class="p">],</span>
         <span class="p">),</span>
         <span class="n">GCProp</span><span class="p">(</span>
             <span class="n">prop_name</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span>
@@ -241,6 +534,7 @@
                  <span class="n">Vnom</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">R</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
                  <span class="n">R0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">X0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">B0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">C0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
                  <span class="n">freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+                 <span class="n">earth_resistivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
                  <span class="n">capex</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">opex</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
@@ -255,6 +549,7 @@
 <span class="sd">        :param B0: Susceptance of zero sequence in uS/km</span>
 <span class="sd">        :param C0: Capacitance of zero sequence in uF/km (alternative to B0)</span>
 <span class="sd">        :param freq: Frequency of underground line (Hz)</span>
+<span class="sd">        :param earth_resistivity: Earth resistivity in ohm metres</span>
 <span class="sd">        :param capex: Capital expenditures</span>
 <span class="sd">        :param opex: Operating expenditures</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -267,6 +562,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Imax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Imax</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Vnom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Vnom</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_freq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">earth_resistivity</span> <span class="o">=</span> <span class="n">earth_resistivity</span>
+
+        <span class="c1"># The physical composition is optional so existing sequence-only cable</span>
+        <span class="c1"># catalogues retain their exact behaviour.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="p">:</span> <span class="n">ListOfCables</span> <span class="o">=</span> <span class="n">ListOfCables</span><span class="p">()</span>
 
         <span class="c1"># impudence and admittance per unit of length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
@@ -284,83 +584,468 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">capex</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">capex</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opex</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">opex</span><span class="p">)</span>
 
+        <span class="c1"># Physical matrices are derived from the composition and therefore are</span>
+        <span class="c1"># recomputed after loading instead of being persisted independently.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_primitive</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_primitive</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_phases_nabc</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_phases_nabc</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="UndergroundLineType.has_physical_data">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.has_physical_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_physical_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the template contains positioned physical cables.</span>
+
+<span class="sd">        :return: True for a geometry-backed cable system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="UndergroundLineType.is_computed">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.is_computed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_computed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether all physical cable matrices are available.</span>
+
+<span class="sd">        :return: Matrix calculation state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_z_primitive</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_primitive</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="UndergroundLineType.get_values">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.get_values">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the per-unit values</span>
-<span class="sd">        :param Sbase: Base power (MVA, always use 100MVA)</span>
-<span class="sd">        :param length: length in km</span>
-<span class="sd">        :return: R (p.u.), x(p.u.), B(p.u.), Rate (MVA)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                   <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                   <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                   <span class="n">circuit_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="n">round_vals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">Vnom</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the line sequence values in per unit.</span>
+
+<span class="sd">        :param Sbase: Base power in megavolt amperes.</span>
+<span class="sd">        :param length: Line length in kilometres.</span>
+<span class="sd">        :param circuit_index: One-based circuit index.</span>
+<span class="sd">        :param round_vals: Round the per-unit values to the legacy six decimals.</span>
+<span class="sd">        :param Vnom: Optional connected-line voltage overriding the template voltage.</span>
+<span class="sd">        :return: Positive and zero sequence R/X/B plus rating.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">Vn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vnom</span>
-        <span class="n">Zbase</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vn</span> <span class="o">*</span> <span class="n">Vn</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sbase</span>
-        <span class="n">Ybase</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">Zbase</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_physical_data</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_computed</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Zbase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Zbase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Ybase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">nominal_voltage_kv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vnom</span> <span class="k">if</span> <span class="n">Vnom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">Vnom</span><span class="p">)</span>
+        <span class="n">positive_resistance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="n">positive_reactance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
+        <span class="n">positive_susceptance_us_km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span>
+        <span class="n">zero_resistance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R0</span>
+        <span class="n">zero_reactance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X0</span>
+        <span class="n">zero_susceptance_us_km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B0</span>
 
-        <span class="n">R0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R0</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Zbase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">X0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X0</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Zbase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="n">B0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B0</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">Ybase</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="c1"># Geometry-backed multi-circuit systems retain each circuit&#39;s diagonal</span>
+        <span class="c1"># sequence block while legacy templates continue using their scalars.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zero_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">circuit_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">positive_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">zero_index</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">positive_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">positive_resistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="n">positive_index</span><span class="p">,</span> <span class="n">positive_index</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="n">positive_reactance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="n">positive_index</span><span class="p">,</span> <span class="n">positive_index</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+                <span class="n">positive_susceptance_us_km</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">[</span><span class="n">positive_index</span><span class="p">,</span> <span class="n">positive_index</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="mf">1.0e6</span>
+                <span class="p">)</span>
+                <span class="n">zero_resistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="n">zero_index</span><span class="p">,</span> <span class="n">zero_index</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="n">zero_reactance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="n">zero_index</span><span class="p">,</span> <span class="n">zero_index</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+                <span class="n">zero_susceptance_us_km</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">[</span><span class="n">zero_index</span><span class="p">,</span> <span class="n">zero_index</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="mf">1.0e6</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-        <span class="c1"># get the rating in MVA = kA * kV</span>
-        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Imax</span> <span class="o">*</span> <span class="n">Vn</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">impedance_base_ohm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">nominal_voltage_kv</span> <span class="o">*</span> <span class="n">nominal_voltage_kv</span> <span class="o">/</span> <span class="n">Sbase</span>
+        <span class="n">admittance_base_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">positive_resistance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">positive_resistance</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">positive_reactance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">positive_reactance</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">positive_susceptance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">positive_susceptance_us_km</span> <span class="o">*</span> <span class="mf">1.0e-6</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">admittance_base_s</span>
+        <span class="p">)</span>
+        <span class="n">zero_resistance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">zero_resistance</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">zero_reactance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">zero_reactance</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">zero_susceptance_pu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">zero_susceptance_us_km</span> <span class="o">*</span> <span class="mf">1.0e-6</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">admittance_base_s</span>
 
-        <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">R0</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> <span class="n">B0</span><span class="p">,</span> <span class="n">rate</span></div>
+        <span class="k">if</span> <span class="n">round_vals</span><span class="p">:</span>
+            <span class="n">positive_resistance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">positive_resistance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">positive_reactance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">positive_reactance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">positive_susceptance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">positive_susceptance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">zero_resistance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">zero_resistance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">zero_reactance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">zero_reactance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">zero_susceptance_pu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">zero_susceptance_pu</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">rate_mva</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Imax</span> <span class="o">*</span> <span class="n">nominal_voltage_kv</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">positive_resistance_pu</span><span class="p">,</span>
+            <span class="n">positive_reactance_pu</span><span class="p">,</span>
+            <span class="n">positive_susceptance_pu</span><span class="p">,</span>
+            <span class="n">zero_resistance_pu</span><span class="p">,</span>
+            <span class="n">zero_reactance_pu</span><span class="p">,</span>
+            <span class="n">zero_susceptance_pu</span><span class="p">,</span>
+            <span class="n">rate_mva</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="UndergroundLineType.z_series">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.z_series">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">z_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        positive sequence series impedance in Ohm per unit of length</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_series</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return positive-sequence series impedance in ohms per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">complex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="UndergroundLineType.y_shunt">
 <a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.y_shunt">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">y_shunt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        positive sequence shunt admittance in S per unit of length</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_shunt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return positive-sequence shunt admittance in siemens per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="mf">1.0e-6</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">z_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the physical ABC series-impedance matrix in Ohm/km.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">sequence_to_phase_matrix</span><span class="p">(</span>
-            <span class="n">positive_sequence_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
-            <span class="n">zero_sequence_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">R0</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X0</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_primitive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the core-sheath primitive series matrix in ohms per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_primitive</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">y_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the physical ABC shunt-admittance matrix in S/km.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="n">positive_susceptance</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
-            <span class="n">zero_susceptance</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">C0</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_primitive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the core-sheath primitive shunt matrix in siemens per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_primitive</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_seq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the calculated symmetrical-component series matrix.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_seq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the calculated symmetrical-component shunt matrix.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the physical phase series-impedance matrix in ohms per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">positive_susceptance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
-            <span class="n">zero_susceptance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B0</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+            <span class="k">return</span> <span class="n">sequence_to_phase_matrix</span><span class="p">(</span>
+                <span class="n">positive_sequence_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                <span class="n">zero_sequence_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">R0</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X0</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">sequence_to_phase_matrix</span><span class="p">(</span>
-            <span class="n">positive_sequence_value</span><span class="o">=</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">positive_susceptance</span><span class="p">,</span>
-            <span class="n">zero_sequence_value</span><span class="o">=</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">zero_susceptance</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CxMat</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the physical phase shunt-admittance matrix in siemens per kilometre.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">positive_susceptance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+                <span class="n">zero_susceptance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">C0</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">positive_susceptance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+                <span class="n">zero_susceptance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B0</span> <span class="o">*</span> <span class="mf">1.0e-6</span>
+            <span class="k">return</span> <span class="n">sequence_to_phase_matrix</span><span class="p">(</span>
+                <span class="n">positive_sequence_value</span><span class="o">=</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">positive_susceptance</span><span class="p">,</span>
+                <span class="n">zero_sequence_value</span><span class="o">=</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">zero_susceptance</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">z_phases_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the phase indices corresponding to ``z_nabc``.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return phase indices corresponding to ``z_nabc``.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_phases_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_phases_nabc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">y_phases_nabc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the phase indices corresponding to ``y_nabc``.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return phase indices corresponding to ``y_nabc``.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_phases_nabc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_phases_nabc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UndergroundLineType.add_cable_relationship">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.add_cable_relationship">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_cable_relationship</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span><span class="p">,</span>
+                               <span class="n">xpos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                               <span class="n">ypos</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+                               <span class="n">phase</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a physical cable to this cable system.</span>
+
+<span class="sd">        :param cable: Physical cable catalogue entry.</span>
+<span class="sd">        :param xpos: Horizontal coordinate in metres.</span>
+<span class="sd">        :param ypos: Positive burial depth in metres.</span>
+<span class="sd">        :param phase: Global phase number, starting at one.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">relationship</span><span class="p">:</span> <span class="n">CableInSystem</span> <span class="o">=</span> <span class="n">CableInSystem</span><span class="p">(</span>
+            <span class="n">cable</span><span class="o">=</span><span class="n">cable</span><span class="p">,</span>
+            <span class="n">xpos</span><span class="o">=</span><span class="n">xpos</span><span class="p">,</span>
+            <span class="n">ypos</span><span class="o">=</span><span class="n">ypos</span><span class="p">,</span>
+            <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="n">relationship</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_circuits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_circuits</span><span class="p">,</span> <span class="n">relationship</span><span class="o">.</span><span class="n">circuit_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UndergroundLineType.check">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.check">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the supported single-core cable system geometry.</span>
+
+<span class="sd">        :param logger: Optional validation logger.</span>
+<span class="sd">        :return: True when the system can be calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validation_logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span> <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">logger</span>
+        <span class="n">cable_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">valid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">cable_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">validation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;A physical cable system requires at least one cable&#39;</span><span class="p">,</span>
+                                        <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">expected_phases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">cable_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">actual_phases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">phase</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">actual_phases</span> <span class="o">==</span> <span class="n">expected_phases</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">validation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;Cable phases must be unique and consecutive&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">positions</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">relationship</span><span class="p">:</span> <span class="n">CableInSystem</span>
+        <span class="k">for</span> <span class="n">relationship</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">relationship</span><span class="o">.</span><span class="n">cable</span>
+            <span class="k">if</span> <span class="n">cable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">cable</span><span class="o">.</span><span class="n">core_diameter</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                    <span class="ow">and</span> <span class="n">cable</span><span class="o">.</span><span class="n">cable_diameter</span> <span class="o">&gt;</span> <span class="n">cable</span><span class="o">.</span><span class="n">core_diameter</span>
+                    <span class="ow">and</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_thickness</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                    <span class="ow">and</span> <span class="n">relationship</span><span class="o">.</span><span class="n">ypos</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                    <span class="ow">and</span> <span class="n">cable</span><span class="o">.</span><span class="n">core_filling_factor</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                    <span class="ow">and</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_filling_factor</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">validation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;Invalid cable dimensions, depth or filling factor&#39;</span><span class="p">,</span>
+                                                <span class="n">device</span><span class="o">=</span><span class="n">relationship</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">validation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;Cable relationship has no catalogue type&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">relationship</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">relationship</span><span class="o">.</span><span class="n">xpos</span><span class="p">,</span> <span class="n">relationship</span><span class="o">.</span><span class="n">ypos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+                <span class="n">validation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;Two cables cannot occupy the same position&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">positions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">valid</span></div>
+
+
+<div class="viewcode-block" id="UndergroundLineType.compute">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.compute">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate primitive, phase and sequence matrices from physical data.</span>
+
+<span class="sd">        :param logger: Optional calculation logger.</span>
+<span class="sd">        :return: True when all matrices were calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calculation_logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span> <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">logger</span>
+
+        <span class="c1"># Inputs are mutable through both the API and GUI. Clearing every</span>
+        <span class="c1"># derived value first guarantees that a failed recalculation cannot</span>
+        <span class="c1"># expose matrices from an older, different composition.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_primitive</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_primitive</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z_phases_nabc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_phases_nabc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">calculation_logger</span><span class="p">):</span>
+            <span class="n">cable_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">relationships</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CableInSystem</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="n">cable_count</span><span class="p">)</span>
+            <span class="n">unsorted_relationship</span><span class="p">:</span> <span class="n">CableInSystem</span>
+            <span class="k">for</span> <span class="n">unsorted_relationship</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cables_in_system</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">relationships</span><span class="p">[</span><span class="n">unsorted_relationship</span><span class="o">.</span><span class="n">phase</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">unsorted_relationship</span>
+            <span class="n">dia_con</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">dia_tube</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">dia_cab</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">th_sht</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">th_ins</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">resistivity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">filling_factor</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">relative_permittivity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">loss_factor</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">relative_permeability</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">skin_effect_factor</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">coordinates_m</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">cable_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">phases</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">cable_count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">cable_index</span><span class="p">:</span> <span class="nb">int</span>
+            <span class="k">for</span> <span class="n">cable_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cable_count</span><span class="p">):</span>
+                <span class="n">relationship</span><span class="p">:</span> <span class="n">CableInSystem</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">relationships</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span>
+                <span class="n">cable</span><span class="p">:</span> <span class="n">UndergroundCableType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">relationship</span><span class="o">.</span><span class="n">cable</span> <span class="k">if</span> <span class="n">relationship</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">cable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">relationship</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">dia_con</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">core_diameter</span>
+                    <span class="n">dia_tube</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">core_internal_diameter</span>
+                    <span class="n">dia_cab</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">cable_diameter</span>
+                    <span class="n">th_sht</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_thickness</span>
+                    <span class="c1"># Numerical routines receive only the core and sheath (or their two insulations).</span>
+                    <span class="n">th_ins</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">main_insulation_thickness</span>
+                    <span class="n">resistivity</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cable</span><span class="o">.</span><span class="n">core_resistivity</span><span class="p">,</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_resistivity</span><span class="p">)</span>
+                    <span class="n">filling_factor</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cable</span><span class="o">.</span><span class="n">core_filling_factor</span><span class="p">,</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_filling_factor</span><span class="p">)</span>
+                    <span class="n">relative_permittivity</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cable</span><span class="o">.</span><span class="n">main_insulation_permittivity</span><span class="p">,</span> <span class="n">cable</span><span class="o">.</span><span class="n">outer_insulation_permittivity</span><span class="p">)</span>
+                    <span class="n">loss_factor</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cable</span><span class="o">.</span><span class="n">main_insulation_loss_tangent</span><span class="p">,</span> <span class="n">cable</span><span class="o">.</span><span class="n">outer_insulation_loss_tangent</span><span class="p">)</span>
+                    <span class="n">relative_permeability</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cable</span><span class="o">.</span><span class="n">core_relative_permeability</span><span class="p">,</span> <span class="n">cable</span><span class="o">.</span><span class="n">sheath_relative_permeability</span><span class="p">)</span>
+                    <span class="n">skin_effect_factor</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cable</span><span class="o">.</span><span class="n">skin_effect_factor</span>
+                    <span class="n">coordinates_m</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="o">.</span><span class="n">xpos</span>
+                    <span class="n">coordinates_m</span><span class="p">[</span><span class="n">cable_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="o">.</span><span class="n">ypos</span>
+                    <span class="n">phases</span><span class="p">[</span><span class="n">cable_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="o">.</span><span class="n">phase</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># Keep the reusable circuit count synchronized after GUI edits.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_circuits</span> <span class="o">=</span> <span class="n">n_circuits</span><span class="p">(</span><span class="n">idx</span><span class="o">=</span><span class="n">phases</span><span class="p">)</span>
+
+            <span class="n">earth_conductivity_us_cm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">earth_resistivity</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_z_primitive</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_primitive</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_z_nabc</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_nabc</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">calculate_underground_cable_matrices</span><span class="p">(</span>
+                    <span class="n">dia_con</span><span class="o">=</span><span class="n">dia_con</span><span class="p">,</span>
+                    <span class="n">dia_tube</span><span class="o">=</span><span class="n">dia_tube</span><span class="p">,</span>
+                    <span class="n">dia_cab</span><span class="o">=</span><span class="n">dia_cab</span><span class="p">,</span>
+                    <span class="n">th_sht</span><span class="o">=</span><span class="n">th_sht</span><span class="p">,</span>
+                    <span class="n">th_ins</span><span class="o">=</span><span class="n">th_ins</span><span class="p">,</span>
+                    <span class="n">resistivity_uohm_cm</span><span class="o">=</span><span class="n">resistivity</span><span class="p">,</span>
+                    <span class="n">filling_factor_percent</span><span class="o">=</span><span class="n">filling_factor</span><span class="p">,</span>
+                    <span class="n">relative_permittivity</span><span class="o">=</span><span class="n">relative_permittivity</span><span class="p">,</span>
+                    <span class="n">loss_factor</span><span class="o">=</span><span class="n">loss_factor</span><span class="p">,</span>
+                    <span class="n">relative_permeability</span><span class="o">=</span><span class="n">relative_permeability</span><span class="p">,</span>
+                    <span class="n">skin_effect_factor</span><span class="o">=</span><span class="n">skin_effect_factor</span><span class="p">,</span>
+                    <span class="n">coordinates_m</span><span class="o">=</span><span class="n">coordinates_m</span><span class="p">,</span>
+                    <span class="n">frequency_hz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
+                    <span class="n">earth_conductivity_us_cm</span><span class="o">=</span><span class="n">earth_conductivity_us_cm</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_z_phases_nabc</span> <span class="o">=</span> <span class="n">phases</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_y_phases_nabc</span> <span class="o">=</span> <span class="n">phases</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+                <span class="n">calculation_logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;Cable matrix reduction is singular&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">R0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">B0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="mf">1.0e6</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_seq</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_seq</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span> <span class="o">*</span> <span class="mf">1.0e6</span><span class="p">)</span>
+                <span class="n">angular_frequency_rad_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">/</span> <span class="n">angular_frequency_rad_s</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_C0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B0</span> <span class="o">/</span> <span class="n">angular_frequency_rad_s</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Single- and two-phase PowerFactory systems have valid phase</span>
+                <span class="c1"># matrices but no symmetrical-component representation.</span>
+                <span class="n">calculation_logger</span><span class="o">.</span><span class="n">add_info</span><span class="p">(</span><span class="s1">&#39;Cable system has no complete sequence representation&#39;</span><span class="p">,</span>
+                                            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="UndergroundLineType.get_ys">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.get_ys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_ys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">circuit_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+               <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">Vnom</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AdmittanceMatrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the total series branch admittance matrix in per unit.</span>
+
+<span class="sd">        :param circuit_idx: One-based circuit index.</span>
+<span class="sd">        :param Sbase: Base power in megavolt amperes.</span>
+<span class="sd">        :param length: Line length in kilometres.</span>
+<span class="sd">        :param Vnom: Line nominal voltage in kilovolts.</span>
+<span class="sd">        :return: Four-by-four branch admittance matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">impedance_base_ohm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Vnom</span> <span class="o">*</span> <span class="n">Vnom</span> <span class="o">/</span> <span class="n">Sbase</span>
+        <span class="n">impedance_pu</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_nabc</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">phase_admittance_pu</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">impedance_pu</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="n">phase_admittance_pu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">impedance_pu</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">circuit_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_circuits</span><span class="p">(</span><span class="n">idx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_phases_nabc</span><span class="p">)</span>
+        <span class="n">complete_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">circuit_count</span> <span class="o">-</span> <span class="p">(</span><span class="n">circuit_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">complete_admittance</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">complete_size</span><span class="p">,</span> <span class="n">complete_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">complete_admittance</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_phases_nabc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_phases_nabc</span><span class="p">)]</span> <span class="o">=</span> <span class="n">phase_admittance_pu</span>
+        <span class="n">admittance</span><span class="p">:</span> <span class="n">AdmittanceMatrix</span> <span class="o">=</span> <span class="n">AdmittanceMatrix</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">build_y_4x4</span><span class="p">(</span><span class="n">y_nxn</span><span class="o">=</span><span class="n">complete_admittance</span><span class="p">,</span> <span class="n">circuit_idx</span><span class="o">=</span><span class="n">circuit_idx</span><span class="p">)</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phN</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phA</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phB</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phC</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">admittance</span></div>
+
+
+<div class="viewcode-block" id="UndergroundLineType.get_ysh">
+<a class="viewcode-back" href="../../../../rst_source/api/auto/VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType.get_ysh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_ysh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">circuit_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">Sbase</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">Vnom</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AdmittanceMatrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the total shunt branch admittance matrix in micro per unit.</span>
+
+<span class="sd">        :param circuit_idx: One-based circuit index.</span>
+<span class="sd">        :param Sbase: Base power in megavolt amperes.</span>
+<span class="sd">        :param length: Line length in kilometres.</span>
+<span class="sd">        :param Vnom: Line nominal voltage in kilovolts.</span>
+<span class="sd">        :return: Four-by-four shunt admittance matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">impedance_base_ohm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Vnom</span> <span class="o">*</span> <span class="n">Vnom</span> <span class="o">/</span> <span class="n">Sbase</span>
+        <span class="n">admittance_base_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">impedance_base_ohm</span>
+        <span class="n">phase_admittance_micro_pu</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_nabc</span> <span class="o">*</span> <span class="n">length</span> <span class="o">*</span> <span class="mf">1.0e6</span> <span class="o">/</span> <span class="n">admittance_base_s</span>
+        <span class="n">circuit_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_circuits</span><span class="p">(</span><span class="n">idx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_phases_nabc</span><span class="p">)</span>
+        <span class="n">complete_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">circuit_count</span> <span class="o">-</span> <span class="p">(</span><span class="n">circuit_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">complete_admittance</span><span class="p">:</span> <span class="n">CxMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">complete_size</span><span class="p">,</span> <span class="n">complete_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">complete_admittance</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_phases_nabc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_phases_nabc</span><span class="p">)]</span> <span class="o">=</span> <span class="n">phase_admittance_micro_pu</span>
+        <span class="n">admittance</span><span class="p">:</span> <span class="n">AdmittanceMatrix</span> <span class="o">=</span> <span class="n">AdmittanceMatrix</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">build_y_4x4</span><span class="p">(</span><span class="n">y_nxn</span><span class="o">=</span><span class="n">complete_admittance</span><span class="p">,</span> <span class="n">circuit_idx</span><span class="o">=</span><span class="n">circuit_idx</span><span class="p">)</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phN</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phA</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phB</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">admittance</span><span class="o">.</span><span class="n">phC</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">admittance</span></div>
+
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -568,6 +1253,20 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_circuits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">earth_resistivity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return earth resistivity in ohm metres.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earth_resistivity</span>
+
+    <span class="nd">@earth_resistivity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">earth_resistivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set earth resistivity.</span>
+
+<span class="sd">        :param value: Resistivity in ohm metres.</span>
+<span class="sd">        :return: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_earth_resistivity</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">capex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>

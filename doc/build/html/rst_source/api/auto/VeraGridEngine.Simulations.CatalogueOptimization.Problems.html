@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.CatalogueOptimization.Problems package &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.CatalogueOptimization.Problems package &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -146,6 +146,26 @@ from the grid’s catalogue so as to minimise the six techno-economic scores
 (losses, overload, voltage module, voltage angle, CAPEX, OPEX).</p>
 <p>The decision vector <cite>x</cite> is integer-valued: <cite>x[i]</cite> is the index of the chosen template within the
 pool associated with branch <cite>branches[i]</cite>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.Sbase">
+<span class="sig-name descname"><span class="pre">Sbase</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.Sbase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.branches">
+<span class="sig-name descname"><span class="pre">branches</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.line.Line" title="VeraGridEngine.Devices.Branches.line.Line"><span class="pre">Line</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformer.Transformer2W" title="VeraGridEngine.Devices.Branches.transformer.Transformer2W"><span class="pre">Transformer2W</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.branches" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.branches_cost">
+<span class="sig-name descname"><span class="pre">branches_cost</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.branches_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.fBase">
+<span class="sig-name descname"><span class="pre">fBase</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.fBase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.get_objectives_names">
 <span class="sig-name descname"><span class="pre">get_objectives_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">str_</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/VeraGridEngine/Simulations/CatalogueOptimization/Problems/catalogue_problem.html#CatalogueOptimizationProblem.get_objectives_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.get_objectives_names" title="Link to this definition"></a></dt>
@@ -212,6 +232,51 @@ pool associated with branch <cite>branches[i]</cite>.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.pf_options">
+<span class="sig-name descname"><span class="pre">pf_options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.PowerFlow.html#VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions" title="VeraGridEngine.Simulations.PowerFlow.power_flow_options.PowerFlowOptions"><span class="pre">PowerFlowOptions</span></a></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.pf_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.pools">
+<span class="sig-name descname"><span class="pre">pools</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.overhead_line_type.OverheadLineType" title="VeraGridEngine.Devices.Branches.overhead_line_type.OverheadLineType"><span class="pre">OverheadLineType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.sequence_line_type.SequenceLineType" title="VeraGridEngine.Devices.Branches.sequence_line_type.SequenceLineType"><span class="pre">SequenceLineType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType" title="VeraGridEngine.Devices.Branches.underground_line_type.UndergroundLineType"><span class="pre">UndergroundLineType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Devices.Branches.html#VeraGridEngine.Devices.Branches.transformer_type.TransformerType" title="VeraGridEngine.Devices.Branches.transformer_type.TransformerType"><span class="pre">TransformerType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.pools" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.snapshots">
+<span class="sig-name descname"><span class="pre">snapshots</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="VeraGridEngine.Simulations.CatalogueOptimization.html#VeraGridEngine.Simulations.CatalogueOptimization.catalogue_utils.LineSnapshot" title="VeraGridEngine.Simulations.CatalogueOptimization.catalogue_utils.LineSnapshot"><span class="pre">LineSnapshot</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="VeraGridEngine.Simulations.CatalogueOptimization.html#VeraGridEngine.Simulations.CatalogueOptimization.catalogue_utils.TransformerSnapshot" title="VeraGridEngine.Simulations.CatalogueOptimization.catalogue_utils.TransformerSnapshot"><span class="pre">TransformerSnapshot</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.snapshots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_cost">
+<span class="sig-name descname"><span class="pre">va_cost</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_max">
+<span class="sig-name descname"><span class="pre">va_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_min">
+<span class="sig-name descname"><span class="pre">va_min</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.va_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_cost">
+<span class="sig-name descname"><span class="pre">vm_cost</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_max">
+<span class="sig-name descname"><span class="pre">vm_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_min">
+<span class="sig-name descname"><span class="pre">vm_min</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#VeraGridEngine.Simulations.CatalogueOptimization.Problems.catalogue_problem.CatalogueOptimizationProblem.vm_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

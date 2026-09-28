@@ -17,6 +17,7 @@ from VeraGridEngine.enumerations import ConverterControlType
 
 
 class VscGflRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[
@@ -30,6 +31,7 @@ class VscGflRmsTemplate(TemplateDefinition):
 
 
 class TrafoGflRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[

@@ -169,6 +169,7 @@ def _build_sinusoidal_wave_expression(amplitude_expr: Expr,
 
 
 class CurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -281,6 +282,7 @@ def get_current_source_emt_template(vf: VarFactory,
 
 
 class ControlledCurrentSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -388,6 +390,7 @@ def get_controlled_current_source_emt_template(vf: VarFactory,
 
 
 class VoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -506,6 +509,7 @@ def get_voltage_source_emt_template(vf: VarFactory,
 
 
 class ControlledVoltageSourceEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(

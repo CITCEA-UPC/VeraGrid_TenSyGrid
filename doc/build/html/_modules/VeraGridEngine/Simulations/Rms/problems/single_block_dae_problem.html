@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -115,6 +115,11 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_unique_keep_order</span><span class="p">(</span><span class="n">vars_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Var</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Var</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param vars_list:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vars_list</span><span class="p">:</span>
@@ -134,6 +139,31 @@
 <span class="sd">    This class is shaped like the problem API consumed by implicit RMS solvers,</span>
 <span class="sd">    but focuses on one symbolic block and optional externally-driven inputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;block&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_diff_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_state_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_algebraic_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_all_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uid2idx_vars&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_uid2idx_diff&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_compiler_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_alias_names_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_constant_params&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_eqs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_variable_parameters_values&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_rhs_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_derivative_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_jacobian_fn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_input_var_by_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_input_param_by_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_input_profile_by_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;init_guess&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_x0&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">VARS_NAME</span> <span class="o">=</span> <span class="s2">&quot;vrs&quot;</span>
     <span class="n">VARIABLE_PARAMS_NAME</span> <span class="o">=</span> <span class="s2">&quot;vprms&quot;</span>
@@ -182,6 +212,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_x0_from_init_data</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_collect_block_runtime_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">event_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Var</span><span class="p">):</span>
                 <span class="k">continue</span>
@@ -189,11 +223,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_promote_differential_eqs_to_algebraic_all_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">blk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">get_all_blocks</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blk</span><span class="o">.</span><span class="n">differential_eqs</span><span class="p">):</span>
                 <span class="n">blk</span><span class="o">.</span><span class="n">algebraic_eqs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">blk</span><span class="o">.</span><span class="n">differential_eqs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_wire_in_vars_as_runtime_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">in_var</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">in_vars</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">in_var</span><span class="o">.</span><span class="n">uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_vars</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_algebraic_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">in_var</span><span class="p">)</span>
@@ -219,6 +261,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_compile_rhs_and_jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_eqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_eqs</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebraic_eqs</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="o">=</span> <span class="n">SymbolicVector</span><span class="p">(</span>
@@ -253,6 +299,10 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_populate_init_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">init_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">Var</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_vars</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">init_guess</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Const</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span><span class="p">)</span>
@@ -285,6 +335,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">init_guess</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_x0_from_init_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_vars</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_vars</span><span class="p">:</span>
             <span class="n">x0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_vars</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">uid</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_guess</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
@@ -293,6 +347,12 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.bind_input_constant">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.bind_input_constant">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">bind_input_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param input_name:</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">input_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown input &#39;</span><span class="si">{</span><span class="n">input_name</span><span class="si">}</span><span class="s2">&#39;. Available: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
@@ -301,6 +361,12 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.bind_input_profile">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.bind_input_profile">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">bind_input_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param input_name:</span>
+<span class="sd">        :param profile:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">input_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown input &#39;</span><span class="si">{</span><span class="n">input_name</span><span class="si">}</span><span class="s2">&#39;. Available: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">profile</span></div>
@@ -309,56 +375,100 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.list_inputs">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.list_inputs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">list_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_profile_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_all_vars_number">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_all_vars_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_vars_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_vars</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_states_number">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_states_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_states_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state_vars</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_algebraic_var_number">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_algebraic_var_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_algebraic_var_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_algebraic_vars</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_diff_var_number">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_diff_var_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_diff_var_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_diff_vars</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">algebraic_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebraic_vars</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_algebraic_vars_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebraic_vars</span>
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_x0">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_x0">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_x0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.update_variable_params_ts">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.update_variable_params_ts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_variable_params_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x_snapshot:</span>
+<span class="sd">        :param t:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_variable_params</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="o">=</span><span class="n">x_snapshot</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.update_variable_params">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.update_variable_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_variable_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param t:</span>
+<span class="sd">        :param x_snapshot:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span> <span class="o">=</span> <span class="n">x_snapshot</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_eqs</span><span class="p">):</span>
@@ -384,6 +494,12 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.rhs_algebraic">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.rhs_algebraic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">rhs_algebraic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="n">full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant_params</span><span class="p">)</span>
@@ -394,6 +510,12 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.rhs_state">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.rhs_state">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">rhs_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_states_number</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="n">full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhs_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant_params</span><span class="p">)</span>
@@ -404,10 +526,25 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_dx">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_dx">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param xn:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xn</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_jac_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jacobian_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_parameters_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constant_params</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
@@ -415,6 +552,13 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_j11">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_j11">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j11</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_states_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -425,6 +569,13 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_j12">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_j12">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j12</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_states_number</span><span class="p">()</span>
         <span class="n">na</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -436,6 +587,13 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_j21">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_j21">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j21</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_states_number</span><span class="p">()</span>
         <span class="n">na</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">na</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -447,6 +605,13 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_j22">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_j22">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_j22</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x:</span>
+<span class="sd">        :param dx:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_states_number</span><span class="p">()</span>
         <span class="n">na</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_algebraic_var_number</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">na</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -458,24 +623,48 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_var_idx">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_var_idx">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_var_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Var</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param v:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid2idx_vars</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.report_progress2">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.report_progress2">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">report_progress2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param step_idx:</span>
+<span class="sd">        :param steps:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">step_idx</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.update">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.update">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">event_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param t:</span>
+<span class="sd">        :param x_snapshot:</span>
+<span class="sd">        :param event_values:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">,</span> <span class="n">event_values</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.get_next_forced_event_time">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.get_next_forced_event_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_next_forced_event_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_prev</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t_target</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param t_prev:</span>
+<span class="sd">        :param t_target:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_prev</span><span class="p">,</span> <span class="n">t_target</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -483,25 +672,51 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.initialize_fmu_cs_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.initialize_fmu_cs_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_fmu_cs_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x0:</span>
+<span class="sd">        :param t0:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>  <span class="c1"># TODO: wtf</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.initialize_fmu_me_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.initialize_fmu_me_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_fmu_me_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param x0:</span>
+<span class="sd">        :param t0:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>  <span class="c1"># TODO: wtf</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.advance_fmu_cs_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.advance_fmu_cs_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">advance_fmu_cs_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param t:</span>
+<span class="sd">        :param x_snapshot:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>  <span class="c1"># TODO: wtf</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.advance_fmu_me_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.advance_fmu_me_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">advance_fmu_me_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param t:</span>
+<span class="sd">        :param x_snapshot:</span>
+<span class="sd">        :param h:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x_snapshot</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>  <span class="c1"># TODO: wtf</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.resolve_fmu_me_devices">
@@ -513,7 +728,7 @@
 <span class="sd">        :return: Always ``None`` because this problem owns no FMU.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">_</span> <span class="o">=</span> <span class="n">accepted</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">accepted</span>  <span class="c1"># TODO: wtf</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
@@ -531,12 +746,20 @@
 <div class="viewcode-block" id="SingleBlockDaeProblem.close_fmu_cs_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.close_fmu_cs_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close_fmu_cs_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="SingleBlockDaeProblem.close_fmu_me_devices">
 <a class="viewcode-back" href="../../../../../rst_source/api/auto/VeraGridEngine.Simulations.Rms.problems.html#VeraGridEngine.Simulations.Rms.problems.single_block_dae_problem.SingleBlockDaeProblem.close_fmu_me_devices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close_fmu_me_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 </div>
 

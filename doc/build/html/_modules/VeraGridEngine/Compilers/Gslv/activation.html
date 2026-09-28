@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Compilers.Gslv.activation &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Compilers.Gslv.activation &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -127,7 +127,7 @@
     <span class="n">BranchGroupTypes</span><span class="p">,</span>
     <span class="n">ConverterControlType</span>
 <span class="p">)</span>
-<span class="n">GSLV_RECOMMENDED_VERSION</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.8.5&quot;</span>
+<span class="n">GSLV_RECOMMENDED_VERSION</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.8.10&quot;</span>
 <span class="n">GSLV_VERSION</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 <span class="n">GSLV_AVAILABLE</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -208,6 +208,13 @@
         <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Qac</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Q_ac</span><span class="p">,</span>
         <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Pdc</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_dc</span><span class="p">,</span>
         <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Pac</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_ac</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Pdc_angle_droop</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_dc_angle_droop</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Pdc_droop</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_dc_droop</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Q_droop</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Q_droop</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_droop</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">P_droop</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Imax</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Imax</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Fault1</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Fault1</span><span class="p">,</span>
+        <span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Fault2</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">ConverterControlType</span><span class="o">.</span><span class="n">Fault2</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">bus_type_dict</span> <span class="o">=</span> <span class="p">{</span>

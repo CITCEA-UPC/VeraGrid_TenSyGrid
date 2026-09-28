@@ -145,7 +145,7 @@
         </widget>
        </item>
        <item>
-        <widget class="MatplotlibWidget" name="plotWidget" native="true">
+        <widget class="GraphsWidget" name="plotWidget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -245,9 +245,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MatplotlibWidget</class>
+   <class>GraphsWidget</class>
    <extends>QWidget</extends>
-   <header>.matplotlibwidget</header>
+   <header>VeraGrid.Gui.PlotDialogue.qt_chart_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

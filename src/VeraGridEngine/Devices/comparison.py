@@ -13,6 +13,12 @@ class PropertyConflict:
     Objects conflict
     """
 
+    __slots__ = (
+        'obj_a',
+        'obj_b',
+        'prop_name',
+    )
+
     def __init__(self, obj_a: ALL_DEV_TYPES, obj_b: ALL_DEV_TYPES, prop_name: str):
         self.obj_a = obj_a
         self.obj_b = obj_b
@@ -39,6 +45,11 @@ class CircuitComparison:
     """
     Comparison between two circuits
     """
+
+    __slots__ = (
+        'circuit_a',
+        'circuit_b',
+    )
 
     def __init__(self, circuit_a: MultiCircuit, circuit_b: MultiCircuit):
         """

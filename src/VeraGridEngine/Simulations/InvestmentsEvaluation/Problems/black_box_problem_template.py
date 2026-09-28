@@ -12,19 +12,37 @@ from VeraGridEngine.basic_structures import Vec, IntVec, StrVec, Logger
 
 
 class BlackBoxProblemTemplate:
+    """
+    Template class for black-box optimization problems.
+    """
+    __slots__ = (
+        "grid",
+        "logger",
+        "plot_x_idx",
+        "plot_y_idx",
+        "x_dim",
+        "x_min",
+        "x_max",
+        "investments_by_group",
+    )
 
-    def __init__(self, grid: MultiCircuit, x_dim: int, plot_x_idx: int, plot_y_idx: int):
+    def __init__(self, grid: MultiCircuit, x_dim: int, plot_x_idx: int, plot_y_idx: int) -> None:
+        """
+        BlackBoxProblemTemplate constructor.
 
-        self.grid = grid
+        :param grid: MultiCircuit instance
+        :param x_dim: Dimension of variable vector x
+        :param plot_x_idx: Objective index for Pareto plot X axis
+        :param plot_y_idx: Objective index for Pareto plot Y axis
+        """
+        self.grid: MultiCircuit = grid
+        self.logger: Logger = Logger()
+        self.plot_x_idx: int = plot_x_idx
+        self.plot_y_idx: int = plot_y_idx
 
-        self.logger = Logger()
-
-        self.plot_x_idx = plot_x_idx
-        self.plot_y_idx = plot_y_idx
-
-        self.x_dim = x_dim
-        self.x_min = np.zeros(self.x_dim)
-        self.x_max = np.ones(self.x_dim)
+        self.x_dim: int = x_dim
+        self.x_min: Vec = np.zeros(self.x_dim)
+        self.x_max: Vec = np.ones(self.x_dim)
 
         # dictionary of investment groups
         self.investments_by_group: Dict[int, List[Investment]] = self.grid.get_investment_by_groups_index_dict()

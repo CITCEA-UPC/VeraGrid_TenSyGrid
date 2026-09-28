@@ -8,6 +8,7 @@ from VeraGridEngine.basic_structures import Logger
 
 class RawEquipmentTerminalV34(RawEquipmentTerminal):
     """PSSE v34 equipment terminal."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger) -> None:
         """

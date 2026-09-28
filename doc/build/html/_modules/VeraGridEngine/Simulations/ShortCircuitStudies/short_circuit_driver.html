@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.ShortCircuitStudies.short_circuit_driver &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.ShortCircuitStudies.short_circuit_driver &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -257,7 +257,8 @@
                                        <span class="n">Vpf</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span>
                                        <span class="n">Zf</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span>
                                        <span class="n">island_bus_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                       <span class="n">fault_type</span><span class="p">:</span> <span class="n">FaultType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShortCircuitResults</span><span class="p">:</span>
+                                       <span class="n">fault_type</span><span class="p">:</span> <span class="n">FaultType</span><span class="p">,</span>
+                                       <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShortCircuitResults</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run a short circuit simulation for a single island</span>
 <span class="sd">        :param calculation_inputs:</span>
@@ -273,18 +274,20 @@
         <span class="c1"># is dense, so no need to store it as sparse</span>
         <span class="k">if</span> <span class="n">adm</span><span class="o">.</span><span class="n">Ybus</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="n">fault_type</span> <span class="o">==</span> <span class="n">FaultType</span><span class="o">.</span><span class="n">LLLG</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fault_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">FaultType</span><span class="o">.</span><span class="n">LLL</span><span class="p">,</span> <span class="n">FaultType</span><span class="o">.</span><span class="n">LLLG</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">short_circuit_ph3</span><span class="p">(</span><span class="n">nc</span><span class="o">=</span><span class="n">nc</span><span class="p">,</span>
                                          <span class="n">Vpf</span><span class="o">=</span><span class="n">Vpf</span><span class="p">[</span><span class="n">nc</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
                                          <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">,</span>
-                                         <span class="n">bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">)</span>
+                                         <span class="n">bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
+                                         <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">fault_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">FaultType</span><span class="o">.</span><span class="n">LG</span><span class="p">,</span> <span class="n">FaultType</span><span class="o">.</span><span class="n">LL</span><span class="p">,</span> <span class="n">FaultType</span><span class="o">.</span><span class="n">LLG</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="n">short_circuit_unbalanced</span><span class="p">(</span><span class="n">nc</span><span class="o">=</span><span class="n">nc</span><span class="p">,</span>
                                                 <span class="n">Vpf</span><span class="o">=</span><span class="n">Vpf</span><span class="p">[</span><span class="n">nc</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
                                                 <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">,</span>
                                                 <span class="n">bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
-                                                <span class="n">fault_type</span><span class="o">=</span><span class="n">fault_type</span><span class="p">)</span>
+                                                <span class="n">fault_type</span><span class="o">=</span><span class="n">fault_type</span><span class="p">,</span>
+                                                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown fault type!&#39;</span><span class="p">)</span>
@@ -640,103 +643,112 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">fault_bus_idx</span> <span class="o">=</span> <span class="n">bus_idx</span>
 
-                    <span class="c1"># Compose the fault admittance</span>
-                    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">)</span>
-                    <span class="n">Zf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-                    <span class="n">Zf</span><span class="p">[</span><span class="n">fault_bus_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">get_fault_impedance</span><span class="p">()</span>
+                    <span class="n">fault_impedance</span><span class="p">:</span> <span class="nb">complex</span> <span class="o">=</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">get_fault_impedance</span><span class="p">()</span>
 
-                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">island</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">calculation_inputs</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fault_impedance</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Short-circuit fault impedance is zero&quot;</span><span class="p">,</span>
+                                              <span class="n">device</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">value</span><span class="o">=</span><span class="n">fault_impedance</span><span class="p">,</span>
+                                              <span class="n">expected_value</span><span class="o">=</span><span class="s2">&quot;Non-zero fault impedance&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Compose the fault admittance</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">buses</span><span class="p">)</span>
+                        <span class="n">Zf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+                        <span class="n">Zf</span><span class="p">[</span><span class="n">fault_bus_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">fault_impedance</span>
 
-                        <span class="c1"># the options give the bus index counting all the grid, however</span>
-                        <span class="c1"># for the calculation we need the bus index in the island scheme.</span>
-                        <span class="c1"># Hence, we need to convert it, and if the global bus index is not</span>
-                        <span class="c1"># in the island, do not perform any calculation</span>
-                        <span class="n">reverse_bus_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)}</span>
-                        <span class="n">island_bus_index</span> <span class="o">=</span> <span class="n">reverse_bus_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fault_bus_idx</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">island</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">calculation_inputs</span><span class="p">):</span>
 
-                        <span class="k">if</span> <span class="n">island_bus_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="c1"># the options give the bus index counting all the grid, however</span>
+                            <span class="c1"># for the calculation we need the bus index in the island scheme.</span>
+                            <span class="c1"># Hence, we need to convert it, and if the global bus index is not</span>
+                            <span class="c1"># in the island, do not perform any calculation</span>
+                            <span class="n">reverse_bus_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)}</span>
+                            <span class="n">island_bus_index</span> <span class="o">=</span> <span class="n">reverse_bus_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fault_bus_idx</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-                            <span class="k">if</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">sequences</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">island_bus_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                    <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_sequences</span><span class="p">(</span>
-                                        <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
-                                        <span class="n">Vpf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span>  <span class="c1"># will be slices inside</span>
-                                        <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">island_bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
-                                        <span class="n">fault_type</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">fault_type</span>
-                                    <span class="p">)</span>
+                                <span class="k">if</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">sequences</span><span class="p">:</span>
 
-                                    <span class="c1"># merge results</span>
-                                    <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
-                                                              <span class="n">res</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_sequences</span><span class="p">(</span>
+                                            <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
+                                            <span class="n">Vpf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span>  <span class="c1"># will be slices inside</span>
+                                            <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">island_bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
+                                            <span class="n">fault_type</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">fault_type</span><span class="p">,</span>
+                                            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+                                        <span class="p">)</span>
+
+                                        <span class="c1"># merge results</span>
+                                        <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
+                                                                  <span class="n">res</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;Sequence power flow results missing&quot;</span><span class="p">)</span>
+
+                                <span class="k">elif</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">sequences_vsc</span><span class="p">:</span>
+
+                                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_vsc</span><span class="p">(</span>
+                                            <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
+                                            <span class="n">V_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">voltage</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">S_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Sbus</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">St_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">St_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Pfp_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Pfp_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Pfn_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Pfn_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Z_fault</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">fault_bus</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
+                                            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_options</span><span class="p">,</span>
+                                            <span class="n">constz</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">constz</span><span class="p">,</span>
+                                            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+                                        <span class="p">)</span>
+
+                                        <span class="c1"># merge results</span>
+                                        <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
+                                                                  <span class="n">res</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;Sequence power flow results missing&quot;</span><span class="p">)</span>
+
+                                <span class="k">elif</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
+
+                                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                                        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_phases</span><span class="p">(</span>
+                                            <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
+                                            <span class="n">voltage_N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_N</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">voltage_A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_A</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">voltage_B</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_B</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">voltage_C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_C</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">island_bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
+                                            <span class="n">fault_type</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">fault_type</span><span class="p">,</span>
+                                            <span class="n">phases</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span>
+                                            <span class="n">Sbus_N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_N</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Sbus_A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_A</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Sbus_B</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_B</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">Sbus_C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_C</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
+                                            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+                                        <span class="p">)</span>
+
+                                        <span class="c1"># merge results</span>
+                                        <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
+                                                                  <span class="n">res</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
+                                                                  <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;3ph power flow results missing&quot;</span><span class="p">)</span>
+
                                 <span class="k">else</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;Sequence power flow results missing&quot;</span><span class="p">)</span>
-
-                            <span class="k">elif</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">sequences_vsc</span><span class="p">:</span>
-
-                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                    <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_vsc</span><span class="p">(</span>
-                                        <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
-                                        <span class="n">V_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">voltage</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">S_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Sbus</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">St_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">St_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Pfp_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Pfp_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Pfn_vsc_pf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results</span><span class="o">.</span><span class="n">Pfn_vsc</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Z_fault</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">fault_bus</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
-                                        <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_options</span><span class="p">,</span>
-                                        <span class="n">constz</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">constz</span><span class="p">,</span>
-                                        <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
-                                    <span class="p">)</span>
-
-                                    <span class="c1"># merge results</span>
-                                    <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
-                                                              <span class="n">res</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;Sequence power flow results missing&quot;</span><span class="p">)</span>
-
-                            <span class="k">elif</span> <span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="n">MethodShortCircuit</span><span class="o">.</span><span class="n">phases</span><span class="p">:</span>
-
-                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-                                    <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_short_circuit_phases</span><span class="p">(</span>
-                                        <span class="n">nc</span><span class="o">=</span><span class="n">island</span><span class="p">,</span>
-                                        <span class="n">voltage_N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_N</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">voltage_A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_A</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">voltage_B</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_B</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">voltage_C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">voltage_C</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Zf</span><span class="o">=</span><span class="n">Zf</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">island_bus_index</span><span class="o">=</span><span class="n">island_bus_index</span><span class="p">,</span>
-                                        <span class="n">fault_type</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">fault_type</span><span class="p">,</span>
-                                        <span class="n">phases</span><span class="o">=</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span>
-                                        <span class="n">Sbus_N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_N</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Sbus_A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_A</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Sbus_B</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_B</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">Sbus_C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_results3ph</span><span class="o">.</span><span class="n">Sbus_C</span><span class="p">[</span><span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">],</span>
-                                        <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
-                                    <span class="p">)</span>
-
-                                    <span class="c1"># merge results</span>
-                                    <span class="n">results</span><span class="o">.</span><span class="n">apply_from_island</span><span class="p">(</span><span class="n">k_sc</span><span class="p">,</span>
-                                                              <span class="n">res</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">bus_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">passive_branch_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">hvdc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">,</span>
-                                                              <span class="n">island</span><span class="o">.</span><span class="n">vsc_data</span><span class="o">.</span><span class="n">original_idx</span><span class="p">)</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;3ph power flow results missing&quot;</span><span class="p">)</span>
-
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown short circuit method: </span><span class="si">{</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown short circuit method: </span><span class="si">{</span><span class="n">sc_definition</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span>
                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Device not found&quot;</span><span class="p">,</span>

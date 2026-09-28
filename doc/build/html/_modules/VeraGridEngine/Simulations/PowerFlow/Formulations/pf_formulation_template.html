@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.Formulations.pf_formulation_template &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/js/theme.js"></script>
@@ -123,6 +123,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base Power Flow Formulation class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;V&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_Vm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_Va&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Scalc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;options&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_converged&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_controls_tol&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V0</span><span class="p">:</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">PowerFlowOptions</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

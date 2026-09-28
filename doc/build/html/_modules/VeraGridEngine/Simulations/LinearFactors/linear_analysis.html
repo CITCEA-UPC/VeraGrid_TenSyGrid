@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.LinearFactors.linear_analysis &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.LinearFactors.linear_analysis &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -748,6 +748,23 @@
 <span class="sd">    Linear Analysis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PTDF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PTDF_by_island&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;LODF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HvdcDF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HvdcODF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VscDF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VscODF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_types&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;distributed_slack&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sbase&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau_flows&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tau_injections&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nc</span><span class="p">:</span> <span class="n">NumericalCircuit</span><span class="p">,</span>
                  <span class="n">distributed_slack</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1060,6 +1077,21 @@
 <span class="sd">    LinearMultiContingency</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;branch_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mlodf_factors&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;compensated_ptdf_factors&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;injections_factor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_odf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_odf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;compensated_vsc_df&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;compensated_hvdc_df&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">branch_indices</span><span class="p">:</span> <span class="n">IntVec</span><span class="p">,</span>
                  <span class="n">hvdc_indices</span><span class="p">:</span> <span class="n">IntVec</span><span class="p">,</span>
@@ -1258,6 +1290,14 @@
 <span class="sd">    Contingency indices</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;branch_contingency_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hvdc_contingency_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vsc_contingency_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bus_contingency_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;injections_factors&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">contingency_group</span><span class="p">:</span> <span class="n">ContingencyGroup</span><span class="p">,</span>
                  <span class="n">contingency_group_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Contingency</span><span class="p">]],</span>
@@ -1346,6 +1386,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    LinearMultiContingencies</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;grid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contingency_groups_used&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__contingency_group_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__branches_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__hvdc_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__vsc_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__injections_bus_index_dict&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contingency_indices_list&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;multi_contingencies&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span> <span class="n">contingency_groups_used</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ContingencyGroup</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1601,6 +1653,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to compute the different linear states of a grid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;time_indices&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_inverse_time_index&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;groups&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mapping&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_linear_analysis&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_linear_multi_contingencies&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nbus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nt&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="n">MultiCircuit</span><span class="p">,</span>
                  <span class="n">distributed_slack</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>

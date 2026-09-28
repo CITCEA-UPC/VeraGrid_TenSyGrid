@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.StateEstimation.state_estimation_results &mdash; VeraGrid 6.0.20 documentation</title>
+  <title>VeraGridEngine.Simulations.StateEstimation.state_estimation_results &mdash; VeraGrid 6.5.37 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/style.css?v=b3745da1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/style.css?v=ba3a54df" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=f001e538"></script>
+      <script src="../../../../_static/documentation_options.js?v=069969c3"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -44,9 +44,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/installation.html">💽 Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/user_interface.html">📊 User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/veragrid_scripting_guide.html">📑 VeraGrid scripting guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/grid_analysis.html">🔎 Grid analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/structure.html">🌁 Structure of VeraGrid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/modelling.html">📐 Grid Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/small_signal_stability.html">🔍 Small-Signal stability analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/model_debugging.html">🪲 Model debugging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/file_operations.html">💾 File loading and saving</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/topology.html">🌵 Topology</a></li>
@@ -59,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/short_circuit.html">⚡ Short-Circuit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/stochastic_power_flow.html">🎲 Stochastic power flow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/continuation_power_flow.html">➿ Continuation power flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/sigma_analysis.html">🌘 Sigma analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/solar_wizard.html">☀️ Solar power wizard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/contingency_analysis.html">💥 Contingency analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/investment_optimization.html">🏦 Investment optimization</a></li>
@@ -67,10 +69,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/nodal_hosting_capacity.html">🏭 Nodal hosting capacity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/state_estimation.html">🌀 State estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../md_source/dynamic_simulations.html">🧲 Dynamic simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/license.html">📜 License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../rst_source/change_log.html">Change log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../md_source/data_models.html">Data Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst_source/api/auto/modules.html">VeraGrid</a></li>
 </ul>
@@ -107,14 +109,12 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt_colors</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_table</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.Simulations.results_template</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultsTemplate</span><span class="p">,</span> <span class="n">ResultsProperty</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.basic_structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntVec</span><span class="p">,</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">StrVec</span><span class="p">,</span> <span class="n">CxVec</span><span class="p">,</span> <span class="n">ConvergenceReport</span><span class="p">,</span> <span class="n">Logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">StudyResultsType</span><span class="p">,</span> <span class="n">ResultTypes</span><span class="p">,</span> <span class="n">DeviceType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">VeraGridEngine.enumerations</span><span class="w"> </span><span class="kn">import</span> <span class="n">StudyResultsType</span><span class="p">,</span> <span class="n">ResultTypes</span><span class="p">,</span> <span class="n">DeviceType</span><span class="p">,</span> <span class="n">ResultTablePlotType</span>
 
 
 <div class="viewcode-block" id="NumericStateEstimationResults">
@@ -679,18 +679,8 @@
         <span class="k">elif</span> <span class="n">result_type</span> <span class="o">==</span> <span class="n">ResultTypes</span><span class="o">.</span><span class="n">BusVoltagePolarPlot</span><span class="p">:</span>
             <span class="n">vm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
             <span class="n">va</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">va_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">vm</span><span class="p">,</span> <span class="n">va</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting_allowed</span><span class="p">():</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
-                <span class="n">color_norm</span> <span class="o">=</span> <span class="n">plt_colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">()</span>
-                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-                <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;polar&#39;</span><span class="p">)</span>
-                <span class="n">sc3</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">va_rad</span><span class="p">,</span> <span class="n">vm</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">vm</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">color_norm</span><span class="p">)</span>
-                <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-                <span class="c1"># plt.show()</span>
 
             <span class="k">return</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                                 <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bus_names</span><span class="p">,</span>
@@ -699,6 +689,7 @@
                                 <span class="n">cols_device_type</span><span class="o">=</span><span class="n">DeviceType</span><span class="o">.</span><span class="n">NoDevice</span><span class="p">,</span>
                                 <span class="n">title</span><span class="o">=</span><span class="n">result_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                                 <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;(p.u., deg)&#39;</span><span class="p">,</span>
+                                <span class="n">plot_type</span><span class="o">=</span><span class="n">ResultTablePlotType</span><span class="o">.</span><span class="n">POLAR</span><span class="p">,</span>
                                 <span class="n">units</span><span class="o">=</span><span class="s1">&#39;(p.u., deg)&#39;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">result_type</span> <span class="o">==</span> <span class="n">ResultTypes</span><span class="o">.</span><span class="n">BusActivePower</span><span class="p">:</span>

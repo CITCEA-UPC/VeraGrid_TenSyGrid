@@ -735,11 +735,11 @@ def test_rms_editor_reopen_preserves_persisted_connection_arrows(
         editor.deleteLater()
     qt_app.processEvents()
 
-    # Confirm the symbolic tree and its fallback dictionary boundary contain
-    # no GUI-only wrapper state before exercising the persisted diagram path.
+    # Confirm the symbolic tree schema and serialized state contain no GUI-only
+    # wrapper state before exercising the persisted diagram path.
     for device in devices:
         for child_block in device.rms_model.children:
-            assert "is_root_interface_wrapper" not in child_block.__dict__
+            assert "is_root_interface_wrapper" not in Block.__slots__
             assert "is_root_interface_wrapper" not in child_block.to_dict()
 
     reopened_editors: List[DynamicBlockEditorGUI] = list()

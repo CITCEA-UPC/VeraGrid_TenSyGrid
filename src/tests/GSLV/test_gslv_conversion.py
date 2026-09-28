@@ -396,7 +396,7 @@ def test_gslv_conversion_exports_injection_association_assets_and_facility() -> 
 
 def test_gslv_conversion_exports_generator_market_unit_and_control_bus() -> None:
     """
-    Check that generator market-unit and remote-control bus references are exported.
+    Check that generator remote-control bus references and circuit market-units are exported.
 
     :return: None.
     """
@@ -409,7 +409,7 @@ def test_gslv_conversion_exports_generator_market_unit_and_control_bus() -> None
     bus: vg.Bus = vg.Bus(name="Bus")
     control_bus: vg.Bus = vg.Bus(name="Control bus")
     market_unit: vg.MarketUnit = vg.MarketUnit(name="Market unit", code="MU", color="#123456")
-    generator: vg.Generator = vg.Generator(name="Generator", P=10.0, market_unit=market_unit, market_unit_share=0.7)
+    generator: vg.Generator = vg.Generator(name="Generator", P=10.0)
 
     generator.control_bus = control_bus
 
@@ -427,15 +427,13 @@ def test_gslv_conversion_exports_generator_market_unit_and_control_bus() -> None
     )
 
     converted_generator = grid_gslv.generators[0]
-    assert converted_generator.market_unit.get_idtag() == market_unit.idtag
-    assert converted_generator.market_unit_share.to_list() == [0.7]
     assert converted_generator.control_bus.to_list()[0].get_idtag() == control_bus.idtag
     assert gslv_dict.market_unit_dict[market_unit].get_idtag() == market_unit.idtag
 
 
 def test_gslv_conversion_exports_battery_storage_and_market_unit_fields() -> None:
     """
-    Check that battery-specific storage fields and generator-like market data are exported.
+    Check that battery-specific storage fields and control bus are exported.
 
     :return: None.
     """
@@ -456,8 +454,6 @@ def test_gslv_conversion_exports_battery_storage_and_market_unit_fields() -> Non
                                      x1=0.02)
 
     battery.control_bus = control_bus
-    battery.market_unit = market_unit
-    battery.market_unit_share = 0.4
     battery.min_soc_charge = 0.55
 
     grid.add_bus(obj=bus)
@@ -481,8 +477,6 @@ def test_gslv_conversion_exports_battery_storage_and_market_unit_fields() -> Non
     assert converted_battery.min_soc_charge == 0.55
     assert converted_battery.R1 == 0.01
     assert converted_battery.X1 == 0.02
-    assert converted_battery.market_unit.get_idtag() == market_unit.idtag
-    assert converted_battery.market_unit_share.to_list() == [0.4]
     assert converted_battery.control_bus.to_list()[0].get_idtag() == control_bus.idtag
 
 

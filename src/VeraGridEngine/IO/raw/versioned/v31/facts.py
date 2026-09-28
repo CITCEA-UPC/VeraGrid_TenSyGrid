@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v30.facts import RawFACTSV30
 
 class RawFACTSV31(RawFACTSV30):
     """PSSE v31 typed object inheriting v30."""
+    __slots__ = ()
     pass

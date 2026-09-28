@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v34.area import RawAreaV34
 
 class RawAreaV35(RawAreaV34):
     """PSSE v35 typed object inheriting v34."""
+    __slots__ = ()
     pass

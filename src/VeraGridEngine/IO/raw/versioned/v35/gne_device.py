@@ -7,6 +7,7 @@ from VeraGridEngine.IO.raw.versioned.v34.gne_device import RawGneDeviceV34
 
 class RawGneDeviceV35(RawGneDeviceV34):
     """PSSE v35 typed object inheriting v34."""
+    __slots__ = ()
 
     def parse(self, data, version, logger):
         super().parse(data=data, version=version, logger=logger)

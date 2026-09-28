@@ -6,7 +6,6 @@ import json
 import numpy as np
 from typing import List, Dict, Optional
 
-from matplotlib import pyplot as plt
 
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
 from VeraGridEngine.basic_structures import Vec, DateVec, StrVec, Mat, BoolVec
@@ -295,20 +294,6 @@ class RmsResults(ResultsTemplate):
         else:
             return None
 
-    def plot_var(self, var: Var, group_idx: int = 0):
-        """
-
-        :param var:
-        :param group_idx:
-        :return:
-        """
-        idx = self.uid2idx[var.uid]
-
-        y = self.values[:, idx, group_idx]
-
-        plt.plot(self.time_array, y, label=var.name)
-        plt.legend()
-        plt.show(block=False)
 
     def get_vars_data(self, var_list: List[Var], group_idx: int = 0) -> Mat:
         """

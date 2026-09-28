@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.Simulations.PowerFlow.power_flow_options &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.Simulations.PowerFlow.power_flow_options &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -122,6 +122,32 @@
 <span class="sd">    Power flow options</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;solver_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;retry_with_other_methods&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;tolerance&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;controls_start_tolerance&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;max_iter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;limit_i_vsc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;control_Q&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;verbose&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;initialize_with_existing_solution&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;control_taps_modules&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;control_taps_phase&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;control_remote_voltage&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;orthogonalize_controls&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;apply_temperature_correction&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;branch_impedance_tolerance_mode&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;distributed_slack&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ignore_single_node_islands&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trust_radius&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;backtracking_parameter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;use_stored_guess&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;initialize_angles&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;use_autodiff_jacobian&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;generate_report&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="n">LOCAL_PROPERTY_DECLARATIONS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">GCProp</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">GCProp</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;solver_type&quot;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="n">SolverType</span><span class="p">),</span>
         <span class="n">GCProp</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;retry_with_other_methods&quot;</span><span class="p">,</span> <span class="n">tpe</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span>
@@ -171,7 +197,7 @@
                  <span class="n">initialize_angles</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">use_autodiff_jacobian</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">generate_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">controls_start_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,):</span>
+                 <span class="n">controls_start_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Power flow options class</span>
 <span class="sd">        :param solver_type: Solver type</span>

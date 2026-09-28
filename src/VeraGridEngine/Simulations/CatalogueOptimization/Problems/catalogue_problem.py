@@ -43,6 +43,21 @@ class CatalogueOptimizationProblem(BlackBoxProblemTemplate):
     The decision vector `x` is integer-valued: `x[i]` is the index of the chosen template within the
     pool associated with branch `branches[i]`.
     """
+    __slots__ = (
+        "branches",
+        "pools",
+        "snapshots",
+        "pf_options",
+        "vm_cost",
+        "vm_max",
+        "vm_min",
+        "va_cost",
+        "va_max",
+        "va_min",
+        "branches_cost",
+        "Sbase",
+        "fBase",
+    )
 
     def __init__(self,
                  grid: MultiCircuit,

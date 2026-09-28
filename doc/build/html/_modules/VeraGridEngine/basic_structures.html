@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeraGridEngine.basic_structures &mdash; VeraGrid 6.5.26 documentation</title>
+  <title>VeraGridEngine.basic_structures &mdash; VeraGrid 6.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c62e3d9e"></script>
+      <script src="../../_static/documentation_options.js?v=9cce70e7"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -144,6 +144,8 @@
 <span class="sd">    Inverse Cumulative density function of a given array of data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;arr&quot;</span><span class="p">,</span> <span class="s2">&quot;iscomplex&quot;</span><span class="p">,</span> <span class="s2">&quot;prob&quot;</span><span class="p">,</span> <span class="s2">&quot;idx&quot;</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Vec</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
@@ -257,25 +259,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="CDF.plot">
-<a class="viewcode-back" href="../../rst_source/api/auto/VeraGridEngine.html#VeraGridEngine.basic_structures.CDF.plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plt</span><span class="p">,</span> <span class="n">LINEWIDTH</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plots the CFD</span>
-<span class="sd">        :param plt: MatPlotLib plt module</span>
-<span class="sd">        :param LINEWIDTH: line width in pixels</span>
-<span class="sd">        :param ax: MatPlotLib axis to plot into</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">LINEWIDTH</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$p(x)$&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$x$&#39;</span><span class="p">)</span></div>
 </div>
+
 
 
 
@@ -283,24 +268,38 @@
 <a class="viewcode-back" href="../../rst_source/api/auto/VeraGridEngine.html#VeraGridEngine.basic_structures.classify_by_hour">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">classify_by_hour</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Passes an array of TimeStamps to an array of arrays of indices</span>
-<span class="sd">    classified by hour of the year</span>
-<span class="sd">    @param t: Pandas time Index array</span>
-<span class="sd">    @return: list of lists of integer indices</span>
+<span class="sd">    Classify timestamp indices into bins grouped by continuous hour from series start.</span>
+
+<span class="sd">    :param t: Pandas DatetimeIndex array containing timestamps.</span>
+<span class="sd">    :return: List of lists containing integer indices belonging to each hour bucket.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hour</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
-    <span class="n">mx</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hour</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
+    <span class="c1"># An empty DatetimeIndex cannot be anchored or partitioned.</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
 
+    <span class="c1"># Anchor to the start hour to ensure sub-hourly timestamps begin at bucket 0.</span>
+    <span class="n">t0</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute continuous elapsed hours for each timestamp using integer division of elapsed seconds.</span>
+    <span class="c1"># This prevents arithmetic collisions across days, leap years, and calendar year boundaries.</span>
+    <span class="n">hours_from_start</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">//</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">max_h</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">hours_from_start</span><span class="p">))</span>
+
+    <span class="c1"># Pre-allocate hourly buckets from hour 0 to max_h inclusive.</span>
     <span class="n">arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx</span> <span class="o">-</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">bucket_idx</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="k">for</span> <span class="n">bucket_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_h</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">())</span>
 
+    <span class="c1"># Map each timestamp index to its corresponding hourly bin.</span>
+    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">hourofyear</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hour</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
-        <span class="n">arr</span><span class="p">[</span><span class="n">hourofyear</span> <span class="o">-</span> <span class="n">offset</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">hour_bin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hours_from_start</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">arr</span><span class="p">[</span><span class="n">hour_bin</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">arr</span></div>
 
@@ -308,26 +307,47 @@
 
 <div class="viewcode-block" id="classify_by_day">
 <a class="viewcode-back" href="../../rst_source/api/auto/VeraGridEngine.html#VeraGridEngine.basic_structures.classify_by_day">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">classify_by_day</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">classify_by_day</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Passes an array of TimeStamps to an array of arrays of indices</span>
-<span class="sd">    classified by day of the year</span>
-<span class="sd">    @param t: Pandas time Index array</span>
-<span class="sd">    @return: list of lists of integer indices</span>
+<span class="sd">    Classify timestamp indices into bins grouped by continuous day from series start.</span>
+
+<span class="sd">    :param t: Pandas DatetimeIndex array containing timestamps.</span>
+<span class="sd">    :return: List of lists containing integer indices belonging to each day bucket.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
-    <span class="n">mx</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
+    <span class="c1"># An empty DatetimeIndex cannot be anchored or partitioned.</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
 
-    <span class="n">arr</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="c1"># Normalize timezone localization to naive wall-clock time for calendar day continuity.</span>
+    <span class="n">t_anchor</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">tz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">t_anchor</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t_anchor</span> <span class="o">=</span> <span class="n">t</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx</span> <span class="o">-</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># Anchor to the start day (midnight) to ensure all timestamps begin at day bucket 0.</span>
+    <span class="n">t0</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="n">t_anchor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute continuous elapsed calendar days for each timestamp using integer division of elapsed seconds.</span>
+    <span class="c1"># This prevents arithmetic collisions across days, leap years, and calendar year boundaries.</span>
+    <span class="n">days_from_start</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">((</span><span class="n">t_anchor</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">//</span> <span class="mi">86400</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">max_d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">days_from_start</span><span class="p">))</span>
+
+    <span class="c1"># Pre-allocate daily buckets from day 0 to max_d inclusive.</span>
+    <span class="n">arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">bucket_idx</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="k">for</span> <span class="n">bucket_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">())</span>
 
+    <span class="c1"># Map each timestamp index to its corresponding daily bin.</span>
+    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">hourofyear</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">dayofyear</span>
-        <span class="n">arr</span><span class="p">[</span><span class="n">hourofyear</span> <span class="o">-</span> <span class="n">offset</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">day_bin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">days_from_start</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">arr</span><span class="p">[</span><span class="n">day_bin</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">arr</span></div>
 
@@ -403,6 +423,19 @@
 <span class="sd">    Logger entry</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;msg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;severity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;device&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;device_class&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;device_property&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;expected_value&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;object_value&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;expected_object_value&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -469,6 +502,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Logger class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;entries&quot;</span><span class="p">,</span> <span class="s2">&quot;debug_entries&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -852,6 +887,8 @@
 <span class="sd">    Convergence report</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;methods_&quot;</span><span class="p">,</span> <span class="s2">&quot;converged_&quot;</span><span class="p">,</span> <span class="s2">&quot;error_&quot;</span><span class="p">,</span> <span class="s2">&quot;elapsed_&quot;</span><span class="p">,</span> <span class="s2">&quot;iterations_&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
@@ -978,6 +1015,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compressed json block</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;__fields&quot;</span><span class="p">,</span> <span class="s2">&quot;__data&quot;</span><span class="p">,</span> <span class="s2">&quot;__fields_pos_dict&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -1124,6 +1163,8 @@
 <span class="sd">    This is a class that behaves like a list except for the query &quot;in&quot; where it behaves like a set O(1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_set&quot;</span><span class="p">,)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the ListSet with an optional iterable.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -1228,6 +1269,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Python implementation of a C++ like std::vector</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_data&quot;</span><span class="p">,)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
