@@ -7,12 +7,11 @@ from typing import List, Set, Dict, Union, Tuple, Generator, TYPE_CHECKING
 from time import perf_counter
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
 
 from PySide6 import QtCore
 from PySide6.QtGui import QIcon, QImage
 from PySide6.QtWidgets import (QListView, QTableView, QVBoxLayout, QHBoxLayout, QFrame, QSplitter, QAbstractItemView,
-                               QGraphicsItem, QToolBox, QComboBox)
+                               QGraphicsItem, QToolBox, QComboBox, QDialog)
 
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
@@ -23,22 +22,28 @@ from VeraGridEngine.Devices.Branches.hvdc_line import HvdcLine
 from VeraGridEngine.Devices.Branches.transformer import Transformer2W
 from VeraGridEngine.Devices.Branches.vsc import VSC
 from VeraGridEngine.Devices.Branches.upfc import UPFC
-from VeraGridEngine.Simulations import (PowerFlowTimeSeriesResults, LinearAnalysisTimeSeriesResults,
-                                        ContingencyAnalysisTimeSeriesResults, OptimalPowerFlowTimeSeriesResults,
-                                        StochasticPowerFlowResults)
 from VeraGridEngine.basic_structures import Vec, CxVec, IntVec
 from VeraGridEngine.Devices.Diagrams.schematic_diagram import SchematicDiagram
 from VeraGridEngine.Devices.Diagrams.map_diagram import MapDiagram
 from VeraGridEngine.Simulations.types import DRIVER_OBJECTS
 from VeraGridEngine.basic_structures import Logger
-from VeraGridEngine.enumerations import SimulationTypes, ResultTypes, PrpCat
+from VeraGridEngine.enumerations import DeviceType, SimulationTypes, ResultTypes, PrpCat
 import VeraGridEngine.Devices.Diagrams.palettes as palettes
 
 from VeraGrid.Gui.Diagrams.graphics_manager import GraphicsManager, ALL_GRAPHICS
+from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphics import InjectionNexusPathItem
+from VeraGrid.Gui.DeviceEditors.device_editor_factory import build_device_editor_dialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import DeleteDialogue
 from VeraGrid.Gui.messages import yes_no_question, info_msg
 from VeraGrid.Gui.object_model import ObjectsModel
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.PlotDialogue.result_table_data import get_result_table_series
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
 import VeraGrid.Gui.gui_functions as gf
+from VeraGridEngine.Devices.Parents.editable_device import EditableDevice
+from VeraGridEngine.Simulations.results_table import ResultsTable
+from VeraGridEngine.Simulations.results_template import ResultsTemplate
 
 if TYPE_CHECKING:
     from VeraGrid.Gui.Diagrams.MapWidget.grid_map_widget import MapLibraryModel
@@ -169,6 +174,8 @@ class BaseDiagramWidget(QSplitter):
 
         # Table to display object's properties
         self.object_editor_table = QTableView(self)
+        self.object_editor_table.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.object_editor_table.customContextMenuRequested.connect(self.show_object_editor_table_context_menu)
         # change_font_size(self.object_editor_table, 9)
         # change_font_size(self.object_editor_table.verticalHeader(), 9)
         # change_font_size(self.object_editor_table.horizontalHeader(), 9)
@@ -306,6 +313,7 @@ class BaseDiagramWidget(QSplitter):
         """
         self.left_panel_toolbox.setItemText(0, self._translate_library_label())
         self.left_panel_toolbox.setItemText(1, self._translate_properties_label())
+        self.library_model.retranslate()
 
     def set_video_export_active(self, value: bool) -> None:
         """
@@ -474,20 +482,38 @@ class BaseDiagramWidget(QSplitter):
         """
         if len(selected) > 0:
 
-            # get the set of all affected GenericDiagramWidget instances
-            extended: Set[ALL_DEV_TYPES] = set()
+            # Collect affected devices by stable id instead of hashing the device object.
+            extended: List[ALL_DEV_TYPES] = list()
+            extended_keys: Set[Tuple[str, str]] = set()
 
             for graphic_obj in selected:
 
                 if graphic_obj is not None:
-                    if isinstance(graphic_obj, GenericDiagramWidget):
-                        extended.add(graphic_obj.api_object)
+                    owner_graphic: GenericDiagramWidget | None = self._get_delete_owner_graphic(graphic_obj=graphic_obj)
 
-                    for child_item in graphic_obj.get_associated_devices():
-                        if child_item is not None:
-                            extended.add(child_item)
+                    if owner_graphic is not None:
+                        device: ALL_DEV_TYPES = owner_graphic.api_object
+                        device_key: Tuple[str, str] = (device.device_type.value, device.idtag)
+                        if device_key not in extended_keys:
+                            extended_keys.add(device_key)
+                            extended.append(device)
+                        else:
+                            pass
 
-            extended_lst: List[ALL_DEV_TYPES] = list(extended)
+                        for child_item in owner_graphic.get_associated_devices():
+                            if child_item is not None:
+                                child_key: Tuple[str, str] = (child_item.device_type.value, child_item.idtag)
+                                if child_key not in extended_keys:
+                                    extended_keys.add(child_key)
+                                    extended.append(child_item)
+                                else:
+                                    pass
+                            else:
+                                pass
+                    else:
+                        pass
+
+            extended_lst: List[ALL_DEV_TYPES] = extended
 
             dlg = DeleteDialogue(
                 names_list=[f"{device.device_type.value}: "
@@ -499,7 +525,7 @@ class BaseDiagramWidget(QSplitter):
             )
 
             dlg.setModal(True)
-            dlg.exec()
+            exec_dialog_safely(dialog=dlg)
 
             if dlg.is_accepted:
                 for device in extended_lst:
@@ -513,6 +539,29 @@ class BaseDiagramWidget(QSplitter):
         else:
             self.gui.show_warning_toast("Choose some elements to delete_with_dialogue")
             return False, False
+
+    def _get_delete_owner_graphic(self, graphic_obj: QGraphicsItem) -> GenericDiagramWidget | None:
+        """
+        Resolve one selected graphics item to the diagram widget that owns the device.
+
+        Some selectable helper items, such as injection nexus paths, are not
+        ``GenericDiagramWidget`` instances. Deletion must still target the owning
+        device widget so the dependency dialogue and removal flow remain valid.
+
+        :param graphic_obj: Selected graphics item.
+        :return: Owning diagram widget or ``None`` when unsupported.
+        """
+        if isinstance(graphic_obj, GenericDiagramWidget):
+            return graphic_obj
+        elif isinstance(graphic_obj, InjectionNexusPathItem):
+            owner_item: QGraphicsItem = graphic_obj.owner_item
+
+            if isinstance(owner_item, GenericDiagramWidget):
+                return owner_item
+            else:
+                return None
+        else:
+            return None
 
     def delete_selected_from_widget(self, delete_from_db: bool) -> None:
         """
@@ -563,6 +612,43 @@ class BaseDiagramWidget(QSplitter):
         if self.api_object is not None:
             self.set_editor_model(api_object=self.api_object)
 
+    def open_hosted_device_editor(self, hosted_device: EditableDevice) -> None:
+        """
+        Open the best available editor for one hosted device.
+
+        :param hosted_device: Device referenced by the clicked cell.
+        :return: None.
+        """
+        # Use the diagram circuit so selectors and specialized editor tabs have the same model context.
+        dialog: QDialog = build_device_editor_dialog(api_object=hosted_device,
+                                                     circuit=self.circuit,
+                                                     main_gui=self.gui)
+        exec_dialog_safely(dialog=dialog)
+
+    def show_object_editor_table_context_menu(self, position: QtCore.QPoint) -> None:
+        """
+        Open the hosted device editor for a right-clicked property cell.
+
+        :param position: Table-local click position.
+        :return: None.
+        """
+        index: QtCore.QModelIndex = self.object_editor_table.indexAt(position)
+
+        if index.isValid():
+            model: QtCore.QAbstractItemModel | None = self.object_editor_table.model()
+
+            if isinstance(model, ObjectsModel):
+                hosted_device: EditableDevice | None = model.get_hosted_device_at_index(index=index)
+
+                if hosted_device is not None:
+                    self.open_hosted_device_editor(hosted_device=hosted_device)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+
     def set_editor_model(self, api_object: ALL_DEV_TYPES):
         """
         Set an api object to appear in the editable table view of the editor
@@ -595,131 +681,204 @@ class BaseDiagramWidget(QSplitter):
         """
         self.results_dictionary = {thr.tpe: thr for thr in all_threads if thr is not None}
 
-    def plot_branch(self, i: int, api_object: Union[Line, DcLine, Transformer2W, VSC, UPFC]):
+    def plot_device(self, api_object: EditableDevice) -> None:
+        """Open device profiles and unit-compatible time-series result charts.
+
+        :param api_object: Device represented by the selected injection graphic.
+        :return: None.
         """
-        Plot branch results
-        :param i: branch index (not counting HVDC lines because those are not real Branches)
-        :param api_object: API object
-        """
-        fig = plt.figure(figsize=(12, 8))
-        fig.suptitle(api_object.name, fontsize=20)
-
-        ax_1 = fig.add_subplot(211)
-        ax_1.set_title('Probability x < value', fontsize=14)
-        ax_1.set_ylabel('Loading [%]', fontsize=11)
-
-        ax_2 = fig.add_subplot(212)
-        ax_2.set_title('Power', fontsize=14)
-        ax_2.set_ylabel('Power [MW]', fontsize=11)
-
-        any_plot = False
-
-        for driver, results in self.gui.session.drivers_results_iter():
-
-            if results is not None:
-
-                if isinstance(results, PowerFlowTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.BranchActivePowerFrom)
-                    Sf_table.plot_device(ax=ax_1, device_idx=i, title="Power flow")
-
-                    loading_table = results.mdl(result_type=ResultTypes.BranchLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot_device(ax=ax_2, device_idx=i, title="Power loading")
-                    any_plot = True
-
-                elif isinstance(results, LinearAnalysisTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.BranchActivePowerFrom)
-                    Sf_table.plot_device(ax=ax_1, device_idx=i, title="Linear flow")
-
-                    loading_table = results.mdl(result_type=ResultTypes.BranchLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot_device(ax=ax_2, device_idx=i, title="Linear loading")
-                    any_plot = True
-
-                elif isinstance(results, ContingencyAnalysisTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.MaxContingencyFlows)
-                    Sf_table.plot_device(ax=ax_1, device_idx=i, title="Contingency flow")
-
-                    loading_table = results.mdl(result_type=ResultTypes.MaxContingencyLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot_device(ax=ax_2, device_idx=i, title="Contingency loading")
-                    any_plot = True
-
-                elif isinstance(results, OptimalPowerFlowTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.BranchActivePowerFrom)
-                    Sf_table.plot_device(ax=ax_1, device_idx=i, title="Optimal power flow")
-
-                    loading_table = results.mdl(result_type=ResultTypes.BranchLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot_device(ax=ax_2, device_idx=i, title="Optimal loading")
-                    any_plot = True
-
-                elif isinstance(results, StochasticPowerFlowResults):
-                    loading_table = results.mdl(result_type=ResultTypes.BranchLoadingCDF)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot_device(ax=ax_2, device_idx=i, title="Stochastic loading")
-                    any_plot = True
-
-        if any_plot:
-            plt.legend()
-            plt.show()
+        time_values: np.ndarray = np.asarray(self.circuit.time_profile).copy()
+        dialog_title: str = self.tr("{device_name} plot").format(device_name=api_object.name)
+        plot_dialogue: PlotDialogue = PlotDialogue(title=dialog_title, parent=self.gui)
+        plotted_units: list[str] = list()
+        plotted_charts: list[GraphsWidget] = list()
+        has_profiles: bool = self._add_device_profile_tabs(
+            plot_dialogue=plot_dialogue,
+            api_object=api_object,
+            time_values=time_values,
+            plotted_units=plotted_units,
+            plotted_charts=plotted_charts,
+        )
+        has_results: bool = self._add_device_result_tabs(
+            plot_dialogue=plot_dialogue,
+            api_object=api_object,
+            plotted_units=plotted_units,
+            plotted_charts=plotted_charts,
+        )
+        if has_profiles or has_results:
+            plot_dialogue.select_default_catalog_series()
+            plot_dialogue.set_series_selector_visible(visible=True)
+            self.gui.register_open_plot_dialog(plot_dialogue)
+            plot_dialogue.show()
         else:
-            info_msg("No time series results to plot, run some time series results. Even partial results are fine",
-                     f"{api_object.name} results plot")
+            plot_dialogue.reject()
+            info_msg(self.tr("This device has no numeric profiles or time-series results to plot."), dialog_title)
 
-    def plot_hvdc_branch(self, i: int, api_object: HvdcLine):
+    def _add_device_profile_tabs(self,
+                                 plot_dialogue: PlotDialogue,
+                                 api_object: EditableDevice,
+                                 time_values: np.ndarray,
+                                 plotted_units: list[str],
+                                 plotted_charts: list[GraphsWidget]) -> bool:
+        """Register device profiles grouped by measurement unit.
+
+        :param plot_dialogue: Dialog retaining every created chart widget.
+        :param api_object: Device supplying persisted profile buffers.
+        :param time_values: Copied grid time coordinates.
+        :param plotted_units: Unit keys for charts already added to this dialog.
+        :param plotted_charts: Retained compatibility list; catalog plots do not create unit tabs.
+        :return: Whether one or more profile series were registered.
         """
-        HVDC branch
-        :param i: index of the object
-        :param api_object: HvdcGraphicItem
-        """
-        fig = plt.figure(figsize=(12, 8))
-        fig.suptitle(api_object.name, fontsize=20)
-
-        ax_1 = fig.add_subplot(211)
-        ax_1.set_title('Probability x < value', fontsize=14)
-        ax_1.set_ylabel('Loading [%]', fontsize=11)
-
-        ax_2 = fig.add_subplot(212)
-        ax_2.set_title('Power', fontsize=14)
-        ax_2.set_ylabel('Power [MW]', fontsize=11)
-
-        any_plot = False
-
-        for driver, results in self.gui.session.drivers_results_iter():
-
-            if results is not None:
-
-                if isinstance(results, PowerFlowTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.HvdcPowerFrom)
-                    Sf_table.plot(ax=ax_1, selected_col_idx=[i])
-
-                    loading_table = results.mdl(result_type=ResultTypes.HvdcLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot(ax=ax_2, selected_col_idx=[i])
-                    any_plot = True
-
-                elif isinstance(results, OptimalPowerFlowTimeSeriesResults):
-
-                    Sf_table = results.mdl(result_type=ResultTypes.HvdcPowerFrom)
-                    Sf_table.plot(ax=ax_1, selected_col_idx=[i])
-
-                    loading_table = results.mdl(result_type=ResultTypes.HvdcLoading)
-                    loading_table.convert_to_cdf()
-                    loading_table.plot(ax=ax_2, selected_col_idx=[i])
-                    any_plot = True
-
-        if any_plot:
-            plt.legend()
-            plt.show()
+        profile_units: list[str] = list()
+        profile_names: list[list[str]] = list()
+        profile_values: list[list[np.ndarray]] = list()
+        if time_values.size > 0:
+            property_data: object
+            for property_data in api_object.registered_properties.values():
+                if property_data.has_profile():
+                    profile = api_object.get_profile_by_prop(prop=property_data)
+                    if profile is not None:
+                        raw_values: np.ndarray = np.asarray(profile.toarray()).copy()
+                        values_are_numeric: bool = (
+                            np.issubdtype(raw_values.dtype, np.number)
+                            or np.issubdtype(raw_values.dtype, np.bool_)
+                        )
+                        if values_are_numeric and raw_values.size == time_values.size:
+                            unit: str = str(property_data.units).strip().strip("()")
+                            values: np.ndarray = np.asarray(raw_values, dtype=float)
+                            has_finite_values: bool = bool(np.any(np.isfinite(values)))
+                            if has_finite_values and unit in profile_units:
+                                unit_index: int = profile_units.index(unit)
+                            elif has_finite_values:
+                                profile_units.append(unit)
+                                profile_names.append(list())
+                                profile_values.append(list())
+                                unit_index = len(profile_units) - 1
+                            else:
+                                unit_index = -1
+                            if unit_index >= 0:
+                                profile_names[unit_index].append(str(property_data.name))
+                                profile_values[unit_index].append(values)
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        pass
+                else:
+                    pass
         else:
-            info_msg("No time series results to plot, run some time series results. Even partial results are fine",
-                     f"{api_object.name} results plot")
+            pass
+
+        has_profiles: bool = False
+        unit_index: int
+        for unit_index in range(len(profile_units)):
+            plot_dialogue.register_time_series(
+                group=self.tr("Profile Inputs"),
+                unit=profile_units[unit_index],
+                x_values=time_values,
+                series_names=profile_names[unit_index],
+                series_values=profile_values[unit_index],
+            )
+            if profile_units[unit_index] not in plotted_units:
+                plotted_units.append(profile_units[unit_index])
+            else:
+                pass
+            has_profiles = True
+        return has_profiles
+
+    def _add_device_result_tabs(self,
+                                plot_dialogue: PlotDialogue,
+                                api_object: EditableDevice,
+                                plotted_units: list[str],
+                                plotted_charts: list[GraphsWidget]) -> bool:
+        """Register available device results in the dialog-wide series tree.
+
+        :param plot_dialogue: Dialog retaining every created chart widget.
+        :param api_object: Device used to resolve each result-table column.
+        :param plotted_units: Unit keys for charts already added to this dialog.
+        :param plotted_charts: Retained compatibility list; catalog plots do not create unit tabs.
+        :return: Whether at least one finite result series was registered.
+        """
+        has_results: bool = False
+        driver: object
+        results: object
+        for driver, results in self.gui.session.drivers_results_iter():
+            if isinstance(results, ResultsTemplate):
+                result_type: ResultTypes
+                for result_type in results.get_results_type_dict().values():
+                    table: ResultsTable = results.mdl(result_type=result_type)
+                    if (isinstance(table, ResultsTable) and table.idx_device_type == DeviceType.TimeDevice
+                                and table.cols_device_type != DeviceType.NoDevice):
+                        device_list: list[EditableDevice] = self.circuit.get_elements_by_type(
+                            device_type=table.cols_device_type,
+                        )
+                        if api_object in device_list:
+                            device_index: int = device_list.index(api_object)
+                            finite_data: tuple[np.ndarray, list[str], list[np.ndarray]] | None = get_result_table_series(
+                                table=table,
+                                selected_col_idx=np.array((device_index,), dtype=np.int64),
+                            )
+                            has_finite_values: bool = (
+                                finite_data is not None
+                                and bool(np.any(np.isfinite(finite_data[2][0])))
+                            )
+                            if has_finite_values:
+                                unit: str = str(table.units).strip().strip("()")
+                                if unit == "":
+                                    unit = str(table.y_label).strip().strip("()")
+                                else:
+                                    pass
+                                if unit not in plotted_units:
+                                    plotted_units.append(unit)
+                                else:
+                                    pass
+                                result_group: str
+                                if "optimal" in results.name.casefold():
+                                    result_group = self.tr("OPF Time Series")
+                                elif "power flow" in results.name.casefold():
+                                    result_group = self.tr("Power Flow Time Series")
+                                else:
+                                    result_group = "{} Time Series".format(results.name)
+                                x_values: np.ndarray = finite_data[0]
+                                y_values: list[np.ndarray] = finite_data[2]
+                                plot_dialogue.register_time_series(
+                                    group=result_group,
+                                    unit=unit,
+                                    x_values=x_values,
+                                    series_names=["{}: {}".format(results.name, result_type.value)],
+                                    series_values=[y_values[0]],
+                                )
+                                has_results = True
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        pass
+            else:
+                pass
+        return has_results
+
+    def plot_branch(self, i: int, api_object: Union[Line, DcLine, Transformer2W, VSC, UPFC]) -> None:
+        """Open profile and all time-series result plots for one branch.
+
+        :param i: Legacy result-column index retained for graphic callbacks.
+        :param api_object: Branch represented by the selected graphic.
+        :return: None.
+        """
+        _ = i
+        self.plot_device(api_object=api_object)
+
+    def plot_hvdc_branch(self, i: int, api_object: HvdcLine) -> None:
+        """Open profile and all time-series result plots for one HVDC branch.
+
+        :param i: Legacy result-column index retained for graphic callbacks.
+        :param api_object: HVDC branch represented by the selected graphic.
+        :return: None.
+        """
+        _ = i
+        self.plot_device(api_object=api_object)
 
     @staticmethod
     def set_rate_to_profile(api_object: ALL_DEV_TYPES):
@@ -732,7 +891,10 @@ class BaseDiagramWidget(QSplitter):
                 quit_msg = (f"{api_object.name}\nAre you sure that you want to overwrite the "
                             f"rates profile with the snapshot value?")
 
-                ok = yes_no_question(text=quit_msg, title='Overwrite the profile')
+                ok = yes_no_question(
+                    text=quit_msg,
+                    title=QtCore.QCoreApplication.translate("BaseDiagramWidget", "Overwrite the profile"),
+                )
 
                 if ok:
                     api_object.rate_prof.fill(api_object.rate)
@@ -751,7 +913,10 @@ class BaseDiagramWidget(QSplitter):
                     quit_msg = (f"{api_object.name}\nAre you sure that you want to overwrite the "
                                 f"active profile with the snapshot value?")
 
-                    ok = yes_no_question(text=quit_msg, title='Overwrite the active profile')
+                    ok = yes_no_question(
+                        text=quit_msg,
+                        title=QtCore.QCoreApplication.translate("BaseDiagramWidget", "Overwrite the active profile"),
+                    )
                 else:
                     ok = True
 
@@ -999,7 +1164,7 @@ class BaseDiagramWidget(QSplitter):
         """
         pass
 
-    def start_video_recording(self, fname: str, fps: int = 30, logger: Logger = Logger()) -> Tuple[int, int]:
+    def start_video_recording(self, fname: str, fps: int = 30, logger: Logger | None = None) -> Tuple[int, int]:
         """
         Save video
         :param fname: file name
@@ -1007,6 +1172,8 @@ class BaseDiagramWidget(QSplitter):
         :param logger: LOgger
         :returns width, height
         """
+        if logger is None:
+            logger = Logger()
 
         image = self.get_image()
         w = image.width()

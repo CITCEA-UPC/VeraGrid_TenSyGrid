@@ -53,6 +53,9 @@ device_type_icons = {
     DeviceType.BranchGroupDevice.value: ":/Icons/icons/branch_group.png",
     DeviceType.ModellingAuthority.value: ":/Icons/icons/modelling_authority.png",
     DeviceType.FacilityDevice.value: ":/Icons/icons/powerplant.png",
+    DeviceType.MarketUnitsGroupDevice.value: ":/Icons/icons/market_unit.png",
+    DeviceType.MarketUnitDevice.value: ":/Icons/icons/market_unit.png",
+    DeviceType.ControlPc.value: ":/Icons/icons/control_pc.png",
 
     "Contingencies": ":/Icons/icons/contingency_group.png",
     DeviceType.ContingencyGroupDevice.value: ":/Icons/icons/contingency_group.png",
@@ -96,6 +99,7 @@ device_type_icons = {
     "Catalogue": ":/Icons/icons/Catalogue.png",
     DeviceType.WireDevice.value: ":/Icons/icons/ac_line.png",
     DeviceType.OverheadLineTypeDevice.value: ":/Icons/icons/tower.png",
+    DeviceType.UndergroundCableTypeDevice.value: ":/Icons/icons/ac_line.png",
     DeviceType.UnderGroundLineDevice.value: ":/Icons/icons/ac_line.png",
     DeviceType.SequenceLineDevice.value: ":/Icons/icons/ac_line.png",
     DeviceType.TransformerTypeDevice.value: ":/Icons/icons/to_transformer.png",

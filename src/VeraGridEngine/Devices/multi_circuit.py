@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at https://mozilla.org/MPL/2.0/.  
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 
@@ -12,7 +12,6 @@ import pandas as pd
 from typing import List, Dict, Tuple, Union, Set, Sequence, TYPE_CHECKING
 from uuid import getnode as get_mac, uuid4
 import networkx as nx
-from matplotlib import pyplot as plt
 from scipy.sparse import csc_matrix, lil_matrix
 
 from VeraGridEngine.Devices.assets import Assets
@@ -23,6 +22,7 @@ from VeraGridEngine.Utils.GeographicalMethods.haversine_distance import haversin
 from VeraGridEngine.basic_structures import IntVec, Vec, Mat, CxVec, IntMat, CxMat, BoolVec
 
 import VeraGridEngine.Devices as dev
+from VeraGridEngine.Utils.Symbolic.templates_common_functions import reconcile_saved_emt_model_against_current_topology
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES, INJECTION_DEVICE_TYPES, FLUID_TYPES, AREA_TYPES, BRANCH_TYPES
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Topology.topology import find_different_states
@@ -725,6 +725,17 @@ class MultiCircuit(Assets):
             d[key] = [o.device_type.value for o in elm_list]
         return d
 
+    def get_template_objects_type_dict(self) -> Dict[str, List[DeviceType]]:
+        """
+        Get the template objects grouped by category with stable device types.
+
+        :return: Dictionary of category names and device type lists.
+        """
+        d: Dict[str, List[DeviceType]] = dict()
+        for key, elm_list in self.template_objects_dict.items():
+            d[key] = [o.device_type for o in elm_list]
+        return d
+
     def get_bus_default_types(self) -> IntVec:
         """
         Return an array of bus types
@@ -794,7 +805,9 @@ class MultiCircuit(Assets):
                 'bus_bars',
                 'overhead_line_types',
                 'wire_types',
+                'underground_cable_constructions',
                 'underground_cable_types',
+                'dc_cable_types',
                 'sequence_line_types',
                 'transformer_types',
                 'substations',
@@ -844,7 +857,7 @@ class MultiCircuit(Assets):
         cpy.rebind_internal_device_references()
 
         obj_dict = cpy.get_all_elements_dict_by_type(add_locations=True)
-        cpy.diagrams = [diagram.copy(obj_dict=obj_dict) for diagram in self.diagrams]
+        cpy.diagrams = dev.copy_diagrams(self.diagrams, obj_dict=obj_dict)
 
         return cpy
 
@@ -948,6 +961,10 @@ class MultiCircuit(Assets):
         for branch in self._lines:
             if branch.template is not None:
                 branch.apply_template(branch.template, self.Sbase, freq=self.fBase, logger=logger)
+
+        for branch in self._dc_lines:
+            if branch.template is not None:
+                branch.apply_template(branch.template, self.Sbase, logger=logger)
 
         for branch in self._transformers2w:
             if branch.template is not None:
@@ -1241,18 +1258,6 @@ class MultiCircuit(Assets):
 
         return ac_bus_1, ac_bus_2, dc_bus_1, dc_bus_2, conv1, conv2, dc_line
 
-    def plot_graph(self, ax=None):
-        """
-        Plot the grid.
-        :param ax: Matplotlib axis object
-        :return:
-        """
-        if ax is None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-
-        graph = self.build_graph()
-        nx.draw_spring(graph, ax=ax)
 
     def export_pf(self, file_name, power_flow_results):
         """
@@ -2607,12 +2612,12 @@ class MultiCircuit(Assets):
 
     def set_investments_status(self,
                                investments_list: List[dev.Investment],
-                               status: bool,
+                               apply_investment: bool,
                                all_elements_dict: Union[None, dict[str, EditableDevice]] = None) -> None:
         """
         Set the active (and active profile) status of a list of investments' objects
         :param investments_list: list of investments
-        :param status: status to set in the internal structures
+        :param apply_investment: True to apply the investment status to the device, False to switch it
         :param all_elements_dict: Dictionary of all elements (idtag -> object), if None if is computed
         """
 
@@ -2624,10 +2629,13 @@ class MultiCircuit(Assets):
             device = all_elements_dict[device_idtag]
 
             if hasattr(device, 'active'):
-                device.active = status
+                # apply_investment says "you should apply the investment status to the device" or
+                # "you should apply the not(investment status) to the device".
+                device_status = inv.status if apply_investment else (not inv.status)
+                device.active = device_status
                 profile = device.get_profile('active')
                 if profile is not None:
-                    profile.fill(status)
+                    profile.fill(device_status)
 
     def merge_buses(self, bus1: dev.Bus, bus2: dev.Bus):
         """
@@ -3454,6 +3462,12 @@ class MultiCircuit(Assets):
         for tpe in data.underground_cable_types:
             self.add_underground_line(tpe)
 
+        for tpe in data.underground_cable_constructions:
+            self.add_underground_cable(tpe)
+
+        for tpe in data.dc_cable_types:
+            self.add_dc_cable_type(tpe)
+
         for tpe in data.wire_types:
             self.add_wire(tpe)
 
@@ -3806,6 +3820,9 @@ class MultiCircuit(Assets):
                                  device_class=elm.device_type.value,
                                  device=elm.name)
             else:
+                reconcile_saved_emt_model_against_current_topology(device=elm,
+                                                                  grid=self,
+                                                                  var_factory=self.var_factory)
                 _validate_branch_emt_bus_connections(logger=logger, branch=elm)
                 if elm.device_type == DeviceType.LineDevice:
                     _validate_line_emt_model_phases_present_in_static_object(logger=logger, line=elm)
@@ -3823,6 +3840,9 @@ class MultiCircuit(Assets):
                                  device_class=elm.device_type.value,
                                  device=elm.name)
             else:
+                reconcile_saved_emt_model_against_current_topology(device=elm,
+                                                                  grid=self,
+                                                                  var_factory=self.var_factory)
                 _validate_injection_emt_bus_connections(logger=logger, injection=elm)
                 # TODO: add static vs dynamic validation for other types of device
                 # if elm.device_type == DeviceType.GeneratorDevice:

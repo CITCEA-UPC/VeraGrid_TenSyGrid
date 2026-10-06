@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v35.gne_device import RawGneDeviceV35
 
 class RawGneDeviceV36(RawGneDeviceV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = ()
     pass

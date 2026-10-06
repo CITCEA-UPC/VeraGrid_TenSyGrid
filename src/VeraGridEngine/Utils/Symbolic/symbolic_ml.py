@@ -4,12 +4,398 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from __future__ import annotations
+import copy
 import numpy as np
-from typing import List
+from dataclasses import dataclass
+from typing import Collection, List, Mapping
 from VeraGridEngine.Utils.Symbolic.block import (Block)
 from VeraGridEngine.Utils.Symbolic.symbolic import (Var, Const, Expr, Func, BinOp)
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
+
+
+@dataclass(frozen=True)
+class DynamicLiftRecord:
+    variable: Var
+    derivative: Var
+    original_residual: Expr
+    normalized_coefficient: Expr
+    time_constant: Expr
+
+
+@dataclass(frozen=True)
+class DynamicLiftResult:
+    block: Block
+    lifted: tuple[DynamicLiftRecord, ...]
+    remaining_algebraic_variables: tuple[Var, ...]
+
+
+def dynamic_lift_affine_algebraics(
+        block: Block,
+        vfactory: VarFactory,
+        time_constants: float | Mapping[str | Var, float | Expr] = 1.0e-4,
+        variables: Collection[str | Var] | None = None,
+) -> DynamicLiftResult:
+    """Promote selected affine algebraic assignments to relaxation states.
+
+    For an algebraic variable and matched residual ``(z, g)`` with
+    ``g = a*z + b`` and a
+    coefficient ``a`` independent of every solver variable, create
+
+    ``dot(z) = -g / (a*tau)``.
+
+    This normalizes residual polarity automatically. The returned block is a
+    flattened deep copy; the input block is never mutated. Equations nonlinear
+    in their paired variable are rejected transactionally.
+    """
+    lifted_block = copy.deepcopy(block)
+    root_solver_uids = {
+        variable.uid for variable in (
+            lifted_block.state_vars + lifted_block.algebraic_vars + lifted_block.diff_vars
+        )
+    }
+    child_solver_uids = {
+        variable.uid
+        for child in lifted_block.get_all_blocks()[1:]
+        for variable in (child.state_vars + child.algebraic_vars + child.diff_vars)
+    }
+    # ``Block.unify_blocks`` intentionally retains children. Avoid collecting
+    # them a second time when a caller passes an already-unified model.
+    if not root_solver_uids.intersection(child_solver_uids):
+        lifted_block.unify_blocks()
+    lifted_block.children = []
+    if len(lifted_block.algebraic_vars) != len(lifted_block.algebraic_eqs):
+        raise ValueError(
+            "Dynamic lifting requires equally sized algebraic variable/equation lists"
+        )
+
+    requested_uids: set[int] | None = None
+    requested_names: set[str] | None = None
+    if variables is not None:
+        requested_uids = {item.uid for item in variables if isinstance(item, Var)}
+        requested_names = {str(item) for item in variables if isinstance(item, str)}
+        known_names = {variable.name for variable in lifted_block.algebraic_vars}
+        missing = requested_names - known_names
+        if missing:
+            raise KeyError("Unknown algebraic variables: " + ", ".join(sorted(missing)))
+
+    def selected(variable: Var) -> bool:
+        return variables is None or variable.uid in requested_uids or variable.name in requested_names
+
+    def tau_for(variable: Var) -> Expr:
+        if not isinstance(time_constants, Mapping):
+            value = time_constants
+        elif variable in time_constants:
+            value = time_constants[variable]
+        elif variable.name in time_constants:
+            value = time_constants[variable.name]
+        else:
+            raise KeyError(f"Missing relaxation time constant for {variable.name!r}")
+        result = value if isinstance(value, Expr) else Const(float(value))
+        if isinstance(result, Const) and (result.value is None or float(result.value) <= 0.0):
+            raise ValueError(f"Time constant for {variable.name!r} must be positive")
+        return result
+
+    solver_uids = {
+        variable.uid for variable in (
+            lifted_block.state_vars + lifted_block.algebraic_vars + lifted_block.diff_vars
+        )
+    }
+    selected_variables = [
+        variable for variable in lifted_block.algebraic_vars if selected(variable)
+    ]
+    candidate_data = {}
+    for variable in selected_variables:
+        candidates = []
+        for equation_index, residual in enumerate(lifted_block.algebraic_eqs):
+            coefficient = residual.diff(variable).simplify()
+            if isinstance(coefficient, Const) and coefficient.value in (None, 0, 0.0):
+                continue
+            second = coefficient.diff(variable).simplify()
+            if not isinstance(second, Const) or second.value not in (0, 0.0):
+                continue
+            if any(item.uid in solver_uids for item in coefficient.get_vars()):
+                continue
+            residual_width = sum(
+                item.uid in solver_uids for item in residual.get_vars()
+            )
+            candidates.append((residual_width, equation_index, residual, coefficient))
+        if not candidates:
+            raise ValueError(
+                f"No affine residual with solver-independent coefficient defines "
+                f"{variable.name!r}; its defining equation may be nonlinear"
+            )
+        candidate_data[variable.uid] = sorted(candidates, key=lambda item: (item[0], item[1]))
+
+    # Maximum bipartite matching prevents two promoted variables from consuming
+    # the same residual in a composed block whose lists are not positionally aligned.
+    equation_to_variable = {}
+    variable_choice = {}
+
+    def assign(variable: Var, visited: set[int]) -> bool:
+        for _width, equation_index, residual, coefficient in candidate_data[variable.uid]:
+            if equation_index in visited:
+                continue
+            visited.add(equation_index)
+            incumbent = equation_to_variable.get(equation_index)
+            if incumbent is None or assign(incumbent, visited):
+                equation_to_variable[equation_index] = variable
+                variable_choice[variable.uid] = (
+                    equation_index, residual, coefficient
+                )
+                return True
+        return False
+
+    for variable in selected_variables:
+        if not assign(variable, set()):
+            raise ValueError(
+                f"Could not find a one-to-one affine residual matching for {variable.name!r}"
+            )
+
+    variable_indices = {
+        variable.uid: index
+        for index, variable in enumerate(lifted_block.algebraic_vars)
+    }
+    planned = []
+    for variable in selected_variables:
+        index, residual, coefficient = variable_choice[variable.uid]
+        tau = tau_for(variable)
+        derivative = vfactory.add_diff_var(
+            f"dt_1_lift_{variable.name}", base_var=variable
+        )
+        rhs = -residual / (coefficient * tau)
+        planned.append((
+            variable_indices[variable.uid], index, variable, residual,
+            coefficient, tau, derivative, rhs,
+        ))
+
+    lifted_variable_indices = {item[0] for item in planned}
+    lifted_equation_indices = {item[1] for item in planned}
+    lifted_block.algebraic_vars = [
+        variable for index, variable in enumerate(lifted_block.algebraic_vars)
+        if index not in lifted_variable_indices
+    ]
+    lifted_block.algebraic_eqs = [
+        equation for index, equation in enumerate(lifted_block.algebraic_eqs)
+        if index not in lifted_equation_indices
+    ]
+    records = []
+    for (_variable_index, _equation_index, variable, residual, coefficient,
+         tau, derivative, rhs) in planned:
+        lifted_block.state_vars.append(variable)
+        lifted_block.state_eqs.append(rhs)
+        lifted_block.diff_vars.append(derivative)
+        # On a consistently initialized DAE manifold the relaxation residual,
+        # and therefore the new derivative, is zero. Avoid introducing an
+        # explicit-initialization dependency cycle through other algebraics.
+        lifted_block.diff_init_eqs[derivative] = Const(0.0)
+        records.append(DynamicLiftRecord(
+            variable=variable,
+            derivative=derivative,
+            original_residual=residual,
+            normalized_coefficient=coefficient,
+            time_constant=tau,
+        ))
+
+    return DynamicLiftResult(
+        block=lifted_block,
+        lifted=tuple(records),
+        remaining_algebraic_variables=tuple(lifted_block.algebraic_vars),
+    )
+
+
+def dynamic_lift_balanced_dq_to_abc(
+        block: Block,
+        vfactory: VarFactory,
+        abc_variables: Collection[str],
+        d_variable: str,
+        q_variable: str,
+        cosine_variable: str,
+        sine_variable: str,
+        time_constant: float | Expr = 1.0e-4,
+) -> DynamicLiftResult:
+    """Replace a coupled zero-sequence-free Park system by three states.
+
+    The source block must contain three algebraic phase variables constrained
+    by their d/q Park equations and ``a + b + c = 0``.  Treating those
+    equations independently requires division by angle-dependent coefficients;
+    this group transformation instead applies the exact inverse Park map and
+    relaxes all phases with one time constant.  Equal time constants preserve
+    the zero-sum phase invariant.
+    """
+    names = tuple(abc_variables)
+    if len(names) != 3 or len(set(names)) != 3:
+        raise ValueError("abc_variables must contain three distinct names")
+    lifted_block = copy.deepcopy(block)
+    lifted_block.unify_blocks()
+    lifted_block.children = []
+
+    def unique(name: str, candidates: Collection[Var]) -> Var:
+        matches = [variable for variable in candidates if variable.name == name]
+        if len(matches) != 1:
+            raise KeyError(f"Expected one variable named {name!r}, found {len(matches)}")
+        return matches[0]
+
+    phases = tuple(unique(name, lifted_block.algebraic_vars) for name in names)
+    all_variables = lifted_block.get_all_vars()
+    d_value = unique(d_variable, all_variables)
+    q_value = unique(q_variable, all_variables)
+    cosine = unique(cosine_variable, all_variables)
+    sine = unique(sine_variable, all_variables)
+    phase_uids = {variable.uid for variable in phases}
+    coupled_indices = [
+        index for index, equation in enumerate(lifted_block.algebraic_eqs)
+        if phase_uids.issubset({variable.uid for variable in equation.get_vars()})
+    ]
+    if len(coupled_indices) != 3:
+        raise ValueError(
+            "Expected exactly three coupled d/q/zero-sequence phase equations, "
+            f"found {len(coupled_indices)}"
+        )
+
+    tau = time_constant if isinstance(time_constant, Expr) else Const(float(time_constant))
+    if isinstance(tau, Const) and (tau.value is None or float(tau.value) <= 0.0):
+        raise ValueError("time_constant must be positive")
+    half = Const(0.5)
+    sqrt3half = Const(float(np.sqrt(3.0) / 2.0))
+    commands = (
+        d_value * cosine + q_value * sine,
+        d_value * (-half * cosine + sqrt3half * sine)
+        + q_value * (-half * sine - sqrt3half * cosine),
+        d_value * (-half * cosine - sqrt3half * sine)
+        + q_value * (-half * sine + sqrt3half * cosine),
+    )
+
+    phase_indices = {variable.uid for variable in phases}
+    lifted_block.algebraic_vars = [
+        variable for variable in lifted_block.algebraic_vars
+        if variable.uid not in phase_indices
+    ]
+    coupled_index_set = set(coupled_indices)
+    lifted_block.algebraic_eqs = [
+        equation for index, equation in enumerate(lifted_block.algebraic_eqs)
+        if index not in coupled_index_set
+    ]
+    records = []
+    for variable, command in zip(phases, commands):
+        derivative = vfactory.add_diff_var(
+            f"dt_1_lift_{variable.name}", base_var=variable
+        )
+        residual = variable - command
+        lifted_block.state_vars.append(variable)
+        lifted_block.diff_vars.append(derivative)
+        lifted_block.state_eqs.append(-residual / tau)
+        lifted_block.diff_init_eqs[derivative] = Const(0.0)
+        records.append(DynamicLiftRecord(
+            variable=variable,
+            derivative=derivative,
+            original_residual=residual,
+            normalized_coefficient=Const(1.0),
+            time_constant=tau,
+        ))
+    return DynamicLiftResult(
+        block=lifted_block,
+        lifted=tuple(records),
+        remaining_algebraic_variables=tuple(lifted_block.algebraic_vars),
+    )
+
+
+def promote_trig_algebraics_exact(
+        block: Block,
+        cosine_variable: str,
+        sine_variable: str,
+        angle_variable: str,
+) -> DynamicLiftResult:
+    """Promote a differential sine/cosine lift to exact ODE states.
+
+    ``trig_transform`` represents sine and cosine as algebraics constrained by
+    equations containing their derivatives.  This transformation changes only
+    their structural classification: it reuses those derivative variables and
+    installs ``dot(cos)=-dot(angle)*sin`` and
+    ``dot(sin)=dot(angle)*cos`` as state equations.  No relaxation or
+    approximation is introduced.
+    """
+    lifted_block = copy.deepcopy(block)
+    lifted_block.unify_blocks()
+    lifted_block.children = []
+
+    def unique(name: str, candidates: Collection[Var]) -> Var:
+        matches = [variable for variable in candidates if variable.name == name]
+        if len(matches) != 1:
+            raise KeyError(f"Expected one variable named {name!r}, found {len(matches)}")
+        return matches[0]
+
+    cosine = unique(cosine_variable, lifted_block.algebraic_vars)
+    sine = unique(sine_variable, lifted_block.algebraic_vars)
+    angle = unique(angle_variable, lifted_block.get_all_vars())
+    if cosine.diff_var is None or sine.diff_var is None or angle.diff_var is None:
+        raise ValueError("Cosine, sine, and angle variables must have derivatives")
+    d_cosine, d_sine, d_angle = cosine.diff_var, sine.diff_var, angle.diff_var
+    angle_state_indices = [
+        index for index, variable in enumerate(lifted_block.state_vars)
+        if variable.uid == angle.uid
+    ]
+    if len(angle_state_indices) != 1:
+        raise ValueError(
+            f"Expected {angle.name!r} to be one explicit state, found "
+            f"{len(angle_state_indices)} occurrences"
+        )
+    angle_state_index = angle_state_indices[0]
+    if angle_state_index >= len(lifted_block.state_eqs):
+        raise ValueError(f"Missing explicit state equation for {angle.name!r}")
+    angle_rhs = lifted_block.state_eqs[angle_state_index]
+    differential_uids = {variable.uid for variable in lifted_block.diff_vars}
+    if any(variable.uid in differential_uids for variable in angle_rhs.get_vars()):
+        raise ValueError(
+            f"Angle state equation for {angle.name!r} is not explicit"
+        )
+
+    derivative_equation_indices = []
+    for derivative in (d_cosine, d_sine):
+        matches = [
+            index for index, equation in enumerate(lifted_block.algebraic_eqs)
+            if any(variable.uid == derivative.uid for variable in equation.get_vars())
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                f"Expected one kinematic equation for {derivative.name!r}, found {len(matches)}"
+            )
+        derivative_equation_indices.append(matches[0])
+    if len(set(derivative_equation_indices)) != 2:
+        raise ValueError("Sine and cosine derivatives must have distinct equations")
+
+    promoted_uids = {cosine.uid, sine.uid}
+    lifted_block.algebraic_vars = [
+        variable for variable in lifted_block.algebraic_vars
+        if variable.uid not in promoted_uids
+    ]
+    removed_equations = set(derivative_equation_indices)
+    lifted_block.algebraic_eqs = [
+        equation for index, equation in enumerate(lifted_block.algebraic_eqs)
+        if index not in removed_equations
+    ]
+    # trig_transform creates an additional derivative alias for the angle.
+    # The angle is already a state, so retain its canonical derivative only.
+    lifted_block.diff_vars = [
+        derivative for derivative in lifted_block.diff_vars
+        if derivative.uid in {d_cosine.uid, d_sine.uid}
+        or derivative.base_var is None
+        or derivative.base_var.uid != angle.uid
+        or derivative.uid == d_angle.uid
+    ]
+    lifted_block.state_vars.extend([cosine, sine])
+    lifted_block.state_eqs.extend([-angle_rhs * sine, angle_rhs * cosine])
+    lifted_block.diff_init_eqs[d_cosine] = -angle_rhs * sine
+    lifted_block.diff_init_eqs[d_sine] = angle_rhs * cosine
+    records = (
+        DynamicLiftRecord(cosine, d_cosine, cosine - sym.cos(angle), Const(1.0), Const(0.0)),
+        DynamicLiftRecord(sine, d_sine, sine - sym.sin(angle), Const(1.0), Const(0.0)),
+    )
+    return DynamicLiftResult(
+        block=lifted_block,
+        lifted=records,
+        remaining_algebraic_variables=tuple(lifted_block.algebraic_vars),
+    )
 
 
 def ml_positive_part(

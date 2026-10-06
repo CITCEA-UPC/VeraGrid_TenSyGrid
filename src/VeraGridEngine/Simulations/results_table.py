@@ -6,10 +6,11 @@
 from typing import Union, List
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-from VeraGridEngine.enumerations import ResultTypes, DeviceType
+from VeraGridEngine.enumerations import ResultTypes, DeviceType, ResultTablePlotType
 from VeraGridEngine.basic_structures import StrVec, Mat, Vec
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
+
+
 
 
 class ResultsTable:
@@ -37,6 +38,12 @@ class ResultsTable:
         "idx_device_type",
         "_col_devices",
         "_idx_devices",
+        "plot_type",
+        "damping_ratio_boundary",
+        "plot_title",
+        "complex_plot_x_column",
+        "complex_plot_y_columns",
+        "complex_plot_y_scales",
     )
 
     def __init__(self,
@@ -49,10 +56,16 @@ class ResultsTable:
                  units: str = "",
                  xlabel: str = "",
                  ylabel: str = "",
-                 editable=False,
-                 palette=None,
+                 editable: bool = False,
+                 palette: object | None = None,
                  editable_min_idx: int = -1,
-                 decimals: int = 6):
+                 decimals: int = 6,
+                 plot_type: ResultTablePlotType = ResultTablePlotType.SERIES,
+                 damping_ratio_boundary: float | None = None,
+                 plot_title: str | None = None,
+                 complex_plot_x_column: str | None = None,
+                 complex_plot_y_columns: StrVec | None = None,
+                 complex_plot_y_scales: Vec | None = None) -> None:
         """
         ResultsTable constructor
         :param data:
@@ -65,6 +78,13 @@ class ResultsTable:
         :param editable:
         :param editable_min_idx:
         :param decimals:
+        :param plot_type: Graphical representation used when plotting this table.
+        :param damping_ratio_boundary: Optional damping-ratio guide for complex-point plots.
+        :param plot_title: Optional title used only by the plot representation.
+        :param complex_plot_x_column: Column name used as the real coordinate.
+        :param complex_plot_y_columns: Allowed imaginary-coordinate column names.
+        :param complex_plot_y_scales: Overlay scales corresponding to the allowed imaginary columns.
+        :return: None.
         """
         if data.ndim == 1:
             # assert compatible dimensions
@@ -108,6 +128,26 @@ class ResultsTable:
         # list of devices that match the columns or rows for filtering
         self._col_devices = list()
         self._idx_devices = list()
+
+        # Plot semantics travel with the data so filtering and slicing retain
+        # the same graphical interpretation as the source result.
+        self.plot_type: ResultTablePlotType = plot_type
+        self.damping_ratio_boundary: float | None = damping_ratio_boundary
+        self.plot_title: str | None = plot_title
+        self.complex_plot_x_column: str | None = complex_plot_x_column
+        if complex_plot_y_columns is None:
+            self.complex_plot_y_columns: StrVec = np.empty(0, dtype=np.str_)
+        else:
+            self.complex_plot_y_columns = np.asarray(complex_plot_y_columns, dtype=np.str_)
+        if complex_plot_y_scales is None:
+            self.complex_plot_y_scales: Vec = np.empty(0, dtype=float)
+        else:
+            self.complex_plot_y_scales = np.asarray(complex_plot_y_scales, dtype=float)
+
+        if len(self.complex_plot_y_columns) == len(self.complex_plot_y_scales):
+            pass
+        else:
+            raise ValueError("Complex plot Y columns and scales must have the same length.")
 
     @property
     def data(self):
@@ -158,6 +198,16 @@ class ResultsTable:
         self.cols_c, self.index_c = self.index_c, self.cols_c
         self._col_devices, self._idx_devices = self._idx_devices, self._col_devices
 
+        # Structured complex plots assign semantic roles to rows and columns.
+        # Transposition changes those roles, so the transformed table reverts
+        # explicitly to the ordinary series representation.
+        self.plot_type = ResultTablePlotType.SERIES
+        self.damping_ratio_boundary = None
+        self.plot_title = None
+        self.complex_plot_x_column = None
+        self.complex_plot_y_columns = np.empty(0, dtype=np.str_)
+        self.complex_plot_y_scales = np.empty(0, dtype=float)
+
     def sort_column(self, c: int, max_to_min: bool = True):
         """
 
@@ -197,7 +247,13 @@ class ResultsTable:
                                     editable_min_idx=self.editable_min_idx,
                                     decimals=self.decimals,
                                     cols_device_type=self.cols_device_type,
-                                    idx_device_type=self.idx_device_type)
+                                    idx_device_type=self.idx_device_type,
+                                    plot_type=self.plot_type,
+                                    damping_ratio_boundary=self.damping_ratio_boundary,
+                                    plot_title=self.plot_title,
+                                    complex_plot_x_column=self.complex_plot_x_column,
+                                    complex_plot_y_columns=self.complex_plot_y_columns,
+                                    complex_plot_y_scales=self.complex_plot_y_scales)
 
         return sliced_model
 
@@ -219,7 +275,13 @@ class ResultsTable:
                                     editable_min_idx=self.editable_min_idx,
                                     decimals=self.decimals,
                                     cols_device_type=self.cols_device_type,
-                                    idx_device_type=self.idx_device_type)
+                                    idx_device_type=self.idx_device_type,
+                                    plot_type=self.plot_type,
+                                    damping_ratio_boundary=self.damping_ratio_boundary,
+                                    plot_title=self.plot_title,
+                                    complex_plot_x_column=self.complex_plot_x_column,
+                                    complex_plot_y_columns=self.complex_plot_y_columns,
+                                    complex_plot_y_scales=self.complex_plot_y_scales)
 
         return sliced_model
 
@@ -242,7 +304,13 @@ class ResultsTable:
                                     editable_min_idx=self.editable_min_idx,
                                     decimals=self.decimals,
                                     cols_device_type=self.cols_device_type,
-                                    idx_device_type=self.idx_device_type)
+                                    idx_device_type=self.idx_device_type,
+                                    plot_type=self.plot_type,
+                                    damping_ratio_boundary=self.damping_ratio_boundary,
+                                    plot_title=self.plot_title,
+                                    complex_plot_x_column=self.complex_plot_x_column,
+                                    complex_plot_y_columns=self.complex_plot_y_columns,
+                                    complex_plot_y_scales=self.complex_plot_y_scales)
         return sliced_model
 
     def search_in_columns(self, txt):
@@ -337,6 +405,15 @@ class ResultsTable:
 
         self.x_label = 'Probability of value<=x'
 
+        # Independent column sorting destroys complex coordinate pairs and
+        # eigenvector component relationships.
+        self.plot_type = ResultTablePlotType.SERIES
+        self.damping_ratio_boundary = None
+        self.plot_title = None
+        self.complex_plot_x_column = None
+        self.complex_plot_y_columns = np.empty(0, dtype=np.str_)
+        self.complex_plot_y_scales = np.empty(0, dtype=float)
+
     def convert_to_abs(self):
         """
         Convert the data to abs
@@ -344,6 +421,15 @@ class ResultsTable:
         """
         try:
             self.data_c = np.abs(self.data_c)
+
+            # Magnitudes no longer contain a real-imaginary plane, so their
+            # natural representation is the existing series plot.
+            self.plot_type = ResultTablePlotType.SERIES
+            self.damping_ratio_boundary = None
+            self.plot_title = None
+            self.complex_plot_x_column = None
+            self.complex_plot_y_columns = np.empty(0, dtype=np.str_)
+            self.complex_plot_y_scales = np.empty(0, dtype=float)
         except TypeError:
             print('Could not convert to abs :/')
 
@@ -375,129 +461,3 @@ class ResultsTable:
         """
         index, columns, data = self.get_data()
         return pd.DataFrame(data=data, index=index, columns=columns)
-
-    def plot(self, ax=None, selected_col_idx=None, selected_rows=None, stacked=False):
-        """
-        Plot the data model
-        :param ax: Matplotlib axis
-        :param selected_col_idx: list of selected column indices
-        :param selected_rows: list of rows to plot
-        :param stacked: Stack plot?
-        """
-        index, columns, data = self.get_data()
-
-        if selected_col_idx is not None:
-            columns = [columns[i] for i in selected_col_idx]
-            data = data[:, selected_col_idx]
-
-        if selected_rows is not None:
-            index = [index[i] for i in selected_rows]
-            data = data[selected_rows, :]
-
-        if ax is None:
-            fig = plt.figure(figsize=(12, 6))
-            ax = fig.add_subplot(111)
-
-        if 'voltage' in self.title.lower():
-            data[data == 0] = 'nan'  # to avoid plotting the zeros
-
-        if len(columns) > 15:
-            plot_legend = False
-        else:
-            plot_legend = True
-
-        df = pd.DataFrame(data=data, index=index, columns=columns)
-
-        if stacked and len(columns) > 1:
-            # --- 1. Filter Out Columns That Are Entirely Zero ---
-            df_filtered = df.loc[:, (df != 0).any()]
-            data = df_filtered.values  # Convert the filtered DataFrame to a NumPy array
-            n_series = data.shape[1]
-
-            # --- 2. Prepare the Positive and Negative Parts ---
-            # For positive plotting: keep positive values and set non-positive ones to 0.
-            data_pos = np.where(data > 0, data, 0)
-            # For negative plotting: keep negative values and set non-negative ones to 0.
-            data_neg = np.where(data < 0, data, 0)
-
-            # --- 3. Compute Cumulative Sums Along the Series Axis ---
-            cum_pos = np.cumsum(data_pos, axis=1)
-            cum_neg = np.cumsum(data_neg, axis=1)
-
-            # --- 4. Plot Using Matplotlib's fill_between ---
-            # Use a colormap to generate distinct colors for each series.
-            colors = plt.cm.viridis(np.linspace(0, 1, n_series))
-
-            # x-axis will use the DataFrame's DatetimeIndex.
-            x = df_filtered.index
-
-            # Plot the positive areas for each series.
-            for i in range(n_series):
-                if i == 0:
-                    if cum_pos[:, i].sum() != 0:
-                        ax.fill_between(x, 0, cum_pos[:, i], color=colors[i],
-                            label=f'{df_filtered.columns[i]}')
-                else:
-                    if cum_pos[:, i].sum() != 0:
-                        ax.fill_between(x, cum_pos[:, i - 1], cum_pos[:, i], color=colors[i],
-                            label=f'{df_filtered.columns[i]}')
-
-            # Plot the negative areas for each series.
-            for i in range(n_series):
-                if i == 0:
-                    if cum_neg[:, i].sum() != 0:
-                        ax.fill_between(x, 0, cum_neg[:, i], color=colors[i], alpha=0.6,
-                            label=f'{df_filtered.columns[i]}')
-                else:
-                    if cum_neg[:, i].sum() != 0:
-                        ax.fill_between(x, cum_neg[:, i - 1], cum_neg[:, i], color=colors[i], alpha=0.6,
-                            label=f'{df_filtered.columns[i]}')
-
-            # Add legend and labels for clarity
-            ax.set_title(self.title, fontsize=14)
-            ax.set_ylabel(self.y_label, fontsize=11)
-            ax.set_xlabel(self.x_label, fontsize=11)
-            ax.legend(loc='upper right', fontsize='small')
-        else:
-            ax.set_title(self.title, fontsize=14)
-            ax.set_ylabel(self.y_label, fontsize=11)
-            ax.set_xlabel(self.x_label, fontsize=11)
-            try:
-                df.plot(ax=ax, legend=plot_legend)
-            except TypeError:
-                print('No numeric data to plot...')
-
-    def plot_device(self, ax=None, device_idx: int = 0, stacked=False, title: str = ""):
-        """
-        Plot the data model
-        :param ax: Matplotlib axis
-        :param device_idx: list of selected column indices
-        :param stacked: Stack plot?
-        :param title: Title of the plot
-        """
-        index, columns, data = self.get_data()
-
-        # columns = [columns[device_idx]]
-        columns = [self.title] if title == "" else [title]
-        data = data[:, device_idx]
-
-        if ax is None:
-            fig = plt.figure(figsize=(12, 6))
-            ax = fig.add_subplot(111)
-
-        if 'voltage' in self.title.lower():
-            data[data == 0] = 'nan'  # to avoid plotting the zeros
-
-        if len(columns) > 15:
-            plot_legend = False
-        else:
-            plot_legend = True
-
-        df = pd.DataFrame(data=data, index=index, columns=columns)
-        ax.set_title(self.title, fontsize=14)
-        ax.set_ylabel(self.y_label, fontsize=11)
-        ax.set_xlabel(self.x_label, fontsize=11)
-        try:
-            df.plot(ax=ax, legend=plot_legend, stacked=stacked)
-        except TypeError:
-            print('No numeric data to plot...')

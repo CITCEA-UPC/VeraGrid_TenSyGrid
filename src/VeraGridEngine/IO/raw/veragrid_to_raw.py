@@ -1312,6 +1312,15 @@ class RawCounter:
     Items to count stuff for the raw files
     """
 
+    __slots__ = (
+        "_bus_int_dict",
+        "_bus_2_psseI_dict",
+        "_bus_dev_count_dict",
+        "_ckt_counter",
+        "_used_psse_numbers",
+        "_max_bus_number",
+    )
+
     def __init__(self, grid: MultiCircuit):
         """
         Constructor

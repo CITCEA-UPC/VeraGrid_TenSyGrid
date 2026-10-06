@@ -18,6 +18,7 @@ from VeraGridEngine.basic_structures import Vec
 
 
 class NonLinearResistorEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         """

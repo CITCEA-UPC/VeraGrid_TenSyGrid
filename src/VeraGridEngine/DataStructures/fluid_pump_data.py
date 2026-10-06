@@ -10,6 +10,8 @@ class FluidPumpData(FluidTurbineData):
     FluidPumpData
     """
 
+    __slots__ = ()
+
     def __init__(self, nelm: int):
         """
         Fluid pump data arrays
@@ -25,5 +27,4 @@ class FluidPumpData(FluidTurbineData):
         :return: new FluidPumpData instance
         """
         data: FluidPumpData = super().copy()
-        data.__class__ = FluidPumpData
         return data

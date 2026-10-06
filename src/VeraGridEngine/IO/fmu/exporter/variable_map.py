@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .config import ExportConfig
-from .diff_to_c import render_discrete_derivative
-from .export_ir import ExportModel, StorageSegment, VariableCategory
+from VeraGridEngine.IO.fmu.exporter.config import ExportConfig
+from VeraGridEngine.IO.fmu.exporter.diff_to_c import render_discrete_derivative
+from VeraGridEngine.IO.fmu.exporter.export_ir import ExportModel, StorageSegment, VariableCategory
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,6 +18,13 @@ class ResolvedStorage:
 
 
 class CVariableResolver:
+    __slots__ = (
+        "export_model",
+        "cfg",
+        "by_uid",
+        "by_name",
+    )
+
     def __init__(self, export_model: ExportModel, cfg: ExportConfig):
         self.export_model = export_model
         self.cfg = cfg

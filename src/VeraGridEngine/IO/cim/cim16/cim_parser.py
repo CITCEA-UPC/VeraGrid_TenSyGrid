@@ -136,6 +136,11 @@ def try_bus(b1, bus_duct):
 
 class CIMExport:
 
+    __slots__ = (
+        "circuit",
+        "logger",
+    )
+
     def __init__(self, circuit: MultiCircuit):
 
         self.circuit = circuit
@@ -715,6 +720,17 @@ class CIMExport:
 
 
 class CIMImport:
+
+    __slots__ = (
+        "logger",
+        "cim",
+        "node_terminal",
+        "terminal_node",
+        "text_func",
+        "progress_func",
+        "needs_compiling",
+        "topology",
+    )
 
     def __init__(self, text_func=None, progress_func=None):
 

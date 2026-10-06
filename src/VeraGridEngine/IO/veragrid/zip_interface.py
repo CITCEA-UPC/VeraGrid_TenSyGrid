@@ -3,18 +3,19 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 import json
+import zipfile
 try:
-    import orjson
-
-    _HAS_ORJSON = True
+    import msgspec  # optional, faster alternative to read json files
+    _HAS_MSGSPEC = True
 except ImportError:
-    _HAS_ORJSON = False
+    _HAS_MSGSPEC = False
+
 from io import StringIO, TextIOWrapper, BytesIO, BufferedReader
 import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import zipfile
+
 from warnings import warn
 from typing import List, Dict, Union, Callable, Tuple, Any
 from VeraGridEngine.Devices.types import VERAGRID_FILE_TYPE
@@ -81,15 +82,19 @@ def _split_session_entry_path(path: List[str], active_grid_idtag: str | None) ->
         return None
 
 
-def load_json_from_file_pointer(file_pointer) -> dict:
+def load_json_from_file_pointer(file_pointer) -> list | dict:
     """
     Load JSON from a file pointer using orjson if available, falling back to json.
     :param file_pointer: File pointer (from zip file or regular file)
     :return: Parsed JSON as dict
     """
     content = file_pointer.read()
-    if _HAS_ORJSON:
-        return orjson.loads(content)
+    if _HAS_MSGSPEC:
+        try:
+            return msgspec.json.decode(content, type=list)
+        except msgspec.ValidationError as e:
+            return msgspec.json.decode(content, type=dict)
+
     return json.loads(content)
 
 
@@ -230,6 +235,10 @@ def save_multiverse_data_to_zip(f_zip_ptr: zipfile.ZipFile,
             filename = f"{base_path}/diagrams/{diagram.idtag}.diagram"
             f_zip_ptr.writestr(filename, json.dumps(diagram.get_data_dict(), indent=4))
 
+        if hasattr(diff_grid.diagrams, 'get_data_dict'):
+            tree_filename = f"{base_path}/diagrams/tree.json"
+            f_zip_ptr.writestr(tree_filename, json.dumps(diff_grid.diagrams.get_data_dict(), indent=4))
+
 
 def save_single_circuit_data_to_zip(f_zip_ptr: zipfile.ZipFile,
                                     circuit: dev.MultiCircuit,
@@ -260,6 +269,10 @@ def save_single_circuit_data_to_zip(f_zip_ptr: zipfile.ZipFile,
     for diagram in circuit.diagrams:
         filename = f"diagrams/{diagram.idtag}.diagram"
         f_zip_ptr.writestr(filename, json.dumps(diagram.get_data_dict(), indent=4))
+
+    if hasattr(circuit.diagrams, 'get_data_dict'):
+        tree_filename = "diagrams/tree.json"
+        f_zip_ptr.writestr(tree_filename, json.dumps(circuit.diagrams.get_data_dict(), indent=4))
 
     save_results_in_zip(f_zip_ptr=f_zip_ptr,
                         filename_zip=filename_zip,
@@ -556,7 +569,10 @@ def get_frames_from_zip(file_name_zip: str,
                         data[name] = parse_config_df(df, data)
 
                     elif extension == '.json':
-                        json_files[name] = load_json_from_file_pointer(file_pointer)
+                        if name == "tree" or file_name.endswith("diagrams/tree.json") or name == "diagram_tree":
+                            data['multiverse'][model_idtag]['diagram_tree'] = load_json_from_file_pointer(file_pointer)
+                        else:
+                            json_files[name] = load_json_from_file_pointer(file_pointer)
 
                     elif extension == '.diagram':
                         data['multiverse'][model_idtag]['diagrams'].append(load_json_from_file_pointer(file_pointer))
@@ -643,7 +659,10 @@ def get_frames_from_zip(file_name_zip: str,
                     data[name] = parse_config_df(df, data)
 
                 elif extension == '.json':
-                    json_files[name] = load_json_from_file_pointer(file_pointer)
+                    if file_name.endswith("diagrams/tree.json") or name in ("tree", "diagram_tree"):
+                        data['diagram_tree'] = load_json_from_file_pointer(file_pointer)
+                    else:
+                        json_files[name] = load_json_from_file_pointer(file_pointer)
 
                 elif extension == '.diagram':
                     data['diagrams'].append(load_json_from_file_pointer(file_pointer))

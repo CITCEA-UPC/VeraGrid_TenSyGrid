@@ -72,6 +72,30 @@ class ContingencyTableEntry:
     Entry of a contingency report
     """
 
+    __slots__ = (
+        "time_index",
+        "t_prob",
+        "mon_idx",
+        "con_group_idx",
+        "area_from",
+        "area_to",
+        "base_name",
+        "contingency_name",
+        "base_rating",
+        "contingency_rating",
+        "srap_rating",
+        "base_flow",
+        "post_contingency_flow",
+        "post_srap_flow",
+        "base_loading",
+        "post_contingency_loading",
+        "post_srap_loading",
+        "msg_ov",
+        "msg_srap",
+        "srap_power",
+        "solved_by_srap",
+    )
+
     __hdr__ = ["Time idx",
                "Time",
                "Probability cluster",
@@ -215,6 +239,8 @@ class ContingencyResultsReport:
     """
     Contingency results report table
     """
+
+    __slots__ = ("entries",)
 
     def __init__(self) -> None:
         """

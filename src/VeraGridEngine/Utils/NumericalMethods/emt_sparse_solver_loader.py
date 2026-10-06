@@ -191,8 +191,9 @@ def load_sparse_solver_backend_provider_from_plugin(
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
 
-    if manifest.get_class_name() in module.__dict__:
-        provider_class: Any = module.__dict__[manifest.get_class_name()]
+    module_namespace: Dict[str, Any] = vars(module)
+    if manifest.get_class_name() in module_namespace:
+        provider_class: Any = module_namespace[manifest.get_class_name()]
     else:
         raise AttributeError(
             f"Sparse solver plugin provider class '{manifest.get_class_name()}' not found in {module_path}"

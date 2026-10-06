@@ -12,6 +12,7 @@ from PySide6 import QtWidgets
 import VeraGrid.Gui.gui_functions as gf
 import VeraGrid.Session.file_handler as filedrv
 from VeraGrid.Gui.FileDialogues.CGMESDialogue.cgmes_export_gui import Ui_CgmesExportDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.IO.cim.cgmes.cgmes_enums import CgmesProfileType
 from VeraGridEngine.IO.cim.cgmes.cgmes_export import get_available_cgmes_profiles
 from VeraGridEngine.enumerations import CGMESVersions, CgmesExportMode, FileType
@@ -36,7 +37,7 @@ class CgmesExportDialogue(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
         self.ui = Ui_CgmesExportDialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('CGMES export')
+        self.setWindowTitle(self.tr('CGMES export'))
         self.setModal(True)
 
         self.grid = app.circuit
@@ -240,7 +241,7 @@ class CgmesExportDialogue(QtWidgets.QDialog):
                                          caption='Select Boundary set file',
                                          directory=self.project_directory,
                                          filter=files_types)
-        if dialogue.exec():
+        if exec_dialog_safely(dialog=dialogue):
             filenames: list[str] = dialogue.selectedFiles()
             if len(filenames) > 0:
                 self.current_boundary_set = filenames[0]
@@ -309,7 +310,7 @@ class CgmesExportDialogue(QtWidgets.QDialog):
 
         files_types: str = "CGMES (*.zip);;"
         filename, type_selected = QtWidgets.QFileDialog.getSaveFileName(self,
-                                                                        'Export to CGMES',
+                                                                        self.tr('Export to CGMES'),
                                                                         default_name,
                                                                         files_types)
 

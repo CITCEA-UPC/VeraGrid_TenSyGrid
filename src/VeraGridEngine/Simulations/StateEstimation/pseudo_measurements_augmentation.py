@@ -7,38 +7,57 @@ from VeraGridEngine.Devices.measurement import MeasurementTemplate
 from VeraGridEngine.enumerations import DeviceType
 
 class PseudoMeasurement(MeasurementTemplate):
-    def __init__(self, value, sigma, api_obj: Bus, name="",
-                 idtag = None):
-        # If this has to be injected in DB it has to get a object instance of class Device. In order
-        # to persist it in DB it should be saved in Asset class !
+    """
+    PseudoMeasurement class.
+    """
+    __slots__ = ("bus",)
+
+    def __init__(
+        self,
+        value: float,
+        sigma: float,
+        api_obj: Bus,
+        name: str = "",
+        idtag: str | None = None,
+    ) -> None:
         """
-        Parameters
-        ----------
-        value : float
-            Per-unit value of pseudo measurement
-        sigma : float
-            Per-unit standard deviation (large → low weight)
-        bus : int
-            Bus index this pseudo measurement belongs to
-        mtype : str
-            Measurement type, e.g. "p_inj", "q_inj"
+        PseudoMeasurement constructor.
+
+        :param value: Per-unit value of pseudo measurement
+        :param sigma: Per-unit standard deviation (large -> low weight)
+        :param api_obj: Bus object this pseudo measurement belongs to
+        :param name: Name of the measurement
+        :param idtag: Unique identifier tag
         """
-        MeasurementTemplate.__init__(self,
-                                     value=value,
-                                     uncertainty=sigma,
-                                     api_obj=api_obj,
-                                     name=name,
-                                     idtag=idtag,
-                                     device_type=DeviceType.NoDevice)
+        MeasurementTemplate.__init__(
+            self,
+            value=value,
+            uncertainty=sigma,
+            api_obj=api_obj,
+            name=name,
+            idtag=idtag,
+            device_type=DeviceType.NoDevice,
+        )
         self.value = value
         self.sigma = sigma
-        self.bus = api_obj
+        self.bus: Bus = api_obj
 
+    def get_value_pu(self, Sbase: float) -> float:
+        """
+        Get value in per unit.
 
-    def get_value_pu(self, Sbase: float):
+        :param Sbase: Base power
+        :return: Value per unit
+        """
         return self.value / Sbase
 
-    def get_standard_deviation_pu(self, Sbase: float):
+    def get_standard_deviation_pu(self, Sbase: float) -> float:
+        """
+        Get standard deviation in per unit.
+
+        :param Sbase: Base power
+        :return: Standard deviation per unit
+        """
         return self.sigma / Sbase
 
 

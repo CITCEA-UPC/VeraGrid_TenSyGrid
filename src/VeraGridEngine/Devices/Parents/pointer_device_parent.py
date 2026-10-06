@@ -5,12 +5,13 @@
 from __future__ import annotations
 
 from typing import Union, Tuple, TYPE_CHECKING
-from VeraGridEngine.Devices.Parents.editable_device import EditableDevice, GCProp
+from VeraGridEngine.Devices.Parents.editable_device import EditableDevice, GCProp, PrpCat
 from VeraGridEngine.enumerations import DeviceType
 
 if TYPE_CHECKING:
     from VeraGridEngine.Devices.Parents.injection_parent import InjectionParent
     from VeraGridEngine.Devices.Parents.branch_parent import BranchParent
+    from VeraGridEngine.Devices.Aggregation.facility import Facility
 
 
 class PointerDeviceParent(EditableDevice):
@@ -32,6 +33,7 @@ class PointerDeviceParent(EditableDevice):
             tpe=str,
             definition='Unique ID',
             editable=False,
+            cat=list([PrpCat.TP]),
         ),
         GCProp(
             prop_name='tpe',
@@ -39,6 +41,7 @@ class PointerDeviceParent(EditableDevice):
             tpe=DeviceType,
             definition='Device type',
             editable=False,
+            cat=list([PrpCat.TP]),
         ),
         GCProp(
             prop_name='device_name',
@@ -46,12 +49,13 @@ class PointerDeviceParent(EditableDevice):
             tpe=str,
             definition='Device name',
             editable=False,
+            cat=list([PrpCat.TP]),
         ),
     )
 
     def __init__(self,
                  idtag: Union[str, None],
-                 device: InjectionParent | BranchParent | None,
+                 device: InjectionParent | BranchParent | Facility | None,
                  name: str,
                  code: str,
                  comment: str,
@@ -75,7 +79,7 @@ class PointerDeviceParent(EditableDevice):
         self._device_idtag: str = device.idtag if device is not None else ""
         self._tpe: DeviceType = device.device_type if device is not None else DeviceType.NoDevice
         self._device_name: str = device.name if device is not None else "No device"
-        self._device: InjectionParent | BranchParent | None = device
+        self._device: InjectionParent | BranchParent | Facility | None = device
 
     @property
     def device_idtag(self) -> str:
@@ -123,7 +127,7 @@ class PointerDeviceParent(EditableDevice):
             raise ValueError(f"tpe must be a string not {val}")
 
     @property
-    def device(self) -> InjectionParent | BranchParent | None:
+    def device(self) -> InjectionParent | BranchParent | Facility | None:
         """
         device getter
         :return:
@@ -131,7 +135,7 @@ class PointerDeviceParent(EditableDevice):
         return self._device
 
     @device.setter
-    def device(self, val: InjectionParent | BranchParent | None):
+    def device(self, val: InjectionParent | BranchParent | Facility | None):
         if isinstance(val, EditableDevice):
             if val is not None:
                 self._tpe = val.device_type
@@ -143,7 +147,7 @@ class PointerDeviceParent(EditableDevice):
         else:
             raise ValueError(f"tpe must be a EditableDevice not {val}")
 
-    def set_device(self, elm: InjectionParent | BranchParent | None):
+    def set_device(self, elm: InjectionParent | BranchParent | Facility | None):
         """
         Set the device
         :param elm: Device to be pointed

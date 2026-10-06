@@ -11,6 +11,10 @@ from VeraGridEngine.IO.raw.versioned.v35.generator import RawGeneratorV35
 
 class RawGeneratorV36(RawGeneratorV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = (
+        "DROOPNAME",
+        "NAME",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='DROOPNAME', rawx_key='droopname', class_type=str,

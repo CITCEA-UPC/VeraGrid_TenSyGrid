@@ -38,6 +38,7 @@ import queue
 from typing import List, Union
 from collections.abc import Callable
 from warnings import warn
+from PySide6.QtCore import QObject, Slot, Qt
 from PySide6.QtGui import QPixmap, QColor
 
 from VeraGrid.Gui.Diagrams.MapWidget.Tiles.base_tiles import BaseTiles
@@ -48,6 +49,42 @@ from VeraGrid.Gui.Diagrams.MapWidget.Tiles.tile_worker import TileWorker
 # # server.  this is the number of days old a tile is before we re-request.
 # # if 'None', never re-request tiles after first satisfied request.
 # RefreshTilesAfterDays = 60
+
+
+class TileCallbackBridge(QObject):
+    """
+    GUI-thread bridge for tile worker results.
+    """
+
+    __slots__ = ('_tiles',)
+
+    def __init__(self, tiles: "Tiles") -> None:
+        """
+        Store the tile source that receives decoded images.
+        """
+        QObject.__init__(self)
+        self._tiles: "Tiles | None" = tiles
+
+    def detach(self) -> None:
+        """
+        Remove the Python owner reference before the bridge is destroyed.
+        """
+        self._tiles = None
+
+    @Slot(int, float, float, bytes, bool)
+    def tile_is_available(self, level: int, x: float, y: float, image_data: bytes, error: bool) -> None:
+        """
+        Forward worker bytes to the tile source on this object's Qt thread.
+        """
+        tiles: "Tiles | None" = self._tiles
+        if tiles is not None:
+            tiles.tile_is_available(level=level,
+                                    x=x,
+                                    y=y,
+                                    image_data=image_data,
+                                    error=error)
+        else:
+            pass
 
 
 class Tiles(BaseTiles):
@@ -69,7 +106,8 @@ class Tiles(BaseTiles):
                  max_server_requests: int,
                  http_proxy,
                  re_fetch_days: int = 60,
-                 attribution: str = ""):
+                 attribution: str = "",
+                 start_workers: bool = True):
         """
         Initialise a Tiles instance.
         :param tile_set_name: Name of the tile set.
@@ -85,6 +123,7 @@ class Tiles(BaseTiles):
         :param max_server_requests: maximum number of requests per server
         :param http_proxy: proxy to use if required
         :param re_fetch_days: fetch new server tile if older than this in days (0 means don't ever update tiles)
+        :param start_workers: Start network tile workers immediately.
         """
         # perform the base class initialization
         super().__init__(levels, tile_width, tile_height, tiles_dir, max_lru)
@@ -118,6 +157,7 @@ class Tiles(BaseTiles):
         # callback must be set by higher-level code
         self.callback: Union[None, Callable[[int, float, float, QPixmap, bool], None]] = None
         self._shutdown: bool = False
+        self._shutdown_complete: bool = False
 
         # calculate a re-request age, if specified
         self.re_request_age = (time.time() - self.refresh_tiles_after_days * self.SecondsInADay)
@@ -155,6 +195,8 @@ class Tiles(BaseTiles):
 
         # set the list of queued unsatisfied requests to 'empty'
         self.queued_requests = {}
+        tile_callback_bridge: TileCallbackBridge = TileCallbackBridge(tiles=self)
+        self.tile_callback_bridge: TileCallbackBridge | None = tile_callback_bridge
 
         # prepare the "pending" and "error" images
         self.pending_tile = QPixmap(256, 256)
@@ -168,64 +210,71 @@ class Tiles(BaseTiles):
                        404: 'You might need to check the tile addressing for this server.',
                        429: 'You are asking for too many tiles.', }
 
-        # test for firewall - use proxy (if supplied)
-        test_url = self.servers[0] + self.url_path.format(Z=0, X=0, Y=0)
-        try:
-            r = request.Request(test_url, headers={'User-Agent': 'VeraGrid 5'})
-            response = request.urlopen(r).read()
-
-        except HTTPError as e:
-            # if it's fatal, log it and die, otherwise try a proxy
-            status_code = e.code
-            warn('Error: test_url=%s, status_code=%s' % (test_url, str(status_code)))
-            error_msg = StatusError.get(status_code, None)
-            if status_code:
-                msg = "\nYou got a " + str(status_code) + " (" + str(error_msg) + ") error from: " + str(test_url)
-                print(msg)
-                # raise RuntimeError(msg) from None
-
-            warn('%s exception doing simple connection to: %s' % (type(e).__name__, test_url))
-            warn(''.join(traceback.format_exc()))
-
-            if http_proxy:
-                proxy = request.ProxyHandler({'http': http_proxy})
-                opener = request.build_opener(proxy)
-                request.install_opener(opener)
-                try:
-                    request.urlopen(test_url)
-                except (HTTPError, urllib.error.URLError, http.client.IncompleteRead) as proxy_error:
-                    msg = "Using HTTP proxy but still can't get through a firewall!"
-                    print(msg)
-                    warn('%s exception doing simple connection through proxy to: %s' % (type(proxy_error).__name__, test_url))
-                    warn(''.join(traceback.format_exc()))
-                    # raise Exception(msg) from None
-            else:
-                msg = "There is a firewall but you didn't give me an HTTP proxy to get through it?"
-                print(msg)
-                # raise Exception(msg) from None
-        except urllib.error.URLError as e:
-            print(e)
-
-        except http.client.IncompleteRead as e:
-            print(e)
-
         # set up the request queue and worker threads
         self.request_queue = queue.Queue()  # entries are (level, x, y)
-        self.workers = []
-        for server in self.servers:
-            for num_thread in range(self.max_requests):
-                worker = TileWorker(id_num=num_thread,
-                                    server=server,
-                                    tile_path=self.url_path,
-                                    requests_cue=self.request_queue,
-                                    callback=self.tile_is_available,
-                                    error_tile=self.error_tile,
-                                    content_type=self.content_type,
-                                    re_request_age=self.re_request_age,
-                                    error_image=self.error_tile,
-                                    refresh_tiles_after_days=60)
-                self.workers.append(worker)
-                worker.start()
+        self.workers: List[TileWorker] = list()
+
+        if start_workers:
+            # test for firewall - use proxy (if supplied)
+            test_url = self.servers[0] + self.url_path.format(Z=0, X=0, Y=0)
+            try:
+                r = request.Request(test_url, headers={'User-Agent': 'VeraGrid 5'})
+                request.urlopen(r, timeout=5.0).read()
+
+            except HTTPError as e:
+                # if it's fatal, log it and die, otherwise try a proxy
+                status_code = e.code
+                warn('Error: test_url=%s, status_code=%s' % (test_url, str(status_code)))
+                error_msg = StatusError.get(status_code, None)
+                if status_code:
+                    msg = "\nYou got a " + str(status_code) + " (" + str(error_msg) + ") error from: " + str(test_url)
+                    print(msg)
+                    # raise RuntimeError(msg) from None
+                else:
+                    pass
+
+                warn('%s exception doing simple connection to: %s' % (type(e).__name__, test_url))
+                warn(''.join(traceback.format_exc()))
+
+                if http_proxy:
+                    proxy = request.ProxyHandler({'http': http_proxy})
+                    opener = request.build_opener(proxy)
+                    request.install_opener(opener)
+                    try:
+                        request.urlopen(test_url)
+                    except (HTTPError, urllib.error.URLError, http.client.IncompleteRead) as proxy_error:
+                        msg = "Using HTTP proxy but still can't get through a firewall!"
+                        print(msg)
+                        warn('%s exception doing simple connection through proxy to: %s' % (type(proxy_error).__name__, test_url))
+                        warn(''.join(traceback.format_exc()))
+                        # raise Exception(msg) from None
+                else:
+                    msg = "There is a firewall but you didn't give me an HTTP proxy to get through it?"
+                    print(msg)
+                    # raise Exception(msg) from None
+            except urllib.error.URLError as e:
+                print(e)
+
+            except http.client.IncompleteRead as e:
+                print(e)
+
+            server: str
+            for server in self.servers:
+                num_thread: int
+                for num_thread in range(self.max_requests):
+                    worker = TileWorker(id_num=num_thread,
+                                        server=server,
+                                        tile_path=self.url_path,
+                                        requests_cue=self.request_queue,
+                                        content_type=self.content_type,
+                                        re_request_age=self.re_request_age,
+                                        refresh_tiles_after_days=60)
+                    worker.tile_available.connect(tile_callback_bridge.tile_is_available,
+                                                  Qt.ConnectionType.QueuedConnection)
+                    self.workers.append(worker)
+                    worker.start()
+        else:
+            pass
 
     def copy(self) -> "Tiles":
         """
@@ -350,22 +399,57 @@ class Tiles(BaseTiles):
                 self.request_queue.queue.clear()
             self.queued_requests.clear()
 
-    def shutdown(self) -> None:
+    def shutdown(self) -> bool:
         """
         Stop tile callbacks and background workers for this tile source.
+
+        :return: ``True`` when every tile worker has stopped.
         """
+        if self._shutdown_complete:
+            return True
+        else:
+            pass
+
         if self._shutdown:
-            return
+            pass
+        else:
+            self._shutdown = True
+            self.callback = None
+            self.FlushRequests()
 
-        self._shutdown = True
-        self.callback = None
-        self.FlushRequests()
+            tile_callback_bridge: TileCallbackBridge | None = self.tile_callback_bridge
+            if tile_callback_bridge is not None:
+                tile_callback_bridge.detach()
+                for worker in self.workers:
+                    try:
+                        worker.tile_available.disconnect(tile_callback_bridge.tile_is_available)
+                    except (RuntimeError, TypeError):
+                        pass
+                tile_callback_bridge.deleteLater()
+                self.tile_callback_bridge = None
+            else:
+                pass
 
+            for worker in self.workers:
+                worker.stop()
+
+        all_stopped: bool = True
         for worker in self.workers:
-            worker.stop()
+            stopped: bool = worker.wait(6000)
+            if stopped:
+                pass
+            else:
+                all_stopped = False
 
-        for worker in self.workers:
-            worker.wait(2000)
+        if all_stopped:
+            for worker in self.workers:
+                worker.deleteLater()
+            self.workers.clear()
+            self._shutdown_complete = True
+        else:
+            pass
+
+        return all_stopped
 
     def get_server_tile(self, level: int, x: float, y: float) -> None:
         """
@@ -378,11 +462,14 @@ class Tiles(BaseTiles):
         do this since we can't peek into a queue to see what's there.
         """
 
-        tile_key = (level, x, y)
-        if tile_key not in self.queued_requests:
-            # add tile request to the server request queue
-            self.request_queue.put(tile_key)
-            self.queued_requests[tile_key] = True
+        if self._shutdown:
+            return
+        else:
+            tile_key = (level, x, y)
+            if tile_key not in self.queued_requests:
+                # add tile request to the server request queue
+                self.request_queue.put(tile_key)
+                self.queued_requests[tile_key] = True
 
     def tile_on_disk(self, level: int, x: float, y: float):
         """
@@ -400,17 +487,33 @@ class Tiles(BaseTiles):
 
         self.callback = callback
 
-    def tile_is_available(self, level: int, x: float, y: float, image: QPixmap, error: bool):
+    def tile_is_available(self, level: int, x: float, y: float, image_data: bytes, error: bool):
         """
         Callback routine - a 'net tile is available.
 
         level   level for the tile
         x       x coordinate of tile
         y       y coordinate of tile
-        image   tile image data
+        image_data   tile image data
         error   True if image is 'error' image, don't cache in that case
         """
+        if self._shutdown:
+            return
+        else:
+            pass
+
         tile_key: tuple[int, float, float] = (level, x, y)
+        image: QPixmap
+
+        if error:
+            image = self.error_tile
+        else:
+            image = QPixmap()
+            if image.loadFromData(image_data):
+                pass
+            else:
+                image = self.error_tile
+                error = True
 
         # Keep error tiles in the in-memory LRU only.
         # Writing them through the normal cache assignment would persist the red

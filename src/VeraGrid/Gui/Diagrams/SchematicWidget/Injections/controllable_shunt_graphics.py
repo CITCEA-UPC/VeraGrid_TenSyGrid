@@ -11,6 +11,7 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphi
 from VeraGrid.Gui.DeviceEditors.ControllableShuntEditor.controllable_shunt_device_editor import (
     ControllableShuntDeviceEditorDialog,
 )
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
     from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import SchematicWidget
@@ -49,7 +50,7 @@ class ControllableShuntGraphicItem(InjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = ControllableShuntDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True

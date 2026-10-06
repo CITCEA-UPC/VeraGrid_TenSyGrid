@@ -16,6 +16,27 @@ class ActiveBranchData:
     ControllableBranchData
     """
 
+    __slots__ = (
+        "nelm",
+        "nbus",
+        "is_controlled",
+        "m_taps",
+        "tau_taps",
+        "tap_module",
+        "tap_module_min",
+        "tap_module_max",
+        "tap_angle",
+        "tap_angle_min",
+        "tap_angle_max",
+        "tap_module_control_mode",
+        "tap_phase_control_mode",
+        "tap_controlled_buses",
+        "Pset",
+        "Qset",
+        "vset",
+        "_any_pf_control",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         self.nelm: int = nelm
         self.nbus: int = nbus

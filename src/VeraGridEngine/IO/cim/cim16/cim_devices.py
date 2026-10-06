@@ -62,6 +62,18 @@ def resolve_terminal_bus_node(term):
 
 
 class CimProperty:
+    __slots__ = (
+        "property_name",
+        "class_type",
+        "multiplier",
+        "unit",
+        "description",
+        "max_chars",
+        "mandatory",
+        "comment",
+        "out_of_the_standard",
+    )
+
 
     def __init__(self, name: str,
                  class_type: object,
@@ -130,6 +142,25 @@ class CimProperty:
 
 
 class IdentifiedObject:
+    __slots__ = (
+        "tpe",
+        "rdfid",
+        "uuid",
+        "class_replacements",
+        "resources",
+        "possibleProfileList",
+        "parsed_properties",
+        "references_to_me",
+        "missing_references",
+        "name",
+        "shortName",
+        "description",
+        "energyIdentCodeEic",
+        "aggregate",
+        "standard_document",
+        "declared_properties",
+    )
+
 
     def __init__(self, rdfid, tpe, resources=list(), class_replacements=dict()):
         """
@@ -401,7 +432,7 @@ class IdentifiedObject:
         Get the list of properties of this object
         """
         res = list()
-        for prop_name, value in vars(self).items():
+        for prop_name in self.declared_properties.keys():
             obj = getattr(self, prop_name)
             T = type(obj)
             if T not in [list, dict]:
@@ -441,6 +472,8 @@ class IdentifiedObject:
 
 
 class MonoPole(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -488,6 +521,8 @@ class MonoPole(IdentifiedObject):
 
 
 class DiPole(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -540,6 +575,8 @@ class DiPole(IdentifiedObject):
 
 
 class BaseVoltage(IdentifiedObject):
+    __slots__ = ("nominalVoltage",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -562,12 +599,16 @@ class BaseVoltage(IdentifiedObject):
 
 
 class EquipmentContainer(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
 
 
 class PowerSystemResource(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -578,6 +619,11 @@ class PowerSystemResource(IdentifiedObject):
 
 
 class Equipment(PowerSystemResource):
+    __slots__ = (
+        "EquipmentContainer",
+        "OperationalLimitSet",
+    )
+
 
     def __init__(self, rdfid, tpe):
         PowerSystemResource.__init__(self, rdfid, tpe)
@@ -613,6 +659,11 @@ class Equipment(PowerSystemResource):
 
 
 class ConductingEquipment(Equipment):
+    __slots__ = (
+        "BaseVoltage",
+        "Terminals",
+    )
+
 
     def __init__(self, rdfid, tpe):
         Equipment.__init__(self, rdfid, tpe)
@@ -636,6 +687,8 @@ class ConductingEquipment(Equipment):
 
 
 class BusNameMarker(IdentifiedObject):
+    __slots__ = ("priority",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -659,6 +712,13 @@ class BusNameMarker(IdentifiedObject):
 
 
 class ACDCTerminal(IdentifiedObject):
+    __slots__ = (
+        "connected",
+        "BusNameMarker",
+        "sequenceNumber",
+        "OperationalLimitSet",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -706,6 +766,13 @@ class ACDCTerminal(IdentifiedObject):
 
 
 class Terminal(ACDCTerminal):
+    __slots__ = (
+        "phases",
+        "TopologicalNode",
+        "ConnectivityNode",
+        "ConductingEquipment",
+    )
+
 
     def __init__(self, rdfid, tpe):
         ACDCTerminal.__init__(self, rdfid, tpe)
@@ -813,6 +880,8 @@ class Terminal(ACDCTerminal):
 
 
 class ConnectivityNodeContainer(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -835,6 +904,18 @@ class ConnectivityNode(IdentifiedObject):
     or in another instance of Line. Consequently there can be instances of Line that contain
     only ConnectivityNodes, but no ACLineSegments.
     """
+    __slots__ = (
+        "boundaryPoint",
+        "fromEndIsoCode",
+        "fromEndName",
+        "fromEndNameTso",
+        "toEndIsoCode",
+        "toEndName",
+        "toEndNameTso",
+        "TopologicalNode",
+        "ConnectivityNodeContainer",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1034,6 +1115,19 @@ class ConnectivityNode(IdentifiedObject):
 
 
 class TopologicalNode(IdentifiedObject):
+    __slots__ = (
+        "boundaryPoint",
+        "fromEndIsoCode",
+        "fromEndName",
+        "fromEndNameTso",
+        "toEndIsoCode",
+        "toEndName",
+        "toEndNameTso",
+        "ResourceOwner",
+        "BaseVoltage",
+        "ConnectivityNodeContainer",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1246,6 +1340,12 @@ class TopologicalNode(IdentifiedObject):
 
 
 class BusbarSection(IdentifiedObject):
+    __slots__ = (
+        "ipMax",
+        "EquipmentContainer",
+        "BaseVoltage",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1306,6 +1406,8 @@ class BusbarSection(IdentifiedObject):
 
 
 class Substation(IdentifiedObject):
+    __slots__ = ("Region",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1327,6 +1429,11 @@ class Substation(IdentifiedObject):
 
 
 class OperationalLimitSet(IdentifiedObject):
+    __slots__ = (
+        "Terminal",
+        "Equipment",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1355,6 +1462,12 @@ class OperationalLimitSet(IdentifiedObject):
 
 
 class OperationalLimitType(IdentifiedObject):
+    __slots__ = (
+        "limitType",
+        "direction",
+        "acceptableDuration",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1399,6 +1512,8 @@ class OperationalLimitType(IdentifiedObject):
 
 
 class GeographicalRegion(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1409,6 +1524,8 @@ class GeographicalRegion(IdentifiedObject):
 
 
 class SubGeographicalRegion(IdentifiedObject):
+    __slots__ = ("Region",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1431,6 +1548,13 @@ class SubGeographicalRegion(IdentifiedObject):
 
 
 class VoltageLevel(IdentifiedObject):
+    __slots__ = (
+        "highVoltageLimit",
+        "lowVoltageLimit",
+        "Substation",
+        "BaseVoltage",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1477,6 +1601,12 @@ class VoltageLevel(IdentifiedObject):
 
 
 class VoltageLimit(IdentifiedObject):
+    __slots__ = (
+        "value",
+        "OperationalLimitSet",
+        "OperationalLimitType",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1511,6 +1641,12 @@ class VoltageLimit(IdentifiedObject):
 
 
 class CurrentLimit(IdentifiedObject):
+    __slots__ = (
+        "value",
+        "OperationalLimitSet",
+        "OperationalLimitType",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1543,6 +1679,8 @@ class CurrentLimit(IdentifiedObject):
 
 
 class EquivalentNetwork(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1553,6 +1691,8 @@ class EquivalentNetwork(IdentifiedObject):
 
 
 class EnergyArea(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1563,6 +1703,13 @@ class EnergyArea(IdentifiedObject):
 
 
 class ControlArea(IdentifiedObject):
+    __slots__ = (
+        "type",
+        "netInterchange",
+        "pTolerance",
+        "EnergyArea",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1618,6 +1765,8 @@ class ControlArea(IdentifiedObject):
 
 
 class EquivalentEquipment(ConductingEquipment):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         ConductingEquipment.__init__(self, rdfid, tpe)
@@ -1626,6 +1775,16 @@ class EquivalentEquipment(ConductingEquipment):
 
 
 class EnergySource(MonoPole, ConductingEquipment):
+    __slots__ = (
+        "nominalVoltage",
+        "voltageMagnitude",
+        "voltageAngle",
+        "r",
+        "x",
+        "r0",
+        "x0",
+    )
+
 
     def __init__(self, rdfid, tpe):
         MonoPole.__init__(self, rdfid, tpe)
@@ -1641,6 +1800,25 @@ class EnergySource(MonoPole, ConductingEquipment):
 
 
 class EquivalentInjection(EquivalentEquipment):
+    __slots__ = (
+        "regulationStatus",
+        "regulationTarget",
+        "p",
+        "q",
+        "maxP",
+        "maxQ",
+        "minP",
+        "minQ",
+        "r",
+        "r0",
+        "r2",
+        "x",
+        "x0",
+        "x2",
+        "regulationCapability",
+        "ReactiveCapabilityCurve",
+    )
+
 
     def __init__(self, rdfid, tpe):
         EquivalentEquipment.__init__(self, rdfid, tpe)
@@ -1820,6 +1998,13 @@ class EquivalentInjection(EquivalentEquipment):
 
 
 class Switch(DiPole, ConductingEquipment):
+    __slots__ = (
+        "open",
+        "normalOpen",
+        "ratedCurrent",
+        "retained",
+    )
+
 
     def __init__(self, rdfid, tpe):
         DiPole.__init__(self, rdfid, tpe)
@@ -1911,6 +2096,8 @@ class Switch(DiPole, ConductingEquipment):
 
 
 class Breaker(Switch):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         Switch.__init__(self, rdfid, tpe)
@@ -1929,12 +2116,16 @@ class Breaker(Switch):
 
 
 class LoadBreakSwitch(Switch):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         Switch.__init__(self, rdfid, tpe)
 
 
 class Line(IdentifiedObject):
+    __slots__ = ("Region",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -1953,6 +2144,20 @@ class Line(IdentifiedObject):
 
 
 class ACLineSegment(DiPole):
+    __slots__ = (
+        "bch",
+        "gch",
+        "r",
+        "x",
+        "bch0",
+        "gch0",
+        "r0",
+        "x0",
+        "shortCircuitEndTemperature",
+        "length",
+        "BaseVoltage",
+    )
+
 
     def __init__(self, rdfid, tpe):
         DiPole.__init__(self, rdfid, tpe)
@@ -2124,6 +2329,28 @@ class ACLineSegment(DiPole):
 
 
 class PowerTransformerEnd(IdentifiedObject):
+    __slots__ = (
+        "b",
+        "g",
+        "r",
+        "x",
+        "b0",
+        "g0",
+        "r0",
+        "x0",
+        "rground",
+        "xground",
+        "grounded",
+        "ratedS",
+        "ratedU",
+        "endNumber",
+        "connectionKind",
+        "phaseAngleClock",
+        "Terminal",
+        "BaseVoltage",
+        "PowerTransformer",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2359,6 +2586,15 @@ class PowerTransformerEnd(IdentifiedObject):
 
 
 class PowerTransformer(DiPole, ConductingEquipment):
+    __slots__ = (
+        "beforeShCircuitHighestOperatingCurrent",
+        "beforeShCircuitHighestOperatingVoltage",
+        "beforeShortCircuitAnglePf",
+        "highSideMinOperatingU",
+        "isPartOfGeneratorUnit",
+        "operationalValuesConsidered",
+    )
+
 
     def __init__(self, rdfid, tpe):
         DiPole.__init__(self, rdfid, tpe)
@@ -2517,6 +2753,16 @@ class PowerTransformer(DiPole, ConductingEquipment):
 
 
 class EnergyConsumer(MonoPole, ConductingEquipment):
+    __slots__ = (
+        "pfixed",
+        "pfixedPct",
+        "qfixed",
+        "qfixedPct",
+        "p",
+        "q",
+        "LoadResponse",
+    )
+
 
     def __init__(self, rdfid, tpe):
         MonoPole.__init__(self, rdfid, tpe)
@@ -2627,6 +2873,13 @@ class EnergyConsumer(MonoPole, ConductingEquipment):
 
 
 class EnergyConsumerPhase(IdentifiedObject):
+    __slots__ = (
+        "phase",
+        "p",
+        "q",
+        "EnergyConsumer",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2647,6 +2900,8 @@ class EnergyConsumerPhase(IdentifiedObject):
 
 
 class ConformLoad(EnergyConsumer):
+    __slots__ = ("LoadGroup",)
+
 
     def __init__(self, rdfid, tpe):
         EnergyConsumer.__init__(self, rdfid, tpe)
@@ -2668,6 +2923,8 @@ class ConformLoad(EnergyConsumer):
 
 
 class ConformLoadGroup(IdentifiedObject):
+    __slots__ = ("SubLoadArea",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2687,6 +2944,8 @@ class ConformLoadGroup(IdentifiedObject):
 
 
 class SubLoadArea(IdentifiedObject):
+    __slots__ = ("LoadArea",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2706,12 +2965,16 @@ class SubLoadArea(IdentifiedObject):
 
 
 class LoadArea(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
 
 
 class NonConformLoad(EnergyConsumer):
+    __slots__ = ("LoadGroup",)
+
 
     def __init__(self, rdfid, tpe):
         EnergyConsumer.__init__(self, rdfid, tpe)
@@ -2733,6 +2996,8 @@ class NonConformLoad(EnergyConsumer):
 
 
 class NonConformLoadGroup(IdentifiedObject):
+    __slots__ = ("SubLoadArea",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2752,12 +3017,28 @@ class NonConformLoadGroup(IdentifiedObject):
 
 
 class LoadGroup(IdentifiedObject):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
 
 
 class LoadResponseCharacteristic(IdentifiedObject):
+    __slots__ = (
+        "exponentModel",
+        "pVoltageExponent",
+        "qVoltageExponent",
+        "pFrequencyExponent",
+        "qFrequencyExponent",
+        "pConstantCurrent",
+        "pConstantImpedance",
+        "pConstantPower",
+        "qConstantCurrent",
+        "qConstantImpedance",
+        "qConstantPower",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -2956,6 +3237,16 @@ class LoadResponseCharacteristic(IdentifiedObject):
 
 
 class RegulatingControl(IdentifiedObject):
+    __slots__ = (
+        "mode",
+        "discrete",
+        "enabled",
+        "targetDeadband",
+        "targetValue",
+        "targetValueUnitMultiplier",
+        "Terminal",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -3042,6 +3333,18 @@ class RegulatingControl(IdentifiedObject):
 
 
 class TapChanger(PowerSystemResource):
+    __slots__ = (
+        "controlEnabled",
+        "step",
+        "highStep",
+        "lowStep",
+        "ltcFlag",
+        "neutralStep",
+        "neutralU",
+        "normalStep",
+        "TapChangerControl",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -3145,6 +3448,13 @@ class TapChanger(PowerSystemResource):
 
 
 class RatioTapChanger(TapChanger):
+    __slots__ = (
+        "tculControlMode",
+        "stepVoltageIncrement",
+        "TransformerEnd",
+        "RatioTapChangerTable",
+    )
+
 
     def __init__(self, rdfid, tpe):
         TapChanger.__init__(self, rdfid, tpe)
@@ -3193,6 +3503,26 @@ class RatioTapChanger(TapChanger):
 
 
 class GeneratingUnit(IdentifiedObject):
+    __slots__ = (
+        "genControlSource",
+        "governorSCD",
+        "initialP",
+        "longPF",
+        "maximumAllowableSpinningReserve",
+        "maxOperatingP",
+        "minOperatingP",
+        "nominalP",
+        "ratedGrossMaxP",
+        "ratedGrossMinP",
+        "ratedNetMaxP",
+        "shortPF",
+        "startupCost",
+        "variableCost",
+        "totalEfficiency",
+        "normalPF",
+        "EquipmentContainer",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -3378,6 +3708,11 @@ class GeneratingUnit(IdentifiedObject):
 
 
 class HydroPump(Equipment):
+    __slots__ = (
+        "HydroPowerPlant",
+        "RotatingMachine",
+    )
+
 
     def __init__(self, rdfid, tpe):
         Equipment.__init__(self, rdfid, tpe)
@@ -3403,6 +3738,11 @@ class HydroPump(Equipment):
 
 
 class RegulatingCondEq(ConductingEquipment):
+    __slots__ = (
+        "controlEnabled",
+        "RegulatingControl",
+    )
+
 
     def __init__(self, rdfid, tpe):
         ConductingEquipment.__init__(self, rdfid, tpe)
@@ -3432,6 +3772,16 @@ class RegulatingCondEq(ConductingEquipment):
 
 
 class RotatingMachine(RegulatingCondEq):
+    __slots__ = (
+        "p",
+        "q",
+        "GeneratingUnit",
+        "HydroPump",
+        "ratedPowerFactor",
+        "ratedS",
+        "ratedU",
+    )
+
 
     def __init__(self, rdfid, tpe):
         RegulatingCondEq.__init__(self, rdfid, tpe)
@@ -3512,6 +3862,13 @@ class RotatingMachine(RegulatingCondEq):
 
 
 class SynchronousMachinePhase(IdentifiedObject):
+    __slots__ = (
+        "phase",
+        "p",
+        "q",
+        "SynchronousMachine",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -3532,6 +3889,31 @@ class SynchronousMachinePhase(IdentifiedObject):
 
 
 class SynchronousMachine(MonoPole, RotatingMachine):
+    __slots__ = (
+        "earthing",
+        "earthingStarPointR",
+        "earthingStarPointX",
+        "ikk",
+        "maxQ",
+        "minQ",
+        "mu",
+        "qPercent",
+        "r",
+        "r0",
+        "r2",
+        "x0",
+        "x2",
+        "satDirectSubtransX",
+        "satDirectSyncX",
+        "satDirectTransX",
+        "shortCircuitRotorType",
+        "type",
+        "voltageRegulationRange",
+        "operatingMode",
+        "referencePriority",
+        "InitialReactiveCapabilityCurve",
+    )
+
 
     def __init__(self, rdfid, tpe):
         MonoPole.__init__(self, rdfid, tpe)
@@ -3859,6 +4241,11 @@ class SynchronousMachine(MonoPole, RotatingMachine):
 
 
 class HydroGeneratingUnit(GeneratingUnit):
+    __slots__ = (
+        "energyConversionCapability",
+        "HydroPowerPlant",
+    )
+
 
     def __init__(self, rdfid, tpe):
         GeneratingUnit.__init__(self, rdfid, tpe)
@@ -3888,6 +4275,8 @@ class HydroGeneratingUnit(GeneratingUnit):
 
 
 class HydroPowerPlant(IdentifiedObject):
+    __slots__ = ("hydroPlantStorageType",)
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -3909,6 +4298,26 @@ class HydroPowerPlant(IdentifiedObject):
 
 
 class LinearShuntCompensator(MonoPole):
+    __slots__ = (
+        "bPerSection",
+        "gPerSection",
+        "b0PerSection",
+        "g0PerSection",
+        "aVRDelay",
+        "grounded",
+        "maximumSections",
+        "nomU",
+        "normalSections",
+        "switchOnCount",
+        "switchOnDate",
+        "voltageSensitivity",
+        "controlEnabled",
+        "sections",
+        "RegulatingControl",
+        "EquipmentContainer",
+        "BaseVoltage",
+    )
+
 
     def __init__(self, rdfid, tpe):
         MonoPole.__init__(self, rdfid, tpe)
@@ -4116,6 +4525,15 @@ class LinearShuntCompensator(MonoPole):
 
 
 class LinearShuntCompensatorPhase(IdentifiedObject):
+    __slots__ = (
+        "phase",
+        "bPerSection",
+        "gPerSection",
+        "sections",
+        "normalSections",
+        "ShuntCompensator",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -4146,6 +4564,8 @@ class LinearShuntCompensatorPhase(IdentifiedObject):
 
 
 class NuclearGeneratingUnit(GeneratingUnit):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         GeneratingUnit.__init__(self, rdfid, tpe)
@@ -4155,6 +4575,8 @@ class RatioTapChangerTable(IdentifiedObject):
     """
     Describes a curve for how the voltage magnitude and impedance varies with the tap step.
     """
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -4164,6 +4586,16 @@ class RatioTapChangerTablePoint(IdentifiedObject):
     """
     Describes each tap step in the ratio tap changer tabular curve.
     """
+    __slots__ = (
+        "ratio",
+        "step",
+        "r",
+        "x",
+        "b",
+        "g",
+        "RatioTapChangerTable",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -4262,6 +4694,13 @@ class ReactiveCapabilityCurve(IdentifiedObject):
     such as hydrogen pressure. The Y1 axis values represent reactive minimum and the Y2 axis
     values represent reactive maximum.
     """
+    __slots__ = (
+        "curveStyle",
+        "xUnit",
+        "y1Unit",
+        "y2Unit",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -4311,6 +4750,15 @@ class ReactiveCapabilityCurve(IdentifiedObject):
 
 
 class StaticVarCompensator(RegulatingCondEq):
+    __slots__ = (
+        "q",
+        "capacitiveRating",
+        "inductiveRating",
+        "slope",
+        "sVCControlMode",
+        "voltageSetPoint",
+    )
+
 
     def __init__(self, rdfid, tpe):
         RegulatingCondEq.__init__(self, rdfid, tpe)
@@ -4406,18 +4854,24 @@ class StaticVarCompensator(RegulatingCondEq):
 
 
 class TapChangerControl(RegulatingControl):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         RegulatingControl.__init__(self, rdfid, tpe)
 
 
 class ThermalGeneratingUnit(GeneratingUnit):
+    __slots__ = ()
+
 
     def __init__(self, rdfid, tpe):
         GeneratingUnit.__init__(self, rdfid, tpe)
 
 
 class WindGeneratingUnit(GeneratingUnit):
+    __slots__ = ("windGenUnitType",)
+
 
     def __init__(self, rdfid, tpe):
         GeneratingUnit.__init__(self, rdfid, tpe)
@@ -4437,6 +4891,16 @@ class WindGeneratingUnit(GeneratingUnit):
 
 
 class FullModel(IdentifiedObject):
+    __slots__ = (
+        "scenarioTime",
+        "created",
+        "version",
+        "profile",
+        "modelingAuthoritySet",
+        "DependentOn",
+        "longDependentOnPF",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)
@@ -4451,6 +4915,12 @@ class FullModel(IdentifiedObject):
 
 
 class TieFlow(IdentifiedObject):
+    __slots__ = (
+        "positiveFlowIn",
+        "ControlArea",
+        "Terminal",
+    )
+
 
     def __init__(self, rdfid, tpe):
         IdentifiedObject.__init__(self, rdfid, tpe)

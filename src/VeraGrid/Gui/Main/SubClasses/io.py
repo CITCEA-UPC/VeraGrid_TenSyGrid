@@ -3,11 +3,10 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import gc
 import os
 import pathlib
 import tempfile
-from typing import Union, List, Callable
+from typing import Dict, Union, List, Callable
 from PySide6 import QtWidgets, QtGui
 
 import VeraGrid.Gui.gui_functions as gf
@@ -29,6 +28,7 @@ from VeraGrid.Gui.FileDialogues.MatpowerDialogue.matpower_export import Matpower
 from VeraGrid.Gui.FileDialogues.UcteDialogue.ucte_export import UcteExportDialogue
 from VeraGrid.Gui.Main.SubClasses.Model.scenarios import ScenariosMain
 from VeraGrid.Gui.FileDialogues.ServerFileDialog import ServerFileDialogue
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, exec_dialog_safely, is_dialog_available
 from VeraGrid.Gui.FileDialogues.CGMESDialogue.cgmes_export import CgmesExportDialogue
 from VeraGrid.Gui.FileDialogues.PsseDialogue.psse_export import PsseExportDialogue
 from VeraGrid.Gui.FileDialogues.PsseDialogue.psse_import import PsseImportDialogue
@@ -37,11 +37,60 @@ from VeraGridEngine.Devices.multiverse import MultiVerse, ScenarioNode
 from VeraGridEngine.Compilers.circuit_to_pgm import PGM_AVAILABLE
 from VeraGridEngine.IO.file_save import FileSavingOptions
 from VeraGridEngine.IO.file_open import determine_file_type, FileOpen
+from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.enumerations import SimulationTypes, FileType
 from VeraGridEngine.IO.veragrid.contingency_parser import import_contingencies_from_json, export_contingencies_json_file
 from VeraGridEngine.IO.veragrid.catalogue import save_catalogue, load_catalogue
-from VeraGridEngine.Utils.ThirdParty.gslv.gslv_activation import install_gslv_license
+from VeraGridEngine.Compilers.Gslv.activation import install_gslv_license
 from VeraGrid.Gui.CatalogueElementsDialogue.catalogue_elements_dialogue import CatalogueElementsSelectionDialogue
+
+
+def get_session_tree_icon_map(session_data_dict: Dict[str, Dict[str, List[str]]]) -> Dict[str, str]:
+    """
+    Build an icon map for persisted session trees without polluting runtime icon keys.
+
+    Persisted session metadata stores study names as strings because they are file-format
+    identifiers used again when loading results from disk. The GUI converts those strings
+    to enums only for icon lookup.
+
+    :param session_data_dict: Persisted session tree data.
+    :return: Icon map keyed by persisted study name strings.
+    """
+    simulation_icons: Dict[SimulationTypes, str] = gf.get_simulation_tree_icons()
+    icon_map: Dict[str, str] = dict()
+    studies: Dict[str, List[str]]
+    study_name: str
+    simulation_type: SimulationTypes
+
+    for studies in session_data_dict.values():
+        for study_name in studies.keys():
+            try:
+                simulation_type = SimulationTypes(study_name)
+            except ValueError:
+                pass
+            else:
+                icon_path: str | None = simulation_icons.get(simulation_type, None)
+                if icon_path is not None:
+                    icon_map[study_name] = icon_path
+                else:
+                    pass
+
+    return icon_map
+
+
+def open_logger_requires_dialog(logger: Logger) -> bool:
+    """Return whether a successful file-open log needs a modal dialogue.
+
+    Informational import diagnostics remain available in the logger but do not
+    interrupt a successful GUI open. Warnings and errors remain visible because
+    they describe states that require review before using the imported circuit.
+
+    :param logger: File-open diagnostic logger to classify.
+    :return: ``True`` when the logger contains at least one warning or error.
+    """
+    warning_count: int = logger.warning_count()
+    error_count: int = logger.error_count()
+    return warning_count > 0 or error_count > 0
 
 
 class IoMain(ScenariosMain):
@@ -78,7 +127,6 @@ class IoMain(ScenariosMain):
         self.dgs_export_dialogue: DgsExportDialogue | None = None
         self.matpower_export_dialogue: MatpowerExportDialogue | None = None
         self.ucte_export_dialogue: UcteExportDialogue | None = None
-        self.server_file_dialogue: ServerFileDialogue | None = None
         self.remote_database_file_idtag: str = ""
         self.remote_database_model_idtag: str = ""
         self.remote_database_file_name: str = ""
@@ -229,24 +277,40 @@ class IoMain(ScenariosMain):
                     else:
                         quit_msg = self.tr("Are you sure that you want to quit the current grid and open a new one?"
                                            "\n If the process is cancelled the grid will remain.")
-                        reply = QtWidgets.QMessageBox.question(self, self.tr('Message'), quit_msg,
-                                                               QtWidgets.QMessageBox.StandardButton.Yes,
-                                                               QtWidgets.QMessageBox.StandardButton.No)
+                        reply: bool = yes_no_question(text=quit_msg, title=self.tr('Message'), parent=self)
 
-                        if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
+                        if reply:
                             self.open_file_now(filenames=file_names)
                 else:
                     # Just open the file
                     self.open_file_now(filenames=file_names)
 
-    def new_project_now(self, create_default_diagrams: bool = True) -> None:
+    def new_project_now(self, create_default_diagrams: bool = True) -> bool:
         """
         Reset the current GUI state and create one empty project immediately.
 
         :param create_default_diagrams: Whether to create the default schematic
             and map diagrams for the new empty circuit.
-        :return: None.
+        :return: ``True`` when the project was replaced; ``False`` when an open
+            dynamic editor cancelled the replacement.
         """
+        # Dynamic editors retain direct references to their circuit, devices,
+        # symbolic blocks and working copies. Close the complete detachable
+        # workspace family before invalidating those project-owned objects.
+        dynamic_editors_closed: bool = self.dynamic_editor_workspace_session.close_all_for_project_replacement(
+            parent=self,
+        )
+        if dynamic_editors_closed:
+            pass
+        else:
+            return False
+
+        if self.stop_all_threads():
+            pass
+        else:
+            self.show_warning_toast(self.tr("Some operations are still stopping. Try again after they finish."))
+            return False
+
         # clear the circuit model
         self.circuit = MultiCircuit()
 
@@ -266,12 +330,9 @@ class IoMain(ScenariosMain):
 
         self.ui.grid_name_line_edit.setText("")
 
-        # clear the simulation objects
-        for thread in self.get_all_threads():
-            thread = None
-
-        if self.analysis_dialogue is not None:
-            self.analysis_dialogue.close()
+        analysis_dialogue: QtWidgets.QMainWindow | QtWidgets.QDialog | None = self.window_manager.get("analysis_dialogue")
+        if is_dialog_available(dialog=analysis_dialogue):
+            analysis_dialogue.close()
 
         self.clear_stuff_running()
         self.clear_results()
@@ -281,7 +342,7 @@ class IoMain(ScenariosMain):
             self.add_map_diagram()
             self.set_diagram_widget(self.diagram_widgets_list[0])
 
-        self.collect_memory()
+        return True
 
     def new_project(self) -> None:
         """
@@ -291,11 +352,9 @@ class IoMain(ScenariosMain):
         """
         if self.circuit.valid_for_simulation() > 0:
             quit_msg = self.tr("Are you sure that you want to quit the current grid and create a new one?")
-            reply = QtWidgets.QMessageBox.question(self, self.tr('Message'), quit_msg,
-                                                   QtWidgets.QMessageBox.StandardButton.Yes,
-                                                   QtWidgets.QMessageBox.StandardButton.No)
+            reply: bool = yes_no_question(text=quit_msg, title=self.tr('Message'), parent=self)
 
-            if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
+            if reply:
                 self.new_project_now(create_default_diagrams=True)
 
     def open_file(self) -> None:
@@ -311,11 +370,9 @@ class IoMain(ScenariosMain):
             if self.circuit.valid_for_simulation() > 0:
                 quit_msg = self.tr("Are you sure that you want to quit the current grid and open a new one?"
                                    "\n If the process is cancelled the grid will remain.")
-                reply = QtWidgets.QMessageBox.question(self, self.tr('Message'), quit_msg,
-                                                       QtWidgets.QMessageBox.StandardButton.Yes,
-                                                       QtWidgets.QMessageBox.StandardButton.No)
+                reply: bool = yes_no_question(text=quit_msg, title=self.tr('Message'), parent=self)
 
-                if reply == QtWidgets.QMessageBox.StandardButton.Yes.value:
+                if reply:
                     self.open_file_threaded()
                 else:
                     pass
@@ -332,8 +389,8 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.server_file_dialogue = ServerFileDialogue(parent=self, app=self)
-        self.server_file_dialogue.exec()
+        server_file_dialogue: ServerFileDialogue = ServerFileDialogue(parent=self, app=self)
+        exec_dialog_safely(dialog=server_file_dialogue)
 
     def clear_remote_database_context(self) -> None:
         """
@@ -571,7 +628,7 @@ class IoMain(ScenariosMain):
                         grid=latest_remote_circuit.copy(),
                         diff=merged_circuit,
                     )
-                    merge_dialogue.exec()
+                    exec_dialog_safely(dialog=merge_dialogue)
 
                     if not merge_dialogue.merged_grid:
                         self.show_info_toast(self.tr("Server save cancelled."))
@@ -687,7 +744,7 @@ class IoMain(ScenariosMain):
                                          filter=self.tr("Formats ({files_types})").format(files_types=files_types))
         dialogue.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)
 
-        if dialogue.exec():
+        if exec_dialog_safely(dialog=dialogue):
             filenames = dialogue.selectedFiles()
             self.open_file_now(filenames, post_function)
 
@@ -719,10 +776,13 @@ class IoMain(ScenariosMain):
                               title=self.tr("File opening"))
                     return
 
-            self.file_name = normalized_filenames[0]
+            selected_file_name: str = normalized_filenames[0]
 
-            # store the working directory
-            self.project_directory = os.path.dirname(self.file_name)
+            # Store the selected directory immediately, but keep the current
+            # project's filename until the loaded circuit is accepted. This
+            # preserves the old project identity if a dynamic editor cancels
+            # the replacement after parsing has completed.
+            self.project_directory = os.path.dirname(selected_file_name)
 
             # lock the ui
             self.LOCK()
@@ -735,24 +795,31 @@ class IoMain(ScenariosMain):
             options.file_type = determine_file_type(file_name)
 
             if options.file_type is None and bool_prompt_to_ask_if_unclear:
-                self.file_selector = FileTypeSelector(file_name=file_name)
-                self.file_selector.exec()
-                options.file_type = self.file_selector.file_type
+                file_selector: FileTypeSelector = FileTypeSelector(file_name=file_name)
+                try:
+                    exec_dialog_safely(dialog=file_selector)
+                    options.file_type = file_selector.file_type
+                finally:
+                    delete_dialog_safely(dialog=file_selector)
 
                 if options.file_type == FileType.CGMES:
-                    self.cgmes_import_dialogue = CgmesImportDialogue(app=self, options=options)
-                    self.cgmes_import_dialogue.exec()
+                    cgmes_import_dialogue: CgmesImportDialogue = CgmesImportDialogue(app=self, options=options)
+                    exec_dialog_safely(dialog=cgmes_import_dialogue)
+                else:
+                    pass
 
             elif options.file_type == FileType.PSSE_raw or options.file_type == FileType.PSSE_rawx:
-                self.psse_import_dialogue = PsseImportDialogue(app=self, options=options)
-                self.psse_import_dialogue.exec()
+                psse_import_dialogue: PsseImportDialogue = PsseImportDialogue(app=self, options=options)
+                exec_dialog_safely(dialog=psse_import_dialogue)
                 # NOTE: options will be modified inside
             elif options.file_type == FileType.CGMES:
-                self.cgmes_import_dialogue = CgmesImportDialogue(app=self, options=options)
-                self.cgmes_import_dialogue.exec()
+                cgmes_import_dialogue = CgmesImportDialogue(app=self, options=options)
+                exec_dialog_safely(dialog=cgmes_import_dialogue)
             elif options.file_type == FileType.DGS:
-                self.dgs_import_dialogue = DgsImportDialogue(app=self, options=options)
-                self.dgs_import_dialogue.exec()
+                dgs_import_dialogue: DgsImportDialogue = DgsImportDialogue(options=options)
+                exec_dialog_safely(dialog=dgs_import_dialogue)
+            else:
+                pass
 
             # create thread
             self.open_file_thread_object = filedrv.FileOpenThread(
@@ -760,16 +827,17 @@ class IoMain(ScenariosMain):
                 previous_circuit=self.circuit,
                 options=options
             )
+            self.open_file_thread_object.setParent(self)
 
             # make connections
             self.open_file_thread_object.progress_signal.connect(self.ui.progressBar.setValue)
             self.open_file_thread_object.progress_text.connect(self.ui.progress_label.setText)
-            self.open_file_thread_object.done_signal.connect(self.UNLOCK)
+            self.open_file_thread_object.finished.connect(self.UNLOCK)
 
             if post_function is None:
-                self.open_file_thread_object.done_signal.connect(self.post_open_file)
+                self.open_file_thread_object.finished.connect(self.post_open_file)
             else:
-                self.open_file_thread_object.done_signal.connect(post_function)
+                self.open_file_thread_object.finished.connect(post_function)
 
             # thread start
             self.open_file_thread_object.start()
@@ -797,8 +865,20 @@ class IoMain(ScenariosMain):
 
             if self.open_file_thread_object.valid:
 
-                # assign the loaded circuit
-                self.new_project_now(create_default_diagrams=False)
+                # A successfully parsed file must not coexist with editors that
+                # retain devices from the previous circuit. If the user keeps
+                # unapplied editor changes, leave the old project untouched.
+                project_replacement_accepted: bool = self.new_project_now(create_default_diagrams=False)
+                if project_replacement_accepted:
+                    pass
+                else:
+                    self.show_info_toast(
+                        self.tr(
+                            "The file was loaded but the current project was kept "
+                            "because closing a dynamic editor was cancelled."
+                        )
+                    )
+                    return
 
                 if self.open_file_thread_object.multiverse is not None:
                     # A multiverse file already contains the complete scenario tree and active
@@ -851,7 +931,11 @@ class IoMain(ScenariosMain):
 
                 # get the session tree structure
                 session_data_dict = self.open_file_thread_object.get_session_tree()
-                mdl = gf.get_tree_model(session_data_dict, self.tr('Sessions'), icons=gf.get_simulation_tree_icons())
+                mdl = gf.get_tree_model(
+                    session_data_dict,
+                    self.tr('Sessions'),
+                    icons=get_session_tree_icon_map(session_data_dict=session_data_dict)
+                )
                 self.ui.diskSessionsTreeView.setModel(mdl)
 
                 # apply the GUI settings if found:
@@ -873,22 +957,30 @@ class IoMain(ScenariosMain):
                                                    text=self.tr("Do you want to open the Rosetta CGMES browser?"))
 
                     if show_rosetta:
-                        self.rosetta_gui = RosetaExplorerGUI()
-                        self.rosetta_gui.set_grid_model(self.open_file_thread_object.cgmes_circuit)
-                        self.rosetta_gui.set_logger(self.open_file_thread_object.cgmes_logger)
-                        self.rosetta_gui.update_combo_boxes()
-                        self.rosetta_gui.show()
+                        rosetta_window: QtWidgets.QWidget | None = self.window_manager.get("rosseta")
+                        if isinstance(rosetta_window, RosetaExplorerGUI) and is_dialog_available(dialog=rosetta_window):
+                            rosetta_gui: RosetaExplorerGUI = rosetta_window
+                        else:
+                            rosetta_gui = RosetaExplorerGUI()
+                        rosetta_gui.set_grid_model(self.open_file_thread_object.cgmes_circuit)
+                        rosetta_gui.set_logger(self.open_file_thread_object.cgmes_logger)
+                        rosetta_gui.update_combo_boxes()
+                        self.show_dialogue(win=rosetta_gui, key="rosseta")
                     else:
                         # else, show the logger if it is necessary
-                        if len(self.open_file_thread_object.logger) > 0:
+                        if open_logger_requires_dialog(self.open_file_thread_object.logger):
                             dlg = LogsDialogue(self.tr('Open CGMES file logger'), self.open_file_thread_object.logger)
-                            dlg.exec()
+                            exec_dialog_safely(dialog=dlg)
+                        else:
+                            pass
 
                 else:
                     # else, show the logger if it is necessary
-                    if len(self.open_file_thread_object.logger) > 0:
+                    if open_logger_requires_dialog(self.open_file_thread_object.logger):
                         dlg = LogsDialogue(self.tr('Open file logger'), self.open_file_thread_object.logger)
-                        dlg.exec()
+                        exec_dialog_safely(dialog=dlg)
+                    else:
+                        pass
 
                 if self._pending_remote_database_context is not None:
                     self.remote_database_file_idtag = str(self._pending_remote_database_context["file_idtag"])
@@ -907,7 +999,7 @@ class IoMain(ScenariosMain):
                 # else, show the logger if it is necessary
                 if len(self.open_file_thread_object.logger) > 0:
                     dlg = LogsDialogue(self.tr('Open file logger'), self.open_file_thread_object.logger)
-                    dlg.exec()
+                    exec_dialog_safely(dialog=dlg)
         else:
             # center nodes
             diagram = self.get_selected_diagram_widget()
@@ -917,7 +1009,6 @@ class IoMain(ScenariosMain):
 
         self._pending_remote_database_context = None
         self.cleanup_temporary_remote_downloads()
-        self.collect_memory()
         self.setup_time_sliders()
         self.get_circuit_snapshot_datetime()
         self.change_theme_mode()
@@ -1008,15 +1099,17 @@ class IoMain(ScenariosMain):
 
             new_circuit = self.open_file_thread_object.circuit
 
-            if len(self.open_file_thread_object.logger) > 0:
+            if open_logger_requires_dialog(self.open_file_thread_object.logger):
                 dlg = LogsDialogue(self.tr('Open file logger'),
                                    self.open_file_thread_object.logger)
-                dlg.exec()
+                exec_dialog_safely(dialog=dlg)
+            else:
+                pass
 
             if self.open_file_thread_object.valid:
 
                 merge_dlg = GridMergeDialogue(grid=self.circuit, diff=new_circuit)
-                merge_dlg.exec_()
+                exec_dialog_safely(dialog=merge_dlg)
 
                 if merge_dlg.added_grid:
                     # Create a blank diagram and add to it
@@ -1031,7 +1124,7 @@ class IoMain(ScenariosMain):
                                                   question=self.tr("How do you want to represent the merged grid?"),
                                                   answer1=self.tr("Create new diagram"),
                                                   answer2=self.tr("Add to current diagram"))
-                    dlg3.exec()
+                    exec_dialog_safely(dialog=dlg3)
 
                     if dlg3.accepted_answer == 1:
                         # Create a blank diagram and add to it
@@ -1081,7 +1174,7 @@ class IoMain(ScenariosMain):
         :return: None.
         """
         dlg = GridDiffDialogue(grid=self.circuit)
-        dlg.exec()
+        exec_dialog_safely(dialog=dlg)
 
     def save_file_as(self) -> None:
         """
@@ -1092,6 +1185,17 @@ class IoMain(ScenariosMain):
         # by deleting the file_name, the save_file function will ask for it
         self.file_name = ''
         self.save_file()
+
+    @staticmethod
+    def is_direct_veragrid_save_path(file_name: str) -> bool:
+        """
+        Check whether the current file path is safe for direct VeraGrid overwrite.
+
+        :param file_name: Current GUI file path.
+        :return: ``True`` only for native VeraGrid archive files.
+        """
+        file_extension: str = pathlib.Path(file_name).suffix.lower()
+        return file_extension in (".veragrid", ".gridcal")
 
     def save_file(self) -> None:
         """
@@ -1113,7 +1217,7 @@ class IoMain(ScenariosMain):
             # gather comments
             self.circuit.comments = self.ui.comments_textEdit.toPlainText()
 
-            if self.file_name == '':
+            if self.file_name == '' or not self.is_direct_veragrid_save_path(file_name=self.file_name):
                 # if the global file_name is empty, ask where to save
                 fname = os.path.join(self.project_directory, self.ui.grid_name_line_edit.text())
 
@@ -1184,12 +1288,13 @@ class IoMain(ScenariosMain):
             # lock the ui
             self.LOCK()
 
-            # check not to kill threads avoiding segmentation faults
+            # A blocking save cannot be cancelled by QThread.quit(); refusing a
+            # second save keeps two serializers away from the same circuit.
             if self.save_file_thread_object is not None:
                 if self.save_file_thread_object.isRunning():
-                    ok = yes_no_question(self.tr("There is a saving procedure running.\nCancel and retry?"))
-                    if ok:
-                        self.save_file_thread_object.quit()
+                    warning_msg(self.tr("The current save is still finishing. Please retry when it is done."))
+                    self.UNLOCK()
+                    return
 
             options2 = self.get_file_save_options() if options is None else options
             options2.type_selected = type_selected
@@ -1200,12 +1305,13 @@ class IoMain(ScenariosMain):
                 file_name=filename,
                 options=options2
             )
+            self.save_file_thread_object.setParent(self)
 
             # make connections
             self.save_file_thread_object.progress_signal.connect(self.ui.progressBar.setValue)
             self.save_file_thread_object.progress_text.connect(self.ui.progress_label.setText)
-            self.save_file_thread_object.done_signal.connect(self.UNLOCK)
-            self.save_file_thread_object.done_signal.connect(self.post_file_save)
+            self.save_file_thread_object.finished.connect(self.UNLOCK)
+            self.save_file_thread_object.finished.connect(self.post_file_save)
 
             # thread start
             self.save_file_thread_object.start()
@@ -1224,15 +1330,14 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        # Re-enable the cyclic GC that was disabled in save_file_now() before the worker
-        # thread started. This slot runs on the main thread (queued from done_signal), so any
-        # collection it now allows will finalize Qt objects on the correct thread.
-        gc.enable()
-
         if self.save_file_thread_object.logger is not None:
             if len(self.save_file_thread_object.logger) > 0:
-                dlg = LogsDialogue(self.tr('Save file logger'), self.save_file_thread_object.logger)
-                dlg.exec()
+                dlg: LogsDialogue = LogsDialogue(self.tr('Save file logger'), self.save_file_thread_object.logger)
+                exec_dialog_safely(dialog=dlg)
+            else:
+                pass
+        else:
+            pass
 
         self.stuff_running_now.remove(SimulationTypes.FileSave)
 
@@ -1243,11 +1348,12 @@ class IoMain(ScenariosMain):
 
         # get the session tree structure
         session_data_dict = self.save_file_thread_object.get_session_tree()
-        mdl = gf.get_tree_model(session_data_dict, self.tr('Sessions'), icons=gf.get_simulation_tree_icons())
+        mdl = gf.get_tree_model(
+            session_data_dict,
+            self.tr('Sessions'),
+            icons=get_session_tree_icon_map(session_data_dict=session_data_dict)
+        )
         self.ui.diskSessionsTreeView.setModel(mdl)
-
-        # call the garbage collector to free memory
-        self.collect_memory()
 
     def grid_generator(self) -> None:
         """
@@ -1255,23 +1361,28 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.grid_generator_dialogue = GridGeneratorGUI(parent=self)
-        self.grid_generator_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
-        self.grid_generator_dialogue.exec()
+        grid_generator_dialogue: GridGeneratorGUI = GridGeneratorGUI(parent=self)
+        grid_generator_dialogue.resize(int(1.61 * 600.0), 550)  # golden ratio
+        try:
+            exec_dialog_safely(dialog=grid_generator_dialogue)
+            generator_applied: bool = grid_generator_dialogue.applied
+            generated_circuit: MultiCircuit = grid_generator_dialogue.circuit
+        finally:
+            delete_dialog_safely(dialog=grid_generator_dialogue)
 
-        if self.grid_generator_dialogue.applied:
+        if generator_applied:
 
             if self.circuit.valid_for_simulation() > 0:
-                reply = QtWidgets.QMessageBox.question(self, self.tr('Message'),
-                                                       self.tr('Are you sure that you want to delete '
-                                                               'the current grid and replace it?'),
-                                                       QtWidgets.QMessageBox.StandardButton.Yes,
-                                                       QtWidgets.QMessageBox.StandardButton.No)
+                reply: bool = yes_no_question(
+                    text=self.tr('Are you sure that you want to delete the current grid and replace it?'),
+                    title=self.tr('Message'),
+                    parent=self,
+                )
 
-                if reply == QtWidgets.QMessageBox.StandardButton.No:
+                if not reply:
                     return
 
-            self.circuit = self.grid_generator_dialogue.circuit
+            self.circuit = generated_circuit
 
             # create schematic
             self.redraw_current_diagram()
@@ -1308,9 +1419,17 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.coordinates_window = CoordinatesInputGUI(self, self.circuit.get_buses())
-        self.coordinates_window.exec()
-        self.set_xy_from_lat_lon()
+        coordinates_window: CoordinatesInputGUI = CoordinatesInputGUI(grid=self.circuit, parent=self)
+        try:
+            exec_dialog_safely(dialog=coordinates_window)
+            coordinates_accepted: bool = coordinates_window.was_accepted
+        finally:
+            delete_dialog_safely(dialog=coordinates_window)
+
+        if coordinates_accepted:
+            self.set_xy_from_lat_lon()
+        else:
+            pass
 
     def export_object_profiles(self) -> None:
         """
@@ -1363,10 +1482,11 @@ class IoMain(ScenariosMain):
                 self.export_all_thread_object = exprtdrv.ExportAllThread(circuit=self.circuit,
                                                                          drivers_list=available_results,
                                                                          file_name=filename)
+                self.export_all_thread_object.setParent(self)
 
                 self.export_all_thread_object.progress_signal.connect(self.ui.progressBar.setValue)
                 self.export_all_thread_object.progress_text.connect(self.ui.progress_label.setText)
-                self.export_all_thread_object.done_signal.connect(self.post_export_all)
+                self.export_all_thread_object.finished.connect(self.post_export_all)
                 self.export_all_thread_object.start()
         else:
             warning_msg(self.tr('There are no results available :/'))
@@ -1494,7 +1614,7 @@ class IoMain(ScenariosMain):
 
             if len(logger) > 0:
                 dlg = LogsDialogue(self.tr('Contingencies import'), logger)
-                dlg.exec()
+                exec_dialog_safely(dialog=dlg)
 
     def export_contingencies(self) -> None:
         """
@@ -1526,7 +1646,7 @@ class IoMain(ScenariosMain):
         """
         if isinstance(self, QtWidgets.QWidget):
             dlg = CatalogueElementsSelectionDialogue(parent=self, circuit=self.circuit)
-            dlg.exec()
+            exec_dialog_safely(dialog=dlg)
             return None
 
         self.refresh_catalogue_dependent_views()
@@ -1602,7 +1722,6 @@ class IoMain(ScenariosMain):
         self.update_date_dependent_combos()
         self.update_from_to_list_views()
         self.clear_results()
-        self.collect_memory()
         self.setup_time_sliders()
         self.get_circuit_snapshot_datetime()
         self.change_theme_mode()
@@ -1613,8 +1732,19 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.psse_export_dialogue = PsseExportDialogue(app=self)
-        self.psse_export_dialogue.show()
+        dialog: PsseExportDialogue | None = self.psse_export_dialogue
+        if is_dialog_available(dialog=dialog):
+            pass
+        else:
+            dialog = PsseExportDialogue(app=self)
+            self.psse_export_dialogue = dialog
+
+        if dialog is not None:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+        else:
+            pass
 
     def export_power_factory(self) -> None:
         """
@@ -1622,8 +1752,19 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.dgs_export_dialogue = DgsExportDialogue(app=self)
-        self.dgs_export_dialogue.show()
+        dialog: DgsExportDialogue | None = self.dgs_export_dialogue
+        if is_dialog_available(dialog=dialog):
+            pass
+        else:
+            dialog = DgsExportDialogue(app=self)
+            self.dgs_export_dialogue = dialog
+
+        if dialog is not None:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+        else:
+            pass
 
     def export_matpower(self) -> None:
         """
@@ -1631,8 +1772,19 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.matpower_export_dialogue = MatpowerExportDialogue(app=self)
-        self.matpower_export_dialogue.show()
+        dialog: MatpowerExportDialogue | None = self.matpower_export_dialogue
+        if is_dialog_available(dialog=dialog):
+            pass
+        else:
+            dialog = MatpowerExportDialogue(app=self)
+            self.matpower_export_dialogue = dialog
+
+        if dialog is not None:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+        else:
+            pass
 
     def export_ucte(self) -> None:
         """
@@ -1640,8 +1792,19 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.ucte_export_dialogue = UcteExportDialogue(app=self)
-        self.ucte_export_dialogue.show()
+        dialog: UcteExportDialogue | None = self.ucte_export_dialogue
+        if is_dialog_available(dialog=dialog):
+            pass
+        else:
+            dialog = UcteExportDialogue(app=self)
+            self.ucte_export_dialogue = dialog
+
+        if dialog is not None:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+        else:
+            pass
 
     def export_cim(self) -> None:
         """
@@ -1682,8 +1845,19 @@ class IoMain(ScenariosMain):
 
         :return: None.
         """
-        self.cgmes_dialogue = CgmesExportDialogue(app=self)
-        self.cgmes_dialogue.show()
+        dialog: CgmesExportDialogue | None = self.cgmes_dialogue
+        if is_dialog_available(dialog=dialog):
+            pass
+        else:
+            dialog = CgmesExportDialogue(app=self)
+            self.cgmes_dialogue = dialog
+
+        if dialog is not None:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+        else:
+            pass
 
     def export_power_grid_models(self) -> None:
         """

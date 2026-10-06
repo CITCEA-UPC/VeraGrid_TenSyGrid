@@ -18,6 +18,15 @@ class InvestmentsEvaluationOptions(OptionsTemplate):
     Investments Evaluation Options
     """
 
+    __slots__ = (
+        "max_eval",
+        "pf_options",
+        "opf_options",
+        "solver",
+        "objf_tpe",
+        "plugin_fcn_ptr",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="max_eval", tpe=int),
         GCProp(key="pf_options", tpe=DeviceType.SimulationOptionsDevice),

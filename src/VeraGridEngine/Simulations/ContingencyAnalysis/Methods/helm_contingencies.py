@@ -126,24 +126,26 @@ class HelmVariations:
     """
     Class to quickly evaluate topological variations based on HELM coefficients
     """
+    __slots__ = (
+        "numerical_circuit",
+        "islands",
+        "preparations",
+    )
 
-    def __init__(self, numerical_circuit: NumericalCircuit):
+    def __init__(self, numerical_circuit: NumericalCircuit) -> None:
         """
         Constructor
-        :param numerical_circuit:
+
+        :param numerical_circuit: Numerical circuit instance
         """
-
-        self.numerical_circuit = numerical_circuit
-
-        self.islands = self.numerical_circuit.split_into_islands()
-
+        self.numerical_circuit: NumericalCircuit = numerical_circuit
+        self.islands: List[NumericalCircuit] = self.numerical_circuit.split_into_islands()
         self.preparations: List[HelmPreparation] = list()
-
         self.initialize()
 
-    def initialize(self):
+    def initialize(self) -> None:
         """
-
+        Initialize HELM preparations for each island.
         """
         # compose the HVDC power Injections
         Shvdc, _, _, _, _, _ = self.numerical_circuit.hvdc_data.get_power(Sbase=self.numerical_circuit.Sbase,

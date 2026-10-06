@@ -16,6 +16,23 @@ class HvdcData(BranchParentData):
     HvdcData
     """
 
+    __slots__ = (
+        "dispatchable",
+        "r",
+        "Pset",
+        "Pt",
+        "Vset_f",
+        "Vset_t",
+        "Vnf",
+        "Vnt",
+        "angle_droop",
+        "control_mode_int",
+        "Qmin_f",
+        "Qmax_f",
+        "Qmin_t",
+        "Qmax_t",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Hvdc data arrays
@@ -62,7 +79,6 @@ class HvdcData(BranchParentData):
         """
         data, bus_map = super().slice(elm_idx, bus_idx, bus_map, logger)
         data: HvdcData = data
-        data.__class__ = HvdcData
 
         data.dispatchable = self.dispatchable[elm_idx]
 
@@ -107,7 +123,6 @@ class HvdcData(BranchParentData):
         """
 
         data: HvdcData = super().copy()
-        data.__class__ = HvdcData
 
         data.dispatchable = self.dispatchable.copy()
 

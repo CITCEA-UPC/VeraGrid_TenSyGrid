@@ -5,11 +5,11 @@
 from __future__ import annotations
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from VeraGrid.Gui.pandas_model import PandasModel
 from VeraGrid.Gui.Main.SubClasses.Model.compiled_arrays_model import CompiledArraysModule
 from VeraGrid.Gui.Main.SubClasses.Server.server import ServerMain
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 import VeraGrid.Gui.gui_functions as gf
 
 from VeraGridEngine.enumerations import BranchImpedanceMode
@@ -101,32 +101,65 @@ class CompiledArraysMain(ServerMain):
         self.show_info_toast('Copied!')
 
     def plot_simulation_objects_data(self):
-        """
-        Plot the arrays of the compiled arrays view
+        """Show the selected compiled array in one retained native chart dialog.
+
+        :return: None.
         """
         mdl = self.ui.simulationDataStructureTableView.model()
-        data = mdl.data_c
-
-        # declare figure
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)
+        data: np.ndarray = np.asarray(mdl.data_c)
+        plot_dialogue: PlotDialogue = PlotDialogue(title=self.tr("Array plot"), parent=self)
 
         if mdl.is_2d():
-            ax1.spy(data)
+            row_indices: np.ndarray
+            column_indices: np.ndarray
+            row_indices, column_indices = np.nonzero(data)
+            maximum_points: int = 200000
+            if len(row_indices) > maximum_points:
+                point_stride: int = int(np.ceil(float(len(row_indices)) / float(maximum_points)))
+                retained_rows: np.ndarray = row_indices[::point_stride]
+                retained_columns: np.ndarray = column_indices[::point_stride]
+            else:
+                retained_rows = row_indices
+                retained_columns = column_indices
 
+            if len(retained_rows) > 0:
+                plot_dialogue.chart.add_scatter_series(
+                    name=self.tr("Nonzero entries"),
+                    x_values=retained_columns,
+                    y_values=retained_rows,
+                    color="#2563eb",
+                )
+                plot_dialogue.chart.set_axis_titles(self.tr("Column index"), self.tr("Row index"))
+                plot_dialogue.chart.setTitle(self.tr("Array sparsity pattern"))
+                self.register_open_plot_dialog(plot_dialogue)
+                plot_dialogue.show()
+            else:
+                plot_dialogue.reject()
+                self.show_warning_toast(self.tr("The selected array has no nonzero entries to plot."))
         else:
             if mdl.is_complex():
-                ax1.scatter(data.real, data.imag)
-                ax1.set_xlabel('Real')
-                ax1.set_ylabel('Imag')
+                plot_dialogue.chart.add_scatter_series(
+                    name=self.tr("Array values"),
+                    x_values=np.asarray(data.real, dtype=float).reshape(-1),
+                    y_values=np.asarray(data.imag, dtype=float).reshape(-1),
+                    color="#7c3aed",
+                )
+                plot_dialogue.chart.set_axis_titles(self.tr("Real"), self.tr("Imaginary"))
+                plot_dialogue.chart.setTitle(self.tr("Complex array values"))
             else:
-                arr = np.arange(data.shape[0])
-                ax1.scatter(arr, data)
-                ax1.set_xlabel('Position')
-                ax1.set_ylabel('Value')
+                values: np.ndarray = np.asarray(data, dtype=float).reshape(-1)
+                positions: np.ndarray = np.arange(len(values), dtype=float)
+                plot_dialogue.chart.add_scatter_series(
+                    name=self.tr("Array values"),
+                    x_values=positions,
+                    y_values=values,
+                    color="#2563eb",
+                )
+                plot_dialogue.chart.set_axis_titles(self.tr("Position"), self.tr("Value"))
+                plot_dialogue.chart.setTitle(self.tr("Array values"))
 
-        fig.tight_layout()
-        plt.show()
+            self.register_open_plot_dialog(plot_dialogue)
+            plot_dialogue.show()
 
     def recompile_circuits_for_display(self):
         """

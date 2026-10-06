@@ -7,17 +7,15 @@ from __future__ import annotations
 
 from typing import Union
 
-import matplotlib.colors as plt_colors
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 
 from VeraGridEngine.Simulations.Clustering.clustering_results import ClusteringResults
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsProperty, ResultsTemplate
 from VeraGridEngine.basic_structures import BoolVec, CxMat, DateVec, IntVec, Mat, StrVec, Vec
-from VeraGridEngine.enumerations import DeviceType, ResultTypes, StudyResultsType
+from VeraGridEngine.enumerations import DeviceType, ResultTypes, StudyResultsType, ResultTablePlotType
 
 
 def _build_time_series_results_table(
@@ -28,6 +26,7 @@ def _build_time_series_results_table(
     title: str,
     ylabel: str,
     units: str,
+    plot_type: ResultTablePlotType = ResultTablePlotType.SERIES,
 ) -> ResultsTable:
     """
     Build one standard time-series results table.
@@ -39,6 +38,7 @@ def _build_time_series_results_table(
     :param title: Table title.
     :param ylabel: Plot y-axis label.
     :param units: Engineering units label.
+    :param plot_type: Native rendering contract for this table.
     :return: Time-indexed results table.
     """
     return ResultsTable(
@@ -50,6 +50,7 @@ def _build_time_series_results_table(
         title=title,
         ylabel=ylabel,
         units=units,
+        plot_type=plot_type,
     )
 
 
@@ -588,28 +589,19 @@ class PowerFlowTimeSeriesResults3Ph(ResultsTemplate):
             va_a: np.ndarray = np.angle(self.voltage_A, deg=True)
             va_b: np.ndarray = np.angle(self.voltage_B, deg=True)
             va_c: np.ndarray = np.angle(self.voltage_C, deg=True)
-            va_rad: np.ndarray = np.concatenate((np.angle(self.voltage_A, deg=False).reshape(-1), np.angle(self.voltage_B, deg=False).reshape(-1), np.angle(self.voltage_C, deg=False).reshape(-1)))
-            vm_flat: np.ndarray = np.concatenate((vm_a.reshape(-1), vm_b.reshape(-1), vm_c.reshape(-1)))
-            columns: list[str] = list()
+            magnitude_columns: list[str] = list()
+            angle_columns: list[str] = list()
             bus_name: str
             for bus_name in self.bus_names:
-                columns.append(f"{bus_name} |Va|")
-                columns.append(f"{bus_name} |Vb|")
-                columns.append(f"{bus_name} |Vc|")
-                columns.append(f"{bus_name} angle A (deg)")
-                columns.append(f"{bus_name} angle B (deg)")
-                columns.append(f"{bus_name} angle C (deg)")
-            if self.plotting_allowed():
-                plt.ion()
-                color_norm = plt_colors.LogNorm()
-                fig = plt.figure(figsize=(8, 6))
-                ax3 = plt.subplot(1, 1, 1, projection="polar")
-                ax3.scatter(va_rad, vm_flat, c=vm_flat, norm=color_norm)
-                fig.suptitle(result_type.value)
-                plt.tight_layout()
-                plt.show()
+                magnitude_columns.append(f"{bus_name} |Va|")
+                magnitude_columns.append(f"{bus_name} |Vb|")
+                magnitude_columns.append(f"{bus_name} |Vc|")
+                angle_columns.append(f"{bus_name} angle A (deg)")
+                angle_columns.append(f"{bus_name} angle B (deg)")
+                angle_columns.append(f"{bus_name} angle C (deg)")
+            columns: list[str] = magnitude_columns + angle_columns
             data: np.ndarray = np.concatenate((vm_a, vm_b, vm_c, va_a, va_b, va_c), axis=1)
-            return _build_time_series_results_table(data, self.time_array, np.array(columns), DeviceType.NoDevice, result_type.value, "(p.u., deg)", "(p.u., deg)")
+            return _build_time_series_results_table(data, self.time_array, np.array(columns), DeviceType.NoDevice, result_type.value, "(p.u., deg)", "(p.u., deg)", ResultTablePlotType.POLAR)
         elif result_type == ResultTypes.BranchActivePowerFromA:
             return _build_time_series_results_table(self.Sf_A.real, self.time_array, self.branch_names, DeviceType.BranchDevice, result_type.value, "(MW)", "(MW)")
         elif result_type == ResultTypes.BranchActivePowerFromB:

@@ -11,6 +11,9 @@ from VeraGridEngine.IO.raw.versioned.v35.load import RawLoadV35
 
 class RawLoadV36(RawLoadV35):
     """PSSE v36 typed object inheriting v35."""
+    __slots__ = (
+        "NAME",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='NAME', rawx_key='name', class_type=str, description='Load name', max_chars=40),

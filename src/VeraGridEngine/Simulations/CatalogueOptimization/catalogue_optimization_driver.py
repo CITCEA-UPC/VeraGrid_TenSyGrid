@@ -33,6 +33,11 @@ class CatalogueOptimizationOptions(OptionsTemplate):
     currently exposes for catalogue optimization (max evaluations + power flow options).
     """
 
+    __slots__ = (
+        "max_eval",
+        "pf_options",
+    )
+
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="max_eval", tpe=int),
         GCProp(key="pf_options", tpe=DeviceType.SimulationOptionsDevice),
@@ -242,6 +247,7 @@ class CatalogueOptimizationDriver(DriverTemplate):
         Entry point invoked by the session thread; runs NSGA-3 and finalises the results.
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
 
         self.logger.add_info(msg="Solver", value="NSGA-3")
         self.logger.add_info(msg="Max evaluations", value=f"{self.options.max_eval}")

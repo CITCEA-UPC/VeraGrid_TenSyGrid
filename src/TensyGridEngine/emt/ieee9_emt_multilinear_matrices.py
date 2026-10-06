@@ -7,18 +7,25 @@ from __future__ import annotations
 
 from scipy import sparse
 
-from trunk.tensygrid.emt.ieee9_emt_multilinear_simulation import attach_multilinear_emt_models
-from trunk.tensygrid.emt.ieee9_emt_simulation import build_emt_options, build_ieee9_grid, build_power_flow_options
+from TensyGridEngine.emt.emt_ieee9 import (
+    attach_emt_models,
+    build_emt_options,
+    build_ieee9_grid,
+    build_power_flow_options,
+)
 
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_multilinear import EmtProblemMultilinear
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
+from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
 
 
 def build_multilinear_problem_and_matrices() -> tuple[EmtProblemMultilinear, sparse.csr_matrix, sparse.csc_matrix]:
     """Build the IEEE9 multilinear EMT problem and return ``(problem, Phi, S)``."""
     grid = build_ieee9_grid()
-    attach_multilinear_emt_models(grid)
+    attach_emt_models(grid)
 
+    balanced_pf_driver = PowerFlowDriver(grid=grid, options=build_power_flow_options())
+    balanced_pf_driver.run()
     pf_driver = PowerFlowDriver3Ph(grid=grid, options=build_power_flow_options())
     pf_driver.run()
     if not bool(pf_driver.results.converged):
@@ -28,7 +35,7 @@ def build_multilinear_problem_and_matrices() -> tuple[EmtProblemMultilinear, spa
         grid=grid,
         options=build_emt_options(),
         pf_results_3ph=pf_driver.results,
-        pf_results=None,
+        pf_results=balanced_pf_driver.results,
     )
     Phi, S = problem.linearize_matrices()
     return problem, Phi, S

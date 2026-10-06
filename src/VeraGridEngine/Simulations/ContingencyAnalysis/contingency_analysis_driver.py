@@ -8,8 +8,9 @@ from __future__ import annotations
 import numpy as np
 from typing import Union, List, TYPE_CHECKING
 
-from VeraGridEngine.Compilers.circuit_to_gslv import gslv_contingencies_snapshot
+from VeraGridEngine.Compilers.Gslv.Simulations.contingencies import gslv_contingencies_snapshot
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
+from VeraGridEngine.Devices.Events.contingency_group import ContingencyGroup
 from VeraGridEngine.enumerations import EngineType, ContingencyMethod, SimulationTypes
 from VeraGridEngine.Simulations.ContingencyAnalysis.contingency_analysis_results import ContingencyAnalysisResults
 from VeraGridEngine.Simulations.driver_template import DriverTemplate
@@ -21,9 +22,6 @@ from VeraGridEngine.Simulations.ContingencyAnalysis.Methods.nonlinear_contingenc
 from VeraGridEngine.Simulations.ContingencyAnalysis.Methods.linear_contingency_analysis import (
     linear_contingency_analysis)
 from VeraGridEngine.Simulations.ContingencyAnalysis.Methods.helm_contingency_analysis import helm_contingency_analysis
-from VeraGridEngine.Compilers.circuit_to_bentayga import BENTAYGA_AVAILABLE
-from VeraGridEngine.Compilers.circuit_to_newton_pa import (NEWTON_PA_AVAILABLE, newton_pa_contingencies,
-                                                           translate_newton_pa_contingencies)
 from VeraGridEngine.Compilers.circuit_to_pgm import PGM_AVAILABLE
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
@@ -38,6 +36,8 @@ class ContingencyAnalysisDriver(DriverTemplate):
         "options",
         "opf_results",
         "linear_multiple_contingencies",
+        "contingency_groups_used",
+        "con_names_used"
     )
 
     name = 'Contingency Analysis'
@@ -59,7 +59,9 @@ class ContingencyAnalysisDriver(DriverTemplate):
         DriverTemplate.__init__(self, grid=grid, engine=engine)
 
         # Options to use
-        self.options = options
+        self.options: ContingencyAnalysisOptions = options if options is not None else ContingencyAnalysisOptions(
+            contingency_groups=grid.contingency_groups
+        )
 
         self.opf_results: Union[OptimalPowerFlowResults, None] = opf_results
 
@@ -80,15 +82,21 @@ class ContingencyAnalysisDriver(DriverTemplate):
         else:
             self.linear_multiple_contingencies: LinearMultiContingencies = linear_multiple_contingencies
 
+        self.contingency_groups_used: List[ContingencyGroup] = (self.grid.get_contingency_groups()
+                                                           if self.options.contingency_groups is None
+                                                           else self.options.contingency_groups)
+
+        self.con_names_used=np.array([contingency_group.name for contingency_group in self.contingency_groups_used])
+
         # N-K results
         self.results = ContingencyAnalysisResults(
-            ncon=self.grid.get_contingency_groups_number(),
+            ncon=len(self.contingency_groups_used),
             nbus=self.grid.get_bus_number(),
             nbr=self.grid.get_branch_number(add_hvdc=False, add_vsc=False, add_switch=True),
             bus_names=self.grid.get_bus_names(),
             branch_names=self.grid.get_branch_names(add_hvdc=False, add_vsc=False, add_switch=True),
             bus_types=np.ones(self.grid.get_bus_number(), dtype=int),
-            con_names=np.array(self.grid.get_contingency_group_names())
+            con_names=self.con_names_used
         )
 
     def get_steps(self) -> List[str]:
@@ -100,24 +108,22 @@ class ContingencyAnalysisDriver(DriverTemplate):
         else:
             return list()
 
-    def run_at(self, t_idx: int = None, t_prob: float = 1.0) -> ContingencyAnalysisResults:
+    def run_at(self, t_idx: int | None = None, t_prob: float = 1.0, show_progress=False) -> ContingencyAnalysisResults:
         """
         Run the contingency at a time point
         :param t_idx: index for any time series index, None for the snapshot
         :param t_prob: probability of te time
+        :param show_progress: Show the progress
         :return: ContingencyAnalysisResults
         """
-        if self.engine == EngineType.NewtonPA and not NEWTON_PA_AVAILABLE:
-            self.engine = EngineType.VeraGrid
-            self.logger.add_warning('Tried to use Newton, but failed back to VeraGrid')
-
-        if self.engine == EngineType.Bentayga and not BENTAYGA_AVAILABLE:
-            self.engine = EngineType.VeraGrid
-            self.logger.add_warning('Tried to use Bentayga, but failed back to VeraGrid')
-
         if self.engine == EngineType.PGM and not PGM_AVAILABLE:
             self.engine = EngineType.VeraGrid
             self.logger.add_warning('Tried to use PGM, but failed back to VeraGrid')
+
+        if self.results.Sbus.shape[0] == 0:
+            return self.results
+        else:
+            pass
 
         if self.engine == EngineType.VeraGrid:
 
@@ -142,7 +148,8 @@ class ContingencyAnalysisDriver(DriverTemplate):
                     is_cancel=self.is_cancel,
                     t_idx=t_idx,
                     t_prob=t_prob,
-                    logger=self.logger
+                    logger=self.logger,
+                    report_progress=show_progress
                 )
 
             elif (self.options.contingency_method == ContingencyMethod.Linear
@@ -189,7 +196,8 @@ class ContingencyAnalysisDriver(DriverTemplate):
                     is_cancel=self.is_cancel,
                     t=t_idx,
                     t_prob=t_prob,
-                    logger=self.logger
+                    logger=self.logger,
+                    report_progress=show_progress
                 )
 
             elif self.options.contingency_method == ContingencyMethod.HELM:
@@ -217,17 +225,6 @@ class ContingencyAnalysisDriver(DriverTemplate):
             else:
                 raise Exception(f'Unknown contingency engine {self.options.contingency_method}')
 
-        elif self.engine == EngineType.NewtonPA:
-
-            self.report_text("Running contingencies in newton...")
-            con_res = newton_pa_contingencies(circuit=self.grid,
-                                              con_opt=self.options,
-                                              time_series=False,
-                                              time_indices=None)
-
-            self.results = translate_newton_pa_contingencies(grid=self.grid,
-                                                             con_res=con_res)
-
         elif self.engine == EngineType.GSLV:
 
             self.report_text("Running contingencies in gslv...")
@@ -236,13 +233,13 @@ class ContingencyAnalysisDriver(DriverTemplate):
                                                   opf_results=self.opf_results)
 
             self.results = ContingencyAnalysisResults(
-                ncon=self.grid.get_contingency_groups_number(),
+                ncon=len(self.contingency_groups_used),
                 nbus=self.grid.get_bus_number(),
                 nbr=self.grid.get_branch_number(add_hvdc=False, add_vsc=False, add_switch=True),
                 bus_names=self.grid.get_bus_names(),
                 branch_names=self.grid.get_branch_names(add_hvdc=False, add_vsc=False, add_switch=True),
                 bus_types=np.ones(self.grid.get_bus_number(), dtype=int),
-                con_names=np.array(self.grid.get_contingency_group_names())
+                con_names=self.con_names_used
             )
 
             self.results.Sf = con_res.Sf
@@ -284,5 +281,7 @@ class ContingencyAnalysisDriver(DriverTemplate):
         :return:
         """
         self.tic()
-        self.run_at(t_idx=None)
+        self.report_text("Compiling and configuring...")
+
+        self.run_at(t_idx=None, show_progress=True)
         self.toc()

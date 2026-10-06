@@ -198,6 +198,20 @@ class EmptySparseJacobianEvaluator:
         _unused_args: Tuple[Vec, Vec, Vec, Vec, float] = (vrs, diff, vprms, cprms, h)
         return self._matrix
 
+    def get_sparsity(self) -> Tuple[np.ndarray, np.ndarray, int, int]:
+        """Return the empty CSC structure through the common evaluator contract.
+
+        :return: Row indices, column pointers, row count, and column count.
+        """
+        row_count: int = int(self._matrix.shape[0])
+        column_count: int = int(self._matrix.shape[1])
+        return (
+            self._matrix.indices,
+            self._matrix.indptr,
+            row_count,
+            column_count,
+        )
+
 
 class EmptyVecSparseJacobianEvaluator:
     """
@@ -288,6 +302,20 @@ class SparseJacobianEvaluatorWrapper:
         """
         self._filler_fn(vrs, diff, vprms, cprms, h, self._matrix.data)
         return self._matrix
+
+    def get_sparsity(self) -> Tuple[np.ndarray, np.ndarray, int, int]:
+        """Return the reusable CSC structure through the evaluator contract.
+
+        :return: Row indices, column pointers, row count, and column count.
+        """
+        row_count: int = int(self._matrix.shape[0])
+        column_count: int = int(self._matrix.shape[1])
+        return (
+            self._matrix.indices,
+            self._matrix.indptr,
+            row_count,
+            column_count,
+        )
 
 
 class EventParameterFunctionWrapper:
@@ -600,7 +628,10 @@ def _compile_to_file(full_source: str, func_name: str) -> Callable:
     full_content = header + full_source
 
     repo_root = Path(__file__).resolve().parents[4]
-    cache_dir = str(repo_root / "__pycache_jit__")
+    cache_dir = os.environ.get(
+        "VERAGRID_JIT_CACHE_DIR",
+        str(repo_root / "__pycache_jit__"),
+    )
     os.makedirs(cache_dir, exist_ok=True)
 
     if cache_dir not in sys.path:
@@ -2421,7 +2452,7 @@ class RMSCompiler(EquationCompiler):
 
     def compile_event_params_fn(self, eqs: List[Expr], alias_names_dict: Dict[int, str],
                                 EVENT_PARAMS_NAME: str, TIME_NAME: str,
-                                func_name: str = "event_params_fn") -> Callable[[Vec, float, Vec], Vec]:
+                                func_name: str = "event_params_fn") -> Callable[[Vec, float], Vec]:
         """
         Compiles event parameters equations into a fast, executable JIT function.
 
@@ -2466,7 +2497,7 @@ class RMSCompiler(EquationCompiler):
         return EventParameterFunctionWrapper(raw_fn=raw_fn, equation_count=len(eqs))
 
     def compile_derivative_fn(self, uid2idx_vars: Dict[int, int],
-                              func_name: str = "derivative_fn") -> Callable[[Vec, Vec, Vec, float, Vec], Vec]:
+                              func_name: str = "derivative_fn") -> Callable[[Vec, Vec, Vec, float], Vec]:
         """
         Compiles the derivative evaluation function for differential variables.
 
@@ -2631,7 +2662,7 @@ class RMSCompilerVec(EquationCompiler):
 
     def compile_event_params_fn(self, eqs: List[Expr], alias_names_dict: Dict[int, str],
                                 EVENT_PARAMS_NAME: str, TIME_NAME: str,
-                                func_name: str = "event_params_fn") -> Callable[[Vec, float, Vec], Vec]:
+                                func_name: str = "event_params_fn") -> Callable[[Vec, float], Vec]:
         """
         Compiles event parameters equations into a fast, executable JIT function.
 
@@ -2676,7 +2707,7 @@ class RMSCompilerVec(EquationCompiler):
         return EventParameterFunctionWrapper(raw_fn=raw_fn, equation_count=len(eqs))
 
     def compile_derivative_fn(self, uid2idx_vars: Dict[int, int],
-                              func_name: str = "derivative_fn") -> Callable[[Vec, Vec, Vec, float, Vec], Vec]:
+                              func_name: str = "derivative_fn") -> Callable[[Vec, Vec, Vec, float], Vec]:
         """
         Compiles the derivative evaluation function for differential variables.
 

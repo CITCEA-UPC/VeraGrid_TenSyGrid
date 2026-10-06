@@ -41,7 +41,8 @@ class ClusteringResults(ResultsTemplate):
             self,
             name='Clustering Analysis',
             available_results=[
-                ResultTypes.ClusteringReport
+                ResultTypes.ClusteringReport,
+                ResultTypes.ClusteringMembershipReport
             ],
             clustering_results=None,
             time_array=time_array,
@@ -69,6 +70,23 @@ class ClusteringResults(ResultsTemplate):
                                 units="p.u.",
                                 idx_device_type=DeviceType.TimeDevice,
                                 cols_device_type=DeviceType.NoDevice)
+
+        elif result_type == ResultTypes.ClusteringMembershipReport:
+            # Show per hour the representative hour of the cluster (REE request)
+            representative_indices: IntVec = self.time_indices[self.original_sample_idx]
+            n_hours: int = len(self.original_sample_idx)
+            data: np.ndarray = np.empty((n_hours, 1), dtype=object)
+            data[:, 0] = pd.to_datetime(self.time_array[representative_indices]).astype(str)
+
+            return ResultsTable(
+                data=data,
+                index=pd.to_datetime(self.time_array),
+                columns=list(('Representative time',)),
+                title=result_type.value,
+                units='',
+                idx_device_type=DeviceType.TimeDevice,
+                cols_device_type=DeviceType.NoDevice
+            )
 
         else:
             raise Exception('Result type not understood:' + str(result_type))

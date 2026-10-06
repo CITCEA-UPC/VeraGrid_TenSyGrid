@@ -63,7 +63,6 @@ import warnings
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import io
 import zipfile
@@ -129,7 +128,7 @@ def select_torch_device(prefer_cuda: bool, verbose: bool) -> torch.device:
 # ----------------------------------------------------------------------------------------------------------------------
 # 2) TIME GRID + CALENDAR FEATURES
 # ----------------------------------------------------------------------------------------------------------------------
-@dataclass
+@dataclass(slots=True)
 class TimeGrid:
     """
     Time grid diagnostics.
@@ -263,7 +262,7 @@ def compute_month_index(timestamps: IntVec) -> IntVec:
     return month.astype(np.int64)
 
 
-@dataclass
+@dataclass(slots=True)
 class AggregateBatch:
     """
     Strongly-typed batch for the aggregate model.
@@ -293,7 +292,7 @@ class AggregateBatch:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class ShareBatch:
     """
     Strongly-typed batch for the share model.
@@ -1375,120 +1374,15 @@ def generate_synthetic(
 # ----------------------------------------------------------------------------------------------------------------------
 # 11) PLOTTING
 # ----------------------------------------------------------------------------------------------------------------------
-def plot_losses(losses: List[float], title: str) -> None:
-    """
-    Plot training loss curve.
-
-    :param losses: Loss list.
-    :param title: Plot title.
-    :returns: None
-    """
-    if len(losses) == 0:
-        print(f"[plot] No losses to plot for: {title} (likely loaded artifact).")
-        return
-    plt.figure()
-    plt.plot(losses)
-    plt.title(title)
-    plt.xlabel("Step")
-    plt.ylabel("Loss")
-    plt.grid(True)
-    plt.tight_layout()
 
 
-def plot_aggregate_real_vs_syn(P_agg_real: Vec, P_agg_syn: Vec, max_points: int, title: str) -> None:
-    """
-    Plot aggregate series real vs synthetic.
-
-    :param P_agg_real: Real aggregate ``(T,)``.
-    :param P_agg_syn: Synthetic aggregate ``(T,)``.
-    :param max_points: Downsample cap.
-    :param title: Plot title.
-    :returns: None
-    """
-    T = int(P_agg_real.shape[0])
-    idx = np.arange(T)
-    if T > int(max_points):
-        idx = np.linspace(0, T - 1, int(max_points)).astype(int)
-
-    plt.figure()
-    plt.plot(idx, P_agg_real[idx], label="real aggregate")
-    plt.plot(idx, P_agg_syn[idx], label="synthetic aggregate", linestyle="--")
-    plt.title(title)
-    plt.xlabel("time index")
-    plt.ylabel("Aggregate power")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
 
 
-def plot_share_sum_sanity(P_syn: Mat,
-                          P_agg_syn: Vec,
-                          max_points: int,
-                          title: str) -> None:
-    """
-    Plot sanity check: sum_i P_syn(t,i) / P_agg_syn(t). Should be ~1.
-
-    :param P_syn: Device powers ``(T,N)``.
-    :param P_agg_syn: Aggregate powers ``(T,)``.
-    :param max_points: Downsample cap.
-    :param title: Plot title.
-    :returns: None
-    """
-
-    P = np.asarray(P_syn, dtype=np.float32)
-    A = np.asarray(P_agg_syn, dtype=np.float32)
-    ratio = P.sum(axis=1) / (A + 1e-12)
-
-    T = int(ratio.shape[0])
-    idx = np.arange(T)
-    if T > int(max_points):
-        idx = np.linspace(0, T - 1, int(max_points)).astype(int)
-
-    plt.figure()
-    plt.plot(idx, ratio[idx])
-    plt.axhline(1.0, linestyle="--")
-    plt.title(title)
-    plt.xlabel("time index")
-    plt.ylabel("sum(P_syn)/P_agg_syn")
-    plt.grid(True)
-    plt.tight_layout()
 
 
-def plot_devices_real_vs_syn(P_real: Mat,
-                             P_syn: Mat,
-                             devices: List[int],
-                             max_points: int,
-                             title: str) -> None:
-    """
-    Plot selected devices real vs synthetic.
-
-    :param P_real: Real device powers ``(T,N)``.
-    :param P_syn: Synthetic device powers ``(T,N)``.
-    :param devices: Device indices.
-    :param max_points: Downsample cap.
-    :param title: Plot title.
-    :returns: None
-    """
-    import matplotlib.pyplot as plt
-
-    T = int(P_real.shape[0])
-    idx = np.arange(T)
-    if T > int(max_points):
-        idx = np.linspace(0, T - 1, int(max_points)).astype(int)
-
-    plt.figure()
-    for d in devices:
-        plt.plot(idx, P_real[idx, d], label=f"real d{d}", alpha=0.8)
-        plt.plot(idx, P_syn[idx, d], label=f"syn d{d}", alpha=0.8, linestyle="--")
-    plt.title(title)
-    plt.xlabel("time index")
-    plt.ylabel("Power")
-    plt.grid(True)
-    plt.legend(ncol=2, fontsize=8)
-    plt.tight_layout()
 
 
-@dataclass
+@dataclass(slots=True)
 class HierarchicalZipSpec:
     """
     Serializable, future-safe spec for training and generation.
@@ -1536,8 +1430,18 @@ class HierarchicalZipArtifact:
     - state_dict tensors (.pt)
     - JSON specs/meta/losses
     """
+    __slots__ = (
+        "spec",
+        "agg_model",
+        "share_model",
+        "agg_losses",
+        "share_losses",
+        "agg_meta",
+        "share_meta",
+        "device",
+    )
 
-    def __init__(self, spec: HierarchicalZipSpec):
+    def __init__(self, spec: HierarchicalZipSpec) -> None:
         self.spec = spec
 
         self.agg_model: Optional[AggregateARModel] = None
@@ -1772,154 +1676,6 @@ class HierarchicalZipArtifact:
 # ----------------------------------------------------------------------------------------------------------------------
 # 12) DEMO / HOW TO USE (with parameter explanations)
 # ----------------------------------------------------------------------------------------------------------------------
-def demo():
-    # -------------------------------------------------------------------------
-    # HOW TO USE WITH YOUR DATA (VeraGrid or otherwise)
-    # -------------------------------------------------------------------------
-    #
-    # You need to provide:
-    #   timestamps : ndarray (T,) unix seconds (int64)
-    #   P          : ndarray (T,N) device powers (float), NaNs allowed
-    #   region_id  : ndarray (N,) region index per device (int64 in [0..R-1])
-    #   temp       : ndarray (T,R) temperature per region (float)
-    #
-    # Then:
-    #   agg_model, share_model, meta, agg_losses, share_losses = load_or_train_hierarchical(...)
-    #   y_real, y_syn, sigma_eff, P_agg_syn, P_syn = generate_synthetic(...)
-    #
-    # Key parameters:
-    #   context_len:
-    #     Aggregate AR context length in samples.
-    #
-    #   sigma_damp:
-    #     Damps sampling noise. Start with 0.15–0.35 for national load.
-    #
-    #   anchoring:
-    #     'none'     -> no mean correction (not recommended for free rollouts)
-    #     'global'   -> match overall mean of y(t) to real y(t)
-    #     'monthly'  -> match mean per month (reduces seasonal bias)
-    #
-    #   logit_noise_std:
-    #     Adds noise to share logits before softmax. Controls diversity in splits.
-    #     Start at 0.02–0.10.
-    #
-    #   share_chunk_size:
-    #     If N is large and you hit memory limits, set e.g. 1000–5000.
-    # -------------------------------------------------------------------------
-
-    # Demo data (replace with your real data)
-    T = 24 * 21  # Number of time steps
-    N = 400  # Number of loads
-    R = 8  # region number
-    start = 1704067200  # Unix datetime
-    dt = 3600  # Time step increment in seconds
-    timestamps = np.arange(start, start + T * dt, dt, dtype=np.int64)
-
-    rng = np.random.default_rng(0)
-    region_id = rng.integers(0, R, size=N, dtype=np.int64)
-
-    base = 15 + 8 * np.sin(2 * np.pi * np.arange(T) / (24 * 7))
-    temp = np.stack([base + rng.normal(0, 1.0, size=T) for _ in range(R)], axis=1).astype(np.float32)
-
-    cal = calendar_features_unix(timestamps)
-    tod_sin = cal[:, 0]
-    scale = rng.uniform(0.5, 2.0, size=N).astype(np.float32)
-
-    P = np.zeros((T, N), dtype=np.float32)
-    for i in range(N):
-        r = int(region_id[i])
-        P[:, i] = scale[i] * (50 + 12 * tod_sin + 1.8 * np.maximum(temp[:, r] - 18, 0)) + rng.normal(0, 2.0, size=T)
-    P = np.maximum(P, 0.0)
-
-    mask_nan = rng.random(P.shape) < 0.01
-    P_nan = P.copy()
-    P_nan[mask_nan] = np.nan
-
-    # Train/load
-    artifact_path = "./artifacts/hierarchical_country_load_simplex_anchor.pt"
-
-    context_len = 48
-    steps_agg = 2000
-    steps_share = 3000
-    batch_size_agg = 256
-    batch_size_share = 32
-    lr_agg = 2e-3
-    lr_share = 2e-3
-    prefer_cuda = True
-    verbose = True
-    eps_agg = 1e-3
-    eps_share_denom = 1e-6
-    jitter_tol = 0.05
-    share_chunk_size = 0
-
-    agg_model, share_model, meta, agg_losses, share_losses = load_or_train_hierarchical(
-        artifact_path=artifact_path,
-        timestamps=timestamps,
-        P=P_nan,
-        region_id=region_id,
-        temp=temp,
-        context_len=context_len,
-        steps_agg=steps_agg,
-        steps_share=steps_share,
-        batch_size_agg=batch_size_agg,
-        batch_size_share=batch_size_share,
-        lr_agg=lr_agg,
-        lr_share=lr_share,
-        prefer_cuda=prefer_cuda,
-        verbose=verbose,
-        eps_agg=eps_agg,
-        eps_share_denominator=eps_share_denom,
-        jitter_tol=jitter_tol,
-        share_chunk_size=share_chunk_size,
-    )
-
-    # Generate
-    sigma_damp = 0.25
-    anchoring = "global"  # try "monthly" if seasonal drift persists
-    logit_noise_std = 0.05
-
-    y_real, y_syn, sigma_eff, P_agg_syn, P_syn = generate_synthetic(
-        agg_model=agg_model,
-        share_model=share_model,
-        timestamps=timestamps,
-        P_real=P_nan,
-        region_id=region_id,
-        temp=temp,
-        context_len=context_len,
-        seed=42,
-        eps_agg=eps_agg,
-        sigma_damp=sigma_damp,
-        anchoring=anchoring,
-        logit_noise_std=logit_noise_std,
-        share_chunk_size=share_chunk_size,
-    )
-
-    # Diagnostics
-    P_real_clean = np.nan_to_num(P_nan, nan=0.0)
-    P_agg_real = compute_aggregate(P_real_clean)
-
-    ratio_mean = float(P_agg_syn.mean() / (P_agg_real.mean() + 1e-12))
-    ratio_std = float(P_agg_syn.std() / (P_agg_real.std() + 1e-12))
-    ratio_p95 = float(np.quantile(P_agg_syn, 0.95) / (np.quantile(P_agg_real, 0.95) + 1e-12))
-
-    print("Aggregate mean ratio syn/real:", ratio_mean)
-    print("Aggregate std  ratio syn/real:", ratio_std)
-    print("Aggregate P95  ratio syn/real:", ratio_p95)
-
-    # Plot training losses
-    plot_losses(agg_losses, "Aggregate model training NLL")
-    plot_losses(share_losses, "Share model training KL")
-
-    # Plot aggregate comparison
-    plot_aggregate_real_vs_syn(P_agg_real, P_agg_syn, 5000, "Aggregate real vs synthetic (anchored + corrected)")
-
-    # Sanity check: reconstruction exactness
-    plot_share_sum_sanity(P_syn, P_agg_syn, 5000, "Sanity: sum(P_syn)/P_agg_syn (should be 1.0)")
-
-    # Plot a few devices
-    plot_devices_real_vs_syn(P_real_clean, P_syn, [0, 1, 2, 10], 5000, "Devices real vs synthetic (simplex shares)")
-
-    plt.show()
 
 def _make_synthetic_demo_data(T: int, N: int, R: int, seed: int) -> tuple[
     np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -1964,141 +1720,3 @@ def _make_synthetic_demo_data(T: int, N: int, R: int, seed: int) -> tuple[
     P[mask] = np.nan
 
     return timestamps, P, region_id, temp
-
-
-def demo2():
-    # =============================================================================
-    # Demo: Train / Save / Load / Predict with HierarchicalZipArtifact
-    # =============================================================================
-    # How to use this demo:
-    # - Replace the "INPUT DATA" section with arrays you get from VeraGrid.
-    #   VeraGrid should provide:
-    #     timestamps: (T,) int64 unix seconds
-    #     P:          (T,N) float32 device powers (loads/generation per device)
-    #     region_id:  (N,) int64 region index per device (0..R-1)
-    #     temp:       (T,R) float32 temperatures per region (or per weather zone)
-    #
-    # Key parameters (HierarchicalZipSpec):
-    # - context_len:  number of initial timesteps used to seed the aggregate sampler.
-    # - steps_agg/share: optimisation steps for each model training loop.
-    # - batch_size_agg/share: training batch sizes (share can be smaller if N large).
-    # - lr_agg/share: learning rates.
-    # - prefer_cuda:  if True, training functions will try to use CUDA if available.
-    # - eps_agg:      small epsilon added inside logs for stability (aggregate).
-    # - eps_share_denominator: epsilon in share normalisation denom for stability.
-    # - share_chunk_size: chunk size for share model forward; 0 disables chunking.
-    # - sigma_damp:   damp aggregate stochasticity when sampling (stability knob).
-    # - logit_noise_std: optional noise on share logits during sampling (diversity knob).
-    #
-    # Outputs:
-    # - P_syn: (T,N) synthetic device powers, with aggregate matching the sampled
-    #          aggregate trajectory. You can compare sum(P_syn, axis=1) vs sum(P, axis=1).
-    # =============================================================================
-
-    # -------------------------------------------------------------------------
-    # INPUT DATA
-    # -------------------------------------------------------------------------
-    # Replace the following with VeraGrid-provided arrays:
-    # timestamps = ...
-    # P = ...
-    # region_id = ...
-    # temp = ...
-
-    # Standalone demo fallback:
-    timestamps, P, region_id, temp = _make_synthetic_demo_data(T=24 * 60, N=400, R=6, seed=123)
-
-    # Basic sanity
-    T = int(timestamps.shape[0])
-    N = int(P.shape[1])
-    R = int(temp.shape[1])
-    print(f"[demo] T={T}, N={N}, R={R}")
-
-    # -------------------------------------------------------------------------
-    # SPEC + ARTIFACT PATH
-    # -------------------------------------------------------------------------
-    artifact_path = "./artifacts/hierarchical_country_load.zip"
-    os.makedirs(os.path.dirname(artifact_path), exist_ok=True)
-
-    spec = HierarchicalZipSpec(
-        context_len=48,  # seed length for aggregate sampler (e.g. 2 days if hourly)
-        steps_agg=3000,  # training steps for aggregate model
-        steps_share=3000,  # training steps for share model
-        batch_size_agg=64,  # aggregate batch size
-        batch_size_share=16,  # share batch size (often smaller because N is large)
-        lr_agg=3e-4,  # aggregate learning rate
-        lr_share=3e-4,  # share learning rate
-        prefer_cuda=True,  # try CUDA if available
-        verbose=True,  # print training progress
-        eps_agg=1e-6,  # numerical stability for log transforms
-        eps_share_denominator=1e-6,  # stability in share normalisation
-        share_chunk_size=0,  # 0 disables chunking; set >0 if you need lower peak memory
-        sigma_damp=0.25,  # reduces aggregate stochasticity at generation
-        logit_noise_std=0.0,  # share diversity; start at 0.0
-    )
-
-    # -------------------------------------------------------------------------
-    # TRAIN OR LOAD
-    # -------------------------------------------------------------------------
-    if os.path.exists(artifact_path):
-        print(f"[demo] Loading artifact: {artifact_path}")
-        # Always load to CPU first for maximum portability; move to CUDA later if desired.
-        art = HierarchicalZipArtifact.load(artifact_path, map_location=torch.device("cpu"))
-    else:
-        print(f"[demo] Training new artifact: {artifact_path}")
-        art = HierarchicalZipArtifact(spec=spec)
-        art.train(timestamps=timestamps, P=P, region_id=region_id, temp=temp)
-        art.save(artifact_path)
-        print(f"[demo] Saved: {artifact_path}")
-
-    # -------------------------------------------------------------------------
-    # GENERATE SYNTHETIC
-    # -------------------------------------------------------------------------
-    # y_agg_init must be a (context_len,) log-aggregate seed.
-    # Using the REAL aggregate for seeding is typical (you can also seed with a
-    # previous synthetic run if doing multi-year continuation).
-    P_clean = np.nan_to_num(P.astype(np.float32), nan=0.0)
-    P_agg_real = np.sum(P_clean, axis=1)
-    y_agg_init = np.log(P_agg_real[:int(art.spec.context_len)] + float(art.spec.eps_agg)).astype(np.float32)
-
-    P_syn = art.predict(
-        timestamps=timestamps,
-        temp=temp.astype(np.float32),
-        region_id=region_id.astype(np.int64),
-        y_agg_init=y_agg_init,
-        seed=1234,
-    )
-
-    # -------------------------------------------------------------------------
-    # PLOTS: real vs synthetic aggregate
-    # -------------------------------------------------------------------------
-    P_agg_syn = np.sum(P_syn, axis=1)
-
-    plt.figure()
-    plt.plot(P_agg_real, label="Real aggregate")
-    plt.plot(P_agg_syn, label="Synthetic aggregate")
-    plt.xlabel("timestep")
-    plt.ylabel("Aggregate power")
-    plt.legend()
-    plt.title("Aggregate: Real vs Synthetic")
-    plt.tight_layout()
-    plt.show()
-
-    # Optional: device-level example
-    plt.figure()
-    dev_idx = 0
-    plt.plot(P_clean[:, dev_idx], label=f"Real dev {dev_idx}")
-    plt.plot(P_syn[:, dev_idx], label=f"Synth dev {dev_idx}")
-    plt.xlabel("timestep")
-    plt.ylabel("Device power")
-    plt.legend()
-    plt.title("Example device trajectory")
-    plt.tight_layout()
-    plt.show()
-
-    # Quick numeric check
-    rel_err = float(np.mean(np.abs(P_agg_syn - P_agg_real)) / (np.mean(P_agg_real) + 1e-9))
-    print(f"[demo] Mean abs aggregate error / mean real = {rel_err:.4f}")
-
-
-if __name__ == "__main__":
-    demo2()

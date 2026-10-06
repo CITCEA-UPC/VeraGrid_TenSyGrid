@@ -26,6 +26,8 @@ class XmlDictConfig(dict):
     And then use xmldict for what it is... a dict.
     """
 
+    __slots__ = ("text_to_remove",)
+
     def __init__(self, parent_element, text_to_remove=''):
         """
 
@@ -92,6 +94,7 @@ class PlxBusMode(Enum):
 
 
 class PlxElement:
+    __slots__ = ("name",)
 
     def __init__(self, name):
         """
@@ -105,6 +108,18 @@ class PlxElement:
 
 
 class PlxNode(PlxElement):
+    __slots__ = (
+        "zone",
+        "region",
+        "voltage",
+        "latitude",
+        "longitude",
+        "load",
+        "load_prof",
+        "generators",
+        "batteries",
+        "key",
+    )
 
     def __init__(self, name='', zone='', region='', voltage=0, latitude=0, longitude=0):
 
@@ -140,6 +155,15 @@ class PlxNode(PlxElement):
 
 
 class PlxGenerator(PlxElement):
+    __slots__ = (
+        "category",
+        "p_max",
+        "p_min",
+        "node",
+        "rating_factor_prof",
+        "aux_fixed_prof",
+        "must_run_units_prof",
+    )
 
     def __init__(self, name='', category='', p_max=0, p_min=0, node=None):
         PlxElement.__init__(self, name=name)
@@ -160,6 +184,7 @@ class PlxGenerator(PlxElement):
 
 
 class PlexosBattery(PlxGenerator):
+    __slots__ = ()
 
     def __init__(self, name='', category=''):
         """
@@ -171,6 +196,18 @@ class PlexosBattery(PlxGenerator):
 
 
 class PlxLine(PlxElement):
+    __slots__ = (
+        "units",
+        "node_from",
+        "node_to",
+        "r",
+        "x",
+        "rate_max",
+        "rate_min",
+        "coordinates",
+        "rate_max_prof",
+        "rate_min_prof",
+    )
 
     def __init__(self, name='', units=1, node_from=None, node_to=None, r=0.0, x=0.0, rate_max=0.0, rate_min=0.0):
         """
@@ -252,24 +289,45 @@ class PlxLine(PlxElement):
 
 
 class PlxTransformer(PlxLine):
+    __slots__ = ()
 
     def __init__(self, name=''):
         PlxLine.__init__(self, name=name)
 
 
 class PlxZone(PlxElement):
+    __slots__ = ()
 
     def __init__(self, name=''):
         PlxElement.__init__(self, name=name)
 
 
 class PlxRegion(PlxElement):
+    __slots__ = ()
 
     def __init__(self, name=''):
         PlxElement.__init__(self, name=name)
 
 
 class PlxModel:
+    __slots__ = (
+        "file_name",
+        "load_profiles",
+        "text_func",
+        "prog_func",
+        "directory",
+        "name",
+        "nodes",
+        "generators",
+        "batteries",
+        "lines",
+        "transformers",
+        "branches",
+        "zones",
+        "regions",
+        "branches_by_type",
+        "data_profiles",
+    )
 
     def __init__(self, fname, load_profiles=True, text_func=None, prog_func=None):
         """

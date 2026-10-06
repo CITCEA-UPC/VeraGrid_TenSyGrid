@@ -11,6 +11,10 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_int, c
 
 
 class RawZone(RawObject):
+    __slots__ = (
+        "_I",
+        "_ZONAME",
+    )
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='izone', class_type=int, description='Zone number', min_value=1,
                      max_value=9999),

@@ -493,6 +493,14 @@ class PowerWorldParser:
     PowerWorldParser
     """
 
+    __slots__ = (
+        "parsers",
+        "versions",
+        "logger",
+        "file_name",
+        "circuit",
+    )
+
     def __init__(self, file_name):
         """
         Parse PowerWorld EPC file

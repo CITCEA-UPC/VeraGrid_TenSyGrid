@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MPL-2.0
 import json
 import numpy as np
-from matplotlib import pyplot as plt
 from typing import List, Dict, Optional
 
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
@@ -356,33 +355,6 @@ class EmtResults(ResultsTemplate):
 
         return tree
 
-    def plot_var(self, var: Var, group_idx: int = 0) -> None:
-        """
-        Plot one EMT variable trace when it exists in the results arrays.
-
-        :param var: Variable to plot.
-        :param group_idx: Event-group index.
-        :return: None.
-
-        EMT variables may live either in the algebraic/state array or in the
-        differential-variable array. The plotting path must therefore inspect
-        both index maps and route to the matching numeric array explicitly.
-        """
-        if var.uid in self.uid2idx_vars:
-            idx: int = self.uid2idx_vars[var.uid]
-            y: np.ndarray = self.values[:, idx, group_idx]
-            plt.plot(self.time_array, y, label=var.name)
-            plt.legend()
-            plt.show()
-        else:
-            if var.uid in self.uid2idx_diff:
-                idx = self.uid2idx_diff[var.uid]
-                y = self.diff_values[:, idx, group_idx]
-                plt.plot(self.time_array, y, label=var.name)
-                plt.legend()
-                plt.show()
-            else:
-                pass
 
 
     def get_vars_data(self, var_list: List[Var], group_idx: int = 0) -> Mat:

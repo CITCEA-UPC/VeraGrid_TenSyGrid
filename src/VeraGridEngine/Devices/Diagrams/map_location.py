@@ -12,6 +12,14 @@ class MapLocation:
     GraphicLocation
     """
 
+    __slots__ = (
+        '_latitude',
+        '_longitude',
+        '_altitude',
+        'draw_labels',
+        'api_object',
+    )
+
     def __init__(self,
                  latitude: float = 0.0,
                  longitude: float = 0.0,

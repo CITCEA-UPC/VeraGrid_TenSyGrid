@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QGraphicsEllipseItem, QMenu,
                                QGraphicsSceneContextMenuEvent,
                                QGraphicsSceneMouseEvent)
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.Diagrams.generic_graphics import GenericDiagramWidget
 from VeraGrid.Gui.Diagrams.MapWidget.Substation.node_template import NodeTemplate
@@ -204,11 +205,7 @@ class MapInjectionTemplateGraphicItem(NodeTemplate, QGraphicsEllipseItem):
         """
         Plot API objects profiles
         """
-        # time series object from the last simulation
-        ts = self.editor.circuit.time_profile
-
-        # plot the profiles
-        self.api_object.plot_profiles(time=ts)
+        self.editor.plot_device(api_object=self.api_object)
 
     def open_device_editor(self) -> bool:
         """
@@ -218,7 +215,7 @@ class MapInjectionTemplateGraphicItem(NodeTemplate, QGraphicsEllipseItem):
         """
         circuit = self._editor.circuit
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
 

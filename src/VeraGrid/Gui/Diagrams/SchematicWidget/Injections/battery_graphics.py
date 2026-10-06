@@ -8,6 +8,7 @@ from VeraGrid.Gui.Diagrams.generic_graphics import BatterySymbol
 from VeraGridEngine.Devices.Injections.battery import Battery
 from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphics import InjectionTemplateGraphicItem
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.generator_editor import GeneratorEditorDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
@@ -49,7 +50,7 @@ class BatteryGraphicItem(InjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = GeneratorEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True

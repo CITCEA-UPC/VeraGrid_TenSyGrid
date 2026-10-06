@@ -26,11 +26,13 @@ from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 def get_genqec_rms(vfactory: VarFactory, name: str = "Genqec_rms_template") -> RmsModelTemplate:
     """
      generator with quadratic saturation
+     :return: RmsModelTemplate
     """
     pi = math.pi
 
     templ = RmsModelTemplate(name=name)
     templ.tpe = DeviceType.GeneratorDevice
+    templ.name = name
 
     # Inputs
     # Vm: Bus voltage module
@@ -173,7 +175,7 @@ def get_genqec_rms(vfactory: VarFactory, name: str = "Genqec_rms_template") -> R
     # Xd_2prime_sat = (Xd_2prime - Xl)/Sat + Xl
     # Xq_2prime_sat = (Xq_2prime - Xl)/Sat + Xl
 
-    templ.block = Block(
+    block = Block(
         state_eqs=[
             (omega - vfactory.add_const(1)) * ws,  # dδ/dt
             (inputs[2] - Te - D * (omega - vfactory.add_const(1))) * (1 / M),  # dω/dt
@@ -285,6 +287,13 @@ def get_genqec_rms(vfactory: VarFactory, name: str = "Genqec_rms_template") -> R
         name="genqec"
     )
 
+    templ.block.children.append(block)
+    templ.block.external_mapping = block.external_mapping
+    templ.block.api_obj_mapping = block.api_obj_mapping
+    templ.block.in_vars = inputs
+    templ.block.out_vars = block.out_vars
+
+    templ.comment = 'Generator GENQEC RMS model with quadratic saturation'
     return templ
 
 def get_governor_rms(vfactory: VarFactory, name: str = "Governor") -> RmsModelTemplate:
@@ -352,7 +361,7 @@ def get_governor_rms(vfactory: VarFactory, name: str = "Governor") -> RmsModelTe
     P0: Var = vfactory.add_var("P0")
 
     events_dict: dict[Var, Expr] = dict()
-    events_dict[Pm_ref] = vfactory.add_const(None)
+    events_dict[Pm_ref] = inputs[1]
     events_dict[Kp] = vfactory.add_const(-0.01)
     events_dict[Ki] = vfactory.add_const(-0.01)
     events_dict[p0] = vfactory.add_const(1.0)
@@ -402,7 +411,6 @@ def get_governor_rms(vfactory: VarFactory, name: str = "Governor") -> RmsModelTe
     )
 
     init_eqs: dict[Var, Expr] = dict()
-    init_eqs[Pm_ref] = inputs[1]
     init_eqs[x1] = u1
     init_eqs[y1] = u1
     init_eqs[y2_1] = sym.Const(0.0)
@@ -430,6 +438,7 @@ def get_governor_rms(vfactory: VarFactory, name: str = "Governor") -> RmsModelTe
     api_obj_mapping[ParamPowerFlowReferenceType.P0] = P0
     templ.block.api_obj_mapping = api_obj_mapping
 
+    templ.comment = 'Reusable generator governor RMS control block'
     return templ
 
 
@@ -520,6 +529,7 @@ def get_stabilizer_rms(vfactory: VarFactory, name: str = "stabilizer") -> RmsMod
     init_eqs[y5] = sym.Const(0.0)
     templ.block.init_eqs = init_eqs
 
+    templ.comment = 'Reusable generator stabilizer RMS control block'
     return templ
 
 
@@ -594,7 +604,7 @@ def get_exciter_rms(vfactory: VarFactory, name: str = "exciter") -> RmsModelTemp
     f_output: Var = vfactory.add_var("f_output")
 
     events_dict: dict[Var, Expr] = dict()
-    events_dict[UsRefPu] = vfactory.add_const(None)
+    events_dict[UsRefPu] = Efe / parameters["Ka"] + inputs[1]
     events_dict[AEz] = vfactory.add_const(0.02)
     events_dict[BEz] = vfactory.add_const(1.5)
     events_dict[Se_threshold] = vfactory.add_const(1.0)
@@ -660,7 +670,6 @@ def get_exciter_rms(vfactory: VarFactory, name: str = "exciter") -> RmsModelTemp
     )
     init_eqs[u_aux] = aux_expr
     init_eqs[Efe] = inputs[0] * parameters["Kd"] + u_aux
-    init_eqs[UsRefPu] = Efe / parameters["Ka"] + inputs[1]
     init_eqs[y1] = inputs[1]
     init_eqs[x2] = Vf
     init_eqs[y2] = sym.Const(0.0)
@@ -672,6 +681,7 @@ def get_exciter_rms(vfactory: VarFactory, name: str = "exciter") -> RmsModelTemp
     init_eqs[f_output] = sym.f_exc(f_input)
     templ.block.init_eqs = init_eqs
 
+    templ.comment = 'Reusable generator exciter RMS control block'
     return templ
 
 
@@ -728,4 +738,5 @@ def get_complete_generator_template_rms(vfactory: VarFactory, name: str = "compl
     templ.block.out_vars = [genqec_mdl.out_vars[0], genqec_mdl.out_vars[1]]
     templ.block.name = name
 
+    templ.comment = 'Complete generator RMS model with GENQEC, exciter, governor, and stabilizer'
     return templ

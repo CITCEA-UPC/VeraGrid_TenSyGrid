@@ -75,7 +75,7 @@
     <item>
      <widget class="QTabWidget" name="mainTabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="GridTab">
        <attribute name="icon">
@@ -283,7 +283,7 @@
                             <x>0</x>
                             <y>0</y>
                             <width>396</width>
-                            <height>347</height>
+                            <height>316</height>
                            </rect>
                           </property>
                           <attribute name="icon">
@@ -316,7 +316,20 @@
                                <number>3</number>
                               </property>
                               <item>
-                               <widget class="QLineEdit" name="diagramSearchLineEdit"/>
+                               <widget class="QLineEdit" name="diagramSearchLineEdit">
+                                <property name="locale">
+                                 <locale language="English" country="Estonia"/>
+                                </property>
+                                <property name="inputMask">
+                                 <string/>
+                                </property>
+                                <property name="text">
+                                 <string/>
+                                </property>
+                                <property name="placeholderText">
+                                 <string>Search diagram by name</string>
+                                </property>
+                               </widget>
                               </item>
                               <item>
                                <widget class="QPushButton" name="diagramSearchButton">
@@ -325,7 +338,10 @@
                                 </property>
                                 <property name="icon">
                                  <iconset resource="../Icons/icons.qrc">
-                                  <normaloff>:/Icons/icons/magnifying_glass2.png</normaloff>:/Icons/icons/magnifying_glass2.png</iconset>
+                                  <normaloff>:/Icons/icons/magnifying_glass.png</normaloff>:/Icons/icons/magnifying_glass.png</iconset>
+                                </property>
+                                <property name="flat">
+                                 <bool>true</bool>
                                 </property>
                                </widget>
                               </item>
@@ -333,12 +349,24 @@
                             </widget>
                            </item>
                            <item>
-                            <widget class="QListView" name="diagramsListView">
+                            <widget class="QTreeView" name="diagramsTreeView">
                              <property name="toolTip">
-                              <string>List of available diagrams</string>
+                              <string>Tree of available diagrams and categories</string>
                              </property>
                              <property name="frameShape">
                               <enum>QFrame::Shape::NoFrame</enum>
+                             </property>
+                             <property name="dragEnabled">
+                              <bool>true</bool>
+                             </property>
+                             <property name="dragDropMode">
+                              <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+                             </property>
+                             <property name="defaultDropAction">
+                              <enum>Qt::DropAction::MoveAction</enum>
+                             </property>
+                             <property name="headerHidden">
+                              <bool>true</bool>
                              </property>
                             </widget>
                            </item>
@@ -349,8 +377,8 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>250</width>
-                            <height>336</height>
+                            <width>382</width>
+                            <height>360</height>
                            </rect>
                           </property>
                           <attribute name="icon">
@@ -744,8 +772,8 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>169</width>
-                            <height>224</height>
+                            <width>396</width>
+                            <height>316</height>
                            </rect>
                           </property>
                           <attribute name="icon">
@@ -895,8 +923,8 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>120</width>
-                            <height>226</height>
+                            <width>396</width>
+                            <height>316</height>
                            </rect>
                           </property>
                           <attribute name="icon">
@@ -1001,20 +1029,6 @@
                                </widget>
                               </item>
                               <item>
-                               <widget class="QLabel" name="label_40">
-                                <property name="text">
-                                 <string>Plotting style</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item>
-                               <widget class="QComboBox" name="plt_style_comboBox">
-                                <property name="toolTip">
-                                 <string>MatPlotlib plot styles to choose from</string>
-                                </property>
-                               </widget>
-                              </item>
-                              <item>
                                <spacer name="verticalSpacer_14">
                                 <property name="orientation">
                                  <enum>Qt::Orientation::Vertical</enum>
@@ -1085,6 +1099,9 @@
                             <property name="icon">
                              <iconset resource="../Icons/icons.qrc">
                               <normaloff>:/Icons/icons/color_grid.png</normaloff>:/Icons/icons/color_grid.png</iconset>
+                            </property>
+                            <property name="flat">
+                             <bool>true</bool>
                             </property>
                            </widget>
                           </item>
@@ -1298,6 +1315,46 @@
                  <number>6</number>
                 </property>
                 <item>
+                 <widget class="QFrame" name="frame_62">
+                  <property name="frameShape">
+                   <enum>QFrame::Shape::NoFrame</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Shadow::Raised</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_21">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QLineEdit" name="device_tree_search_lineEdit">
+                     <property name="minimumSize">
+                      <size>
+                       <width>120</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search the device. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="placeholderText">
+                      <string>Search device type</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QTreeView" name="dataStructuresTreeView">
                   <property name="minimumSize">
                    <size>
@@ -1407,6 +1464,9 @@
                          </property>
                          <property name="toolTip">
                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search on the name property. &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For more advanced searches you can compose a filter expression:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;If none is specified idxobj is taken&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Filter all object names that are similar to 'alba' and their Vnom property &amp;gt; 200&lt;/p&gt;&lt;p&gt;-&amp;gt; idx&lt;span style=&quot; font-style:italic;&quot;&gt;obj.name like alba and idxobj.Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Equivalently:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;-&amp;gt; name like alba and Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Enter] to search &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="placeholderText">
+                          <string>Device smart search</string>
                          </property>
                         </widget>
                        </item>
@@ -2311,6 +2371,9 @@
               <property name="toolTip">
                <string>Write here some comments about the grid</string>
               </property>
+              <property name="placeholderText">
+               <string>Type here your comments about the model</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -2381,8 +2444,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>275</width>
-                 <height>540</height>
+                 <width>274</width>
+                 <height>520</height>
                 </rect>
                </property>
                <attribute name="icon">
@@ -2437,8 +2500,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>98</width>
-                 <height>88</height>
+                 <width>274</width>
+                 <height>520</height>
                 </rect>
                </property>
                <attribute name="icon">
@@ -2585,13 +2648,40 @@
                       </property>
                       <item>
                        <widget class="QLineEdit" name="search_results_lineEdit">
+                        <property name="minimumSize">
+                         <size>
+                          <width>240</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>240</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
                         <property name="toolTip">
                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;The columns should not be column1 or column2, the values should be &amp;gt; 5 and the index be like ab of mn&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;col != [column1, column2] and val &amp;gt; 5 or idx like [ab, mn]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Filter the table values that are between 0.5 and 20&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;val &amp;gt; 0.5 and val &amp;lt; 20.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        </property>
+                        <property name="placeholderText">
+                         <string>Results smart query</string>
                         </property>
                        </widget>
                       </item>
                       <item>
                        <widget class="QPushButton" name="search_results_Button">
+                        <property name="minimumSize">
+                         <size>
+                          <width>32</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>32</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
                         <property name="toolTip">
                          <string>Smart search</string>
                         </property>
@@ -2601,6 +2691,9 @@
                         <property name="icon">
                          <iconset resource="../Icons/icons.qrc">
                           <normaloff>:/Icons/icons/magnifying_glass.png</normaloff>:/Icons/icons/magnifying_glass.png</iconset>
+                        </property>
+                        <property name="flat">
+                         <bool>true</bool>
                         </property>
                        </widget>
                       </item>
@@ -2813,6 +2906,12 @@
                    </property>
                    <item>
                     <widget class="QLineEdit" name="search_dynamic_objects_lineEdit">
+                     <property name="minimumSize">
+                      <size>
+                       <width>240</width>
+                       <height>0</height>
+                      </size>
+                     </property>
                      <property name="maximumSize">
                       <size>
                        <width>240</width>
@@ -2826,6 +2925,18 @@
                    </item>
                    <item>
                     <widget class="QPushButton" name="search_dynamic_objects_Button">
+                     <property name="minimumSize">
+                      <size>
+                       <width>32</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>32</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
                      <property name="toolTip">
                       <string>Smart search</string>
                      </property>
@@ -2836,25 +2947,8 @@
                       <iconset resource="../Icons/icons.qrc">
                        <normaloff>:/Icons/icons/magnifying_glass.png</normaloff>:/Icons/icons/magnifying_glass.png</iconset>
                      </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="prepareRmsDynamicPlotsButton">
-                     <property name="toolTip">
-                      <string>Open the RMS pre-simulation dynamic plot editor</string>
-                     </property>
-                     <property name="text">
-                      <string>RMS plots</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="prepareEmtDynamicPlotsButton">
-                     <property name="toolTip">
-                      <string>Open the EMT pre-simulation dynamic plot editor</string>
-                     </property>
-                     <property name="text">
-                      <string>EMT plots</string>
+                     <property name="flat">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -3684,21 +3778,124 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item row="4" column="0" colspan="2">
-               <widget class="QLabel" name="label_58">
-                <property name="text">
-                 <string>Frequency</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0" colspan="2">
+              <item row="7" column="0" colspan="2">
                <widget class="QLabel" name="label_101">
                 <property name="text">
                  <string>Snapshot time</string>
                 </property>
                </widget>
               </item>
-              <item row="12" column="1">
+              <item row="13" column="2">
+               <widget class="QLabel" name="label_48">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QLabel" name="label_82">
+                <property name="text">
+                 <string>Grid name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0" colspan="3">
+               <widget class="QDateTimeEdit" name="snapshot_dateTimeEdit">
+                <property name="calendarPopup">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="2">
+               <widget class="QLabel" name="label_57">
+                <property name="text">
+                 <string>Base power</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QDoubleSpinBox" name="sbase_doubleSpinBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Base power&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Despite all the bibliography, changing this number to anything other than 100 MVA, might change the meaning of what sensible per-unit voltage are.&lt;/p&gt;&lt;p&gt;So, don't touch it. To have power in kW, use the option at the loads, geneerators, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="suffix">
+                 <string> MVA</string>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="minimum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>10000000000000000000.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>100.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1" colspan="2">
+               <widget class="QDoubleSpinBox" name="fbase_doubleSpinBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;System frequency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This only has an effect in the program when computing lines' per-unit impedance from ohm values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="suffix">
+                 <string> Hz</string>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="minimum">
+                 <double>50.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>60.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>10.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0" colspan="2">
+               <widget class="QLabel" name="label_24">
+                <property name="text">
+                 <string>Engine</string>
+                </property>
+               </widget>
+              </item>
+              <item row="13" column="0" colspan="2">
+               <widget class="QCheckBox" name="dark_mode_checkBox">
+                <property name="text">
+                 <string>Dark mode</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" colspan="3">
+               <widget class="QLineEdit" name="grid_name_line_edit">
+                <property name="toolTip">
+                 <string>Name of the grid model</string>
+                </property>
+                <property name="placeholderText">
+                 <string>Name of the grid</string>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="0" colspan="2">
+               <widget class="QLabel" name="language_label">
+                <property name="text">
+                 <string>Language</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QLabel" name="label_58">
+                <property name="text">
+                 <string>Frequency</string>
+                </property>
+               </widget>
+              </item>
+              <item row="16" column="1">
                <widget class="QFrame" name="frame_37">
                 <property name="frameShape">
                  <enum>QFrame::Shape::NoFrame</enum>
@@ -3722,113 +3919,13 @@
                 </layout>
                </widget>
               </item>
-              <item row="4" column="2">
-               <widget class="QDoubleSpinBox" name="fbase_doubleSpinBox">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;System frequency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This only has an effect in the program when computing lines' per-unit impedance from ohm values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="suffix">
-                 <string> Hz</string>
-                </property>
-                <property name="decimals">
-                 <number>0</number>
-                </property>
-                <property name="minimum">
-                 <double>50.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>60.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>10.000000000000000</double>
-                </property>
-               </widget>
+              <item row="12" column="0" colspan="3">
+               <widget class="QComboBox" name="language_combo_box"/>
               </item>
-              <item row="6" column="2">
-               <widget class="QDateTimeEdit" name="snapshot_dateTimeEdit">
-                <property name="calendarPopup">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0" colspan="2">
-               <widget class="QLabel" name="label_57">
-                <property name="text">
-                 <string>Base power</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLineEdit" name="grid_name_line_edit">
-                <property name="toolTip">
-                 <string>Name of the grid model</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="2">
-               <widget class="QLabel" name="label_48">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QLabel" name="label_82">
-                <property name="text">
-                 <string>Grid name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QDoubleSpinBox" name="sbase_doubleSpinBox">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Base power&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Despite all the bibliography, changing this number to anything other than 100 MVA, might change the meaning of what sensible per-unit voltage are.&lt;/p&gt;&lt;p&gt;So, don't touch it. To have power in kW, use the option at the loads, geneerators, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="suffix">
-                 <string> MVA</string>
-                </property>
-                <property name="decimals">
-                 <number>0</number>
-                </property>
-                <property name="minimum">
-                 <double>1.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>10000000000000000000.000000000000000</double>
-                </property>
-                <property name="value">
-                 <double>100.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="2">
+              <item row="10" column="0" colspan="3">
                <widget class="QComboBox" name="engineComboBox">
                 <property name="toolTip">
                  <string>Engine to be used when available</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0" colspan="2">
-               <widget class="QLabel" name="label_24">
-                <property name="text">
-                 <string>Engine</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="0" colspan="2">
-               <widget class="QLabel" name="language_label">
-                <property name="text">
-                 <string>Language</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QComboBox" name="language_combo_box"/>
-              </item>
-              <item row="9" column="0" colspan="2">
-               <widget class="QCheckBox" name="dark_mode_checkBox">
-                <property name="text">
-                 <string>Dark mode</string>
                 </property>
                </widget>
               </item>
@@ -3869,7 +3966,7 @@
            <enum>QTabWidget::TabPosition::South</enum>
           </property>
           <property name="currentIndex">
-           <number>8</number>
+           <number>0</number>
           </property>
           <property name="iconSize">
            <size>
@@ -7822,177 +7919,6 @@
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_32">
-                  <item row="0" column="0" colspan="3">
-                   <widget class="QLabel" name="label_411">
-                    <property name="text">
-                     <string>Integration</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QComboBox" name="rms_integration_method_comboBox">
-                    <property name="minimumSize">
-                     <size>
-                      <width>200</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                    <property name="editable">
-                     <bool>false</bool>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>trapezoid</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>implicit euler</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="1" column="0" colspan="3">
-                   <widget class="QLabel" name="label_413">
-                    <property name="text">
-                     <string>Initialization</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="3">
-                   <widget class="QComboBox" name="rms_initialization_method_comboBox"/>
-                  </item>
-                  <item row="2" column="0" colspan="2">
-                   <widget class="QLabel" name="label_439">
-                    <property name="text">
-                     <string>Problem</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="3">
-                   <widget class="QComboBox" name="rms_problem_comboBox">
-                    <item>
-                     <property name="text">
-                      <string>standard</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>vectorized</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="3" column="0" colspan="3">
-                   <widget class="QLabel" name="label_409">
-                    <property name="text">
-                     <string>Tolerance</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="3">
-                   <widget class="QSpinBox" name="tolerance_rms_spinBox">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="prefix">
-                     <string>1e-</string>
-                    </property>
-                    <property name="minimum">
-                     <number>1</number>
-                    </property>
-                    <property name="maximum">
-                     <number>15</number>
-                    </property>
-                    <property name="value">
-                     <number>4</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0" colspan="3">
-                   <widget class="QLabel" name="label_412">
-                    <property name="text">
-                     <string>Simulation time</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="3">
-                   <widget class="QDoubleSpinBox" name="rms_sim_time_spinBox">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="suffix">
-                     <string> s</string>
-                    </property>
-                    <property name="decimals">
-                     <number>4</number>
-                    </property>
-                    <property name="minimum">
-                     <double>0.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1000.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.010000000000000</double>
-                    </property>
-                    <property name="value">
-                     <double>1.000000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0" colspan="3">
-                   <widget class="QLabel" name="label_405">
-                    <property name="text">
-                     <string>Time step</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="3">
-                   <widget class="QDoubleSpinBox" name="rms_h_spinBox">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="suffix">
-                     <string> s</string>
-                    </property>
-                    <property name="decimals">
-                     <number>4</number>
-                    </property>
-                    <property name="minimum">
-                     <double>0.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1000.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.001000000000000</double>
-                    </property>
-                    <property name="value">
-                     <double>0.001000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_45">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="label_50">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>26</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="8" column="0">
                    <widget class="QLabel" name="label_415">
                     <property name="sizePolicy">
@@ -8024,55 +7950,140 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="8" column="1" colspan="3">
-                   <widget class="QLabel" name="label_418">
-                    <property name="palette">
-                     <palette>
-                      <active>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>85</red>
-                          <green>87</green>
-                          <blue>83</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </active>
-                      <inactive>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>85</red>
-                          <green>87</green>
-                          <blue>83</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </inactive>
-                      <disabled>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>190</red>
-                          <green>190</green>
-                          <blue>190</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </disabled>
-                     </palette>
+                  <item row="0" column="3">
+                   <widget class="QComboBox" name="rms_integration_method_comboBox">
+                    <property name="minimumSize">
+                     <size>
+                      <width>200</width>
+                      <height>0</height>
+                     </size>
                     </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>16</pointsize>
-                     </font>
+                    <property name="editable">
+                     <bool>false</bool>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>implicit euler</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>trapezoid</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>bdf2</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>euler</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="1" column="0" colspan="3">
+                   <widget class="QLabel" name="label_413">
+                    <property name="text">
+                     <string>Initialization</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="3">
+                   <widget class="QDoubleSpinBox" name="rms_ss_assessment_time_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="suffix">
+                     <string>s</string>
+                    </property>
+                    <property name="decimals">
+                     <number>4</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>0.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0" colspan="3">
+                   <widget class="QLabel" name="label_411">
+                    <property name="text">
+                     <string>Integration</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QComboBox" name="rms_problem_comboBox">
+                    <item>
+                     <property name="text">
+                      <string>standard</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>vectorized</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="4" column="3">
+                   <widget class="QDoubleSpinBox" name="rms_sim_time_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="suffix">
+                     <string> s</string>
+                    </property>
+                    <property name="decimals">
+                     <number>4</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>1.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0" colspan="2">
+                   <widget class="QLabel" name="label_54">
+                    <property name="text">
+                     <string>Modes</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_45">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>26</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>26</height>
+                     </size>
                     </property>
                     <property name="text">
-                     <string>RMS Small-Signal</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
+                     <string/>
                     </property>
                    </widget>
                   </item>
@@ -8133,13 +8144,32 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="10" column="3">
-                   <widget class="QDoubleSpinBox" name="rms_ss_assessment_time_spinBox">
+                  <item row="3" column="3">
+                   <widget class="QSpinBox" name="tolerance_rms_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="prefix">
+                     <string>1e-</string>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>15</number>
+                    </property>
+                    <property name="value">
+                     <number>4</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="3">
+                   <widget class="QDoubleSpinBox" name="rms_h_spinBox">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="suffix">
-                     <string>s</string>
+                     <string> s</string>
                     </property>
                     <property name="decimals">
                      <number>4</number>
@@ -8151,24 +8181,53 @@
                      <double>1000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000000000000</double>
+                     <double>0.001000000000000</double>
                     </property>
                     <property name="value">
-                     <double>0.000000000000000</double>
+                     <double>0.001000000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item row="11" column="0" colspan="2">
-                   <widget class="QLabel" name="label_54">
-                    <property name="text">
-                     <string>Modes</string>
-                    </property>
-                   </widget>
+                  <item row="1" column="3">
+                   <widget class="QComboBox" name="rms_initialization_method_comboBox"/>
                   </item>
                   <item row="11" column="3">
                    <widget class="QSpinBox" name="rms_small_signal_modes_number_spinBox">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of modes.&lt;br/&gt;If zero, all modes are included and the calculation is done using dense matrices.&lt;br/&gt;If a number of modes greater than zero is given the calculation is sparse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0" colspan="3">
+                   <widget class="QLabel" name="label_412">
+                    <property name="text">
+                     <string>Simulation time</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="label_50">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>26</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>26</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0" colspan="3">
+                   <widget class="QLabel" name="label_409">
+                    <property name="text">
+                     <string>Tolerance</string>
                     </property>
                    </widget>
                   </item>
@@ -8184,6 +8243,72 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item row="5" column="0" colspan="3">
+                   <widget class="QLabel" name="label_405">
+                    <property name="text">
+                     <string>Time step</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0" colspan="2">
+                   <widget class="QLabel" name="label_439">
+                    <property name="text">
+                     <string>Problem</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1" colspan="3">
+                   <widget class="QLabel" name="label_418">
+                    <property name="palette">
+                     <palette>
+                      <active>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>85</red>
+                          <green>87</green>
+                          <blue>83</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </active>
+                      <inactive>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>85</red>
+                          <green>87</green>
+                          <blue>83</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </inactive>
+                      <disabled>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>190</red>
+                          <green>190</green>
+                          <blue>190</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </disabled>
+                     </palette>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>16</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>RMS Small-Signal</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -8360,110 +8485,54 @@
                   <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="0" column="0" colspan="2">
-                   <widget class="QLabel" name="label_432">
-                    <property name="text">
-                     <string>Integration</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QComboBox" name="emt_integration_method_comboBox">
+                  <item row="13" column="3">
+                   <widget class="QComboBox" name="emt_sss_build_type_comboBox">
                     <property name="minimumSize">
                      <size>
                       <width>200</width>
                       <height>0</height>
                      </size>
                     </property>
-                    <property name="editable">
-                     <bool>false</bool>
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Subspace build type. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="currentText">
-                     <string>trapezoid</string>
+                     <string>Arnoldi</string>
                     </property>
                     <item>
                      <property name="text">
-                      <string>trapezoid</string>
+                      <string>Arnoldi</string>
                      </property>
                     </item>
                     <item>
                      <property name="text">
-                      <string>implicit euler</string>
+                      <string>Hybrid Arnoldi</string>
                      </property>
                     </item>
                    </widget>
                   </item>
-                  <item row="1" column="0" colspan="2">
-                   <widget class="QLabel" name="label_433">
-                    <property name="text">
-                     <string>Initialization</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="3">
-                   <widget class="QComboBox" name="emt_initialization_method_comboBox"/>
-                  </item>
-                  <item row="2" column="0" colspan="2">
-                   <widget class="QLabel" name="label_440">
-                    <property name="text">
-                     <string>Problem</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="3">
-                   <widget class="QComboBox" name="emt_problem_comboBox">
-                    <item>
-                     <property name="text">
-                      <string>standard</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>vectorized</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="label_438">
-                    <property name="text">
-                     <string>Solver</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="3">
-                   <widget class="QComboBox" name="emt_solver_type_comboBox"/>
-                  </item>
-                  <item row="4" column="0" colspan="2">
-                   <widget class="QLabel" name="label_434">
-                    <property name="text">
-                     <string>Tolerance</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="3">
-                   <widget class="QSpinBox" name="tolerance_emt_spinBox">
+                  <item row="10" column="3">
+                   <widget class="QDoubleSpinBox" name="emt_ss_assessment_time_spinBox">
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
-                    <property name="prefix">
-                     <string>1e-</string>
+                    <property name="suffix">
+                     <string> s</string>
                     </property>
-                    <property name="minimum">
-                     <number>1</number>
-                    </property>
-                    <property name="maximum">
-                     <number>15</number>
-                    </property>
-                    <property name="value">
+                    <property name="decimals">
                      <number>4</number>
                     </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0" colspan="3">
-                   <widget class="QLabel" name="label_435">
-                    <property name="text">
-                     <string>Simulation time</string>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>0.000000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -8492,6 +8561,188 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="13" column="0" colspan="2">
+                   <widget class="QLabel" name="label_37">
+                    <property name="text">
+                     <string>Build type</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="3">
+                   <widget class="QSpinBox" name="tolerance_emt_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="prefix">
+                     <string>1e-</string>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>15</number>
+                    </property>
+                    <property name="value">
+                     <number>4</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="14" column="2">
+                   <spacer name="verticalSpacer_26">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item row="2" column="0" colspan="2">
+                   <widget class="QLabel" name="label_440">
+                    <property name="text">
+                     <string>Problem</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0" colspan="2">
+                   <widget class="QLabel" name="label_434">
+                    <property name="text">
+                     <string>Tolerance</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QComboBox" name="emt_integration_method_comboBox">
+                    <property name="minimumSize">
+                     <size>
+                      <width>200</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="editable">
+                     <bool>false</bool>
+                    </property>
+                    <property name="currentText">
+                     <string>trapezoid</string>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>trapezoid</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>implicit euler</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>bdf2</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QComboBox" name="emt_initialization_method_comboBox"/>
+                  </item>
+                  <item row="12" column="3">
+                   <widget class="QDoubleSpinBox" name="emt_small_signal_modes_number_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of modes.&lt;br/&gt;If zero, all modes are included and the calculation is done using dense matrices.&lt;br/&gt;If a number of modes greater than zero is given the calculation is sparse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="decimals">
+                     <number>0</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0" colspan="2">
+                   <widget class="QLabel" name="label_60">
+                    <property name="text">
+                     <string>Target period</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_438">
+                    <property name="text">
+                     <string>Solver</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0" colspan="2">
+                   <widget class="QLabel" name="label_432">
+                    <property name="text">
+                     <string>Integration</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0" colspan="3">
+                   <widget class="QLabel" name="label_435">
+                    <property name="text">
+                     <string>Simulation time</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="0" colspan="4">
+                   <widget class="Line" name="line_66">
+                    <property name="palette">
+                     <palette>
+                      <active>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>186</red>
+                          <green>189</green>
+                          <blue>182</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </active>
+                      <inactive>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>186</red>
+                          <green>189</green>
+                          <blue>182</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </inactive>
+                      <disabled>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>190</red>
+                          <green>190</green>
+                          <blue>190</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </disabled>
+                     </palette>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Shadow::Plain</enum>
+                    </property>
+                    <property name="lineWidth">
+                     <number>4</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="0" colspan="3">
+                   <widget class="QLabel" name="label_437">
+                    <property name="text">
+                     <string>Assessment time</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item row="6" column="0" colspan="2">
                    <widget class="QLabel" name="label_436">
                     <property name="text">
@@ -8499,63 +8750,33 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="6" column="3">
-                   <widget class="QDoubleSpinBox" name="emt_h_spinBox">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="suffix">
-                     <string> s</string>
-                    </property>
-                    <property name="decimals">
-                     <number>8</number>
-                    </property>
-                    <property name="minimum">
-                     <double>0.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1000.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.001000000000000</double>
-                    </property>
-                    <property name="value">
-                     <double>0.000001000000000</double>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="7" column="0">
-                   <widget class="QLabel" name="label_430">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
+                   <widget class="QLabel" name="emt_small_signal_alignment_label">
                     <property name="minimumSize">
                      <size>
-                      <width>24</width>
-                      <height>24</height>
+                      <width>0</width>
+                      <height>26</height>
                      </size>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>24</width>
-                      <height>24</height>
+                      <width>16777215</width>
+                      <height>26</height>
                      </size>
                     </property>
                     <property name="text">
                      <string/>
                     </property>
-                    <property name="pixmap">
-                     <pixmap resource="../Icons/icons.qrc">:/Icons/icons/ss_emt_icon.png</pixmap>
-                    </property>
-                    <property name="scaledContents">
-                     <bool>true</bool>
+                   </widget>
+                  </item>
+                  <item row="12" column="0">
+                   <widget class="QLabel" name="label_56">
+                    <property name="text">
+                     <string>Modes</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="7" column="1" colspan="3">
+                  <item row="8" column="1" colspan="3">
                    <widget class="QLabel" name="label_431">
                     <property name="palette">
                      <palette>
@@ -8607,65 +8828,69 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="8" column="0" colspan="4">
-                   <widget class="Line" name="line_66">
-                    <property name="palette">
-                     <palette>
-                      <active>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>186</red>
-                          <green>189</green>
-                          <blue>182</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </active>
-                      <inactive>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>186</red>
-                          <green>189</green>
-                          <blue>182</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </inactive>
-                      <disabled>
-                       <colorrole role="WindowText">
-                        <brush brushstyle="SolidPattern">
-                         <color alpha="255">
-                          <red>190</red>
-                          <green>190</green>
-                          <blue>190</blue>
-                         </color>
-                        </brush>
-                       </colorrole>
-                      </disabled>
-                     </palette>
+                  <item row="8" column="0">
+                   <widget class="QLabel" name="label_430">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
                     </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Shadow::Plain</enum>
+                    <property name="minimumSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
                     </property>
-                    <property name="lineWidth">
+                    <property name="maximumSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="../Icons/icons.qrc">:/Icons/icons/ss_emt_icon.png</pixmap>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QComboBox" name="emt_problem_comboBox">
+                    <item>
+                     <property name="text">
+                      <string>standard</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>vectorized</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="11" column="3">
+                   <widget class="QDoubleSpinBox" name="emt_sss_target_period_spinBox">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Period of the periodic orbit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="suffix">
+                     <string> s</string>
+                    </property>
+                    <property name="decimals">
                      <number>4</number>
                     </property>
-                    <property name="orientation">
-                     <enum>Qt::Orientation::Horizontal</enum>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item row="9" column="0" colspan="3">
-                   <widget class="QLabel" name="label_437">
-                    <property name="text">
-                     <string>Assessment time</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="3">
-                   <widget class="QDoubleSpinBox" name="emt_ss_assessment_time_spinBox">
+                  <item row="6" column="3">
+                   <widget class="QDoubleSpinBox" name="emt_h_spinBox">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
@@ -8673,7 +8898,7 @@
                      <string> s</string>
                     </property>
                     <property name="decimals">
-                     <number>4</number>
+                     <number>8</number>
                     </property>
                     <property name="minimum">
                      <double>0.000000000000000</double>
@@ -8682,39 +8907,22 @@
                      <double>1000.000000000000000</double>
                     </property>
                     <property name="singleStep">
-                     <double>0.010000000000000</double>
+                     <double>0.001000000000000</double>
                     </property>
                     <property name="value">
-                     <double>0.000000000000000</double>
+                     <double>0.000001000000000</double>
                     </property>
                    </widget>
                   </item>
-                  <item row="10" column="0">
-                   <widget class="QLabel" name="label_56">
+                  <item row="1" column="0" colspan="2">
+                   <widget class="QLabel" name="label_433">
                     <property name="text">
-                     <string>Modes</string>
+                     <string>Initialization</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="10" column="3">
-                   <widget class="QSpinBox" name="emt_small_signal_modes_number_spinBox_2">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of modes.&lt;br/&gt;If zero, all modes are included and the calculation is done using dense matrices.&lt;br/&gt;If a number of modes greater than zero is given the calculation is sparse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="2">
-                   <spacer name="verticalSpacer_26">
-                    <property name="orientation">
-                     <enum>Qt::Orientation::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>18</width>
-                      <height>149</height>
-                     </size>
-                    </property>
-                   </spacer>
+                  <item row="3" column="3">
+                   <widget class="QComboBox" name="emt_solver_type_comboBox"/>
                   </item>
                  </layout>
                  <widget class="QLabel" name="label_49">
@@ -10787,40 +10995,36 @@
        <enum>QFrame::Shadow::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_7">
-       <item row="6" column="0">
-        <widget class="QPushButton" name="cancelButton">
-         <property name="minimumSize">
+       <item row="0" column="3">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
           <size>
-           <width>0</width>
-           <height>24</height>
+           <width>20</width>
+           <height>40</height>
           </size>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Cancel process</string>
+        </spacer>
+       </item>
+       <item row="6" column="4">
+        <widget class="QPushButton" name="unlockButton">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>16777215</height>
+          </size>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset resource="../Icons/icons.qrc">
-           <normaloff>:/Icons/icons/delete.png</normaloff>:/Icons/icons/delete.png</iconset>
+           <normaloff>:/Icons/icons/unlock.png</normaloff>:/Icons/icons/unlock.png</iconset>
          </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLabel" name="progress_label">
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -10849,6 +11053,52 @@ QProgressBar::chunk{
          </property>
         </widget>
        </item>
+       <item row="3" column="3">
+        <widget class="QLabel" name="progress_label">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="5">
+        <widget class="QPushButton" name="cancelButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Cancel process</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../Icons/icons.qrc">
+           <normaloff>:/Icons/icons/delete.png</normaloff>:/Icons/icons/delete.png</iconset>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -10860,7 +11110,7 @@ QProgressBar::chunk{
      <x>0</x>
      <y>0</y>
      <width>1235</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="font">
@@ -10902,6 +11152,7 @@ QProgressBar::chunk{
      <property name="title">
       <string>Import data</string>
      </property>
+     <addaction name="actionImport_bus_coordinates"/>
      <addaction name="actionImport_contingencies"/>
      <addaction name="actionAdd_custom_catalogue"/>
     </widget>
@@ -10909,7 +11160,6 @@ QProgressBar::chunk{
     <addaction name="actiongrid_Generator"/>
     <addaction name="actionOpen_file"/>
     <addaction name="actionAdd_circuit"/>
-    <addaction name="actionImport_bus_coordinates"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
@@ -10925,14 +11175,15 @@ QProgressBar::chunk{
     </property>
     <addaction name="actionOnline_documentation"/>
     <addaction name="actionReport_a_bug"/>
+    <addaction name="actionCommunity_chat"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuActions">
     <property name="title">
      <string>Actions</string>
     </property>
-    <addaction name="actionAdd_default_catalogue"/>
     <addaction name="actionClear_stuff_running_right_now"/>
+    <addaction name="actionClear_cache"/>
     <addaction name="actionReset_console"/>
    </widget>
    <widget class="QMenu" name="menuSimulations">
@@ -10991,6 +11242,7 @@ QProgressBar::chunk{
     <property name="title">
      <string>Model</string>
     </property>
+    <addaction name="actionAdd_default_catalogue"/>
     <addaction name="actionAuto_rate_branches"/>
     <addaction name="actionDetect_transformers"/>
     <addaction name="actionDetect_substations"/>
@@ -10998,6 +11250,7 @@ QProgressBar::chunk{
     <addaction name="actionFuse_devices"/>
     <addaction name="actionSet_model_x_y_based_on_lat_lon"/>
     <addaction name="actionGrid_reduction"/>
+    <addaction name="actionCandidate_investment_generator"/>
     <addaction name="actionProcedural_grid_expansion"/>
     <addaction name="actionRestore_investments"/>
     <addaction name="actionre_index_time"/>
@@ -11072,8 +11325,8 @@ QProgressBar::chunk{
     <addaction name="actionAdd_selected_to_contingency"/>
     <addaction name="actionAdd_selected_as_new_investment"/>
     <addaction name="actionAdd_selected_as_remedial_action"/>
-    <addaction name="actionAdd_rms_event_to_selected"/>
     <addaction name="actionAdd_short_circuit_events"/>
+    <addaction name="actionAdd_rms_event_to_selected"/>
     <addaction name="actionAdd_emt_event_to_selected"/>
    </widget>
    <addaction name="menuProject"/>
@@ -11259,7 +11512,7 @@ QProgressBar::chunk{
     <font/>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt++</string>
+    <string>Ctrl+Shift++</string>
    </property>
   </action>
   <action name="actionSmaller_nodes">
@@ -11277,7 +11530,7 @@ QProgressBar::chunk{
     <font/>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+-</string>
+    <string>Ctrl+Shift+-</string>
    </property>
   </action>
   <action name="actionPower_flow_Stochastic">
@@ -11691,10 +11944,13 @@ QProgressBar::chunk{
   <action name="actionClear_stuff_running_right_now">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/clear_runs.png</normaloff>:/Icons/icons/clear_runs.png</iconset>
+     <normaloff>:/Icons/icons/minus (gray).png</normaloff>:/Icons/icons/minus (gray).png</iconset>
    </property>
    <property name="text">
-    <string>Clear &quot;stuff running right now&quot;</string>
+    <string>Stop &quot;stuff running right now&quot;</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop &quot;stuff running right now&quot;</string>
    </property>
    <property name="font">
     <font/>
@@ -11829,10 +12085,10 @@ QProgressBar::chunk{
   <action name="actionImport_bus_coordinates">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/load_add.png</normaloff>:/Icons/icons/load_add.png</iconset>
+     <normaloff>:/Icons/icons/map (add).png</normaloff>:/Icons/icons/map (add).png</iconset>
    </property>
    <property name="text">
-    <string>Import bus coordinates</string>
+    <string>Coordinates</string>
    </property>
    <property name="font">
     <font/>
@@ -12558,21 +12814,6 @@ QProgressBar::chunk{
     <enum>QAction::MenuRole::TextHeuristicRole</enum>
    </property>
   </action>
-  <action name="actionPrepare_RMS_Dynamic_Plots">
-   <property name="icon">
-    <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/dyn.png</normaloff>:/Icons/icons/dyn.png</iconset>
-   </property>
-   <property name="text">
-    <string>Prepare RMS dynamic plots</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Prepare RMS dynamic plots&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the RMS dynamic plot editor before running the simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::MenuRole::TextHeuristicRole</enum>
-   </property>
-  </action>
   <action name="actionRun_Small_Signal_RMS_Simulation">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
@@ -12594,13 +12835,13 @@ QProgressBar::chunk{
   <action name="actionAdd_rms_event_to_selected">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/dyn_add.png</normaloff>:/Icons/icons/dyn_add.png</iconset>
+     <normaloff>:/Icons/icons/dyn_edit.png</normaloff>:/Icons/icons/dyn_edit.png</iconset>
    </property>
    <property name="text">
-    <string>Add rms event to selected</string>
+    <string>Add RMS event</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add RMS event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new RMS event to the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add RMS event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring RMS events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="font">
     <font/>
@@ -12816,6 +13057,18 @@ QProgressBar::chunk{
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
+  <action name="actionCandidate_investment_generator">
+   <property name="icon">
+    <iconset resource="../Icons/icons.qrc">
+     <normaloff>:/Icons/icons/schematic.png</normaloff>:/Icons/icons/schematic.png</iconset>
+   </property>
+   <property name="text">
+    <string>Candidate investment generator</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Candidate investment generator&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Generate candidate reinforcements (new lines and upgrades) for N-1 violations via LODF/PTDF screening&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
   <action name="actionProcedural_grid_expansion">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
@@ -12844,21 +13097,6 @@ QProgressBar::chunk{
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;EMT Simulation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a dynamic EMT simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::MenuRole::TextHeuristicRole</enum>
-   </property>
-  </action>
-  <action name="actionPrepare_EMT_Dynamic_Plots">
-   <property name="icon">
-    <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/dyn_emt.png</normaloff>:/Icons/icons/dyn_emt.png</iconset>
-   </property>
-   <property name="text">
-    <string>Prepare EMT dynamic plots</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Prepare EMT dynamic plots&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the EMT dynamic plot editor before running the simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::TextHeuristicRole</enum>
@@ -12928,13 +13166,13 @@ QProgressBar::chunk{
   <action name="actionAdd_emt_event_to_selected">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/icons/dyn_emt_add.png</normaloff>:/Icons/icons/dyn_emt_add.png</iconset>
+     <normaloff>:/Icons/icons/dyn_emt_edit.png</normaloff>:/Icons/icons/dyn_emt_edit.png</iconset>
    </property>
    <property name="text">
-    <string>Add emt event to selected</string>
+    <string>Add EMT event</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add EMT event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new EMT event to the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add EMT event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring EMT events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionSet_model_x_y_based_on_lat_lon">
@@ -12989,6 +13227,24 @@ QProgressBar::chunk{
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionClear_cache">
+   <property name="icon">
+    <iconset resource="../Icons/icons.qrc">
+     <normaloff>:/Icons/icons/clear_runs.png</normaloff>:/Icons/icons/clear_runs.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear cache</string>
+   </property>
+  </action>
+  <action name="actionCommunity_chat">
+   <property name="icon">
+    <iconset resource="../Icons/icons.qrc">
+     <normaloff>:/Icons/icons/modelling_authority.png</normaloff>:/Icons/icons/modelling_authority.png</iconset>
+   </property>
+   <property name="text">
+    <string>Community chat</string>
    </property>
   </action>
  </widget>

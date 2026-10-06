@@ -43,13 +43,35 @@ from VeraGridEngine.IO.others.rte_parser import rte2veragrid
 from VeraGridEngine.IO.others.anarede import PWFParser
 from VeraGridEngine.IO.iidm.iidm_parser_pypowsybl import IidmParser
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
-from VeraGridEngine.enumerations import CGMESVersions, CgmesTopologyMode, FileType
+from VeraGridEngine.enumerations import (
+    CGMESVersions,
+    CgmesTopologyMode,
+    DynamicSimulationMode,
+    FileType,
+)
 
 
 class FileOpenOptions:
     """
     This class is to store the extra stuff that needs to be passed to open more complex files
     """
+
+    __slots__ = (
+        "file_type",
+        "crash_on_errors",
+        "cgmes_version",
+        "cgmes_map_areas_like_raw",
+        "cgmes_try_to_map_dc_to_hvdc_line",
+        "cgmes_topology_mode",
+        "cgmes_create_busbar_section_for_every_connectivity_node",
+        "cgmes_recovery_mode",
+        "psse_adjust_taps_to_discrete_positions",
+        "psse_use_short_names",
+        "psse_flatten_virtual_taps",
+        "dgs_use_vsc_for_injections",
+        "dgs_use_dynamic_information",
+        "dgs_dynamic_simulation_mode",
+    )
 
     def __init__(self,
                  # General
@@ -69,6 +91,7 @@ class FileOpenOptions:
                  # DGS
                  dgs_use_vsc_for_injections: bool = False,
                  dgs_use_dynamic_information: bool = False,
+                 dgs_dynamic_simulation_mode: DynamicSimulationMode | None = None,
                  ):
         """
         :param file_type: FileType to load, none is unsure
@@ -113,6 +136,7 @@ class FileOpenOptions:
         # DGS
         self.dgs_use_vsc_for_injections: bool = dgs_use_vsc_for_injections
         self.dgs_use_dynamic_information: bool = dgs_use_dynamic_information
+        self.dgs_dynamic_simulation_mode: DynamicSimulationMode | None = dgs_dynamic_simulation_mode
 
 
 def open_cgmes(files: List[str] | str,
@@ -331,6 +355,19 @@ class FileOpen:
     """
     File open interface
     """
+
+    __slots__ = (
+        "file_name",
+        "circuit",
+        "multiverse",
+        "options",
+        "cgmes_circuit",
+        "json_files",
+        "logger",
+        "cgmes_logger",
+        "_previous_circuit",
+        "file_type"
+    )
 
     def __init__(self,
                  file_name: Union[str, List[str]],
@@ -631,7 +668,8 @@ class FileOpen:
                     self.file_name,
                     logger_=self.logger,
                     use_vsc_for_injections=self.options.dgs_use_vsc_for_injections,
-                    use_dynamic_information=self.options.dgs_use_dynamic_information
+                    use_dynamic_information=self.options.dgs_use_dynamic_information,
+                    dynamic_simulation_mode=self.options.dgs_dynamic_simulation_mode,
                 )
             else:
                 self.logger.add("File name is not a string")

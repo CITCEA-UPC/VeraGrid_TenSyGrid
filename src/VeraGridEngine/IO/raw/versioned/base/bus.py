@@ -10,6 +10,23 @@ from VeraGridEngine.IO.raw.psse_property import PsseProperty, coerce_psse_float,
 
 
 class RawBus(RawObject):
+    __slots__ = (
+        "_I",
+        "_NAME",
+        "_BASKV",
+        "_IDE",
+        "_AREA",
+        "_ZONE",
+        "_OWNER",
+        "_VM",
+        "_VA",
+        "_NVHI",
+        "_NVLO",
+        "_EVHI",
+        "_EVLO",
+        "GL",
+        "BL",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='I', rawx_key='ibus', class_type=int, description='Bus number', min_value=1, max_value=999997, max_chars=6),

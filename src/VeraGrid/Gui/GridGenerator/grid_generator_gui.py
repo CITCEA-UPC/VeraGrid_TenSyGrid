@@ -8,21 +8,15 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-    QCursor, QFont, QFontDatabase, QGradient,
-    QIcon, QImage, QKeySequence, QLinearGradient,
-    QPainter, QPalette, QPixmap, QRadialGradient,
-    QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QDoubleSpinBox, QFrame,
-    QGridLayout, QHBoxLayout, QLabel, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
-    QVBoxLayout, QWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QSize, Qt)
+from PySide6.QtGui import (QAction, QBrush, QColor, QFont, QIcon, QPalette)
+from PySide6.QtWidgets import (QDoubleSpinBox, QFrame,
+                               QGridLayout, QHBoxLayout, QLabel, QPushButton,
+                               QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
+                               QVBoxLayout)
 
-from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
-from VeraGrid.Gui.Icons.icons_rc import *
+from VeraGrid.Gui.PlotDialogue.qt_chart_widget import GraphsWidget
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -252,7 +246,7 @@ class Ui_MainWindow(object):
         self.PlotFrame.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout = QHBoxLayout(self.PlotFrame)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.plotwidget = MatplotlibWidget(self.PlotFrame)
+        self.plotwidget = GraphsWidget(self.PlotFrame)
         self.plotwidget.setObjectName(u"plotwidget")
 
         self.horizontalLayout.addWidget(self.plotwidget)
@@ -331,4 +325,3 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.applyButton.setText(QCoreApplication.translate("MainWindow", u"Accept", None))
     # retranslateUi
-

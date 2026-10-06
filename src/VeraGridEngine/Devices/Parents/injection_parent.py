@@ -61,7 +61,7 @@ class InjectionParent(DynamicDevice):
             tpe=DeviceType.BusDevice,
             definition='Connection bus',
             editable=False,
-            cat=[PrpCat.TP],
+            cat=list([PrpCat.TP]),
         ),
         GCProp(
             prop_name='active',
@@ -78,6 +78,7 @@ class InjectionParent(DynamicDevice):
             tpe=str,
             definition='Color to paint the element in the map diagram',
             is_color=True,
+            cat=[PrpCat.TP],
         ),
         GCProp(
             prop_name='mttf',
@@ -113,7 +114,7 @@ class InjectionParent(DynamicDevice):
             tpe=float,
             definition='Cost of not served energy. Used in OPF.',
             profile_name='Cost_prof',
-            cat=[PrpCat.OPF],
+            cat=list([PrpCat.OPF, PrpCat.NTC]),
         ),
         GCProp(
             prop_name='facility',
@@ -121,6 +122,7 @@ class InjectionParent(DynamicDevice):
             tpe=DeviceType.FacilityDevice,
             definition='Facility where this is located',
             editable=True,
+            cat=list([PrpCat.OPF, PrpCat.TP]),
         ),
         GCProp(
             prop_name='technologies',
@@ -166,7 +168,7 @@ class InjectionParent(DynamicDevice):
             units='',
             tpe=bool,
             definition='Consider the injections in kW and kVAr?',
-            cat=[PrpCat.PF, PrpCat.OPF],
+            cat=list([PrpCat.PF, PrpCat.OPF, PrpCat.NTC]),
         ),
         GCProp(
             prop_name='conn',
@@ -734,7 +736,6 @@ class InjectionParent(DynamicDevice):
     @property
     def phN(self) -> bool:
         """
-
         :return:
         """
         return self._phN
@@ -744,12 +745,11 @@ class InjectionParent(DynamicDevice):
         if isinstance(val, bool):
             self._phN = val
         else:
-            raise ValueError(f'{val} is not an bool')
+            raise ValueError(f'{val} is not an bool.')
 
     @property
     def phA(self) -> bool:
         """
-
         :return:
         """
         return self._phA
@@ -759,10 +759,13 @@ class InjectionParent(DynamicDevice):
         if isinstance(val, bool):
             self._phA = val
         else:
-            raise ValueError(f'{val} is not an bool')
+            raise ValueError(f'{val} is not an bool.')
 
     @property
     def phB(self) -> bool:
+        """
+        :return:
+        """
         return self._phB
 
     @phB.setter
@@ -770,10 +773,13 @@ class InjectionParent(DynamicDevice):
         if isinstance(val, bool):
             self._phB = val
         else:
-            raise ValueError(f'{val} is not an bool')
+            raise ValueError(f'{val} is not an bool.')
 
     @property
     def phC(self) -> bool:
+        """
+        :return:
+        """
         return self._phC
 
     @phC.setter
@@ -781,4 +787,4 @@ class InjectionParent(DynamicDevice):
         if isinstance(val, bool):
             self._phC = val
         else:
-            raise ValueError(f'{val} is not an bool')
+            raise ValueError(f'{val} is not an bool.')

@@ -61,8 +61,8 @@ for package in packages:
         packages2.append(package)
 
 package_data = {
-    package_name('Gui.AiAgent.knowledge'): ['*.md'],
     package_name('Gui.translations'): ['*.qm'],
+    package_name('Gui.Widgets'): ['*.qml', 'shaders/*.qsb'],
     package_name('data'): [
         'cables.csv',
         'transformers.csv',
@@ -75,7 +75,7 @@ package_data = {
 }
 
 dependencies = ["numpy>=2.2.0,<3",
-                "PySide6>=6.8.0",  # 5.14 breaks the UI generation for development, 6.7.0 breaks all
+                "PySide6>=6.10.0",  # Qt 6.10 provides the current proxy-filter APIs used by the GUI
                 "requests>=2.33.0",
                 "urllib3>=2.7.0",
                 "websockets>=9.1",

@@ -13,6 +13,18 @@ class BatteryData(GeneratorData):
     Structure to host the battery compiled data
     """
 
+    __slots__ = (
+        "enom",
+        "e_min",
+        "e_max",
+        "min_soc",
+        "max_soc",
+        "soc_0",
+        "discharge_efficiency",
+        "charge_efficiency",
+        "efficiency",
+    )
+
     def __init__(self, nelm: int, nbus: int):
         """
         Battery data arrays
@@ -42,7 +54,6 @@ class BatteryData(GeneratorData):
         """
 
         data: BatteryData = super().slice(elm_idx, bus_idx, bus_map)
-        data.__class__ = BatteryData
 
         data.enom = self.enom[elm_idx]
         data.e_min = self.e_min[elm_idx]
@@ -63,7 +74,6 @@ class BatteryData(GeneratorData):
         """
 
         data: BatteryData = super().copy()
-        data.__class__ = BatteryData
 
         data.enom = self.enom.copy()
         data.e_min = self.e_min.copy()

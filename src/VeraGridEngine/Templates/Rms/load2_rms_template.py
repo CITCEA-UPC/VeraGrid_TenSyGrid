@@ -18,8 +18,8 @@ def get_load2_rms_template(var_factory: VarFactory, name = "Load rms template") 
     templ.tpe = DeviceType.LoadDevice
     templ.name = name
 
-    inputs= [var_factory.add_var("Vm"),
-                         var_factory.add_var("Va")
+    inputs= [var_factory.add_var("Vm", reference=VarPowerFlowReferenceType.Vm),
+                         var_factory.add_var("Va", reference=VarPowerFlowReferenceType.Va)
                          ]
 
     Pl0 = var_factory.add_var("Pl0")
@@ -49,4 +49,5 @@ def get_load2_rms_template(var_factory: VarFactory, name = "Load rms template") 
 
     templ.block.in_vars = inputs
 
+    templ.comment = 'Load RMS model variant 2'
     return templ

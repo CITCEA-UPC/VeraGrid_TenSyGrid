@@ -478,34 +478,3 @@ class RpgAlgorithm:
 #######################################################################################################################
 #######################################################################################################################
 #######################################################################################################################
-
-
-def main():
-    from matplotlib import pyplot as plt
-
-    # initialise algorithm
-    g = RpgAlgorithm()
-
-    # for detailed output set 
-    g.debug = False
-
-    # set desired parameters and perform algorithm
-    g.set_params(n=100, n0=10, r=1./3.)
-    g.initialise()
-    g.grow()
-
-    print(g)
-
-    G = nx.Graph(g.edges)
-    pos = {i: (g.lat[i], g.lon[i]) for i in range(g.added_nodes)}
-    nx.draw(G, pos=pos, with_labels=True, node_color='lightblue')
-    plt.show()
-    
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-

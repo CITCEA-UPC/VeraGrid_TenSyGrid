@@ -24,6 +24,7 @@
     <file>icons/accept.png</file>
     <file>icons/fix.png</file>
     <file>icons/accept2.png</file>
+    <file>icons/equation.png</file>
     <file>icons/dyn_add.png</file>
     <file>icons/dyn_emt_add.png</file>
     <file>icons/short_circuit_plus.png</file>
@@ -53,6 +54,7 @@
     <file>icons/flag_fr.png</file>
     <file>icons/flag_pt.png</file>
     <file>icons/flag_es.png</file>
+    <file>icons/flag_pl.png</file>
     <file>icons/region.png</file>
     <file>icons/rotate.png</file>
     <file>icons/community.png</file>
@@ -62,6 +64,10 @@
     <file>icons/investment_dev.png</file>
     <file>icons/modelling_authority.png</file>
     <file>icons/branch_group.png</file>
+    <file>icons/market_unit.svg</file>
+    <file>icons/market_unit.png</file>
+    <file>icons/control_pc.svg</file>
+    <file>icons/control_pc.png</file>
     <file>icons/contingency_group.png</file>
     <file>icons/contingency.png</file>
     <file>icons/powerplant.png</file>
@@ -188,6 +194,10 @@
     <file>icons/copy2up.png</file>
     <file>icons/calculator.png</file>
     <file>icons/magnifying_glass.png</file>
+    <file>icons/line_edit_clear_gray.png</file>
+    <file>icons/line_edit_clear_gray.svg</file>
+    <file>icons/table_filter_active.png</file>
+    <file>icons/table_filter_active.svg</file>
     <file>icons/up.png</file>
     <file>icons/undo.png</file>
     <file>icons/redo.png</file>
@@ -203,6 +213,10 @@
     <file>icons/piece.png</file>
     <file>icons/schematic.png</file>
     <file>icons/plot.png</file>
+    <file>icons/rms_plots.png</file>
+    <file>icons/emt_plots.png</file>
+    <file>icons/rms_compare.png</file>
+    <file>icons/emt_compare.png</file>
     <file>icons/import_profiles.png</file>
     <file>icons/copy2left.png</file>
     <file>icons/copy2right.png</file>
@@ -261,6 +275,9 @@
     <file>icons/pf_ts.png</file>
     <file>icons/owner.png</file>
     <file>icons/matpower.png</file>
+    <file>icons/lock.png</file>
+    <file>icons/unlock.png</file>
+    <file>icons/pdf.png</file>
   </qresource>
   <qresource prefix="Program icon">
     <file>icons/VeraGrid_icon.png</file>

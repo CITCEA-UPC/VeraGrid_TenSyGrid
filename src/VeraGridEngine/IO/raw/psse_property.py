@@ -92,6 +92,11 @@ class PsseProperty(BaseProperty):
     Psse Property
     """
 
+    __slots__ = (
+        "rawx_key",
+        "format_rule",
+    )
+
     def __init__(self,
                  property_name: str,
                  rawx_key: str,

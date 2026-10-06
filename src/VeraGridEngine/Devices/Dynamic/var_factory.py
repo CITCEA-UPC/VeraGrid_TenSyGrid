@@ -20,6 +20,63 @@ def _new_uid() -> int:
     """
     return uuid.uuid4().int
 
+
+def find_var_by_persisted_identity(var_dict: Dict[int, Var],
+                                   persisted_uid: int | None) -> Var | None:
+    """
+    Resolve a variable from either stable identity or legacy mutable UID.
+
+    :param var_dict: Variable dictionary keyed by stable identity.
+    :param persisted_uid: Identifier read from a persisted property.
+    :return: Matching variable or ``None``.
+    """
+    direct_var: Var | None
+    candidate_var: Var
+
+    if persisted_uid is None:
+        return None
+    else:
+        direct_var = var_dict.get(persisted_uid, None)
+
+    if direct_var is not None:
+        return direct_var
+    else:
+        pass
+
+    # Files written before stable references were used store the mutable UID.
+    # Keep that format readable while all new writes use non_mutable_uid.
+    for candidate_var in var_dict.values():
+        if candidate_var.uid == persisted_uid:
+            return candidate_var
+        else:
+            pass
+
+    return None
+
+
+def build_persisted_identity_lookup(var_dict: Dict[int, Var]) -> Dict[int, Var]:
+    """
+    Build one constant-time lookup for stable and legacy mutable identities.
+
+    Stable dictionary keys remain authoritative when a mutable UID collides
+    with another variable's stable identity. This preserves the current
+    connection semantics while avoiding a full dictionary scan for every
+    symbolic leaf in legacy expression archives.
+
+    :param var_dict: Variables keyed by their stable non-mutable identity.
+    :return: Lookup containing stable identities and non-conflicting mutable UID aliases.
+    """
+    identity_lookup: Dict[int, Var] = dict(var_dict)
+    candidate_var: Var
+
+    for candidate_var in var_dict.values():
+        if candidate_var.uid not in identity_lookup:
+            identity_lookup[candidate_var.uid] = candidate_var
+        else:
+            pass
+
+    return identity_lookup
+
 class Connection:
     """
     Lightweight saved description of one propagated variable connection.
@@ -150,7 +207,8 @@ class VarFactory(EditableDevice):
             self._var_dict[v.non_mutable_uid] = v
             return v
         else:
-            v = Var(name=name, reference=reference, network_conn=network_conn, shared_reference=shared_reference, uid=uid,
+            v = Var(name=name, reference=reference, network_conn=network_conn,
+                    shared_reference=shared_reference, non_mutable_uid=non_mutable_uid, uid=uid,
                     diff_var=None, base_var=None)
             if shared_reference is not None:
                 self.save_var_in_vars_references_dict(v, shared_reference.name)
@@ -188,7 +246,16 @@ class VarFactory(EditableDevice):
         :return:
         """
         if uid is not None:
-            return self._var_dict[uid]
+            found_var: Var | None = find_var_by_persisted_identity(
+                var_dict=self._var_dict,
+                persisted_uid=uid,
+            )
+            if found_var is not None:
+                return found_var
+            else:
+                # Preserve the historical KeyError contract for truly missing
+                # variable references after both lookup formats are exhausted.
+                return self._var_dict[uid]
         else:
             return None
 
@@ -217,15 +284,68 @@ class VarFactory(EditableDevice):
                 self.create_reference(shared_reference)
                 self._vars_references_dict[self._references_dict[shared_reference].uid] = list()
 
-            v = Var(name=name, shared_reference=self._references_dict[shared_reference], reference=reference, network_conn=network_conn, uid=uid, diff_var=diff_var, base_var=base_var)
+            v = Var(name=name, shared_reference=self._references_dict[shared_reference], reference=reference,
+                    network_conn=network_conn, non_mutable_uid=non_mutable_uid, uid=uid,
+                    diff_var=diff_var, base_var=base_var)
             self.save_var_in_vars_references_dict(v, shared_reference)
             self._var_dict[v.non_mutable_uid] = v
             self._diff_var_dict[v.non_mutable_uid] = v
             return v
         else:
-            v = Var(name=name, reference=reference, network_conn=network_conn, shared_reference=shared_reference, uid=uid, diff_var=diff_var, base_var=base_var)
+            v = Var(name=name, reference=reference, network_conn=network_conn,
+                    shared_reference=shared_reference, non_mutable_uid=non_mutable_uid, uid=uid,
+                    diff_var=diff_var, base_var=base_var)
             self._diff_var_dict[v.non_mutable_uid] = v
             return v
+
+    def get_connection_source_non_mutable_uid(self,
+                                              variable_non_mutable_uid: int) -> int:
+        """
+        Resolve the upstream owner of one connected variable identity.
+
+        The saved connection graph is directional from an incoming source to
+        substituted targets. A rename can originate from either endpoint in
+        the editor, so it must first walk the reverse relation and then replay
+        the existing forward propagation from the canonical source.
+
+        :param variable_non_mutable_uid: Stable identity selected by the user.
+        :return: Stable identity of the upstream connection owner.
+        """
+        current_non_mutable_uid: int = variable_non_mutable_uid
+        visited_non_mutable_uids: set[int] = set()
+        source_non_mutable_uid: int | None
+        owner_non_mutable_uid: int
+        connection_list: List[Connection]
+        connection: Connection
+
+        while current_non_mutable_uid not in visited_non_mutable_uids:
+            visited_non_mutable_uids.add(current_non_mutable_uid)
+            source_non_mutable_uid = None
+
+            # Find the unique incoming owner without changing the established
+            # source-to-target storage layout used by connect/disconnect.
+            for owner_non_mutable_uid, connection_list in self._vars_connected_dict.items():
+                for connection in connection_list:
+                    if connection.non_mutable_uid == current_non_mutable_uid:
+                        source_non_mutable_uid = owner_non_mutable_uid
+                        break
+                    else:
+                        pass
+
+                if source_non_mutable_uid is not None:
+                    break
+                else:
+                    pass
+
+            if source_non_mutable_uid is None:
+                return current_non_mutable_uid
+            else:
+                current_non_mutable_uid = source_non_mutable_uid
+
+        # A malformed cycle has no unique root. Returning the first repeated
+        # identity keeps rename propagation finite and consistent with the
+        # existing cycle guard in connect_variables_by_uid().
+        return current_non_mutable_uid
 
     def get_diff_var(self, uid: int) -> Var:
         """
@@ -233,7 +353,15 @@ class VarFactory(EditableDevice):
         :param uid:
         :return:
         """
-        return self._diff_var_dict[uid]
+        found_var: Var | None = find_var_by_persisted_identity(
+            var_dict=self._diff_var_dict,
+            persisted_uid=uid,
+        )
+        if found_var is not None:
+            return found_var
+        else:
+            # Preserve the historical KeyError for a genuinely absent entry.
+            return self._diff_var_dict[uid]
 
     def add_const(self,
                   value: float | None = None,
@@ -253,7 +381,34 @@ class VarFactory(EditableDevice):
     def connect_variables_by_uid(self,
                                  var_to_subs_non_mutable_uid: int,
                                  incoming_var_uid: int,
-                                 incoming_var_name: str) -> None:
+                                 incoming_var_name: str,
+                                 visited_non_mutable_uids: set[int] | None = None) -> None:
+        """
+        Propagate one incoming variable identity through the saved connection graph.
+
+        The connection registry can contain cycles when editor-side EMT models
+        reconnect root mapping vars that already alias back into the same live
+        symbolic chain. Track visited stable uids during one propagation walk so
+        the alias update remains finite even when the graph contains loops.
+
+        :param var_to_subs_non_mutable_uid: Stable uid of the variable to rewrite.
+        :param incoming_var_uid: Mutable uid that should be propagated.
+        :param incoming_var_name: Variable name that should be propagated.
+        :param visited_non_mutable_uids: Stable uids already processed in this walk.
+        :return: None.
+        """
+        next_visited_non_mutable_uids: set[int]
+        connection: Connection
+
+        if visited_non_mutable_uids is None:
+            next_visited_non_mutable_uids = set()
+        else:
+            next_visited_non_mutable_uids = visited_non_mutable_uids
+
+        if var_to_subs_non_mutable_uid in next_visited_non_mutable_uids:
+            return
+        else:
+            next_visited_non_mutable_uids.add(var_to_subs_non_mutable_uid)
 
         if var_to_subs_non_mutable_uid in self._var_dict:
             self._var_dict[var_to_subs_non_mutable_uid].uid = incoming_var_uid
@@ -271,16 +426,45 @@ class VarFactory(EditableDevice):
         # recursitity for previous connected vars
         if var_to_subs_non_mutable_uid in self._vars_connected_dict:
             for connection in self._vars_connected_dict[var_to_subs_non_mutable_uid]:
-                self.connect_variables_by_uid(connection.non_mutable_uid, incoming_var_uid, incoming_var_name)
+                self.connect_variables_by_uid(connection.non_mutable_uid,
+                                              incoming_var_uid,
+                                              incoming_var_name,
+                                              next_visited_non_mutable_uids)
+        else:
+            pass
 
-    def add_connection(self, var_to_subs: Var, incoming_var: Var):
+    def add_connection(self, var_to_subs: Var, incoming_var: Var) -> None:
+        """
+        Register and propagate one directed symbolic-variable connection.
 
-        if not incoming_var.non_mutable_uid in self._vars_connected_dict:
+        Reopening an editor and running dynamic preflight can request the same
+        bus-to-device edge repeatedly. Keep one restoration record per stable
+        target while still replaying the current incoming UID and name.
+
+        :param var_to_subs: Target variable whose effective identity is replaced.
+        :param incoming_var: Source variable providing the effective identity.
+        :return: None.
+        """
+        connections: List[Connection]
+        existing_connection: Connection
+
+        if incoming_var.non_mutable_uid not in self._vars_connected_dict:
             self._vars_connected_dict[incoming_var.non_mutable_uid] = list()
+        else:
+            pass
+
+        connections = self._vars_connected_dict[incoming_var.non_mutable_uid]
+        for existing_connection in connections:
+            if existing_connection.non_mutable_uid == var_to_subs.non_mutable_uid:
+                self.connect_variables_by_uid(var_to_subs.non_mutable_uid,
+                                              incoming_var.uid,
+                                              incoming_var.name)
+                return
+            else:
+                pass
 
         connection = Connection(var_to_subs.non_mutable_uid, var_to_subs.name, var_to_subs.uid)
-        self._vars_connected_dict[incoming_var.non_mutable_uid].append(connection)
-
+        connections.append(connection)
         self.connect_variables_by_uid(connection.non_mutable_uid, incoming_var.uid, incoming_var.name)
 
     def remove_connection(self, var_to_disconnect: Var, outgoing_var: Var) -> None:
@@ -439,15 +623,19 @@ class VarFactory(EditableDevice):
         """
         obj_dict: Dict[int, Var] = dict()
         for data in data_list:
-            assert data["type"] == "Var"
+            data_tpe: Any = data.get("type", None)
+            if data_tpe != "Var":
+                continue
+            else:
+                pass
 
             # Older persisted symbolic models may not store the power-flow
             # reference field, so keep loading those files by defaulting to None.
             key_ref = None
-            ref_data_dict: Any = data["shared_ref"]
+            ref_data_dict: Any = data.get("shared_ref", None)
             if ref_data_dict is not None:
-                ref_data_name = ref_data_dict["name"]
-                ref_data_uid = ref_data_dict["uid"]
+                ref_data_name = ref_data_dict.get("name", None)
+                ref_data_uid = ref_data_dict.get("uid", None)
                 key_ref: SharedVarReferenceType | None
 
                 if ref_data_name is not None and ref_data_uid is not None:
@@ -468,9 +656,33 @@ class VarFactory(EditableDevice):
             else:
                 key_power_flow_ref = None
 
-            obj = Var(name=data["name"], uid=data["uid"], shared_reference=key_ref, reference=key_power_flow_ref, non_mutable_uid=data["non_mutable_uid"])
+            # obj = Var(name=data["name"], uid=data["uid"], shared_reference=key_ref, reference=key_power_flow_ref, non_mutable_uid=data["non_mutable_uid"])
+            obj_name: Any = data.get("name", "")
+            obj_uid: Any = data.get("uid", None)
+            obj_non_mutable_uid: Any = data.get("non_mutable_uid", None)
+
+            # Legacy symbolic entries can miss one of the identity keys. Reuse
+            # the surviving identifier so the rest of the dynamic block payload
+            # can still be reconstructed.
+            if obj_uid is None and obj_non_mutable_uid is None:
+                continue
+            else:
+                pass
+
+            if obj_uid is None:
+                obj_uid = obj_non_mutable_uid
+            else:
+                pass
+
+            if obj_non_mutable_uid is None:
+                obj_non_mutable_uid = obj_uid
+            else:
+                pass
+
+            obj = Var(name=obj_name, uid=obj_uid, shared_reference=key_ref, reference=key_power_flow_ref,
+                      non_mutable_uid=obj_non_mutable_uid)
             if ref_data_dict is not None:
-                ref_data_uid = ref_data_dict["uid"]
+                ref_data_uid = ref_data_dict.get("uid", None)
                 if ref_data_uid is not None:
                     if ref_data_uid in self._vars_references_dict:
                         self._vars_references_dict[ref_data_uid].append(obj)
@@ -498,9 +710,13 @@ class VarFactory(EditableDevice):
         :param data_list: Serialized differential variable records.
         :return: None.
         """
-        obj_dict: Dict[int, Var | Const | Var] = dict()
+        obj_dict: Dict[int, Var] = dict()
         for data in data_list:
-            assert data["type"] == "DiffVar"
+            data_tpe: Any = data.get("type", None)
+            if data_tpe != "DiffVar":
+                continue
+            else:
+                pass
 
             """
             lst.append({
@@ -513,20 +729,38 @@ class VarFactory(EditableDevice):
             # Recover the base variable first because differential variables
             # are linked to the already reconstructed algebraic/differential
             # chain. This preserves the original derivative hierarchy.
-            if data["base_var"] in self._var_dict.keys():
-                base_var = self._var_dict[data["base_var"]]
-            elif data["base_var"] in self._diff_var_dict.keys():
-                base_var = self._diff_var_dict[data["base_var"]]
+            base_var_uid: Any = data.get("base_var", None)
+            base_var: Var | None = find_var_by_persisted_identity(
+                var_dict=self._var_dict,
+                persisted_uid=base_var_uid,
+            )
+            if base_var is None:
+                base_var = find_var_by_persisted_identity(
+                    var_dict=self._diff_var_dict,
+                    persisted_uid=base_var_uid,
+                )
             else:
-                base_var = obj_dict[data["base_var"]]
+                pass
+            if base_var is None:
+                base_var = find_var_by_persisted_identity(
+                    var_dict=obj_dict,
+                    persisted_uid=base_var_uid,
+                )
+            else:
+                pass
+
+            if base_var is None:
+                continue
+            else:
+                pass
 
             # Older persisted symbolic models may not store the power-flow
             # reference field on differential variables either.
             key_ref: SharedVarReferenceType | None = None
-            ref_data_dict: Any = data["shared_ref"]
+            ref_data_dict: Any = data.get("shared_ref", None)
             if ref_data_dict is not None:
-                ref_data_name = ref_data_dict["name"]
-                ref_data_uid = ref_data_dict["uid"]
+                ref_data_name = ref_data_dict.get("name", None)
+                ref_data_uid = ref_data_dict.get("uid", None)
 
                 if ref_data_name is not None and ref_data_uid is not None:
                     if ref_data_name not in self._references_dict:
@@ -552,14 +786,27 @@ class VarFactory(EditableDevice):
             else:
                 reference_power_flow = None
 
-            obj = Var(name=data["name"],
-                      uid=data["uid"],
+            obj_name: Any = data.get("name", "")
+            obj_uid: Any = data.get("uid", None)
+            if obj_uid is None:
+                obj_uid = data.get("non_mutable_uid", None)
+            else:
+                pass
+
+            if obj_uid is None:
+                continue
+            else:
+                pass
+
+            obj = Var(name=obj_name,
+                      uid=obj_uid,
+                      non_mutable_uid=data.get("non_mutable_uid", obj_uid),
                       base_var=base_var,
                       shared_reference=key_ref,
                       reference=reference_power_flow)
 
             if ref_data_dict is not None:
-                ref_data_uid = ref_data_dict["uid"]
+                ref_data_uid = ref_data_dict.get("uid", None)
                 if ref_data_uid is not None:
                     if ref_data_uid in self._vars_references_dict:
                         self._vars_references_dict[ref_data_uid].append(obj)
@@ -619,11 +866,20 @@ class VarFactory(EditableDevice):
                 pass
 
             for conn_data in connections_list:
-                if conn_data["type"] == "Connection":
+                conn_tpe: Any = conn_data.get("type", None)
+                if conn_tpe == "Connection":
+                    conn_non_mutable_uid: Any = conn_data.get("non_mutable_uid", None)
+                    conn_name: Any = conn_data.get("name", "")
+                    conn_uid: Any = conn_data.get("uid", None)
+                    if conn_non_mutable_uid is None or conn_uid is None:
+                        continue
+                    else:
+                        pass
+
                     conn: Connection = Connection(
-                        non_mutable_uid=conn_data["non_mutable_uid"],
-                        name=conn_data["name"],
-                        uid=conn_data["uid"]
+                        non_mutable_uid=conn_non_mutable_uid,
+                        name=conn_name,
+                        uid=conn_uid
                     )
                     self._vars_connected_dict[uid_key].append(conn)
                 else:

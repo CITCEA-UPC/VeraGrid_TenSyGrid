@@ -11,6 +11,7 @@ from VeraGridEngine.enumerations import BuildStatus, DeviceType
 
 
 class FluidTurbine(FluidInjectionTemplate):
+    __slots__ = ()
 
     def __init__(self,
                  name: str = '',

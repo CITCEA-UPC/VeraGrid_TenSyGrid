@@ -13,7 +13,7 @@ from VeraGridEngine.enumerations import ParamPowerFlowReferenceType, DeviceType,
 from VeraGridEngine.Devices import MultiCircuit
 from VeraGridEngine.Simulations.driver_template import DummySignal
 from VeraGridEngine.Utils.Symbolic.symbolic import (Var, Const, Expr, piecewise, get_expression_vars, hard_sat)
-from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicParamsVector, SymbolicDerivative, SymbolicJacobian
+from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType, RmsInitializationMethod
 from VeraGridEngine.basic_structures import Vec, ObjVec, BoolVec, Logger
@@ -23,6 +23,10 @@ from VeraGridEngine.Utils.Symbolic.explicit_initialization_symbolic import (init
                                                                             build_rms_single_equation_compiler)
 from VeraGridEngine.Simulations.Rms.initialization import init_pseudo_transient
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProblemTemplate
+from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import (
+    _resolve_rms_constant_parameter_value,
+    _resolve_rms_runtime_parameter_expression,
+)
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
 from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
@@ -31,21 +35,29 @@ from VeraGridEngine.Devices.Branches.transformer import Transformer2W
 from VeraGridEngine.Utils.Symbolic.jit_compiler import RMSCompiler, RMSCompilerVec
 from VeraGridEngine.Utils.Symbolic.bus_rms_template import get_bus_rms_algebraic_vars
 from VeraGridEngine.Utils.procedural_logic import build_boundary_updater_from_block
-from VeraGridEngine.IO.fmu.importer.experimental_cs import (
+from VeraGridEngine.IO.fmu.importer.co_simulation import (
     advance_rms_fmu_cs_devices,
     align_rms_fmu_cs_device_output_parameters,
     close_rms_fmu_cs_devices,
     initialize_rms_fmu_cs_devices,
     register_rms_fmu_cs_device,
 )
-from VeraGridEngine.IO.fmu.importer.experimental_me import (
+from VeraGridEngine.IO.fmu.importer.model_exchange import (
     advance_rms_fmu_me_devices,
     close_rms_fmu_me_devices,
+    get_next_rms_fmu_me_event_time,
     initialize_rms_fmu_me_devices,
+    _prepare_rms_fmu_me_state_event_retry,
     register_rms_fmu_me_device,
+    resolve_rms_fmu_me_devices,
 )
+from VeraGridEngine.IO.fmu.importer.runtime_profile import FmuMeEvaluationBudget
 
-from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_rms import (
+# Previous mapper:
+# from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_rms import (
+#     assign_static_api_object_mapping_for_device,
+# )
+from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified import (
     assign_static_api_object_mapping_for_device,
 )
 
@@ -277,6 +289,11 @@ def setQ(Q: ObjVec, Q_used: BoolVec, k: int, val: object):
 
 
 def get_all_uids_from_block_composition_dict(block_composition_dict: Dict[int, List[int]]) -> List[int]:
+    """
+
+    :param block_composition_dict:
+    :return:
+    """
     return [uid for uids in block_composition_dict.values() for uid in uids]
 
 
@@ -302,22 +319,140 @@ class RmsProblemDaeVec(RmsProblemTemplate):
     DIFF_NAME = "diff"
     TIME_NAME = "glob_time"
 
+    __slots__ = (
+        "Sf",
+        "St",
+        "options",
+        "logger",
+        "init_guess",
+        "event_params_init_dict",
+        "sys_block",
+        "sys_vars",
+        "_algebraic_vars",
+        "_algebraic_eqs",
+        "_algebraic_vars_equiv_class_dict",
+        "_algebraic_eqs_equiv_class_dict",
+        "_state_vars",
+        "_state_eqs",
+        "_state_vars_equiv_class_dict",
+        "_state_eqs_equiv_class_dict",
+        "_diff_vars",
+        "_diff_vars_equiv_class_dict",
+        "_variable_parameters",
+        "_variable_parameters_equiv_class_dict",
+        "_event_parameters_eqs0",
+        "_event_parameters_eqs",
+        "_constant_parameters",
+        "_constant_parameters_equiv_class_dict",
+        "_parameters_values",
+        "_static_parameters_values_mapping",
+        "_runtime_all_parameters_source",
+        "_runtime_all_eqs_source",
+        "_runtime_continuous_parameters",
+        "_runtime_mode_parameters",
+        "_runtime_continuous_eqs",
+        "_runtime_mode_eqs",
+        "_event_parameter_device_idtags",
+        "_runtime_all_eqs_source0",
+        "_runtime_continuous_slice",
+        "_runtime_mode_slice",
+        "_continuous_event_parameter_uids",
+        "_discrete_event_parameter_uids",
+        "_continuous_runtime_events",
+        "_scheduled_mode_events",
+        "_mode_event_cursor",
+        "_active_events_group",
+        "_mode_runtime_expression_by_uid",
+        "_mode_runtime_initialized_uids",
+        "_procedural_logic_updater",
+        "_derivative_fn",
+        "_event_params_fn",
+        "_rhs_algeb_fn_by_types",
+        "_rhs_state_fn_by_types",
+        "_rhs_algeb_energy_balance_fn",
+        "_j11_fn_by_types",
+        "_j12_fn_by_types",
+        "_j21_fn_by_types",
+        "_j22_fn_by_types",
+        "_jbalance_fn",
+        "_jbalance_state_fn",
+        "_balance_equations",
+        "_variable_parameters_values",
+        "_last_variable_parameters_values",
+        "_constant_params",
+        "_block_boundary_updater",
+        "_fmu_cs_adapters",
+        "_fmu_cs_initialized",
+        "_fmu_me_adapters",
+        "_fmu_me_initialized",
+        "_fmu_me_evaluation_budget",
+        "_n_vars",
+        "_n_state",
+        "_n_alg",
+        "_n_algebraic",
+        "_n_diff",
+        "_n_params",
+        "_n_event_params",
+        "_class_n_vars",
+        "_class_n_diff",
+        "_class_n_params",
+        "_class_n_event_params",
+        "_uid2idx_vars",
+        "_uid2idx_diff",
+        "_uid2idx_t",
+        "_uid2idx_params",
+        "_uid2idx_event_params",
+        "_uid2idx_vars_vec",
+        "_uid2idx_diff_vec",
+        "_uid2idx_params_vec",
+        "_uid2idx_event_params_vec",
+        "_vars_glob_name2uid",
+        "_compiler_names_dict",
+        "_compiler_names_dict_vect",
+        "_alias_names_dict",
+        "_alias_names_dict_vect",
+        "_vars_info",
+        "_glob_time",
+        "_delta",
+        "_dt",
+        "_state_algeb_vars",
+        "_x_gather_idx",
+        "_dx_gather_idx",
+        "_vp_gather_idx",
+        "_cp_gather_idx",
+        "_input_matrices_by_model",
+        "_model_algebraic_eq_start_idx",
+        "_model_state_eq_start_idx",
+        "_jac_algeb_col_off",
+        "_jac_state_col_off",
+        "_jac_global_data",
+        "_prof_timings",
+        "block_composition_dict",
+        "equivalence_dict",
+        "reference_class_for_all_blocks_dict",
+        "variables_equivalence_dict",
+    )
+
     def __init__(self,
                  grid: MultiCircuit,
                  options: RmsOptions,
                  pf_results: PowerFlowResults,
                  progress_signal: DummySignal | None = None,
-                 progress_text: DummySignal | None = None, ):
+                 progress_text: DummySignal | None = None,
+                 logger: Logger | None = None):
         """
 
-        :param grid:
-        :param options:
-        :param pf_results:
+        :param grid: MultiCircuit
+        :param options: RmsOptions
+        :param pf_results: PowerFlowResults
+        :param progress_signal: DummySignal
+        :param progress_text: DummySignal
+        :param logger: Logger
         """
         super().__init__(progress_signal=progress_signal,
                          progress_text=progress_text)
 
-        self.logger = Logger()
+        self.logger = logger
         self.grid: MultiCircuit = grid
         self.power_flow_results: PowerFlowResults = pf_results
         self.Sf = self.power_flow_results.Sf / self.grid.Sbase
@@ -403,22 +538,16 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._rhs_algeb_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec], Vec]] = dict()
         self._rhs_algeb_energy_balance_fn: Callable[[Vec, Vec, Vec, Vec], Vec] | None = None
 
-        self._j11_fn_by_types: Dict[int,Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix]] = dict()
-        self._j12_fn_by_types: Dict[int,Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix]] = dict()
-        self._j21_fn_by_types: Dict[int,Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix]] = dict()
-        self._j22_fn_by_types: Dict[int,Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix]] = dict()
+        self._j11_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec, float], np.ndarray] | None] = dict()
+        self._j12_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec, float], np.ndarray] | None] = dict()
+        self._j21_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec, float], np.ndarray] | None] = dict()
+        self._j22_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec, float], np.ndarray] | None] = dict()
 
         self._jbalance_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
         self._jbalance_state_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
-        # function pointers
-        self._derivative_fn: SymbolicDerivative | None = None
-        self._event_params_fn: SymbolicParamsVector | None = None
-        self._rhs_algeb_fn: Callable[[Vec, Vec, Vec, Vec], Vec] | None = None
-        self._rhs_state_fn: Callable[[Vec, Vec, Vec, Vec], Vec] | None = None
-        self._j11_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
-        self._j12_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
-        self._j21_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
-        self._j22_fn: Callable[[Vec, Vec, Vec, Vec, float], sp.csc_matrix] | None = None
+        # The JIT compilers return allocation wrappers with these public call signatures.
+        self._derivative_fn: Callable[[Vec, Vec, Vec, float], Vec] | None = None
+        self._event_params_fn: Callable[[Vec, float], Vec] | None = None
 
         self._variable_parameters_values: Optional[Vec] = None
         self._last_variable_parameters_values: Optional[Vec] = None
@@ -428,6 +557,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._fmu_cs_initialized: bool = False
         self._fmu_me_adapters: List[object] = list()
         self._fmu_me_initialized: bool = False
+        self._fmu_me_evaluation_budget: FmuMeEvaluationBudget | None = None
+        self._prof_timings: Dict[str, float] = dict()
 
         # --------------------------------------------------------------------------------------------------------------
         # Initialize the RMS problem
@@ -537,9 +668,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         for branch_num, elm in enumerate(self.grid.get_branches_iter(add_vsc=False, add_hvdc=False, add_switch=True)):
 
             if elm.rms_model.empty():
-                self.logger.add_error("No RMS model",
-                                      device_class=elm.device_type.value,
-                                      device=elm.name)
+                if self.logger is not None:
+                    self.logger.add_error("No RMS model",
+                                          device_class=elm.device_type.value,
+                                          device=elm.name)
+                else:
+                    pass
             else:
 
                 assign_static_api_object_mapping_for_device(grid=self.grid,
@@ -547,8 +681,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                                                             mdl=elm.rms_model,
                                                             problem_mapping=self._static_parameters_values_mapping,
                                                             logger=None)
-
-                _, Vmf, Vaf = get_bus_rms_algebraic_vars(elm.bus_from.rms_model)
 
                 self.add_variables_to_compilation_dicts(elm, elm.rms_model)
                 register_rms_fmu_cs_device(self, elm, elm.rms_model)
@@ -560,22 +692,33 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Pt, self.St[branch_num].real)
                 self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Qt, self.St[branch_num].imag)
 
-                if VarPowerFlowReferenceType.If_dc in elm.rms_model.external_mapping and Vmf is not None:
-                    if Vmf.uid in self.uid2idx_vars:
-                        vmf_idx = self.uid2idx_vars[Vmf.uid]
-                        if vmf_idx in self.init_guess:
-                            vmf0: float = self.init_guess[vmf_idx]
+                if elm.rms_model.external_mapping.get(VarPowerFlowReferenceType.If_dc, None) is not None:
+                    from_voltage_dc: Var | None
+                    from_voltage_dc, _, _ = get_bus_rms_algebraic_vars(bus_rms_model=elm.bus_from.rms_model)
+                    if from_voltage_dc is not None:
+                        # Reuse the DC-bus value already initialized from the PF so
+                        # the branch current and its terminal voltage share one seed.
+                        from_voltage_raw: float | int | complex | None = self.init_guess.get(
+                            from_voltage_dc.uid,
+                            None,
+                        )
+                        from_current: float = 0.0
 
-                            if abs(vmf0) > 1e-9:
-                                self.set_init_guess(
-                                    elm.rms_model,
-                                    VarPowerFlowReferenceType.If_dc,
-                                    self.Sf[branch_num].real / vmf0,
-                                )
+                        if from_voltage_raw is not None:
+                            from_voltage: float = float(np.real(from_voltage_raw))
+                            if abs(from_voltage) > 1.0e-9:
+                                from_current = float(self.Sf[branch_num].real / from_voltage)
+                            else:
+                                # A de-energized DC terminal cannot define current from P/V.
+                                pass
                         else:
                             pass
+
+                        self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.If_dc, from_current)
                     else:
                         pass
+                else:
+                    pass
 
                 # Run explicit initialization for branches to solve algebraic equations
                 if isinstance(elm, Transformer2W):
@@ -655,9 +798,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         # Populating VSCs init guess
         for i, elm in enumerate(self.grid.get_vsc()):
             if elm.rms_model.empty():
-                self.logger.add_error("No RMS model",
-                                      device_class=elm.device_type.value,
-                                      device=elm.name)
+                if self.logger is not None:
+                    self.logger.add_error("No RMS model",
+                                          device_class=elm.device_type.value,
+                                          device=elm.name)
+                else:
+                    pass
             else:
                 mdl = elm.rms_model
 
@@ -678,18 +824,28 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 pt_init = St_vsc[i].real
                 qt_init = St_vsc[i].imag
                 vm_t = np.abs(self.power_flow_results.voltage[t])
-                im_init = np.sqrt(pt_init * pt_init + qt_init * qt_init) / (vm_t + 1e-12)
+                im_init: float = float(
+                    np.sqrt(pt_init * pt_init + qt_init * qt_init)
+                    / (vm_t + 1e-12)
+                )
 
                 if i < len(self.power_flow_results.It_vsc):
-                    it_mag = np.abs(self.power_flow_results.It_vsc[i]) / self.grid.Sbase
+                    # Power-flow VSC currents already use the system per-unit
+                    # base expected by the RMS physical-terminal equations.
+                    it_mag: float = float(
+                        np.abs(self.power_flow_results.It_vsc[i])
+                    )
                     if np.isfinite(it_mag) and it_mag > 0.0:
                         im_init = it_mag
+                    else:
+                        pass
+                else:
+                    pass
 
                 self.set_init_guess(mdl, VarPowerFlowReferenceType.Pf, Sf_vsc)
                 self.set_init_guess(mdl, VarPowerFlowReferenceType.Pt, pt_init)
                 self.set_init_guess(mdl, VarPowerFlowReferenceType.Qt, qt_init)
                 if VarPowerFlowReferenceType.Im in mdl.external_mapping:
-                    im_init = float(np.abs(self.power_flow_results.It_vsc[i]) / self.grid.Sbase)
                     self.set_init_guess(mdl, VarPowerFlowReferenceType.Im, im_init)
                 else:
                     pass
@@ -705,9 +861,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         # Populating HVDC init guess (similar to VSCs)
         for i, elm in enumerate(self.grid.get_hvdc()):
             if elm.rms_model.empty():
-                self.logger.add_error("No RMS model",
-                                      device_class=elm.device_type.value,
-                                      device=elm.name)
+                if self.logger is not None:
+                    self.logger.add_error("No RMS model",
+                                          device_class=elm.device_type.value,
+                                          device=elm.name)
+                else:
+                    pass
             else:
                 mdl = elm.rms_model
 
@@ -732,9 +891,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         for elm in grid.get_vsc():
 
             if elm.rms_model.empty():
-                self.logger.add_error("No RMS model",
-                                      device_class=elm.device_type.value,
-                                      device=elm.name)
+                if self.logger is not None:
+                    self.logger.add_error("No RMS model",
+                                          device_class=elm.device_type.value,
+                                          device=elm.name)
+                else:
+                    pass
             else:
 
                 # find init values for the variables of this model
@@ -814,11 +976,25 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         for elm in grid.get_injection_devices_iter():
 
             if elm.rms_model.empty():
-                self.logger.add_error("No RMS model",
-                                      device_class=elm.device_type.value,
-                                      device=elm.name)
+                if self.logger is not None:
+                    self.logger.add_error("No RMS model",
+                                          device_class=elm.device_type.value,
+                                          device=elm.name)
+                else:
+                    pass
             else:
                 bus_index = bus_dict[elm.bus]
+
+                # Static values must be resolved before parameter registration;
+                # explicit initialization then sees physical values rather than
+                # template defaults (notably for shunt conductance/susceptance).
+                assign_static_api_object_mapping_for_device(
+                    grid=self.grid,
+                    device=elm,
+                    mdl=elm.rms_model,
+                    problem_mapping=self._static_parameters_values_mapping,
+                    logger=self.logger,
+                )
 
                 self.add_variables_to_compilation_dicts(elm, elm.rms_model)
                 register_rms_fmu_cs_device(self, elm, elm.rms_model)
@@ -931,7 +1107,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
         total_init_explicit_time += time.perf_counter() - t0
         # print(f"\nTotal time explicit initialization: {total_init_explicit_time:.6f} seconds")
-        self.logger.add_info("Total time explicit initialization", value=total_init_explicit_time)
+        if self.logger is not None:
+            self.logger.add_info("Total time explicit initialization", value=total_init_explicit_time)
+        else:
+            pass
         if self.progress_signal is not None:
             self.progress_signal.emit(10)
 
@@ -967,7 +1146,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         ac_virtual_buses = [elm.bus_to.idtag for elm in grid.get_vsc()]
         for i, elm in enumerate(self.grid.buses):
             if not P_used[i] and not Q_used[i]:
-                self.logger.add_error("Isolated bus", value=i)
+                if self.logger is not None:
+                    self.logger.add_error("Isolated bus", value=i)
+                else:
+                    pass
             else:
                 if elm.is_dc:
                     self._algebraic_eqs.append(P[i])
@@ -1323,36 +1505,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 self._balance_equations, self._state_vars, "j_balance_state"
             )
 
-        # self._rhs_algeb_fn = rms_compiler_all_models.compile_rhs(self._algebraic_eqs, "rhs_algeb")
-        # timings["RHS algebraic"] = _toc(t0)
-        #
-        #
-        # if len(self._state_eqs) != 0:
-        #     t0 = _tic()
-        #     self._rhs_state_fn = rms_compiler_all_models.compile_rhs(self._state_eqs, "rhs_state")
-        #     timings["RHS state"] = _toc(t0)
-        #
-        #     t0 = _tic()
-        #     self._j11_fn = rms_compiler_all_models.compile_sparse_jacobian(self._state_eqs, self._state_vars, "j11")
-        #     timings["J11 (dF/dx)"] = _toc(t0)
-        #
-        #     t0 = _tic()
-        #     self._j12_fn = rms_compiler_all_models.compile_sparse_jacobian(self._state_eqs, self._algebraic_vars, "j12")
-        #     timings["J12 (dF/dy)"] = _toc(t0)
-        #
-        #     t0 = _tic()
-        #     self._j21_fn = rms_compiler_all_models.compile_sparse_jacobian(self._algebraic_eqs, self._state_vars, "j21")
-        #     timings["J21 (dG/dx)"] = _toc(t0)
-        #
-        #     t0 = _tic()
-        #     self._j22_fn = rms_compiler_all_models.compile_sparse_jacobian(self._algebraic_eqs, self._algebraic_vars, "j22")
-        #     timings["J22 (dG/dy)"] = _toc(t0)
-        #
-        # else:
-        #     t0 = _tic()
-        #     self._j22_fn = rms_compiler_all_models.compile_sparse_jacobian(self._algebraic_eqs, self._algebraic_vars, "j22")
-        #     timings["J22 only (no states)"] = _toc(t0)
-
         if self.options.verbose > 0:
             print(f"Model compiled with {self._n_vars} variables")
             print("\nCompilation timing summary:")
@@ -1495,11 +1647,26 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         if self._procedural_logic_updater is not None:
             t_proc = self._procedural_logic_updater.get_next_forced_event_time(t_prev, t_target)
 
+        t_fmu: Optional[float] = get_next_rms_fmu_me_event_time(
+            problem=self,
+            t_prev=t_prev,
+            t_target=t_target,
+        )
+        native_event_time: Optional[float]
         if t_mode is None:
-            return t_proc
-        if t_proc is None:
-            return t_mode
-        return min(t_mode, t_proc)
+            native_event_time = t_proc
+        else:
+            if t_proc is None:
+                native_event_time = t_mode
+            else:
+                native_event_time = min(t_mode, t_proc)
+        if native_event_time is None:
+            return t_fmu
+        else:
+            if t_fmu is None:
+                return native_event_time
+            else:
+                return min(native_event_time, t_fmu)
 
     def _initialize_procedural_logic_updater(self) -> None:
         entries: List = list()
@@ -1828,28 +1995,13 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         :param t: Simulation time.
         :return: Updated runtime parameter vector.
         """
-        runtime_continuous_eqs: List[Expr | Const]
-        runtime_mode_slice: slice
-
-        if "_runtime_continuous_eqs" in self.__dict__:
-            runtime_continuous_eqs = self._runtime_continuous_eqs
-        else:
-            if self._event_params_fn is None:
-                return ev_param
-            else:
-                updated = self._event_params_fn(ev_param, t)
-                updated = self._event_params_fn(updated, t)
-                return updated
+        runtime_continuous_eqs: List[Expr | Const] = self._runtime_continuous_eqs
+        runtime_mode_slice: slice = self._runtime_mode_slice
 
         n_continuous = len(runtime_continuous_eqs)
 
         if n_continuous == 0 or self._event_params_fn is None:
             return ev_param
-
-        if "_runtime_mode_slice" in self.__dict__:
-            runtime_mode_slice = self._runtime_mode_slice
-        else:
-            runtime_mode_slice = slice(0, 0)
 
         mode_snapshot: Optional[Vec]= None
         if runtime_mode_slice.start != runtime_mode_slice.stop:
@@ -1955,52 +2107,62 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             self._algebraic_eqs_equiv_class_dict[mdl.uid] = list()
 
             # we add bus variables for vectorization
-            class_idx = self._class_n_vars.get(mdl.uid, 0)
             if elm in self.grid.get_branches_iter():
-                _, Vmf, Vaf = get_bus_rms_algebraic_vars(elm.bus_from.rms_model)
-                self._compiler_names_dict_vect[mdl.uid][Vmf.uid] = f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Vmf.uid] = f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Vmf.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Vmf)
-                self._class_n_vars[mdl.uid] = class_idx + 1
+                branch_bus_models: List[Block] = list((elm.bus_from.rms_model, elm.bus_to.rms_model))
+                bus_model: Block
+                bus_voltage_var: Var | None
 
-                class_idx = self._class_n_vars.get(mdl.uid, 0)
-                self._compiler_names_dict_vect[mdl.uid][Vaf.uid] = f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Vaf.uid] =f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Vaf.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Vaf)
-                self._class_n_vars[mdl.uid] = class_idx + 1
-
-                class_idx = self._class_n_vars.get(mdl.uid, 0)
-                _, Vmt, Vat = get_bus_rms_algebraic_vars(elm.bus_to.rms_model)
-                self._compiler_names_dict_vect[mdl.uid][Vmt.uid] = f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Vmt.uid] = f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Vmt.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Vmt)
-                self._class_n_vars[mdl.uid] = class_idx + 1
-
-                class_idx = self._class_n_vars.get(mdl.uid, 0)
-                self._compiler_names_dict_vect[mdl.uid][Vat.uid] = f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Vat.uid] = f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Vat.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Vat)
-                self._class_n_vars[mdl.uid] = class_idx + 1
+                for bus_model in branch_bus_models:
+                    voltage_dc: Var | None
+                    voltage_magnitude: Var | None
+                    voltage_angle: Var | None
+                    voltage_dc, voltage_magnitude, voltage_angle = get_bus_rms_algebraic_vars(
+                        bus_rms_model=bus_model,
+                    )
+                    bus_voltage_vars: Tuple[Var | None, Var | None, Var | None] = (
+                        voltage_dc,
+                        voltage_magnitude,
+                        voltage_angle,
+                    )
+                    for bus_voltage_var in bus_voltage_vars:
+                        if bus_voltage_var is not None:
+                            class_idx = self._class_n_vars.get(mdl.uid, 0)
+                            self._compiler_names_dict_vect[mdl.uid][bus_voltage_var.uid] = f"{self.VARS_NAME}[{class_idx}]"
+                            self._alias_names_dict_vect[mdl.uid][bus_voltage_var.uid] = f"{self.VARS_NAME}_{class_idx}"
+                            self._uid2idx_vars_vec[mdl.uid][bus_voltage_var.uid] = class_idx
+                            self._algebraic_vars_equiv_class_dict[mdl.uid].append(bus_voltage_var)
+                            self._class_n_vars[mdl.uid] = class_idx + 1
+                        else:
+                            pass
+            else:
+                pass
 
             if elm in self.grid.get_injection_devices_iter():
-                _, Vm, Va = get_bus_rms_algebraic_vars(elm.bus.rms_model)
-                class_idx = self._class_n_vars.get(mdl.uid, 0)
-                self._compiler_names_dict_vect[mdl.uid][Vm.uid] =f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Vm.uid] = f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Vm.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Vm)
-                self._class_n_vars[mdl.uid] = class_idx + 1
+                injection_voltage_dc: Var | None
+                injection_voltage_magnitude: Var | None
+                injection_voltage_angle: Var | None
+                injection_voltage_dc, injection_voltage_magnitude, injection_voltage_angle = get_bus_rms_algebraic_vars(
+                    bus_rms_model=elm.bus.rms_model,
+                )
+                injection_bus_voltage_vars: Tuple[Var | None, Var | None, Var | None] = (
+                    injection_voltage_dc,
+                    injection_voltage_magnitude,
+                    injection_voltage_angle,
+                )
+                injection_bus_voltage_var: Var | None
 
-                class_idx = self._class_n_vars.get(mdl.uid, 0)
-                self._compiler_names_dict_vect[mdl.uid][Va.uid] = f"{self.VARS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[mdl.uid][Va.uid] = f"{self.VARS_NAME}_{class_idx}"
-                self._uid2idx_vars_vec[mdl.uid][Va.uid] = class_idx
-                self._algebraic_vars_equiv_class_dict[mdl.uid].append(Va)
-                self._class_n_vars[mdl.uid] = class_idx + 1
+                for injection_bus_voltage_var in injection_bus_voltage_vars:
+                    if injection_bus_voltage_var is not None:
+                        class_idx = self._class_n_vars.get(mdl.uid, 0)
+                        self._compiler_names_dict_vect[mdl.uid][injection_bus_voltage_var.uid] = f"{self.VARS_NAME}[{class_idx}]"
+                        self._alias_names_dict_vect[mdl.uid][injection_bus_voltage_var.uid] = f"{self.VARS_NAME}_{class_idx}"
+                        self._uid2idx_vars_vec[mdl.uid][injection_bus_voltage_var.uid] = class_idx
+                        self._algebraic_vars_equiv_class_dict[mdl.uid].append(injection_bus_voltage_var)
+                        self._class_n_vars[mdl.uid] = class_idx + 1
+                    else:
+                        pass
+            else:
+                pass
 
 
         equiv_class_uid = next((uid for uid, list_uid in self.block_composition_dict.items() if mdl.uid in list_uid), None)
@@ -2056,6 +2218,15 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             self._n_vars += 1
 
         for ep, const in mdl.parameters.items():
+            resolved_parameter_value: Const = _resolve_rms_constant_parameter_value(
+                device=elm,
+                root_block=elm.rms_model,
+                owner_block=mdl,
+                parameter=ep,
+                declared_value=const,
+                static_parameter_values=self._static_parameters_values_mapping,
+            )
+
             # if ep.name == "g":
             #     print("")
             # if ep.uid in self._uid2idx_params:
@@ -2076,11 +2247,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
             self._uid2idx_params[ep.uid] = self._n_params
             self._constant_parameters.append(ep)
-            # search value in self._static_parameters_values_mapping
-            if ep in self._static_parameters_values_mapping:
-                self._parameters_values.append(self._static_parameters_values_mapping[ep])
-            else:
-                self._parameters_values.append(const)
+            # Register only the already validated concrete value. This keeps a
+            # missing static mapping from reaching the numerical compiler as a
+            # late, context-free ``None`` conversion error.
+            self._parameters_values.append(resolved_parameter_value)
             self._n_params += 1
 
         # m is for variable parameters
@@ -2088,6 +2258,20 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
         # Todo: function inside a function, refactor this!
         def _register_event_parameter(ep: Var, eq: Expr | Const, runtime_eq: Expr | Const | None = None) -> None:
+            declared_eq: Expr | Const = self._static_parameters_values_mapping.get(ep, eq)
+            if ep in self._static_parameters_values_mapping:
+                mapped_value = self._static_parameters_values_mapping[ep].value
+                if mapped_value is not None:
+                    self.event_params_init_dict[ep.uid] = float(mapped_value)
+
+            effective_eq: Expr | Const = _resolve_rms_runtime_parameter_expression(
+                device=elm,
+                owner_block=mdl,
+                parameter=ep,
+                declared_expression=declared_eq,
+                is_discrete_parameter=ep.uid in self._discrete_event_parameter_uids,
+            )
+
             if ep.uid in self._uid2idx_event_params:
                 raise ValueError(f"Event parameter '{ep.name}' (uid={ep.uid}) is already registered in the system. "
                                  f"Previous device may have created a duplicate event parameter.")
@@ -2104,16 +2288,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             self._alias_names_dict[ep.uid] = f"{self.VARIABLE_PARAMS_NAME}_{self._n_event_params}"
             self._uid2idx_event_params[ep.uid] = self._n_event_params
 
-            effective_eq: Expr | Const = eq
-            if isinstance(eq, Const) and eq.value is None:
-                init_eq_for_ep: Expr | Const | None = None
-                for init_var, init_eq in mdl.init_eqs.items():
-                    if init_var.uid == ep.uid:
-                        init_eq_for_ep = init_eq
-                        break
-                if init_eq_for_ep is not None:
-                    effective_eq = init_eq_for_ep
-
             self._variable_parameters.append(ep)
             self._event_parameters_eqs0.append(effective_eq)
             self._runtime_all_parameters_source.append(ep)
@@ -2122,8 +2296,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             runtime_expression: Expr | Const = effective_eq if runtime_eq is None else runtime_eq
 
             if runtime_eq is None and ep.uid in self._discrete_event_parameter_uids:
-                if isinstance(eq, Const) and eq.value is not None:
-                    runtime_expression = Const(float(eq.value))
+                if isinstance(effective_eq, Const) and effective_eq.value is not None:
+                    runtime_expression = Const(float(effective_eq.value))
                 else:
                     runtime_expression = Const(0.0)
                     self._mode_runtime_expression_by_uid[ep.uid] = effective_eq
@@ -2177,22 +2351,23 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         if self.progress_signal is not None:
             self.progress_signal.emit(20)
 
-    def set_init_guess(self, mdl: Block, reference_powerflow: VarPowerFlowReferenceType, val: float):
+    def set_init_guess(self,
+                       mdl: Block,
+                       reference_powerflow: VarPowerFlowReferenceType,
+                       val: float) -> None:
         """
-        add values from powerflow to initial guess
+        Store a power-flow value as the initial guess of a mapped RMS variable.
 
-        :param mdl:
-        :type mdl:
-        :param reference_powerflow:
-        :type reference_powerflow:
-        :param val:
-        :type val:
-        :return:
-        :rtype:
+        :param mdl: RMS model containing the external power-flow mapping.
+        :param reference_powerflow: Power-flow quantity identifying the target variable.
+        :param val: Initial value expressed in the RMS model's units.
+        :return: None.
         """
-        if reference_powerflow in mdl.external_mapping:
-            var = mdl.external_mapping[reference_powerflow]
+        var: Var | None = mdl.external_mapping.get(reference_powerflow, None)
+        if var is not None:
             self.init_guess[var.uid] = val
+        else:
+            pass
 
     def get_equation_at(self, i: int) -> Expr:
         """
@@ -2299,6 +2474,18 @@ class RmsProblemDaeVec(RmsProblemTemplate):
     @property
     def glob_time(self):
         return self._glob_time
+
+    @property
+    def event_params_values(self) -> Vec:
+        """Return the mutable runtime event-parameter vector.
+
+        :return: Runtime parameter values owned by this RMS problem.
+        :raises ValueError: If runtime parameters have not been initialized.
+        """
+        if self._variable_parameters_values is None:
+            raise ValueError("Runtime event parameters are not initialized")
+        else:
+            return self._variable_parameters_values
 
     def get_parameters_values(self) -> List[Const]:
         return self._parameters_values
@@ -2439,20 +2626,27 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         else:
             self._fmu_cs_initialized = True
 
-    def advance_fmu_cs_devices(self, t: float, x_snapshot: Vec, h: float) -> None:
+    def advance_fmu_cs_devices(self, t: float, x_snapshot: Vec, h: float) -> bool:
         """
         Advance imported FMU Co-Simulation devices for one RMS communication step.
 
         :param t: Current simulation time.
         :param x_snapshot: Current accepted state vector.
         :param h: RMS communication step.
-        :return: None.
+        :return: Whether at least one registered CS adapter advanced.
         """
 
+        co_simulation_advanced: bool = False
         if len(self._fmu_cs_adapters) > 0:
-            advance_rms_fmu_cs_devices(problem=self, time_value=t, x_snapshot=x_snapshot, step_size=h)
+            co_simulation_advanced = advance_rms_fmu_cs_devices(
+                problem=self,
+                time_value=t,
+                x_snapshot=x_snapshot,
+                step_size=h,
+            )
         else:
             pass
+        return co_simulation_advanced
 
     def close_fmu_cs_devices(self) -> None:
         """
@@ -2494,6 +2688,36 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             advance_rms_fmu_me_devices(problem=self, time_value=t, x_snapshot=x_snapshot, step_size=h)
         else:
             pass
+
+    def resolve_fmu_me_devices(self, accepted: bool) -> float | None:
+        """Resolve all prepared FMI ME candidates after one RMS step.
+
+        :param accepted: Whether the RMS numerical step converged.
+        :return: Earlier state-event retry time, or ``None``.
+        """
+
+        if len(self._fmu_me_adapters) > 0:
+            return resolve_rms_fmu_me_devices(
+                problem=self,
+                accepted=accepted,
+            )
+        else:
+            return None
+
+    def prepare_fmu_me_state_event_retry(self) -> float | None:
+        """Localize an ME state event before any CS device advances.
+
+        :return: Global shortened target time, or ``None``.
+        """
+
+        if len(self._fmu_me_adapters) > 0:
+            return _prepare_rms_fmu_me_state_event_retry(
+                problem=self,
+                state_event_time_tolerance=self.options.fmi_state_event_time_tolerance,
+                state_event_max_iterations=self.options.fmi_state_event_max_iterations,
+            )
+        else:
+            return None
 
     def close_fmu_me_devices(self) -> None:
         """
@@ -2578,8 +2802,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             cp_gather = self._cp_gather_idx.get(model_type)
             if cp_gather is not None:
                 self._input_matrices_by_model[model_type][3] = self._constant_params[cp_gather]
-        if not hasattr(self, '_prof_timings'):
-            self._prof_timings = {}
         self._prof_timings['total_gather_time'] = self._prof_timings.get('total_gather_time', 0.0) + time.time() - _t0
 
 
@@ -2606,8 +2828,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 for inst_idx, uid in enumerate(model_uids):
                     start = self._model_state_eq_start_idx[uid]
                     complete_rhs_state[start:start + n_eqs] = rhs_state[:, inst_idx]
-                if not hasattr(self, '_prof_timings'):
-                    self._prof_timings = {}
                 self._prof_timings['rhs_state_filler_total'] = self._prof_timings.get('rhs_state_filler_total', 0.0) + _t1 - _t0
                 self._prof_timings['rhs_state_scatter_total'] = self._prof_timings.get('rhs_state_scatter_total', 0.0) + time.time() - _t1
 
@@ -2634,8 +2854,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             for inst_idx, uid in enumerate(model_uids):
                 start = self._model_algebraic_eq_start_idx[uid]
                 complete_rhs_algeb[start:start + n_eqs] = rhs_algeb[:, inst_idx]
-            if not hasattr(self, '_prof_timings'):
-                self._prof_timings = {}
             self._prof_timings['rhs_algeb_filler_total'] = self._prof_timings.get('rhs_algeb_filler_total', 0.0) + _t1 - _t0
             self._prof_timings['rhs_algeb_scatter_total'] = self._prof_timings.get('rhs_algeb_scatter_total', 0.0) + time.time() - _t1
 
@@ -2653,9 +2871,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             return csc_template
 
         csc_template.data[:] = 0.0
-
-        if not hasattr(self, '_prof_timings'):
-            self._prof_timings = {}
 
         _t0 = time.time()
         fn_dict = getattr(self, fn_key)
@@ -2711,62 +2926,34 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         j22 = self._fill_jacobian_block("j22", "_j22_fn_by_types", h)
         return self._add_balance_jacobian(j22, self._jbalance_fn, x, dx, h, is_state_block=False)
 
-    def rhs_state(self, x: Vec, dx: Vec) -> Vec:
-
-        if self._rhs_state_fn is None:
-            raise ValueError("_rhs_state_fn is None")
-
-        return self._rhs_state_fn(x, dx,
-                                  self._variable_parameters_values,
-                                  self._constant_params)
-
     def rhs_algebraic(self, x: Vec, dx: Vec) -> Vec:
-        if self._rhs_algeb_fn is None:
-            raise ValueError("_rhs_algeb_fn is None")
+        """Evaluate the algebraic residual through the vectorized owner.
 
-        return self._rhs_algeb_fn(x, dx,
-                                  self._variable_parameters_values,
-                                  self._constant_params)
+        The shared initial projector supplies a new candidate on every Newton
+        and line-search evaluation, so the per-model inputs must be gathered
+        from that exact candidate before evaluating the established residual.
 
-    def get_j11(self, x: Vec, dx: Vec, h: float):
+        :param x: Current state and algebraic variable values.
+        :param dx: Current differential-variable values.
+        :return: Algebraic residual for the supplied candidate.
+        """
+        # Refresh every per-model input from the current projection candidate.
+        self.update_input_matrices_by_model(x=x, dx=dx)
+        # Reuse the supported vectorized residual assembly without duplicating equations.
+        return self.rhs_algebraic_vec(x=x, dx=dx)
 
-        if self._j11_fn is None:
-            raise ValueError("_j11_fn is None")
+    def get_j22(self, x: Vec, dx: Vec, h: float) -> sp.csc_matrix:
+        """Evaluate the algebraic Jacobian through the vectorized owner.
 
-        return self._j11_fn(x, dx,
-                            self._variable_parameters_values,
-                            self._constant_params,
-                            h)
-
-    def get_j12(self, x: Vec, dx: Vec, h: float):
-
-        if self._j12_fn is None:
-            raise ValueError("_j12_fn is None")
-
-        return self._j12_fn(x, dx,
-                            self._variable_parameters_values,
-                            self._constant_params,
-                            h)
-
-    def get_j21(self, x: Vec, dx: Vec, h: float):
-
-        if self._j21_fn is None:
-            raise ValueError("_j21_fn is None")
-
-        return self._j21_fn(x, dx,
-                            self._variable_parameters_values,
-                            self._constant_params,
-                            h)
-
-    def get_j22(self, x: Vec, dx: Vec, h: float):
-
-        if self._j22_fn is None:
-            raise ValueError("_j22_fn is None")
-
-        return self._j22_fn(x, dx,
-                            self._variable_parameters_values,
-                            self._constant_params,
-                            h)
+        :param x: Current state and algebraic variable values.
+        :param dx: Current differential-variable values.
+        :param h: Numerical step supplied by the shared projection interface.
+        :return: Algebraic Jacobian in compressed sparse column format.
+        """
+        # Gather the same candidate used by the residual before assembling J22.
+        self.update_input_matrices_by_model(x=x, dx=dx)
+        # Preserve the existing per-model and network-balance Jacobian assembly.
+        return self.get_j22_vec(x=x, dx=dx, h=h)
 
     def get_dt(self):
         return self._dt

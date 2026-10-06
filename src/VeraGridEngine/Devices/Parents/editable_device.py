@@ -375,7 +375,20 @@ def get_at(snapshot_val: GCPROP_TYPES | float | int,
     if t is None:
         return snapshot_val
     else:
-        return profile[t]
+        # A size-zero profile is not time-series data. Indexing it would silently replace
+        # the snapshot the user set, so fall back to the snapshot until a real profile
+        # of matching length exists.
+        if not profile.is_initialized:
+            return snapshot_val
+        else:
+            profile_size: int = profile.size()
+            if profile_size == 0:
+                return snapshot_val
+            else:
+                if t < 0 or t >= profile_size:
+                    return snapshot_val
+                else:
+                    return profile[t]
 
 
 
@@ -435,6 +448,7 @@ class EditableDeviceMeta(type):
 
 
 class PropertyChanges:
+    __slots__ = ("__property_merge_selections",)
 
     def __init__(self):
         # This per-instance map stores merge toggles to avoid mutating shared schema objects.
@@ -500,24 +514,28 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             tpe=str,
             definition='Unique ID',
             editable=False,
+            cat=[PrpCat.MT],
         ),
         GCProp(
             prop_name='name',
             units='',
             tpe=str,
             definition='Name of the device.',
+            cat=[PrpCat.TP],
         ),
         GCProp(
             prop_name='code',
             units='',
             tpe=str,
             definition='Secondary ID',
+            cat=[PrpCat.MT],
         ),
         GCProp(
             prop_name='rdfid',
             units='',
             tpe=str,
             definition='RDF ID for further compatibility',
+            cat=[PrpCat.MT],
         ),
         GCProp(
             prop_name='action',
@@ -525,6 +543,7 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             tpe=ActionType,
             definition='Object action to perform.\nOnly used for model merging.',
             display=False,
+            cat=[PrpCat.TP],
         ),
         GCProp(
             prop_name='selected_to_merge',
@@ -533,12 +552,14 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             definition='Whether this object should be applied during diff merge.',
             display=False,
             editable=False,
+            cat=[PrpCat.MT],
         ),
         GCProp(
             prop_name='comment',
             units='',
             tpe=str,
             definition='User comment',
+            cat=[PrpCat.MT],
         ),
         GCProp(
             prop_name='diff_changes',
@@ -546,6 +567,7 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             tpe=SubObjectType.MergeInformation,
             display=False,
             editable=False,
+            cat=[PrpCat.MT],
         )
     )
     CLASS_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = tuple()
@@ -966,8 +988,11 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             return self.get_snapshot_value(prop=prop)
         else:
             if prop.has_profile():
-                # the property has a profile, return the value at t_idx
-                return self.get_profile_by_prop(prop=prop)[t_idx]
+                # the property has a profile, return the value at t_idx (or the snapshot
+                # when the profile was never filled)
+                return get_at(self.get_snapshot_value(prop=prop),
+                              self.get_profile_by_prop(prop=prop),
+                              t_idx)
             else:
                 # the property has no profile, just return it
                 return self.get_snapshot_value(prop=prop)
@@ -1057,8 +1082,10 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             return getattr(self, prop.name)
         else:
             if prop.has_profile():
-                # get the profile value
-                return getattr(self, prop.profile_name)[t_idx]
+                # get the profile value, falling back to the snapshot if the profile is empty
+                return get_at(getattr(self, prop.name),
+                              getattr(self, prop.profile_name),
+                              t_idx)
             else:
                 # return the normal property
                 return getattr(self, prop.name)
@@ -1153,16 +1180,18 @@ class EditableDevice(metaclass=EditableDeviceMeta):
                 profile = getattr(self, prof_attr)
 
                 if profile.is_initialized:
-                    if profile.size() != len(index):
+                    if profile.size() == 0:
+                        # Size zero means the profile was marked initialized on construction
+                        # or file load but never filled. Recreate from the snapshot.
+                        self.create_profile(magnitude=magnitude, index=index)
+                    elif profile.size() != len(index):
                         # the length of the profile is different from the length of the master profile
-                        # print(self.name, ': created profile for ' + prof_attr)
                         profile.resize(n=len(index))
                     else:
                         # all ok
                         pass
                 else:
-                    # there is no profile, create a new one with the default values
-                    # print(self.name, ': created profile for ' + prof_attr)
+                    # there is no profile, create a new one with the snapshot values
                     self.create_profile(magnitude=magnitude, index=index)
 
                 if set_profile_default_as_snapshot:

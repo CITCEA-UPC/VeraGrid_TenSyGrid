@@ -47,6 +47,26 @@ class FileSavingOptions:
     Store the extra data required by the richer file-export paths.
     """
 
+    __slots__ = (
+        "file_type",
+        "sessions_data",
+        "dictionary_of_json_files",
+        "cgmes_version",
+        "cgmes_boundary_set",
+        "type_selected",
+        "cgmes_profiles",
+        "cgmes_one_file_per_profile",
+        "cgmes_map_areas_like_raw",
+        "raw_version",
+        "psse_topology_mode",
+        "psse_export_mode",
+        "dgs_export_mode",
+        "matpower_export_mode",
+        "ucte_export_mode",
+        "cgmes_export_mode",
+        "t_idx",
+    )
+
     def __init__(self,
                  file_type: FileType | None = None,
                  sessions_data: List[DriverToSave] = None,
@@ -712,33 +732,6 @@ def save_psse_batch_zip(circuit: MultiCircuit,
     return logger
 
 
-def save_newton(circuit: MultiCircuit,
-                file_name: str) -> Logger:
-    """
-    Save the circuit information in sqlite
-    :return: logger with information
-    """
-
-    logger = Logger()
-    try:
-        from VeraGridEngine.Compilers.circuit_to_newton_pa import to_newton_pa, npa
-
-        time_series = circuit.time_profile is not None
-
-        if time_series:
-            t_idx = list(range(circuit.get_time_number()))
-        else:
-            t_idx = None
-
-        newton_grid, _ = to_newton_pa(circuit, use_time_series=time_series, time_indices=t_idx)
-
-        npa.FileHandler().save(newton_grid, file_name)
-    except ImportError:
-        logger.add_error(msg="Error while trying to import newton package!", )
-
-    return logger
-
-
 def save_pgm(circuit: MultiCircuit, file_name: str) -> Logger:
     """
     Save to Power Grid Model format
@@ -1119,6 +1112,15 @@ class FileSave:
     """
     FileSave
     """
+
+    __slots__ = (
+        "circuit",
+        "multiverse",
+        "file_name",
+        "options",
+        "text_func",
+        "progress_func",
+    )
 
     def __init__(self,
                  circuit: MultiCircuit,

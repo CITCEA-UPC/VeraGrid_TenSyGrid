@@ -6,6 +6,10 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class ObservabilityArea(IidmObject):
+    __slots__ = (
+        "id",
+        "name",
+    )
     def __init__(self, id: str, name: str):
         super().__init__("ObservabilityArea")
         self.id = id

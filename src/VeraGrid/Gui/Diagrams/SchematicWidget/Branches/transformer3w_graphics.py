@@ -16,6 +16,7 @@ from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.winding_graphics import Wind
 from VeraGridEngine.Devices.Branches.transformer3w import Transformer3W
 from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGrid.Gui.messages import yes_no_question
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.enumerations import DeviceType
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
 
@@ -148,7 +149,7 @@ class Transformer3WGraphicItem(GenericDiagramWidget, QGraphicsRectItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = Transformer3WDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -304,8 +305,8 @@ class Transformer3WGraphicItem(GenericDiagramWidget, QGraphicsRectItem):
                 self.set_enable(True)
 
             if self._editor.circuit.get_time_number() > 0:
-                ok = yes_no_question('Do you want to update the time series active status accordingly?',
-                                     'Update time series active status')
+                ok = yes_no_question(self.tr('Do you want to update the time series active status accordingly?'),
+                                     self.tr('Update time series active status'))
 
                 if ok:
                     # change the bus state (time series)

@@ -16,6 +16,7 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |code                    |str                      |       |False    |         |Secondary ID                                                                    |False      |       |
 |rdfid                   |str                      |       |False    |         |RDF ID for further compatibility                                                |False      |       |
 |action                  |enum ActionType          |       |False    |         |Object action to perform. Only used for model merging.                          |False      |       |
+|selected_to_merge       |bool                     |       |False    |         |Whether this object should be applied during diff merge.                        |False      |       |
 |comment                 |str                      |       |False    |         |User comment                                                                    |False      |       |
 |diff_changes            |MergeInformation         |       |False    |         |                                                                                |False      |       |
 |modelling_authority     |Modelling Authority      |       |False    |         |Modelling authority of this asset                                               |False      |       |
@@ -49,6 +50,10 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |latitude                |float                    |deg    |False    |         |latitude of the injection.                                                      |False      |       |
 |use_kw                  |bool                     |       |False    |         |Consider the injections in kW and kVAr?                                         |False      |       |
 |conn                    |enum ShuntConnectionType |       |False    |         |Connection type for 3-phase studies                                             |False      |       |
+|phN                     |bool                     |       |False    |         |Is the neutral connected?                                                       |False      |       |
+|phA                     |bool                     |       |False    |         |Is phase A connected?                                                           |False      |       |
+|phB                     |bool                     |       |False    |         |Is phase B connected?                                                           |False      |       |
+|phC                     |bool                     |       |False    |         |Is phase C connected?                                                           |False      |       |
 |bus_pos                 |int                      |       |False    |         |Aid to locate devices on a busbar                                               |False      |       |
 |P                       |float                    |MW     |False    |         |Active power                                                                    |True       |       |
 |Pmin                    |float                    |MW     |False    |         |Minimum active power. Used in OPF.                                              |True       |       |
@@ -90,6 +95,7 @@ Profile-enabled properties: `active`, `Cost`, `shift_key`, `P`, `Pmin`, `Pmax`, 
 |fuels                   |AssociationsList         |t/MWh  |False    |         |List of fuels                                                                   |False      |       |
 |srap_enabled            |bool                     |       |False    |         |Is the unit available for SRAP participation?                                   |True       |       |
 |tpe                     |enum GeneratorType       |       |False    |         |Machine type of the generator.                                                  |False      |       |
+|is_static_generator     |bool                     |       |False    |         |Use the static generator short-circuit model.                                   |False      |       |
 |Enom                    |float                    |MWh    |False    |         |Nominal energy capacity.                                                        |False      |       |
 |max_soc                 |float                    |p.u.   |False    |         |Minimum state of charge.                                                        |False      |       |
 |min_soc                 |float                    |p.u.   |False    |         |Maximum state of charge.                                                        |False      |       |

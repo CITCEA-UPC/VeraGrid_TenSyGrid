@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 
+from typing import Callable
+
 import numpy as np
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.population import Population
@@ -16,8 +18,11 @@ from pymoo.core.mixed import MixedVariableSampling
 from pymoo.core.sampling import Sampling
 from pymoo.operators.sampling.rnd import IntegerRandomSampling
 from pymoo.core.termination import Termination
+from pymoo.termination.collection import TerminationCollection
+from pymoo.termination.max_eval import MaximumFunctionCallTermination
 from pymoo.core.mutation import Mutation
 from VeraGridEngine.basic_structures import Vec, IntVec, IntMat, Mat
+from VeraGridEngine.Simulations.InvestmentsEvaluation.Methods.stop_crits import VeraGridCancelTermination
 
 
 def finalize_seed_population(seed_population: IntMat,
@@ -154,6 +159,11 @@ def get_nsga3_initial_population(problem: ElementwiseProblem,
 
 
 class IntegerRandomSamplingVeraGrid(Sampling):
+    """
+    Random integer sampling for VeraGrid bounds.
+    """
+    __slots__ = ()
+
     def _do(self, problem, n_samples, **kwargs):
         xl = np.asarray(problem.xl, dtype=int)
         xu = np.asarray(problem.xu, dtype=int)
@@ -173,6 +183,7 @@ class UniformBinarySampling(Sampling):
     """
     UniformBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         num_ones = np.linspace(0, problem.n_var, n_samples, dtype=int)
@@ -190,6 +201,7 @@ class SkewedBinarySampling(Sampling):
     """
     SkewedBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         max_ones = int(problem.n_var * 1)
@@ -217,6 +229,7 @@ class SkewedIntegerSamplingRange(Sampling):
     SkewedIntegerSampling generates samples skewed toward the lower bounds
     but spread across the full lb–ub range. Works for integer variables.
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         xl = np.asarray(problem.xl, dtype=int)
@@ -245,6 +258,7 @@ class QuadBinarySampling(Sampling):
     """
     QuadBinarySampling
     """
+    __slots__ = ()
 
     def _do(self, problem, n_samples, **kwargs):
         max_ones = int(problem.n_var * 1)
@@ -267,6 +281,7 @@ class BitflipMutation(Mutation):
     """
     BitflipMutation
     """
+    __slots__ = ()
 
     def _do(self, problem, x, **kwargs):
         mask = np.random.random(x.shape) < self.get_prob_var(problem)
@@ -278,10 +293,10 @@ class GridNsga(ElementwiseProblem):
     """
     Problem formulation packaging to use the pymoo library
     """
+    __slots__ = ("obj_func",)
 
-    def __init__(self, obj_func, n_var, n_obj, lb: Vec | IntVec, ub: Vec | IntVec):
+    def __init__(self, obj_func, n_var, n_obj, lb: Vec | IntVec, ub: Vec | IntVec) -> None:
         """
-
         :param obj_func:
         :param n_var:
         :param n_obj:
@@ -316,7 +331,8 @@ def NSGA_3(obj_func,
            mutation_probability=0.5,
            eta: float = 3.0,
            initial_population: IntMat | None = None,
-           initial_objectives: Mat | None = None):
+           initial_objectives: Mat | None = None,
+           cancel_checker: Callable[[], bool] | None = None):
     """
     NSGA3 designed for pareto investments
     :param obj_func: Objective function pointer [f(x)]
@@ -334,9 +350,16 @@ def NSGA_3(obj_func,
     :type initial_population: IntMat | None
     :param initial_objectives: Optional objective vectors aligned with ``initial_population``.
     :type initial_objectives: Mat | None
+    :param cancel_checker: Optional VeraGrid cancellation check.
+    :type cancel_checker: Callable[[], bool] | None
     :return: X, f
     """
     problem = GridNsga(obj_func, n_var, n_obj, lb=lb, ub=ub)
+
+    if cancel_checker is not None and cancel_checker():
+        return np.zeros((0, n_var), dtype=int), np.zeros((0, n_obj), dtype=float)
+    else:
+        pass
 
     ref_dirs = get_reference_directions("das-dennis", n_obj, n_partitions=n_partitions) # ref_dirs = get_reference_directions("reduction", n_obj, n_partitions, seed=1)
     sampling: Sampling | Population
@@ -369,11 +392,14 @@ def NSGA_3(obj_func,
                       eliminate_duplicates=True,
                       ref_dirs=ref_dirs)
 
-    # term = Termination()
+    termination: Termination = TerminationCollection(MaximumFunctionCallTermination(max_evals),
+                                                     VeraGridCancelTermination(cancel_checker=cancel_checker))
 
     res = minimize(problem=problem,
                    algorithm=algorithm,
-                   termination=('n_eval', max_evals),
+                   termination=termination,
+                   copy_algorithm=False,
+                   copy_termination=False,
                    seed=1,
                    verbose=True,
                    save_history=False)

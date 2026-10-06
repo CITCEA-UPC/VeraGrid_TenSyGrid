@@ -52,6 +52,8 @@ def test_short_circuit():
                             pf_results=power_flow.results,
                             pf_results3ph=None)
     sc.run()
+    assert sc.results is not None
+    assert sc.logger.has_errors()
     print('\n\n', main_circuit.name)
     print('\t|V|:', abs(sc.results.voltage1))
     print('\t|Sf|:', abs(sc.results.Sf1))

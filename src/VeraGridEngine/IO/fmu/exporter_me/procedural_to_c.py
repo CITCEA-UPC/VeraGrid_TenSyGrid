@@ -4,17 +4,18 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 
+import math
 from typing import Any
 
-from . import compat
-from .expr_to_c import ExprToCVisitor
-from .export_ir import ExportEventIndicator, ExportLogicEntry, ExportModel
-from .variable_map import CVariableResolver
+from VeraGridEngine.IO.fmu.exporter_me import compat
+from VeraGridEngine.IO.fmu.exporter_me.expr_to_c import ExprToCVisitor
+from VeraGridEngine.IO.fmu.exporter_me.export_ir import ExportEventIndicator, ExportLogicEntry, ExportModel
+from VeraGridEngine.IO.fmu.exporter_me.variable_map import CVariableResolver
 
 _dict_to_expr = compat._dict_to_expr
 
 
-def _expr_like_from_dict(data: dict[str, Any]) -> Any:
+def _expr_like_from_dict(data: dict[str, Any]) -> compat.Expr | compat.Comparison:
     kind = str(data.get("kind", "Expr"))
     if kind == "Expr":
         return _dict_to_expr(data["expr"])
@@ -135,7 +136,7 @@ def _render_completed_step(lines: list[str], entry: ExportLogicEntry, visitor: E
             f"      double old_value = {target};",
             f"      double new_value = {source};",
             f"      {target} = new_value;",
-            "      if (vg_logic_changed(old_value, new_value)) changed = fmi2True;",
+            "      if (vg_logic_changed(old_value, new_value)) changed = 1;",
             "    }",
         ]
     )
@@ -162,7 +163,7 @@ def _render_new_discrete_states(lines: list[str], entry: ExportLogicEntry, visit
             "      else if (!set_on && reset_on) new_state = 0.0;",
             f"      instance->logic_reals[{base_r}] = new_state;",
             f"      {target} = new_state;",
-            f"      if (vg_logic_changed(old_state, new_state) || vg_logic_changed(old_target, {target})) changed = fmi2True;",
+            f"      if (vg_logic_changed(old_state, new_state) || vg_logic_changed(old_target, {target})) changed = 1;",
             "    }",
         ]
     )
@@ -172,8 +173,55 @@ def _render_indicator(lines: list[str], indicator: ExportEventIndicator, visitor
     lines.append(f"    out[{indicator.index}] = {_render_indicator_expr(visitor, indicator.expr_data)};")
 
 
+def _static_time_event_from_expression(raw_expression: object) -> float | None:
+    """Extract a finite threshold from a direct comparison with simulation time.
+
+    :param raw_expression: Serialized procedural expression to inspect.
+    :return: Constant event time, or None when the expression is not a direct time comparison.
+    """
+    candidate_time: float | None = None
+    if isinstance(raw_expression, dict) and str(raw_expression.get("kind", "")) == "Comparison":
+        parsed_expression: compat.Expr | compat.Comparison = _expr_like_from_dict(raw_expression)
+        if isinstance(parsed_expression, compat.Comparison):
+            comparison: compat.Comparison = parsed_expression
+            left_is_time: bool = isinstance(comparison.lhs, compat.Var) and comparison.lhs.name in {"time", "glob_time"}
+            right_is_time: bool = isinstance(comparison.rhs, compat.Var) and comparison.rhs.name in {"time", "glob_time"}
+            if left_is_time and isinstance(comparison.rhs, compat.Const):
+                candidate_time = float(comparison.rhs.value)
+            elif left_is_time and isinstance(comparison.rhs, (int, float)):
+                candidate_time = float(comparison.rhs)
+            elif right_is_time and isinstance(comparison.lhs, compat.Const):
+                candidate_time = float(comparison.lhs.value)
+            else:
+                candidate_time = None
+        else:
+            candidate_time = None
+    else:
+        candidate_time = None
+    if candidate_time is not None and math.isfinite(candidate_time):
+        return candidate_time
+    else:
+        return None
+
 def render_procedural_c(export_model: ExportModel, resolver: CVariableResolver) -> str:
-    visitor = ExprToCVisitor(resolver)
+    """Render procedural behavior and its statically known time-event schedule.
+
+    :param export_model: Neutral model containing serialized procedural logic.
+    :param resolver: Typed mapping from symbolic variables to C storage.
+    :return: Complete generated C translation unit.
+    """
+    visitor: ExprToCVisitor = ExprToCVisitor(resolver)
+    time_event_values: list[float] = list()
+    time_event_fields: tuple[str, ...] = ("set_expr", "reset_expr", "condition_expr", "source_expr")
+    for entry in export_model.logic_entries:
+        for field_name in time_event_fields:
+            raw_expression: object = entry.data.get(field_name, None)
+            candidate_time: float | None = _static_time_event_from_expression(raw_expression)
+            if candidate_time is not None and candidate_time not in time_event_values:
+                time_event_values.append(candidate_time)
+            else:
+                pass
+    time_event_values.sort()
     lines: list[str] = [
         '#include "generated_model.h"',
         '#include "generated_metadata.h"',
@@ -185,11 +233,17 @@ def render_procedural_c(export_model: ExportModel, resolver: CVariableResolver) 
         "",
         "void generated_procedural_apply_initial(ModelInstance* instance) {",
     ]
+    if len(time_event_values) > 0:
+        for event_index, event_time in enumerate(time_event_values):
+            lines.append(f"    instance->time_events[{event_index}] = {event_time:.17g};")
+        lines.append(f"    instance->time_event_count = {len(time_event_values)}u;")
+    else:
+        lines.append("    instance->time_event_count = 0u;")
     for entry in export_model.logic_entries:
         _render_apply_initial(lines, entry, visitor, resolver)
     if not export_model.logic_entries:
         lines.append("    (void)instance;")
-    lines.extend(["}", "", "fmi2Boolean generated_procedural_completed_integrator_step(ModelInstance* instance) {", "    fmi2Boolean changed = fmi2False;"])
+    lines.extend(["}", "", "int generated_procedural_completed_integrator_step(ModelInstance* instance) {", "    int changed = 0;"])
     for entry in export_model.logic_entries:
         _render_completed_step(lines, entry, visitor, resolver)
     lines.extend(["    (void)instance;" if not export_model.logic_entries else "", "    return changed;", "}", "", "void generated_procedural_get_event_indicators(ModelInstance* instance, double* out) {"])
@@ -198,7 +252,7 @@ def render_procedural_c(export_model: ExportModel, resolver: CVariableResolver) 
             _render_indicator(lines, indicator, visitor)
     else:
         lines.extend(["    (void)instance;", "    (void)out;"])
-    lines.extend(["}", "", "fmi2Boolean generated_procedural_new_discrete_states(ModelInstance* instance) {", "    fmi2Boolean changed = fmi2False;"])
+    lines.extend(["}", "", "int generated_procedural_new_discrete_states(ModelInstance* instance) {", "    int changed = 0;"])
     for entry in export_model.logic_entries:
         _render_new_discrete_states(lines, entry, visitor, resolver)
     lines.extend(["    (void)instance;" if not export_model.logic_entries else "", "    return changed;", "}", ""])

@@ -484,7 +484,10 @@ def check_all_folders_contain_init_py(directory, exceptions=('__pycache__')):
     :param exceptions:
     :return:
     """
-    for root, dirs, files in os.walk(directory):
+
+    here = Path(__file__).resolve().parent
+
+    for root, dirs, files in os.walk(here / directory):
 
         root_name = os.path.basename(root)
         if root_name not in exceptions:

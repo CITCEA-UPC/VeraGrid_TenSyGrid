@@ -2,13 +2,251 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from typing import List
+from typing import List, Union
 import numpy as np
 import pandas as pd
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
-from VeraGridEngine.basic_structures import IntVec, Vec, StrVec, CxVec, ObjVec
-from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType
+from VeraGridEngine.basic_structures import IntVec, Vec, StrVec, CxVec, ObjVec, DateVec
+from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType, SolutionState
+
+
+def monitored_flag_from_logic(value: object) -> bool:
+    """
+    Convert the stored monitor-logic cell to a boolean flag.
+
+    The OPF writes 0/1 integers. Disk-loaded results may also store booleans.
+
+    :param value: monitor-logic cell
+    :return: True when the branch is N-state monitored
+    """
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    else:
+        if isinstance(value, (int, np.integer, float, np.floating)):
+            return int(value) != 0
+        else:
+            return False
+
+
+def worst_contingency_report_table(time_array: Union[DateVec, None],
+                                   branch_names: StrVec,
+                                   group_names: StrVec,
+                                   group_device_names: ObjVec,
+                                   worst_idx: np.ndarray,
+                                   worst_flow: np.ndarray,
+                                   worst_loading: np.ndarray,
+                                   alpha: np.ndarray,
+                                   alpha_n1: np.ndarray,
+                                   monitor_logic: np.ndarray,
+                                   flow_n: np.ndarray,
+                                   ntc: np.ndarray,
+                                   contingency_rates: Vec,
+                                   loading_threshold_pct: float,
+                                   total_slack_mw: Vec | None = None,
+                                   time_percentage: Vec | None = None,
+                                   original_time_indices: IntVec | None = None,
+                                   result_type: ResultTypes = ResultTypes.ContingencyFlowsReport,
+                                   vsc_names: StrVec | None = None,
+                                   vsc_power: np.ndarray | None = None,
+                                   hvdc_names: StrVec | None = None,
+                                   hvdc_power: np.ndarray | None = None,
+                                   phase_shifter_indices: IntVec | None = None,
+                                   phase_shift: np.ndarray | None = None) -> ResultsTable:
+    """
+    Build the long form worst-contingency table with one row per kept (time, branch).
+
+    A row is kept only when the branch is monitored and its N-1 loading is at
+    least ``loading_threshold_pct``.
+    That is the NTC "loading threshold to report" option. It avoids allocating
+    an object cell for every branch of every hour.
+
+    :param time_array: timestamps, or None for a snapshot
+    :param branch_names: branch names
+    :param group_names: contingency group names in grid order
+    :param group_device_names: joined outaged-device names in the same order
+    :param worst_idx: worst group index per time and branch, -1 if none
+    :param worst_flow: N-1 flow (MW) of that group
+    :param worst_loading: N-1 loading (p.u.) of that group
+    :param alpha: N-state exchange sensitivity
+    :param alpha_n1: N-1 exchange sensitivity of the worst group
+    :param monitor_logic: N-state monitor flag
+    :param flow_n: N-state branch flow (MW)
+    :param ntc: NTC of each time index (MW)
+    :param contingency_rates: branch contingency ratings (MW)
+    :param loading_threshold_pct: keep rows whose N-1 loading is at least this percent
+    :param total_slack_mw: optional total thermal slack per displayed operating point
+    :param time_percentage: optional cluster probabilities expressed as percentages
+    :param original_time_indices: optional original-series indices for the displayed hours
+    :param vsc_names: converter names, in stored power order
+    :param vsc_power: base operating-point converter powers, MW (time, converter)
+    :param hvdc_names: HVDC names, in stored power order
+    :param hvdc_power: base operating-point HVDC powers, MW (time, HVDC)
+    :param phase_shifter_indices: indices of branches configured for phase-angle control
+    :param phase_shift: base operating-point branch tap angles, radians (time, branch)
+    :param result_type: report title to display
+    :return: results table
+    """
+    n_g: int = len(group_names)
+    n_dev: int = len(group_device_names)
+
+    if time_array is None:
+        include_time: bool = False
+    else:
+        include_time = True
+
+    # worst_loading is already p.u. of the contingency rate, including the N-state
+    loading_pct: np.ndarray = np.asarray(worst_loading, dtype=float) * 100.0
+    # Apply the same per hour monitoring flags displayed in the monitored column.
+    keep: np.ndarray = ((loading_pct >= float(loading_threshold_pct))
+                        & np.asarray(monitor_logic, dtype=bool))
+    kept: np.ndarray = np.argwhere(keep)
+    n_rows: int = int(kept.shape[0])
+
+    if include_time:
+        n_cols: int = 12
+        columns = [
+            'Time index', 'Time',
+            'Branch', 'Monitored',
+            'Contingency group', 'Contingency devices',
+            'NTC (MW)', 'Alpha', 'Alpha N-1',
+            'Flow N (MW)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
+        ]
+    else:
+        n_cols = 10
+        columns = [
+            'Branch', 'Monitored',
+            'Contingency group', 'Contingency devices',
+            'NTC (MW)', 'Alpha', 'Alpha N-1',
+            'Flow N (MW)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
+        ]
+
+    # Slack is useful for snapshots too. Probability exists only for clusters.
+    detail_column: int = columns.index('NTC (MW)') + 1
+    if total_slack_mw is not None:
+        columns.insert(detail_column, 'Total slack (MW)')
+        detail_column += 1
+        n_cols += 1
+    else:
+        pass
+    if time_percentage is not None:
+        columns.insert(detail_column, 'Time percentage (%)')
+        n_cols += 1
+    else:
+        pass
+
+    # Controls describe the optimized N operating point, not corrective N-1 settings.
+    # Keep their columns even when a solved power or angle is zero.
+    control_start: int = n_cols
+    if vsc_names is not None and vsc_power is not None:
+        columns.extend(f'VSC {name}: P N (MW)' for name in vsc_names)
+    else:
+        pass
+    if hvdc_names is not None and hvdc_power is not None:
+        columns.extend(f'HVDC {name}: P N (MW)' for name in hvdc_names)
+    else:
+        pass
+    if phase_shifter_indices is not None and phase_shift is not None:
+        for branch_index in phase_shifter_indices:
+            columns.append(f'PST {branch_names[branch_index]}: angle N (deg)')
+            columns.append(f'PST {branch_names[branch_index]}: P N (MW)')
+    else:
+        pass
+    n_cols = len(columns)
+    data: np.ndarray = np.empty((n_rows, n_cols), dtype=object)
+    index: np.ndarray = np.empty(n_rows, dtype=object)
+
+    row_i: int
+    for row_i in range(n_rows):
+        h: int = int(kept[row_i, 0])
+        m: int = int(kept[row_i, 1])
+        if include_time:
+            time_val: str = str(time_array[h])
+        else:
+            time_val = ""
+        ntc_h: float = float(ntc[h])
+        c_star: int = int(worst_idx[h, m])
+        flow_n_m: float = float(np.real(flow_n[h, m]))
+        if c_star >= 0 and c_star < n_g:
+            c_name: str = str(group_names[c_star])
+            if c_star < n_dev:
+                c_dev: str = str(group_device_names[c_star])
+            else:
+                c_dev = ""
+            flow_n1_m: float = float(worst_flow[h, m])
+            loading_n1_m: float = float(loading_pct[h, m])
+        else:
+            c_star = -1
+            c_name = ""
+            c_dev = ""
+            # no outage makes N-1 worse so we report the N flow as the N-1 flow
+            flow_n1_m = flow_n_m
+            loading_n1_m = float(loading_pct[h, m])
+
+        mon_flag: bool = monitored_flag_from_logic(monitor_logic[h, m])
+
+        if include_time:
+            if original_time_indices is not None:
+                data[row_i, 0] = int(original_time_indices[h])
+            else:
+                data[row_i, 0] = h
+            data[row_i, 1] = time_val
+            col0: int = 2
+        else:
+            col0 = 0
+
+        data[row_i, col0 + 0] = branch_names[m]
+        data[row_i, col0 + 1] = mon_flag
+        data[row_i, col0 + 2] = c_name
+        data[row_i, col0 + 3] = c_dev
+        data[row_i, col0 + 4] = np.round(ntc_h, 4)
+        next_col: int = col0 + 5
+        if total_slack_mw is not None:
+            data[row_i, next_col] = np.round(float(total_slack_mw[h]), 4)
+            next_col += 1
+        else:
+            pass
+        if time_percentage is not None:
+            data[row_i, next_col] = np.round(float(time_percentage[h]), 6)
+            next_col += 1
+        else:
+            pass
+        data[row_i, next_col] = np.round(float(alpha[h, m]), 6)
+        data[row_i, next_col + 1] = np.round(float(alpha_n1[h, m]), 6)
+        data[row_i, next_col + 2] = np.round(flow_n_m, 4)
+        data[row_i, next_col + 3] = np.round(flow_n1_m, 4)
+        data[row_i, next_col + 4] = np.round(loading_n1_m, 4)
+        control_col: int = control_start
+        if vsc_names is not None and vsc_power is not None:
+            data[row_i, control_col:control_col + len(vsc_names)] = np.round(vsc_power[h], 4)
+            control_col += len(vsc_names)
+        else:
+            pass
+        if hvdc_names is not None and hvdc_power is not None:
+            data[row_i, control_col:control_col + len(hvdc_names)] = np.round(hvdc_power[h], 4)
+            control_col += len(hvdc_names)
+        else:
+            pass
+        if phase_shifter_indices is not None and phase_shift is not None:
+            for branch_index in phase_shifter_indices:
+                data[row_i, control_col] = np.round(np.rad2deg(phase_shift[h, branch_index]), 4)
+                data[row_i, control_col + 1] = np.round(flow_n[h, branch_index], 4)
+                control_col += 2
+        else:
+            pass
+        index[row_i] = ""
+
+    return ResultsTable(
+        data=data,
+        index=index,
+        columns=columns,
+        title=str(result_type.value),
+        ylabel='',
+        xlabel='',
+        units='',
+        cols_device_type=DeviceType.NoDevice,
+        idx_device_type=DeviceType.NoDevice
+    )
 
 
 class OptimalNetTransferCapacityResults(ResultsTemplate):
@@ -43,6 +281,7 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         ResultsProperty(name='overloads', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='loading', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='losses', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='phase_shifter_indices', tpe=IntVec, old_names=list(), expandable=False),
         ResultsProperty(name='phase_shift', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='rates', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='contingency_rates', tpe=Vec, old_names=list(), expandable=False),
@@ -59,6 +298,12 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         ResultsProperty(name='structural_inter_area_flows', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='contingency_flows_list', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='strict_formulation', tpe=bool, old_names=list(), expandable=False),
+        ResultsProperty(name='contingency_group_device_names', tpe=ObjVec, old_names=list(), expandable=False),
+        ResultsProperty(name='worst_contingency_idx', tpe=IntVec, old_names=list(), expandable=False),
+        ResultsProperty(name='worst_contingency_flow', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='worst_contingency_loading', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='alpha_n1_worst', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='loading_threshold_to_report', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='sending_bus_idx', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='receiving_bus_idx', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='inter_space_branches', tpe=list, old_names=list(), expandable=False),
@@ -85,6 +330,7 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         "loading",
         "losses",
         "phase_shift",
+        "phase_shifter_indices",
         "rates",
         "contingency_rates",
         "alpha",
@@ -105,6 +351,12 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         "converged",
         "inter_area_flows",
         "structural_inter_area_flows",
+        "contingency_group_device_names",
+        "worst_contingency_idx",
+        "worst_contingency_flow",
+        "worst_contingency_loading",
+        "alpha_n1_worst",
+        "loading_threshold_to_report",
     )
 
     def __init__(self,
@@ -134,14 +386,15 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                                          ResultTypes.BranchLoading,
                                          ResultTypes.BranchTapAngle,
                                          ResultTypes.BranchMonitoring,
+                                         ResultTypes.BranchOverloads,
                                          ResultTypes.AvailableTransferCapacityAlpha,
+                                         ResultTypes.AvailableTransferCapacityAlphaN1,
                                      ],
                                      ResultTypes.HvdcResults: [
                                          ResultTypes.HvdcPowerFrom,
                                      ],
                                      ResultTypes.VscResults: [
                                          ResultTypes.VscPowerFromPositive,
-                                         ResultTypes.VscPowerFromNegative,
                                      ],
                                      ResultTypes.FlowReports: [
                                          ResultTypes.ContingencyFlowsReport,
@@ -178,6 +431,7 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         self.overloads = np.zeros(m, dtype=float)
         self.loading = np.zeros(m, dtype=float)
         self.losses = np.zeros(m, dtype=float)
+        self.phase_shifter_indices: IntVec = np.empty(0, dtype=int)
         self.phase_shift = np.zeros(m, dtype=float)
         self.rates = np.zeros(m, dtype=float)
         self.contingency_rates = np.zeros(m, dtype=float)
@@ -211,6 +465,51 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         self.inter_area_flows = 0
         self.structural_inter_area_flows = 0
 
+        n_g: int = len(contingency_group_names)
+        self.contingency_group_device_names = np.empty(n_g, dtype=object)
+        i_g: int
+        for i_g in range(n_g):
+            self.contingency_group_device_names[i_g] = ""
+        self.worst_contingency_idx = np.full(m, -1, dtype=int)
+        self.worst_contingency_flow = np.zeros(m, dtype=float)
+        self.worst_contingency_loading = np.zeros(m, dtype=float)
+        self.alpha_n1_worst = np.zeros(m, dtype=float)
+        self.loading_threshold_to_report: float = 98.0
+
+
+    def get_total_slack_mw(self) -> float:
+        """
+        Total limit-relaxation slack of the solution in MW, with the base case overload
+        slacks plus the post-contingency relaxation slacks.
+
+        :return: total slack in MW
+        """
+        total: float = float(np.sum(np.abs(self.overloads)))
+        for item in self.contingency_flows_list:
+            t_i, m_i, c_i, flow_i, neg_i, pos_i = item
+            if isinstance(neg_i, float) and isinstance(pos_i, float):
+                total += abs(neg_i) + abs(pos_i)
+            else:
+                pass  # slack not evaluated to a number, nothing to add
+        return total
+
+    def get_solution_state(self, slack_tol_mw: float = 0.1) -> SolutionState:
+        """
+        Classify the solution: 
+        - Optimal (solved and every limit held within tolerance),
+        - Relaxed (solved, but only by relaxing limits beyond the tolerance)
+        - NotOptimal (the solver did not reach optimality).
+
+        :param slack_tol_mw: total slack below which the solution counts as clean
+        :return: NtcSolutionState
+        """
+        if bool(np.all(self.converged)):
+            if self.get_total_slack_mw() <= slack_tol_mw:
+                return SolutionState.Optimal
+            else:
+                return SolutionState.Relaxed
+        else:
+            return SolutionState.NotOptimal
 
     def get_bus_df(self) -> pd.DataFrame:
         """
@@ -372,6 +671,19 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                 idx_device_type=DeviceType.BranchDevice
             )
 
+        elif result_type == ResultTypes.AvailableTransferCapacityAlphaN1:
+            return ResultsTable(
+                data=self.alpha_n1_worst,
+                index=self.branch_names,
+                title=str(result_type.value),
+                columns=['Sensitivity N-1'],
+                ylabel='(p.u.)',
+                xlabel='',
+                units='',
+                cols_device_type=DeviceType.NoDevice,
+                idx_device_type=DeviceType.BranchDevice
+            )
+
         elif result_type == ResultTypes.InterSpaceBranchPower:
 
             data = list()
@@ -443,40 +755,44 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                 idx_device_type=DeviceType.BranchDevice
             )
 
-        elif result_type == ResultTypes.ContingencyFlowsReport:
-            data = list()
-            index = list()
-            columns = ['Contingency group index', 'Contingency group',
-                       'Monitored index', 'Monitored branch',
-                       'Flow (MW)', 'Loading (%)']
-            for entry in self.contingency_flows_list:
-                # The strict formulation stores (t, m, c, flow) with no slacks,
-                # while the non-strict one stores (t, m, c, flow, neg_slack, pos_slack).
-                if self.strict_formulation:
-                    t, m, c, contingency = entry
-                    flow_c = contingency
-                else:
-                    t, m, c, contingency, negative_slack, positive_slack = entry
-                    flow_c = contingency - negative_slack + positive_slack
-                index.append("")
-                loading_c = abs(flow_c) / self.contingency_rates[m] * 100
-                data.append([
-                    # Contingency group info
-                    c, self.contingency_group_names[c],
-                    # Monitored branch info
-                    m, self.branch_names[m], np.round(flow_c, 4), np.round(loading_c, 4)
-                ])
-
+        elif result_type == ResultTypes.BranchOverloads:
             return ResultsTable(
-                data=np.array(data),
-                index=np.array(index),
-                columns=columns,
+                data=self.overloads,
+                index=self.branch_names,
                 title=str(result_type.value),
-                ylabel='',
+                columns=['Overload slack (MW)'],
+                ylabel='(MW)',
                 xlabel='',
-                units='',
+                units='(MW)',
                 cols_device_type=DeviceType.NoDevice,
-                idx_device_type=DeviceType.NoDevice
+                idx_device_type=DeviceType.BranchDevice
+            )
+
+        elif result_type == ResultTypes.ContingencyFlowsReport:
+            n_br: int = len(self.branch_names)
+            flow_n: np.ndarray = np.real(self.Sf).reshape(1, n_br)
+            return worst_contingency_report_table(
+                time_array=None,
+                total_slack_mw=np.array([self.get_total_slack_mw()], dtype=float),
+                branch_names=self.branch_names,
+                group_names=self.contingency_group_names,
+                group_device_names=self.contingency_group_device_names,
+                worst_idx=self.worst_contingency_idx.reshape(1, n_br),
+                worst_flow=self.worst_contingency_flow.reshape(1, n_br),
+                worst_loading=self.worst_contingency_loading.reshape(1, n_br),
+                alpha=self.alpha.reshape(1, n_br),
+                alpha_n1=self.alpha_n1_worst.reshape(1, n_br),
+                monitor_logic=self.monitor_logic.reshape(1, n_br),
+                flow_n=flow_n,
+                ntc=np.array([self.inter_area_flows], dtype=float),
+                contingency_rates=self.contingency_rates,
+                loading_threshold_pct=self.loading_threshold_to_report,
+                vsc_names=self.vsc_names,
+                vsc_power=self.vsc_Pf.reshape(1, -1),
+                hvdc_names=self.hvdc_names,
+                hvdc_power=self.hvdc_Pf.reshape(1, -1),
+                phase_shifter_indices=self.phase_shifter_indices,
+                phase_shift=self.phase_shift.reshape(1, -1)
             )
 
         else:

@@ -4,16 +4,17 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, List, Any, Union
 from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QPen, QCursor, QPainter, QPainterPath, QColor, QBrush, QPainterPathStroker
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsItemGroup, QMenu,
                                QGraphicsSceneContextMenuEvent, QGraphicsPathItem,
-                               QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsSceneMouseEvent,
+                               QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsLineItem, QGraphicsSceneMouseEvent,
                                QGraphicsSceneHoverEvent, QGraphicsTextItem, QStyleOptionGraphicsItem, QWidget)
 from VeraGrid.Gui.messages import yes_no_question, error_msg
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.Diagrams.generic_graphics import (GenericDiagramWidget, ACTIVE, DEACTIVATED, OTHER, Square, Circle,
                                                     Polygon, Condenser, InjectionSymbolBase, DraggableLabelItem)
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.route_geometry import (merge_route_with_endpoints,
@@ -546,7 +547,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         self.parent.delete_child(self)
 
-    def get_associated_widgets(self) -> List["GenericDiagramWidget" | "QGraphicsLineItem"]:
+    def get_associated_widgets(self) -> List[Union[GenericDiagramWidget, QGraphicsLineItem]]:
         """
         Get a list of all associated graphics
         :return:
@@ -579,8 +580,8 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
                 self.set_enable(True)
 
             if self.editor.circuit.has_time_series:
-                ok = yes_no_question('Do you want to update the time series active status accordingly?',
-                                     'Update time series active status')
+                ok = yes_no_question(self.tr('Do you want to update the time series active status accordingly?'),
+                                     self.tr('Update time series active status'))
 
                 if ok:
                     # change the bus state (time series)
@@ -1411,11 +1412,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         Plot API objects profiles
         """
-        # time series object from the last simulation
-        ts = self.editor.circuit.time_profile
-
-        # plot the profiles
-        self.api_object.plot_profiles(time=ts)
+        self.editor.plot_device(api_object=self.api_object)
 
     def open_device_editor(self) -> bool:
         """
@@ -1425,7 +1422,7 @@ class InjectionTemplateGraphicItem(GenericDiagramWidget, QGraphicsItemGroup):
         """
         circuit = self._editor.circuit
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def mousePressEvent(self, QGraphicsSceneMouseEvent):

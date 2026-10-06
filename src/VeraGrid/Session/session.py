@@ -82,7 +82,6 @@ class GcThread(QThread):
     """
     progress_signal = Signal(float)
     progress_text = Signal(str)
-    done_signal = Signal()
 
     def __init__(self, driver: DriverTemplate):
         QThread.__init__(self)
@@ -91,7 +90,6 @@ class GcThread(QThread):
         self.driver: DriverTemplate = driver
         self.driver.progress_signal = self.progress_signal
         self.driver.progress_text = self.progress_text
-        self.driver.done_signal = self.done_signal
         self.tpe = driver.tpe
 
         self.results = None
@@ -99,6 +97,7 @@ class GcThread(QThread):
         self.elapsed = 0
 
         self.logger = Logger()
+        self._failed: bool = False
 
         self.__cancel__ = False
 
@@ -115,14 +114,42 @@ class GcThread(QThread):
         """
         self.progress_signal.emit(0.0)
 
-        self.driver.run()
+        try:
+            self.driver.run()
+        except Exception as e:
+            error_message: str = str(e)
+            self._failed = True
+
+            # A driver's constructor may expose an empty result shell before
+            # the numerical run starts.  Once execution fails that shell is
+            # not a valid study result and must not remain available to the UI.
+            self.driver.results = None
+
+            # Preserve diagnostics emitted by the engine before the exception.
+            # The post-processing GUI owns the presentation, while the generic
+            # worker only transports the engine logger across the thread
+            # boundary.
+            self.logger += self.driver.logger
+            self.driver.logger.add_error(error_message)
+            self.logger.add_error(error_message)
+            self.progress_text.emit(f"Error: {error_message}")
 
         self.progress_signal.emit(0.0)
         if self.__cancel__:
             self.progress_text.emit('Cancelled!')
         else:
-            self.progress_text.emit('Done!')
-        self.done_signal.emit()
+            if self._failed:
+                self.progress_text.emit('Failed!')
+            else:
+                self.progress_text.emit('Done!')
+
+    def has_failed(self) -> bool:
+        """
+        Return whether the driver execution raised an exception.
+
+        :return: ``True`` when the worker caught a driver exception.
+        """
+        return self._failed
 
     def cancel(self) -> None:
         """
@@ -200,7 +227,7 @@ class SimulationSession:
             driver: DRIVER_OBJECTS,
             post_func: Union[None, Callable] = None,
             prog_func: Union[None, Callable] = None,
-            text_func: Union[None, Callable] = None):
+            text_func: Union[None, Callable] = None) -> None:
         """
         Register driver
         :param driver: driver to register (must have a tpe variable in it)
@@ -210,22 +237,52 @@ class SimulationSession:
         """
 
         # create a process
-        thr = GcThread(driver)
-        thr.progress_signal.connect(prog_func)
-        thr.progress_text.connect(text_func)
-        thr.done_signal.connect(post_func)
+        thr: GcThread = GcThread(driver)
+        if prog_func is not None:
+            thr.progress_signal.connect(prog_func)
+        else:
+            pass
 
-        # check and kill
-        if driver.tpe in self.drivers.keys():
-            del self.drivers[driver.tpe]
-            existing_thread: GcThread | None = self.threads.get(driver.tpe, None)
+        if text_func is not None:
+            thr.progress_text.connect(text_func)
+        else:
+            pass
 
+        if post_func is not None:
+            thr.finished.connect(post_func)
+        else:
+            pass
+
+        previous_driver: DRIVER_OBJECTS | None = self.drivers.get(driver.tpe, None)
+        previous_thread: GcThread | None = self.threads.get(driver.tpe, None)
+        restore_previous_state: bool = False
+
+        # check previous state without killing live Python/native work
+        if previous_driver is not None:
             # Loaded sessions or reset flows can leave a stored driver without a
             # matching live thread entry. Re-runs must tolerate that state and
             # only stop a thread when one is actually registered.
-            if existing_thread is not None:
-                if existing_thread.isRunning():
-                    existing_thread.terminate()
+            if previous_thread is not None:
+                if previous_thread.isRunning():
+                    if text_func is not None:
+                        text_func("A simulation of this type is still finishing. Try again after it stops.")
+                    else:
+                        pass
+                    return
+                else:
+                    restore_previous_state = True
+                del self.threads[driver.tpe]
+            else:
+                restore_previous_state = True
+            del self.drivers[driver.tpe]
+        else:
+            if previous_thread is not None:
+                if previous_thread.isRunning():
+                    if text_func is not None:
+                        text_func("A simulation of this type is still finishing. Try again after it stops.")
+                    else:
+                        pass
+                    return
                 else:
                     pass
                 del self.threads[driver.tpe]
@@ -237,7 +294,33 @@ class SimulationSession:
         self.threads[driver.tpe] = thr
 
         # run!
-        thr.start()
+        try:
+            thr.start()
+        except Exception:
+            if self.drivers.get(driver.tpe, None) is driver:
+                del self.drivers[driver.tpe]
+            else:
+                pass
+
+            if self.threads.get(driver.tpe, None) is thr:
+                del self.threads[driver.tpe]
+            else:
+                pass
+
+            if restore_previous_state:
+                if previous_driver is not None:
+                    self.drivers[driver.tpe] = previous_driver
+                else:
+                    pass
+
+                if previous_thread is not None:
+                    self.threads[driver.tpe] = previous_thread
+                else:
+                    pass
+            else:
+                pass
+
+            raise
 
     def register_driver(self, driver: DRIVER_OBJECTS):
         """
@@ -308,6 +391,15 @@ class SimulationSession:
         else:
             return None
 
+    def get_driver(self, driver_type: SimulationTypes) -> Union[DRIVER_OBJECTS, None]:
+        """
+        Get the driver by simulation type.
+
+        :param driver_type: Driver simulation type.
+        :return: Driver instance or None.
+        """
+        return self.drivers.get(driver_type, None)
+
     def delete_driver(self, driver_type: SimulationTypes) -> None:
         """
         Get the results of the driver
@@ -342,6 +434,39 @@ class SimulationSession:
                 return self.drivers[driver_type]
         return None
 
+    def get_results_model(self,
+                          driver_type: SimulationTypes,
+                          result_type: ResultTypes) -> Union[ResultsModel, None]:
+        """
+        Get the results model by simulation type and result type.
+
+        :param driver_type: Driver simulation type.
+        :param result_type: Result type.
+        :return: ResultsModel instance or None if not found.
+        """
+        drv: DRIVER_OBJECTS | None = self.drivers.get(driver_type, None)
+        if drv is not None:
+            thread: GcThread | None = self.threads.get(driver_type, None)
+            if thread is not None:
+                result_is_available: bool = not thread.isRunning() and not thread.has_failed()
+            else:
+                result_is_available = True
+
+            if result_is_available:
+                if drv.results is not None:
+                    tbl = drv.results.mdl(result_type=result_type)
+                    if tbl is None:
+                        return None
+                    else:
+                        return ResultsModel(tbl)
+                else:
+                    print('There seem to be no results :(')
+                    return None
+            else:
+                return None
+        else:
+            return None
+
     def get_results_model_by_name(self,
                                   study_name: str,
                                   study_type: ResultTypes) -> Union[ResultsModel, None]:
@@ -353,14 +478,25 @@ class SimulationSession:
         """
         for driver_type, drv in self.drivers.items():
             if study_name == drv.tpe.value or study_name == drv.name:
-                if drv.results is not None:
-                    tbl = drv.results.mdl(result_type=study_type)
-                    if tbl is None:
-                        return None
-                    else:
-                        return ResultsModel(tbl)
+                thread: GcThread | None = self.threads.get(driver_type, None)
+                if thread is not None:
+                    result_is_available: bool = not thread.isRunning() and not thread.has_failed()
                 else:
-                    print('There seem to be no results :(')
+                    result_is_available = True
+
+                # A registered driver owns a placeholder while it is running.
+                # Do not let a stale results-tree entry expose that placeholder.
+                if result_is_available:
+                    if drv.results is not None:
+                        tbl = drv.results.mdl(result_type=study_type)
+                        if tbl is None:
+                            return None
+                        else:
+                            return ResultsModel(tbl)
+                    else:
+                        print('There seem to be no results :(')
+                        return None
+                else:
                     return None
 
         return None

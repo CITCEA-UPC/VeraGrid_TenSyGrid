@@ -7,7 +7,6 @@ from typing import Tuple
 
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
 
 from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.enumerations import BuildStatus, PrpCat
@@ -294,41 +293,6 @@ class UPFC(BranchParent):
         self.Rsh *= b
         self.X *= b
 
-    def plot_profiles(self, time_series=None, my_index=0, show_fig=True):
-        """
-        Plot the time series results of this object
-        :param time_series: TimeSeries Instance
-        :param my_index: index of this object in the simulation
-        :param show_fig: Show the figure?
-        """
-
-        if time_series is not None:
-            fig = plt.figure(figsize=(12, 8))
-
-            ax_1 = fig.add_subplot(211)
-            ax_2 = fig.add_subplot(212, sharex=ax_1)
-
-            x = time_series.results.time_array
-
-            # loading
-            y = time_series.results.loading.real * 100.0
-            df = pd.DataFrame(data=y[:, my_index], index=x, columns=[self.name])
-            ax_1.set_title('Loading', fontsize=14)
-            ax_1.set_ylabel('Loading [%]', fontsize=11)
-            df.plot(ax=ax_1)
-
-            # losses
-            y = np.abs(time_series.results.losses)
-            df = pd.DataFrame(data=y[:, my_index], index=x, columns=[self.name])
-            ax_2.set_title('Losses', fontsize=14)
-            ax_2.set_ylabel('Losses [MVA]', fontsize=11)
-            df.plot(ax=ax_2)
-
-            plt.legend()
-            fig.suptitle(self.name, fontsize=20)
-
-        if show_fig:
-            plt.show()
 
     # Scalar property accessors coerce assignments to the declared schema types.
 

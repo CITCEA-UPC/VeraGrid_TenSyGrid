@@ -52,6 +52,10 @@ class PwfVoltageGroup:
     """
     PwfBus
     """
+    __slots__ = (
+        "char",
+        "voltage",
+    )
 
     def __init__(self):
         self.char: str = ""
@@ -78,6 +82,27 @@ class PwfBus:
     """
     PwfBus
     """
+    __slots__ = (
+        "number",
+        "operation",
+        "type",
+        "base_voltage_group",
+        "voltage_limit_group",
+        "name",
+        "voltage",
+        "angle",
+        "pg",
+        "qg",
+        "qmin",
+        "qmax",
+        "controlled_bus",
+        "pl",
+        "ql",
+        "area",
+        "v_charge",
+        "zone",
+        "aggregators",
+    )
 
     def __init__(self) -> None:
         """
@@ -174,6 +199,26 @@ class PwfLine:
     """
     PwfLine
     """
+    __slots__ = (
+        "from_bus",
+        "to_bus",
+        "circuit",
+        "status",
+        "owner",
+        "r",
+        "x",
+        "b",
+        "tap",
+        "tap_min",
+        "tap_max",
+        "tap_lag",
+        "controlled_bus",
+        "normal_capacity",
+        "emergency_capacity",
+        "ntaps",
+        "equipment_capacity",
+        "aggregators",
+    )
 
     def __init__(self) -> None:
         self.from_bus: int = 0
@@ -266,6 +311,20 @@ class PwfGenerator:
     """
     PwfGenerator
     """
+    __slots__ = (
+        "number",
+        "operation",
+        "min_active_gen",
+        "max_active_gen",
+        "participation_factor",
+        "remote_participation_factor",
+        "nominal_power_factor",
+        "armature_service_factor",
+        "rotor_service_factor",
+        "charge_angle",
+        "machine_reactance",
+        "nominal_apparent_power",
+    )
 
     def __init__(self) -> None:
         self.number: int = 0
@@ -329,6 +388,14 @@ class PwfLoad:
     """
     PwfLoad
     """
+    __slots__ = (
+        "number",
+        "operation",
+        "bus",
+        "active_power",
+        "reactive_power",
+        "status",
+    )
 
     def __init__(self):
         # Attributes
@@ -377,6 +444,15 @@ class PwfTransformer:
     """
     PwfTransformer
     """
+    __slots__ = (
+        "number",
+        "from_bus",
+        "to_bus",
+        "r",
+        "x",
+        "tap",
+        "shift",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -432,6 +508,15 @@ class PwfShunt:
     """
     PwfShunt
     """
+    __slots__ = (
+        "number",
+        "from_bus",
+        "to_bus",
+        "status_from",
+        "status_to",
+        "shunt_from",
+        "shunt_to",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -489,6 +574,14 @@ class PwfStaticCompensator:
     """
     StaticCompensator
     """
+    __slots__ = (
+        "number",
+        "from_bus",
+        "to_bus",
+        "status",
+        "initial_value",
+        "specified_value",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -537,6 +630,12 @@ class PwfDCLine:
     """
     PwfDCLine
     """
+    __slots__ = (
+        "number",
+        "from_bus",
+        "to_bus",
+        "vdc",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -585,6 +684,11 @@ class PwfGeneratorReactance:
     """
     PwfGeneratorReactance
     """
+    __slots__ = (
+        "number",
+        "group",
+        "reactance",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -613,6 +717,13 @@ class PwfVoltageLimitGroup:
     """
     PwfVoltageLimitGroup
     """
+    __slots__ = (
+        "group",
+        "lower_bound",
+        "upper_bound",
+        "lower_emergency_bound",
+        "upper_emergency_bound",
+    )
 
     def __init__(self):
         self.group: int = 0
@@ -673,6 +784,21 @@ class PwfEquipmentConnection:
     """
     PwfEquipmentConnection
     """
+    __slots__ = (
+        "number",
+        "equipment_type_1",
+        "equipment_id_1",
+        "condition_1",
+        "equipment_type_2",
+        "equipment_id_2",
+        "condition_2",
+        "operation",
+        "parameter_a",
+        "parameter_b",
+        "parameter_c",
+        "parameter_d",
+        "voltage",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -721,6 +847,18 @@ class PwfTransformerSettings:
     """
     PwfTransformerSettings
     """
+    __slots__ = (
+        "from_bus",
+        "to_bus",
+        "circuit",
+        "minimum_voltage",
+        "maximum_voltage",
+        "bounds_control_type",
+        "control_mode",
+        "minimum_phase",
+        "maximum_phase",
+        "specified_value",
+    )
 
     def __init__(self):
         self.from_bus: int = 0
@@ -763,6 +901,17 @@ class PwfGeneratorIdentification:
     """
     PwfGeneratorIdentification
     """
+    __slots__ = (
+        "number",
+        "operation",
+        "automatic_mode",
+        "group",
+        "status",
+        "units",
+        "operating_units",
+        "active_generation",
+        "reactive_generation",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -803,6 +952,23 @@ class PwfMotorConfiguration:
     """
     PwfMotorConfiguration
     """
+    __slots__ = (
+        "bus",
+        "operation",
+        "status",
+        "group",
+        "sign",
+        "loading_factor",
+        "units",
+        "stator_resistance",
+        "stator_reactance",
+        "magnetizing_reactance",
+        "rotor_resistance",
+        "rotor_reactance",
+        "base_power",
+        "engine_type",
+        "active_charge_portion",
+    )
 
     def __init__(self):
         self.bus: int = 0
@@ -855,6 +1021,9 @@ class PwfComment:
     """
     PwfComment
     """
+    __slots__ = (
+        "comment",
+    )
 
     def __init__(self):
         self.comment: str = ""
@@ -879,6 +1048,14 @@ class PwfInjection:
     """
     PwfInjection
     """
+    __slots__ = (
+        "number",
+        "operation",
+        "equivalent_active_injection",
+        "equivalent_reactive_injection",
+        "equivalent_shunt",
+        "equivalent_participation_factor",
+    )
 
     def __init__(self):
         self.number: int = 0
@@ -912,6 +1089,22 @@ class PwfNetwork:
     """
     PwfNetwork
     """
+    __slots__ = (
+        "buses",
+        "lines",
+        "generators",
+        "transformers",
+        "shunts",
+        "static_compensators",
+        "dc_lines",
+        "loads",
+        "comments",
+        "injections",
+        "generator_reactances",
+        "voltage_limit_groups",
+        "voltage_groups",
+        "generator_identifications",
+    )
 
     def __init__(self):
         # Store devices by type (e.g., buses, lines, generators, etc.)
@@ -1067,6 +1260,12 @@ class PWFParser:
     """
     PWFParser
     """
+    __slots__ = (
+        "filepath",
+        "network",
+        "logger",
+        "voltage_group_dict",
+    )
 
     def __init__(self, filepath: str):
         self.filepath: str = filepath

@@ -205,6 +205,13 @@ class CimDataParser(BaseCircuit):
     Class to read any cim-like set of files
     """
 
+    __slots__ = (
+        "logger",
+        "text_func",
+        "progress_func",
+        "cim_data",
+    )
+
     def __init__(self,
                  text_func: Union[Callable, None] = None,
                  progress_func: Union[Callable, None] = None,

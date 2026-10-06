@@ -12,6 +12,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block
 
 
 class ZipLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[
@@ -51,6 +52,7 @@ def ZIPLoadBuild(vfactory: VarFactory, name: str = "ZIP model", Pl0=1.0, Ql0=0.1
         ValueError: If ZIP coefficients do not sum to 1.0 within tolerance
     """
     templ = RmsModelTemplate()
+    templ.name = name
     templ.tpe = DeviceType.LoadDevice
     inputs = [vfactory.add_var("Vm")]
 
@@ -73,7 +75,7 @@ def ZIPLoadBuild(vfactory: VarFactory, name: str = "ZIP model", Pl0=1.0, Ql0=0.1
     event_dict = {
         P0: vfactory.add_const(Pl0),
         Q0: vfactory.add_const(Ql0),
-        V0: vfactory.add_const(None),
+        V0: inputs[0],
 
         # Active power ZIP
         a1: vfactory.add_const(0.1),  # Z
@@ -106,7 +108,6 @@ def ZIPLoadBuild(vfactory: VarFactory, name: str = "ZIP model", Pl0=1.0, Ql0=0.1
         )
 
     init_eqs = {
-        V0: inputs[0],
         P: P0,
         Q: Q0,
     }
@@ -129,4 +130,5 @@ def ZIPLoadBuild(vfactory: VarFactory, name: str = "ZIP model", Pl0=1.0, Ql0=0.1
 
     templ.block.in_vars = inputs
 
+    templ.comment = 'Load RMS ZIP voltage-dependent model'
     return templ

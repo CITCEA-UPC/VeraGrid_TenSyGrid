@@ -22,6 +22,52 @@ from VeraGridEngine.basic_structures import Vec
 class EmtProblemMTI(EmtProblemDae):
     """EMT problem exposing the MTI API consumed by ``BackEulerImplicitIntegrationMTI``."""
 
+    __slots__ = (
+        "_constant_params",
+        "_derivative_fn",
+        "_dt",
+        "_ineq_var_positions",
+        "_j11_fn",
+        "_j12_fn",
+        "_j21_fn",
+        "_j22_fn",
+        "_j_eq_dx_static_fn",
+        "_j_eq_x_static_fn",
+        "_j_ineq_dx_fn",
+        "_j_ineq_dx_static_fn",
+        "_j_ineq_x_fn",
+        "_j_ineq_x_static_fn",
+        "_mti_alg_uid_to_y_col",
+        "_mti_base_uid_to_xp_col",
+        "_mti_base_xp_incidence_mask",
+        "_mti_bool_guard_compiled_by_param_idx",
+        "_mti_bool_guard_var_positions_by_param_idx",
+        "_mti_bool_param_indices",
+        "_mti_bool_uid2param_idx",
+        "_mti_bool_uid_to_local_col",
+        "_mti_boolean_params",
+        "_mti_col_meta",
+        "_mti_col_to_continuous_var_idx_map",
+        "_mti_continuous_var_idx_to_col",
+        "_mti_diff_uid_to_xp_col",
+        "_mti_incidence",
+        "_mti_incidence_bool_param_indices",
+        "_mti_incidence_includes_inequalities",
+        "_mti_inequalities_compiled",
+        "_mti_inequalities_raw",
+        "_mti_row_meta",
+        "_mti_solving_order",
+        "_mti_xp_vars",
+        "_mti_y_vars",
+        "_rhs_algeb_fn",
+        "_rhs_ineq_fn",
+        "_rhs_state_fn",
+        "_state_algeb_vars",
+        "_variable_parameters_values",
+        "disable_mti_first_step_zero_dx",
+        "use_full_dae_event_candidates",
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.disable_mti_first_step_zero_dx = True

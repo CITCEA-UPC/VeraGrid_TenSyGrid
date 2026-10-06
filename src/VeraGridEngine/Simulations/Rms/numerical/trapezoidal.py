@@ -13,6 +13,22 @@ from VeraGridEngine.basic_structures import Vec, Mat
 
 
 class TrapezoidalImplicitIntegration:
+    """
+    Trapezoidal implicit integration solver.
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+        "tol",
+        "dx0_init",
+        "use_fd_jacobian",
+        "use_chain_rule_jacobian",
+    )
 
     def __init__(self,
                  problem: RmsProblemDae,
@@ -23,7 +39,19 @@ class TrapezoidalImplicitIntegration:
                  tolerance: float = 1e-7,
                  dx0_init: Vec | None = None,
                  use_fd_jacobian: bool = True,
-                 use_chain_rule_jacobian: bool = True):
+                 use_chain_rule_jacobian: bool = True) -> None:
+        """
+
+        :param problem:
+        :param t0:
+        :param t_end:
+        :param h:
+        :param max_iter:
+        :param tolerance:
+        :param dx0_init:
+        :param use_fd_jacobian:
+        :param use_chain_rule_jacobian:
+        """
         self.problem = problem
         self.t0 = t0
         self.h = h
@@ -42,6 +70,15 @@ class TrapezoidalImplicitIntegration:
                       xn: Vec,
                       h: float,
                       f_state_prev: Vec | None) -> tuple[Vec, Vec]:
+        """
+
+        :param x:
+        :param dx:
+        :param xn:
+        :param h:
+        :param f_state_prev:
+        :return:
+        """
         x_mid = 0.5 * (x + xn)
         f_algeb = self.problem.rhs_algebraic(x_mid, dx)
 
@@ -58,6 +95,13 @@ class TrapezoidalImplicitIntegration:
                            x_mid: Vec,
                            dx: Vec,
                            h: float) -> sp.csc_matrix:
+        """
+
+        :param x_mid:
+        :param dx:
+        :param h:
+        :return:
+        """
         if self.problem.get_states_number() == 0:
             j22: sp.csc_matrix = self.problem.get_j22(x_mid, dx, h)
             return 0.5 * j22
@@ -82,6 +126,16 @@ class TrapezoidalImplicitIntegration:
                      h_eff: float,
                      f_state_prev: Vec | None,
                      rhs_base: Vec) -> sp.csc_matrix:
+        """
+
+        :param x_new:
+        :param x_prev:
+        :param dx_last:
+        :param h_eff:
+        :param f_state_prev:
+        :param rhs_base:
+        :return:
+        """
         n = x_new.size
         m = rhs_base.size
         J = np.zeros((m, n), dtype=float)
@@ -105,6 +159,17 @@ class TrapezoidalImplicitIntegration:
                              h_eff: float,
                              f_state_prev: Vec | None,
                              x_mid: Vec) -> sp.csc_matrix:
+        """
+
+        :param x_new:
+        :param x_prev:
+        :param dx:
+        :param dx_last:
+        :param h_eff:
+        :param f_state_prev:
+        :param x_mid:
+        :return:
+        """
         # Base Jacobian includes midpoint 0.5 factors for x-dependence only.
         J_base = self._jacobian_implicit(x_mid, dx, h_eff).toarray()
 
@@ -136,6 +201,10 @@ class TrapezoidalImplicitIntegration:
         return sp.csc_matrix(J)
 
     def simulate(self):
+        """
+
+        :return:
+        """
         converged: bool = False
         well_initialized: bool = True
 
@@ -200,13 +269,20 @@ class TrapezoidalImplicitIntegration:
 
                     self.problem.update(t_curr, x_new, self.problem._variable_parameters_values)
 
-                    if has_fmu_cs:
-                        self.problem.advance_fmu_cs_devices(t=t_local_prev, x_snapshot=x_prev, h=h_eff)
                     if has_fmu_me:
                         self.problem.advance_fmu_me_devices(t=t_local_prev, x_snapshot=x_prev, h=h_eff)
+                        state_event_retry_time: float | None = (
+                            self.problem.prepare_fmu_me_state_event_retry()
+                        )
+                    else:
+                        state_event_retry_time = None
+                    if has_fmu_cs and state_event_retry_time is None:
+                        self.problem.advance_fmu_cs_devices(t=t_local_prev, x_snapshot=x_prev, h=h_eff)
+                    else:
+                        pass
 
                     n_iter = 0
-                    substep_converged = False
+                    substep_converged = state_event_retry_time is not None
 
                     dx_prev = dx_last.copy()
 
@@ -261,11 +337,22 @@ class TrapezoidalImplicitIntegration:
                             n_iter += 1
 
                     if substep_converged:
-                        dx_last = dx.copy()
-                        x_prev = x_new.copy()
-                        t_local_prev = t_curr
-                        is_first_local_step = False
+                        if state_event_retry_time is None:
+                            if has_fmu_me:
+                                self.problem.resolve_fmu_me_devices(accepted=True)
+                            else:
+                                pass
+                            dx_last = dx.copy()
+                            x_prev = x_new.copy()
+                            t_local_prev = t_curr
+                            is_first_local_step = False
+                        else:
+                            x_new = x_prev.copy()
                     else:
+                        if has_fmu_me:
+                            self.problem.resolve_fmu_me_devices(accepted=False)
+                        else:
+                            pass
                         converged = False
                         break
 

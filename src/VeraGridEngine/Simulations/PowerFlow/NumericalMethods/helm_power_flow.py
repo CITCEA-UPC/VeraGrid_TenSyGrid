@@ -455,6 +455,26 @@ class HelmPreparation:
     HelmPreparation
     """
 
+    __slots__ = (
+        'sys_mat_factorization',
+        'Uini',
+        'Xini',
+        'Yslack',
+        'Vslack',
+        'vec_P',
+        'vec_Q',
+        'Ysh',
+        'vec_W',
+        'pq',
+        'pv',
+        'sl',
+        'pqpv',
+        'npqpv',
+        'nbus',
+        'pqpv_original',
+        'pq_original',
+    )
+
     def __init__(self, sys_mat_factorization, Uini, Xini, Yslack, Vslack,
                  vec_P, vec_Q, Ysh, vec_W, pq, pv, pqpv, sl,
                  npqpv, nbus, pqpv_original, pq_original):
@@ -497,7 +517,7 @@ class HelmPreparation:
 
 
 def helm_preparation_dY(Yseries, V0, S0, Ysh0, pq, pv, sl, pqpv, verbose: int = 0,
-                        logger: Logger = None) -> HelmPreparation:
+                        logger: Logger | None = None) -> HelmPreparation:
     """
     This function returns the constant objects to run many HELM simulations
 

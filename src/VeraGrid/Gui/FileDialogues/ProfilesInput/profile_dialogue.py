@@ -12,18 +12,15 @@ from enum import Enum
 from difflib import SequenceMatcher
 import numpy as np
 import pandas as pd
-from PySide6 import QtWidgets, QtCore
-import matplotlib
-
-matplotlib.use('QtAgg')  # Or 'Qt5Agg' — depending on your matplotlib version
-
-from matplotlib import pyplot as plt
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from VeraGrid.Gui.general_dialogues import LogsDialogue
 from VeraGrid.Gui.gui_functions import ComboModel, get_list_model
 from VeraGrid.Gui.FileDialogues.ProfilesInput.profiles_from_data_gui import Ui_Dialog
 from VeraGrid.Gui.FileDialogues.ProfilesInput.excel_dialog import ExcelDialog
+from VeraGrid.Gui.dialog_lifecycle import delete_dialog_safely, delete_dialogs_safely, exec_dialog_safely
 from VeraGrid.Gui.messages import error_msg, info_msg
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGrid.Gui.toast_widget import ToastManager
 from VeraGridEngine import DeviceType
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
@@ -352,7 +349,7 @@ class GeneratorsProfileOptionsDialogue(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Generator active power options")
+        self.setWindowTitle(self.tr("Generator active power options"))
         self.setModal(True)  # Make the dialog modal
 
         # Create checkboxes
@@ -401,6 +398,7 @@ class ProfileInputGUI(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         self.toast_manager = ToastManager(parent=self, position_top=False)
+        self._open_plot_dialogs: List[QtWidgets.QDialog] = list()
 
         self.project_directory: str | None = None
 
@@ -466,13 +464,10 @@ class ProfileInputGUI(QtWidgets.QDialog):
         )
 
         self.original_data_frame: pd.DataFrame | None = None
-        self.fig = None
 
         self.ui.autolink_slider.setValue(100)  # Set slider to max value
 
         self.profile_names = list()
-
-        self.excel_dialogue: ExcelDialog | None = None
 
         # click
         self.ui.open_button.clicked.connect(self.import_profile)
@@ -507,7 +502,7 @@ class ProfileInputGUI(QtWidgets.QDialog):
 
         # call dialog to select the file
         filename, type_selected = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                        caption='Open file',
+                                                                        caption=self.tr('Open file'),
                                                                         filter=files_types)
 
         if len(filename) > 0:
@@ -523,15 +518,15 @@ class ProfileInputGUI(QtWidgets.QDialog):
                                      dayfirst=True)
 
                     if df.shape[0] == 0 or df.shape[1] == 0:
-                        error_msg(text="Make sure this is a proper comma-separated-value file.\n Otherwise use excel.",
-                                  title="Value error loading CSV file")
+                        error_msg(text=self.tr("Make sure this is a proper comma-separated-value file.\n Otherwise use excel."),
+                                  title=self.tr("Value error loading CSV file"))
                         return
                     else:
                         # try to assign
                         self.assign_origin_df(df=df)
 
                 except ValueError as e:
-                    error_msg(text=str(e), title="Value error loading CSV file")
+                    error_msg(text=str(e), title=self.tr("Value error loading CSV file"))
                     return
 
                 except UnicodeDecodeError:
@@ -542,15 +537,18 @@ class ProfileInputGUI(QtWidgets.QDialog):
                         self.assign_origin_df(df=df)
 
                     except Exception as e:
-                        error_msg(str(e), title="Error")
+                        error_msg(str(e), title=self.tr("Error"))
                         return
 
             elif file_extension in ['.xlsx', '.xls']:
 
                 # select the sheet from the file
-                self.excel_dialogue = ExcelDialog(self, filename)
-                self.excel_dialogue.exec()
-                sheet_index = self.excel_dialogue.excel_sheet
+                excel_dialogue: ExcelDialog = ExcelDialog(self, filename)
+                try:
+                    exec_dialog_safely(dialog=excel_dialogue)
+                    sheet_index: int | None = excel_dialogue.excel_sheet
+                finally:
+                    delete_dialog_safely(dialog=excel_dialogue)
 
                 if sheet_index is not None:
                     df = pd.read_excel(filename, sheet_name=sheet_index, index_col=0)
@@ -561,7 +559,10 @@ class ProfileInputGUI(QtWidgets.QDialog):
                     return
 
             else:
-                error_msg(text="Could not open:\n" + filename, title="File open")
+                error_msg(
+                    text=self.tr("Could not open:\n{file_name}").format(file_name=filename),
+                    title=self.tr("File open"),
+                )
                 return
 
     def try_format_the_source_data(self, df: pd.DataFrame = None) -> Tuple[pd.DataFrame, bool, Logger]:
@@ -703,30 +704,66 @@ class ProfileInputGUI(QtWidgets.QDialog):
 
         else:
             if logger.has_logs():
-                dlg = LogsDialogue("Import issues", logger)
+                dlg: LogsDialogue = LogsDialogue(self.tr("Import issues"), logger, parent=self)
                 dlg.setModal(True)
-                dlg.exec()
+                exec_dialog_safely(dialog=dlg)
 
-    def plot_selected(self):
-        """
-        Plot the selected profile
+    def plot_selected(self) -> None:
+        """Show the selected input profile in one retained native chart.
+
+        :return: None.
         """
         if self.original_data_frame is not None:
             if len(self.ui.sources_list.selectedIndexes()) > 0:
-                idx = self.ui.sources_list.selectedIndexes()[0].row()
-                col_name = self.original_data_frame.columns[idx]
+                index: int = self.ui.sources_list.selectedIndexes()[0].row()
+                column_name: str = str(self.original_data_frame.columns[index])
                 try:
-                    plt.ion()
-                    self.fig = plt.Figure(figsize=(8, 6))
-                    ax = self.fig.add_subplot(111)
-                    self.original_data_frame[col_name].plot(ax=ax)
-                    plt.show()
-                except TypeError as e:
-                    self.toast_manager.show_error_toast(str(e))
+                    time_values: np.ndarray = np.asarray(self.original_data_frame.index)
+                    profile_values: np.ndarray = np.asarray(
+                        self.original_data_frame.iloc[:, index],
+                        dtype=float,
+                    )
+                    delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+                    plot_dialogue: PlotDialogue = PlotDialogue(title=self.tr("Profile plot"), parent=self)
+                    accepted: bool = plot_dialogue.set_time_series(
+                        time_values=time_values,
+                        series_names=(column_name,),
+                        series_values=(profile_values,),
+                        title=self.tr("Profile plot"),
+                        y_axis_title=self.magnitude,
+                    )
+                    if accepted:
+                        self._open_plot_dialogs.append(plot_dialogue)
+                        plot_dialogue.show()
+                    else:
+                        plot_dialogue.reject()
+                        self.toast_manager.show_error_toast(self.tr("Profile data cannot be charted"))
+                except (TypeError, ValueError) as exc:
+                    self.toast_manager.show_error_toast(str(exc))
             else:
                 self.toast_manager.show_warning_toast("No profile selected :/")
         else:
             self.toast_manager.show_warning_toast("No data loaded :/")
+
+    def done(self, result: int) -> None:
+        """
+        Close retained plot windows before completing profile input.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.done(self, result)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Close retained plot windows before closing profile input.
+
+        :param event: Qt close event.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.closeEvent(self, event)
 
     def display_associations(self) -> None:
         """
@@ -936,38 +973,45 @@ class ProfileInputGUI(QtWidgets.QDialog):
             self.associations.clear_at(obj_idx)
         self.display_associations()
 
-    def transform_names(self):
+    def transform_names(self) -> None:
         """
-        Transform the names of the inputs
-        :return:
+        Transform the names of the inputs according to the selected substitution mode.
         """
         if self.original_data_frame is not None:
-            mode = self.ui.nameTransformationComboBox.currentData()
+            mode: StringSubstitutions | None = self.ui.nameTransformationComboBox.currentData()
 
             if mode == StringSubstitutions.PSSeBranchName:
-
                 for i, name in enumerate(self.profile_names):
-                    if '_':
-                        vals = name.split('_')
-                        if len(vals) < 7:
-                            pass
+                    if '_' in name:
+                        vals: List[str] = name.split('_')
+                        if len(vals) >= 7:
+                            self.profile_names[i] = f"{vals[0]}_{vals[3]}_{vals[6]}"
                         else:
-                            self.profile_names[i] = vals[0] + '_' + vals[3] + '_' + vals[6]
+                            pass
+                    else:
+                        pass
                 self.original_data_frame.columns = self.profile_names
 
-            if mode == StringSubstitutions.PSSeBusGenerator:
-
+            elif mode == StringSubstitutions.PSSeBusGenerator:
                 for i, name in enumerate(self.profile_names):
-                    if '_':
-                        vals = name.split('_')
+                    if '_' in name:
+                        vals: List[str] = name.split('_')
                         if len(vals) == 3:
-                            self.profile_names[i] = vals[0] + '_1'
+                            self.profile_names[i] = f"{vals[0]}_1"
+                        else:
+                            pass
+                    else:
+                        pass
                 self.original_data_frame.columns = self.profile_names
 
             elif mode == StringSubstitutions.PSSeBusLoad:
                 for i, name in enumerate(self.profile_names):
-                    self.profile_names[i] = name + '_1'
+                    self.profile_names[i] = f"{name}_1"
                 self.original_data_frame.columns = self.profile_names
+            else:
+                pass
+        else:
+            pass
 
     def has_profile(self, i: int) -> bool:
         """
@@ -1023,5 +1067,5 @@ class ProfileInputGUI(QtWidgets.QDialog):
             self.close()
         else:
             self.was_accepted = False
-            info_msg(text="No time profile.\nConsider loading a valid source of data.",
-                     title="No time profile")
+            info_msg(text=self.tr("No time profile.\nConsider loading a valid source of data."),
+                     title=self.tr("No time profile"))

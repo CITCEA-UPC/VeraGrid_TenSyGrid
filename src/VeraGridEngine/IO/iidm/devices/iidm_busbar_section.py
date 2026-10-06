@@ -6,6 +6,9 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject
 
 
 class IidmBusbarSection(IidmObject):
+    __slots__ = (
+        "id",
+    )
     def __init__(self, _id: str):
         super().__init__("BusbarSection")
         self.id = _id

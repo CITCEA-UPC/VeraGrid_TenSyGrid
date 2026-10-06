@@ -11,6 +11,7 @@ from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_te
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.generator_editor import GeneratorEditorDialog
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.generator_editor import GeneratorQCurveEditor
 from VeraGrid.Gui.Diagrams.MapWidget.Injections.map_injections_template_graphics import MapInjectionTemplateGraphicItem
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGridEngine.enumerations import DynamicSimulationMode
 
 if TYPE_CHECKING:  # Only imports the below statements during type checking
@@ -53,7 +54,7 @@ class MapBatteryGraphicItem(MapInjectionTemplateGraphicItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = GeneratorEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -112,7 +113,7 @@ class MapBatteryGraphicItem(MapInjectionTemplateGraphicItem):
                                     Pmin=self.api_object.Pmin,
                                     Pmax=self.api_object.Pmax,
                                     Snom=self.api_object.Snom)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             pass
 
         self.api_object.Snom = np.round(dlg.Snom, 1) if dlg.Snom > 1 else dlg.Snom

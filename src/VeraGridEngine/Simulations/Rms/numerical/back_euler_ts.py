@@ -16,12 +16,25 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProb
 
 
 class BackEulerImplicitTensygrid:
+    """
+    Backward Euler implicit integration using TensyGrid.
+    """
+    __slots__ = (
+        "problem",
+        "t0",
+        "h",
+        "max_iter_0",
+        "steps",
+        "t",
+        "y",
+    )
+
     def __init__(self,
                  problem: RmsProblemDae,
                  t0: float,
                  t_end: float,
                  h: float,
-                 max_iter: int):
+                 max_iter: int) -> None:
         """
 
         :param problem:
@@ -192,7 +205,7 @@ class BackEulerImplicitTensygrid:
                         for i in singular_dirs:
                             v = vh.T[:, i]  # variable-space vector
                             abs_v = np.abs(v)
-                            dominant_idx = np.argsort(abs_v)[::-1][:5]  # top 5 vars
+                            dominant_idx = np.argsort(abs_v, kind="stable")[::-1][:5]  # top 5 vars
                             print(f"\nSingular direction {i}, σ={s[i]:.3e}")
                             for j in dominant_idx:
                                 if j < self.problem.get_algebraic_var_number():

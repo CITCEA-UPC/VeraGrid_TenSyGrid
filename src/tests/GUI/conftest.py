@@ -1,22 +1,113 @@
+import hashlib
 import os
 import sys
+import tempfile
+from pathlib import Path
+
+if sys.platform.startswith("win"):
+    _REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+    _REPOSITORY_KEY = hashlib.sha256(str(_REPOSITORY_ROOT).encode("utf-8")).hexdigest()[:12]
+    _TEST_STATE_ROOT = Path(tempfile.gettempdir()) / "veragrid-pytest-gui" / _REPOSITORY_KEY
+    _TEST_TEMP_ROOT = _TEST_STATE_ROOT / "temp"
+    _TEST_HOME_ROOT = _TEST_STATE_ROOT / "home"
+    _TEST_BASE_TEMP_ROOT = _TEST_STATE_ROOT / "basetemp"
+    _TEST_TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+    _TEST_HOME_ROOT.mkdir(parents=True, exist_ok=True)
+    _TEST_BASE_TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+    os.environ["TMP"] = str(_TEST_TEMP_ROOT)
+    os.environ["TEMP"] = str(_TEST_TEMP_ROOT)
+    os.environ["USERPROFILE"] = str(_TEST_HOME_ROOT)
+    os.environ["HOME"] = str(_TEST_HOME_ROOT)
+    tempfile.tempdir = str(_TEST_TEMP_ROOT)
 
 import pytest
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 
 def pytest_configure(config: pytest.Config) -> None:
     """
-    Configure Qt before GUI test modules import PySide.
+    Keep Windows GUI test temporary paths inside one known writable directory.
 
-    :param config: Pytest configuration object.
-    :return: Nothing.
+    :param config: Active pytest configuration.
+    :return: None.
     """
-    del config
-
-    if "QT_QPA_PLATFORM" in os.environ:
-        pass
+    if sys.platform.startswith("win") and config.option.basetemp is None:
+        config.option.basetemp = str(_TEST_BASE_TEMP_ROOT)
     else:
-        os.environ["QT_QPA_PLATFORM"] = "offscreen"
+        pass
+
+
+class ModalDialogAutoCloser(QtCore.QObject):
+    """
+    Close modal dialogs that block unattended GUI regression flows.
+    """
+
+    __slots__ = ("_app", "_protected_widget", "_timer")
+
+    def __init__(
+            self,
+            app: QtWidgets.QApplication,
+            protected_widget: QtWidgets.QWidget,
+            parent: QtCore.QObject | None = None,
+    ) -> None:
+        """
+        Build one modal-dialog closer.
+
+        :param app: Shared Qt application.
+        :param protected_widget: Main window that must not be closed by the helper.
+        :param parent: Optional Qt owner.
+        :return: None.
+        """
+        QtCore.QObject.__init__(self, parent)
+        self._app: QtWidgets.QApplication = app
+        self._protected_widget: QtWidgets.QWidget = protected_widget
+        self._timer: QtCore.QTimer = QtCore.QTimer(self)
+        self._timer.setInterval(25)
+        self._timer.timeout.connect(self.close_modal_dialogs)
+
+    def start(self) -> None:
+        """
+        Start polling for blocking dialogs.
+
+        :return: None.
+        """
+        self._timer.start()
+
+    def stop(self) -> None:
+        """
+        Stop polling for blocking dialogs.
+
+        :return: None.
+        """
+        self._timer.stop()
+
+    @QtCore.Slot()
+    def close_modal_dialogs(self) -> None:
+        """
+        Close modal dialogs while preserving the main GUI.
+
+        :return: None.
+        """
+        widget: QtWidgets.QWidget
+        for widget in self._app.topLevelWidgets():
+            self.close_widget(widget=widget)
+
+    def close_widget(self, widget: QtWidgets.QWidget) -> None:
+        """
+        Close one eligible modal widget.
+
+        :param widget: Candidate top-level widget.
+        :return: None.
+        """
+        if widget is self._protected_widget:
+            pass
+        elif isinstance(widget, QtWidgets.QMessageBox):
+            widget.accept()
+        elif isinstance(widget, QtWidgets.QDialog):
+            widget.reject()
+        else:
+            pass
 
 
 @pytest.fixture(scope="session")
@@ -26,10 +117,38 @@ def qt_app() -> object:
 
     :return: Qt application instance.
     """
-    from PySide6 import QtWidgets
-
     app: QtWidgets.QApplication | None = QtWidgets.QApplication.instance()
     if app is None:
-        return QtWidgets.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
     else:
-        return app
+        pass
+
+    yield app
+
+    app.processEvents()
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    app.processEvents()
+
+
+@pytest.fixture(autouse=True)
+def cleanup_qt_widgets(qt_app: object) -> object:
+    """
+    Ensure GUI tests do not leak top-level widgets or deferred deletions across test boundaries.
+
+    :param qt_app: Shared Qt application instance.
+    :return: Nothing.
+    """
+    app: QtWidgets.QApplication = qt_app
+
+    yield
+
+    app.processEvents()
+
+    for widget in list(app.topLevelWidgets()):
+        widget.close()
+        widget.deleteLater()
+
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    app.processEvents()
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    app.processEvents()

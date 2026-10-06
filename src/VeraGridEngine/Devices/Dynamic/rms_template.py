@@ -7,14 +7,18 @@ import copy
 from typing import Tuple
 
 from VeraGridEngine.Devices.Parents.pointer_device_parent import PointerDeviceParent
-from VeraGridEngine.Utils.Symbolic.block import Block
+from VeraGridEngine.Utils.Symbolic.block import Block, normalize_event_parameter_initialization
 from VeraGridEngine.enumerations import DeviceType, SubObjectType
 from VeraGridEngine.Devices.Parents.editable_device import GCProp
 
 
 class RmsModelTemplate(PointerDeviceParent):
     """
-    This class serves to give flexible access to either a template or a custom model
+    Store a reusable RMS model and the type of network device it can model.
+
+    ``tpe`` is the compatible network device type. The dynamic editor uses it to
+    offer the template only for matching devices; ``DeviceType.NoDevice`` marks a
+    generic template.
     """
 
     __slots__ = (
@@ -30,14 +34,6 @@ class RmsModelTemplate(PointerDeviceParent):
             definition='DAE block',
             editable=False,
             display=False,
-        ),
-        GCProp(
-            prop_name='tpe',
-            units="",
-            tpe=DeviceType,
-            definition='Device type',
-            editable=True,
-            display=True,
         ),
     )
 
@@ -67,7 +63,11 @@ class RmsModelTemplate(PointerDeviceParent):
         result.action = self.action
         result.selected_to_merge = self.selected_to_merge
         result.diff_changes = copy.deepcopy(self.diff_changes, memo)
-        result._EditableDevice__auto_update_enabled = self._EditableDevice__auto_update_enabled
+
+        if self.auto_update_enabled:
+            result.enable_auto_updates()
+        else:
+            result.disable_auto_updates()
 
         result._device_idtag = self._device_idtag
         result._tpe = self._tpe
@@ -79,13 +79,20 @@ class RmsModelTemplate(PointerDeviceParent):
         return result
 
     @property
-    def block(self):
-        """
+    def block(self) -> Block:
+        """Return the normalized symbolic block owned by this RMS template.
 
-        :return:
+        :return: RMS symbolic block using one initialization source per event parameter.
         """
+        normalize_event_parameter_initialization(block=self._block)
         return self._block
 
     @block.setter
-    def block(self, obj: Block):
+    def block(self, obj: Block) -> None:
+        """Replace the RMS block and normalize legacy event initialization.
+
+        :param obj: Complete symbolic block assigned to the template.
+        :return: None.
+        """
         self._block = obj
+        normalize_event_parameter_initialization(block=self._block)

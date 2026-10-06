@@ -60,6 +60,8 @@ class ScenarioNode:
         self.node_id: int = node_id
         self.circuit: MultiCircuit = data
         self.diagrams: list[Any] = copy_diagrams(diagrams if diagrams is not None else data.diagrams)
+        if self.circuit is not None:
+            self.circuit.diagrams = self.diagrams
         self.parent: ScenarioNode | None = parent
         self.children: list[ScenarioNode] = children if children is not None else list()
 
@@ -294,6 +296,8 @@ class MultiVerse:
         """
         node.circuit = stored_circuit
         node.diagrams = copy_diagrams(stored_circuit.diagrams)
+        if node.circuit is not None:
+            node.circuit.diagrams = node.diagrams
 
     def _store_composed_node_data(self, node: ScenarioNode, composed: MultiCircuit) -> None:
         """
@@ -354,6 +358,8 @@ class MultiVerse:
             # Keep root node diagram snapshots aligned with in-place edits without running
             # the expensive root storage/diff path.
             self._current_node.diagrams = copy_diagrams(self._current_model.diagrams)
+            if self._current_node.circuit is not None:
+                self._current_node.circuit.diagrams = self._current_node.diagrams
             self._base_model = self._current_node.circuit
             return
 
@@ -459,7 +465,10 @@ class MultiVerse:
         node_diagrams: list[Any] | None = None
         if parent_id is not None:
             parent = self.get_node(parent_id)
-            # ScenarioNode performs the deep copy; avoid copying twice here.
+            if parent is self._current_node and self._current_model is not None:
+                self._current_node.diagrams = copy_diagrams(self._current_model.diagrams)
+                if self._current_node.circuit is not None:
+                    self._current_node.circuit.diagrams = self._current_node.diagrams
             node_diagrams = parent.diagrams
 
         node: ScenarioNode = ScenarioNode(

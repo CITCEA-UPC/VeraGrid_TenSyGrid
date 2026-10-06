@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Callable, Tuple
 import numpy as np
 import numba as nb
-from matplotlib import pyplot as plt
 from VeraGridEngine.basic_structures import Vec, CscMat, IntVec, CxVec
 
 
@@ -94,16 +93,6 @@ class ConvexMethodResult:
     elapsed: float  # time elapsed in seconds
     error_evolution: Vec  # array of errors to plot
 
-    def plot_error(self) -> None:
-        """
-        Plot the IPS error
-        """
-        plt.figure()
-        plt.plot(self.error_evolution, )
-        plt.xlabel("Iterations")
-        plt.ylabel("Error")
-        plt.yscale('log')
-        plt.show()
 
     def print_info(self):
         """

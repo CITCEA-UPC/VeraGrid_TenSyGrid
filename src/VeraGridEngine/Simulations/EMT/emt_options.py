@@ -3,6 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import math
 from typing import Tuple
 
 from VeraGridEngine.Simulations.options_template import OptionsTemplate
@@ -16,6 +17,52 @@ class EmtOptions(OptionsTemplate):
     """
     EMT simulation options
     """
+
+    __slots__ = (
+        "time_step",
+        "simulation_time",
+        "tolerance",
+        "solver_type",
+        "integration_method",
+        "verbose",
+        "initialization_method",
+        "problem_type",
+        "init_newton_tol",
+        "init_newton_max_iter",
+        "init_newton_backtracking",
+        "init_dense_threshold",
+        "init_ptc_dtau0",
+        "init_ptc_dtau_min",
+        "init_ptc_dtau_max",
+        "init_ptc_max_iter",
+        "init_allow_state_equilibrium",
+        "init_fix_pf_bus_voltages",
+        "newton_compute_dense_cond",
+        "newton_enable_fallback",
+        "newton_enable_index1_check",
+        "newton_enable_backtracking",
+        "newton_step_norm_explode",
+        "newton_dense_cond_warn",
+        "newton_dense_cond_max_n",
+        "newton_index1_max_block_n",
+        "newton_index1_warn_pivot_ratio",
+        "newton_index1_fail_pivot_ratio",
+        "newton_backtracking_beta",
+        "newton_backtracking_min_alpha",
+        "newton_backtracking_max_iter",
+        "compiled_warmup_policy",
+        "sparse_solver",
+        "external_sparse_solver_directory",
+        "external_sparse_solver_plugin_name",
+        "allow_internal_sparse_fallback",
+        "fmi_state_event_time_tolerance",
+        "fmi_state_event_max_iterations",
+        "fmi_me_newton_absolute_tolerance",
+        "fmi_me_newton_relative_tolerance",
+        "fmi_me_newton_max_iterations",
+        "fmi_me_max_continuous_states",
+        "fmi_me_max_runtime_evaluations_per_step",
+    )
 
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="time_step", tpe=float),
@@ -35,6 +82,7 @@ class EmtOptions(OptionsTemplate):
         GCProp(key="init_ptc_dtau_max", tpe=float),
         GCProp(key="init_ptc_max_iter", tpe=int),
         GCProp(key="init_allow_state_equilibrium", tpe=bool),
+        GCProp(key="init_fix_pf_bus_voltages", tpe=bool),
         GCProp(key="newton_compute_dense_cond", tpe=bool),
         GCProp(key="newton_enable_fallback", tpe=bool),
         GCProp(key="newton_enable_index1_check", tpe=bool),
@@ -53,6 +101,13 @@ class EmtOptions(OptionsTemplate):
         GCProp(key="external_sparse_solver_directory", tpe=str),
         GCProp(key="external_sparse_solver_plugin_name", tpe=str),
         GCProp(key="allow_internal_sparse_fallback", tpe=bool),
+        GCProp(key="fmi_state_event_time_tolerance", tpe=float),
+        GCProp(key="fmi_state_event_max_iterations", tpe=int),
+        GCProp(key="fmi_me_newton_absolute_tolerance", tpe=float),
+        GCProp(key="fmi_me_newton_relative_tolerance", tpe=float),
+        GCProp(key="fmi_me_newton_max_iterations", tpe=int),
+        GCProp(key="fmi_me_max_continuous_states", tpe=int),
+        GCProp(key="fmi_me_max_runtime_evaluations_per_step", tpe=int),
     )
 
     def __init__(self,
@@ -73,6 +128,7 @@ class EmtOptions(OptionsTemplate):
                  init_ptc_dtau_max: float = 1e1,
                  init_ptc_max_iter: int = 60,
                  init_allow_state_equilibrium: bool = True,
+                 init_fix_pf_bus_voltages: bool = False,
                  newton_compute_dense_cond: bool = False,
                  newton_enable_fallback: bool = False,
                  newton_enable_index1_check: bool = False,
@@ -90,13 +146,28 @@ class EmtOptions(OptionsTemplate):
                  sparse_solver: SparseSolver = SparseSolver.SuperLU,
                  external_sparse_solver_directory: str = "",
                  external_sparse_solver_plugin_name: str = "",
-                 allow_internal_sparse_fallback: bool = True):
+                 allow_internal_sparse_fallback: bool = True,
+                 fmi_state_event_time_tolerance: float = 1e-9,
+                 fmi_state_event_max_iterations: int = 32,
+                 fmi_me_newton_absolute_tolerance: float = 1e-8,
+                 fmi_me_newton_relative_tolerance: float = 1e-8,
+                 fmi_me_newton_max_iterations: int = 20,
+                 fmi_me_max_continuous_states: int = 128,
+                 fmi_me_max_runtime_evaluations_per_step: int = 100000) -> None:
         """
         EmtOptions
         :param time_step: time step of the simulations (s)
         :param simulation_time: simulation time (s)
         :param tolerance: Integration tolerance
         :param verbose: Verbosity level
+        :param fmi_state_event_time_tolerance: Absolute FMI ME event-time tolerance in seconds.
+        :param fmi_state_event_max_iterations: Maximum FMI ME event bisections.
+        :param fmi_me_newton_absolute_tolerance: Absolute scale used by the FMI ME Newton residual.
+        :param fmi_me_newton_relative_tolerance: Relative scale used by the FMI ME Newton residual.
+        :param fmi_me_newton_max_iterations: Maximum FMI ME Backward Euler Newton updates.
+        :param fmi_me_max_continuous_states: Maximum dense FMI ME state dimension.
+        :param fmi_me_max_runtime_evaluations_per_step: Shared runtime-call limit for one FMI ME step.
+        :return: None.
         """
 
         OptionsTemplate.__init__(self, name='EmtSimulationOptions')
@@ -118,6 +189,7 @@ class EmtOptions(OptionsTemplate):
         self.init_ptc_dtau_max: float = init_ptc_dtau_max
         self.init_ptc_max_iter: int = init_ptc_max_iter
         self.init_allow_state_equilibrium: bool = init_allow_state_equilibrium
+        self.init_fix_pf_bus_voltages: bool = init_fix_pf_bus_voltages
         self.newton_compute_dense_cond = newton_compute_dense_cond
         self.newton_enable_fallback = newton_enable_fallback
         self.newton_enable_index1_check = newton_enable_index1_check
@@ -136,5 +208,81 @@ class EmtOptions(OptionsTemplate):
         self.external_sparse_solver_directory: str = external_sparse_solver_directory
         self.external_sparse_solver_plugin_name: str = external_sparse_solver_plugin_name
         self.allow_internal_sparse_fallback: bool = allow_internal_sparse_fallback
-
-
+        if (
+            math.isfinite(fmi_state_event_time_tolerance)
+            and fmi_state_event_time_tolerance > 0.0
+        ):
+            self.fmi_state_event_time_tolerance: float = (
+                fmi_state_event_time_tolerance
+            )
+        else:
+            raise ValueError(
+                "EMT FMI state-event time tolerance must be finite and positive"
+            )
+        if (
+            isinstance(fmi_state_event_max_iterations, int)
+            and not isinstance(fmi_state_event_max_iterations, bool)
+            and fmi_state_event_max_iterations > 0
+        ):
+            self.fmi_state_event_max_iterations: int = (
+                fmi_state_event_max_iterations
+            )
+        else:
+            raise ValueError(
+                "EMT FMI state-event maximum iterations must be a positive integer"
+            )
+        if (
+            math.isfinite(fmi_me_newton_absolute_tolerance)
+            and fmi_me_newton_absolute_tolerance > 0.0
+        ):
+            self.fmi_me_newton_absolute_tolerance: float = (
+                fmi_me_newton_absolute_tolerance
+            )
+        else:
+            raise ValueError(
+                "EMT FMI ME Newton absolute tolerance must be finite and positive"
+            )
+        if (
+            math.isfinite(fmi_me_newton_relative_tolerance)
+            and fmi_me_newton_relative_tolerance > 0.0
+        ):
+            self.fmi_me_newton_relative_tolerance: float = (
+                fmi_me_newton_relative_tolerance
+            )
+        else:
+            raise ValueError(
+                "EMT FMI ME Newton relative tolerance must be finite and positive"
+            )
+        if (
+            isinstance(fmi_me_newton_max_iterations, int)
+            and not isinstance(fmi_me_newton_max_iterations, bool)
+            and 1 <= fmi_me_newton_max_iterations <= 100
+        ):
+            self.fmi_me_newton_max_iterations: int = fmi_me_newton_max_iterations
+        else:
+            raise ValueError(
+                "EMT FMI ME Newton iteration limit must be an integer between 1 and 100"
+            )
+        if (
+            isinstance(fmi_me_max_continuous_states, int)
+            and not isinstance(fmi_me_max_continuous_states, bool)
+            and 1 <= fmi_me_max_continuous_states <= 128
+        ):
+            self.fmi_me_max_continuous_states: int = fmi_me_max_continuous_states
+        else:
+            raise ValueError(
+                "EMT FMI ME state limit must be an integer between 1 and 128"
+            )
+        if (
+            isinstance(fmi_me_max_runtime_evaluations_per_step, int)
+            and not isinstance(fmi_me_max_runtime_evaluations_per_step, bool)
+            and 1 <= fmi_me_max_runtime_evaluations_per_step <= 10_000_000
+        ):
+            self.fmi_me_max_runtime_evaluations_per_step: int = (
+                fmi_me_max_runtime_evaluations_per_step
+            )
+        else:
+            raise ValueError(
+                "EMT FMI ME runtime evaluation limit must be an integer between "
+                "1 and 10000000"
+            )

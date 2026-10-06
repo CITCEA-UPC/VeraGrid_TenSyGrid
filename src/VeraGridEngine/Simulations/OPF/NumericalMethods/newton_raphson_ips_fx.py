@@ -10,7 +10,6 @@ import pandas as pd
 from scipy.sparse import csc_matrix as csc
 from scipy import sparse
 import timeit
-from matplotlib import pyplot as plt
 from VeraGridEngine.basic_structures import Vec, CxVec
 from VeraGridEngine.Utils.Sparse.csc import pack_3_by_4, diags
 from VeraGridEngine.Utils.NumericalMethods.sparse_solve import get_linear_solver, get_available_sparse_solvers
@@ -324,7 +323,7 @@ def solve_kkt_with_fallback(jac: csc,
     return None, None, np.inf
 
 
-@dataclass
+@dataclass(slots=True)
 class IpsFunctionReturn:
     """
     Represents the returning value of the interior point evaluation
@@ -387,7 +386,7 @@ class IpsFunctionReturn:
         return errors
 
 
-@dataclass
+@dataclass(slots=True)
 class IpsIterationHistory:
     """
     Compact IPS per-iteration history for debugging and solver comparisons.
@@ -404,7 +403,7 @@ class IpsIterationHistory:
     step_norm: Vec
 
 
-@dataclass
+@dataclass(slots=True)
 class IpsSolution:
     """
     Represents the returning value of the interior point solution
@@ -422,16 +421,6 @@ class IpsSolution:
     error_evolution: Vec
     history: IpsIterationHistory | None = None
 
-    def plot_error(self):
-        """
-        Plot the IPS error
-        """
-        plt.figure()
-        plt.plot(self.error_evolution, )
-        plt.xlabel("Iterations")
-        plt.ylabel("Error")
-        plt.yscale('log')
-        plt.show()
 
 
 def interior_point_solver(problem,

@@ -6,7 +6,6 @@ import math
 from typing import List
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
@@ -564,34 +563,6 @@ class EraMatrixPencilResults(ResultsTemplate):
             index_labels = np.array([f'Mode {index}' for index in range(n_modes)], dtype=np.str_)
             columns = np.array(['Real', 'Imag [Hz]'], dtype=np.str_)
 
-            if self.plotting_allowed() and n_modes > 0:
-                max_energy: float = float(np.max(self._modal_energy))
-
-                if max_energy > 1e-15:
-                    colors: Vec = self._modal_energy / max_energy
-                else:
-                    colors = np.ones(n_modes, dtype=np.float64)
-
-                slope: float = 1.0 / 0.05
-                x_reference: Vec = np.linspace(-200.0, 0.0, 400)
-                y_reference: Vec = slope * x_reference / (2.0 * np.pi)
-
-                plt.ion()
-                figure = plt.figure(figsize=(8, 6))
-                axis = figure.add_subplot(111)
-                axis.plot(x_reference, y_reference, '--', color='grey', linewidth=0.7, alpha=0.6, label='zeta = 5%')
-                axis.plot(x_reference, -y_reference, '--', color='grey', linewidth=0.7, alpha=0.6)
-                axis.scatter(self._eigenvalues_s.real, self._frequencies_hz, c=colors, cmap='viridis', s=120, alpha=0.9)
-                axis.set_xlabel('Real [1/s]')
-                axis.set_ylabel('Imaginary [Hz]')
-                axis.axhline(0.0, color='black', linewidth=1.0)
-                axis.axvline(0.0, color='black', linewidth=1.0)
-                axis.set_title('ERA Matrix Pencil S-Domain Plot in Hz')
-                axis.grid(True, alpha=0.25)
-                plt.tight_layout()
-                plt.show()
-            else:
-                pass
 
             return ResultsTable(
                 data=plot_data,

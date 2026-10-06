@@ -11,6 +11,8 @@ class OptionsTemplate(EditableDevice):
     Options template
     """
 
+    __slots__ = ()
+
     def __init__(self, name: str):
         """
 

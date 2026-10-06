@@ -9,6 +9,17 @@ import pandas as pd
 
 class PowerFlowTimeSeriesInput:
 
+    __slots__ = (
+        'time_array',
+        'Sprof',
+        'Iprof',
+        'Yprof',
+        'Y',
+        'I',
+        'S',
+        'valid',
+    )
+
     def __init__(self, s_profile: pd.DataFrame = None, i_profile: pd.DataFrame = None, y_profile: pd.DataFrame = None):
         """
         Time series input

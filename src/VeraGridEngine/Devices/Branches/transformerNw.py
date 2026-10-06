@@ -16,30 +16,71 @@ from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.Devices.Profiles import ProfileBool
 from VeraGridEngine.enumerations import BuildStatus, DeviceType, PrpCat, SubObjectType
 
+
 class ImpedanceTriplet:
+    """
+
+    """
     __slots__ = ("i", "j", "imp")
     def __init__(self, i: int = 0, j: int = 0, imp:complex = complex(0,0)) -> None:
+        """
+
+        :param i:
+        :param j:
+        :param imp:
+        """
         self.i = i
         self.j = j
         self.imp = imp
 
     def to_list(self) -> List[int|float]:
+        """
+
+        :return:
+        """
         return [self.i, self.j, self.imp.real, self.imp.imag]
 
     def from_list(self, value: List[int|float]) -> "ImpedanceTriplet":
+        """
+
+        :param value:
+        :return:
+        """
         self.i = int(value[0])
         self.j = int(value[1])
         self.imp = complex(value[2], value[3])
         return self
 
 class ImpedanceTripletList:
+    __slots__ = ("__list",)
+
     def __init__(self):
-        self.__list = []
+        """
+
+        """
+        self.__list: List[ImpedanceTriplet] = list()
+
     def append(self, imp: ImpedanceTriplet) -> None:
+        """
+
+        :param imp:
+        :return:
+        """
         self.__list.append(imp)
+
     def to_list(self) -> List[ImpedanceTripletList]:
+        """
+
+        :return:
+        """
         return [x.to_list() for x in self.__list]
+
     def parse(self, data: List[List[int|float]]) -> None:
+        """
+
+        :param data:
+        :return:
+        """
         for entry in data:
             self.append(ImpedanceTriplet().from_list(entry))
 

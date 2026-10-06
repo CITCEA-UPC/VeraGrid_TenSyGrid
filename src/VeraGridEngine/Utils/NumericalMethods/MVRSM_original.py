@@ -26,7 +26,6 @@ import time
 import numpy as np
 from typing import List, Tuple
 
-from matplotlib import pyplot as plt
 from scipy.linalg.blas import dger
 from scipy.optimize import minimize
 from VeraGridEngine.basic_structures import Vec, Mat, IntVec
@@ -457,11 +456,6 @@ def MVRSM_minimize(obj_func, x0, lb, ub, num_int, max_evals, rand_evals=0, obj_t
         if log_times:
             # noinspection PyUnboundLocalVariable
             print(f'Iteration time: {time.time() - iter_start}')
-
-    plt.scatter(best_x, best_y, facecolor="none", edgecolor="red")
-    plt.xlabel("Investment cost (M€)")
-    plt.ylabel("Technical cost (M€)")
-    plt.show()
 
     return best_x, inv_scale(best_y, y0, scale_threshold), model
 

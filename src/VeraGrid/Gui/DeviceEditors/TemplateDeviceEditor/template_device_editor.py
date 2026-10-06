@@ -17,9 +17,10 @@ from VeraGrid.Gui.DeviceEditors.AdmittanceMatrixEditor.admittance_matrix_editor 
 from VeraGrid.Gui.DeviceEditors.LineLocationsEditor.line_locations_editor import LineLocationsEditorWidget
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor_gui import Ui_TemplateDeviceEditorDialog
 from VeraGrid.Gui.gui_functions import ComboDelegate, FloatDelegate, IntDelegate, TextDelegate, ComplexDelegate
-from VeraGrid.Gui.Widgets.matplotlibwidget import MatplotlibWidget
+from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely, exec_dialog_safely
 from VeraGrid.Gui.messages import warning_msg
 from VeraGrid.Gui.object_model import ObjectsModel
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
 from VeraGrid.Gui.spread_sheet_table import SpreadsheetTableView
 from VeraGrid.Gui.table_view_header_wrap import HeaderViewWithWordWrap
 from VeraGrid.Gui.toast_widget import ToastManager
@@ -282,8 +283,9 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
         self.ui = Ui_TemplateDeviceEditorDialog()
         self.ui.setupUi(self)
         self._replace_profiles_table_view()
-        self.setWindowTitle("Device editor")
+        self.setWindowTitle(self.tr("Device editor"))
         self.toast_manager: ToastManager = ToastManager(parent=self, position_top=False)
+        self._open_plot_dialogs: list[QtWidgets.QDialog] = list()
 
         prop_filter_mdl = gf.ComboModel(
             icon_enum_values=[
@@ -337,6 +339,8 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
 
         # UI post-configuration.
         self.properties_table_view.setAlternatingRowColors(True)
+        self.properties_table_view.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.properties_table_view.customContextMenuRequested.connect(self.show_properties_table_context_menu)
         self.profiles_table_view.setAlternatingRowColors(True)
         self.associations_table_view.setAlternatingRowColors(True)
         self.associations_table_view.setHorizontalHeader(HeaderViewWithWordWrap(self.associations_table_view))
@@ -465,6 +469,43 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
         :param duration: Duration in milliseconds.
         """
         self.toast_manager.show_info_toast(message=message, duration=duration)
+
+    def open_hosted_device_editor(self, hosted_device: EditableDevice) -> None:
+        """
+        Open the best available editor for one hosted device.
+
+        :param hosted_device: Device referenced by the clicked cell.
+        :return: None.
+        """
+        from VeraGrid.Gui.DeviceEditors.device_editor_factory import build_device_editor_dialog
+
+        # Use this editor's circuit context so selector delegates keep the same model visibility.
+        dialog: QtWidgets.QDialog = build_device_editor_dialog(api_object=hosted_device, circuit=self.circuit)
+        exec_dialog_safely(dialog=dialog)
+
+    def show_properties_table_context_menu(self, position: QtCore.QPoint) -> None:
+        """
+        Open the hosted device editor for a right-clicked property cell.
+
+        :param position: Table-local click position.
+        :return: None.
+        """
+        index: QtCore.QModelIndex = self.properties_table_view.indexAt(position)
+
+        if index.isValid():
+            model: QtCore.QAbstractItemModel | None = self.properties_table_view.model()
+
+            if isinstance(model, ObjectsModel):
+                hosted_device: EditableDevice | None = model.get_hosted_device_at_index(index=index)
+
+                if hosted_device is not None:
+                    self.open_hosted_device_editor(hosted_device=hosted_device)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
 
     def _build_delegate_dictionary(self) -> dict[DeviceType, list[object]]:
         """
@@ -1049,58 +1090,71 @@ class TemplateDeviceEditor(QtWidgets.QDialog):
 
     def _open_profiles_plot_dialog(self, grouped_series: dict[str, list[tuple[str, np.ndarray]]], title: str) -> None:
         """
-        Open a modal chart dialog with one subplot per units group.
+        Open one native chart window per engineering-unit group.
 
         :param grouped_series: Mapping `unit -> list[(series_name, values)]`.
         :param title: Dialog title.
         """
         if len(grouped_series) > 0:
-            dialog: QtWidgets.QDialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle(title)
-            dialog.resize(1200, 760)
-
-            dialog_layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout(dialog)
-            plot_widget: MatplotlibWidget = MatplotlibWidget(dialog)
-            dialog_layout.addWidget(plot_widget)
-
-            close_buttons: QtWidgets.QDialogButtonBox = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Close,
-                dialog,
-            )
-            dialog_layout.addWidget(close_buttons)
-            close_buttons.rejected.connect(dialog.close)
-
             unit_labels: list[str] = sorted(list(grouped_series.keys()))
-            figure = plot_widget.canvas.fig
-            figure.clear()
-
-            # Build one axis per engineering unit to avoid mixing scales.
-            axes_object = figure.subplots(len(unit_labels), 1, sharex=True)
-            if len(unit_labels) == 1:
-                axes = [axes_object]
-            else:
-                axes = list(np.ravel(np.asarray(axes_object)))
-
-            axis_index: int
-            for axis_index, unit_label in enumerate(unit_labels):
-                axis = axes[axis_index]
+            plotted_dialogs: int = 0
+            unit_label: str
+            delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+            for unit_label in unit_labels:
                 series_items: list[tuple[str, np.ndarray]] = grouped_series[unit_label]
+                series_names: list[str] = list()
+                series_values: list[np.ndarray] = list()
                 series_name: str
-                series_values: np.ndarray
-                for series_name, series_values in series_items:
-                    x_values: np.ndarray = np.arange(len(series_values), dtype=float)
-                    axis.plot(x_values, series_values, label=series_name, linewidth=1.5)
+                profile_values: np.ndarray
+                for series_name, profile_values in series_items:
+                    series_names.append(series_name)
+                    series_values.append(profile_values)
 
-                axis.set_ylabel(unit_label)
-                axis.grid(True, linestyle="--", alpha=0.4)
-                axis.legend(loc="best")
+                if len(series_values) > 0:
+                    x_values: np.ndarray = np.arange(len(series_values[0]), dtype=float)
+                    dialogue_title: str = f"{title} ({unit_label})"
+                    plot_dialogue: PlotDialogue = PlotDialogue(title=dialogue_title, parent=self)
+                    accepted: bool = plot_dialogue.set_line_series(
+                        x_values=x_values,
+                        series_names=series_names,
+                        series_values=series_values,
+                        title=dialogue_title,
+                        x_axis_title=self.tr("Time index"),
+                        y_axis_title=unit_label,
+                    )
+                    if accepted:
+                        self._open_plot_dialogs.append(plot_dialogue)
+                        plotted_dialogs += 1
+                        plot_dialogue.show()
+                    else:
+                        plot_dialogue.reject()
+                else:
+                    pass
 
-            axes[len(axes) - 1].set_xlabel("Time index")
-            figure.tight_layout()
-            plot_widget.redraw()
-            dialog.exec()
+            if plotted_dialogs == 0:
+                self.show_warning_toast("No compatible numeric profile columns available for plotting")
+            else:
+                pass
         else:
             self.show_warning_toast("No numeric profile columns available for plotting")
+
+    def done(self, result: int) -> None:
+        """Close retained chart dialogs before the editor completes.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.done(self, result)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """Close retained chart dialogs before the editor widget is destroyed.
+
+        :param event: Qt close event.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.closeEvent(self, event)
 
     def plot_selected_profiles_grouped_by_units(self) -> None:
         """

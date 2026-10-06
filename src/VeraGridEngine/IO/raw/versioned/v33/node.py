@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v32.node import RawNodeV32
 
 class RawNodeV33(RawNodeV32):
     """PSSE v33 typed object inheriting v32."""
+    __slots__ = ()
     pass

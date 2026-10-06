@@ -8,12 +8,49 @@ class MatAcDcConverter:
     Class to parse and write converter data from MATPOWER .m files.
     """
 
-    def __init__(self):
+    __slots__ = (
+        "busdc_i",
+        "busac_i",
+        "type_dc",
+        "type_ac",
+        "p_g",
+        "q_g",
+        "islcc",
+        "vtar",
+        "rtf",
+        "xtf",
+        "transformer",
+        "tm",
+        "bf",
+        "filter_flag",
+        "rc",
+        "xc",
+        "reactor",
+        "base_kvac",
+        "vmmax",
+        "vmmin",
+        "imax",
+        "status",
+        "loss_a",
+        "loss_b",
+        "loss_crec",
+        "loss_cinv",
+        "droop",
+        "pdcset",
+        "vdcset",
+        "dvdcset",
+        "pacmax",
+        "pacmin",
+        "qacmax",
+        "qacmin",
+    )
+
+    def __init__(self) -> None:
         # Initialize all attributes to default values
 
         # Converter buses, control parameters and AC system data
-        self.busdc_i = 0  # DC bus number
-        self.busac_i = 0  # AC bus number
+        self.busdc_i: int = 0  # DC bus number
+        self.busac_i: int = 0  # AC bus number
 
         """
         CONVTYPE_DC constants

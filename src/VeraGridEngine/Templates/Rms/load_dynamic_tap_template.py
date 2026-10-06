@@ -12,6 +12,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block
 
 
 class DynamicTapLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[
@@ -73,7 +74,7 @@ def DynamicTapLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) 
     event_dict = {
         P0: vfactory.add_const(Pl0),
         Q0: vfactory.add_const(Ql0),
-        V0: vfactory.add_const(None),
+        V0: inputs[0],
 
         # Exponential Parameters
         alpha_p: vfactory.add_const(1.2),
@@ -85,7 +86,6 @@ def DynamicTapLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) 
     }
 
     init_eqs = {
-        V0: inputs[0],
         m: V0,
         P: P0,
         Q: Q0,

@@ -70,5 +70,47 @@ def test_unbalanced_short_circuit():
     assert v2_ok
 
 
+def test_three_phase_line_fault_sequence_dispatch() -> None:
+    """
+    The sequence short-circuit dispatcher must accept valid ``LLL`` events.
+
+    :return: None.
+    """
+    fname: str = os.path.join('data', 'grids', '5bus_Saadat.xlsx')
+    grid = FileOpen(fname).open()
+
+    pf_options: PowerFlowOptions = PowerFlowOptions(
+        solver_type=SolverType.NR,
+        verbose=False,
+        tolerance=1e-6,
+        max_iter=25,
+    )
+    pf: PowerFlowDriver = PowerFlowDriver(grid, pf_options)
+    pf.run()
+
+    grid.add_short_circuit_event(
+        ShortCircuitEvent(
+            device=grid.buses[2],
+            fault_type=FaultType.LLL,
+            method=MethodShortCircuit.sequences,
+            phases=PhasesShortCircuit.abc,
+            x_fault=0.1
+        )
+    )
+
+    sc: ShortCircuitDriver = ShortCircuitDriver(
+        grid,
+        options=ShortCircuitOptions(),
+        pf_options=pf_options,
+        pf_results=pf.results,
+        pf_results3ph=None
+    )
+    sc.run()
+
+    assert sc.results is not None
+    assert not sc.logger.has_errors()
+    assert np.all(np.isfinite(sc.results.voltage1))
+
+
 if __name__ == '__main__':
     test_unbalanced_short_circuit()

@@ -4,8 +4,25 @@
 # SPDX-License-Identifier: MPL-2.0
 
 class UcteComment:
-    def __init__(self):
-        self.content = ""
+    """
+    UcteComment device holding comment line contents.
+    """
 
-    def parse(self, line):
+    __slots__ = (
+        "content",
+    )
+
+    def __init__(self) -> None:
+        """
+        Initialize the UcteComment device.
+        """
+        self.content: str = ""
+
+    def parse(self, line: str) -> None:
+        """
+        Parse comment text from line.
+
+        :param line: Raw text line.
+        :return: None
+        """
         self.content = line.strip()

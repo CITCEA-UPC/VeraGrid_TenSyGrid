@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .export_ir import ExportModel, StorageSegment
+from VeraGridEngine.IO.fmu.exporter_me.export_ir import ExportModel, StorageSegment
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,6 +16,12 @@ class ResolvedStorage:
 
 
 class CVariableResolver:
+    __slots__ = (
+        "export_model",
+        "by_uid",
+        "by_name",
+    )
+
     def __init__(self, export_model: ExportModel):
         self.export_model = export_model
         self.by_uid = {variable.uid: variable for variable in export_model.variables}

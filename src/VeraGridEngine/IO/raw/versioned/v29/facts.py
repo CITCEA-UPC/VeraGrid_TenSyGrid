@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.base.facts import RawFACTS
 
 class RawFACTSV29(RawFACTS):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         self.version = version

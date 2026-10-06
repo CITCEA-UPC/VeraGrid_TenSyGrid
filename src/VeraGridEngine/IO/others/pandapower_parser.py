@@ -194,6 +194,13 @@ def is_pandapower_file(file_path: str):
 
 
 class Panda2VeraGrid:
+    __slots__ = (
+        "logger",
+        "panda_dict",
+        "panda_net",
+        "fBase",
+        "load_scale",
+    )
 
     def __init__(self, file_or_net: str | "pandapowerNet", logger: Logger | None = None):
         """

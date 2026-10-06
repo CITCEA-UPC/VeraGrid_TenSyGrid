@@ -7,7 +7,6 @@ from __future__ import annotations
 from typing import List, Dict, Tuple
 import numpy as np
 from numpy import pi, log, sqrt
-from matplotlib import pyplot as plt
 import math
 from VeraGridEngine.Devices.admittance_matrix import AdmittanceMatrix
 from VeraGridEngine.basic_structures import Logger, Mat, IntVec, Vec, CxMat
@@ -379,7 +378,10 @@ def calc_z_ii(R_int, is_tube, r_outer, r_inner, y_i, f, rho, err_tol=1e-6, use_d
         X_int = 1000 * omega * calc_L_int(is_tube, r_outer, r_inner)
 
         # Calculate geometrical reactance (in Ohm/km) - Equation 4.15 EMTP
-        X_geo = 1000 * omega * mu_0 / 2 / np.pi * np.log(2 * y_i / r_outer)
+        if r_outer > 0.0:
+            X_geo = 1000.0 * omega * mu_0 / 2 / np.pi * np.log(2 * y_i / r_outer)
+        else:
+            X_geo = 0.0
 
         # Calculate Carson's correction factors (in Ohm/km)
         Rp, Xp = carsons(True, y_i, 0, 0, f, rho, err_tol)
@@ -1231,38 +1233,6 @@ class OverheadLineType(DynamicDevice):
         w = WireInTower(wire=wire, xpos=xpos, ypos=ypos, phase=phase)
         self.wires_in_tower.append(w)
 
-    def plot(self, ax=None):
-        """
-        Plot wires position
-        :param ax: Axis object
-        """
-        if ax is None:
-            fig = plt.Figure(figsize=(12, 6))
-            ax = fig.add_subplot(1, 1, 1)
-
-        n = len(self.wires_in_tower.data)
-
-        if n > 0:
-            x = np.zeros(n)
-            y = np.zeros(n)
-            for i, wire_tower in enumerate(self.wires_in_tower.data):
-                x[i] = wire_tower.xpos
-                y[i] = wire_tower.ypos
-
-            ax.plot(x, y, '.')
-            ax.set_title('Tower wire position', fontsize=14)
-            ax.set_xlabel('m', fontsize=8)
-            ax.set_ylabel('m', fontsize=8)
-            ax.tick_params(axis='x', labelsize=8)
-            ax.tick_params(axis='y', labelsize=8)
-            ax.set_xlim((min(0, np.min(x) - 1), np.max(x) + 1))
-            ax.set_ylim((0, np.max(y) + 1))
-            ax.patch.set_facecolor('white')
-            ax.grid(False)
-            ax.grid(which='major', axis='y', linestyle='--')
-        else:
-            # there are no wires
-            pass
 
     def is_computed(self) -> bool:
         """
@@ -1334,9 +1304,13 @@ class OverheadLineType(DynamicDevice):
                        'If this is correct, try a very small value.')
             return False
 
-        if len(phases) == 1:
-            logger.add('All the wires are in the same phase!')
+        # A tower may legitimately contain one phase only. Reject just the
+        # configuration that has earth/neutral wires without a phase conductor.
+        if len(phases) == 1 and 0 in phases:
+            logger.add('The tower has no phase conductor!')
             return False
+        else:
+            pass
 
         # if there is a phase, all the preceding ones must be present too
         # mx = max(phases)

@@ -5,8 +5,36 @@
 import os
 import numpy as np
 import VeraGridEngine.api as vg
-from VeraGridEngine.Compilers.circuit_to_gslv import GSLV_AVAILABLE
+from VeraGridEngine.Compilers.Gslv.activation import GSLV_AVAILABLE, pg
+from VeraGridEngine.Compilers.Gslv.Simulations.opf import get_gslv_opf_options
 from VeraGridEngine.Simulations.OPF.opf_ts_results import OptimalPowerFlowTimeSeriesResults
+
+
+def test_gslv_opf_time_grouping_translation() -> None:
+    """
+    GSLV OPF options must preserve the VeraGrid time grouping selection.
+    """
+    if not GSLV_AVAILABLE:
+        return
+    else:
+        # Check the option bridge directly so a slow solver run is not needed.
+        groupings: tuple[tuple[vg.TimeGrouping, "pg.TimeGrouping"], ...] = (
+            (vg.TimeGrouping.NoGrouping, pg.TimeGrouping.NoGrouping),
+            (vg.TimeGrouping.Monthly, pg.TimeGrouping.Monthly),
+            (vg.TimeGrouping.Weekly, pg.TimeGrouping.Weekly),
+            (vg.TimeGrouping.Daily, pg.TimeGrouping.Daily),
+            (vg.TimeGrouping.Hourly, pg.TimeGrouping.Hourly),
+        )
+        circuit: vg.MultiCircuit = vg.MultiCircuit()
+        gslv_grid: "pg.MultiCircuit" = pg.MultiCircuit(1)
+
+        for veragrid_grouping, gslv_grouping in groupings:
+            options: vg.OptimalPowerFlowOptions = vg.OptimalPowerFlowOptions(time_grouping=veragrid_grouping)
+            gslv_options: "pg.OptimalPowerFlowOptions" = get_gslv_opf_options(opt=options,
+                                                                               circuit=circuit,
+                                                                               gslv_circuit=gslv_grid)
+
+            assert gslv_options.time_grouping == gslv_grouping
 
 
 def set_unique_linear_cost_profiles(grid: vg.MultiCircuit) -> None:

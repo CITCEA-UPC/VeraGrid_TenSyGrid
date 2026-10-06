@@ -9,11 +9,17 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 import pvlib
-from matplotlib import pyplot as plt
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
+from VeraGrid.Gui.dialog_lifecycle import delete_dialogs_safely
 from VeraGrid.Gui.messages import error_msg
 from VeraGrid.Gui.DeviceEditors.GeneratorEditor.SolarPowerWizard.solar_power_wizard_gui import Ui_MainWindow
 from VeraGrid.Gui.pandas_model import PandasModel
+from VeraGrid.Gui.PlotDialogue.plot_dialogue import PlotDialogue
+from VeraGrid.Gui.profile_wizard_utils import (
+    build_mapped_time_index,
+    get_longitude_time_offset,
+    remap_timestamp_to_base_year,
+)
 
 
 def get_weather_column(data: pd.DataFrame, candidates: List[str]) -> Union[np.ndarray, None]:
@@ -60,10 +66,39 @@ def parse_pv_time_array(time_array: Sequence[Union[str, datetime, pd.Timestamp]]
         return False, pd.DatetimeIndex(list()), message
 
 
+def get_naive_pvgis_time_index(data_index: pd.DatetimeIndex,
+                               longitude: float,
+                               use_local_time: bool) -> pd.DatetimeIndex:
+    """
+    Convert the PVGIS returned index to the timestamp basis used for interpolation.
+
+    :param data_index: PVGIS returned data index.
+    :type data_index: pd.DatetimeIndex
+    :param longitude: Site longitude in degrees.
+    :type longitude: float
+    :param use_local_time: Interpret circuit timestamps as local solar time at the site.
+    :type use_local_time: bool
+    :return: Naive datetime index used for interpolation.
+    :rtype: pd.DatetimeIndex
+    """
+    if data_index.tz is None:
+        naive_index: pd.DatetimeIndex = data_index
+    else:
+        naive_index = data_index.tz_convert(None)
+
+    if use_local_time:
+        naive_index = naive_index + get_longitude_time_offset(longitude=longitude)
+    else:
+        pass
+
+    return naive_index
+
+
 def get_pv_lib_weather_df(time_array: Sequence[Union[str, datetime, pd.Timestamp]],
                           latitude: float,
                           longitude: float,
-                          peak_power: float) -> Tuple[bool, pd.DataFrame]:
+                          peak_power: float,
+                          use_local_time: bool = False) -> Tuple[bool, pd.DataFrame]:
     """
     Download and align PVGIS solar photovoltaic production for the requested time profile.
 
@@ -71,6 +106,7 @@ def get_pv_lib_weather_df(time_array: Sequence[Union[str, datetime, pd.Timestamp
     :param latitude: Site latitude in degrees.
     :param longitude: Site longitude in degrees.
     :param peak_power: Generator peak power in MW.
+    :param use_local_time: Interpret circuit timestamps as local solar time at the site.
     :return: Success flag and PVGIS data aligned to the requested time profile.
     """
     max_year_span: int = 10
@@ -112,36 +148,19 @@ def get_pv_lib_weather_df(time_array: Sequence[Union[str, datetime, pd.Timestamp
 
     if valid_latitude and valid_longitude and valid_peak_power and valid_time_span:
 
+        if use_local_time:
+            query_offset: timedelta = get_longitude_time_offset(longitude=longitude)
+        else:
+            query_offset = timedelta()
+
         base_year: int = 2010 + ((int(ts1.year) - 2010) % 4)
-        s: datetime = datetime(year=base_year,
-                               month=int(ts1.month),
-                               day=int(ts1.day),
-                               hour=int(ts1.hour),
-                               minute=int(ts1.minute),
-                               second=int(ts1.second),
-                               microsecond=int(ts1.microsecond))
-        e: datetime = datetime(year=base_year + year_span,
-                               month=int(ts2.month),
-                               day=int(ts2.day),
-                               hour=int(ts2.hour),
-                               minute=int(ts2.minute),
-                               second=int(ts2.second),
-                               microsecond=int(ts2.microsecond))
+        s: datetime = remap_timestamp_to_base_year(ts=ts1, base_year=base_year) - query_offset
+        e: datetime = remap_timestamp_to_base_year(ts=ts2,
+                                                   base_year=base_year,
+                                                   start_year=int(ts1.year)) - query_offset
 
-        mapped_timestamps: List[datetime] = list()
-
-        for ts in time_index:
-            target_year: int = base_year + int(ts.year - ts1.year)
-            mapped_timestamp: datetime = datetime(year=target_year,
-                                                  month=int(ts.month),
-                                                  day=int(ts.day),
-                                                  hour=int(ts.hour),
-                                                  minute=int(ts.minute),
-                                                  second=int(ts.second),
-                                                  microsecond=int(ts.microsecond))
-            mapped_timestamps.append(mapped_timestamp)
-
-        new_ts: np.ndarray = pd.to_datetime(mapped_timestamps).asi8
+        mapped_time_index: pd.DatetimeIndex = build_mapped_time_index(time_index=time_index, base_year=base_year)
+        new_ts: np.ndarray = mapped_time_index.asi8
 
         try:
 
@@ -163,11 +182,10 @@ def get_pv_lib_weather_df(time_array: Sequence[Union[str, datetime, pd.Timestamp
 
             if 'P' in data.columns:
                 data_index: pd.DatetimeIndex = pd.DatetimeIndex(data.index)
-
-                if data_index.tz is None:
-                    normalized_data_index: pd.DatetimeIndex = data_index
-                else:
-                    normalized_data_index = data_index.tz_convert(None)
+                normalized_data_index: pd.DatetimeIndex = get_naive_pvgis_time_index(
+                    data_index=data_index,
+                    longitude=longitude,
+                    use_local_time=use_local_time)
 
                 data.index = normalized_data_index.asi8
                 data.sort_index(inplace=True)
@@ -177,31 +195,46 @@ def get_pv_lib_weather_df(time_array: Sequence[Union[str, datetime, pd.Timestamp
                 data2: pd.DataFrame = interpolated_data.ffill().bfill().reindex(new_ts)
 
                 if bool(data2['P'].isna().any()):
-                    error_msg("PVGIS returned data, but it could not be interpolated to the circuit time profile")
+                    error_msg(QtCore.QCoreApplication.translate(
+                        "MainWindow",
+                        "PVGIS returned data, but it could not be interpolated to the circuit time profile",
+                    ))
                     return False, pd.DataFrame(data=dict(P=np.zeros(len(time_array))))
                 else:
                     pass
 
                 return True, data2
             else:
-                error_msg("PVGIS did not return photovoltaic power data")
+                error_msg(QtCore.QCoreApplication.translate("MainWindow", "PVGIS did not return photovoltaic power data"))
                 return False, pd.DataFrame(data=dict(P=np.zeros(len(time_array))))
 
         except (requests.RequestException, KeyError, ValueError, TypeError) as err:
-            error_msg("pvlib's http request failed :(\n" + str(err))
+            error_msg(QtCore.QCoreApplication.translate(
+                "MainWindow",
+                "pvlib's http request failed :(\n{error_text}",
+            ).format(error_text=str(err)))
             return False, pd.DataFrame(data=dict(P=np.zeros(len(time_array))))
 
     else:
         if valid_latitude:
             if valid_longitude:
                 if valid_peak_power:
-                    error_msg(f"The time span of your profile is {year_span} year(s), Pvlib's span is 10 years maximum")
+                    error_msg(QtCore.QCoreApplication.translate(
+                        "MainWindow",
+                        "The time span of your profile is {year_span} year(s), Pvlib's span is 10 years maximum",
+                    ).format(year_span=year_span))
                 else:
-                    error_msg("The photovoltaic peak power must be greater than zero")
+                    error_msg(QtCore.QCoreApplication.translate(
+                        "MainWindow",
+                        "The photovoltaic peak power must be greater than zero",
+                    ))
             else:
-                error_msg("The longitude must be between -180 and 180 degrees")
+                error_msg(QtCore.QCoreApplication.translate(
+                    "MainWindow",
+                    "The longitude must be between -180 and 180 degrees",
+                ))
         else:
-            error_msg("The latitude must be between -90 and 90 degrees")
+            error_msg(QtCore.QCoreApplication.translate("MainWindow", "The latitude must be between -90 and 90 degrees"))
 
         return False, pd.DataFrame(data=dict(P=np.zeros(len(time_array))))
 
@@ -241,12 +274,14 @@ class SolarPvWizard(QtWidgets.QDialog):
         self.ui.powerSpinBox.setValue(peak_power)
         self.ui.latitudeSpinBox.setValue(latitude)
         self.ui.longitudeSpinBox.setValue(longitude)
+        self.ui.localTimeCheckBox.setChecked(False)
 
         self.time_array = time_array
         self.P = np.zeros(len(time_array))
         self.temperature: Union[np.ndarray, None] = None
         self.wind_speed: Union[np.ndarray, None] = None
         self.irradiation: Union[np.ndarray, None] = None
+        self._open_plot_dialogs: List[QtWidgets.QDialog] = list()
 
         # accept button
         self.ui.acceptButton.clicked.connect(self.accept_click)
@@ -279,7 +314,8 @@ class SolarPvWizard(QtWidgets.QDialog):
         self.ok, self.df = get_pv_lib_weather_df(time_array=self.time_array,
                                                  latitude=self.ui.latitudeSpinBox.value(),
                                                  longitude=self.ui.longitudeSpinBox.value(),
-                                                 peak_power=self.ui.powerSpinBox.value())
+                                                 peak_power=self.ui.powerSpinBox.value(),
+                                                 use_local_time=self.ui.localTimeCheckBox.isChecked())
         if self.ok:
             self.P = self.df['P'].values / 1e6  # Power in MW
             self.temperature = get_weather_column(data=self.df, candidates=["T2m", "temp_air", "temperature"])
@@ -294,10 +330,30 @@ class SolarPvWizard(QtWidgets.QDialog):
             self.ui.resultsTableView.setModel(None)
 
     def plot(self) -> None:
+        """Show the generated photovoltaic profile in a retained native chart.
 
-        df: pd.DataFrame = pd.DataFrame(data=self.P, index=self.time_array, columns=['P (MW)'])
-        df.plot()
-        plt.show()
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        plot_dialogue: PlotDialogue = PlotDialogue(
+            title=self.tr('Solar power profile'),
+            parent=self,
+        )
+        accepted: bool = plot_dialogue.set_time_series(
+            time_values=np.asarray(self.time_array),
+            series_names=(self.tr('P (MW)'),),
+            series_values=(np.asarray(self.P, dtype=float),),
+            colors=('#f59e0b',),
+            title=self.tr('Solar power profile'),
+            y_axis_title=self.tr('Power (MW)'),
+        )
+        if accepted:
+            # Keep a Python owner until the wizard shuts down, avoiding an
+            # orphaned PySide wrapper while the modeless child is visible.
+            self._open_plot_dialogs.append(plot_dialogue)
+            plot_dialogue.show()
+        else:
+            plot_dialogue.reject()
 
     def accept_click(self) -> None:
         """
@@ -306,6 +362,26 @@ class SolarPvWizard(QtWidgets.QDialog):
 
         self.is_accepted = self.ok
         self.accept()
+
+    def done(self, result: int) -> None:
+        """
+        Close retained plot windows before completing the wizard.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.done(self, result)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Close retained plot windows before closing the wizard.
+
+        :param event: Qt close event.
+        :return: None.
+        """
+        delete_dialogs_safely(dialogs=self._open_plot_dialogs)
+        QtWidgets.QDialog.closeEvent(self, event)
 
 
 if __name__ == "__main__":

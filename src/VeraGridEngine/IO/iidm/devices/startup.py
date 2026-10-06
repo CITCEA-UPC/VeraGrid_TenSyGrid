@@ -6,6 +6,10 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class Startup(IidmObject):
+    __slots__ = (
+        "generatorId",
+        "startupTime",
+    )
     def __init__(self, generatorId: str, startupTime: float):
         super().__init__("Startup")
         self.generatorId = generatorId

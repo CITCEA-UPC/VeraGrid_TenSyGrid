@@ -13,6 +13,17 @@ class BaseProperty:
     BaseProperty
     """
 
+    __slots__ = (
+        "property_name",
+        "class_type",
+        "unit",
+        "denominator_unit",
+        "description",
+        "max_chars",
+        "min_value",
+        "max_value",
+    )
+
     def __init__(self, property_name: str,
                  class_type: TypeVar,
                  unit: Unit | None,

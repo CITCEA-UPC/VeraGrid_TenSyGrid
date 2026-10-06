@@ -12,6 +12,22 @@ from VeraGridEngine.IO.raw.psse_circuit import PsseCircuit
 
 
 class PSSeLookUpDb(BaseDb):
+    __slots__ = (
+        "areas",
+        "zones",
+        "buses",
+        "loads",
+        "generators",
+        "induction_machines",
+        "switched_shunts",
+        "fixed_shunts",
+        "branches",
+        "transformers",
+        "facts",
+        "two_terminal_dc_lines",
+        "vsc_dc_lines",
+        "__dataframes_index",
+    )
 
     def __init__(self, new_db=False):
         """

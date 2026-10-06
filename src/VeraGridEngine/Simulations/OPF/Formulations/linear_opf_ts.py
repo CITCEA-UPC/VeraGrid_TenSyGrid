@@ -94,6 +94,16 @@ class BusVars:
     Struct to store the bus related vars
     """
 
+    __slots__ = (
+        'Va',
+        'Vm',
+        'Pinj',
+        'Pgen',
+        'Pbalance',
+        'kirchhoff',
+        'shadow_prices',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BusVars structure
@@ -142,6 +152,10 @@ class NodalCapacityVars:
     Struct to store the nodal capacity related vars
     """
 
+    __slots__ = (
+        'P',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BusVars structure
@@ -173,6 +187,12 @@ class LoadVars:
     """
     Struct to store the load related vars
     """
+
+    __slots__ = (
+        'shedding',
+        'p',
+        'shedding_cost',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -212,6 +232,18 @@ class GenerationVars:
     """
     Struct to store the generation vars
     """
+
+    __slots__ = (
+        'p',
+        'dp',
+        'shedding',
+        'reserve',
+        'producing',
+        'starting_up',
+        'shutting_down',
+        'cost',
+        'invested',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -276,6 +308,10 @@ class BatteryVars(GenerationVars):
     struct extending the generation vars to handle the battery vars
     """
 
+    __slots__ = (
+        'e',
+    )
+
     def __init__(self, nt: int, n_elm: int):
         """
         BatteryVars structure
@@ -324,6 +360,21 @@ class BranchVars:
     """
     Struct to store the branch related vars
     """
+
+    __slots__ = (
+        'flows',
+        'z_flows',
+        'losses',
+        'flow_slacks_pos',
+        'flow_slacks_neg',
+        'tap_angles',
+        'flow_constraints_ub',
+        'flow_constraints_lb',
+        'overload_cost',
+        'rates',
+        'loading',
+        'contingency_flow_data',
+    )
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -407,6 +458,8 @@ class HvdcVars:
     Struct to store the generation vars
     """
 
+    __slots__ = ("flows", "rates", "loading")
+
     def __init__(self, nt: int, n_elm: int):
         """
         GenerationVars structure
@@ -444,6 +497,8 @@ class VscVars:
     Struct to store the generation vars
     """
 
+    __slots__ = ("flows", "rates", "loading")
+
     def __init__(self, nt: int, n_elm: int):
         """
         GenerationVars structure
@@ -455,13 +510,13 @@ class VscVars:
         self.rates = np.zeros((nt, n_elm), dtype=float)
         self.loading = np.zeros((nt, n_elm), dtype=float)
 
-    def get_values(self, Sbase: float, model: LpModel) -> "HvdcVars":
+    def get_values(self, Sbase: float, model: LpModel) -> "VscVars":
         """
         Return an instance of this class where the arrays content are not LP vars but their value
-        :return: HvdcVars
+        :return: VscVars
         """
         nt, n_elm = self.flows.shape
-        data = HvdcVars(nt=nt, n_elm=n_elm)
+        data = VscVars(nt=nt, n_elm=n_elm)
         data.rates = self.rates
 
         for t in range(nt):
@@ -481,6 +536,8 @@ class FluidNodeVars:
     Struct to store the vars of nodes of fluid type
     """
 
+    __slots__ = ("p2x_flow", "current_level", "spillage", "flow_in", "flow_out", "water_balance", "fluid_value")
+
     def __init__(self, nt: int, n_elm: int):
         """
         FluidNodeVars structure
@@ -498,6 +555,8 @@ class FluidNodeVars:
         self.spillage = np.zeros((nt, n_elm), dtype=object)  # m3/s
         self.flow_in = np.zeros((nt, n_elm), dtype=object)  # m3/s
         self.flow_out = np.zeros((nt, n_elm), dtype=object)  # m3/s
+        self.water_balance = np.zeros((nt, n_elm), dtype=object)
+        self.fluid_value = np.zeros((nt, n_elm), dtype=float)
 
     def get_values(self, model: LpModel) -> "FluidNodeVars":
         """
@@ -515,6 +574,19 @@ class FluidNodeVars:
                 data.spillage[t, i] = model.get_value(self.spillage[t, i])
                 data.flow_in[t, i] = model.get_value(self.flow_in[t, i])
                 data.flow_out[t, i] = model.get_value(self.flow_out[t, i])
+                water_balance: object = self.water_balance[t, i]
+                if isinstance(water_balance, (int, float)):
+                    data.fluid_value[t, i] = 0.0
+                else:
+                    water_balance_dual: float = model.get_dual_value(water_balance)
+                    # IMPORTANT FLUID VALUE SIGN CONVENTION:
+                    # The LP dual belongs to the equality written as
+                    # level[t] = previous_level + inflows - spillage - outflows.
+                    # That raw row dual has the opposite sign of the intuitive
+                    # marginal value of one extra stored m3 of fluid.  The public
+                    # result therefore reports -dual so positive values mean that
+                    # stored fluid reduces the OPF objective cost.
+                    data.fluid_value[t, i] = -water_balance_dual
 
         # format the arrays appropriately
         data.p2x_flow = data.p2x_flow.astype(float, copy=False)
@@ -522,6 +594,7 @@ class FluidNodeVars:
         data.spillage = data.spillage.astype(float, copy=False)
         data.flow_in = data.flow_in.astype(float, copy=False)
         data.flow_out = data.flow_out.astype(float, copy=False)
+        data.fluid_value = data.fluid_value.astype(float, copy=False)
 
         # from the data object itself
         # data.min_level = self.min_level
@@ -535,6 +608,8 @@ class FluidPathVars:
     """
     Struct to store the vars of paths of fluid type
     """
+
+    __slots__ = ("flow",)
 
     def __init__(self, nt: int, n_elm: int):
         """
@@ -576,6 +651,8 @@ class FluidInjectionVars:
     Struct to store the vars of injections of fluid type
     """
 
+    __slots__ = ("flow",)
+
     def __init__(self, nt: int, n_elm: int):
         """
         FluidInjectionVars structure
@@ -608,6 +685,14 @@ class SystemVars:
     """
     Struct to store the system vars
     """
+
+    __slots__ = (
+        "system_fuel",
+        "system_emissions",
+        "system_unit_energy_cost",
+        "system_total_energy_cost",
+        "power_by_technology",
+    )
 
     def __init__(self, nt: int):
         """
@@ -659,6 +744,34 @@ class OpfVars:
     """
     Structure to host the opf variables
     """
+
+    __slots__ = (
+        "nt",
+        "nbus",
+        "ng",
+        "nb",
+        "nl",
+        "nbr",
+        "n_hvdc",
+        "n_vsc",
+        "n_fluid_node",
+        "n_fluid_path",
+        "n_fluid_inj",
+        "n_cap_buses",
+        "acceptable_solution",
+        "bus_vars",
+        "nodal_capacity_vars",
+        "load_vars",
+        "gen_vars",
+        "batt_vars",
+        "branch_vars",
+        "hvdc_vars",
+        "vsc_vars",
+        "fluid_node_vars",
+        "fluid_path_vars",
+        "fluid_inject_vars",
+        "sys_vars",
+    )
 
     def __init__(self, nt: int, nbus: int, ng: int, nb: int, nl: int, nbr: int, n_hvdc: int, n_vsc: int,
                  n_fluid_node: int,
@@ -2831,26 +2944,26 @@ def add_hydro_formulation(t: Union[int, None],
                 dt = get_time_increment_seconds(time_array=time_array, idx=time_global_tidx)
 
                 # Initialize level at fluid_level_0
-                prob.add_cst(cst=(node_vars.current_level[t, m] ==
-                                  fluid_level_0[m]
-                                  + dt * node_data.inflow[m]
-                                  + dt * node_vars.flow_in[t, m]
-                                  + dt * node_vars.p2x_flow[t, m]
-                                  - dt * node_vars.spillage[t, m]
-                                  - dt * node_vars.flow_out[t, m]),
-                             name=join("nodal_balance_", [t, m], "_"))
+                node_vars.water_balance[t, m] = prob.add_cst(cst=(node_vars.current_level[t, m] ==
+                                                                   fluid_level_0[m]
+                                                                   + dt * node_data.inflow[m]
+                                                                   + dt * node_vars.flow_in[t, m]
+                                                                   + dt * node_vars.p2x_flow[t, m]
+                                                                   - dt * node_vars.spillage[t, m]
+                                                                   - dt * node_vars.flow_out[t, m]),
+                                                              name=join("nodal_balance_", [t, m], "_"))
             else:
                 # Update the level according to the in and out flows as time passes
                 dt = get_time_increment_seconds(time_array=time_array, idx=time_global_tidx)
 
-                prob.add_cst(cst=(node_vars.current_level[t, m] ==
-                                  node_vars.current_level[t - 1, m]
-                                  + dt * node_data.inflow[m]
-                                  + dt * node_vars.flow_in[t, m]
-                                  + dt * node_vars.p2x_flow[t, m]
-                                  - dt * node_vars.spillage[t, m]
-                                  - dt * node_vars.flow_out[t, m]),
-                             name=join("nodal_balance_", [t, m], "_"))
+                node_vars.water_balance[t, m] = prob.add_cst(cst=(node_vars.current_level[t, m] ==
+                                                                   node_vars.current_level[t - 1, m]
+                                                                   + dt * node_data.inflow[m]
+                                                                   + dt * node_vars.flow_in[t, m]
+                                                                   + dt * node_vars.p2x_flow[t, m]
+                                                                   - dt * node_vars.spillage[t, m]
+                                                                   - dt * node_vars.flow_out[t, m]),
+                                                              name=join("nodal_balance_", [t, m], "_"))
     return f_obj
 
 

@@ -9,6 +9,7 @@ from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QMenu
 from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor import TemplateDeviceEditor
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem
 from VeraGridEngine.Devices.Branches.upfc import UPFC
 from VeraGridEngine.enumerations import TapModuleControl
@@ -53,7 +54,7 @@ class UpfcGraphicItem(LineGraphicTemplateItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def contextMenuEvent(self, event):

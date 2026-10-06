@@ -91,6 +91,14 @@ class RawObject(metaclass=RawObjectMeta):
     CLASS_REGISTERED_PROPERTIES: Dict[str, PsseProperty] = dict()
     CLASS_PROPERTIES: Tuple[PsseProperty, ...] = tuple()
 
+    __slots__ = (
+        "class_name",
+        "version",
+        "idtag",
+        "__registered_properties",
+        "__properties",
+    )
+
     """
     PSSeObject
     """

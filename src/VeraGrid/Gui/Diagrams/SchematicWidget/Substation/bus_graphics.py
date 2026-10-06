@@ -15,6 +15,7 @@ from VeraGrid.Gui.DeviceEditors.TemplateDeviceEditor.template_device_editor impo
 from VeraGrid.Gui.Diagrams.SchematicWidget.Injections.injections_template_graphics import InjectionTemplateGraphicItem
 from VeraGrid.Gui.messages import yes_no_question, warning_msg
 from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_text
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.ShortCircuitEditor.short_circuit_selector import ShortCircuitSelector
 from VeraGrid.Gui.Diagrams.generic_graphics import (GenericDiagramWidget, ACTIVE, DEACTIVATED,
                                                     FONT_SCALE, TRANSPARENT, DraggableLabelItem)
@@ -979,7 +980,7 @@ class BusGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         if self.api_object is not None:
             self.editor.gui.new_bus_branch_diagram_from_bus(root_bus=self.api_object)
         else:
-            warning_msg("The api object is none :(")
+            warning_msg(self.tr("The api object is none :("))
 
     def enable_disable_toggle(self):
         """
@@ -1002,8 +1003,8 @@ class BusGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
             self.update_color()
 
             if self._editor.circuit.has_time_series:
-                ok = yes_no_question('Do you want to update the time series active status accordingly?',
-                                     'Update time series active status')
+                ok = yes_no_question(self.tr('Do you want to update the time series active status accordingly?'),
+                                     self.tr('Update time series active status'))
 
                 if ok:
                     # change the bus state (time series)
@@ -1019,7 +1020,7 @@ class BusGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         Enable 3-phase short circuit
         """
         selector = ShortCircuitSelector()
-        selector.exec()
+        exec_dialog_safely(dialog=selector)
 
         if selector.was_accepted:
             z_pu: complex = selector.get_impedance_pu(Sbase=self.editor.circuit.Sbase,
@@ -1087,7 +1088,7 @@ class BusGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
         :return: ``True`` when the editor was opened.
         """
         dialog = TemplateDeviceEditor(api_object=self.api_object, circuit=self.editor.circuit)
-        dialog.exec()
+        exec_dialog_safely(dialog=dialog)
         return True
 
     def edit(self) -> None:
@@ -1795,7 +1796,7 @@ class BusGraphicItem(GenericDiagramWidget, QtWidgets.QGraphicsRectItem):
             url = f"https://www.google.com/maps/?q={self._api_object.latitude},{self._api_object.longitude}"
             webbrowser.open(url)
         else:
-            warning_msg(f"No API object available :(")
+            warning_msg(self.tr("No API object available :("))
 
     def __str__(self):
 

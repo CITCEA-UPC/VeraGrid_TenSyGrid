@@ -7,24 +7,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import scipy.linalg as la
+from numba import njit
 from scipy import sparse
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_phasor import RmsProblemPhasor
 from VeraGridEngine.Utils.Symbolic.symbolic import Expr, Var, Const, BinOp, UnOp, get_expr_factors
 
-try:
-    from numba import njit
-except ImportError:  # pragma: no cover - optional acceleration
-    njit = None
-
-
 if njit is not None:
     @njit(cache=True)
     def _compute_monomial_rank_products_numba(
-        base_product: np.ndarray,
-        ratio_matrix: np.ndarray,
-        signs: np.ndarray,
-        active_indptr: np.ndarray,
-        active_indices: np.ndarray,
+            base_product: np.ndarray,
+            ratio_matrix: np.ndarray,
+            signs: np.ndarray,
+            active_indptr: np.ndarray,
+            active_indices: np.ndarray,
     ) -> np.ndarray:
         n_mon = signs.shape[0]
         rank = base_product.shape[0]
@@ -47,6 +42,7 @@ if njit is not None:
 
         return out
 
+
 @dataclass(slots=True)
 class SparseCoefficientTensor:
     """
@@ -63,6 +59,7 @@ class SparseCoefficientTensor:
     coords: np.ndarray
     values: np.ndarray
     shape: tuple[int, ...]
+
 
 @dataclass(slots=True)
 class CpnFitDiagnostics:
@@ -110,11 +107,22 @@ class MultilinearCpnApproximator:
         factors[0]     -> equation factor, shape (n_eq, rank)
         factors[i + 1] -> variable i factor, shape (2, rank)
     """
+    __slots__ = (
+        "S",
+        "Phi",
+        "n_vars",
+        "n_mon",
+        "n_eq",
+        "_Phi_csc",
+        "_S_csr",
+        "cp_tensor",
+        "diagnostics",
+    )
 
     def __init__(
-        self,
-        S: sparse.csc_matrix,
-        Phi: sparse.csr_matrix,
+            self,
+            S: sparse.csc_matrix,
+            Phi: sparse.csr_matrix,
     ) -> None:
         """
         Create the approximator from the exact sparse multilinear matrices.
@@ -152,8 +160,8 @@ class MultilinearCpnApproximator:
         self.diagnostics: CpnFitDiagnostics | None = None
 
     def exact_phi_from_s(
-        self,
-        x: np.ndarray,
+            self,
+            x: np.ndarray,
     ) -> np.ndarray:
         """
         Evaluate the exact monomial basis vector varphi(x) from S.
@@ -186,8 +194,8 @@ class MultilinearCpnApproximator:
         return varphi
 
     def exact_residual(
-        self,
-        x: np.ndarray,
+            self,
+            x: np.ndarray,
     ) -> np.ndarray:
         """
         Evaluate the exact residual f(x) = Phi @ varphi(x).
@@ -199,10 +207,10 @@ class MultilinearCpnApproximator:
         return np.asarray(residual, dtype=float).reshape(-1)
 
     def _safe_divide_rank_vector(
-        self,
-        numerator: np.ndarray,
-        denominator: np.ndarray,
-        zero_tol: float,
+            self,
+            numerator: np.ndarray,
+            denominator: np.ndarray,
+            zero_tol: float,
     ) -> np.ndarray:
         """
         Divide two rank vectors with protection against near-zero denominators.
@@ -216,10 +224,10 @@ class MultilinearCpnApproximator:
         return numerator / safe_denominator
 
     def _solve_als_factor_update(
-        self,
-        mttkrp: np.ndarray,
-        normal_matrix: np.ndarray,
-        ridge: float,
+            self,
+            mttkrp: np.ndarray,
+            normal_matrix: np.ndarray,
+            ridge: float,
     ) -> np.ndarray:
         """
         Solve one ALS normal-equation update.
@@ -234,8 +242,8 @@ class MultilinearCpnApproximator:
         ).T
 
     def _hadamard_gram_product(
-        self,
-        factors: list[np.ndarray],
+            self,
+            factors: list[np.ndarray],
     ) -> np.ndarray:
         """
         Compute Hadamard product of factor Gram matrices.
@@ -249,8 +257,8 @@ class MultilinearCpnApproximator:
         return result
 
     def _build_implicit_metadata(
-        self,
-        zero_tol: float,
+            self,
+            zero_tol: float,
     ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray]:
         """
         Build metadata required by implicit CP-ALS.
@@ -302,8 +310,8 @@ class MultilinearCpnApproximator:
         )
 
     def _flatten_active_variables_by_mon(
-        self,
-        active_variables_by_mon: np.ndarray,
+            self,
+            active_variables_by_mon: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         active_indptr = np.zeros(self.n_mon + 1, dtype=np.int64)
         total = 0
@@ -323,13 +331,13 @@ class MultilinearCpnApproximator:
         return active_indptr, active_indices
 
     def _compute_monomial_rank_products(
-        self,
-        variable_factors: list[np.ndarray],
-        signs: np.ndarray,
-        active_variables_by_mon: np.ndarray,
-        active_indptr: np.ndarray | None,
-        active_indices: np.ndarray | None,
-        zero_tol: float,
+            self,
+            variable_factors: list[np.ndarray],
+            signs: np.ndarray,
+            active_variables_by_mon: np.ndarray,
+            active_indptr: np.ndarray | None,
+            active_indices: np.ndarray | None,
+            zero_tol: float,
     ) -> np.ndarray:
         """
         Compute monomial rank products without constructing H.
@@ -375,10 +383,10 @@ class MultilinearCpnApproximator:
         return rank_products
 
     def _normalise_variable_factors_into_equation_factor(
-        self,
-        equation_factor: np.ndarray,
-        variable_factors: list[np.ndarray],
-        zero_tol: float,
+            self,
+            equation_factor: np.ndarray,
+            variable_factors: list[np.ndarray],
+            zero_tol: float,
     ) -> tuple[np.ndarray, list[np.ndarray]]:
         """
         Normalise variable-factor columns and absorb scale into equation factor.
@@ -403,10 +411,10 @@ class MultilinearCpnApproximator:
         return scaled_equation_factor, scaled_variable_factors
 
     def _finalise_as_cptensor(
-        self,
-        equation_factor: np.ndarray,
-        variable_factors: list[np.ndarray],
-        zero_tol: float,
+            self,
+            equation_factor: np.ndarray,
+            variable_factors: list[np.ndarray],
+            zero_tol: float,
     ) -> MultilinearCpTensor:
         """
         Convert raw factors into a normalized CP tensor representation.
@@ -429,14 +437,14 @@ class MultilinearCpnApproximator:
         return MultilinearCpTensor(weights=weights, factors=factors)
 
     def fit(
-        self,
-        rank: int,
-        max_iter: int = 30,
-        tol: float = 1e-7,
-        ridge: float = 1e-10,
-        random_state: int = 0,
-        zero_tol: float = 1e-12,
-        verbose: bool = True,
+            self,
+            rank: int,
+            max_iter: int = 30,
+            tol: float = 1e-7,
+            ridge: float = 1e-10,
+            random_state: int = 0,
+            zero_tol: float = 1e-12,
+            verbose: bool = True,
     ):
         """
         Fit an implicit CP/CPN approximation of H.
@@ -511,7 +519,7 @@ class MultilinearCpnApproximator:
                 )
 
                 weighted_products = (
-                    phi_transpose_times_equation * monomial_rank_products
+                        phi_transpose_times_equation * monomial_rank_products
                 )
 
                 total_weighted_product = np.sum(weighted_products, axis=0)
@@ -555,7 +563,6 @@ class MultilinearCpnApproximator:
                     ridge=ridge,
                 )
 
-
             equation_factor, variable_factors = (
                 self._normalise_variable_factors_into_equation_factor(
                     equation_factor=equation_factor,
@@ -571,15 +578,15 @@ class MultilinearCpnApproximator:
             variable_norm = 0.0
 
             for factor, previous_factor in zip(
-                variable_factors,
-                previous_variable_factors,
+                    variable_factors,
+                    previous_variable_factors,
             ):
                 variable_change += np.linalg.norm(factor - previous_factor)
                 variable_norm += np.linalg.norm(previous_factor)
 
             relative_change = (
-                equation_change + variable_change
-            ) / max(equation_norm + variable_norm, zero_tol)
+                                      equation_change + variable_change
+                              ) / max(equation_norm + variable_norm, zero_tol)
 
             relative_changes.append(float(relative_change))
 
@@ -611,9 +618,9 @@ class MultilinearCpnApproximator:
         return self.cp_tensor
 
     def evaluate_residual(
-        self,
-        x: np.ndarray,
-        cp_tensor: MultilinearCpTensor | None = None,
+            self,
+            x: np.ndarray,
+            cp_tensor: MultilinearCpTensor | None = None,
     ) -> np.ndarray:
         """
         Evaluate the approximate residual from a fitted CP tensor.
@@ -647,10 +654,10 @@ class MultilinearCpnApproximator:
         return np.asarray(residual, dtype=float).reshape(-1)
 
     def relative_residual_error(
-        self,
-        x: np.ndarray,
-        cp_tensor=None,
-        norm_floor: float = 1e-12,
+            self,
+            x: np.ndarray,
+            cp_tensor=None,
+            norm_floor: float = 1e-12,
     ) -> float:
         """
         Compare exact S/Phi residual against the CPN approximation.
@@ -661,7 +668,8 @@ class MultilinearCpnApproximator:
         return float(
             np.linalg.norm(exact - approx) / max(np.linalg.norm(exact), norm_floor)
         )
-    
+
+
 class RmsProblemMultilinear(RmsProblemPhasor):
     """
     Phasor RMS problem with multilinear-oriented utilities.
@@ -670,11 +678,36 @@ class RmsProblemMultilinear(RmsProblemPhasor):
     and adds lightweight operating-point extraction and small-signal helpers
     inspired by ``PolynomialMatrixBuilder`` but without SciPy dependencies.
     """
+    __slots__ = (
+        "Phi",
+        "S",
+        "_last_cp_tensor",
+        "_last_cpn_approximator",
+        "_ml_all_basis_vars",
+        "_ml_all_vars_sa",
+        "_ml_idx_vars",
+        "_ml_uid_to_basis_idx",
+        "_ml_uid_to_idx_full",
+    )
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.Phi: sparse.csr_matrix | None = None
+        self.S: sparse.csc_matrix | None = None
+        self._last_cp_tensor: MultilinearCpTensor | None = None
+        self._last_cpn_approximator: MultilinearCpnApproximator | None = None
+        self._ml_all_basis_vars: list[Var] | None = None
+        self._ml_all_vars_sa: list[Var] | None = None
+        self._ml_idx_vars: list[int] | None = None
+        self._ml_uid_to_basis_idx: dict[int, int] | None = None
+        self._ml_uid_to_idx_full: dict[int, int] | None = None
+        super().__init__(*args, **kwargs)
 
     def _ensure_multilinear_index_cache(self) -> None:
         """Build and cache multilinear index maps reused across methods."""
-        if hasattr(self, "_ml_uid_to_idx_full"):
+        if self._ml_all_vars_sa is not None:
             return
+        else:
+            pass
 
         all_vars_sa = list(self._state_vars) + list(self._algebraic_vars)
         all_basis_vars = all_vars_sa + list(self._diff_vars)
@@ -767,11 +800,11 @@ class RmsProblemMultilinear(RmsProblemPhasor):
         return S, Phi
 
     def _term_to_monomial(
-        self,
-        factors: list[Expr],
-        base_gain: float,
-        uid_to_idx: dict[int, int],
-        param_by_uid: dict[int, float],
+            self,
+            factors: list[Expr],
+            base_gain: float,
+            uid_to_idx: dict[int, int],
+            param_by_uid: dict[int, float],
     ) -> tuple[tuple[tuple[int, float], ...] | None, float]:
         """Map a symbolic product term to sparse monomial tuple and gain."""
         gain = float(base_gain)
@@ -822,12 +855,20 @@ class RmsProblemMultilinear(RmsProblemPhasor):
             a_expr = f_reduced.subs({s: Const(0)}).simplify()
             b_val = self._expr_to_float(b_expr)
             a_val = self._expr_to_float(a_expr)
-            scale = abs(a_val) + abs(b_val)
-            if scale == 0.0:
-                scale = 1.0
+            # S encodes one affine factor as
+            #     gain_factor * (s*x + 1 - |s|).
+            # Choose the branch from the signs of the intercept and slope so
+            # this equals a_val + b_val*x exactly.  The previous absolute-sum
+            # scaling changed (x-c) into (x+c), corrupting shifted factors.
+            if a_val * b_val >= 0.0:
+                gain_factor = a_val + b_val
+            else:
+                gain_factor = a_val - b_val
+            if abs(gain_factor) <= 1e-15:
+                return None, gain
 
-            sparse_weights[idx] = b_val / scale
-            gain *= scale
+            sparse_weights[idx] = b_val / gain_factor
+            gain *= gain_factor
 
         monom_tuple = tuple(sorted(sparse_weights.items()))
         return monom_tuple, gain
@@ -890,10 +931,10 @@ class RmsProblemMultilinear(RmsProblemPhasor):
                 raise ValueError("Encountered undefined negated Const while building multilinear matrices")
             return float(-simp.operand.value)
         raise ValueError(f"Expected constant scalar expression, got: {simp}")
-    
+
     def build_sparse_h_from_s_phi(
-        self,
-        zero_tol: float = 1e-12,
+            self,
+            zero_tol: float = 1e-12,
     ) -> SparseCoefficientTensor:
         """
         Build the exact sparse coordinate representation of the coefficient tensor H.
@@ -992,16 +1033,15 @@ class RmsProblemMultilinear(RmsProblemPhasor):
             shape=tuple([n_eq] + [2 for _ in range(n_vars)]),
         )
 
-
     def fit_cptensor_from_s_phi(
-        self,
-        rank: int,
-        max_iter: int = 30,
-        tol: float = 1e-7,
-        ridge: float = 1e-10,
-        random_state: int = 0,
-        zero_tol: float = 1e-12,
-        verbose: bool = True,
+            self,
+            rank: int,
+            max_iter: int = 30,
+            tol: float = 1e-7,
+            ridge: float = 1e-10,
+            random_state: int = 0,
+            zero_tol: float = 1e-12,
+            verbose: bool = True,
     ):
         """
         Fit a CP/CPN approximation of the multilinear coefficient tensor H.
@@ -1039,9 +1079,9 @@ class RmsProblemMultilinear(RmsProblemPhasor):
         return cp_tensor
 
     def evaluate_residual_from_cptensor(
-        self,
-        x: np.ndarray,
-        cp_tensor: MultilinearCpTensor,
+            self,
+            x: np.ndarray,
+            cp_tensor: MultilinearCpTensor,
     ) -> np.ndarray:
         """
         Evaluate the approximate residual from a CP tensor.
@@ -1089,10 +1129,9 @@ class RmsProblemMultilinear(RmsProblemPhasor):
 
         return np.asarray(residual, dtype=float).reshape(-1)
 
-
     def exact_phi_from_s(
-        self,
-        x: np.ndarray,
+            self,
+            x: np.ndarray,
     ) -> np.ndarray:
         """
         Evaluate the exact monomial basis vector varphi(x) from S.
@@ -1152,11 +1191,10 @@ class RmsProblemMultilinear(RmsProblemPhasor):
 
         return varphi
 
-
     def exact_residual_from_s_phi(
-        self,
-        x: np.ndarray,
-        ) -> np.ndarray:
+            self,
+            x: np.ndarray,
+    ) -> np.ndarray:
         """
         Evaluate the exact residual f(x) = Phi @ varphi(x).
 
@@ -1166,11 +1204,11 @@ class RmsProblemMultilinear(RmsProblemPhasor):
         varphi = self.exact_phi_from_s(x=x)
         residual = self.Phi @ varphi
         return np.asarray(residual, dtype=float).reshape(-1)
-    
+
     def linearize_multilinear(
-        self,
-        x: np.ndarray | None = None,
-        sparse_output: bool = False,
+            self,
+            x: np.ndarray | None = None,
+            sparse_output: bool = False,
     ) -> tuple[np.ndarray | sparse.csc_matrix, np.ndarray | sparse.csc_matrix, np.ndarray | sparse.csc_matrix]:
         """
         Linearize using multilinear matrices S/Phi and return (E, A, EABC).
@@ -1267,7 +1305,6 @@ class RmsProblemMultilinear(RmsProblemPhasor):
         _, A, _ = self.linearize_multilinear(x=np.asarray(x, dtype=float))
         return A
 
-    
     @staticmethod
     def _compute_jacobian_sparse_from_S(S: sparse.csc_matrix, v: np.ndarray) -> sparse.csc_matrix:
         """Sparse multilinear Jacobian equivalent to PolynomialMatrixBuilder logic."""

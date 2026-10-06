@@ -8,7 +8,6 @@ import numpy as np
 import networkx as nx
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from VeraGrid.ThirdParty.adjustText import adjust_text
 from VeraGrid.Gui.Diagrams.MapWidget.Substation.substation_graphic_item import SubstationGraphicItem
 from VeraGrid.Gui.Diagrams.MapWidget.grid_map_widget import GridMapWidget
 from VeraGridEngine.Utils.GeographicalMethods.haversine_distance import haversine_distance
@@ -21,6 +20,7 @@ from VeraGridEngine.Topology.Procedural.procedural_grid_engine import Procedural
 from VeraGridEngine.basic_structures import Logger
 from VeraGrid.Gui.Diagrams.SchematicWidget.schematic_widget import make_diagram_from_buses, SchematicWidget
 from VeraGrid.Gui.ProceduralGrid.voltage_warning import VoltageWarningDialog
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.general_dialogues import LogsDialogue, CheckListDialogue
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Procedural grid expansion')
+        self.setWindowTitle(self.tr('Procedural grid expansion'))
         self.app = app
 
         # Setup combobox
@@ -94,6 +94,16 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         # Initialise the enable/disable state of the inputs and buttons so it matches the
         # method currently shown in the combo box at construction time.
         self._on_method_changed()
+
+    def done(self, result: int) -> None:
+        """
+        Release plot resources before the modal dialog closes.
+
+        :param result: Qt dialog result code.
+        :return: None.
+        """
+        self.ui.plotWidget.dispose()
+        QtWidgets.QDialog.done(self, result)
 
     def _invalidate_preview(self) -> None:
         """
@@ -176,7 +186,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         if distances.shape[0] > 0:
 
             distances2 = np.min(distances, axis=1)
-            sorted_indices = np.argsort(distances2, axis=0)
+            sorted_indices = np.argsort(distances2, axis=0, kind="stable")
 
             self.candidate_list.clear()
             for i in sorted_indices:
@@ -233,7 +243,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         if offenders:
             dlg = VoltageWarningDialog(offenders=offenders, valid_voltages=valid_voltages, parent=self)
             dlg.setModal(True)
-            dlg.exec()
+            exec_dialog_safely(dialog=dlg)
             # Voltage mismatch: do not enable Accept; user must fix inputs first
             self._invalidate_preview()
             return None
@@ -339,7 +349,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
     def _draw_graph(self, engine: ProceduralGridComputationEngine) -> None:
         """
         Build a NetworkX graph from the engine result and render it on the
-        embedded MatplotlibWidget. Existing buses (targets and candidates) are
+        Qt Graphs view. Existing buses (targets and candidates) are
         drawn in light blue; newly created buses are drawn in light green.
 
         :param engine: The engine whose buses and lines are used to build the graph.
@@ -376,27 +386,42 @@ class ProceduralGridWindow(QtWidgets.QDialog):
         for transformer in new_transformers:
             G.add_edge(transformer.bus_from.name, transformer.bus_to.name)
 
-        # Clear the matplotlib canvas before redrawing so successive Preview clicks
-        # do not stack graphs on top of each other
-        self.ui.plotWidget.clear()
-        ax = self.ui.plotWidget.get_axis()
+        # Preserve renderer-owned series when the preview topology keeps its series count.
+        series_data: List[tuple[np.ndarray, np.ndarray, str | None]] = list()
+        edge: tuple[str, str]
+        for edge in G.edges:
+            edge_x: np.ndarray = np.asarray([pos[edge[0]][0], pos[edge[1]][0]], dtype=float)
+            edge_y: np.ndarray = np.asarray([pos[edge[0]][1], pos[edge[1]][1]], dtype=float)
+            series_data.append((edge_x, edge_y, "#8b9dad"))
 
-        # Draw existing buses in blue and new buses in green so the user can
-        # clearly distinguish what is being added to the grid
-        nx.draw_networkx_nodes(G, pos=pos, nodelist=existing_node_names,
-                               ax=ax, node_color='lightblue', node_size=300)
-        nx.draw_networkx_nodes(G, pos=pos, nodelist=new_node_names,
-                               ax=ax, node_color='lightgreen', node_size=300)
-        nx.draw_networkx_edges(G, pos=pos, ax=ax)
-
-        # Place labels as Text objects first, then let adjustText reposition
-        # them so that overlapping labels (including co-located nodes) are
-        # spread apart automatically
-        texts: List = list()
-        for node, (x, y) in pos.items():
-            texts.append(ax.text(x, y, node, fontsize=7))
-
-        adjust_text(texts, ax=ax)
+        existing_x: np.ndarray = np.asarray([pos[node][0] for node in existing_node_names], dtype=float)
+        existing_y: np.ndarray = np.asarray([pos[node][1] for node in existing_node_names], dtype=float)
+        new_x: np.ndarray = np.asarray([pos[node][0] for node in new_node_names], dtype=float)
+        new_y: np.ndarray = np.asarray([pos[node][1] for node in new_node_names], dtype=float)
+        series_data.append((existing_x, existing_y, "#8ac6e8"))
+        series_data.append((new_x, new_y, "#69c681"))
+        updated: bool = self.ui.plotWidget.replace_xy_series_data(series_data=series_data)
+        if not updated:
+            self.ui.plotWidget.clear()
+            edge_index: int
+            for edge_index in range(len(G.edges)):
+                edge_data: tuple[np.ndarray, np.ndarray, str | None] = series_data[edge_index]
+                self.ui.plotWidget.add_line_series(name="",
+                                                   x_values=edge_data[0],
+                                                   y_values=edge_data[1],
+                                                   color=edge_data[2])
+            self.ui.plotWidget.add_scatter_series(name=self.tr("Existing buses"),
+                                                  x_values=existing_x,
+                                                  y_values=existing_y,
+                                                  color="#8ac6e8")
+            self.ui.plotWidget.add_scatter_series(name=self.tr("New buses"),
+                                                  x_values=new_x,
+                                                  y_values=new_y,
+                                                  color="#69c681")
+        else:
+            pass
+        self.ui.plotWidget.setTitle(self.tr("Procedural grid preview"))
+        self.ui.plotWidget.set_axis_titles(self.tr("Longitude"), self.tr("Latitude"))
 
         self.ui.plotWidget.redraw()
 
@@ -472,8 +497,8 @@ class ProceduralGridWindow(QtWidgets.QDialog):
 
         # Show logger if there are any entries
         if logger.has_logs():
-            logs_dlg = LogsDialogue('Procedural grid expansion log', logger)
-            logs_dlg.exec()
+            logs_dlg = LogsDialogue(self.tr('Procedural grid expansion log'), logger, parent=self)
+            exec_dialog_safely(dialog=logs_dlg)
         else:
             pass
 
@@ -489,7 +514,7 @@ class ProceduralGridWindow(QtWidgets.QDialog):
                                                        group_label="Investment name",
                                                        group_text=group_name)
         inv_dlg.setModal(True)
-        inv_dlg.exec()
+        exec_dialog_safely(dialog=inv_dlg)
 
         if inv_dlg.is_accepted:
             group: dev.InvestmentsGroup = dev.InvestmentsGroup(

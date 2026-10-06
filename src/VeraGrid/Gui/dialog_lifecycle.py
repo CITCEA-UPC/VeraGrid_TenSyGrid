@@ -1,0 +1,93 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+from __future__ import annotations
+
+import shiboken6
+from PySide6 import QtWidgets
+
+
+def is_dialog_available(dialog: QtWidgets.QWidget | None) -> bool:
+    """
+    Return whether a stored Qt widget pointer still wraps a live C++ widget.
+
+    :param dialog: Stored Qt widget pointer.
+    :return: ``True`` when the pointer can be reused.
+    """
+    if dialog is None:
+        result: bool = False
+    else:
+        result = shiboken6.isValid(dialog)
+
+    return result
+
+
+def delete_dialog_safely(dialog: object) -> None:
+    """
+    Schedule one Qt widget for deferred deletion if it is still valid.
+
+    :param dialog: Qt widget to delete.
+    :return: None.
+    """
+    if isinstance(dialog, QtWidgets.QWidget) and shiboken6.isValid(dialog):
+        delete_child_widgets_safely(widget=dialog)
+        try:
+            dialog.deleteLater()
+        except Exception:
+            pass
+
+
+def delete_child_widgets_safely(widget: QtWidgets.QWidget) -> None:
+    """
+    Schedule floating or window children for closure before parent deletion.
+    Embedded child widgets are safely destroyed by Qt's C++ parent ownership.
+
+    :param widget: Parent widget whose owned children must be released.
+    :return: None.
+    """
+    if isinstance(widget, QtWidgets.QWidget) and shiboken6.isValid(widget):
+        children: list[QtWidgets.QWidget] = widget.findChildren(QtWidgets.QWidget)
+        child: QtWidgets.QWidget
+        for child in children:
+            if shiboken6.isValid(child) and child.isWindow():
+                try:
+                    child.close()
+                except Exception:
+                    pass
+
+
+def delete_dialogs_safely(dialogs: list[QtWidgets.QDialog]) -> None:
+    """
+    Schedule all retained dialogs for deferred deletion and release the list.
+
+    :param dialogs: Owner list containing dialogs to close.
+    :return: None.
+    """
+    retained_dialogs: list[QtWidgets.QDialog] = list(dialogs)
+    for dialog in retained_dialogs:
+        delete_dialog_safely(dialog=dialog)
+    dialogs.clear()
+
+
+def exec_dialog_safely(dialog: QtWidgets.QDialog) -> int:
+    """
+    Execute one modal dialog and always schedule it for deletion afterwards.
+
+    :param dialog: Modal dialog to execute.
+    :return: Qt dialog result code.
+    """
+    try:
+        result: int = int(dialog.exec())
+    finally:
+        # Keep the wrapper valid until the caller has consumed fields populated
+        # by the dialog. Qt will perform the deferred deletion on the GUI loop.
+        if isinstance(dialog, QtWidgets.QWidget) and shiboken6.isValid(dialog):
+            delete_child_widgets_safely(widget=dialog)
+            try:
+                dialog.deleteLater()
+            except Exception:
+                pass
+
+    return result

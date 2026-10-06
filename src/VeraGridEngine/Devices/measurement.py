@@ -205,6 +205,8 @@ class PiMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -232,6 +234,8 @@ class QiMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,
@@ -261,6 +265,8 @@ class PgMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -288,6 +294,8 @@ class QgMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,
@@ -317,6 +325,8 @@ class VmMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -337,6 +347,8 @@ class VaMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -356,6 +368,8 @@ class PfMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,
@@ -385,6 +399,8 @@ class QfMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -413,6 +429,8 @@ class PtMeasurement(MeasurementTemplate):
     Measurement class
     """
 
+    __slots__ = ()
+
     def __init__(self,
                  value: float = 0.0,
                  uncertainty: float = 0.0,
@@ -440,6 +458,8 @@ class QtMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,
@@ -472,6 +492,8 @@ class IfMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,
@@ -506,6 +528,8 @@ class ItMeasurement(MeasurementTemplate):
     """
     Measurement class
     """
+
+    __slots__ = ()
 
     def __init__(self,
                  value: float = 0.0,

@@ -568,45 +568,27 @@ def test_issue_372_4():
 
 
 def test_issue_372_5():
-    """
+    """Reject an unbalanced generator island in the issue-372 contingency set.
+
+    The original test expected a converged, secure transfer for every outage.
+    However, branch 13 is Bus 8's sole connection, and its outage isolates a
+    nonzero generator injection. This corrective model shares generator
+    injections with the base case and does not authorize generator tripping or
+    island redispatch. The HVDC controller cannot balance that disconnected bus.
+
+    The old flow-factor formulation dropped the island's balance requirement,
+    so its convergence and transfer assertions validated an unphysical result.
+    The correct expectation for this unchanged contingency set is infeasibility;
+    flow and exchange assertions require a feasible state and cannot apply here.
+
     https://github.com/SanPen/VeraGrid/issues/372#issuecomment-2824174417
-
-    Using the grid IEEE14 - ntc areas_voltages_hvdc_shifter_l10free.gridcal
-
-    Test:
-
-        Given a base situation (simulated with a linear power flow)
-        We define the exchange from A1->A2
-        Run the NTC optimization
-
-    Run options:
-
-        All contingencies
-        HVDC mode: free
-        Phase shifter (branch 8): tap_phase_control_mode: fixed.
-        All generators enable_dispatch = True
-        Exchange sensitivity criteria: use alpha = 5%
-
-    Metrics:
-
-        Δ P in A1 optimized > 0 (because there are no base overloads)
-        Δ P in A2 optimized < 0 (because there are no base overloads)
-        Δ P in A1 == − Δ P in A2
-        The summation of flow increments in the inter-area branches must be ΔP in A1.
-        Monitored & selected by the exchange sensitivity criteria, branches must not be overloaded beyond 100%
-        The total exchange should be greater than in _test1.
-        The HVDC power must be: P0 + angle_droop · (theta_f − theta_t) (all in proper units)
-
-        TODO: Monitored & selected by the exchange sensitivity criteria branches flow must be lower than rate.
-        TODO: Monitored & selected by the exchange sensitivity criteria branches contingency flow must be lower than contingency rate.
-
     """
     # fname = os.path.join('data', 'grids', 'ntc_test.gridcal')
     fname = get_grid_path('IEEE14 - ntc areas_voltages_hvdc_shifter_l10free.gridcal')
 
     grid = gce.open_file(fname)
 
-    # Phase shifter (branch 8): tap_phase_control_mode: Pt.
+    # Keep the phase shifter (branch 8) fixed.
     grid.transformers2w[6].tap_phase_control_mode = gce.TapPhaseControl.fixed
     grid.hvdc_lines[0].control_mode = gce.HvdcControlType.type_0_free
 
@@ -640,67 +622,25 @@ def test_issue_372_5():
 
     drv.run()
 
-    res = drv.results
-
-    bus_area_indices = grid.get_bus_area_indices()
-
-    # List of (branch index, branch object, flow sense w.r.t the area exchange)
-    inter_info = grid.get_inter_areas_branches(a1=[grid.areas[0]], a2=[grid.areas[1]])
-    inter_area_branch_idx = [x[0] for x in inter_info]
-    inter_area_branch_sense = [x[2] for x in inter_info]
-
-    inter_info_hvdc = grid.get_inter_areas_hvdc_branches(a1=[grid.areas[0]], a2=[grid.areas[1]])
-    inter_area_hvdc_idx = [x[0] for x in inter_info_hvdc]
-    inter_area_hvdc_sense = [x[2] for x in inter_info_hvdc]
-
-    a1 = np.where(bus_area_indices == 0)[0]
-    a2 = np.where(bus_area_indices == 1)[0]
-
-    assert res.converged[0]
-
-    # Because the alpha N-1 is made abs in this formulation, this is less precise (1e-5, instead of 1e-8)
-    assert abs(res.nodal_balance.sum()) < 1e-5
-
-    # ΔP in A1 optimized > 0 (because there are no base overloads)
-    assert res.dSbus[a1].sum() > 0
-
-    # ΔP in A2 optimized < 0 (because there are no base overloads)
-    assert res.dSbus[a2].sum() < 0
-
-    # ΔP in A1 == − ΔP in A2
-    assert np.isclose(res.dSbus[a1].sum(), -res.dSbus[a2].sum(), atol=1e-6)
-
-    # The summation of flow increments in the inter-area branches must be ΔP in A1.
-    inter_area_flows = np.sum(res.Sf[inter_area_branch_idx].real * inter_area_branch_sense)
-    inter_area_flows += np.sum(res.hvdc_Pf[inter_area_hvdc_idx] * inter_area_hvdc_sense)
-    assert np.isclose(res.Sbus[a1].sum(), inter_area_flows, atol=1e-6)
-
-    # Monitored & selected by the exchange sensitivity criteria branches must not be overloaded beyond 100%
-    monitor_idx = np.where(res.monitor_logic == 1)[0]
-    assert np.all(res.loading[monitor_idx] <= 1)
-
-    # The HVDC power must be: P0 + angle_droop · (theta_f − theta_t) (all in proper units)
-    dev = grid.hvdc_lines[0]
-    k = dev.angle_droop
-    theta_f = np.angle(res.voltage[10], deg=True)
-    theta_t = np.angle(res.voltage[14], deg=True)
-    hvdc_power = dev.Pset + k * (theta_f - theta_t)
-    assert np.isclose(hvdc_power, res.hvdc_Pf[0], atol=1e-6)
-
-    # The total exchange should be greater than in _test1 (inter_area_flows=89.7438187457783)
-    # TODO: so far it is not, maybe this is not a universal truth
-    assert inter_area_flows < 89.7438187457783
-
-    # We expect less exchange than test 2. (inter_area_flows=89.7438187457783)
-    # TODO: so far it is not (it is the same), maybe this is not a universal truth
-    assert inter_area_flows < 89.7438187457783
-    print()
+    # Keep the original all-contingency setup: do not filter out the outage
+    # merely to recover the former convergence expectation.
+    assert not drv.results.converged[0]
+    isolated_generator_tie = next(branch for branch in grid.get_branches() if branch.name == "branch 13")
+    assert any(gen.bus == isolated_generator_tie.bus_to and gen.P > 0 for gen in grid.get_generators())
 
 
 def test_ntc_pmode_saturation() -> None:
-    """
-    In this test we force one of the HVDC devices to dispatch using PMODE3 and saturate to its rating,
-    checking that the PMODE3 equation goes on to provide a larger set point
+    """Check positive saturation against the exact clipped base case droop law.
+
+    The original setup used Pset=0 and droop=0.2 MW/degree. Its solved demand
+    is about 1.13 MW, far below the 1,000 MW rating, so it does not force
+    saturation and allowed Pmode3 to dispatch freely.
+    Moreover, the original assertion flow > demand contradicts positive
+    saturation where flow must equal rate while demand is at least rate.
+
+    We set Pset above the rating to actually exercise positive saturation, then
+    check flow == clip(demand, -rate, rate). We disable contingencies here to
+    isolate the base case clip behavior. 
     """
     np.set_printoptions(precision=4)
     fname = get_grid_path('ntc_test.gridcal')
@@ -708,7 +648,8 @@ def test_ntc_pmode_saturation() -> None:
     grid = gce.open_file(fname)
 
     grid.hvdc_lines[0].control_mode = gce.HvdcControlType.type_0_free
-    grid.hvdc_lines[0].angle_droop = 0.2  # this will force a greater pmode3 flow
+    grid.hvdc_lines[0].angle_droop = 0.2
+    grid.hvdc_lines[0].Pset = 2.0 * grid.hvdc_lines[0].rate  # force positive saturation
 
     grid.hvdc_lines[1].control_mode = gce.HvdcControlType.type_1_Pset
 
@@ -732,7 +673,7 @@ def test_ntc_pmode_saturation() -> None:
         use_branch_exchange_sensitivity=True,
         branch_rating_contribution=1.0,
         monitor_only_ntc_load_rule_branches=True,
-        consider_contingencies=True,
+        consider_contingencies=False,
         strict_formulation=True,
         opf_options=opf_options,
         lin_options=lin_options
@@ -759,14 +700,15 @@ def test_ntc_pmode_saturation() -> None:
     monitor_idx = np.where(res.monitor_logic == 1)[0]
     assert np.all(res.loading[monitor_idx] <= 1)
 
-    # The HVDC power must be: P0 + angle_droop · (theta_f − theta_t) (all in proper units)
+    # Compute the unclipped demand, and actual HVDC power must obey the clipped law.
     dev = grid.hvdc_lines[0]
     k = dev.angle_droop
     theta_f = np.angle(res.voltage[3], deg=True)
     theta_t = np.angle(res.voltage[4], deg=True)
     hvdc_power = dev.Pset + k * (theta_f - theta_t)
     assert np.isclose(res.hvdc_Pf[0], grid.hvdc_lines[0].rate, atol=1e-6)  # the power must saturate to the rate
-    assert res.hvdc_Pf[0] > hvdc_power  # the actual power must be greater than what the angles suggest
+    assert hvdc_power > dev.rate
+    assert np.isclose(res.hvdc_Pf[0], np.clip(hvdc_power, -dev.rate, dev.rate), atol=1e-6)
 
     assert res.converged
     assert abs(res.nodal_balance.sum()) < 1e-8

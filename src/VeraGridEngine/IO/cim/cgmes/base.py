@@ -133,7 +133,10 @@ class Base:
         if "CLASS_REGISTERED_PROPERTIES" not in cls.__dict__:
             declared_props: Dict[str, CgmesProperty] = dict()
             for base_cls in reversed(cls.__mro__):
-                local_props: Tuple[CgmesProperty, ...] | None = getattr(base_cls, "LOCAL_CGMES_PROPERTIES", None)
+                local_props: Tuple[CgmesProperty, ...] | None = base_cls.__dict__.get(
+                    "LOCAL_CGMES_PROPERTIES",
+                    None,
+                )
                 if isinstance(local_props, tuple):
                     for prop in local_props:
                         declared_props[prop.property_name] = prop

@@ -9,6 +9,7 @@ from VeraGridEngine.Devices.Aggregation.area import GenericAreaGroup
 
 
 class Country(GenericAreaGroup):
+    __slots__ = ()
 
     def __init__(self, name='Country', idtag: Union[str, None] = None, code='', latitude=0.0, longitude=0.0):
         """

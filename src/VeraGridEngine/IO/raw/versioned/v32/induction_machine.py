@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v31.induction_machine import RawInductionMa
 
 class RawInductionMachineV32(RawInductionMachineV31):
     """PSSE v32 typed object inheriting v31."""
+    __slots__ = ()
     pass

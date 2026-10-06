@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v34.bus import RawBusV34
 
 class RawBusV35(RawBusV34):
     """PSSE v35 typed object inheriting v34."""
+    __slots__ = ()
     pass

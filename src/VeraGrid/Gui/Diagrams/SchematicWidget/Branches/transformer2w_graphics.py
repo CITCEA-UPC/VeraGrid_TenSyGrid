@@ -10,6 +10,7 @@ from VeraGrid.Gui.gui_functions import add_menu_entry, translate_context_menu_te
 from VeraGrid.Gui.Diagrams.SchematicWidget.Branches.line_graphics_template import LineGraphicTemplateItem
 from VeraGrid.Gui.Diagrams.SchematicWidget.terminal_item import BarTerminalItem, RoundTerminalItem
 from VeraGrid.Gui.messages import yes_no_question
+from VeraGrid.Gui.dialog_lifecycle import exec_dialog_safely
 from VeraGrid.Gui.DeviceEditors.TransformerEditor.transformer_editor import TransformerEditor
 from VeraGrid.Gui.DeviceEditors.TransformerEditor.transformer_device_editor import TransformerDeviceEditorDialog
 from VeraGridEngine.Devices.Branches.transformer import Transformer2W, TransformerType
@@ -58,7 +59,7 @@ class TransformerGraphicItem(LineGraphicTemplateItem):
         :return: ``True`` when the editor was opened.
         """
         dlg = TransformerDeviceEditorDialog(api_object=self.api_object, circuit=self.editor.circuit)
-        if dlg.exec():
+        if exec_dialog_safely(dialog=dlg):
             return True
         else:
             return True
@@ -230,13 +231,13 @@ class TransformerGraphicItem(LineGraphicTemplateItem):
             else:
                 # raise dialogue to set the template
                 dlg = TransformerEditor(self.api_object, grid=self.editor.circuit, modify_on_accept=False)
-                if dlg.exec():
+                if exec_dialog_safely(dialog=dlg):
                     tpe = dlg.get_template()
                     self.editor.circuit.add_transformer_type(tpe)
         else:
             # raise dialogue to set the template
             dlg = TransformerEditor(self.api_object, grid=self.editor.circuit, modify_on_accept=False)
-            if dlg.exec():
+            if exec_dialog_safely(dialog=dlg):
                 tpe = dlg.get_template()
                 self.editor.circuit.add_transformer_type(tpe)
 
@@ -246,8 +247,8 @@ class TransformerGraphicItem(LineGraphicTemplateItem):
         :return:
         """
 
-        ok = yes_no_question(text="A template will be generated using this transformer values",
-                             title="Add transformer type")
+        ok = yes_no_question(text=self.tr("A template will be generated using this transformer values"),
+                             title=self.tr("Add transformer type"))
 
         if ok:
             tpe = self.api_object.get_transformer_type(Sbase=self.editor.circuit.Sbase)

@@ -7,8 +7,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntEnum
 
-from .compat import BinOp, CmpOp, Comparison, Const, Expr, Func, Func2, UnOp, Var
-from .variable_map import CVariableResolver
+from VeraGridEngine.IO.fmu.exporter.compat import BinOp, CmpOp, Comparison, Const, Expr, Func, Func2, UnOp, Var
+from VeraGridEngine.IO.fmu.exporter.variable_map import CVariableResolver
 
 
 class UnsupportedExpressionError(ValueError):
@@ -50,6 +50,8 @@ def _number_literal(value: float | int | bool | None) -> str:
 
 
 class ExprToCVisitor:
+    __slots__ = ("resolver",)
+
     def __init__(self, resolver: CVariableResolver):
         self.resolver = resolver
 

@@ -27,6 +27,10 @@ class IidmParser:
     """
     Xiidm file parser
     """
+    __slots__ = (
+        "logger",
+        "ps_grid",
+    )
 
     def __init__(self, fname: str, logger: Logger | None = None):
         """

@@ -3,9 +3,84 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from pathlib import Path
+from typing import Any
+
 import VeraGridEngine.api as gce
 from VeraGridEngine import WindingType, ShuntConnectionType
+from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
+from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
+from VeraGridEngine.Simulations.PowerFlow3ph.Formulations.pf_basic_formulation_3ph import expandVoltage3ph
 import numpy as np
+import pytest
+
+
+def test_expand_voltage_3ph_initializes_neutrals_uniformly():
+    voltage = np.array([1.0, 0.95 * np.exp(0.1j)])
+    expanded = expandVoltage3ph(voltage)
+
+    assert np.allclose(expanded[0::4], 1e-4 * np.exp(1j * np.angle(voltage)))
+
+
+def test_three_phase_power_flow_propagates_reduced_bus_voltages() -> None:
+    """Return the representative voltage at every bus joined by an ideal switch.
+
+    :return: None.
+    """
+    grid: gce.MultiCircuit = gce.MultiCircuit()
+    bus_from: gce.Bus = grid.add_bus(gce.Bus(name="From", is_slack=True))
+    bus_to: gce.Bus = grid.add_bus(gce.Bus(name="To"))
+    generator: gce.Generator = gce.Generator(vset=1.0)
+    switch: gce.Switch = gce.Switch(name="Switch", bus_from=bus_from, bus_to=bus_to)
+    grid.add_generator(bus=bus_from, api_obj=generator)
+    grid.add_switch(switch)
+
+    results: Any = gce.power_flow3ph(grid=grid)
+
+    assert np.isclose(results.voltage_N[1], results.voltage_N[0])
+    assert np.isclose(results.voltage_A[1], results.voltage_A[0])
+    assert np.isclose(results.voltage_B[1], results.voltage_B[0])
+    assert np.isclose(results.voltage_C[1], results.voltage_C[0])
+
+
+@pytest.mark.parametrize("disabled_lines,max_iter", (((3, 5), 25), ((3,), 0), ((), 0)))
+def test_three_phase_nonconvergence_preserves_branch_results(disabled_lines: tuple[int, ...],
+                                                            max_iter: int) -> None:
+    """Preserve branch result dimensions and failure diagnostics after solver rejection.
+
+    :param disabled_lines: IEEE 9 bus lines to disconnect before solving.
+    :param max_iter: Solver iteration limit; zero forces rejection in connected cases.
+    :return: None.
+    """
+    # Cover the reported island split and connected grids with different branch counts.
+    grid_path: Path = Path(__file__).resolve().parents[3] / "Grids_and_profiles" / "grids" / "IEEE 9 Bus.gridcal"
+    grid: gce.MultiCircuit = gce.open_file(str(grid_path))
+    line_idx: int
+    for line_idx in disabled_lines:
+        grid.lines[line_idx].active = False
+
+    options: gce.PowerFlowOptions = gce.PowerFlowOptions(max_iter=max_iter)
+    driver: PowerFlowDriver3Ph = PowerFlowDriver3Ph(grid=grid, options=options)
+    driver.run()
+    results: PowerFlowResults3Ph = driver.results
+
+    # Returning correctly sized fallback arrays must not hide the solver failure.
+    assert not results.converged
+    assert results.error > options.tolerance
+    assert "Tried solution is garbage" in str(driver.logger)
+    assert "Did not converge, even after retry!" in str(driver.logger)
+
+    branch_count: int = grid.get_branch_number(add_hvdc=False, add_vsc=False, add_switch=True)
+    branch_values: np.ndarray
+    for branch_values in (results.Sf_A, results.Sf_B, results.Sf_C,
+                          results.St_A, results.St_B, results.St_C,
+                          results.If_N, results.If_A, results.If_B, results.If_C,
+                          results.It_N, results.It_A, results.It_B, results.It_C,
+                          results.loading_A, results.loading_B, results.loading_C,
+                          results.losses_A, results.losses_B, results.losses_C):
+        assert branch_values.shape == (branch_count,)
+        assert np.all(branch_values == 0.0)
+
 
 def test_ieee_13_bus_feeder_driver():
     """

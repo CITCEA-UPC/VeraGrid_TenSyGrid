@@ -12,6 +12,15 @@ class CgmesProperty(BaseProperty):
     """
     CgmesProperty
     """
+
+    __slots__ = (
+        "mandatory",
+        "comment",
+        "out_of_the_standard",
+        "profiles",
+        "default_value",
+    )
+
     def __init__(self, property_name: str,
                  class_type: TypeVar,
                  multiplier: UnitMultiplier = UnitMultiplier.none,

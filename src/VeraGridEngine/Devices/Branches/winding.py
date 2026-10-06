@@ -12,6 +12,7 @@ from VeraGridEngine.Devices.Parents.editable_device import DeviceType
 
 
 class Winding(Transformer2W):
+    __slots__ = ()
 
     def __init__(self,
                  bus_from: Bus = None,

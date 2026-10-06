@@ -11,6 +11,9 @@ from VeraGridEngine.basic_structures import Logger
 
 class RawSubstationSwitchingDeviceV35(RawSubstationSwitchingDeviceV34):
     """PSSE v35 substation switching device."""
+    __slots__ = (
+        "CKT",
+    )
 
     LOCAL_PROPERTIES: Tuple[PsseProperty, ...] = (
         PsseProperty(property_name='CKT', rawx_key='swdid', class_type=str,

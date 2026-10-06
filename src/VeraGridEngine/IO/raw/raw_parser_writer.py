@@ -266,7 +266,10 @@ def interpret_line(raw_line: str, splitter=','):
     pattern = splitter + r"\s*(?=(?:[^']*'[^']*')*[^']*$)"
 
     # Use re.split to apply the pattern
-    elms = re.split(pattern, lne)
+    if ',' in lne:
+        elms = re.split(pattern, lne)
+    else:
+        elms = lne.split()
 
     for elm in elms:
 
@@ -864,16 +867,28 @@ def read_raw(filename, text_func=None, progress_func=None, logger=Logger()) -> P
                         # the transformers may have 4 or 5 lines to define them
                         # so, to be able to know, we look at the line "l" and check if the first arguments
                         # are 2 or 3 buses
-                        if is_3w(lines[l_count], bus_set):
-                            # 3 - windings (5 lines)
-                            for k in range(5):
+                        # Alex review required: this changes static PSS/E RAW import behavior.
+                        is_three_winding: bool = is_3w(lines[l_count], bus_set)
+                        if is_three_winding:
+                            transformer_line_count: int = 5
+                            transformer_description: str = "3W"
+                        else:
+                            transformer_line_count = 4
+                            transformer_description = "2W"
+
+                        # Parse a transformer only when its complete fixed-size record is available.
+                        remaining_line_count: int = len(lines) - l_count
+                        if remaining_line_count >= transformer_line_count:
+                            for k in range(transformer_line_count):
                                 data.append(lines[l_count])
                                 l_count += 1
                         else:
-                            # 2-windings (4 lines)
-                            for k in range(4):
-                                data.append(lines[l_count])
-                                l_count += 1
+                            logger.add_error(
+                                "Incomplete {0} transformer data at the raw file".format(
+                                    transformer_description
+                                )
+                            )
+                            l_count = len(lines)
 
                     elif key == 'induction machine':
                         if is_one_line_for_induction_machine(lines[l_count]):
@@ -911,10 +926,13 @@ def read_raw(filename, text_func=None, progress_func=None, logger=Logger()) -> P
                     # data = [interpret_line(object_lines[k]) for k in range(lines_per_object)]
 
                     # pass the data to the according object to assign it to the matching variables
-                    data2 = format_lines(data1=data, logger=logger)
-                    obj = ObjectT()
-                    obj.parse(data2, version, logger)
-                    objects_list.append(obj)
+                    if len(data) > 0:
+                        data2 = format_lines(data1=data, logger=logger)
+                        obj = ObjectT()
+                        obj.parse(data2, version, logger)
+                        objects_list.append(obj)
+                    else:
+                        pass
 
                     if progress_func is not None:
                         progress_func((l_count / len(lines)) * 100)

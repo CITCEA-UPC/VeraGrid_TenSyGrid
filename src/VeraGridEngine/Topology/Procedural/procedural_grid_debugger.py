@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import List, Tuple
 
 import numpy as np
-import matplotlib.pyplot as plt
 import VeraGridEngine.Devices as dev
 
 
@@ -22,89 +21,6 @@ class ProceduralGridDebugger:
         """
         self.enabled = enabled
 
-    def plot_mst_graph(
-        self,
-        coords_final_network: np.ndarray,
-        edges: List[Tuple[int, int]],
-        n_candidate: int,
-        n_target: int,
-        final_steiner_pts: np.ndarray,
-        title: str = "Procedural Grid Graph",
-        show_labels: bool = True,
-    ) -> None:
-        """
-        Plot the graph defined by node coordinates and edge list.
-
-        :param coords_final_network: Array of shape (n_nodes, 2) with [lon, lat]
-        :param edges: List of node index pairs
-        :param n_candidate: Number of candidate buses
-        :param n_target: Number of target buses
-        :param final_steiner_pts: Array of Steiner point coordinates
-        :param title: Plot title
-        :param show_labels: Whether to label nodes with their indices
-        """
-        if not self.enabled:
-            return
-
-        plt.figure(figsize=(10, 8))
-
-        for i_from, i_to in edges:
-            p1 = coords_final_network[i_from]
-            p2 = coords_final_network[i_to]
-            plt.plot(
-                [p1[0], p2[0]],
-                [p1[1], p2[1]],
-                "k-",
-                linewidth=1.5,
-                alpha=0.7,
-                zorder=1,
-            )
-
-        if n_candidate > 0:
-            plt.scatter(
-                coords_final_network[:n_candidate, 0],
-                coords_final_network[:n_candidate, 1],
-                s=80,
-                marker="s",
-                c="green",
-                label="Candidates",
-                zorder=2,
-            )
-
-        if n_target > 0:
-            plt.scatter(
-                coords_final_network[n_candidate:n_candidate + n_target, 0],
-                coords_final_network[n_candidate:n_candidate + n_target, 1],
-                s=80,
-                marker="s",
-                c="blue",
-                label="Targets",
-                zorder=2,
-            )
-
-        if final_steiner_pts.shape[0] > 0:
-            plt.scatter(
-                final_steiner_pts[:, 0],
-                final_steiner_pts[:, 1],
-                s=70,
-                marker="o",
-                c="gray",
-                label="Steiner points",
-                zorder=3,
-            )
-
-        if show_labels:
-            for i, (x, y) in enumerate(coords_final_network):
-                plt.text(x, y, str(i), fontsize=8, ha="right", va="bottom")
-
-        plt.xlabel("Longitude")
-        plt.ylabel("Latitude")
-        plt.title(title)
-        plt.legend()
-        plt.grid(True, linestyle="--", alpha=0.5)
-        plt.axis("equal")
-        plt.tight_layout()
-        plt.show()
 
     def snapshot_grid_element_names(self, grid: dev.MultiCircuit) -> set[str]:
         """

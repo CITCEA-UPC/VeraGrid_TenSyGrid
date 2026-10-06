@@ -20,6 +20,18 @@ class UcteCircuit:
     UCTE circuit class
     """
 
+    __slots__ = (
+        "comments",
+        "nodes",
+        "lines",
+        "transformers",
+        "regulations",
+        "transformer_tap_tables",
+        "exchange_powers",
+        "regulations_dict",
+        "transformer_tap_tables_dict",
+    )
+
     def __init__(self) -> None:
         """
 

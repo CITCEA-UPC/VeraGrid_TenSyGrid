@@ -21,7 +21,31 @@ from VeraGridEngine.Simulations.PowerFlow.NumericalMethods.common_functions impo
 from VeraGridEngine.Topology.simulation_indices import compile_types
 from VeraGridEngine.basic_structures import Vec, IntVec, CxVec
 from VeraGridEngine.Utils.Sparse.csc2 import CSC
+
+
 class PfBasicFormulation(PfFormulationTemplate):
+
+    __slots__ = (
+        "nc",
+        "adm",
+        "S0",
+        "I0",
+        "Y0",
+        "Qmin",
+        "Qmax",
+        "discrete_shunt_control",
+        "qv_droop_control",
+        "vd",
+        "pq",
+        "pv",
+        "pqv",
+        "p",
+        "no_slack",
+        "idx_dVa",
+        "idx_dVm",
+        "idx_dP",
+        "idx_dQ",
+    )
 
     def __init__(self,
                  V0: CxVec,

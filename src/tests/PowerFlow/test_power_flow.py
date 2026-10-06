@@ -192,14 +192,17 @@ def test_controllable_shunt() -> None:
 
     fname = os.path.join('data', 'grids', 'Controllable_shunt_example.gridcal')
     main_circuit = FileOpen(fname).open()
-    options = PowerFlowOptions(control_q=False)
-    power_flow = PowerFlowDriver(main_circuit, options)
-    power_flow.run()
+    for solver_type in [SolverType.NR, SolverType.HELM]:
+        options = PowerFlowOptions(solver_type=solver_type,
+                                   control_q=False,
+                                   retry_with_other_methods=False)
+        power_flow = PowerFlowDriver(main_circuit, options)
+        power_flow.run()
 
-    Vm = np.abs(power_flow.results.voltage)
-    Vm_test = np.array([[1., 1.0164564, 1.02]])
+        Vm = np.abs(power_flow.results.voltage)
+        Vm_test = np.array([[1., 1.0164564, 1.02]])
 
-    assert np.allclose(Vm_test, Vm, atol=1e-3)
+        assert np.allclose(Vm_test, Vm, atol=1e-3)
 
 
 def test_voltage_local_control_with_generation() -> None:
@@ -219,7 +222,7 @@ def test_voltage_local_control_with_generation() -> None:
 
     # run power flow with the local voltage control enabled
     for solver_type in [SolverType.NR, SolverType.IWAMOTO, SolverType.LM,
-                        SolverType.FASTDECOUPLED, SolverType.PowellDogLeg]:
+                        SolverType.FASTDECOUPLED, SolverType.PowellDogLeg, SolverType.HELM]:
         options = PowerFlowOptions(solver_type,
                                    verbose=0,
                                    control_q=False,
@@ -234,7 +237,7 @@ def test_voltage_local_control_with_generation() -> None:
     # run power flow with the local voltage control disabled
     gen.control_mode = GeneratorControlMode.Q
     for solver_type in [SolverType.NR, SolverType.IWAMOTO, SolverType.LM,
-                        SolverType.FASTDECOUPLED, SolverType.PowellDogLeg]:
+                        SolverType.FASTDECOUPLED, SolverType.PowellDogLeg, SolverType.HELM]:
         options = PowerFlowOptions(solver_type,
                                    verbose=0,
                                    control_q=False,
@@ -272,22 +275,23 @@ def test_qv_droop_control_mode() -> None:
     gen.Q = 0.0
     gen.Vset = gen.Vset + 0.01
 
-    options = PowerFlowOptions(solver_type=SolverType.NR,
-                               verbose=0,
-                               control_q=False,
-                               retry_with_other_methods=False)
+    for solver_type in [SolverType.NR, SolverType.HELM]:
+        options = PowerFlowOptions(solver_type=solver_type,
+                                   verbose=0,
+                                   control_q=False,
+                                   retry_with_other_methods=False)
 
-    results = gce.power_flow(grid, options)
-    vm: np.ndarray = np.abs(results.voltage)
-    delta_v: float = gen.Vset - vm[bus_i]
+        results = gce.power_flow(grid, options)
+        vm: np.ndarray = np.abs(results.voltage)
+        delta_v: float = gen.Vset - vm[bus_i]
 
-    # Reproduce the implemented droop equation in MVAr, including the reactive
-    # power clipping at the generator capability limits.
-    expected_q: float = delta_v * gen.k_droop * gen.Qmax
-    expected_q = float(np.clip(expected_q, gen.Qmin, gen.Qmax))
+        # Reproduce the implemented droop equation in MVAr, including the reactive
+        # power clipping at the generator capability limits.
+        expected_q: float = delta_v * gen.k_droop * gen.Qmax
+        expected_q = float(np.clip(expected_q, gen.Qmin, gen.Qmax))
 
-    assert results.converged
-    assert np.isclose(results.gen_q[gen_idx], expected_q, atol=1e-6, rtol=1e-6)
+        assert results.converged
+        assert np.isclose(results.gen_q[gen_idx], expected_q, atol=1e-6, rtol=1e-6)
 
 
 def test_reactive_split_removes_fixed_bus_q_before_voltage_control_share() -> None:
@@ -343,6 +347,84 @@ def test_reactive_split_removes_fixed_bus_q_before_voltage_control_share() -> No
     assert q_batt.size == 0
     assert np.isclose(q_gen[0], 6.0, atol=1e-12)
     assert np.isclose(qfixed_bus[0] + q_gen[0], qbus[0], atol=1e-12)
+
+
+def test_reactive_split_can_report_voltage_controller_q_without_limits() -> None:
+    """
+    Check that no-Q-limit reporting preserves the solved bus residual instead of
+    clipping the reported generator Q to capability limits.
+    """
+    qbus: np.ndarray = np.array([31.0], dtype=float)
+    qfixed_bus: np.ndarray = np.array([0.0], dtype=float)
+    gen_bus_idx: np.ndarray = np.array([0], dtype=int)
+    qmin_gen: np.ndarray = np.array([-6.27], dtype=float)
+    qmax_gen: np.ndarray = np.array([6.27], dtype=float)
+    gen_status: np.ndarray = np.array([True], dtype=bool)
+    control_mode_int_gen: np.ndarray = np.array([GeneratorControlMode.V.idx()], dtype=int)
+    q0_gen: np.ndarray = np.array([0.0], dtype=float)
+    vset_gen: np.ndarray = np.array([1.0], dtype=float)
+    k_droop_gen: np.ndarray = np.array([0.0], dtype=float)
+    dead_band_gen: np.ndarray = np.array([0.0], dtype=float)
+    batt_bus_idx: np.ndarray = np.zeros(0, dtype=int)
+    qmin_batt: np.ndarray = np.zeros(0, dtype=float)
+    qmax_batt: np.ndarray = np.zeros(0, dtype=float)
+    batt_status: np.ndarray = np.zeros(0, dtype=bool)
+    control_mode_int_batt: np.ndarray = np.zeros(0, dtype=int)
+    q0_batt: np.ndarray = np.zeros(0, dtype=float)
+    vm: np.ndarray = np.array([1.0], dtype=float)
+
+    q_limited, _ = split_reactive_power_between_generators_and_batteries(
+        Qbus=qbus,
+        Qfixed_bus=qfixed_bus,
+        gen_bus_idx=gen_bus_idx,
+        Qmin_gen=qmin_gen,
+        Qmax_gen=qmax_gen,
+        gen_status=gen_status,
+        control_mode_int_gen=control_mode_int_gen,
+        Q0_gen=q0_gen,
+        Vset_gen=vset_gen,
+        k_droop_gen=k_droop_gen,
+        dead_band_gen=dead_band_gen,
+        batt_bus_idx=batt_bus_idx,
+        Qmin_batt=qmin_batt,
+        Qmax_batt=qmax_batt,
+        batt_status=batt_status,
+        control_mode_int_batt=control_mode_int_batt,
+        Q0_batt=q0_batt,
+        v_ctrl_val_gen=GeneratorControlMode.V.idx(),
+        qv_droop_val_gen=GeneratorControlMode.QVDroop.idx(),
+        Vm=vm,
+        enforce_q_limits=True,
+        atol=1e-12,
+    )
+
+    q_unlimited, _ = split_reactive_power_between_generators_and_batteries(
+        Qbus=qbus,
+        Qfixed_bus=qfixed_bus,
+        gen_bus_idx=gen_bus_idx,
+        Qmin_gen=qmin_gen,
+        Qmax_gen=qmax_gen,
+        gen_status=gen_status,
+        control_mode_int_gen=control_mode_int_gen,
+        Q0_gen=q0_gen,
+        Vset_gen=vset_gen,
+        k_droop_gen=k_droop_gen,
+        dead_band_gen=dead_band_gen,
+        batt_bus_idx=batt_bus_idx,
+        Qmin_batt=qmin_batt,
+        Qmax_batt=qmax_batt,
+        batt_status=batt_status,
+        control_mode_int_batt=control_mode_int_batt,
+        Q0_batt=q0_batt,
+        v_ctrl_val_gen=GeneratorControlMode.V.idx(),
+        qv_droop_val_gen=GeneratorControlMode.QVDroop.idx(),
+        Vm=vm,
+        enforce_q_limits=False,
+        atol=1e-12,
+    )
+
+    assert np.isclose(q_limited[0], qmax_gen[0], atol=1e-12)
+    assert np.isclose(q_unlimited[0], qbus[0], atol=1e-12)
 
 
 def test_slack_bus_split_handles_multiple_slack_buses() -> None:
@@ -487,7 +569,7 @@ def test_voltage_remote_control_with_generation() -> None:
 
     for control_remote_voltage in [True, False]:
         for solver_type in [SolverType.NR, SolverType.IWAMOTO, SolverType.LM,
-                            SolverType.FASTDECOUPLED, SolverType.PowellDogLeg]:
+                            SolverType.FASTDECOUPLED, SolverType.PowellDogLeg, SolverType.HELM]:
 
             options = PowerFlowOptions(solver_type=solver_type,
                                        verbose=0,
@@ -679,29 +761,30 @@ def test_generator_Q_lims() -> None:
     grid = gce.open_file(fname)
 
     for control_q in [True, False]:
-        options = PowerFlowOptions(gce.SolverType.NR,
-                                   verbose=1,
-                                   control_q=control_q,
-                                   retry_with_other_methods=False,
-                                   control_taps_modules=False,
-                                   control_taps_phase=False,
-                                   control_remote_voltage=False,
-                                   apply_temperature_correction=False,
-                                   distributed_slack=False)
+        for solver_type in [SolverType.NR, SolverType.HELM]:
+            options = PowerFlowOptions(solver_type,
+                                       verbose=1,
+                                       control_q=control_q,
+                                       retry_with_other_methods=False,
+                                       control_taps_modules=False,
+                                       control_taps_phase=False,
+                                       control_remote_voltage=False,
+                                       apply_temperature_correction=False,
+                                       distributed_slack=False)
 
-        power_flow = PowerFlowDriver(grid, options)
-        power_flow.run()
+            power_flow = PowerFlowDriver(grid, options)
+            power_flow.run()
 
-        # check that the bus Q is at the limit
-        qbus = power_flow.results.Sbus[3].imag
-        ok = np.isclose(qbus, grid.generators[1].Qmin, atol=options.tolerance)
+            # check that the bus Q is at the limit
+            qbus = power_flow.results.Sbus[3].imag
+            ok = np.isclose(qbus, grid.generators[1].Qmin, atol=options.tolerance)
 
-        if control_q:
-            assert ok
-        else:
-            assert not ok
+            if control_q:
+                assert ok
+            else:
+                assert not ok
 
-        assert power_flow.results.converged
+            assert power_flow.results.converged
 
 
 def test_fubm() -> None:

@@ -109,18 +109,19 @@ def __solve_island_limited_support_3ph(island: NumericalCircuit,
 
     else:
 
+        # Keep the N,A,B,C branch layout when every solver attempt is rejected.
         final_solution = NumericPowerFlowResults(V=V0,
                                                  converged=False,
                                                  norm_f=1e200,
                                                  Scalc=S0,
                                                  m=expand3ph(island.active_branch_data.tap_module),
                                                  tau=expand3ph(island.active_branch_data.tap_angle),
-                                                 Sf=np.zeros(island.nbr * 3, dtype=complex),
-                                                 St=np.zeros(island.nbr * 3, dtype=complex),
-                                                 If=np.zeros(island.nbr * 3, dtype=complex),
-                                                 It=np.zeros(island.nbr * 3, dtype=complex),
-                                                 loading=np.zeros(island.nbr * 3, dtype=complex),
-                                                 losses=np.zeros(island.nbr * 3, dtype=complex),
+                                                 Sf=np.zeros(island.nbr * 4, dtype=complex),
+                                                 St=np.zeros(island.nbr * 4, dtype=complex),
+                                                 If=np.zeros(island.nbr * 4, dtype=complex),
+                                                 It=np.zeros(island.nbr * 4, dtype=complex),
+                                                 loading=np.zeros(island.nbr * 4, dtype=complex),
+                                                 losses=np.zeros(island.nbr * 4, dtype=complex),
                                                  Pfp_vsc=np.zeros(island.nvsc, dtype=float),
                                                  Pfn_vsc=np.zeros(island.nvsc, dtype=float),
                                                  St_vsc=np.zeros(island.nvsc * 3, dtype=complex),
@@ -335,8 +336,14 @@ def __multi_island_pf_nc_limited_support_3ph(nc: NumericalCircuit,
     # Compile HVDC results (available for the complete grid since HVDC line as
     # formulated are split objects
     # Pt is the "generation" at the sending point
-    results.Pf_hvdc = - Pf_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
-    results.Pt_hvdc = - Pt_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+    results.Pf_hvdc_A = - Pf_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+    results.Pf_hvdc_B = - Pf_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+    results.Pf_hvdc_C = - Pf_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+
+    results.Pt_hvdc_A = - Pt_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+    results.Pt_hvdc_B = - Pt_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+    results.Pt_hvdc_C = - Pt_hvdc * nc.Sbase  # we change the sign to keep the sign convention with AC lines
+
     results.loading_hvdc = loading_hvdc
     results.losses_hvdc = Losses_hvdc * nc.Sbase
 
@@ -345,12 +352,12 @@ def __multi_island_pf_nc_limited_support_3ph(nc: NumericalCircuit,
 
     for i in load_idx:
 
-        if nc.load_data.A_floatingstar[i] > 0:
+        if nc.load_data.A_floatingstar[i] != 0.0 + 0.0j:
             results.load_Vn[i] = nc.load_data.A_floatingstar[i] * results.voltage_A[load_bus_idx[i]] + \
                               nc.load_data.B_floatingstar[i] * results.voltage_B[load_bus_idx[i]] + \
                               nc.load_data.C_floatingstar[i] * results.voltage_C[load_bus_idx[i]]
 
-        elif nc.load_data.I3_floatingstar[i+1] > 0.0+0.0j:
+        elif nc.load_data.I3_floatingstar[4 * i + 1] != 0.0 + 0.0j:
 
             Vn_prev = (results.voltage_A[load_bus_idx[i]] + results.voltage_B[load_bus_idx[i]] + results.voltage_C[
                 load_bus_idx[i]]) / 3
@@ -363,7 +370,7 @@ def __multi_island_pf_nc_limited_support_3ph(nc: NumericalCircuit,
                                                                  nc.load_data.I3_floatingstar[4 * i + 3],
                                                                  Vn_prev)
 
-        elif nc.load_data.S3_floatingstar[i+1] > 0.0+0.0j:
+        elif nc.load_data.S3_floatingstar[4 * i + 1] != 0.0 + 0.0j:
 
             Ia, Ib, Ic, results.load_Vn[i] = floating_star_powers(results.voltage_A[load_bus_idx[i]],
                                                                   results.voltage_B[load_bus_idx[i]],
@@ -415,14 +422,18 @@ def multi_island_pf_nc_3ph(nc: NumericalCircuit,
         Sbus_input=Sbus_input,
     )
 
-    # expand voltages if there was a bus topology reduction
-    # if nc.topology_performed:
-    #     results.voltage = nc.propagate_bus_result(results.voltage)
+    # Restore the voltage of buses represented by another bus after reducing ideal links.
+    if nc.topology_performed:
+        results.voltage_N = nc.propagate_bus_result(results.voltage_N)
+        results.voltage_A = nc.propagate_bus_result(results.voltage_A)
+        results.voltage_B = nc.propagate_bus_result(results.voltage_B)
+        results.voltage_C = nc.propagate_bus_result(results.voltage_C)
+    else:
+        pass
 
     # do the reactive power partition and store the values
     # __split_reactive_power_into_devices(nc=nc, Qbus=results.Sbus.imag, results=results)
 
-    results.three_phase = True
     return results
 
 

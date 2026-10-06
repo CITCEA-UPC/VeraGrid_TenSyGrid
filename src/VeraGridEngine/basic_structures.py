@@ -38,6 +38,8 @@ class CDF:
     Inverse Cumulative density function of a given array of data
     """
 
+    __slots__ = ("arr", "iscomplex", "prob", "idx", "len")
+
     def __init__(self, data: Vec | pd.Series):
         """
         Constructor
@@ -144,66 +146,87 @@ class CDF:
         n = len(self.arr)
         return np.sum(self.arr) * (1 / n)
 
-    def plot(self, plt, LINEWIDTH: int, ax=None):
-        """
-        Plots the CFD
-        :param plt: MatPlotLib plt module
-        :param LINEWIDTH: line width in pixels
-        :param ax: MatPlotLib axis to plot into
-        :return:
-        """
-        if ax is None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        ax.plot(self.prob, self.arr, linewidth=LINEWIDTH)
-        ax.set_xlabel('$p(x)$')
-        ax.set_ylabel('$x$')
 
 
 def classify_by_hour(t: pd.DatetimeIndex) -> List[List[int]]:
     """
-    Passes an array of TimeStamps to an array of arrays of indices
-    classified by hour of the year
-    @param t: Pandas time Index array
-    @return: list of lists of integer indices
+    Classify timestamp indices into bins grouped by continuous hour from series start.
+
+    :param t: Pandas DatetimeIndex array containing timestamps.
+    :return: List of lists containing integer indices belonging to each hour bucket.
     """
-    n = len(t)
+    n: int = len(t)
 
-    offset = t[0].hour * t[0].dayofyear
-    mx = t[n - 1].hour * t[n - 1].dayofyear
+    # An empty DatetimeIndex cannot be anchored or partitioned.
+    if n == 0:
+        return list()
+    else:
+        pass
 
+    # Anchor to the start hour to ensure sub-hourly timestamps begin at bucket 0.
+    t0: pd.Timestamp = t[0].floor("h")
+
+    # Compute continuous elapsed hours for each timestamp using integer division of elapsed seconds.
+    # This prevents arithmetic collisions across days, leap years, and calendar year boundaries.
+    hours_from_start: npt.NDArray[np.int_] = np.asarray((t - t0).total_seconds() // 3600, dtype=int)
+    max_h: int = int(np.max(hours_from_start))
+
+    # Pre-allocate hourly buckets from hour 0 to max_h inclusive.
     arr: List[List[int]] = list()
-
-    for i in range(mx - offset + 1):
+    bucket_idx: int
+    for bucket_idx in range(max_h + 1):
         arr.append(list())
 
+    # Map each timestamp index to its corresponding hourly bin.
+    i: int
     for i in range(n):
-        hourofyear = t[i].hour * t[i].dayofyear
-        arr[hourofyear - offset].append(i)
+        hour_bin: int = int(hours_from_start[i])
+        arr[hour_bin].append(i)
 
     return arr
 
 
-def classify_by_day(t: pd.DatetimeIndex) -> list[list[int]]:
+def classify_by_day(t: pd.DatetimeIndex) -> List[List[int]]:
     """
-    Passes an array of TimeStamps to an array of arrays of indices
-    classified by day of the year
-    @param t: Pandas time Index array
-    @return: list of lists of integer indices
+    Classify timestamp indices into bins grouped by continuous day from series start.
+
+    :param t: Pandas DatetimeIndex array containing timestamps.
+    :return: List of lists containing integer indices belonging to each day bucket.
     """
-    n = len(t)
+    n: int = len(t)
 
-    offset = t[0].dayofyear
-    mx = t[n - 1].dayofyear
+    # An empty DatetimeIndex cannot be anchored or partitioned.
+    if n == 0:
+        return list()
+    else:
+        pass
 
-    arr: list[list[int]] = list()
+    # Normalize timezone localization to naive wall-clock time for calendar day continuity.
+    t_anchor: pd.DatetimeIndex
+    if t.tz is not None:
+        t_anchor = t.tz_localize(None)
+    else:
+        t_anchor = t
 
-    for i in range(mx - offset + 1):
+    # Anchor to the start day (midnight) to ensure all timestamps begin at day bucket 0.
+    t0: pd.Timestamp = t_anchor[0].floor("D")
+
+    # Compute continuous elapsed calendar days for each timestamp using integer division of elapsed seconds.
+    # This prevents arithmetic collisions across days, leap years, and calendar year boundaries.
+    days_from_start: npt.NDArray[np.int_] = np.asarray((t_anchor - t0).total_seconds() // 86400, dtype=int)
+    max_d: int = int(np.max(days_from_start))
+
+    # Pre-allocate daily buckets from day 0 to max_d inclusive.
+    arr: List[List[int]] = list()
+    bucket_idx: int
+    for bucket_idx in range(max_d + 1):
         arr.append(list())
 
+    # Map each timestamp index to its corresponding daily bin.
+    i: int
     for i in range(n):
-        hourofyear = t[i].dayofyear
-        arr[hourofyear - offset].append(i)
+        day_bin: int = int(days_from_start[i])
+        arr[day_bin].append(i)
 
     return arr
 
@@ -217,36 +240,53 @@ def get_time_groups(t_array: pd.DatetimeIndex, grouping: TimeGrouping) -> List[i
     """
     groups: List[int] = list()
     nt = len(t_array)
-    last = -1
+    last: Union[int, Tuple[int, int], Tuple[int, int, int], Tuple[int, int, int, int], None] = None
+
+    if nt == 0:
+        return groups
+    else:
+        pass
+
+    if grouping == TimeGrouping.NoGrouping:
+        groups.append(0)
+        groups.append(nt - 1)
+        return groups
+    else:
+        pass
 
     i = 0
     for i in range(nt):
         t = t_array[i]
 
         if grouping == TimeGrouping.Monthly:
-            if t.month != last:
-                last = t.month
+            current_month: Tuple[int, int] = (t.year, t.month)
+            if current_month != last:
+                last = current_month
                 groups.append(i)
 
         elif grouping == TimeGrouping.Weekly:
-            if t.week != last:
-                last = t.week
+            iso_calendar = t.isocalendar()
+            current_week: Tuple[int, int] = (int(iso_calendar.year), int(iso_calendar.week))
+            if current_week != last:
+                last = current_week
                 groups.append(i)
 
         elif grouping == TimeGrouping.Daily:
-            if t.day != last:
-                last = t.day
+            current_day: Tuple[int, int, int] = (t.year, t.month, t.day)
+            if current_day != last:
+                last = current_day
                 groups.append(i)
 
         elif grouping == TimeGrouping.Hourly:
-            if t.hour != last:
-                last = t.hour
+            current_hour: Tuple[int, int, int, int] = (t.year, t.month, t.day, t.hour)
+            if current_hour != last:
+                last = current_hour
                 groups.append(i)
 
-    # add the last index if it is not already there
-    if nt > 0:
-        if i != groups[len(groups) - 1]:
-            groups.append(i)
+        else:
+            pass
+
+    groups.append(i)
 
     return groups
 
@@ -255,6 +295,19 @@ class LogEntry:
     """
     Logger entry
     """
+
+    __slots__ = (
+        "time",
+        "msg",
+        "severity",
+        "device",
+        "device_class",
+        "device_property",
+        "value",
+        "expected_value",
+        "object_value",
+        "expected_object_value",
+    )
 
     def __init__(self,
                  time: Union[str, None] = None,
@@ -313,6 +366,8 @@ class Logger:
     """
     Logger class
     """
+
+    __slots__ = ("entries", "debug_entries")
 
     def __init__(self) -> None:
 
@@ -633,6 +688,8 @@ class ConvergenceReport:
     Convergence report
     """
 
+    __slots__ = ("methods_", "converged_", "error_", "elapsed_", "iterations_")
+
     def __init__(self) -> None:
         """
         Constructor
@@ -735,6 +792,8 @@ class CompressedJsonStruct:
     """
     Compressed json block
     """
+
+    __slots__ = ("__fields", "__data", "__fields_pos_dict")
 
     def __init__(self, fields: List[str] = None, data: List[Any] = None):
         self.__fields: List[str] = list()
@@ -848,6 +907,8 @@ class ListSet(list):
     This is a class that behaves like a list except for the query "in" where it behaves like a set O(1)
     """
 
+    __slots__ = ("_set",)
+
     def __init__(self, iterable=None):
         """Initialize the ListSet with an optional iterable."""
         super().__init__()
@@ -928,6 +989,8 @@ class Vector:
     """
     Python implementation of a C++ like std::vector
     """
+
+    __slots__ = ("_data",)
 
     def __init__(self, size=0, value=None):
         """

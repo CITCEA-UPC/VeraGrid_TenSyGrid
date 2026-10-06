@@ -8,7 +8,13 @@ from __future__ import annotations
 from enum import Enum
 from typing import Callable, Tuple, Any
 
+from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
+from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
+from VeraGrid.Gui.DynamicModelEditor.Editor.DynamicLibrary.dynamic_editor_library import (
+    LibraryDeviceTemplateSpec,
+    build_dynamic_library_device_template,
+)
 
 
 class CatalogueActionKind(Enum):
@@ -40,8 +46,10 @@ class CatalogueAction:
         '_name',
         '_voltage_text',
         '_power_text',
+        '_description_text',
         '_unique_key',
         '_function_ptr',
+        '_device_template_spec',
     )
 
     def __init__(self,
@@ -50,26 +58,32 @@ class CatalogueAction:
                  name: str,
                  voltage_text: str,
                  power_text: str,
+                 description_text: str,
                  unique_key: str,
-                 function_ptr: Callable[..., Any] | None = None) -> None:
+                 function_ptr: Callable[..., Any] | None = None,
+                 device_template_spec: LibraryDeviceTemplateSpec | None = None) -> None:
         """
         Constructor.
 
         :param kind: Action kind.
         :param args: Explicit tuple of arguments (stored as-is).
         :param name: Display name (column 0).
-        :param voltage_text: Display voltage info (column 1).
+        :param voltage_text: Display voltage information (column 1).
         :param power_text: Display power info (column 2).
+        :param description_text: Display description (column 3).
         :param unique_key: Stable key to help avoid duplicates.
         :param function_ptr: Callable used for deferred RMS/EMT creation.
+        :param device_template_spec: Canonical Library device registration.
         """
         self._kind = kind
         self._args = args
         self._name = str(name)
         self._voltage_text = str(voltage_text)
         self._power_text = str(power_text)
+        self._description_text = str(description_text)
         self._unique_key = str(unique_key)
         self._function_ptr = function_ptr
+        self._device_template_spec: LibraryDeviceTemplateSpec | None = device_template_spec
 
     @property
     def kind(self) -> CatalogueActionKind:
@@ -115,6 +129,14 @@ class CatalogueAction:
         :return: str
         """
         return self._power_text
+
+    @property
+    def description_text(self) -> str:
+        """Get the display description.
+
+        :return: Description shown in column 3.
+        """
+        return self._description_text
 
     @property
     def unique_key(self) -> str:
@@ -168,15 +190,24 @@ class CatalogueAction:
         :param circuit: Circuit instance.
         :return: None
         """
-        if self._function_ptr is None:
+        if self._device_template_spec is not None:
+            obj: object | None = build_dynamic_library_device_template(
+                spec=self._device_template_spec,
+                var_factory=circuit.var_factory,
+            )
+        elif self._function_ptr is None:
             obj = None
         else:
             obj = self._function_ptr(*self._args)
 
-        if obj is None:
-            pass
-        else:
+        if isinstance(obj, RmsModelTemplate):
+            # Persist the catalogue action identity on the reusable template.
+            # The display name may be edited later, while this stable code lets
+            # subsequent catalogue imports recognize the original entry.
+            obj.code = self._unique_key
             circuit.add_rms_model(obj)
+        else:
+            pass
 
     def _execute_add_emt_template(self, circuit: MultiCircuit) -> None:
         """
@@ -185,12 +216,20 @@ class CatalogueAction:
         :param circuit: Circuit instance.
         :return: None
         """
-        if self._function_ptr is None:
+        if self._device_template_spec is not None:
+            obj: object | None = build_dynamic_library_device_template(
+                spec=self._device_template_spec,
+                var_factory=circuit.var_factory,
+            )
+        elif self._function_ptr is None:
             obj = None
         else:
             obj = self._function_ptr(*self._args)
 
-        if obj is None:
-            pass
-        else:
+        if isinstance(obj, EmtModelTemplate):
+            # RMS and EMT catalogue entries use the same stable-identity
+            # contract so duplicate prevention is independent of display names.
+            obj.code = self._unique_key
             circuit.add_emt_model(obj)
+        else:
+            pass

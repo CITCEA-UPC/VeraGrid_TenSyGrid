@@ -5,7 +5,11 @@
 import os
 import numpy as np
 import VeraGridEngine.api as gce
-from VeraGridEngine.Topology.GridReduction.ptdf_grid_reduction import ptdf_reduction, ptdf_reduction_projected
+from VeraGridEngine.Topology.GridReduction.ptdf_grid_reduction import (ptdf_reduction,
+                                                                       ptdf_reduction_projected,
+                                                                       ptdf_reduction_ree_bad,
+                                                                       ptdf_reduction_ree_less_bad,
+                                                                       get_reduced_branch_flows)
 from VeraGridEngine.Topology.GridReduction.ward_equivalents import ward_standard_reduction
 from VeraGridEngine.Topology.GridReduction.di_shi_grid_reduction import di_shi_reduction
 from VeraGridEngine.Simulations.LinearFactors.linear_analysis import get_hvdc_Pdc_ts
@@ -150,6 +154,33 @@ def test_ward_reduction():
 
     ok = np.allclose(Flows4, Flows0[internal_branches], atol=1e-10)
     assert ok
+
+
+def test_ptdf_reduction_maps_original_flows_to_reduced_rows() -> None:
+    """
+    Check that PTDF reduction targets are ordered with the reduced numerical circuit rows.
+
+    :return: None.
+    """
+    fname: str = os.path.join('data', 'grids', '5bus_linear.veragrid')
+    grid: gce.MultiCircuit = gce.open_file(filename=fname)
+
+    nc: gce.NumericalCircuit = gce.compile_numerical_circuit_at(circuit=grid, t_idx=None)
+    lin: gce.LinearAnalysis = gce.LinearAnalysis(nc=nc)
+    original_flows: np.ndarray = lin.get_flows(grid.get_Pbus(apply_active=True))
+
+    grid.delete_buses(lst=[grid.buses[1]], delete_associated=True)
+
+    nc2: gce.NumericalCircuit = gce.compile_numerical_circuit_at(circuit=grid, t_idx=None)
+    lin2: gce.LinearAnalysis = gce.LinearAnalysis(nc=nc2)
+    reduced_order_flows: np.ndarray = get_reduced_branch_flows(original_nc=nc,
+                                                               reduced_nc=nc2,
+                                                               original_flows=original_flows)
+
+    assert reduced_order_flows.shape[0] == lin2.PTDF.shape[0]
+    pbus: np.ndarray
+    pbus, _, _, _ = np.linalg.lstsq(lin2.PTDF, reduced_order_flows, rcond=None)
+    assert pbus.shape[0] == lin2.PTDF.shape[1]
 
     
 def test_ptdf_projected_14_reduction():
@@ -1292,6 +1323,43 @@ def ptdf_projected_large_real_syst_time_series():
         "Compacted generation should match non-compacted"
     assert np.allclose(P_no_compact_load_ts, P_compact_load_ts, atol=1e-4), \
         "Compacted load should match non-compacted"
+
+
+def test_ptdf_reduction_ree_execution() -> None:
+    """
+    Verify ptdf_reduction_ree_bad and ptdf_reduction_ree_less_bad execute.
+    """
+    grid: gce.MultiCircuit = gce.MultiCircuit()
+    b1: gce.Bus = gce.Bus(name="B1", Vnom=110.0)
+    b2: gce.Bus = gce.Bus(name="B2", Vnom=110.0)
+    b3: gce.Bus = gce.Bus(name="B3", Vnom=110.0)
+    grid.add_bus(b1)
+    grid.add_bus(b2)
+    grid.add_bus(b3)
+    l1: gce.Line = gce.Line(bus_from=b1, bus_to=b2, name="L1", x=0.1, r=0.01)
+    l2: gce.Line = gce.Line(bus_from=b2, bus_to=b3, name="L2", x=0.1, r=0.01)
+    grid.add_line(l1)
+    grid.add_line(l2)
+    gen: gce.Generator = gce.Generator(name="G1", P=10.0)
+    load: gce.Load = gce.Load(name="Load1", P=10.0)
+    grid.add_generator(bus=b1, api_obj=gen)
+    grid.add_load(bus=b3, api_obj=load)
+
+    # Reduction using ptdf_reduction_ree_bad
+    g1: gce.MultiCircuit = grid.copy()
+    red1, _log1 = ptdf_reduction_ree_bad(
+        grid=g1,
+        reduction_bus_indices=np.array([2]),
+    )
+    assert red1.get_bus_number() == 2
+
+    # Reduction using ptdf_reduction_ree_less_bad
+    g2: gce.MultiCircuit = grid.copy()
+    red2, _log2 = ptdf_reduction_ree_less_bad(
+        grid=g2,
+        reduction_bus_indices=np.array([2]),
+    )
+    assert red2.get_bus_number() == 2
 
 
 if __name__ == '__main__':

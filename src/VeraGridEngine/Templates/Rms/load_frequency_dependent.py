@@ -12,6 +12,7 @@ from VeraGridEngine.Utils.Symbolic.block_helpers import tf_to_block
 
 
 class FrequencyLoadRmsTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(vf, params=[
@@ -24,11 +25,18 @@ class FrequencyLoadRmsTemplate(TemplateDefinition):
         return FrequencyLoadBuild(self.vf, self.get_value("name"), self.get_value("Pl0"), self.get_value("Ql0"))
 
 
-def FrequencyLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) -> RmsModelTemplate:
+def FrequencyLoadBuild(vfactory: VarFactory, name: str = "Frequency-dependent load RMS template",
+                       Pl0: float = 1.0, Ql0: float = 0.1) -> RmsModelTemplate:
+    """Build a voltage- and frequency-dependent RMS load model.
+
+    :param vfactory: Factory that owns the model's symbolic variables.
+    :param name: Name assigned to the generated RMS model template.
+    :param Pl0: Initial active power at nominal voltage in per unit.
+    :param Ql0: Initial reactive power at nominal voltage in per unit.
+    :return: Configured frequency-dependent load RMS model template.
     """
-     generator with quadratic saturation
-    """
-    templ = RmsModelTemplate()
+    templ = RmsModelTemplate(name=name)
+    templ.name = name
     templ.tpe = DeviceType.LoadDevice
     inputs = [vfactory.add_var("Vm"), vfactory.add_var('Va')]
 
@@ -63,7 +71,7 @@ def FrequencyLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) -
     event_dict = {
         P0: vfactory.add_const(Pl0),
         Q0: vfactory.add_const(Ql0),
-        V0: vfactory.add_const(None),
+        V0: inputs[0],
 
         # Exponential Parameters
         alpha_p: vfactory.add_const(1.2),
@@ -72,12 +80,10 @@ def FrequencyLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) -
         beta_q: vfactory.add_const(1.2),
 
         Tf: vfactory.add_const(0.1),
-        theta0: vfactory.add_const(None),
+        theta0: inputs[1],
     }
 
     init_eqs = {
-        V0: inputs[0],
-        theta0: inputs[1],
         P: P0,
         Q: Q0,
     }
@@ -100,4 +106,5 @@ def FrequencyLoadBuild(vfactory: VarFactory, name: str = "", Pl0=1.0, Ql0=0.1) -
 
     templ.block.in_vars = inputs
 
+    templ.comment = 'Load RMS frequency-dependent model'
     return templ

@@ -406,24 +406,25 @@ def test_system_scaler_preview_arrays_use_cumulative_checkpoints(qt_app: object)
     window.deleteLater()
 
 
-def test_system_scaler_plot_is_embedded_in_plot_frame(qt_app: object) -> None:
-    """
-    Check that the scaling preview plot is embedded in the plot frame.
+def test_system_scaler_plot_opens_owned_native_previews(qt_app: QtWidgets.QApplication) -> None:
+    """Check that scaling previews use retained native chart dialogs.
 
     :param qt_app: Shared Qt application fixture.
     :return: Nothing.
     """
-    del qt_app
-
+    app: QtWidgets.QApplication = qt_app
     grid: MultiCircuit = build_temporal_scaling_grid()
     window: SystemScaler = SystemScaler(grid=grid)
-
-    assert window.ui.verticalLayout_2.indexOf(window.plot_canvas) >= 0
-    assert window.ui.verticalLayout_2.indexOf(window.plot_toolbar) >= 0
-
+    window.show()
     window.plot_scaling()
+    app.processEvents()
 
-    assert len(window.plot_figure.axes) == 2
+    assert len(window._open_plot_dialogs) == 2
+    assert len(window._open_plot_dialogs[0].chart._series) == 4
+    assert len(window._open_plot_dialogs[1].chart._series) == 4
 
-    window.close()
+    window.reject()
+    assert len(window._open_plot_dialogs) == 0
     window.deleteLater()
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.Type.DeferredDelete)
+    app.processEvents()

@@ -10,10 +10,11 @@ from VeraGridEngine.enumerations import DeviceType, VarPowerFlowReferenceType, P
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Templates.template_definition import TemplateDefinition, TemplateProp
-from VeraGridEngine.Utils.Symbolic.block import Var, Expr
+from VeraGridEngine.Utils.Symbolic.block import Block, Var, Expr
 
 
 class PiLineEmtTemplate(TemplateDefinition):
+    __slots__ = ()
 
     def __init__(self, vf):
         super().__init__(
@@ -43,7 +44,8 @@ def get_pi_line_emt_template(vf: VarFactory,
                              phA: bool = True,
                              phB: bool = True,
                              phC: bool = True,
-                             name: str = "Pi") -> EmtModelTemplate:
+                             name: str = "Pi",
+                             numerical_damping_conductance: float = 1.0e-5) -> EmtModelTemplate:
     """
     Build the EMT pi-line template with explicit API-mapped parameters.
 
@@ -58,6 +60,9 @@ def get_pi_line_emt_template(vf: VarFactory,
     :param phB: Bool. True if the line has phase B, else False.
     :param phC: Bool. True if the line has phase C, else False.
     :param name: Symbolic model name.
+    :param numerical_damping_conductance: Optional terminal shunt conductance
+        used for numerical damping. Set to zero when exact agreement with a
+        power-flow line model without that shunt is required.
     :return: EMT pi-line model template.
     :raises ValueError: If the line has no active phases.
     """
@@ -152,7 +157,14 @@ def get_pi_line_emt_template(vf: VarFactory,
     ])
 
     # -----------------------------
-    # Create the symbolic parameter variables and publish them in the API map.
+    # Create the symbolic model block first.
+    # The wrapped editor contract keeps the equations in one child block, but the
+    # same symbolic variables must also be visible from the root wrapper later.
+    # -----------------------------
+    block: Block = Block()
+
+    # -----------------------------
+    # Create the symbolic parameter variables and publish them in the child API map.
     # The EMT problem writes numerical values into these variables later, so the
     # template equations must depend on the mapped variables instead of line data.
     # -----------------------------
@@ -160,23 +172,23 @@ def get_pi_line_emt_template(vf: VarFactory,
     for i in range(4):
         for j in range(4):
             var_r = vf.add_var(f"R{phases[i]}{phases[j]}")
-            templ.block.api_obj_mapping[r_enums[i][j]] = var_r
-            templ.block.parameters[var_r] = vf.add_const(0.0)
+            block.api_obj_mapping[r_enums[i][j]] = var_r
+            block.parameters[var_r] = vf.add_const(0.0)
 
             var_l = vf.add_var(f"Linv_{phases[i]}{phases[j]}")
-            templ.block.api_obj_mapping[linv_enums[i][j]] = var_l
-            templ.block.parameters[var_l] = vf.add_const(0.0)
+            block.api_obj_mapping[linv_enums[i][j]] = var_l
+            block.parameters[var_l] = vf.add_const(0.0)
 
             var_c = vf.add_var(f"C{phases[i]}{phases[j]}")
-            templ.block.api_obj_mapping[c_enums[i][j]] = var_c
-            templ.block.parameters[var_c] = vf.add_const(0.0)
+            block.api_obj_mapping[c_enums[i][j]] = var_c
+            block.parameters[var_c] = vf.add_const(0.0)
 
     # -----------------------------
     # Reduce the full mapped matrices using the physical line phase mask.
     # This cleanly separates topology from parameters: line.ys chooses the
     # active equations, while api_obj_mapping supplies the electrical values.
     # -----------------------------
-    api_mapping: Dict[ParamPowerFlowReferenceType, Var] = templ.block.api_obj_mapping
+    api_mapping: Dict[ParamPowerFlowReferenceType, Var] = block.api_obj_mapping
     r_full: list[list[Var]] = list()
     linv_full: list[list[Var]] = list()
     c_full: list[list[Var]] = list()
@@ -237,11 +249,11 @@ def get_pi_line_emt_template(vf: VarFactory,
     # -----------------------------
     # Create model vars
     # -----------------------------
-    i_ser = [vf.add_var(name=f"i_ser_{name}_{ph_label}") for ph_label in active_ph]
-    q_f = [vf.add_var(name=f"q_f_{name}_{ph_label}") for ph_label in active_ph]
-    q_t = [vf.add_var(name=f"q_t_{name}_{ph_label}") for ph_label in active_ph]
-    d_vf_vars = [vf.add_var(name=f"d_vf_{ph_label}_{name}") for ph_label in active_ph]
-    d_vt_vars = [vf.add_var(name=f"d_vt_{ph_label}_{name}") for ph_label in active_ph]
+    i_ser = [vf.add_var(name=f"i_ser_{ph_label}") for ph_label in active_ph]
+    q_f = [vf.add_var(name=f"q_f_{ph_label}") for ph_label in active_ph]
+    q_t = [vf.add_var(name=f"q_t_{ph_label}") for ph_label in active_ph]
+    d_vf_vars = [vf.add_var(name=f"d_vf_{ph_label}") for ph_label in active_ph]
+    d_vt_vars = [vf.add_var(name=f"d_vt_{ph_label}") for ph_label in active_ph]
 
     di_ser = [vf.add_diff_var(name=f"di_ser_{ph_label}", base_var=i_ser[k]) for k, ph_label  in enumerate(active_ph)]
     dq_f = [vf.add_diff_var(name=f"dq_f_{ph_label}", base_var=q_f[k]) for k, ph_label  in enumerate(active_ph)]
@@ -255,10 +267,10 @@ def get_pi_line_emt_template(vf: VarFactory,
     # -----------------------------
     # Build block
     # -----------------------------
-    templ.block.in_vars = vf_vars + vt_vars
-    templ.block.state_vars = i_ser + q_f + q_t
-    templ.block.diff_vars = di_ser + dq_f + dq_t
-    templ.block.algebraic_vars = i_cap_f + i_cap_t + if_act + it_act
+    block.in_vars = vf_vars + vt_vars
+    block.state_vars = i_ser + q_f + q_t
+    block.diff_vars = di_ser + dq_f + dq_t
+    block.algebraic_vars = i_cap_f + i_cap_t + if_act + it_act
 
     # -----------------------------
     # State equations
@@ -281,7 +293,7 @@ def get_pi_line_emt_template(vf: VarFactory,
     for a in range(m):
         state_eqs.append(i_cap_t[a])
 
-    templ.block.state_eqs = state_eqs
+    block.state_eqs = state_eqs
 
     # -----------------------------
     # Algebraic equations
@@ -302,13 +314,16 @@ def get_pi_line_emt_template(vf: VarFactory,
             rhs_q = rhs_q + C_ab * vt_vars[b]
         alg_eqs.append(q_t[a] - rhs_q)
 
-    G_damp = 1e-5
+    G_damp = float(numerical_damping_conductance)
     for a in range(m):
-        alg_eqs.append(if_act[a] - (i_ser[a] + i_cap_f[a] + G_damp * vf_vars[a]))
-        alg_eqs.append(it_act[a] - (-i_ser[a] + i_cap_t[a] + G_damp * vt_vars[a]))
+        # The static PI-line power-flow model has no extra terminal conductance.
+        # Adding numerical shunt damping here changes the operating point and
+        # makes the PF-seeded EMT state non-periodic even with exact R/X/B data.
+        alg_eqs.append(if_act[a] - (i_ser[a] + i_cap_f[a]))
+        alg_eqs.append(it_act[a] - (-i_ser[a] + i_cap_t[a]))
 
-    templ.block.algebraic_eqs = alg_eqs
-    templ.block.out_vars = if_act + it_act
+    block.algebraic_eqs = alg_eqs
+    block.out_vars = if_act + it_act
 
     # -----------------------------
     # External mapping
@@ -329,16 +344,16 @@ def get_pi_line_emt_template(vf: VarFactory,
         mapping[if_keys[phase_label]] = if_act[k]
         mapping[it_keys[phase_label]] = it_act[k]
 
-    templ.block.external_mapping = mapping
+    block.external_mapping = mapping
 
     d_vf_keys = dict({"N": VarPowerFlowReferenceType.d_v_N_f, "A": VarPowerFlowReferenceType.d_v_A_f, "B": VarPowerFlowReferenceType.d_v_B_f, "C": VarPowerFlowReferenceType.d_v_C_f})
     d_vt_keys = dict({"N": VarPowerFlowReferenceType.d_v_N_t, "A": VarPowerFlowReferenceType.d_v_A_t, "B": VarPowerFlowReferenceType.d_v_B_t, "C": VarPowerFlowReferenceType.d_v_C_t})
 
     for k, phase_label in enumerate(active_ph):
-        templ.block.external_mapping[d_vf_keys[phase_label]] = d_vf_vars[k]
-        templ.block.external_mapping[d_vt_keys[phase_label]] = d_vt_vars[k]
-        templ.block.event_dict[d_vf_vars[k]] = vf.add_const(None)
-        templ.block.event_dict[d_vt_vars[k]] = vf.add_const(None)
+        block.external_mapping[d_vf_keys[phase_label]] = d_vf_vars[k]
+        block.external_mapping[d_vt_keys[phase_label]] = d_vt_vars[k]
+        block.event_dict[d_vf_vars[k]] = vf.add_const(None)
+        block.event_dict[d_vt_vars[k]] = vf.add_const(None)
 
     # -----------------------------
     # Init equations
@@ -356,11 +371,11 @@ def get_pi_line_emt_template(vf: VarFactory,
         init_eqs[q_t[a]] = rhs_t
 
     for a in range(m):
-        i_ser_from = if_act[a] - i_cap_f[a] - G_damp * vf_vars[a]
-        i_ser_to = -it_act[a] + i_cap_t[a] + G_damp * vt_vars[a]
+        i_ser_from = if_act[a] - i_cap_f[a]
+        i_ser_to = -it_act[a] + i_cap_t[a]
         init_eqs[i_ser[a]] = 0.5 * (i_ser_from + i_ser_to)
 
-    templ.block.init_eqs = init_eqs
+    block.init_eqs = init_eqs
 
     # -----------------------------
     # Derivative initialization
@@ -392,6 +407,13 @@ def get_pi_line_emt_template(vf: VarFactory,
         init_eqs[i_cap_f[a]] = rhs_i_cap_f
         init_eqs[i_cap_t[a]] = rhs_i_cap_t
 
-    templ.block.diff_init_eqs = diff_init_eqs
+    block.diff_init_eqs = diff_init_eqs
+
+    templ.block.children.append(block)
+    templ.block.external_mapping = block.external_mapping
+    templ.block.api_obj_mapping = block.api_obj_mapping
+    templ.block.parameters = block.parameters
+    templ.block.in_vars = block.in_vars
+    templ.block.out_vars = block.out_vars
 
     return templ

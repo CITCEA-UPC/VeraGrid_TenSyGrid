@@ -172,7 +172,11 @@ def short_circuit_post_process_phases_abc(
 #     return Sfb, Stb, If, It, Vbranch, loading, losses
 
 
-def short_circuit_ph3(nc: NumericalCircuit, Vpf: CxVec, Zf: CxVec, bus_index: int):
+def short_circuit_ph3(nc: NumericalCircuit,
+                      Vpf: CxVec,
+                      Zf: CxVec,
+                      bus_index: int,
+                      logger: Logger | None = None) -> ShortCircuitResults:
     """
     Run a 3-phase short circuit simulation for a single island
     :param nc: NumericalCircuit
@@ -192,7 +196,8 @@ def short_circuit_ph3(nc: NumericalCircuit, Vpf: CxVec, Zf: CxVec, bus_index: in
                                             Vbus=Vpf,
                                             Vnom=nc.bus_data.Vnom,
                                             Zf=Zf,
-                                            baseMVA=nc.Sbase)
+                                            baseMVA=nc.Sbase,
+                                            logger=logger)
 
     (Sfb, Stb, If, It, Vbranch,
      loading, losses) = short_circuit_post_process(calculation_inputs=nc,
@@ -236,7 +241,8 @@ def short_circuit_unbalanced(nc: NumericalCircuit,
                              Vpf: CxVec,
                              Zf: CxVec,
                              bus_index: int,
-                             fault_type: FaultType) -> ShortCircuitResults:
+                             fault_type: FaultType,
+                             logger: Logger | None = None) -> ShortCircuitResults:
     """
     Run an unbalanced short circuit simulation for a single island
     :param nc:
@@ -375,7 +381,8 @@ def short_circuit_unbalanced(nc: NumericalCircuit,
                                                    Vbus=Vpf,
                                                    Zf=Zf,
                                                    fault_type=fault_type,
-                                                   baseMVA=nc.Sbase)
+                                                   baseMVA=nc.Sbase,
+                                                   logger=logger)
 
     # process results in the sequences
     (Sfb0, Stb0, If0, It0, Vbranch0,

@@ -365,7 +365,7 @@ def setup_initial_condition(problem: GenericEmtProblem, block: Block, n_nodes: i
         else:
             pass
 
-    problem.get_x0 = InitialConditionGetter(x0)
+    problem.set_x0(x0)
 
 
 def run_backend(label: str, n_nodes: int, vectorized: bool, t_end: float, h: float, verbose: bool = False) -> Dict[str, Any]:

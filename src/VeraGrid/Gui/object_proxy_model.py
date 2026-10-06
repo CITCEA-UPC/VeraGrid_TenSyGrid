@@ -3,12 +3,58 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List, Tuple
-from PySide6 import QtCore, QtWidgets
+from enum import Enum
+from typing import Any, Dict, List, Set, Tuple
+from PySide6 import QtCore, QtGui, QtWidgets
 import numpy as np
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
 from VeraGridEngine.Utils.Filtering.objects_filtering import FilterObjects
 from VeraGrid.Gui.object_model import ObjectsModel
+
+
+def parse_bool_text(value: str) -> bool | None:
+    """
+    Parse one spreadsheet boolean value.
+
+    :param value: Clipboard cell text.
+    :return: Boolean value, or None when the text is not a boolean.
+    """
+    text: str = value.strip().casefold()
+
+    if text in ("true", "1", "yes", "y"):
+        return True
+    else:
+        if text in ("false", "0", "no", "n"):
+            return False
+        else:
+            return None
+
+
+def parse_float_text(value: str) -> float | None:
+    """
+    Parse one spreadsheet float value.
+
+    :param value: Clipboard cell text.
+    :return: Floating point value, or None when the text is not a float.
+    """
+    text: str = value.strip().replace(" ", "").replace("\u00a0", "")
+    comma_index: int = text.rfind(",")
+    dot_index: int = text.rfind(".")
+
+    try:
+        parsed_value: float | None = float(text)
+    except ValueError:
+        if comma_index > dot_index:
+            normalized_text: str = text.replace(".", "").replace(",", ".")
+        else:
+            normalized_text = text.replace(",", "")
+
+        try:
+            parsed_value = float(normalized_text)
+        except ValueError:
+            parsed_value = None
+
+    return parsed_value
 
 
 class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
@@ -33,21 +79,59 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
         self._filter_engine = FilterObjects(self._mdl.objects)
 
         # indexes allowed after the last call to setExpression()
-        self._allowed_rows: set[int] = set(range(len(self._mdl.objects)))  # start with “show all”
+        self._allowed_rows: set[int] = set(range(len(self._mdl.objects)))
 
-        # list of filtered objects, by default it is the same as the model since we "show all"
-        self._filtered_objects: List[ALL_DEV_TYPES] = self._mdl.objects
+        # Column exact-match filters keyed by source column index.
+        self._column_filters: Dict[int, Set[str]] = dict()
+
+        # Active sort state. Qt can sort without filtering rows, but the GUI treats it as filter-menu state.
+        self._sort_column: int | None = None
+        self._sort_order: QtCore.Qt.SortOrder | None = None
 
         # set the source model
         super().setSourceModel(mdl)
 
     @property
     def all_objects(self) -> List[ALL_DEV_TYPES]:
-        return self._mdl.objects
+        """
+        Return all objects in the underlying source model order.
+
+        :return: Objects in DB/source order.
+        """
+        return self.get_objects_in_db_order()
 
     @property
     def objects(self) -> List[ALL_DEV_TYPES]:
-        return self._filtered_objects
+        """
+        Return objects in the visible proxy order.
+
+        :return: Objects in filtered/sorted display order.
+        """
+        return self.get_objects_in_display_order()
+
+    def get_objects_in_db_order(self) -> List[ALL_DEV_TYPES]:
+        """
+        Return all objects in the underlying source model order.
+
+        :return: Objects in DB/source order.
+        """
+        return self._mdl.objects
+
+    def get_objects_in_display_order(self) -> List[ALL_DEV_TYPES]:
+        """
+        Return the visible objects in the same order shown by the view.
+
+        :return: Objects in filtered/sorted display order.
+        """
+        objects: List[ALL_DEV_TYPES] = list()
+        row: int
+        for row in range(self.rowCount()):
+            obj: ALL_DEV_TYPES | None = self.get_object_at_proxy_row(proxy_row=row)
+            if obj is not None:
+                objects.append(obj)
+            else:
+                pass
+        return objects
 
     @property
     def attributes(self):
@@ -60,25 +144,254 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
         """
         has_error = False
         error_txt = ""
+        new_allowed_rows: Set[int]
         if not expr.strip():
             # empty => show everything
-            self._allowed_rows = set(range(len(self.all_objects)))
+            new_allowed_rows = set(range(len(self.get_objects_in_db_order())))
         else:
             try:
                 self._filter_engine.filter(expr)  # updates .filtered_indices
-                self._allowed_rows = list(set(self._filter_engine.filtered_indices))
-                self._allowed_rows.sort()
+                new_allowed_rows = set(self._filter_engine.filtered_indices)
             except Exception as e:
-                # invalid expression → fall back to “show none” (or handle as you prefer)
+                # invalid expression: fall back to show none
                 error_txt = f"Filter expression error: {e}"
-                self._allowed_rows = list()
+                new_allowed_rows = set()
                 has_error = True
 
-        self._filtered_objects = [self._mdl.objects[i] for i in self._allowed_rows]
-
-        self.invalidateFilter()  # <- triggers filterAcceptsRow()
+        self._allowed_rows = new_allowed_rows
+        self.invalidate()
 
         return has_error, error_txt
+
+    def source_row(self, proxy_row: int) -> int:
+        """
+        Convert a visible proxy row into the underlying source row.
+
+        :param proxy_row: Row index in the filtered/sorted proxy.
+        :return: Source row index or -1.
+        """
+        return self.get_source_row_from_proxy_row(proxy_row=proxy_row)
+
+    def get_source_row_from_proxy_row(self, proxy_row: int) -> int:
+        """
+        Convert a visible proxy row into the underlying source row.
+
+        :param proxy_row: Row index in the filtered/sorted proxy.
+        :return: Source row index or -1.
+        """
+        if proxy_row > -1:
+            proxy_index: QtCore.QModelIndex = self.index(proxy_row, 0)
+            if proxy_index.isValid():
+                return self.mapToSource(proxy_index).row()
+            else:
+                return -1
+        else:
+            return -1
+
+    def object_at(self, proxy_row: int) -> ALL_DEV_TYPES | None:
+        """
+        Return the object shown at one visible proxy row.
+
+        :param proxy_row: Row index in the filtered/sorted proxy.
+        :return: Object or None.
+        """
+        return self.get_object_at_proxy_row(proxy_row=proxy_row)
+
+    def get_object_at_proxy_row(self, proxy_row: int) -> ALL_DEV_TYPES | None:
+        """
+        Return the object shown at one visible proxy row.
+
+        :param proxy_row: Row index in the filtered/sorted proxy.
+        :return: Object or None.
+        """
+        source_row: int = self.get_source_row_from_proxy_row(proxy_row=proxy_row)
+        if 0 <= source_row < len(self._mdl.objects):
+            return self._mdl.objects[source_row]
+        else:
+            return None
+
+    def objects_at_proxy_rows(self, proxy_rows: List[int]) -> List[ALL_DEV_TYPES]:
+        """
+        Return objects shown at the requested visible proxy rows.
+
+        :param proxy_rows: Row indexes in the filtered/sorted proxy.
+        :return: Objects in the requested row order.
+        """
+        return self.get_objects_at_proxy_rows(proxy_rows=proxy_rows)
+
+    def get_objects_at_proxy_rows(self, proxy_rows: List[int]) -> List[ALL_DEV_TYPES]:
+        """
+        Return objects shown at the requested visible proxy rows.
+
+        :param proxy_rows: Row indexes in the filtered/sorted proxy.
+        :return: Objects in the requested row order.
+        """
+        objects: List[ALL_DEV_TYPES] = list()
+        proxy_row: int
+        for proxy_row in proxy_rows:
+            obj: ALL_DEV_TYPES | None = self.get_object_at_proxy_row(proxy_row=proxy_row)
+            if obj is not None:
+                objects.append(obj)
+            else:
+                pass
+        return objects
+
+    def get_cell_text(self, source_row: int, source_column: int) -> str:
+        """
+        Return the displayed text for one source cell.
+
+        :param source_row: Row index in the source model.
+        :param source_column: Column index in the source model.
+        :return: Display text used by exact column filters.
+        """
+        if source_row > -1 and source_column > -1:
+            index: QtCore.QModelIndex = self._mdl.index(source_row, source_column)
+            value: Any = self._mdl.data(index=index, role=QtCore.Qt.ItemDataRole.DisplayRole)
+            if value is None:
+                return ""
+            else:
+                return str(value)
+        else:
+            return ""
+
+    def get_column_filter_values(self, source_column: int) -> List[str]:
+        """
+        Return the values available for one column under the other active filters.
+
+        :param source_column: Source column index.
+        :return: Sorted distinct display values.
+        """
+        values: Set[str] = set()
+        source_row: int
+        for source_row in range(self._mdl.rowCount()):
+            if self._source_row_accepted(source_row=source_row, ignored_column=source_column):
+                values.add(self.get_cell_text(source_row=source_row, source_column=source_column))
+            else:
+                pass
+
+        return sorted(values)
+
+    def get_column_filter(self, source_column: int) -> Set[str] | None:
+        """
+        Return the active exact-value filter for one column.
+
+        :param source_column: Source column index.
+        :return: Accepted display values, or None when the column is not filtered.
+        """
+        return self._column_filters.get(source_column, None)
+
+    def set_column_filter(self, source_column: int, accepted_values: Set[str]) -> None:
+        """
+        Set the accepted exact display values for one column.
+
+        :param source_column: Source column index.
+        :param accepted_values: Accepted display values.
+        :return: None.
+        """
+        all_values: Set[str] = set(self.get_column_filter_values(source_column=source_column))
+        new_values: Set[str] = set(accepted_values)
+
+        if new_values == all_values:
+            if source_column in self._column_filters:
+                self._column_filters.pop(source_column)
+            else:
+                pass
+        else:
+            self._column_filters[source_column] = new_values
+        self.invalidate()
+
+    def clear_column_filter(self, source_column: int) -> None:
+        """
+        Remove the exact-value filter and sort state from one column.
+
+        :param source_column: Source column index.
+        :return: None.
+        """
+        if source_column in self._column_filters:
+            self._column_filters.pop(source_column)
+        else:
+            pass
+        self.invalidate()
+
+        if self.has_column_sort(source_column=source_column):
+            self.clear_column_sort()
+        else:
+            pass
+
+    def clear_all_column_filters(self) -> None:
+        """
+        Remove all exact-value column filters and sort state.
+
+        :return: None.
+        """
+        self._column_filters = dict()
+        self.invalidate()
+        self.clear_column_sort()
+
+    def has_column_filter(self, source_column: int) -> bool:
+        """
+        Check if one column has an active exact-value filter.
+
+        :param source_column: Source column index.
+        :return: True when the column is filtered.
+        """
+        return source_column in self._column_filters
+
+    def has_column_sort(self, source_column: int) -> bool:
+        """
+        Check if one column has the active sort state.
+
+        :param source_column: Source column index.
+        :return: True when the column is sorted.
+        """
+        return self._sort_column == source_column
+
+    def get_column_sort_order(self, source_column: int) -> QtCore.Qt.SortOrder | None:
+        """
+        Return the active sort order for one column.
+
+        :param source_column: Source column index.
+        :return: Sort order, or None when the column is not sorted.
+        """
+        if self._sort_column == source_column:
+            return self._sort_order
+        else:
+            return None
+
+    def clear_column_sort(self) -> None:
+        """
+        Clear the active sort state and restore source order.
+
+        :return: None.
+        """
+        self._sort_column = None
+        self._sort_order = None
+        QtCore.QSortFilterProxyModel.sort(self, -1, QtCore.Qt.SortOrder.AscendingOrder)
+
+    def _source_row_accepted(self, source_row: int, ignored_column: int | None = None) -> bool:
+        """
+        Check one source row against the smart filter and exact column filters.
+
+        :param source_row: Source row index.
+        :param ignored_column: Column whose filter is ignored while listing its values.
+        :return: True when the source row is accepted.
+        """
+        if source_row in self._allowed_rows:
+            accepted: bool = True
+            source_column: int
+            values: Set[str]
+            for source_column, values in self._column_filters.items():
+                if ignored_column is not None and source_column == ignored_column:
+                    pass
+                else:
+                    cell_text: str = self.get_cell_text(source_row=source_row, source_column=source_column)
+                    if cell_text in values:
+                        pass
+                    else:
+                        accepted = False
+            return accepted
+        else:
+            return False
 
     # ------------------------------------------------------------------  QSortFilterProxyModel
     def filterAcceptsRow(self, source_row: int,
@@ -86,7 +399,65 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
         """
         Called by Qt for every row that might be shown.
         """
-        return source_row in self._allowed_rows
+        return self._source_row_accepted(source_row=source_row)
+
+    def lessThan(self, left: QtCore.QModelIndex, right: QtCore.QModelIndex) -> bool:
+        """
+        Compare source model values for sorting.
+
+        :param left: Left source index.
+        :param right: Right source index.
+        :return: True when left sorts before right.
+        """
+        left_value: Any = self._mdl.data(index=left, role=QtCore.Qt.ItemDataRole.EditRole)
+        right_value: Any = self._mdl.data(index=right, role=QtCore.Qt.ItemDataRole.EditRole)
+        left_key: Any = self._get_sort_key(value=left_value)
+        right_key: Any = self._get_sort_key(value=right_value)
+
+        if isinstance(left_key, float) and isinstance(right_key, float):
+            return left_key < right_key
+        else:
+            return str(left_key).casefold() < str(right_key).casefold()
+
+    def _get_sort_key(self, value: Any) -> Any:
+        """
+        Normalize one model value into a comparable sort key.
+
+        :param value: Source model value.
+        :return: Numeric key when possible, otherwise display text.
+        """
+        if value is None:
+            return ""
+        else:
+            if isinstance(value, bool):
+                return str(value)
+            else:
+                if isinstance(value, (int, float)):
+                    return float(value)
+                else:
+                    if isinstance(value, Enum):
+                        return str(value)
+                    else:
+                        return value
+
+    def sort(self,
+             column: int,
+             order: QtCore.Qt.SortOrder = QtCore.Qt.SortOrder.AscendingOrder) -> None:
+        """
+        Sort the proxy and track sorting as filter-menu state.
+
+        :param column: Source column index, or -1 to clear sorting.
+        :param order: Sort order.
+        :return: None.
+        """
+        if column > -1:
+            self._sort_column = column
+            self._sort_order = order
+        else:
+            self._sort_column = None
+            self._sort_order = None
+
+        QtCore.QSortFilterProxyModel.sort(self, column, order)
 
     def get_data(self):
         """
@@ -98,14 +469,21 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
         n_cols = self.columnCount()
         data = np.empty((n_rows, n_cols), dtype=object)
 
-        for j in range(n_cols):
-            for i in self._allowed_rows:
-                data[i, j] = self._mdl.data_raw(r=i, c=j)
+        proxy_row: int
+        source_row: int
+        for proxy_row in range(n_rows):
+            source_row = self.get_source_row_from_proxy_row(proxy_row=proxy_row)
+            if source_row > -1:
+                for j in range(n_cols):
+                    data[proxy_row, j] = self._mdl.data_raw(r=source_row, c=j)
+            else:
+                pass
 
         columns = [self._mdl.headerData(section=i, orientation=QtCore.Qt.Orientation.Horizontal,
                                         role=QtCore.Qt.ItemDataRole.DisplayRole) for i in range(n_cols)]
 
-        index = [self._mdl.headerData(section=i, orientation=QtCore.Qt.Orientation.Vertical,
+        index = [self._mdl.headerData(section=self.get_source_row_from_proxy_row(proxy_row=i),
+                                      orientation=QtCore.Qt.Orientation.Vertical,
                                       role=QtCore.Qt.ItemDataRole.DisplayRole) for i in range(n_rows)]
 
         return index, columns, data
@@ -120,18 +498,21 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
         if row > -1 and col > -1:
             if self._mdl.transposed:
                 attr_name = self._mdl.attributes[row]
-                sel = self.objects[col]
+                sel = self.get_object_at_proxy_row(proxy_row=col)
             else:
                 attr_name = self._mdl.attributes[col]
-                sel = self.objects[row]
+                sel = self.get_object_at_proxy_row(proxy_row=row)
 
-            value = getattr(sel, attr_name)
-            for elm in self.objects:
-                if elm != sel:
-                    if attr_name not in self._mdl.non_editable_attributes:
-                        setattr(elm, attr_name, value)
-                    else:
-                        pass  # the column cannot be edited
+            if sel is not None:
+                value = getattr(sel, attr_name)
+                for elm in self.objects:
+                    if elm != sel:
+                        if attr_name not in self._mdl.non_editable_attributes:
+                            setattr(elm, attr_name, value)
+                        else:
+                            pass  # the column cannot be edited
+            else:
+                pass
 
     def copy_to_clipboard(self):
         """
@@ -155,6 +536,113 @@ class ObjectModelFilterProxy(QtCore.QSortFilterProxyModel):
             cb = QtWidgets.QApplication.clipboard()
             cb.clear()
             cb.setText(txt)
+
+    def parse_clipboard_value(self, value: str, column: int) -> float | int | bool | str | None:
+        """
+        Parse one clipboard cell for the target column type.
+
+        :param value: Clipboard cell text.
+        :param column: Proxy column index.
+        :return: Parsed value, or None when the target column is unsupported or the value is invalid.
+        """
+        parsed_value: float | int | bool | str | None
+
+        if 0 <= column < len(self._mdl.attribute_types):
+            tpe: object = self._mdl.attribute_types[column]
+
+            if tpe is float:
+                parsed_value = parse_float_text(value=value)
+            else:
+                if tpe is int:
+                    try:
+                        parsed_value = int(value)
+                    except ValueError:
+                        parsed_value = None
+                else:
+                    if tpe is bool:
+                        parsed_value = parse_bool_text(value=value)
+                    else:
+                        if tpe is str:
+                            parsed_value = value
+                        else:
+                            parsed_value = None
+        else:
+            parsed_value = None
+
+        return parsed_value
+
+    def paste_from_clipboard(self,
+                             row_idx: int = 0,
+                             col_idx: int = 0,
+                             selected_rows: List[int] | None = None,
+                             selected_cols: List[int] | None = None) -> int:
+        """
+        Paste spreadsheet values into editable scalar object columns.
+
+        :param row_idx: Proxy row where the paste starts.
+        :param col_idx: Proxy column where the paste starts.
+        :param selected_rows: Selected proxy rows used for single-cell fill.
+        :param selected_cols: Selected proxy columns used for single-cell fill.
+        :return: Number of pasted cells.
+        """
+        cb: QtGui.QClipboard = QtWidgets.QApplication.clipboard()
+        text: str = cb.text()
+        rows: List[str] = [line for line in text.splitlines() if len(line) > 0]
+        parsed_rows: List[List[str]] = list()
+        pasted_cells: int = 0
+
+        for row in rows:
+            parsed_rows.append(row.split('\t'))
+
+        if len(parsed_rows) == 0:
+            return pasted_cells
+        else:
+            pass
+
+        if (len(parsed_rows) == 1 and len(parsed_rows[0]) == 1 and
+                selected_rows is not None and selected_cols is not None and
+                len(selected_rows) * len(selected_cols) > 1):
+            value: float | int | bool | str | None
+            selected_row: int
+            selected_col: int
+
+            for selected_row in selected_rows:
+                for selected_col in selected_cols:
+                    value = self.parse_clipboard_value(value=parsed_rows[0][0], column=selected_col)
+                    if value is not None:
+                        index: QtCore.QModelIndex = self.index(selected_row, selected_col)
+                        if index.isValid() and bool(self.flags(index) & QtCore.Qt.ItemFlag.ItemIsEditable):
+                            self.setData(index, value, QtCore.Qt.ItemDataRole.EditRole)
+                            pasted_cells += 1
+                        else:
+                            pass
+                    else:
+                        pass
+        else:
+            values: List[str]
+            cell_text: str
+            paste_row: int
+            paste_col: int
+            parsed_value: float | int | bool | str | None
+            row_number: int
+            col_number: int
+
+            for row_number, values in enumerate(parsed_rows):
+                paste_row = row_idx + row_number
+                for col_number, cell_text in enumerate(values):
+                    paste_col = col_idx + col_number
+                    parsed_value = self.parse_clipboard_value(value=cell_text, column=paste_col)
+                    if parsed_value is not None:
+                        target_index: QtCore.QModelIndex = self.index(paste_row, paste_col)
+                        if target_index.isValid() and bool(self.flags(target_index) & QtCore.Qt.ItemFlag.ItemIsEditable):
+                            self.setData(target_index, parsed_value, QtCore.Qt.ItemDataRole.EditRole)
+                            pasted_cells += 1
+                        else:
+                            pass
+                    else:
+                        pass
+
+        return pasted_cells
 
     def set_time_index(self, time_index: int | None):
         """

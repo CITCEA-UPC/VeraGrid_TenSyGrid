@@ -12,7 +12,6 @@ from PySide6 import QtWidgets
 import VeraGrid.Gui.gui_functions as gf
 import VeraGrid.Session.file_handler as filedrv
 from VeraGrid.Gui.FileDialogues.PsseDialogue.psse_export_gui import Ui_PsseExportDialog
-from VeraGrid.Gui.general_dialogues import LogsDialogue
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.enumerations import FileType, PsseTopologyExportMode, PsseExportMode
 
@@ -36,13 +35,12 @@ class PsseExportDialogue(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
         self.ui = Ui_PsseExportDialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('PSS/e export')
+        self.setWindowTitle(self.tr('PSS/e export'))
         self.setModal(True)
 
         self.app: IoMain = app
 
         self.logger: Logger = Logger()
-        self.logs_dialogue: LogsDialogue | None = None
 
         self.psse_export_modes: list[PsseExportMode] = [
             PsseExportMode.SingleFile,
@@ -259,7 +257,7 @@ class PsseExportDialogue(QtWidgets.QDialog):
         default_name: str = os.path.join(self.app.project_directory, self.app.ui.grid_name_line_edit.text())
         file_filter: str = self.get_dialogue_file_filter(export_mode=export_mode, file_tpe=file_tpe)
         selected_file_name, type_selected = QtWidgets.QFileDialog.getSaveFileName(self,
-                                                                                   'Export to PSS/e',
+                                                                                   self.tr('Export to PSS/e'),
                                                                                    default_name,
                                                                                    file_filter)
 

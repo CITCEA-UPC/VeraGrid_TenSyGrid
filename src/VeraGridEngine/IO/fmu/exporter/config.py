@@ -6,9 +6,12 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-import platform
 import re
 import uuid
+
+from VeraGridEngine.enumerations import FmiVersion
+from VeraGridEngine.IO.fmu.export_platform import TargetPlatform, detect_target_platform, library_suffix
+from VeraGridEngine.IO.fmu.versions import normalize_fmi_export_version
 
 
 class InterfaceType(str, Enum):
@@ -27,50 +30,6 @@ class IntegrationMethod(str, Enum):
     BACKWARD_EULER = "backward_euler"
     TRAPEZOIDAL = "trapezoidal"
     BDF2 = "bdf2"
-
-
-class TargetPlatform(str, Enum):
-    """
-    FMI binary folders supported by the exporter.
-    """
-
-    WIN64 = "win64"
-    LINUX64 = "linux64"
-    DARWIN64 = "darwin64"
-
-
-def detect_target_platform() -> TargetPlatform:
-    """
-    Detect the current host platform using the FMI binary-folder naming convention.
-
-    :return: Host target platform.
-    """
-
-    system_name: str = platform.system().lower()
-    if system_name == "windows":
-        return TargetPlatform.WIN64
-    else:
-        if system_name == "darwin":
-            return TargetPlatform.DARWIN64
-        else:
-            return TargetPlatform.LINUX64
-
-
-def library_suffix(target_platform: TargetPlatform) -> str:
-    """
-    Return the shared-library suffix used by one FMI binary folder.
-
-    :param target_platform: Target FMI binary platform.
-    :return: Shared-library suffix.
-    """
-
-    if target_platform == TargetPlatform.WIN64:
-        return ".dll"
-    else:
-        if target_platform == TargetPlatform.DARWIN64:
-            return ".dylib"
-        else:
-            return ".so"
 
 
 def sanitize_identifier(name: str) -> str:
@@ -114,6 +73,7 @@ class ExportConfig:
     __slots__ = (
         "model_name",
         "output_path",
+        "fmi_version",
         "guid",
         "interface_type",
         "target_platform",
@@ -148,7 +108,8 @@ class ExportConfig:
                  include_export_model_resource: bool = True,
                  compile_binary: bool = True,
                  max_newton_iterations: int = 10,
-                 newton_tolerance: float = 1e-9) -> None:
+                 newton_tolerance: float = 1e-9,
+                 fmi_version: FmiVersion | str = FmiVersion.FMI_2_0) -> None:
         """
         Build one explicit FMU export configuration.
 
@@ -169,11 +130,13 @@ class ExportConfig:
         :param compile_binary: Compile the FMU binary.
         :param max_newton_iterations: Maximum nonlinear iterations in the runtime solver.
         :param newton_tolerance: Nonlinear solver tolerance.
+        :param fmi_version: Canonical FMI family selected for export.
         :return: None.
         """
 
         self.model_name: str = model_name
         self.output_path: Path = Path(output_path)
+        self.fmi_version: FmiVersion = normalize_fmi_export_version(fmi_version)
         if guid is None:
             self.guid: str = build_export_guid()
         else:
@@ -210,6 +173,16 @@ class ExportConfig:
         :return: None.
         """
 
+        if self.fmi_version in (
+            FmiVersion.FMI_1_0,
+            FmiVersion.FMI_2_0,
+            FmiVersion.FMI_3_0,
+        ):
+            pass
+        else:
+            raise NotImplementedError(
+                f"FMI {self.fmi_version.value} Co-Simulation export is not connected yet"
+            )
         if self.fixed_step <= 0.0:
             raise ValueError("fixed_step must be positive")
         else:

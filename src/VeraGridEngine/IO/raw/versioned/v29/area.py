@@ -10,6 +10,7 @@ from VeraGridEngine.IO.raw.versioned.base.area import RawArea
 
 class RawAreaV29(RawArea):
     """PSSE v29 typed object."""
+    __slots__ = ()
 
     def parse(self, data: List[List[str | int | float]], version: int, logger: Logger):
         self.version = version

@@ -6,6 +6,17 @@ from VeraGridEngine.IO.iidm.devices.iidm_object import IidmObject, Unit
 
 
 class IidmDanglingLine(IidmObject):
+    __slots__ = (
+        "id",
+        "bus",
+        "p0",
+        "q0",
+        "u0",
+        "r",
+        "x",
+        "g",
+        "b",
+    )
     def __init__(self, _id: str, bus: str, p0: float, q0: float, u0: float, r: float, x: float, g: float, b: float):
         super().__init__("DanglingLine")
         self.id = _id

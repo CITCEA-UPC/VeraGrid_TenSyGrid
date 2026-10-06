@@ -14,10 +14,33 @@ from VeraGridEngine.basic_structures import Logger
 
 
 class EurostagCircuit:
-    def __init__(self):
-        self.name = ""
-        self.ech_file_name = ""
-        self.dta_file_name = ""
+    """
+    Eurostag circuit container class.
+    """
+
+    __slots__ = (
+        "name",
+        "ech_file_name",
+        "dta_file_name",
+        "general_parameters",
+        "nodes",
+        "slack_buses",
+        "lines",
+        "coupling_devices",
+        "loads",
+        "capacitor_banks",
+        "generators",
+        "dynamic_generators",
+        "type1_transformers",
+        "type8_transformers",
+        "Sbase",
+        "logger",
+    )
+
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.ech_file_name: str = ""
+        self.dta_file_name: str = ""
 
         self.general_parameters: EurostagGeneralParameters | None = None
         self.nodes: list[EurostagNode] = []
@@ -31,8 +54,8 @@ class EurostagCircuit:
         self.type1_transformers: list[EurostagType1Transformer] = []
         self.type8_transformers: list[EurostagType8Transformer] = []
 
-        self.Sbase = 100.0
-        self.logger = Logger()
+        self.Sbase: float = 100.0
+        self.logger: Logger = Logger()
 
     @staticmethod
     def check_file_extension(f_name: str) -> bool:

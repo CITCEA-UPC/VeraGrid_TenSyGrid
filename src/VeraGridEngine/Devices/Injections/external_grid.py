@@ -7,7 +7,6 @@ from __future__ import annotations
 from typing import Union, Tuple
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from VeraGridEngine.enumerations import DeviceType, BuildStatus, ExternalGridMode, PrpCat, ParamPowerFlowReferenceType
 from VeraGridEngine.Devices.Parents.load_parent import LoadParent
 from VeraGridEngine.Devices.Profiles import ProfileFloat
@@ -165,55 +164,6 @@ class ExternalGrid(LoadParent):
         """
         return get_at(self.Va, self.Va_prof, t)
 
-    def plot_profiles(self, time=None, show_fig=True):
-        """
-        Plot the time series results of this object
-        :param time: array of time values
-        :param show_fig: Show the figure?
-        """
-
-        if time is not None:
-            fig = plt.figure(figsize=(12, 8))
-
-            ax_1 = fig.add_subplot(211)
-            ax_2 = fig.add_subplot(212)
-
-            if self.mode == ExternalGridMode.VD:
-                y1 = self.Vm_prof.toarray()
-                title_1 = 'Voltage module'
-                units_1 = 'p.u'
-
-                y2 = self.Va_prof.toarray()
-                title_2 = 'Voltage angle'
-                units_2 = 'radians'
-
-            elif self.mode == ExternalGridMode.PQ:
-                y1 = self.P_prof.toarray()
-                title_1 = 'Active Power'
-                units_1 = 'MW'
-
-                y2 = self.Q_prof.toarray()
-                title_2 = 'Reactive power'
-                units_2 = 'MVAr'
-
-            else:
-                raise Exception('Unrecognised external grid mode: ' + str(self.mode))
-
-            ax_1.set_title(title_1, fontsize=14)
-            ax_1.set_ylabel(units_1, fontsize=11)
-            df = pd.DataFrame(data=y1, index=time, columns=[self.name])
-            df.plot(ax=ax_1)
-
-            df = pd.DataFrame(data=y2, index=time, columns=[self.name])
-            ax_2.set_title(title_2, fontsize=14)
-            ax_2.set_ylabel(units_2, fontsize=11)
-            df.plot(ax=ax_2)
-
-            plt.legend()
-            fig.suptitle(self.name, fontsize=20)
-
-            if show_fig:
-                plt.show()
 
     # Scalar property accessors coerce assignments to the declared schema types.
 

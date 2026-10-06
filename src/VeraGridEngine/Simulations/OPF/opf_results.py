@@ -6,12 +6,10 @@
 
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-import matplotlib.colors as plt_colors
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
 from VeraGridEngine.basic_structures import IntVec, Vec, StrVec, CxVec
-from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType
+from VeraGridEngine.enumerations import StudyResultsType, ResultTypes, DeviceType, ResultTablePlotType
 
 
 class OptimalPowerFlowResults(ResultsTemplate):
@@ -59,6 +57,7 @@ class OptimalPowerFlowResults(ResultsTemplate):
         ResultsProperty(name='shunt_like_reactive_power', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='fluid_node_p2x_flow', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='fluid_node_current_level', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='fluid_node_fluid_value', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='fluid_node_spillage', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='fluid_node_flow_in', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='fluid_node_flow_out', tpe=Vec, old_names=list(), expandable=False),
@@ -121,6 +120,7 @@ class OptimalPowerFlowResults(ResultsTemplate):
         "battery_power",
         "fluid_node_p2x_flow",
         "fluid_node_current_level",
+        "fluid_node_fluid_value",
         "fluid_node_spillage",
         "fluid_node_flow_in",
         "fluid_node_flow_out",
@@ -285,6 +285,7 @@ class OptimalPowerFlowResults(ResultsTemplate):
 
         self.fluid_node_p2x_flow = np.zeros(n_fluid_node, dtype=float)  # m3
         self.fluid_node_current_level = np.zeros(n_fluid_node, dtype=float)  # m3
+        self.fluid_node_fluid_value = np.zeros(n_fluid_node, dtype=float)
         self.fluid_node_spillage = np.zeros(n_fluid_node, dtype=float)  # m3/s
         self.fluid_node_flow_in = np.zeros(n_fluid_node, dtype=float)  # m3/s
         self.fluid_node_flow_out = np.zeros(n_fluid_node, dtype=float)  # m3/s
@@ -845,18 +846,8 @@ class OptimalPowerFlowResults(ResultsTemplate):
         elif result_type == ResultTypes.BusVoltagePolarPlot:
             vm = np.abs(self.voltage)
             va = np.angle(self.voltage, deg=True)
-            va_rad = np.angle(self.voltage, deg=False)
             data = np.c_[vm, va]
 
-            if self.plotting_allowed():
-                plt.ion()
-                color_norm = plt_colors.LogNorm()
-                fig = plt.figure(figsize=(8, 6))
-                ax3 = plt.subplot(1, 1, 1, projection='polar')
-                sc3 = ax3.scatter(va_rad, vm, c=vm, norm=color_norm)
-                fig.suptitle(result_type.value)
-                plt.tight_layout()
-                plt.show()
 
             return ResultsTable(data=data,
                                 index=self.bus_names,
@@ -865,6 +856,7 @@ class OptimalPowerFlowResults(ResultsTemplate):
                                 cols_device_type=DeviceType.NoDevice,
                                 title=result_type.value,
                                 ylabel='(p.u., deg)',
+                                plot_type=ResultTablePlotType.POLAR,
                                 units='(p.u., deg)')
 
         else:

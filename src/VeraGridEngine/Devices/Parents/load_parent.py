@@ -7,7 +7,6 @@ from __future__ import annotations
 from typing import Union, Tuple
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.enumerations import BuildStatus, DeviceType, PrpCat, ParamPowerFlowReferenceType
 from VeraGridEngine.basic_structures import CxVec
@@ -47,7 +46,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Active power',
             profile_name='P_prof',
-            cat=[PrpCat.PF],
+            cat=[PrpCat.PF, PrpCat.OPF, PrpCat.NTC],
             dyn_ref=ParamPowerFlowReferenceType.Pl0,
         ),
         GCProp(
@@ -56,7 +55,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Phase A active power',
             profile_name='Pa_prof',
-            cat=[PrpCat.PF3],
+            cat=[PrpCat.PF3, PrpCat.EMT],
             dyn_ref=ParamPowerFlowReferenceType.Pl0_A,
         ),
         GCProp(
@@ -65,7 +64,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Phase B active power',
             profile_name='Pb_prof',
-            cat=[PrpCat.PF3],
+            cat=[PrpCat.PF3, PrpCat.EMT],
             dyn_ref=ParamPowerFlowReferenceType.Pl0_B,
         ),
         GCProp(
@@ -74,7 +73,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Phase C active power',
             profile_name='Pc_prof',
-            cat=[PrpCat.PF3],
+            cat=[PrpCat.PF3, PrpCat.EMT],
             dyn_ref=ParamPowerFlowReferenceType.Pl0_C,
         ),
         GCProp(
@@ -83,7 +82,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Reactive power',
             profile_name='Q_prof',
-            cat=[PrpCat.PF],
+            cat=[PrpCat.PF, PrpCat.OPF, PrpCat.NTC],
             dyn_ref=ParamPowerFlowReferenceType.Ql0,
         ),
         GCProp(
@@ -101,7 +100,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Phase B reactive power',
             profile_name='Qb_prof',
-            cat=[PrpCat.PF3],
+            cat=[PrpCat.PF3, PrpCat.EMT],
             dyn_ref=ParamPowerFlowReferenceType.Ql0_B,
         ),
         GCProp(
@@ -110,7 +109,7 @@ class LoadParent(InjectionParent):
             tpe=float,
             definition='Phase C reactive power',
             profile_name='Qc_prof',
-            cat=[PrpCat.PF3],
+            cat=[PrpCat.PF3, PrpCat.EMT],
             dyn_ref=ParamPowerFlowReferenceType.Ql0_C,
         ),
     )
@@ -457,38 +456,6 @@ class LoadParent(InjectionParent):
         self.Qb = self.Q * share_b
         self.Qc = self.Q * share_c
 
-    def plot_profiles(self, time=None, show_fig=True):
-        """
-        Plot the time series results of this object
-        :param time: array of time values
-        :param show_fig: Show the figure?
-        """
-
-        if time is not None:
-            fig = plt.figure(figsize=(12, 8))
-
-            ax_1 = fig.add_subplot(211)
-            ax_2 = fig.add_subplot(212, sharex=ax_1)
-
-            # P
-            y = self.P_prof.toarray()
-            df = pd.DataFrame(data=y, index=time, columns=[self.name])
-            ax_1.set_title('Active power', fontsize=14)
-            ax_1.set_ylabel('MW', fontsize=11)
-            df.plot(ax=ax_1)
-
-            # Q
-            y = self.Q_prof.toarray()
-            df = pd.DataFrame(data=y, index=time, columns=[self.name])
-            ax_2.set_title('Reactive power', fontsize=14)
-            ax_2.set_ylabel('MVAr', fontsize=11)
-            df.plot(ax=ax_2)
-
-            plt.legend()
-            fig.suptitle(self.name, fontsize=20)
-
-            if show_fig:
-                plt.show()
 
     def __iadd__(self, other: "LoadParent"):
         """

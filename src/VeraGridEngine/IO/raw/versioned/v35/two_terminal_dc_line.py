@@ -8,6 +8,7 @@ from VeraGridEngine.IO.raw.versioned.v34.two_terminal_dc_line import RawTwoTermi
 
 class RawTwoTerminalDCLineV35(RawTwoTerminalDCLineV34):
     """PSSE v35 typed object inheriting v34."""
+    __slots__ = ()
 
     def parse(self, data, version, logger: Logger):
         super().parse(data=data, version=version, logger=logger)

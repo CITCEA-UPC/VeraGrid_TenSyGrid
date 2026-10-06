@@ -4,18 +4,19 @@
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
 import numba as nb
-from matplotlib import pyplot as plt
 from typing import Union
 
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Simulations.PowerFlow.power_flow_options import PowerFlowOptions
 from VeraGridEngine.Simulations.results_table import ResultsTable
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
-from VeraGridEngine.enumerations import ResultTypes, DeviceType, SimulationTypes, StudyResultsType
+from VeraGridEngine.enumerations import (ResultTypes, DeviceType, StudyResultsType, SimulationTypes,
+                                         ShuntControlMode, GeneratorControlMode)
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Compilers.circuit_to_data import compile_numerical_circuit_at
 from VeraGridEngine.Simulations.PowerFlow.NumericalMethods.helm_power_flow import (helm_coefficients_josep,
                                                                                    sigma_function)
+from VeraGridEngine.Simulations.SigmaAnalysis.sigma_dpr import DprSigmaResult, sigma_dpr
 from VeraGridEngine.Simulations.driver_template import DriverTemplate
 from VeraGridEngine.basic_structures import Vec, StrVec, CxVec
 
@@ -108,74 +109,8 @@ class SigmaAnalysisResults(ResultsTemplate):
 
         self.converged = self.converged & results.converged
 
-    def plot(self, fig, ax, n_points=1000):
-        """
-        Plot the sigma analysis
-        :param fig: Matplotlib figure. If None, one will be created
-        :param ax: Matplotlib Axis
-        :param n_points: number of points in the curve
-        """
-        if ax is None:
-            fig = plt.figure(figsize=(8, 7))
-            ax = fig.add_subplot(111)
 
-        sx = np.linspace(-0.25, np.max(self.sigma_re) + 0.1, n_points)
-        sy1 = np.sqrt(0.25 + sx)
-        sy2 = -np.sqrt(0.25 + sx)
-        names = self.bus_names
-
-        ax.plot(sx, sy1, 'k', linewidth=2)
-        ax.plot(sx, sy2, 'k', linewidth=2)
-
-        d = np.abs(np.nan_to_num(self.distances))
-        colors = (d / d.max())
-        area = 100.0 * np.power(1.0 + d, 2)
-
-        if self.converged:
-            cmap = 'winter'
-        else:
-            cmap = 'autumn'
-
-        sc = ax.scatter(self.sigma_re, self.sigma_im, c=colors, s=area, cmap=cmap, alpha=0.75)
-
-        annot = ax.annotate("", xy=(0, 0), xytext=(20, 20),
-                            textcoords="offset points",
-                            bbox=dict(boxstyle="round", fc="w"),
-                            arrowprops=dict(arrowstyle="->"),
-                            fontsize=8)
-        annot.set_visible(False)
-
-        ax.set_title(r'$\Sigma$ plot')
-        ax.set_xlabel(r'$\sigma_{re}$')
-        ax.set_ylabel(r'$\sigma_{im}$')
-
-        def update_annotation(ind):
-            """
-
-            :param ind:
-            :return:
-            """
-            pos = sc.get_offsets()[ind["ind"][0]]
-            annot.xy = pos
-            text = "{}".format("\n".join([names[n] for n in ind["ind"]]))
-            annot.set_text(text)
-            annot.get_bbox_patch().set_alpha(0.8)
-
-        def hover(event):
-            if event.inaxes == ax:
-                cont, ind = sc.contains(event)
-                if cont:
-                    update_annotation(ind)
-                    annot.set_visible(True)
-                    fig.canvas.draw_idle()
-                else:
-                    if annot.get_visible():
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
-
-        fig.canvas.mpl_connect("motion_notify_event", hover)
-
-    def mdl(self, result_type: ResultTypes, indices=None, names=None) -> Union[None, "ResultsTable"]:
+    def mdl(self, result_type: ResultTypes, indices=None, names=None) -> ResultsTable | None:
         """
 
         :param result_type:
@@ -256,19 +191,36 @@ class SigmaAnalysisResults(ResultsTemplate):
 
 def multi_island_sigma(multi_circuit: MultiCircuit,
                        options: PowerFlowOptions,
-                       logger=Logger()) -> "SigmaAnalysisResults":
+                       logger: Logger = Logger(),
+                       t_idx: int | None = None,
+                       classical_sigma: bool = False,
+                       dpr_use_stored_guess: bool = True,
+                       dpr_control_q: bool | None = None,
+                       dpr_control_discrete_shunts: bool = True,
+                       dpr_control_qv_droop: bool = True,
+                       dpr_distributed_slack: bool | None = None) -> SigmaAnalysisResults:
     """
     Multiple islands power flow (this is the most generic power flow function)
     :param multi_circuit: MultiCircuit instance
     :param options: PowerFlowOptions instance
     :param logger: list of events to add to
+    :param t_idx: Time-series index to compile. None uses the snapshot values.
+    :param classical_sigma: Use the original single-embedding HELM sigma instead of DPR path sigma.
+    :param dpr_use_stored_guess: Use stored voltages as DPR initial germ instead of the classical no-load germ.
+    :param dpr_control_q: Apply PV/P reactive limit control in DPR sigma. If None, use the power-flow option.
+    :param dpr_control_discrete_shunts: Apply discrete shunt controls in DPR sigma.
+    :param dpr_control_qv_droop: Apply generator QV droop controls in DPR sigma.
+    :param dpr_distributed_slack: Apply distributed slack in DPR sigma. If None, use the power-flow option.
     :return: PowerFlowResults instance
     """
     n = len(multi_circuit.buses)
+    active_control_q: bool = options.control_Q if dpr_control_q is None else dpr_control_q
+    active_distributed_slack: bool = options.distributed_slack if dpr_distributed_slack is None else dpr_distributed_slack
 
     results = SigmaAnalysisResults(n)
 
     nc = compile_numerical_circuit_at(circuit=multi_circuit,
+                                      t_idx=t_idx,
                                       apply_temperature=options.apply_temperature_correction,
                                       branch_tolerance_mode=options.branch_impedance_tolerance_mode,
                                       opf_results=None,
@@ -321,14 +273,23 @@ def multi_island_sigma(multi_circuit: MultiCircuit,
 
         S0 = island.get_power_injections_pu()
         Sbus = S0 + Shvdc[island.bus_data.original_idx]
-        indices = island.get_simulation_indices(Sbus=Sbus, force_only_pq_pv_vd_types=True)
+        if classical_sigma:
+            indices = island.get_simulation_indices(Sbus=Sbus, force_only_pq_pv_vd_types=True)
+        else:
+            # DPR sigma can use the same remote-voltage and control-aware bus partitions as DPR power flow.
+            indices = island.get_simulation_indices(Sbus=Sbus, force_only_pq_pv_vd_types=False)
 
         if len(indices.vd) > 0:
 
             adm = island.get_admittance_matrices()
             adms = island.get_series_admittance_matrices()
 
-            if len(indices.pv) + len(indices.pq) + len(indices.vd) == island.nbus:
+            if classical_sigma:
+                run_classical_sigma: bool = len(indices.pv) + len(indices.pq) + len(indices.vd) == island.nbus
+            else:
+                run_classical_sigma = False
+
+            if run_classical_sigma:
 
                 # V, converged, norm_f, Scalc, iter_, elapsed, Sig_re, Sig_im
                 U, X, Q, V, iter_, converged = helm_coefficients_josep(Ybus=adm.Ybus,
@@ -361,7 +322,6 @@ def multi_island_sigma(multi_circuit: MultiCircuit,
                         sig_im = np.zeros(n, dtype=float)
                 except np.linalg.LinAlgError:
                     print('numpy.linalg.LinAlgError: Matrix is singular to machine precision.')
-                    # sigma = np.zeros(n, dtype=complex)
                     sig_re = np.zeros(n, dtype=float)
                     sig_im = np.zeros(n, dtype=float)
 
@@ -379,7 +339,57 @@ def multi_island_sigma(multi_circuit: MultiCircuit,
                 # merge the results from this island
                 results.apply_from_island(island_results, island.bus_data.original_idx)
             else:
-                logger.add_info("Handled bus types don't match")
+                if classical_sigma:
+                    logger.add_info("Handled bus types don't match")
+                else:
+                    # DPR sigma follows the controlled DPR power-flow path. Control changes are model restarts, so the
+                    # sigma values are computed from the accepted DPR segments of the final settled controlled model.
+                    Qmax: Vec
+                    Qmin: Vec
+                    Qmax, Qmin = island.get_reactive_power_limits()
+                    dpr_result: DprSigmaResult = sigma_dpr(
+                        nc=island,
+                        Ybus=adm.Ybus,
+                        Yshunt_bus=adm.Yshunt_bus,
+                        Yseries=adms.Yseries,
+                        V0=island.bus_data.Vbus,
+                        S0=Sbus,
+                        Ysh0=adms.Yshunt,
+                        pq=indices.pq,
+                        pv=indices.pv,
+                        vd=indices.vd,
+                        no_slack=indices.no_slack,
+                        tolerance=options.tolerance,
+                        max_coefficients=options.max_iter,
+                        restart_order=6,
+                        max_restarts=20,
+                        use_classical_germ=not dpr_use_stored_guess,
+                        control_q=active_control_q,
+                        pqv=indices.pqv,
+                        p=indices.p,
+                        Qmin=Qmin,
+                        Qmax=Qmax,
+                        control_discrete_shunts=bool(dpr_control_discrete_shunts and np.any(
+                            island.shunt_data.control_mode_int == ShuntControlMode.Discrete.idx())),
+                        control_qv_droop=bool(dpr_control_qv_droop and np.any(
+                            island.generator_data.control_mode_int == GeneratorControlMode.QVDroop.idx())),
+                        distributed_slack=active_distributed_slack,
+                        bus_installed_power=island.bus_data.installed_power,
+                        controls_tol=options.controls_start_tolerance,
+                        verbose=0,
+                        logger=logger
+                    )
+
+                    island_results = SigmaAnalysisResults(n=island.bus_data.nbus)
+                    island_results.lambda_value = 1.0
+                    island_results.Sbus = Sbus
+                    island_results.sigma_re = dpr_result.sigma_re
+                    island_results.sigma_im = dpr_result.sigma_im
+                    island_results.distances = dpr_result.distances
+                    island_results.converged = dpr_result.converged
+
+                    # merge the results from this island
+                    results.apply_from_island(island_results, island.bus_data.original_idx)
         else:
             logger.add_info('No slack nodes in the island', str(i))
 
@@ -460,22 +470,52 @@ def sigma_distance(sigma_real, sigma_imag) -> Vec:
 class SigmaAnalysisDriver(DriverTemplate):
     __slots__ = (
         "options",
+        "t_idx",
+        "classical_sigma",
+        "dpr_use_stored_guess",
+        "dpr_control_q",
+        "dpr_control_discrete_shunts",
+        "dpr_control_qv_droop",
+        "dpr_distributed_slack",
         "convergence_reports",
     )
 
     name = 'Sigma Analysis'
     tpe = SimulationTypes.SigmaAnalysis_run
 
-    def __init__(self, grid: MultiCircuit, options: PowerFlowOptions):
+    def __init__(self,
+                 grid: MultiCircuit,
+                 options: PowerFlowOptions,
+                 t_idx: int | None = None,
+                 classical_sigma: bool = False,
+                 dpr_use_stored_guess: bool = True,
+                 dpr_control_q: bool | None = None,
+                 dpr_control_discrete_shunts: bool = True,
+                 dpr_control_qv_droop: bool = True,
+                 dpr_distributed_slack: bool | None = None):
         """
         PowerFlowDriver class constructor
         :param grid: MultiCircuit instance
         :param options: PowerFlowOptions instance
+        :param t_idx: Time-series index to compile. None uses the snapshot values.
+        :param classical_sigma: Use the original single-embedding HELM sigma instead of DPR path sigma.
+        :param dpr_use_stored_guess: Use stored voltages as DPR initial germ instead of the classical no-load germ.
+        :param dpr_control_q: Apply PV/P reactive limit control in DPR sigma. If None, use the power-flow option.
+        :param dpr_control_discrete_shunts: Apply discrete shunt controls in DPR sigma.
+        :param dpr_control_qv_droop: Apply generator QV droop controls in DPR sigma.
+        :param dpr_distributed_slack: Apply distributed slack in DPR sigma. If None, use the power-flow option.
         """
         DriverTemplate.__init__(self, grid=grid)
 
         # Options to use
         self.options = options
+        self.t_idx = t_idx
+        self.classical_sigma = classical_sigma
+        self.dpr_use_stored_guess = dpr_use_stored_guess
+        self.dpr_control_q = dpr_control_q
+        self.dpr_control_discrete_shunts = dpr_control_discrete_shunts
+        self.dpr_control_qv_droop = dpr_control_qv_droop
+        self.dpr_distributed_slack = dpr_distributed_slack
 
         self.results: Union[None, SigmaAnalysisResults] = None
 
@@ -498,9 +538,17 @@ class SigmaAnalysisDriver(DriverTemplate):
         :return:
         """
         self.tic()
+        self.report_text("Compiling and configuring...")
         self.results = multi_island_sigma(multi_circuit=self.grid,
                                           options=self.options,
-                                          logger=self.logger)
+                                          logger=self.logger,
+                                          t_idx=self.t_idx,
+                                          classical_sigma=self.classical_sigma,
+                                          dpr_use_stored_guess=self.dpr_use_stored_guess,
+                                          dpr_control_q=self.dpr_control_q,
+                                          dpr_control_discrete_shunts=self.dpr_control_discrete_shunts,
+                                          dpr_control_qv_droop=self.dpr_control_qv_droop,
+                                          dpr_distributed_slack=self.dpr_distributed_slack)
         self.toc()
 
     def cancel(self):

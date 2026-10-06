@@ -6,4 +6,5 @@ from VeraGridEngine.IO.raw.versioned.v29.substation import RawSubstationV29
 
 class RawSubstationV30(RawSubstationV29):
     """PSSE v30 typed object inheriting v29."""
+    __slots__ = ()
     pass

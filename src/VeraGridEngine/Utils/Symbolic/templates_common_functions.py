@@ -5,16 +5,1485 @@
 
 from __future__ import annotations
 #
-from typing import Any, List
+from typing import Any, List, Dict, Iterable, NamedTuple
 #
-from VeraGridEngine.enumerations import VarPowerFlowReferenceType
+from VeraGridEngine.enumerations import ParamPowerFlowReferenceType, VarPowerFlowReferenceType
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 
-from VeraGridEngine.Utils.Symbolic.block import Block, Var
+from VeraGridEngine.Utils.Symbolic.block import (Block,
+                                                 Var,
+                                                 Const,
+                                                 find_matching_dynamic_connection_intent,
+                                                 normalize_dynamic_connection_intents,
+                                                 rehash_block_tree_var_keyed_dicts)
+from VeraGridEngine.Utils.Symbolic.dynamic_connection_intent import (DynamicConnectionIntent,
+                                                                     DynamicConnectionIntentDirection,
+                                                                     DynamicConnectionIntentOrigin)
 from VeraGridEngine.enumerations import DeviceType
 from VeraGridEngine.Utils.Symbolic.bus_rms_template import initialize_bus_rms
-from VeraGridEngine.Utils.Symbolic.bus_emt_template import BusEmtTemplate
+from VeraGridEngine.Utils.Symbolic.bus_emt_template import (BusEmtTemplate,
+                                                           get_bus_emt_template,
+                                                           get_bus_mask,
+                                                           get_bus_emt_algebraic_vars)
 from VeraGridEngine.Devices.Parents.dynamic_bus_parent import EmtBusConnectionSide, EmtBusConnectedModelRecord
+
+
+def _find_block_by_uid(root_block: Block,
+                       block_uid: int) -> Block | None:
+    """
+    Return one child block by UID from one symbolic block tree.
+
+    :param root_block: Root block to inspect.
+    :param block_uid: Block UID to locate.
+    :return: Matching block or ``None``.
+    """
+    candidate_block: Block
+
+    for candidate_block in root_block.get_all_blocks():
+        if candidate_block.uid == block_uid:
+            return candidate_block
+        else:
+            pass
+
+    return None
+
+
+def _find_root_var_by_ref(root_block: Block,
+                          reference: VarPowerFlowReferenceType,
+                          direction: DynamicConnectionIntentDirection) -> Var | None:
+    """
+    Return one root interface variable by semantic reference and direction.
+
+    :param root_block: Root block to inspect.
+    :param reference: Desired root reference.
+    :param direction: Root-interface direction.
+    :return: Matching variable or ``None``.
+    """
+    candidate_var: Var
+
+    if direction == DynamicConnectionIntentDirection.INPUT:
+        for candidate_var in root_block.in_vars:
+            if candidate_var.ref == reference:
+                return candidate_var
+            else:
+                pass
+    else:
+        if direction == DynamicConnectionIntentDirection.OUTPUT:
+            for candidate_var in root_block.out_vars:
+                if candidate_var.ref == reference:
+                    return candidate_var
+                else:
+                    pass
+        else:
+            pass
+
+    return None
+
+
+def _is_branch_like_device(device: Any) -> bool:
+    """
+    Return whether one device uses two-terminal EMT branch semantics.
+
+    :param device: Device to classify.
+    :return: ``True`` when the device is branch-like.
+    """
+    branch_device_types: List[DeviceType] = list([DeviceType.BranchDevice,
+                                                  DeviceType.LineDevice,
+                                                  DeviceType.Transformer2WDevice,
+                                                  DeviceType.Transformer3WDevice,
+                                                  DeviceType.DCLineDevice,
+                                                  DeviceType.HVDCLineDevice,
+                                                  DeviceType.SwitchDevice,
+                                                  DeviceType.SeriesReactanceDevice,
+                                                  DeviceType.UpfcDevice,
+                                                  DeviceType.VscDevice])
+
+    if device.device_type in branch_device_types:
+        return True
+    else:
+        return False
+
+
+def _build_supported_root_intent_refs_for_device(device: Any) -> tuple[List[VarPowerFlowReferenceType], List[VarPowerFlowReferenceType]]:
+    """
+    Return the supported root input/output references for one EMT device.
+
+    :param device: Device whose root EMT contract is being inspected.
+    :return: ``(input_refs, output_refs)``.
+    """
+    input_refs: List[VarPowerFlowReferenceType] = list()
+    output_refs: List[VarPowerFlowReferenceType] = list()
+
+    if _is_branch_like_device(device):
+        input_refs = list([
+            VarPowerFlowReferenceType.Vf_dc,
+            VarPowerFlowReferenceType.vf_N,
+            VarPowerFlowReferenceType.vf_A,
+            VarPowerFlowReferenceType.vf_B,
+            VarPowerFlowReferenceType.vf_C,
+            VarPowerFlowReferenceType.Vt_dc,
+            VarPowerFlowReferenceType.vt_N,
+            VarPowerFlowReferenceType.vt_A,
+            VarPowerFlowReferenceType.vt_B,
+            VarPowerFlowReferenceType.vt_C,
+        ])
+        output_refs = list([
+            VarPowerFlowReferenceType.If_dc,
+            VarPowerFlowReferenceType.if_N,
+            VarPowerFlowReferenceType.if_A,
+            VarPowerFlowReferenceType.if_B,
+            VarPowerFlowReferenceType.if_C,
+            VarPowerFlowReferenceType.It_dc,
+            VarPowerFlowReferenceType.it_N,
+            VarPowerFlowReferenceType.it_A,
+            VarPowerFlowReferenceType.it_B,
+            VarPowerFlowReferenceType.it_C,
+        ])
+    else:
+        if device.bus.is_dc:
+            input_refs = list([VarPowerFlowReferenceType.Vdc])
+            output_refs = list([VarPowerFlowReferenceType.Idc])
+        else:
+            input_refs = list([
+                VarPowerFlowReferenceType.v_N,
+                VarPowerFlowReferenceType.v_A,
+                VarPowerFlowReferenceType.v_B,
+                VarPowerFlowReferenceType.v_C,
+            ])
+            output_refs = list([
+                VarPowerFlowReferenceType.i_N,
+                VarPowerFlowReferenceType.i_A,
+                VarPowerFlowReferenceType.i_B,
+                VarPowerFlowReferenceType.i_C,
+            ])
+
+    return input_refs, output_refs
+
+
+def _prune_saved_root_io_vars_to_supported_contract(device: Any) -> None:
+    """
+    Remove saved root IO vars that are no longer part of the live device contract.
+
+    The persisted saved model can retain stale branch-side root variables after a
+    topology shrink because connection intent is meant to survive even when one
+    endpoint becomes unavailable. The authoritative saved root contract,
+    however, must only expose currently available root endpoints. Dormant intent
+    stays in ``connection_intents`` and is rematerialized later when the root
+    endpoint becomes valid again.
+
+    :param device: Device whose saved root contract must be pruned.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    supported_input_refs: List[VarPowerFlowReferenceType]
+    supported_output_refs: List[VarPowerFlowReferenceType]
+    pruned_in_vars: List[Var] = list()
+    pruned_out_vars: List[Var] = list()
+    io_var: Var
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    if _is_branch_like_device(device):
+        supported_input_refs = list()
+        supported_output_refs = list()
+        from_input_refs: List[VarPowerFlowReferenceType]
+        from_output_refs: List[VarPowerFlowReferenceType]
+        to_input_refs: List[VarPowerFlowReferenceType]
+        to_output_refs: List[VarPowerFlowReferenceType]
+        from_input_refs, from_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                        side=EmtBusConnectionSide.FROM)
+        to_input_refs, to_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                    side=EmtBusConnectionSide.TO)
+        supported_input_refs.extend(from_input_refs)
+        supported_input_refs.extend(to_input_refs)
+        supported_output_refs.extend(from_output_refs)
+        supported_output_refs.extend(to_output_refs)
+    else:
+        supported_input_refs, supported_output_refs = _build_live_root_contract_refs(device=device)
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            pruned_in_vars.append(io_var)
+        else:
+            if io_var.ref in supported_input_refs:
+                pruned_in_vars.append(io_var)
+            else:
+                pass
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            pruned_out_vars.append(io_var)
+        else:
+            if io_var.ref in supported_output_refs:
+                pruned_out_vars.append(io_var)
+            else:
+                pass
+
+    model.in_vars = pruned_in_vars
+    model.out_vars = pruned_out_vars
+
+
+def _prune_saved_branch_root_contract_side(device: Any,
+                                           side: EmtBusConnectionSide) -> None:
+    """
+    Prune one saved branch root contract side against its live bus shell.
+
+    :param device: Branch-like device whose side contract must be pruned.
+    :param side: Side to prune.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    side_input_refs: List[VarPowerFlowReferenceType]
+    side_output_refs: List[VarPowerFlowReferenceType]
+    side_input_ref_set: set[VarPowerFlowReferenceType]
+    side_output_ref_set: set[VarPowerFlowReferenceType]
+    kept_in_vars: List[Var] = list()
+    kept_out_vars: List[Var] = list()
+    io_var: Var
+    side_input_ref: VarPowerFlowReferenceType
+    side_output_ref: VarPowerFlowReferenceType
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    side_input_refs, side_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                    side=side)
+    side_input_ref_set = set(side_input_refs)
+    side_output_ref_set = set(side_output_refs)
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            kept_in_vars.append(io_var)
+        else:
+            if side == EmtBusConnectionSide.FROM:
+                if io_var.ref in list([VarPowerFlowReferenceType.vf_N,
+                                       VarPowerFlowReferenceType.vf_A,
+                                       VarPowerFlowReferenceType.vf_B,
+                                       VarPowerFlowReferenceType.vf_C,
+                                       VarPowerFlowReferenceType.Vf_dc]):
+                    if io_var.ref in side_input_ref_set:
+                        kept_in_vars.append(io_var)
+                    else:
+                        pass
+                else:
+                    kept_in_vars.append(io_var)
+            else:
+                if side == EmtBusConnectionSide.TO:
+                    if io_var.ref in list([VarPowerFlowReferenceType.vt_N,
+                                           VarPowerFlowReferenceType.vt_A,
+                                           VarPowerFlowReferenceType.vt_B,
+                                           VarPowerFlowReferenceType.vt_C,
+                                           VarPowerFlowReferenceType.Vt_dc]):
+                        if io_var.ref in side_input_ref_set:
+                            kept_in_vars.append(io_var)
+                        else:
+                            pass
+                    else:
+                        kept_in_vars.append(io_var)
+                else:
+                    kept_in_vars.append(io_var)
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            kept_out_vars.append(io_var)
+        else:
+            if side == EmtBusConnectionSide.FROM:
+                if io_var.ref in list([VarPowerFlowReferenceType.if_N,
+                                       VarPowerFlowReferenceType.if_A,
+                                       VarPowerFlowReferenceType.if_B,
+                                       VarPowerFlowReferenceType.if_C,
+                                       VarPowerFlowReferenceType.If_dc]):
+                    if io_var.ref in side_output_ref_set:
+                        kept_out_vars.append(io_var)
+                    else:
+                        pass
+                else:
+                    kept_out_vars.append(io_var)
+            else:
+                if side == EmtBusConnectionSide.TO:
+                    if io_var.ref in list([VarPowerFlowReferenceType.it_N,
+                                           VarPowerFlowReferenceType.it_A,
+                                           VarPowerFlowReferenceType.it_B,
+                                           VarPowerFlowReferenceType.it_C,
+                                           VarPowerFlowReferenceType.It_dc]):
+                        if io_var.ref in side_output_ref_set:
+                            kept_out_vars.append(io_var)
+                        else:
+                            pass
+                    else:
+                        kept_out_vars.append(io_var)
+                else:
+                    kept_out_vars.append(io_var)
+
+    model.in_vars = kept_in_vars
+    model.out_vars = kept_out_vars
+
+    for side_input_ref in list([VarPowerFlowReferenceType.vf_N,
+                                VarPowerFlowReferenceType.vf_A,
+                                VarPowerFlowReferenceType.vf_B,
+                                VarPowerFlowReferenceType.vf_C,
+                                VarPowerFlowReferenceType.Vf_dc]) if side == EmtBusConnectionSide.FROM else list([
+                                    VarPowerFlowReferenceType.vt_N,
+                                    VarPowerFlowReferenceType.vt_A,
+                                    VarPowerFlowReferenceType.vt_B,
+                                    VarPowerFlowReferenceType.vt_C,
+                                    VarPowerFlowReferenceType.Vt_dc,
+                                ]):
+        if side_input_ref in side_input_ref_set:
+            pass
+        else:
+            model.external_mapping[side_input_ref] = None
+
+    for side_output_ref in list([VarPowerFlowReferenceType.if_N,
+                                 VarPowerFlowReferenceType.if_A,
+                                 VarPowerFlowReferenceType.if_B,
+                                 VarPowerFlowReferenceType.if_C,
+                                 VarPowerFlowReferenceType.If_dc]) if side == EmtBusConnectionSide.FROM else list([
+                                     VarPowerFlowReferenceType.it_N,
+                                     VarPowerFlowReferenceType.it_A,
+                                     VarPowerFlowReferenceType.it_B,
+                                     VarPowerFlowReferenceType.it_C,
+                                     VarPowerFlowReferenceType.It_dc,
+                                 ]):
+        if side_output_ref in side_output_ref_set:
+            pass
+        else:
+            model.external_mapping[side_output_ref] = None
+
+
+def _build_live_root_contract_refs(device: Any) -> tuple[List[VarPowerFlowReferenceType], List[VarPowerFlowReferenceType]]:
+    """
+    Build the exact currently available root refs for one live device contract.
+
+    :param device: Device whose live root contract must be derived.
+    :return: ``(input_refs, output_refs)``.
+    """
+    input_refs: List[VarPowerFlowReferenceType] = list()
+    output_refs: List[VarPowerFlowReferenceType] = list()
+    available_bus_ref: VarPowerFlowReferenceType
+    available_bus_var: Var | None
+    from_voltage_map: dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType] = dict([
+        (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.vf_N),
+        (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.vf_A),
+        (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.vf_B),
+        (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.vf_C),
+        (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vf_dc),
+    ])
+    to_voltage_map: dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType] = dict([
+        (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.vt_N),
+        (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.vt_A),
+        (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.vt_B),
+        (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.vt_C),
+        (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vt_dc),
+    ])
+    from_current_map: dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType] = dict([
+        (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.if_N),
+        (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.if_A),
+        (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.if_B),
+        (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.if_C),
+        (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.If_dc),
+    ])
+    to_current_map: dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType] = dict([
+        (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.it_N),
+        (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.it_A),
+        (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.it_B),
+        (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.it_C),
+        (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.It_dc),
+    ])
+
+    if _is_branch_like_device(device):
+        for available_bus_ref, available_bus_var in device.bus_from.emt_model.external_mapping.items():
+            if available_bus_var is None:
+                pass
+            else:
+                if available_bus_ref in from_voltage_map:
+                    input_refs.append(from_voltage_map[available_bus_ref])
+                    output_refs.append(from_current_map[available_bus_ref])
+                else:
+                    pass
+
+        for available_bus_ref, available_bus_var in device.bus_to.emt_model.external_mapping.items():
+            if available_bus_var is None:
+                pass
+            else:
+                if available_bus_ref in to_voltage_map:
+                    input_refs.append(to_voltage_map[available_bus_ref])
+                    output_refs.append(to_current_map[available_bus_ref])
+                else:
+                    pass
+    else:
+        if device.bus.is_dc:
+            if device.bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.Vdc, None) is not None:
+                input_refs.append(VarPowerFlowReferenceType.Vdc)
+                output_refs.append(VarPowerFlowReferenceType.Idc)
+            else:
+                pass
+        else:
+            injection_current_map: dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType] = dict([
+                (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.i_N),
+                (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.i_A),
+                (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.i_B),
+                (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.i_C),
+            ])
+            injection_voltage_ref: VarPowerFlowReferenceType
+
+            for injection_voltage_ref in injection_current_map:
+                if device.bus.emt_model.external_mapping.get(injection_voltage_ref, None) is not None:
+                    input_refs.append(injection_voltage_ref)
+                    output_refs.append(injection_current_map[injection_voltage_ref])
+                else:
+                    pass
+
+    return input_refs, output_refs
+
+
+def _build_live_branch_side_root_contract_refs(device: Any,
+                                               side: EmtBusConnectionSide) -> tuple[List[VarPowerFlowReferenceType], List[VarPowerFlowReferenceType]]:
+    """
+    Build the exact currently available root refs for one branch side.
+
+    :param device: Branch-like device whose side contract must be derived.
+    :param side: Branch side to inspect.
+    :return: ``(input_refs, output_refs)``.
+    """
+    input_refs: List[VarPowerFlowReferenceType] = list()
+    output_refs: List[VarPowerFlowReferenceType] = list()
+    available_bus_ref: VarPowerFlowReferenceType
+    available_bus_var: Var | None
+    voltage_map: Dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType]
+    current_map: Dict[VarPowerFlowReferenceType, VarPowerFlowReferenceType]
+    bus_model: Block
+
+    if side == EmtBusConnectionSide.FROM:
+        bus_model = device.bus_from.emt_model
+        voltage_map = dict([
+            (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.vf_N),
+            (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.vf_A),
+            (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.vf_B),
+            (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.vf_C),
+            (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vf_dc),
+        ])
+        current_map = dict([
+            (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.if_N),
+            (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.if_A),
+            (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.if_B),
+            (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.if_C),
+            (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.If_dc),
+        ])
+    else:
+        if side == EmtBusConnectionSide.TO:
+            bus_model = device.bus_to.emt_model
+            voltage_map = dict([
+                (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.vt_N),
+                (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.vt_A),
+                (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.vt_B),
+                (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.vt_C),
+                (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vt_dc),
+            ])
+            current_map = dict([
+                (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.it_N),
+                (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.it_A),
+                (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.it_B),
+                (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.it_C),
+                (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.It_dc),
+            ])
+        else:
+            return input_refs, output_refs
+
+    for available_bus_ref, available_bus_var in bus_model.external_mapping.items():
+        if available_bus_var is None:
+            pass
+        else:
+            if available_bus_ref in voltage_map:
+                input_refs.append(voltage_map[available_bus_ref])
+                output_refs.append(current_map[available_bus_ref])
+            else:
+                pass
+
+    return input_refs, output_refs
+
+
+def _ensure_saved_root_io_vars_for_live_contract(device: Any,
+                                                 var_factory: VarFactory) -> None:
+    """
+    Recreate missing saved root IO vars required by the current live contract.
+
+    :param device: Device whose saved root contract must be completed.
+    :param var_factory: Shared variable factory used to create replacement vars.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    input_refs: List[VarPowerFlowReferenceType]
+    output_refs: List[VarPowerFlowReferenceType]
+    existing_input_refs: set[VarPowerFlowReferenceType] = set()
+    existing_output_refs: set[VarPowerFlowReferenceType] = set()
+    io_var: Var
+    root_ref: VarPowerFlowReferenceType
+    new_var: Var
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    if _is_branch_like_device(device):
+        input_refs = list()
+        output_refs = list()
+        from_input_refs: List[VarPowerFlowReferenceType]
+        from_output_refs: List[VarPowerFlowReferenceType]
+        to_input_refs: List[VarPowerFlowReferenceType]
+        to_output_refs: List[VarPowerFlowReferenceType]
+        from_input_refs, from_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                        side=EmtBusConnectionSide.FROM)
+        to_input_refs, to_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                    side=EmtBusConnectionSide.TO)
+        input_refs.extend(from_input_refs)
+        input_refs.extend(to_input_refs)
+        output_refs.extend(from_output_refs)
+        output_refs.extend(to_output_refs)
+    else:
+        input_refs, output_refs = _build_live_root_contract_refs(device=device)
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            pass
+        else:
+            existing_input_refs.add(io_var.ref)
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            pass
+        else:
+            existing_output_refs.add(io_var.ref)
+
+    for root_ref in input_refs:
+        if root_ref in existing_input_refs:
+            pass
+        else:
+            new_var = var_factory.add_var(name=root_ref.value,
+                                          reference=root_ref)
+            model.in_vars.append(new_var)
+            model.external_mapping[root_ref] = new_var
+
+    for root_ref in output_refs:
+        if root_ref in existing_output_refs:
+            pass
+        else:
+            new_var = var_factory.add_var(name=root_ref.value,
+                                          reference=root_ref)
+            model.out_vars.append(new_var)
+            model.external_mapping[root_ref] = new_var
+
+
+def _ensure_saved_branch_root_contract_side(device: Any,
+                                            side: EmtBusConnectionSide,
+                                            var_factory: VarFactory) -> None:
+    """
+    Recreate missing saved root IO vars for one branch side only.
+
+    :param device: Branch-like device whose side contract must be completed.
+    :param side: Side to complete.
+    :param var_factory: Shared variable factory.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    input_refs: List[VarPowerFlowReferenceType]
+    output_refs: List[VarPowerFlowReferenceType]
+    existing_input_refs: set[VarPowerFlowReferenceType] = set()
+    existing_output_refs: set[VarPowerFlowReferenceType] = set()
+    io_var: Var
+    root_ref: VarPowerFlowReferenceType
+    new_var: Var
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    input_refs, output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                         side=side)
+
+    if side == EmtBusConnectionSide.TO:
+        if VarPowerFlowReferenceType.vt_C in input_refs:
+            pass
+        else:
+            pass
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            pass
+        else:
+            existing_input_refs.add(io_var.ref)
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            pass
+        else:
+            existing_output_refs.add(io_var.ref)
+
+    for root_ref in input_refs:
+        if root_ref in existing_input_refs:
+            pass
+        else:
+            new_var = var_factory.add_var(name=root_ref.value,
+                                          reference=root_ref)
+            model.in_vars.append(new_var)
+            model.external_mapping[root_ref] = new_var
+
+
+def _rebuild_saved_branch_root_contract_from_live_sides(device: Any,
+                                                        var_factory: VarFactory) -> None:
+    """
+    Rebuild the saved branch root IO contract directly from the current live side contracts.
+
+    :param device: Branch-like device whose saved root contract must be rebuilt.
+    :param var_factory: Shared variable factory.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    from_input_refs: List[VarPowerFlowReferenceType]
+    from_output_refs: List[VarPowerFlowReferenceType]
+    to_input_refs: List[VarPowerFlowReferenceType]
+    to_output_refs: List[VarPowerFlowReferenceType]
+    ordered_input_refs: List[VarPowerFlowReferenceType] = list()
+    ordered_output_refs: List[VarPowerFlowReferenceType] = list()
+    rebuilt_in_vars: List[Var] = list()
+    rebuilt_out_vars: List[Var] = list()
+    existing_input_by_ref: Dict[VarPowerFlowReferenceType, Var] = dict()
+    existing_output_by_ref: Dict[VarPowerFlowReferenceType, Var] = dict()
+    io_var: Var
+    root_ref: VarPowerFlowReferenceType
+    new_var: Var
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    from_input_refs, from_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                    side=EmtBusConnectionSide.FROM)
+    to_input_refs, to_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                side=EmtBusConnectionSide.TO)
+    ordered_input_refs.extend(from_input_refs)
+    ordered_input_refs.extend(to_input_refs)
+    ordered_output_refs.extend(from_output_refs)
+    ordered_output_refs.extend(to_output_refs)
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            pass
+        elif io_var.ref in existing_input_by_ref:
+            pass
+        else:
+            existing_input_by_ref[io_var.ref] = io_var
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            pass
+        elif io_var.ref in existing_output_by_ref:
+            pass
+        else:
+            existing_output_by_ref[io_var.ref] = io_var
+
+    for root_ref in ordered_input_refs:
+        if root_ref in existing_input_by_ref:
+            rebuilt_in_vars.append(existing_input_by_ref[root_ref])
+        else:
+            new_var = var_factory.add_var(name=root_ref.value,
+                                          reference=root_ref)
+            rebuilt_in_vars.append(new_var)
+
+    for root_ref in ordered_output_refs:
+        if root_ref in existing_output_by_ref:
+            existing_output_by_ref[root_ref]._network_conn = True
+            rebuilt_out_vars.append(existing_output_by_ref[root_ref])
+        else:
+            new_var = var_factory.add_var(name=root_ref.value,
+                                          reference=root_ref,
+                                          network_conn=True)
+            rebuilt_out_vars.append(new_var)
+
+    model.in_vars = rebuilt_in_vars
+    model.out_vars = rebuilt_out_vars
+    _normalize_saved_branch_root_contract_from_live_sides(device=device)
+
+
+def _clear_saved_branch_root_external_mapping(device: Any) -> None:
+    """
+    Clear every branch root external-mapping entry before rebuilding the live contract.
+
+    :param device: Branch-like device whose saved root mapping must be cleared.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    mapping_ref: VarPowerFlowReferenceType
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    for mapping_ref in list([
+        VarPowerFlowReferenceType.vf_N,
+        VarPowerFlowReferenceType.vf_A,
+        VarPowerFlowReferenceType.vf_B,
+        VarPowerFlowReferenceType.vf_C,
+        VarPowerFlowReferenceType.Vf_dc,
+        VarPowerFlowReferenceType.vt_N,
+        VarPowerFlowReferenceType.vt_A,
+        VarPowerFlowReferenceType.vt_B,
+        VarPowerFlowReferenceType.vt_C,
+        VarPowerFlowReferenceType.Vt_dc,
+        VarPowerFlowReferenceType.if_N,
+        VarPowerFlowReferenceType.if_A,
+        VarPowerFlowReferenceType.if_B,
+        VarPowerFlowReferenceType.if_C,
+        VarPowerFlowReferenceType.If_dc,
+        VarPowerFlowReferenceType.it_N,
+        VarPowerFlowReferenceType.it_A,
+        VarPowerFlowReferenceType.it_B,
+        VarPowerFlowReferenceType.it_C,
+        VarPowerFlowReferenceType.It_dc,
+    ]):
+        model.external_mapping[mapping_ref] = None
+
+
+def _prune_saved_root_external_mapping_to_live_contract(device: Any) -> None:
+    """
+    Clear saved root external-mapping entries that are not in the live contract.
+
+    Per-terminal topology changes can leave one saved external-mapping entry
+    pointing to one stale root var even after the root IO lists have been pruned.
+    Validation reads ``external_mapping`` directly, so the mapping must follow
+    the same live-contract pruning rule as ``in_vars`` and ``out_vars``.
+
+    :param device: Device whose saved root external mapping must be pruned.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    live_input_refs: List[VarPowerFlowReferenceType]
+    live_output_refs: List[VarPowerFlowReferenceType]
+    live_refs: set[VarPowerFlowReferenceType] = set()
+    root_interface_refs: set[VarPowerFlowReferenceType]
+    reference: VarPowerFlowReferenceType
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    if _is_branch_like_device(device):
+        live_input_refs = list()
+        live_output_refs = list()
+        from_input_refs: List[VarPowerFlowReferenceType]
+        from_output_refs: List[VarPowerFlowReferenceType]
+        to_input_refs: List[VarPowerFlowReferenceType]
+        to_output_refs: List[VarPowerFlowReferenceType]
+        from_input_refs, from_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                        side=EmtBusConnectionSide.FROM)
+        to_input_refs, to_output_refs = _build_live_branch_side_root_contract_refs(device=device,
+                                                                                    side=EmtBusConnectionSide.TO)
+        live_input_refs.extend(from_input_refs)
+        live_input_refs.extend(to_input_refs)
+        live_output_refs.extend(from_output_refs)
+        live_output_refs.extend(to_output_refs)
+    else:
+        live_input_refs, live_output_refs = _build_live_root_contract_refs(device=device)
+
+    for reference in live_input_refs:
+        live_refs.add(reference)
+
+    for reference in live_output_refs:
+        live_refs.add(reference)
+
+    if _is_branch_like_device(device):
+        supported_input_refs: List[VarPowerFlowReferenceType]
+        supported_output_refs: List[VarPowerFlowReferenceType]
+        supported_input_refs, supported_output_refs = _build_supported_root_intent_refs_for_device(device=device)
+        root_interface_refs = set(supported_input_refs + supported_output_refs)
+    else:
+        root_interface_refs = set([
+            VarPowerFlowReferenceType.Vdc,
+            VarPowerFlowReferenceType.Idc,
+            VarPowerFlowReferenceType.v_N,
+            VarPowerFlowReferenceType.v_A,
+            VarPowerFlowReferenceType.v_B,
+            VarPowerFlowReferenceType.v_C,
+            VarPowerFlowReferenceType.i_N,
+            VarPowerFlowReferenceType.i_A,
+            VarPowerFlowReferenceType.i_B,
+            VarPowerFlowReferenceType.i_C,
+        ])
+
+    for reference in list(model.external_mapping.keys()):
+        if reference not in root_interface_refs:
+            pass
+        else:
+            if reference in live_refs:
+                pass
+            else:
+                model.external_mapping[reference] = None
+
+
+def _normalize_saved_branch_root_contract_from_live_sides(device: Any) -> None:
+    """
+    Rebuild one saved branch external mapping from currently materialized side refs.
+
+    The generic branch normalization path can clear untouched-side mappings when
+    one side has changed topology and the root IO lists are in transition. This
+    helper rebuilds the saved branch external mapping directly from the current
+    materialized branch root IO vars per side, preserving whichever side remains
+    valid while still clearing refs that truly no longer exist.
+
+    :param device: Branch-like device whose saved root contract must be normalized.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    input_ref: VarPowerFlowReferenceType
+    output_ref: VarPowerFlowReferenceType
+    input_var: Var | None
+    output_var: Var | None
+    kept_in_vars: List[Var] = list()
+    kept_out_vars: List[Var] = list()
+    live_input_refs: set[VarPowerFlowReferenceType] = set()
+    live_output_refs: set[VarPowerFlowReferenceType] = set()
+    io_var: Var
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    for input_ref in list([
+        VarPowerFlowReferenceType.vf_N,
+        VarPowerFlowReferenceType.vf_A,
+        VarPowerFlowReferenceType.vf_B,
+        VarPowerFlowReferenceType.vf_C,
+        VarPowerFlowReferenceType.Vf_dc,
+        VarPowerFlowReferenceType.vt_N,
+        VarPowerFlowReferenceType.vt_A,
+        VarPowerFlowReferenceType.vt_B,
+        VarPowerFlowReferenceType.vt_C,
+        VarPowerFlowReferenceType.Vt_dc,
+    ]):
+        input_var = _find_root_var_by_ref(root_block=model,
+                                          reference=input_ref,
+                                          direction=DynamicConnectionIntentDirection.INPUT)
+        if input_var is None:
+            pass
+        else:
+            live_input_refs.add(input_ref)
+
+    for output_ref in list([
+        VarPowerFlowReferenceType.if_N,
+        VarPowerFlowReferenceType.if_A,
+        VarPowerFlowReferenceType.if_B,
+        VarPowerFlowReferenceType.if_C,
+        VarPowerFlowReferenceType.If_dc,
+        VarPowerFlowReferenceType.it_N,
+        VarPowerFlowReferenceType.it_A,
+        VarPowerFlowReferenceType.it_B,
+        VarPowerFlowReferenceType.it_C,
+        VarPowerFlowReferenceType.It_dc,
+    ]):
+        output_var = _find_root_var_by_ref(root_block=model,
+                                           reference=output_ref,
+                                           direction=DynamicConnectionIntentDirection.OUTPUT)
+        if output_var is None:
+            pass
+        else:
+            live_output_refs.add(output_ref)
+
+    for io_var in model.in_vars:
+        if io_var.ref is None:
+            kept_in_vars.append(io_var)
+        else:
+            if io_var.ref in live_input_refs:
+                kept_in_vars.append(io_var)
+            else:
+                pass
+
+    for io_var in model.out_vars:
+        if io_var.ref is None:
+            kept_out_vars.append(io_var)
+        else:
+            if io_var.ref in live_output_refs:
+                kept_out_vars.append(io_var)
+            else:
+                pass
+
+    model.in_vars = kept_in_vars
+    model.out_vars = kept_out_vars
+
+    for input_ref in list([
+        VarPowerFlowReferenceType.vf_N,
+        VarPowerFlowReferenceType.vf_A,
+        VarPowerFlowReferenceType.vf_B,
+        VarPowerFlowReferenceType.vf_C,
+        VarPowerFlowReferenceType.Vf_dc,
+        VarPowerFlowReferenceType.vt_N,
+        VarPowerFlowReferenceType.vt_A,
+        VarPowerFlowReferenceType.vt_B,
+        VarPowerFlowReferenceType.vt_C,
+        VarPowerFlowReferenceType.Vt_dc,
+    ]):
+        input_var = _find_root_var_by_ref(root_block=model,
+                                          reference=input_ref,
+                                          direction=DynamicConnectionIntentDirection.INPUT)
+        if input_var is None:
+            model.external_mapping[input_ref] = None
+        else:
+            model.external_mapping[input_ref] = input_var
+
+    for output_ref in list([
+        VarPowerFlowReferenceType.if_N,
+        VarPowerFlowReferenceType.if_A,
+        VarPowerFlowReferenceType.if_B,
+        VarPowerFlowReferenceType.if_C,
+        VarPowerFlowReferenceType.If_dc,
+        VarPowerFlowReferenceType.it_N,
+        VarPowerFlowReferenceType.it_A,
+        VarPowerFlowReferenceType.it_B,
+        VarPowerFlowReferenceType.it_C,
+        VarPowerFlowReferenceType.It_dc,
+    ]):
+        output_var = _find_root_var_by_ref(root_block=model,
+                                           reference=output_ref,
+                                           direction=DynamicConnectionIntentDirection.OUTPUT)
+        if output_var is None:
+            model.external_mapping[output_ref] = None
+        else:
+            model.external_mapping[output_ref] = output_var
+
+
+def _connection_exists_in_var_factory(var_factory: VarFactory,
+                                      source_var: Var,
+                                      target_var: Var) -> bool:
+    """
+    Return whether one directed symbolic connection already exists.
+
+    :param var_factory: Shared variable factory.
+    :param source_var: Source variable.
+    :param target_var: Target variable.
+    :return: ``True`` when the connection already exists.
+    """
+    existing_connection: Any
+
+    for existing_connection in var_factory.get_connections_dict().get(source_var.non_mutable_uid, list()):
+        if existing_connection.non_mutable_uid == target_var.non_mutable_uid:
+            return True
+        else:
+            pass
+
+    return False
+
+
+def seed_template_derived_dynamic_connection_intents(device: Any) -> None:
+    """
+    Record template-derived root-interface intents for one template-backed EMT model.
+
+    :param device: Device whose current EMT model originated from a template.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    child_block: Block
+    input_var: Var
+    output_var: Var
+    existing_intent: DynamicConnectionIntent | None
+    new_intent: DynamicConnectionIntent
+    supported_input_refs: List[VarPowerFlowReferenceType]
+    supported_output_refs: List[VarPowerFlowReferenceType]
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    if device.emt_template is None:
+        return
+    else:
+        pass
+
+    normalize_dynamic_connection_intents(model)
+    supported_input_refs, supported_output_refs = _build_supported_root_intent_refs_for_device(device)
+    for child_block in model.children:
+        if len(child_block.algebraic_vars) > 0 or len(child_block.state_vars) > 0 or len(child_block.diff_vars) > 0:
+            for input_var in child_block.in_vars:
+                if input_var.ref is None:
+                    pass
+                elif input_var.ref not in supported_input_refs:
+                    pass
+                else:
+                    existing_intent = find_matching_dynamic_connection_intent(block=model,
+                                                                             origin=DynamicConnectionIntentOrigin.TEMPLATE_DERIVED,
+                                                                             root_reference=input_var.ref,
+                                                                             direction=DynamicConnectionIntentDirection.INPUT,
+                                                                             internal_block_uid=child_block.uid,
+                                                                             internal_variable_uid=input_var.non_mutable_uid)
+
+                    if existing_intent is None:
+                        new_intent = DynamicConnectionIntent(
+                            origin=DynamicConnectionIntentOrigin.TEMPLATE_DERIVED,
+                            root_reference=input_var.ref,
+                            direction=DynamicConnectionIntentDirection.INPUT,
+                            internal_block_uid=child_block.uid,
+                            internal_variable_uid=input_var.non_mutable_uid,
+                            suppressed=False,
+                        )
+                        model.connection_intents.append(new_intent)
+                    else:
+                        pass
+
+            for output_var in child_block.out_vars:
+                if output_var.ref is None:
+                    pass
+                elif output_var.ref not in supported_output_refs:
+                    pass
+                else:
+                    existing_intent = find_matching_dynamic_connection_intent(block=model,
+                                                                             origin=DynamicConnectionIntentOrigin.TEMPLATE_DERIVED,
+                                                                             root_reference=output_var.ref,
+                                                                             direction=DynamicConnectionIntentDirection.OUTPUT,
+                                                                             internal_block_uid=child_block.uid,
+                                                                             internal_variable_uid=output_var.non_mutable_uid)
+
+                    if existing_intent is None:
+                        new_intent = DynamicConnectionIntent(
+                            origin=DynamicConnectionIntentOrigin.TEMPLATE_DERIVED,
+                            root_reference=output_var.ref,
+                            direction=DynamicConnectionIntentDirection.OUTPUT,
+                            internal_block_uid=child_block.uid,
+                            internal_variable_uid=output_var.non_mutable_uid,
+                            suppressed=False,
+                        )
+                        model.connection_intents.append(new_intent)
+                    else:
+                        pass
+        else:
+            pass
+
+    normalize_dynamic_connection_intents(model)
+
+
+def seed_branch_template_derived_dynamic_connection_intents(device: Any) -> None:
+    """
+    Record template-derived root-interface intents for one branch-like EMT template.
+
+    :param device: Branch-like device whose EMT model originated from a template.
+    :return: None.
+    """
+    if not _is_branch_like_device(device):
+        return
+    else:
+        pass
+
+    seed_template_derived_dynamic_connection_intents(device=device)
+
+
+def rematerialize_saved_dynamic_connection_intents(device: Any,
+                                                   var_factory: VarFactory) -> None:
+    """
+    Restore active symbolic root-interface connections from persisted intent records.
+
+    :param device: Device whose saved model must be rematerialized.
+    :param var_factory: Shared variable factory.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    entry: DynamicConnectionIntent
+    direction: DynamicConnectionIntentDirection
+    root_reference: VarPowerFlowReferenceType
+    root_var: Var | None
+    internal_block: Block | None
+    internal_var: Var | None
+    candidate_var: Var
+    supported_input_refs: List[VarPowerFlowReferenceType]
+    supported_output_refs: List[VarPowerFlowReferenceType]
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    normalize_dynamic_connection_intents(model)
+    supported_input_refs, supported_output_refs = _build_supported_root_intent_refs_for_device(device)
+
+    for entry in model.connection_intents:
+        if entry.is_suppressed():
+            pass
+        else:
+            root_reference = entry.get_root_reference()
+            direction = entry.get_direction()
+            if direction == DynamicConnectionIntentDirection.INPUT and root_reference not in supported_input_refs:
+                root_var = None
+            elif direction == DynamicConnectionIntentDirection.OUTPUT and root_reference not in supported_output_refs:
+                root_var = None
+            else:
+                root_var = _find_root_var_by_ref(root_block=model,
+                                                 reference=root_reference,
+                                                 direction=direction)
+
+            internal_block = _find_block_by_uid(root_block=model,
+                                                block_uid=entry.get_internal_block_uid())
+            if root_var is None or internal_block is None:
+                pass
+            else:
+                internal_var = None
+                if direction == DynamicConnectionIntentDirection.INPUT:
+                    for candidate_var in internal_block.in_vars:
+                        if candidate_var.non_mutable_uid == entry.get_internal_variable_uid():
+                            internal_var = candidate_var
+                        else:
+                            pass
+                else:
+                    for candidate_var in internal_block.out_vars:
+                        if candidate_var.non_mutable_uid == entry.get_internal_variable_uid():
+                            internal_var = candidate_var
+                        else:
+                            pass
+
+                if internal_var is None:
+                    pass
+                elif direction == DynamicConnectionIntentDirection.INPUT:
+                    if not _connection_exists_in_var_factory(var_factory=var_factory,
+                                                             source_var=root_var,
+                                                             target_var=internal_var):
+                        var_factory.add_connections([internal_var], [root_var])
+                    else:
+                        pass
+                else:
+                    if not _connection_exists_in_var_factory(var_factory=var_factory,
+                                                             source_var=internal_var,
+                                                             target_var=root_var):
+                        var_factory.add_connections([root_var], [internal_var])
+                    else:
+                        pass
+
+
+def reconcile_saved_emt_model_against_current_topology(device: Any,
+                                                       grid: Any,
+                                                       var_factory: VarFactory) -> None:
+    """
+    Synchronize one saved EMT device model against the current static topology.
+
+    :param device: Device whose EMT model must match the current grid topology.
+    :param grid: Owning circuit used to derive bus-shell topology.
+    :param var_factory: Shared symbolic variable factory.
+    :return: None.
+    """
+    if device.emt_model.empty():
+        return
+    else:
+        pass
+
+    if _is_branch_like_device(device):
+        # Empty and previously grid-built shells follow the current static
+        # topology. A non-empty replacement shell remains authoritative for the
+        # pass, which preserves explicit editor/test topology substitutions.
+        from_shell_requires_grid_sync: bool = (device.bus_from.emt_model.empty()
+                                                or device.bus_from.is_emt_model_grid_synchronized())
+        if from_shell_requires_grid_sync:
+            synchronize_emt_bus_shell_with_grid(bus=device.bus_from,
+                                                grid=grid,
+                                                var_factory=var_factory,
+                                                device_to_skip=device)
+        else:
+            pass
+
+        to_shell_requires_grid_sync: bool = (device.bus_to.emt_model.empty()
+                                              or device.bus_to.is_emt_model_grid_synchronized())
+        if to_shell_requires_grid_sync:
+            synchronize_emt_bus_shell_with_grid(bus=device.bus_to,
+                                                grid=grid,
+                                                var_factory=var_factory,
+                                                device_to_skip=device)
+        else:
+            pass
+        _clear_saved_branch_root_external_mapping(device=device)
+        _rebuild_saved_branch_root_contract_from_live_sides(device=device,
+                                                            var_factory=var_factory)
+        register_saved_emt_model_vars_for_device(device=device,
+                                                 var_factory=var_factory)
+        seed_template_derived_dynamic_connection_intents(device=device)
+        rematerialize_saved_dynamic_connection_intents(device=device,
+                                                       var_factory=var_factory)
+        attach_emt_model_to_buses(device=device,
+                                  model=device.emt_model,
+                                  var_factory=var_factory)
+        _normalize_saved_branch_root_contract_from_live_sides(device=device)
+        synchronize_saved_emt_root_contract_from_bus(device=device)
+    else:
+        synchronize_emt_bus_shell_with_grid(bus=device.bus,
+                                            grid=grid,
+                                            var_factory=var_factory)
+
+        _prune_saved_root_io_vars_to_supported_contract(device=device)
+        _prune_saved_root_external_mapping_to_live_contract(device=device)
+        _ensure_saved_root_io_vars_for_live_contract(device=device,
+                                                     var_factory=var_factory)
+        register_saved_emt_model_vars_for_device(device=device,
+                                                 var_factory=var_factory)
+        seed_template_derived_dynamic_connection_intents(device=device)
+        attach_emt_model_to_buses(device=device,
+                                  model=device.emt_model,
+                                  var_factory=var_factory)
+
+
+class EmtBusShellSyncResult(NamedTuple):
+    """
+    Describe the outcome of one EMT bus-shell synchronization pass.
+
+    :param changed: Whether the bus shell was replaced.
+    :param old_mask: Previously detected AC phase mask, or ``None`` for DC or malformed shells.
+    :param new_mask: Authoritative AC phase mask, or ``None`` for DC buses.
+    :param voltage_vars: Current authoritative bus-voltage vars indexed by reference.
+    """
+
+    changed: bool
+    old_mask: List[bool] | None
+    new_mask: List[bool] | None
+    voltage_vars: Dict[VarPowerFlowReferenceType, Var | None]
+
+
+def _build_bus_shell_voltage_mapping(bus: Any) -> Dict[VarPowerFlowReferenceType, Var | None]:
+    """
+    Build the authoritative bus-voltage mapping for one live EMT shell.
+
+    :param bus: Bus whose EMT shell is being inspected.
+    :return: Voltage mapping keyed by bus-side power-flow reference.
+    """
+    voltage_mapping: Dict[VarPowerFlowReferenceType, Var | None] = dict()
+
+    if bus.is_dc:
+        voltage_mapping[VarPowerFlowReferenceType.Vdc] = bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.Vdc, None)
+    else:
+        voltage_mapping[VarPowerFlowReferenceType.v_N] = bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.v_N, None)
+        voltage_mapping[VarPowerFlowReferenceType.v_A] = bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.v_A, None)
+        voltage_mapping[VarPowerFlowReferenceType.v_B] = bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.v_B, None)
+        voltage_mapping[VarPowerFlowReferenceType.v_C] = bus.emt_model.external_mapping.get(VarPowerFlowReferenceType.v_C, None)
+
+    return voltage_mapping
+
+
+def _detect_bus_shell_ac_mask(model: Block) -> List[bool] | None:
+    """
+    Detect the AC phase mask represented by one EMT bus shell.
+
+    :param model: Bus EMT shell to inspect.
+    :return: Mask ordered as ``[N, A, B, C]``, or ``None`` when malformed.
+    """
+    try:
+        get_bus_emt_algebraic_vars(model)
+    except (AttributeError, TypeError, ValueError):
+        return None
+    else:
+        pass
+
+    return list([
+        model.external_mapping.get(VarPowerFlowReferenceType.v_N, None) is not None,
+        model.external_mapping.get(VarPowerFlowReferenceType.v_A, None) is not None,
+        model.external_mapping.get(VarPowerFlowReferenceType.v_B, None) is not None,
+        model.external_mapping.get(VarPowerFlowReferenceType.v_C, None) is not None,
+    ])
+
+
+def _bus_shell_matches_expected_voltage_contract(bus: Any,
+                                                 model: Block,
+                                                 expected_mask: List[bool] | None) -> bool:
+    """
+    Check whether one EMT bus shell exposes the expected voltage contract.
+
+    :param bus: Owning bus.
+    :param model: EMT shell to inspect.
+    :param expected_mask: Expected AC mask, or ``None`` for DC buses.
+    :return: ``True`` when the shell matches the current topology/domain contract.
+    """
+    if bus.is_dc:
+        voltage_var: Var | None = model.external_mapping.get(VarPowerFlowReferenceType.Vdc, None)
+        if voltage_var is None:
+            return False
+        elif model.external_mapping.get(VarPowerFlowReferenceType.v_N, None) is not None:
+            return False
+        elif model.external_mapping.get(VarPowerFlowReferenceType.v_A, None) is not None:
+            return False
+        elif model.external_mapping.get(VarPowerFlowReferenceType.v_B, None) is not None:
+            return False
+        elif model.external_mapping.get(VarPowerFlowReferenceType.v_C, None) is not None:
+            return False
+        else:
+            return True
+    else:
+        detected_mask: List[bool] | None = _detect_bus_shell_ac_mask(model=model)
+        if detected_mask is None or expected_mask is None:
+            return False
+        elif model.external_mapping.get(VarPowerFlowReferenceType.Vdc, None) is not None:
+            return False
+        elif detected_mask != expected_mask:
+            return False
+        else:
+            return True
+
+
+def emt_bus_shell_matches_grid_topology(bus: Any, grid: Any) -> bool:
+    """
+    Check whether one existing EMT bus shell matches the current static topology.
+
+    :param bus: Bus that owns the EMT shell.
+    :param grid: Circuit used to derive the authoritative phase mask.
+    :return: ``True`` when the existing shell matches the current grid contract.
+    """
+    expected_mask: List[bool] | None
+
+    if bus.is_dc:
+        expected_mask = None
+    else:
+        expected_mask = get_bus_mask(grid=grid, bus=bus)
+
+    return _bus_shell_matches_expected_voltage_contract(bus=bus,
+                                                        model=bus.emt_model,
+                                                        expected_mask=expected_mask)
+
+
+def _cleanup_bus_shell_var_factory_state(model: Block,
+                                         var_factory: VarFactory) -> None:
+    """
+    Remove one discarded bus shell from the shared var-factory registries.
+
+    :param model: Discarded bus shell.
+    :param var_factory: Shared symbolic variable factory.
+    :return: None.
+    """
+    stale_vars: List[Var] = list()
+    stale_var: Var
+    connected_uid: int
+
+    stale_vars.extend(model.algebraic_vars)
+    stale_vars.extend(model.out_vars)
+
+    for stale_var in stale_vars:
+        if stale_var.non_mutable_uid in var_factory.get_vars_dict():
+            del var_factory.get_vars_dict()[stale_var.non_mutable_uid]
+        else:
+            pass
+
+    stale_uids: set[int] = set(var.non_mutable_uid for var in stale_vars)
+    connections_dict: Dict[int, List[Any]] = var_factory.get_connections_dict()
+    connected_uid_list: List[int] = list(connections_dict.keys())
+
+    for connected_uid in connected_uid_list:
+        if connected_uid in stale_uids:
+            del connections_dict[connected_uid]
+        else:
+            filtered_connections: List[Any] = list()
+            connection: Any
+            for connection in connections_dict[connected_uid]:
+                if connection.non_mutable_uid in stale_uids:
+                    pass
+                else:
+                    filtered_connections.append(connection)
+
+            if len(filtered_connections) == 0:
+                del connections_dict[connected_uid]
+            else:
+                connections_dict[connected_uid] = filtered_connections
+
+
+def synchronize_emt_bus_shell_with_grid(bus: Any,
+                                        grid: Any,
+                                        var_factory: VarFactory,
+                                        device_to_skip: Any | None = None) -> EmtBusShellSyncResult:
+    """
+    Synchronize one EMT bus shell with the current static topology.
+
+    :param bus: Bus whose EMT shell must match the current topology.
+    :param grid: Circuit used to derive the authoritative phase mask.
+    :param var_factory: Shared symbolic variable factory.
+    :param device_to_skip: Optional device currently being reconciled elsewhere.
+    :return: Detailed synchronization result.
+    """
+    expected_mask: List[bool] | None
+    old_mask: List[bool] | None = None
+    rebuild_required: bool = False
+    connected_devices: List[Any] = list()
+    record: EmtBusConnectedModelRecord
+    model: Block = bus.emt_model
+
+    if bus.is_dc:
+        expected_mask = None
+    else:
+        expected_mask = get_bus_mask(grid=grid, bus=bus)
+
+    if model.empty():
+        rebuild_required = True
+    else:
+        old_mask = _detect_bus_shell_ac_mask(model=model)
+        if _bus_shell_matches_expected_voltage_contract(bus=bus,
+                                                       model=model,
+                                                       expected_mask=expected_mask):
+            rebuild_required = False
+        else:
+            rebuild_required = True
+
+    if rebuild_required:
+        for record in bus.get_emt_models_connected():
+            if record.get_device() in connected_devices:
+                pass
+            else:
+                connected_devices.append(record.get_device())
+
+        if not model.empty():
+            _cleanup_bus_shell_var_factory_state(model=model, var_factory=var_factory)
+        else:
+            pass
+
+        get_bus_emt_template(grid=grid, bus=bus)
+        reconnect_registered_emt_models_for_bus(bus=bus,
+                                                var_factory=var_factory,
+                                                device_to_skip=device_to_skip)
+        connect_pending_injection_bus_variables_emt(bus=bus,
+                                                    var_factory=var_factory)
+
+        for record in bus.get_emt_models_connected():
+            if record.get_device() in connected_devices:
+                pass
+            else:
+                connected_devices.append(record.get_device())
+
+        for device in connected_devices:
+            if device_to_skip is not None:
+                if device is device_to_skip:
+                    pass
+                else:
+                    if _has_materialized_emt_model(device=device):
+                        unify_saved_emt_model_root_contract(device=device)
+                        synchronize_saved_emt_root_contract_identity(device=device)
+                        synchronize_saved_emt_root_contract_from_bus(device=device)
+                    else:
+                        pass
+            else:
+                if _has_materialized_emt_model(device=device):
+                    unify_saved_emt_model_root_contract(device=device)
+                    synchronize_saved_emt_root_contract_identity(device=device)
+                    synchronize_saved_emt_root_contract_from_bus(device=device)
+                else:
+                    pass
+
+        bus.mark_emt_model_grid_synchronized()
+        return EmtBusShellSyncResult(changed=True,
+                                     old_mask=old_mask,
+                                     new_mask=expected_mask,
+                                     voltage_vars=_build_bus_shell_voltage_mapping(bus=bus))
+    else:
+        bus.mark_emt_model_grid_synchronized()
+        return EmtBusShellSyncResult(changed=False,
+                                     old_mask=old_mask,
+                                     new_mask=expected_mask,
+                                     voltage_vars=_build_bus_shell_voltage_mapping(bus=bus))
 
 
 def _has_materialized_emt_model(device: Any) -> bool:
@@ -136,7 +1605,8 @@ def cleanup_connected_emt_models_for_bus(bus: Any) -> None:
 
 
 def reconnect_registered_emt_models_for_bus(bus: Any,
-                                            var_factory: VarFactory) -> None:
+                                            var_factory: VarFactory,
+                                            device_to_skip: Any | None = None) -> None:
     """
     Reconnect every live registered EMT endpoint for one rebuilt bus shell.
 
@@ -146,6 +1616,7 @@ def reconnect_registered_emt_models_for_bus(bus: Any,
 
     :param bus: Bus whose connected EMT endpoints must be rebound.
     :param var_factory: Shared variable factory.
+    :param device_to_skip: Optional device currently being reconciled elsewhere.
     :return: None.
     """
     cleanup_connected_emt_models_for_bus(bus=bus)
@@ -156,6 +1627,15 @@ def reconnect_registered_emt_models_for_bus(bus: Any,
         model: Block = record.get_model()
         side: EmtBusConnectionSide = record.get_side()
         device_tpe: DeviceType = record.get_device_tpe()
+
+        if device_to_skip is not None:
+            if device is device_to_skip:
+                pass
+                continue
+            else:
+                pass
+        else:
+            pass
 
         if side == EmtBusConnectionSide.BUS:
             # Single-bus EMT devices consume the bus shell directly, so the
@@ -278,9 +1758,12 @@ def register_saved_emt_model_vars_for_device(device: Any,
     :return: None.
     """
     model: Block = device.emt_model
-    algebraic_var = None
-    state_var = None
-    diff_var = None
+    block_model: Block
+    model_var: Var
+    standard_var_lists: tuple[List[Var], ...]
+    standard_var_list: List[Var]
+    registered_standard_uids: set[int] = set()
+    registered_diff_uids: set[int] = set()
 
     if model.empty():
         return
@@ -294,36 +1777,87 @@ def register_saved_emt_model_vars_for_device(device: Any,
     # later lookups reflect the authoritative post-editor symbolic objects.
     var_factory.vars_info[device] = list()
 
-    for algebraic_var in model.algebraic_vars:
-        # The var-factory connection propagation operates through the central var
-        # registries keyed by stable ``non_mutable_uid``. Re-registering only in
-        # ``vars_info`` is not enough for the saved editor-built vars to receive
-        # propagated bus-side uid updates.
-        vars_dict[algebraic_var.non_mutable_uid] = algebraic_var
-        var_factory.register_var(device, algebraic_var)
+    # Register the complete persisted tree, not only the root block. Editor
+    # commit replaces child-block Var objects as well, and the connection graph
+    # addresses those objects by stable identity. Leaving the factory pointed at
+    # a previous working-copy instance makes topology reconnection update that
+    # obsolete clone while the saved model retains stale bus UIDs.
+    for block_model in model.get_all_blocks():
+        standard_var_lists = (
+            block_model.algebraic_vars,
+            block_model.state_vars,
+            block_model.reformulated_vars,
+            block_model.in_vars,
+            block_model.out_vars,
+        )
+        for standard_var_list in standard_var_lists:
+            for model_var in standard_var_list:
+                if model_var.non_mutable_uid in registered_standard_uids:
+                    pass
+                else:
+                    vars_dict[model_var.non_mutable_uid] = model_var
+                    var_factory.register_var(device, model_var)
+                    registered_standard_uids.add(model_var.non_mutable_uid)
 
-    for state_var in model.state_vars:
-        vars_dict[state_var.non_mutable_uid] = state_var
-        var_factory.register_var(device, state_var)
+        for model_var in block_model.diff_vars:
+            if model_var.non_mutable_uid in registered_diff_uids:
+                pass
+            else:
+                diff_vars_dict[model_var.non_mutable_uid] = model_var
+                var_factory.register_var(device, model_var)
+                registered_diff_uids.add(model_var.non_mutable_uid)
 
-    # Editor-built EMT models expose their bus contract through root input and
-    # output vars. The bus connection helpers propagate live bus identities via
-    # ``VarFactory`` using those root connection vars directly. If they are not
-    # registered in the central var registry, ``add_connections()`` cannot find
-    # them by ``non_mutable_uid`` and the saved editor model keeps stale bus-side
-    # ``uid`` values even though the template setter path succeeds.
-    io_var: Var
-    for io_var in model.in_vars:
-        vars_dict[io_var.non_mutable_uid] = io_var
-        var_factory.register_var(device, io_var)
 
-    for io_var in model.out_vars:
-        vars_dict[io_var.non_mutable_uid] = io_var
-        var_factory.register_var(device, io_var)
+def unregister_saved_emt_model_var_connections_for_device(device: Any,
+                                                          var_factory: VarFactory) -> None:
+    """
+    Remove saved EMT var-factory connection edges currently associated to one device.
 
-    for diff_var in model.diff_vars:
-        diff_vars_dict[diff_var.non_mutable_uid] = diff_var
-        var_factory.register_var(device, diff_var)
+    Reapplying one editor-built EMT model replaces the device symbolic vars, but
+    the shared var-factory connection graph keeps old propagated edges unless the
+    previous device-owned vars are detached explicitly. Those stale edges can
+    later alias old and new root contract vars together and create symbolic
+    cycles during bus reconnection.
+
+    :param device: Device whose saved EMT graph edges must be removed.
+    :param var_factory: Shared variable factory that owns the connection graph.
+    :return: None.
+    """
+    previous_device_vars: list[Var] | None = var_factory.vars_info.get(device, None)
+    previous_device_var_uids: set[int] = set()
+    connected_uid: int
+    outgoing_uid: int
+    existing_connections: list[Any]
+    kept_connections: list[Any]
+    connection: Any
+
+    if previous_device_vars is None:
+        return
+    else:
+        pass
+
+    for connection_var in previous_device_vars:
+        previous_device_var_uids.add(connection_var.non_mutable_uid)
+
+    for outgoing_uid, existing_connections in list(var_factory.get_connections_dict().items()):
+        kept_connections = list()
+
+        for connection in existing_connections:
+            if connection.non_mutable_uid in previous_device_var_uids:
+                pass
+            else:
+                kept_connections.append(connection)
+
+        if len(kept_connections) == 0:
+            del var_factory.get_connections_dict()[outgoing_uid]
+        else:
+            var_factory.get_connections_dict()[outgoing_uid] = kept_connections
+
+    for connected_uid in previous_device_var_uids:
+        if connected_uid in var_factory.get_connections_dict():
+            del var_factory.get_connections_dict()[connected_uid]
+        else:
+            pass
 
 
 def unify_saved_emt_model_root_contract(device: Any) -> None:
@@ -345,6 +1879,12 @@ def unify_saved_emt_model_root_contract(device: Any) -> None:
     ref = None
 
     if model.empty():
+        return
+    else:
+        pass
+
+    if _is_branch_like_device(device):
+        _normalize_saved_branch_root_contract_from_live_sides(device=device)
         return
     else:
         pass
@@ -411,7 +1951,7 @@ def unify_saved_emt_model_root_contract(device: Any) -> None:
             if ref in authoritative_output_by_ref:
                 model.external_mapping[ref] = authoritative_output_by_ref[ref]
             else:
-                pass
+                model.external_mapping[ref] = None
 
     # Prune duplicate root input vars that expose the same bus-contract
     # reference. The first root IO var seen for one reference is now the
@@ -518,6 +2058,8 @@ def synchronize_saved_emt_root_contract_identity(device: Any) -> None:
             else:
                 pass
 
+    rehash_block_tree_var_keyed_dicts(root_block=model)
+
 
 def synchronize_saved_emt_root_contract_from_bus(device: Any) -> None:
     """
@@ -569,7 +2111,7 @@ def synchronize_saved_emt_root_contract_from_bus(device: Any) -> None:
             device_var = model.external_mapping.get(device_reference, None)
 
             if bus_var is None:
-                pass
+                model.external_mapping[device_reference] = None
             else:
                 if device_var is None:
                     pass
@@ -589,36 +2131,205 @@ def synchronize_saved_emt_root_contract_from_bus(device: Any) -> None:
             device_var = model.external_mapping.get(device_reference, None)
 
             if bus_var is None:
-                pass
+                model.external_mapping[device_reference] = None
             else:
                 if device_var is None:
                     pass
                 else:
                     device_var.uid = bus_var.uid
                     device_var.name = bus_var.name
+
+    rehash_block_tree_var_keyed_dicts(root_block=model)
+
+
+def synchronize_saved_emt_root_parameters_from_children(device: Any) -> None:
+    """
+    Mirror child static parameters into one saved EMT root block.
+
+    Some editor-produced EMT models keep static parameters only in child blocks.
+    The EMT initialization pipeline can still compile temporary residual systems
+    starting from the saved root block contract before every wrapper/child path
+    has been flattened, so the saved root must expose the same constant vars as
+    its children for robust GUI execution.
+
+    :param device: Device whose saved EMT root parameters must be synchronized.
+    :return: None.
+    """
+    model: Block = device.emt_model
+    child_block: Block
+    parameter_var: Var
+    parameter_value: Const
+    api_key: Any
+    api_var: Var | None
+
+    if model.empty():
+        return
     else:
-        phase_map = dict([
-            (VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vdc),
-            (VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.v_N),
-            (VarPowerFlowReferenceType.v_A, VarPowerFlowReferenceType.v_A),
-            (VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.v_B),
-            (VarPowerFlowReferenceType.v_C, VarPowerFlowReferenceType.v_C),
-        ])
-        for bus_reference, device_reference in phase_map.items():
-            bus_var = device.bus.emt_model.external_mapping.get(bus_reference, None)
-            device_var = model.external_mapping.get(device_reference, None)
+        pass
 
-            if bus_var is None:
+    for child_block in model.children:
+        for parameter_var, parameter_value in child_block.parameters.items():
+            if parameter_var in model.parameters:
                 pass
             else:
-                if device_var is None:
-                    pass
+                model.parameters[parameter_var] = parameter_value
+
+        # Editor-saved wrapper roots can keep static API mappings such as
+        # ``omega_base`` only on the generated child block. The EMT static
+        # parameter mapper later reads the root ``api_obj_mapping`` contract, so
+        # mirror missing child mappings into the root before assembly.
+        for api_key, api_var in child_block.api_obj_mapping.items():
+            if api_key in model.api_obj_mapping:
+                pass
+            else:
+                model.api_obj_mapping[api_key] = api_var
+
+            if api_var is None:
+                pass
+            else:
+                if api_var in child_block.parameters:
+                    if api_var in model.parameters:
+                        pass
+                    else:
+                        model.parameters[api_var] = child_block.parameters[api_var]
                 else:
-                    device_var.uid = bus_var.uid
-                    device_var.name = bus_var.name
+                    pass
 
 
-def connect_line_rms_from(mdl1: Block, mdl2: Block, var_factory:VarFactory):
+def synchronize_saved_rms_root_mappings_from_children(device: Any) -> None:
+    """Synchronize live child RMS mappings into the saved device-model root.
+
+    Models assembled in the Dynamic Editor store complete device templates as
+    children of the editor-owned root. RMS initialization reads
+    ``external_mapping`` and ``api_obj_mapping`` from that root, so every
+    mapping owned by a generated child must also be exposed there after the
+    edited model is committed. Keep existing root bindings only when their
+    targets are still declared in the current tree. This removes orphaned
+    mappings left by deleted blocks while preserving live interface bindings,
+    including connected variables with different names or from/to references.
+
+    :param device: Device whose saved RMS model has just been committed.
+    :return: None.
+    """
+    model: Block = device.rms_model
+    descendant_block: Block
+    external_key: VarPowerFlowReferenceType
+    external_var: Var | None
+    api_key: ParamPowerFlowReferenceType
+    api_var: Var | None
+
+    if model.empty():
+        return
+    else:
+        pass
+
+    all_blocks: List[Block] = model.get_all_blocks()
+    live_variable_uids: set[int] = set()
+    current_block: Block
+    variable_collection: Iterable[Var]
+    variable: Var
+
+    # Only declarations establish that a variable belongs to the saved model.
+    # Counting mappings or initialization expressions would keep the orphaned
+    # symbols alive through the very metadata that needs to be repaired.
+    for current_block in all_blocks:
+        for variable_collection in (
+                current_block.in_vars, current_block.out_vars,
+                current_block.state_vars, current_block.algebraic_vars,
+                current_block.diff_vars, current_block.reformulated_vars,
+                current_block.parameters, current_block.event_dict,
+                current_block.discrete_eqs, current_block.mode_dict,
+                current_block.boolean_guards,
+        ):
+            for variable in variable_collection:
+                live_variable_uids.add(variable.uid)
+
+    # Compare connected UIDs, not names or PF reference labels. Two terminal
+    # voltages can legitimately share Vm as their reference without sharing a
+    # connection. Do not rewrite ports, equations or graphical connections.
+    model.external_mapping = dict(
+        (external_key, external_var)
+        for external_key, external_var in model.external_mapping.items()
+        if external_var is None or external_var.uid in live_variable_uids
+    )
+    model.api_obj_mapping = dict(
+        (api_key, api_var)
+        for api_key, api_var in model.api_obj_mapping.items()
+        if api_var is None or api_var.uid in live_variable_uids
+    )
+
+    # The first element is the root itself. Fill missing or orphaned mappings
+    # from surviving descendants, without overriding still-live root choices.
+    for descendant_block in all_blocks[1:]:
+        for external_key, external_var in descendant_block.external_mapping.items():
+            root_external_var: Var | None = model.external_mapping.get(external_key, None)
+            if (root_external_var is None and external_var is not None
+                    and external_var.uid in live_variable_uids):
+                model.external_mapping[external_key] = external_var
+            else:
+                pass
+
+        for api_key, api_var in descendant_block.api_obj_mapping.items():
+            root_api_var: Var | None = model.api_obj_mapping.get(api_key, None)
+            if (root_api_var is None and api_var is not None
+                    and api_var.uid in live_variable_uids):
+                model.api_obj_mapping[api_key] = api_var
+            else:
+                pass
+
+
+def ensure_bus_emt_model_matches_grid_mask(bus: Any,
+                                           grid: Any,
+                                           var_factory: VarFactory) -> bool:
+    """
+    Ensure one bus EMT shell matches the current grid-derived phase contract.
+
+    Reopening the dynamic editor after static topology or phase changes can
+    leave one previously materialized EMT bus shell exposing an obsolete phase
+    contract. When that happens, the shell must be rebuilt from the current
+    ``get_bus_mask()`` result and every already-registered EMT device must be
+    rebound to the new bus variables.
+
+    :param bus: Bus whose EMT shell must be validated and, if needed, rebuilt.
+    :param grid: Circuit used to derive the current bus phase mask.
+    :param var_factory: Shared symbolic variable factory.
+    :return: ``True`` when the bus EMT shell was rebuilt, else ``False``.
+    """
+    sync_result: EmtBusShellSyncResult = synchronize_emt_bus_shell_with_grid(bus=bus,
+                                                                             grid=grid,
+                                                                             var_factory=var_factory)
+    return sync_result.changed
+
+
+def initialize_bus_emt_from_grid_with_fallback(bus: Any,
+                                               grid: Any,
+                                               var_factory: VarFactory) -> None:
+    """
+    Initialize one bus EMT shell from the grid using the safe fallback mask.
+
+    Template-style EMT assignment can occur before the surrounding topology has
+    materialized any EMT-aware branch mask for the bus. In that case the bus
+    still needs a stable ABC shell so the device connection contract can be
+    attached without raising.
+
+    :param bus: Bus to initialize.
+    :param grid: Circuit used to derive the current mask.
+    :param var_factory: Shared variable factory.
+    :return: None.
+    """
+    bus.emt_model = BusEmtTemplate(
+        vf=var_factory,
+        mask=get_bus_mask(grid=grid, bus=bus),
+        is_dc=bus.is_dc,
+        name=f"{bus.name}_emt",
+    ).block
+
+
+def connect_line_rms_from(
+        mdl1: Block,
+        mdl2: Block,
+        var_factory: VarFactory,
+) -> None:
     """
     This function substitutes input variables for output variables to connect two rms models
     :param mdl1:
@@ -626,12 +2337,27 @@ def connect_line_rms_from(mdl1: Block, mdl2: Block, var_factory:VarFactory):
     :param var_factory:
     :return:
     """
-    # connect Vm
-    pairs = [
+    # Connect the branch-side voltage to the canonical AC or DC bus voltage.
+    # AC and DC line shells use Vmf at the terminal boundary, while a VSC uses
+    # Vf_dc for its DC terminal. The bus owns either Vm or Vdc according to its
+    # physical topology.
+    pairs: List[tuple[Var, Var]] = [
         (outp, inpt)
         for outp in mdl1.out_vars
         for inpt in mdl2.in_vars
-        if outp.ref == VarPowerFlowReferenceType.Vm and inpt.ref == VarPowerFlowReferenceType.Vmf
+        if (
+            outp.ref in (
+                VarPowerFlowReferenceType.Vm,
+                VarPowerFlowReferenceType.Vdc,
+            )
+            and (
+                inpt.ref == VarPowerFlowReferenceType.Vmf
+                or (
+                    outp.ref == VarPowerFlowReferenceType.Vdc
+                    and inpt.ref == VarPowerFlowReferenceType.Vf_dc
+                )
+            )
+        )
     ]
     for outp, inpt in pairs:
         var_factory.add_connections([inpt], [outp])
@@ -645,6 +2371,8 @@ def connect_line_rms_from(mdl1: Block, mdl2: Block, var_factory:VarFactory):
     ]
     for outp, inpt in pairs:
         var_factory.add_connections([inpt], [outp])
+
+    normalize_branch_rms_root_contract_from(mdl1=mdl1, mdl2=mdl2)
 
 def connect_models_power_flow(mdl1: Block, mdl2: Block, var_factory: VarFactory):
     """
@@ -666,8 +2394,14 @@ def connect_models_power_flow(mdl1: Block, mdl2: Block, var_factory: VarFactory)
         # Todo: change connection method to use var_factory
         var_factory.add_connections([pair[1]], [pair[0]])
 
+    normalize_single_bus_rms_root_contract(mdl1=mdl1, mdl2=mdl2)
 
-def connect_line_rms_to(mdl1: Block, mdl2: Block, var_factory:VarFactory):
+
+def connect_line_rms_to(
+        mdl1: Block,
+        mdl2: Block,
+        var_factory: VarFactory,
+) -> None:
     """
     This function substitutes input variables for output variables to connect two rms models
     :param mdl1:
@@ -675,12 +2409,27 @@ def connect_line_rms_to(mdl1: Block, mdl2: Block, var_factory:VarFactory):
     :param var_factory:
     :return:
     """
-    # connect Vm
-    pairs = [
+    # Connect the branch-side voltage to the canonical AC or DC bus voltage.
+    # AC and DC line shells use Vmt at the terminal boundary, while a VSC uses
+    # Vt_dc for its DC terminal. The bus owns either Vm or Vdc according to its
+    # physical topology.
+    pairs: List[tuple[Var, Var]] = [
         (outp, inpt)
         for outp in mdl1.out_vars
         for inpt in mdl2.in_vars
-        if outp.ref == VarPowerFlowReferenceType.Vm and inpt.ref == VarPowerFlowReferenceType.Vmt
+        if (
+            outp.ref in (
+                VarPowerFlowReferenceType.Vm,
+                VarPowerFlowReferenceType.Vdc,
+            )
+            and (
+                inpt.ref == VarPowerFlowReferenceType.Vmt
+                or (
+                    outp.ref == VarPowerFlowReferenceType.Vdc
+                    and inpt.ref == VarPowerFlowReferenceType.Vt_dc
+                )
+            )
+        )
     ]
     for outp, inpt in pairs:
         var_factory.add_connections([inpt], [outp])
@@ -695,6 +2444,182 @@ def connect_line_rms_to(mdl1: Block, mdl2: Block, var_factory:VarFactory):
     for outp, inpt in pairs:
         var_factory.add_connections([inpt], [outp])
 
+    normalize_branch_rms_root_contract_to(mdl1=mdl1, mdl2=mdl2)
+
+
+def normalize_rms_root_contract(mdl2: Block,
+                                var_mapping: Dict[Var, Var]) -> None:
+    """
+    Normalize one RMS root contract to the authoritative connected bus variables.
+
+    The RMS templates use one root wrapper block exposing ``in_vars`` and
+    ``external_mapping`` while the actual equations can live in child blocks.
+    After one connection is established, the authoritative symbolic identity for
+    one bus-facing contract must be the live bus variable, not the template-side
+    wrapper variable. Rewriting the whole block hierarchy keeps equations,
+    initialization equations and root mappings aligned on the same variable UIDs.
+
+    :param mdl2: Device RMS model whose root contract must be normalized.
+    :param var_mapping: Old-to-new variable mapping for RMS contract vars.
+    :return: None.
+    """
+    if len(var_mapping) == 0:
+        pass
+    else:
+        mdl2.update_model_bulk(var_mapping=var_mapping)
+
+
+def normalize_branch_rms_root_contract_from(mdl1: Block, mdl2: Block) -> None:
+    """
+    Normalize the RMS root contract for the branch ``from`` side.
+
+    :param mdl1: Connected bus RMS model.
+    :param mdl2: Branch RMS model.
+    :return: None.
+    """
+    vm_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Vm, None)
+    vdc_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Vdc, None)
+    va_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Va, None)
+    vm_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vmf, None)
+    vdc_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vf_dc, None)
+    va_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vaf, None)
+    var_mapping: Dict[Var, Var] = dict()
+
+    if vm_bus is None:
+        if vdc_bus is None:
+            pass
+        else:
+            if vm_dev is None:
+                pass
+            else:
+                if vm_dev.uid == vdc_bus.uid:
+                    pass
+                else:
+                    var_mapping[vm_dev] = vdc_bus
+            if vdc_dev is None:
+                pass
+            else:
+                if vdc_dev.uid == vdc_bus.uid:
+                    pass
+                else:
+                    var_mapping[vdc_dev] = vdc_bus
+    else:
+        if vm_dev is None:
+            pass
+        else:
+            if vm_dev.uid == vm_bus.uid:
+                pass
+            else:
+                var_mapping[vm_dev] = vm_bus
+
+    if va_bus is None:
+        pass
+    else:
+        if va_dev is None:
+            pass
+        else:
+            if va_dev.uid == va_bus.uid:
+                pass
+            else:
+                var_mapping[va_dev] = va_bus
+
+    normalize_rms_root_contract(mdl2=mdl2, var_mapping=var_mapping)
+
+
+def normalize_branch_rms_root_contract_to(mdl1: Block, mdl2: Block) -> None:
+    """
+    Normalize the RMS root contract for the branch ``to`` side.
+
+    :param mdl1: Connected bus RMS model.
+    :param mdl2: Branch RMS model.
+    :return: None.
+    """
+    vm_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Vm, None)
+    vdc_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Vdc, None)
+    va_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Va, None)
+    vm_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vmt, None)
+    vdc_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vt_dc, None)
+    va_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vat, None)
+    var_mapping: Dict[Var, Var] = dict()
+
+    if vm_bus is None:
+        if vdc_bus is None:
+            pass
+        else:
+            if vm_dev is None:
+                pass
+            else:
+                if vm_dev.uid == vdc_bus.uid:
+                    pass
+                else:
+                    var_mapping[vm_dev] = vdc_bus
+            if vdc_dev is None:
+                pass
+            else:
+                if vdc_dev.uid == vdc_bus.uid:
+                    pass
+                else:
+                    var_mapping[vdc_dev] = vdc_bus
+    else:
+        if vm_dev is None:
+            pass
+        else:
+            if vm_dev.uid == vm_bus.uid:
+                pass
+            else:
+                var_mapping[vm_dev] = vm_bus
+
+    if va_bus is None:
+        pass
+    else:
+        if va_dev is None:
+            pass
+        else:
+            if va_dev.uid == va_bus.uid:
+                pass
+            else:
+                var_mapping[va_dev] = va_bus
+
+    normalize_rms_root_contract(mdl2=mdl2, var_mapping=var_mapping)
+
+
+def normalize_single_bus_rms_root_contract(mdl1: Block, mdl2: Block) -> None:
+    """
+    Normalize the RMS root contract for one single-bus injection model.
+
+    :param mdl1: Connected bus RMS model.
+    :param mdl2: Single-bus RMS model.
+    :return: None.
+    """
+    vm_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Vm, None)
+    va_bus: Var | None = mdl1.external_mapping.get(VarPowerFlowReferenceType.Va, None)
+    vm_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Vm, None)
+    va_dev: Var | None = mdl2.external_mapping.get(VarPowerFlowReferenceType.Va, None)
+    var_mapping: Dict[Var, Var] = dict()
+
+    if vm_bus is None:
+        pass
+    else:
+        if vm_dev is None:
+            pass
+        else:
+            if vm_dev.uid == vm_bus.uid:
+                pass
+            else:
+                var_mapping[vm_dev] = vm_bus
+
+    if va_bus is None:
+        pass
+    else:
+        if va_dev is None:
+            pass
+        else:
+            if va_dev.uid == va_bus.uid:
+                pass
+            else:
+                var_mapping[va_dev] = va_bus
+
+    normalize_rms_root_contract(mdl2=mdl2, var_mapping=var_mapping)
 
 def connect_line_phasor_rms_from(mdl1: Block, mdl2: Block, var_factory:VarFactory):
     """
@@ -779,20 +2704,188 @@ def connect_models(mdl1: Block, mdl2: Block, var_factory:VarFactory):
         var_factory.add_connections([inpt], [outp])
 
     #print("")
-def connect_bus_variables_rms(device: Any, model:Block, var_factory: VarFactory | None):
-    """
-    connect the bus variables of the model with the api_object bus variables
-    :param device:
-    :type device:
-    :param model:
-    :type model:
-    :param var_factory:
-    :type var_factory:
-    :return:
-    :rtype:
-    """
+def _connect_rms_bus_voltage_reference(
+        bus_model: Block,
+        device_model: Block,
+        bus_reference: VarPowerFlowReferenceType,
+        device_reference: VarPowerFlowReferenceType,
+        var_factory: VarFactory,
+) -> bool:
+    """Connect one device RMS voltage terminal to its authoritative bus variable.
 
-    if device.device_type in [DeviceType.BranchDevice, DeviceType.LineDevice, DeviceType.Transformer2WDevice, DeviceType.Transformer3WDevice]:
+    The ordinary AC branch helpers encode the conventional ``Vm/Va`` to
+    ``Vmf/Vaf`` or ``Vmt/Vat`` mappings directly. DC terminals and mixed
+    AC/DC devices need the same operation with a different pair of semantic
+    references. This helper performs that reference-to-reference connection
+    while normalizing the complete device block hierarchy to the bus variable.
+
+    :param bus_model: Initialized RMS bus model providing the source voltage.
+    :param device_model: RMS device model consuming the terminal voltage.
+    :param bus_reference: Voltage reference exposed by the bus model.
+    :param device_reference: Terminal reference exposed by the device model.
+    :param var_factory: Shared variable factory that persists the connection.
+    :return: ``True`` when both endpoints exist and are connected.
+    """
+    bus_voltage: Var | None = bus_model.external_mapping.get(bus_reference, None)
+    device_voltage: Var | None = device_model.external_mapping.get(device_reference, None)
+    candidate_var: Var
+
+    # Legacy models may expose the correct terminal only through their visible
+    # interface. Recover it there without weakening the authoritative mapping
+    # used by current templates.
+    if bus_voltage is None:
+        for candidate_var in bus_model.out_vars:
+            if bus_voltage is None and candidate_var.ref == bus_reference:
+                bus_voltage = candidate_var
+            else:
+                pass
+    else:
+        pass
+
+    if device_voltage is None:
+        for candidate_var in device_model.in_vars:
+            if device_voltage is None and candidate_var.ref == device_reference:
+                device_voltage = candidate_var
+            else:
+                pass
+    else:
+        pass
+
+    if bus_voltage is None or device_voltage is None:
+        return False
+    else:
+        pass
+
+    # Replace every occurrence in the model before registering the persistent
+    # alias. The equations, initialization expressions and root mappings then
+    # all use the exact bus variable identity rather than a detached terminal.
+    var_mapping: Dict[Var, Var] = dict()
+    if device_voltage.non_mutable_uid == bus_voltage.non_mutable_uid:
+        pass
+    else:
+        var_mapping[device_voltage] = bus_voltage
+    normalize_rms_root_contract(mdl2=device_model, var_mapping=var_mapping)
+    var_factory.add_connections(
+        vars_to_subs=list((device_voltage,)),
+        incoming_vars=list((bus_voltage,)),
+    )
+    return True
+
+
+def connect_bus_variables_rms(device: Any,
+                              model: Block,
+                              var_factory: VarFactory | None) -> None:
+    """Connect one RMS device model to the voltage variables of its buses.
+
+    Mixed AC/DC VSCs and pure DC lines use explicit device-specific terminal
+    mappings. Conventional AC branches retain the existing from/to connection
+    helpers, while injection devices retain exact power-flow-reference matching.
+
+    :param device: Static network device receiving the RMS model.
+    :param model: Materialized RMS model whose terminal variables are connected.
+    :param var_factory: Shared symbolic variable factory, when available.
+    :return: None.
+    """
+    if device.device_type == DeviceType.VscDevice:
+        # A VeraGrid VSC is oriented from its DC bus to its AC bus. Its RMS
+        # template therefore combines a direct Vdc terminal on the from side
+        # with the conventional Vmt/Vat pair on the to side.
+        if var_factory is None:
+            raise ValueError("var factory not associated to grid element")
+        else:
+            pass
+
+        if device.bus_from.rms_model.empty():
+            initialize_bus_rms(device.bus_from, var_factory)
+        else:
+            pass
+        if device.bus_to.rms_model.empty():
+            initialize_bus_rms(device.bus_to, var_factory)
+        else:
+            pass
+
+        _connect_rms_bus_voltage_reference(
+            bus_model=device.bus_from.rms_model,
+            device_model=model,
+            bus_reference=VarPowerFlowReferenceType.Vdc,
+            device_reference=VarPowerFlowReferenceType.Vdc,
+            var_factory=var_factory,
+        )
+        vm_connected: bool = _connect_rms_bus_voltage_reference(
+            bus_model=device.bus_to.rms_model,
+            device_model=model,
+            bus_reference=VarPowerFlowReferenceType.Vm,
+            device_reference=VarPowerFlowReferenceType.Vmt,
+            var_factory=var_factory,
+        )
+        if vm_connected:
+            pass
+        else:
+            # Older VSC templates used the injection-style Vm reference for
+            # their AC terminal. Preserve that supported contract as fallback.
+            _connect_rms_bus_voltage_reference(
+                bus_model=device.bus_to.rms_model,
+                device_model=model,
+                bus_reference=VarPowerFlowReferenceType.Vm,
+                device_reference=VarPowerFlowReferenceType.Vm,
+                var_factory=var_factory,
+            )
+        va_connected: bool = _connect_rms_bus_voltage_reference(
+            bus_model=device.bus_to.rms_model,
+            device_model=model,
+            bus_reference=VarPowerFlowReferenceType.Va,
+            device_reference=VarPowerFlowReferenceType.Vat,
+            var_factory=var_factory,
+        )
+        if va_connected:
+            pass
+        else:
+            _connect_rms_bus_voltage_reference(
+                bus_model=device.bus_to.rms_model,
+                device_model=model,
+                bus_reference=VarPowerFlowReferenceType.Va,
+                device_reference=VarPowerFlowReferenceType.Va,
+                var_factory=var_factory,
+            )
+    elif device.device_type == DeviceType.DCLineDevice:
+        # A DC line reuses the branch-side Vmf/Vmt references for its two
+        # terminals, while both connected bus shells expose a direct Vdc.
+        if var_factory is None:
+            raise ValueError("var factory not associated to grid element")
+        else:
+            pass
+
+        if device.bus_from.rms_model.empty():
+            initialize_bus_rms(device.bus_from, var_factory)
+        else:
+            pass
+        if device.bus_to.rms_model.empty():
+            initialize_bus_rms(device.bus_to, var_factory)
+        else:
+            pass
+
+        _connect_rms_bus_voltage_reference(
+            bus_model=device.bus_from.rms_model,
+            device_model=model,
+            bus_reference=VarPowerFlowReferenceType.Vdc,
+            device_reference=VarPowerFlowReferenceType.Vmf,
+            var_factory=var_factory,
+        )
+        _connect_rms_bus_voltage_reference(
+            bus_model=device.bus_to.rms_model,
+            device_model=model,
+            bus_reference=VarPowerFlowReferenceType.Vdc,
+            device_reference=VarPowerFlowReferenceType.Vmt,
+            var_factory=var_factory,
+        )
+    elif device.device_type in [DeviceType.BranchDevice,
+                                DeviceType.LineDevice,
+                                DeviceType.Transformer2WDevice,
+                                DeviceType.Transformer3WDevice,
+                                DeviceType.HVDCLineDevice,
+                                DeviceType.SwitchDevice,
+                                DeviceType.SeriesReactanceDevice,
+                                DeviceType.UpfcDevice]:
         # Check if using phasor or polar coordinates by looking at bus model outputs
         bus_model = device.bus_from.rms_model
         if bus_model.empty():
@@ -873,81 +2966,32 @@ def connect_pending_injection_bus_variables_emt(bus: Any,
                 bus.remove_pending_emt_device(pending_device)
 
 
-def build_emt_bus_mask_from_existing_model(bus_model: Block) -> list[bool]:
+def initialize_bus_emt_from_local_device_context(bus: Any,
+                                                 var_factory: VarFactory) -> None:
     """
-    Build the AC phase mask already materialized in one EMT bus model.
+    Materialize one minimal EMT bus shell from the local bus context.
 
-    The shared EMT attachment flow must preserve the phases that already exist on
-    one bus because other connected EMT devices may already depend on them. This
-    helper reads the current bus external mapping and converts it into the
-    canonical ``[N, A, B, C]`` phase mask used by the bus-shell ensure logic.
+    When the GUI assigns one single-bus EMT template before any branch template
+    exists, there is no topology-derived phase mask available yet. In that case
+    the fallback shell must still be materialized immediately so the device can
+    bind its voltage inputs. The default shell matches the existing bus-mask
+    fallback contract: AC buses expose ABC and DC buses expose ``Vdc``.
 
-    :param bus_model: Existing EMT bus block.
-    :return: Phase mask ordered as ``[N, A, B, C]``.
-    """
-    external_mapping: dict[Any, Var | None] = bus_model.external_mapping
-    mask: list[bool] = list([False, False, False, False])
-
-    mask[0] = external_mapping.get(VarPowerFlowReferenceType.v_N, None) is not None
-    mask[1] = external_mapping.get(VarPowerFlowReferenceType.v_A, None) is not None
-    mask[2] = external_mapping.get(VarPowerFlowReferenceType.v_B, None) is not None
-    mask[3] = external_mapping.get(VarPowerFlowReferenceType.v_C, None) is not None
-
-    return mask
-
-
-def ensure_bus_emt_shell(bus: Any,
-                         required_mask: list[bool],
-                         var_factory: VarFactory) -> bool:
-    """
-    Ensure that one bus owns one EMT shell covering the required phases.
-
-    The EMT assignment algorithm must materialize a missing bus shell on first
-    use and expand one existing AC shell only when one newly attached device
-    requires additional phases.
-
-    :param bus: Bus whose EMT shell must exist.
-    :param required_mask: Required AC phase mask ordered as ``[N, A, B, C]``.
+    :param bus: Bus whose EMT shell must be initialized.
     :param var_factory: Shared symbolic variable factory.
-    :return: ``True`` when the bus shell had to be rebuilt.
+    :return: None.
     """
-    bus_shell_rebuilt: bool = False
+    default_mask: list[bool]
 
     if bus.is_dc:
-        if bus.emt_model.empty():
-            bus.emt_model = BusEmtTemplate(vf=var_factory,
-                                           mask=list([False, False, False, False]),
-                                           is_dc=True,
-                                           name=f"{bus.name}_emt_template").block
-            bus_shell_rebuilt = True
-        else:
-            pass
+        default_mask = list([False, False, False, False])
     else:
-        if bus.emt_model.empty():
-            bus.emt_model = BusEmtTemplate(vf=var_factory,
-                                           mask=required_mask,
-                                           is_dc=False,
-                                           name=f"{bus.name}_emt_template").block
-            bus_shell_rebuilt = True
-        else:
-            existing_mask: list[bool] = build_emt_bus_mask_from_existing_model(bus.emt_model)
-            merged_mask: list[bool] = list([False, False, False, False])
+        default_mask = list([False, True, True, True])
 
-            merged_mask[0] = existing_mask[0] or required_mask[0]
-            merged_mask[1] = existing_mask[1] or required_mask[1]
-            merged_mask[2] = existing_mask[2] or required_mask[2]
-            merged_mask[3] = existing_mask[3] or required_mask[3]
-
-            if merged_mask != existing_mask:
-                bus.emt_model = BusEmtTemplate(vf=var_factory,
-                                               mask=merged_mask,
-                                               is_dc=False,
-                                               name=f"{bus.name}_emt_template").block
-                bus_shell_rebuilt = True
-            else:
-                pass
-
-    return bus_shell_rebuilt
+    bus.emt_model = BusEmtTemplate(vf=var_factory,
+                                   mask=default_mask,
+                                   is_dc=bus.is_dc,
+                                   name=f"{bus.name}_emt").block
 
 
 def _connect_branch_emt_model_to_bus(device: Any,
@@ -988,22 +3032,15 @@ def _connect_branch_emt_model_to_bus(device: Any,
             else:
                 pass
 
-
 def attach_emt_model_to_buses(device: Any,
                               model: Block,
-                              var_factory: VarFactory,
-                              bus_mask: list[bool] | None = None,
-                              from_mask: list[bool] | None = None,
-                              to_mask: list[bool] | None = None) -> None:
+                              var_factory: VarFactory) -> None:
     """
     Attach one EMT model to its bus shells using one shared engine workflow.
 
     :param device: Device owning the EMT model.
     :param model: Materialized EMT model block to attach.
     :param var_factory: Shared symbolic variable factory.
-    :param bus_mask: Required single-bus mask for injection devices.
-    :param from_mask: Required from-side mask for branch devices.
-    :param to_mask: Required to-side mask for branch devices.
     :return: None.
     """
     branch_devices: list[DeviceType] = list([DeviceType.BranchDevice,
@@ -1017,32 +3054,14 @@ def attach_emt_model_to_buses(device: Any,
                                              DeviceType.UpfcDevice,
                                              DeviceType.VscDevice])
 
-    # The shared attachment path must materialize the current block on the
-    # device first because registry cleanup and validation helpers compare live
-    # entries against ``device.emt_model``.
-    device.emt_model = model
-
     unregister_connected_emt_model_from_attached_buses(device=device)
 
     if device.device_type in branch_devices:
-        from_required_mask: list[bool]
-        to_required_mask: list[bool]
-        from_bus_rebuilt: bool
-        to_bus_rebuilt: bool
-
-        if from_mask is None:
-            from_required_mask = list([False, False, False, False])
+        if device.bus_from.emt_model.empty():
+            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_from.name} EMT model")
         else:
-            from_required_mask = from_mask
+            pass
 
-        if to_mask is None:
-            to_required_mask = list([False, False, False, False])
-        else:
-            to_required_mask = to_mask
-
-        from_bus_rebuilt = ensure_bus_emt_shell(bus=device.bus_from,
-                                                required_mask=from_required_mask,
-                                                var_factory=var_factory)
         _connect_branch_emt_model_to_bus(device=device,
                                          model=model,
                                          bus=device.bus_from,
@@ -1052,16 +3071,12 @@ def attach_emt_model_to_buses(device: Any,
                                      device=device,
                                      model=model,
                                      side=EmtBusConnectionSide.FROM)
-        if from_bus_rebuilt:
-            reconnect_registered_emt_models_for_bus(bus=device.bus_from,
-                                                    var_factory=var_factory)
+
+        if device.bus_to.emt_model.empty():
+            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_to.name} EMT model")
         else:
             pass
-        connect_pending_injection_bus_variables_emt(device.bus_from, var_factory)
 
-        to_bus_rebuilt = ensure_bus_emt_shell(bus=device.bus_to,
-                                              required_mask=to_required_mask,
-                                              var_factory=var_factory)
         _connect_branch_emt_model_to_bus(device=device,
                                          model=model,
                                          bus=device.bus_to,
@@ -1071,12 +3086,6 @@ def attach_emt_model_to_buses(device: Any,
                                      device=device,
                                      model=model,
                                      side=EmtBusConnectionSide.TO)
-        if to_bus_rebuilt:
-            reconnect_registered_emt_models_for_bus(bus=device.bus_to,
-                                                    var_factory=var_factory)
-        else:
-            pass
-        connect_pending_injection_bus_variables_emt(device.bus_to, var_factory)
 
         # Non-VSC branch devices expose bus-side EMT voltage contracts through
         # root external-mapping vars such as ``vf_A`` and ``vt_A``. The symbolic
@@ -1085,34 +3094,27 @@ def attach_emt_model_to_buses(device: Any,
         # can still point to pre-propagation objects. Re-normalize the saved root
         # contract after the bus connections are attached so validation reads the
         # same propagated symbolic objects that the connection helpers updated.
+        seed_template_derived_dynamic_connection_intents(device=device)
+        rematerialize_saved_dynamic_connection_intents(device=device,
+                                                       var_factory=var_factory)
         if device.device_type == DeviceType.VscDevice:
             pass
         else:
-            unify_saved_emt_model_root_contract(device=device)
+            _normalize_saved_branch_root_contract_from_live_sides(device=device)
             synchronize_saved_emt_root_contract_identity(device=device)
             synchronize_saved_emt_root_contract_from_bus(device=device)
     else:
-        single_bus_required_mask: list[bool]
-
-        if bus_mask is None:
-            if device.bus.is_dc:
-                single_bus_required_mask = list([False, False, False, False])
-            else:
-                single_bus_required_mask = list([False, True, True, True])
-        else:
-            single_bus_required_mask = bus_mask
-
-        ensure_bus_emt_shell(bus=device.bus,
-                             required_mask=single_bus_required_mask,
-                             var_factory=var_factory)
         if device.bus.emt_model.empty():
-            pass
+            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus.name} EMT model")
         else:
             connect_injection_emt(device.bus.emt_model, model, var_factory)
             register_connected_emt_model(bus=device.bus,
                                          device=device,
                                          model=model,
                                          side=EmtBusConnectionSide.BUS)
+            seed_template_derived_dynamic_connection_intents(device=device)
+            rematerialize_saved_dynamic_connection_intents(device=device,
+                                                           var_factory=var_factory)
             # Single-bus EMT devices validate their root external mapping against
             # the live bus shell directly. Rebuild the saved root contract after
             # the connection propagation step so those root references point to
@@ -1160,64 +3162,55 @@ def connect_bus_variables_emt(device: Any,
         pass
 
     if device.device_type in branch_devices:
-        from_required_mask: list[bool] = list([False, False, False, False])
-        to_required_mask: list[bool] = list([False, False, False, False])
-
-        def _get_branch_ac_phase_mask(branch_device: Any) -> list[bool]:
-            if branch_device.device_type == DeviceType.LineDevice and branch_device.ys is not None:
-                return list([
-                    bool(branch_device.ys.phN),
-                    bool(branch_device.ys.phA),
-                    bool(branch_device.ys.phB),
-                    bool(branch_device.ys.phC),
-                ])
-            else:
-                if branch_device.device_type in [DeviceType.Transformer2WDevice, DeviceType.WindingDevice]:
-                    phase_set: set[int] = set(int(phase) for phase in branch_device.phases)
-                    return list([
-                        0 in phase_set,
-                        1 in phase_set,
-                        2 in phase_set,
-                        3 in phase_set,
-                    ])
+        if device.bus_from.emt_model.empty():
+            if allow_deferred_connection:
+                if grid is None:
+                    initialize_bus_emt_from_local_device_context(bus=device.bus_from,
+                                                                 var_factory=var_factory)
                 else:
-                    if branch_device.device_type == DeviceType.VscDevice:
-                        return list([
-                            branch_device.bus_dc_n is not None,
-                            True,
-                            True,
-                            True,
-                        ])
-                    else:
-                        return list([False, True, True, True])
-
-        if not device.bus_from.is_dc:
-            from_required_mask = _get_branch_ac_phase_mask(device)
+                    initialize_bus_emt_from_grid_with_fallback(bus=device.bus_from,
+                                                               grid=grid,
+                                                               var_factory=var_factory)
+            else:
+                raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_from.name} EMT model")
         else:
             pass
 
-        if not device.bus_to.is_dc:
-            to_required_mask = _get_branch_ac_phase_mask(device)
+        if device.bus_to.emt_model.empty():
+            if allow_deferred_connection:
+                if grid is None:
+                    initialize_bus_emt_from_local_device_context(bus=device.bus_to,
+                                                                 var_factory=var_factory)
+                else:
+                    initialize_bus_emt_from_grid_with_fallback(bus=device.bus_to,
+                                                               grid=grid,
+                                                               var_factory=var_factory)
+            else:
+                raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_to.name} EMT model")
         else:
             pass
 
         attach_emt_model_to_buses(device=device,
                                   model=model,
-                                  var_factory=var_factory,
-                                  from_mask=from_required_mask,
-                                  to_mask=to_required_mask)
+                                  var_factory=var_factory)
     else:
-        single_bus_required_mask: list[bool]
-
-        if device.bus.is_dc:
-            single_bus_required_mask = list([False, False, False, False])
+        if device.bus.emt_model.empty():
+            if allow_deferred_connection:
+                if grid is not None:
+                    initialize_bus_emt_from_grid_with_fallback(bus=device.bus,
+                                                               grid=grid,
+                                                               var_factory=var_factory)
+                else:
+                    initialize_bus_emt_from_local_device_context(bus=device.bus,
+                                                                 var_factory=var_factory)
+            else:
+                raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus.name} EMT model")
         else:
-            single_bus_required_mask = list([False, True, True, True])
+            pass
 
         attach_emt_model_to_buses(device=device,
                                   model=model,
-                                  var_factory=var_factory,
-                                  bus_mask=single_bus_required_mask)
+                                  var_factory=var_factory)
 
 
 def set_rms_model(device: Any, model:Block, var_factory: VarFactory):
@@ -1228,7 +3221,16 @@ def set_rms_model(device: Any, model:Block, var_factory: VarFactory):
     """
     # connect bus variables
 
-    if device.device_type in [DeviceType.BranchDevice, DeviceType.LineDevice, DeviceType.Transformer2WDevice, DeviceType.Transformer3WDevice]:
+    if device.device_type in [DeviceType.BranchDevice,
+                              DeviceType.LineDevice,
+                              DeviceType.Transformer2WDevice,
+                              DeviceType.Transformer3WDevice,
+                              DeviceType.DCLineDevice,
+                              DeviceType.HVDCLineDevice,
+                              DeviceType.SwitchDevice,
+                              DeviceType.SeriesReactanceDevice,
+                              DeviceType.UpfcDevice,
+                              DeviceType.VscDevice]:
         # Check if using phasor or polar coordinates by looking at bus model outputs
         bus_model = device.bus_from.rms_model
         if not bus_model.empty():
@@ -1260,7 +3262,7 @@ def set_rms_model(device: Any, model:Block, var_factory: VarFactory):
         else:
             raise ValueError(f"Connection Bus RMS model cannot be empty, initialize {device.bus.name} RMS model")
 
-    # fill var factoru dict[Dev, List[Var]] with model variables
+    # fill var factory dict[Dev, List[Var]] with model variables
     # model.unify_blocks()
     # for vr in model.algebraic_vars:
     #     var_factory.register_var(device, vr)
@@ -1269,6 +3271,11 @@ def set_rms_model(device: Any, model:Block, var_factory: VarFactory):
 
     # set the model to the device
     device.rms_model = model
+
+    # The RMS assembler reads power-flow mappings from the saved model root.
+    # Promote mappings owned by complete-template descendants so scripted
+    # assignment follows the same persistence contract as the Dynamic Editor.
+    synchronize_saved_rms_root_mappings_from_children(device=device)
 
 
 def connect_line_emt_from(mdl1: Block, mdl2: Block, var_factory:VarFactory):
@@ -1598,72 +3605,26 @@ def connect_vsc_emt_to(mdl1: Block, mdl2: Block, var_factory:VarFactory, is_dc_b
 def set_emt_model(device: Any, model: Block, var_factory: VarFactory):
     """
     Sets the EMT model for a given device, connects it to the bus(es),
-    and registers all its variables in the VarFactory.
+    and stores the same hierarchical runtime shape used by GUI assignment.
 
     :param device: The power system device (Line, Transformer, Generator, etc.)
     :param model: The mathematical block model of the device
     :param var_factory: Factory to register simulation variables
     :return: None
     """
-    # 1. Connect bus variables depending on the device type
-    if device.device_type in [DeviceType.BranchDevice,
-                              DeviceType.LineDevice,
-                              DeviceType.DCLineDevice,
-                              DeviceType.HVDCLineDevice,
-                              DeviceType.SwitchDevice,
-                              DeviceType.SeriesReactanceDevice,
-                              DeviceType.UpfcDevice,
-                              DeviceType.Transformer2WDevice,
-                              DeviceType.Transformer3WDevice]:
-
-        # Bus FROM connection
-        bus_from_model = device.bus_from.emt_model
-        if not bus_from_model.empty():
-            connect_line_emt_from(bus_from_model, model, var_factory)
-        else:
-            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_from.name} EMT model")
-
-        # Bus TO connection
-        bus_to_model = device.bus_to.emt_model
-        if not bus_to_model.empty():
-            connect_line_emt_to(bus_to_model, model, var_factory)
-        else:
-            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_to.name} EMT model")
-
-    elif device.device_type == DeviceType.VscDevice:
-
-        # VSC: bus_from is DC, bus_to is AC
-        bus_from_model = device.bus_from.emt_model
-        if not bus_from_model.empty():
-            connect_vsc_emt_from(bus_from_model, model, var_factory, is_dc_bus=device.bus_from.is_dc)
-        else:
-            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_from.name} EMT model")
-
-        bus_to_model = device.bus_to.emt_model
-        if not bus_to_model.empty():
-            connect_vsc_emt_to(bus_to_model, model, var_factory, is_dc_bus=device.bus_to.is_dc)
-        else:
-            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus_to.name} EMT model")
-
-    else:
-        # Generic device connection (e.g., Loads, Generators connected to a single bus)
-        if not device.bus.emt_model.empty():
-            connect_injection_emt(device.bus.emt_model, model, var_factory)
-        else:
-            raise ValueError(f"Connection Bus EMT model cannot be empty, initialize {device.bus.name} EMT model")
-
-    # 2. Unify blocks and register all variables in the VarFactory
-    model.unify_blocks()
-
-    for vr in model.algebraic_vars:
-        var_factory.register_var(device, vr)
-
-    for vr in model.state_vars:
-        var_factory.register_var(device, vr)
-
-    # Added diff_vars for EMT simulations
-    for vr in model.diff_vars:
-        var_factory.register_var(device, vr)
-
-    # 3. Assign the configured model to the device
+    # The attachment path normalizes the authoritative saved root through
+    # ``device.emt_model``. Publish the incoming block first so scripting does
+    # not normalize the previous (often empty) device model while connecting
+    # the new block separately.
     device.emt_model = model
+
+    # Route all callers through the shared attachment path so branch and
+    # injection EMT models preserve the same root external contract used by the
+    # editor-driven template setters and topology validation.
+    connect_bus_variables_emt(device=device,
+                              model=model,
+                              var_factory=var_factory,
+                              allow_deferred_connection=True)
+    # EMT scripting must now preserve the same pre-build hierarchical runtime
+    # shape produced by GUI template assignment. The shared EMT problem build
+    # path performs the authoritative flattening stage for both workflows.
