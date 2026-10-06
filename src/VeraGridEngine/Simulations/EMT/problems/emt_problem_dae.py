@@ -2085,6 +2085,7 @@ class EmtProblemDae(EmtProblemTemplate):
         "_temp_post_diff_init_guess",
         "_vars2device",
         "_vars_info",
+        "algebraic_predictor_derivatives",
     )
 
     def __init__(self,
@@ -2127,6 +2128,11 @@ class EmtProblemDae(EmtProblemTemplate):
         self._temp_post_diff_init_guess: Dict[int, float] = dict()
         self.initialization_report: EmtInitializationReport | None = None
         self.build_report: Dict[str, float] = dict()
+        # Optional first-step derivatives supplied by model-validation helpers.
+        # Structural solvers already consume this mapping through ``getattr``;
+        # declaring it here also permits slotted problem instances to receive
+        # predictor seeds.
+        self.algebraic_predictor_derivatives: Dict[int, float] = dict()
 
         self._scheduled_mode_events: Dict[int, List[Tuple[float, float, bool]]] = dict()
         self._mode_event_cursor: Dict[int, int] = dict()

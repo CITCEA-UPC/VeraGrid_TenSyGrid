@@ -9,9 +9,9 @@ import scipy.sparse.linalg as spla
 import scipy.linalg as la
 
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
-from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDae
 from VeraGridEngine.Simulations.driver_template import DriverTemplate
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
+from VeraGridEngine.Simulations.EMT.emt_problem_factory import build_emt_problem
 from VeraGridEngine.Simulations.EMT.solvers.StructuralVectorizedSolver import StructuralVectorizedSolver
 from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowResults
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
@@ -260,37 +260,64 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         "problem",
         "emt_options",
         "sss_options",
+        "last_monodromy_matrix",
+        "last_period_trajectory",
+        "last_period_derivative_trajectory",
     )
 
     def __init__(self,
                  grid: MultiCircuit,
                  emt_options: EmtOptions,
                  sss_options: SmallSignalStabilityEmtOptions,
-                 pf_results: Union[PowerFlowResults|PowerFlowResults3Ph]):
+                 pf_results: Union[PowerFlowResults, PowerFlowResults3Ph, None] = None,
+                 pf_results_3ph: PowerFlowResults3Ph | None = None):
         """
         Initializes the EMT Small Signal Stability Driver.
 
         :param grid: The VeraGrid MultiCircuit network representation.
         :param emt_options: Integration settings for the limit cycle capture.
         :param sss_options: Specific algorithm settings for the Floquet analysis.
-        :param pf_results: 3Ph or balanced power flow results
+        :param pf_results: Balanced results, or three-phase results for backward compatibility.
+        :param pf_results_3ph: Optional three-phase results when both PF result sets are available.
         """
 
         DriverTemplate.__init__(self, grid=grid)
-        self.pf_results = pf_results
+        balanced_results: PowerFlowResults | None
+        three_phase_results: PowerFlowResults3Ph | None = pf_results_3ph
+        if isinstance(pf_results, PowerFlowResults3Ph):
+            balanced_results = None
+            if three_phase_results is None:
+                three_phase_results = pf_results
+        elif isinstance(pf_results, PowerFlowResults):
+            balanced_results = pf_results
+        elif pf_results is None:
+            balanced_results = None
+        else:
+            raise TypeError(
+                "pf_results must be PowerFlowResults, PowerFlowResults3Ph, or None"
+            )
+
+        if balanced_results is None and three_phase_results is None:
+            raise ValueError("EMT small-signal analysis requires power-flow results")
+
+        self.pf_results = (three_phase_results
+                           if three_phase_results is not None
+                           else balanced_results)
         self.emt_options: EmtOptions = emt_options
         self.sss_options: SmallSignalStabilityEmtOptions = sss_options
+        # Diagnostics from the most recent Arnoldi run.  The monodromy matrix
+        # is populated only when the dense/full-spectrum path is selected.
+        self.last_monodromy_matrix: Mat | None = None
+        self.last_period_trajectory: Mat | None = None
+        self.last_period_derivative_trajectory: Mat | None = None
 
-        if isinstance(pf_results, PowerFlowResults) :
-            self.problem = EmtProblemDae(grid=grid,
-                                         options=emt_options,
-                                         pf_results=pf_results,
-                                         logger=self.logger)
-        elif isinstance(pf_results, PowerFlowResults3Ph):
-            self.problem = EmtProblemDae(grid=grid,
-                                         options=emt_options,
-                                         pf_results_3Ph=pf_results,
-                                         logger=self.logger)
+        self.problem = build_emt_problem(
+            grid=grid,
+            options=emt_options,
+            pf_results=balanced_results,
+            pf_results_3ph=three_phase_results,
+            logger=self.logger,
+        )
         
         # self.results: SmallSignalStabilityEmtResults = SmallSignalStabilityEmtResults(multipliers=np.empty(0),
         #                                                                               right_vecs=np.empty(0),
@@ -358,6 +385,9 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         # 1. Capture limit cycle trajectory
         y_traj, d_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
+        self.last_period_trajectory = y_traj
+        self.last_period_derivative_trajectory = d_traj
+        self.last_monodromy_matrix = None
 
         # 2. Operator initialized with HPC LU Caching
         monodromy_op = EmtFloquetOperator(  # O BlockEmtFloquetOperator
@@ -385,6 +415,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             for i in range(operator_states):
                 C_M[:, i] = monodromy_op.matvec(I_dense[:, i])
 
+            self.last_monodromy_matrix = C_M
             mu, v = la.eig(C_M)
         else:
             # High-Performance Sparse Arnoldi

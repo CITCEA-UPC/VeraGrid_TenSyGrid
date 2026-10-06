@@ -10,7 +10,6 @@ different dispatch would test an initialization mismatch, not the controls.
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -18,10 +17,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-STAMP_ROOT = Path("/home/pablo/Desktop/eroots/STAMP_Public")
+from TensyGridEngine.emt.emt_stamp_demo.stamp_common import add_stamp_public_to_path
+
+STAMP_ROOT = add_stamp_public_to_path()
 STAMP_PERIODIC_X0 = STAMP_ROOT / "scripts/stamp_wscc_emt_periodic_x0.csv"
-if str(STAMP_ROOT) not in sys.path:
-    sys.path.insert(0, str(STAMP_ROOT))
 
 from veragrid_stamp.emt_case import build_stamp_wscc_emt_grid
 

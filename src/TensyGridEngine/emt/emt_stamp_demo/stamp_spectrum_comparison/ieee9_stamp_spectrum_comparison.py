@@ -10,7 +10,6 @@ Krylov request avoids mistaking a truncated Arnoldi spectrum for a missing mode.
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -18,13 +17,11 @@ import numpy as np
 
 
 HERE = Path(__file__).resolve().parent
-DEMO_ROOT = HERE.parent
-STAMP_ROOT = Path("/home/pablo/Desktop/eroots/STAMP_Public")
-for path in (DEMO_ROOT, STAMP_ROOT):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+from TensyGridEngine.emt.emt_stamp_demo.stamp_common import add_stamp_public_to_path
 
-from ieee9_stamp_multilinear_ssa import build_grid
+add_stamp_public_to_path()
+
+from TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_multilinear_ssa import build_grid
 
 
 def run_case(multilinear: bool, krylov_modes: int):

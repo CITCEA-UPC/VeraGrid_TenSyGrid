@@ -10,7 +10,7 @@ from VeraGridEngine.Simulations.EMT.solvers.StructuralVectorizedSolver import (
 )
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 
-from ieee9_common import build_ieee9_case, signal
+from TensyGridEngine.emt.emt_ieee_veragrid_demo.ieee9_common import build_ieee9_case, signal
 
 
 DURATION = 0.2e-3

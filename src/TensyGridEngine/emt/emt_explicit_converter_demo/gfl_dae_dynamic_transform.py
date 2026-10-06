@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from TensyGridEngine.emt_demo.single_model_time_inputs import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.single_model_time_inputs import build_problem
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.problems.emt_model_problem import EmtModelProblem
 from VeraGridEngine.Utils.Symbolic import symbolic_ml

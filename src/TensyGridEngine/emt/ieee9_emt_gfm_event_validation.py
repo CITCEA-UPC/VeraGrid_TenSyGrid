@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from TensyGridEngine.emt import ieee9_emt_ibr_simulation as ieee9
-from TensyGridEngine.emt_demo.ieee9_common import build_ieee9_case, signal
+from TensyGridEngine.emt.emt_ieee_veragrid_demo.ieee9_common import build_ieee9_case, signal
 
 
 TIME_STEP = 1.0e-5

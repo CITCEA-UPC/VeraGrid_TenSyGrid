@@ -93,8 +93,11 @@ class EmtFloquetOperator(spla.LinearOperator):
 
         self.n_diff = len(problem.get_diff_vars())
         self.diff_base_indices = _differential_base_indices(problem)
-        operator_size = n_states + self.n_diff if method == DynamicIntegrationMethod.DaeTrapezoidal else n_states
-        op_shape = (operator_size, operator_size)
+        # Derivative history is an internal integration coordinate, not an
+        # independent physical perturbation.  Exposing it to Arnoldi doubles
+        # the trapezoidal eigenproblem and introduces non-physical modes near
+        # mu=-1 through eta[k+1] = ... - eta[k].
+        op_shape = (n_states, n_states)
         op_dtype = np.float64
 
         super().__init__(dtype=op_dtype, shape=op_shape)
@@ -198,12 +201,10 @@ class EmtFloquetOperator(spla.LinearOperator):
 
         v_prev = v_curr.copy()
         v_prev2 = v_curr.copy()
-        # Store eta = h * delta(xdot) in the augmented coordinate.  This is a
-        # similarity scaling of the discrete map and avoids a 1/h imbalance in
-        # Arnoldi between state and derivative-history components.
+        # Scaled derivative history remains internal to the trapezoidal
+        # propagation.  The compatibility baseline uses zero initial tangent
+        # history, matching the stable physical-state Floquet implementation.
         eta_prev = np.zeros(self.n_diff, dtype=np.float64)
-        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-            eta_prev[:] = v0[self.n_states:]
         rhs = np.zeros_like(v_curr)
 
         for step_index, lu in enumerate(self.lu_solvers):
@@ -231,8 +232,6 @@ class EmtFloquetOperator(spla.LinearOperator):
             v_prev2 = v_prev.copy()
             v_prev = v_curr.copy()
 
-        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-            return np.concatenate((v_curr[:self.n_states], eta_prev))
         return v_curr[:self.n_states]
 
     def _rmatvec(self, w0: Vec) -> Vec:
@@ -310,8 +309,10 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         n_total_calc = problem.get_states_number() + problem.get_algebraic_var_number()
         self.n_diff = len(problem.get_diff_vars())
         self.diff_base_indices = _differential_base_indices(problem)
-        operator_size = n_states + self.n_diff if method == DynamicIntegrationMethod.DaeTrapezoidal else n_states
-        op_shape = (operator_size, operator_size)
+        # Keep Arnoldi in the physical state space.  Trapezoidal derivative
+        # history is propagated internally and must not become an independent
+        # eigenvector coordinate.
+        op_shape = (n_states, n_states)
         op_dtype = np.float64
 
         super().__init__(dtype=op_dtype, shape=op_shape)
@@ -421,10 +422,8 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
 
         X_prev = X_curr.copy()
         X_prev2 = X_curr.copy()
-        # Scaled derivative history eta = h * delta(xdot).
+        # Scaled derivative history eta = h * delta(xdot), internal only.
         eta_prev = np.zeros((self.n_diff, p_cols), dtype=X.dtype)
-        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-            eta_prev[:, :] = X[self.n_states:, :]
         rhs_block = np.zeros_like(X_curr)
 
         for step_index, lu in enumerate(self.lu_solvers):
@@ -453,8 +452,6 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
             X_prev2 = X_prev.copy()
             X_prev = X_curr.copy()
 
-        if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-            return np.vstack((X_curr[:self.n_states, :], eta_prev))
         return X_curr[:self.n_states, :]
 
     def _matvec(self, v0:Vec)-> Vec:

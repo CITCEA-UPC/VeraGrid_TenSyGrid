@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import scipy.sparse.linalg as spla
 
-from TensyGridEngine.emt_demo.ieee9_common import build_ieee9_case
+from TensyGridEngine.emt.emt_ieee_veragrid_demo.ieee9_common import build_ieee9_case
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator import (
     EmtFloquetOperator,
 )

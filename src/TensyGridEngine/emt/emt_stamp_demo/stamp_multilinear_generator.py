@@ -2,13 +2,9 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+from TensyGridEngine.emt.emt_stamp_demo.stamp_common import add_stamp_public_to_path
 
-
-STAMP_ROOT = Path("/home/pablo/Desktop/eroots/STAMP_Public")
-if str(STAMP_ROOT) not in sys.path:
-    sys.path.insert(0, str(STAMP_ROOT))
+add_stamp_public_to_path()
 
 from veragrid_stamp.emt_generator import build_stamp_generator_emt
 

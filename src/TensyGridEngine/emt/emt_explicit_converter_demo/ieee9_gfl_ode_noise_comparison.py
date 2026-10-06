@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from TensyGridEngine.emt import ieee9_emt_ibr_simulation as ieee9
-from TensyGridEngine.emt_demo.gfl_ode_time_inputs import (
+from TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode_time_inputs import (
     build_gfl_ode_problem,
     dc_voltage_trace,
     runtime_input_traces,

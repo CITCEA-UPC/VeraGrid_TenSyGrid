@@ -14,7 +14,7 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
 )
 from VeraGridEngine.enumerations import DynamicIntegrationMethod, SmallSignalEmtBuildTypes
 
-from ieee9_common import GOVERNOR_K, build_ieee9_case
+from TensyGridEngine.emt.emt_ieee_veragrid_demo.ieee9_common import GOVERNOR_K, build_ieee9_case
 
 
 N_MODES = 12

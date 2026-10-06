@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 import numpy as np
+from scipy import sparse
 
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
@@ -80,6 +81,17 @@ class EmtModelProblem(EmtProblemMultilinear):
             static_parameter_values_mapping=dict(block.parameters),
             glob_time=time_var,
         )
+        # EmtModelProblem intentionally bypasses EmtProblemMultilinear.__init__
+        # because that constructor assembles a complete electrical network.
+        # Initialize its model-independent matrix caches explicitly so the
+        # inherited multilinear utilities remain usable for standalone blocks.
+        self.Phi: sparse.csr_matrix | None = None
+        self.S: sparse.csc_matrix | None = None
+        self._ml_all_vars_sa = None
+        self._ml_all_basis_vars = None
+        self._ml_idx_vars = None
+        self._ml_uid_to_basis_idx = None
+        self._ml_uid_to_idx_full = None
         self._run_model_explicit_initialization()
         # Explicit caller-provided operating-point values are authoritative and
         # may complete or correct template initialization equations that normally

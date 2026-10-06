@@ -12,9 +12,15 @@ OUTPUT = HERE / "ieee9_trapezoidal_600_diagnostics.png"
 
 
 def main() -> None:
-    data = np.load(DATA)
-    multipliers = data["multipliers"]
-    exponents = data["eigenvalues"]
+    if DATA.exists():
+        with np.load(DATA) as data:
+            multipliers = np.asarray(data["multipliers"])
+            exponents = np.asarray(data["eigenvalues"])
+    else:
+        # The historical convergence summary below is still useful when the
+        # optional saved Ritz spectrum is not present in a checkout.
+        multipliers = np.asarray([], dtype=complex)
+        exponents = np.asarray([], dtype=complex)
 
     # Identical solver settings were used in the three resolution checks apart
     # from the expanded 600-step Krylov space. Values are diagnostics, not a
@@ -30,12 +36,19 @@ def main() -> None:
                     label="600-step Ritz values")
     axes[0].set(xlabel="Re(mu)", ylabel="Im(mu)", title="Floquet multipliers")
     axes[0].set_aspect("equal", adjustable="box")
-    axes[0].legend()
+    if multipliers.size:
+        axes[0].legend()
+    else:
+        axes[0].text(0.5, 0.5, "optional 600-step spectrum not available",
+                     transform=axes[0].transAxes, ha="center", va="center")
 
     axes[1].axvline(0.0, color="black", linestyle="--", lw=1)
     axes[1].scatter(exponents.real, exponents.imag, color="tab:purple")
     axes[1].set(xlabel="Re(lambda) [1/s]", ylabel="Im(lambda) [rad/s]",
                 title="Floquet exponents (unconverged)")
+    if not exponents.size:
+        axes[1].text(0.5, 0.5, "optional 600-step spectrum not available",
+                     transform=axes[1].transAxes, ha="center", va="center")
 
     axes[2].axhline(1.0, color="black", linestyle="--", lw=1, label="unit circle")
     axes[2].plot(steps, dominant, "o-", color="tab:blue", label="largest returned |mu|")

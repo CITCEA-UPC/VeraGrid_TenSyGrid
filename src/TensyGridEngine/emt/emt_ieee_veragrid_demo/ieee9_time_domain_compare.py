@@ -7,7 +7,7 @@ import numpy as np
 
 from VeraGridEngine.Simulations.EMT.emt_solver_factory import build_emt_solver
 
-from ieee9_common import build_ieee9_case, signal
+from TensyGridEngine.emt.emt_ieee_veragrid_demo.ieee9_common import build_ieee9_case, signal
 
 
 TIME_STEP = 2.5e-6
@@ -59,4 +59,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
