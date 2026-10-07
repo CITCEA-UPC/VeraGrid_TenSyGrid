@@ -120,7 +120,9 @@ def build_problem(*, source_conductance: float = 10.0,
     )
     options = EmtOptions(
         time_step=1.0e-5, simulation_time=simulation_time,
-        solver_type=EmtSolverTypes.StructuralAD,
+        # The ordinary VeraGrid time-domain path. S/Phi is built below only as
+        # a separate validation that the reduced equations are multi-affine.
+        solver_type=EmtSolverTypes.Symbolic,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
     )
@@ -136,44 +138,27 @@ def build_problem(*, source_conductance: float = 10.0,
 
 if __name__ == "__main__":
     problem, network = build_problem()
-    # Build and evaluate VeraGrid's exact EmtProblemMultilinear S/Phi form.
+    # Validate that VeraGrid can form the exact multilinear representation.
+    # The ordinary ``simulate()`` call below still uses the symbolic EMT
+    # residual and Jacobian backend.
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     states = problem.get_state_vars()
     S, Phi = problem.build_multilinear_matrices()
     n_states = len(states)
-    n_basis = S.shape[0]
-    S_csc = S.tocsc()
-
-    def rhs(y):
-        basis = np.zeros(n_basis)
-        basis[:n_states] = y
-        monomials = np.ones(S.shape[1])
-        for column in range(S.shape[1]):
-            start, end = S_csc.indptr[column:column + 2]
-            for pointer in range(start, end):
-                row = S_csc.indices[pointer]
-                coefficient = S_csc.data[pointer]
-                monomials[column] *= coefficient * basis[row]
-        return np.asarray(Phi @ monomials).reshape(-1)
-
-    y0 = np.array([problem.init_guess[state.uid] for state in states])
     # Small phase-A current perturbation reveals the electrical coupling.
-    y0[0] = 0.05
     first_network_copy = 2 * len(network["blocks"][0].state_vars)
-    y0[first_network_copy] = 0.05
-    step = problem.options.time_step
-    times = np.arange(0.0, problem.options.simulation_time + 0.5 * step, step)
-    values = np.empty((n_states, len(times)))
-    values[:, 0] = y0
-    for index in range(1, len(times)):
-        previous = values[:, index - 1]
-        k1 = rhs(previous)
-        k2 = rhs(previous + 0.5 * step * k1)
-        k3 = rhs(previous + 0.5 * step * k2)
-        k4 = rhs(previous + step * k3)
-        values[:, index] = previous + step * (k1 + 2*k2 + 2*k3 + k4) / 6.0
+    problem.init_guess[states[0].uid] = 0.05
+    problem.init_guess[states[first_network_copy].uid] = 0.05
+    result = problem.simulate()
+    if not result.initialized or not result.converged:
+        raise RuntimeError(
+            f"EMT simulation failed: initialized={result.initialized}, "
+            f"converged={result.converged}"
+        )
+    times = result.time
+    values = result.values.T
     current_1 = values[:3]
     current_2 = values[len(network["blocks"][0].state_vars):][:3]
     network_current_1 = values[first_network_copy:first_network_copy + 3]
@@ -219,7 +204,8 @@ if __name__ == "__main__":
     output = Path(__file__).with_name("two_gfl_kcl_ode.png")
     figure.savefig(output, dpi=160)
     plt.close(figure)
-    print(f"saved={output}, states={len(states)}, algebraics=0, "
+    print(f"saved={output}, initialized={result.initialized}, "
+          f"converged={result.converged}, states={len(states)}, algebraics=0, "
           f"S={S.shape}, Phi={Phi.shape}, "
           f"max_kcl_residual={np.max(np.abs(residual)):.3e}, "
           f"max_copy_error={synchronization_error:.3e}")

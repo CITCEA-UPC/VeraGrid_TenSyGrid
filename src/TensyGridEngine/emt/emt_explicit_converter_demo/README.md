@@ -17,5 +17,7 @@ PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode
 - `two_gfl_kcl_ode.py`: two GFL ODEs on separate three-phase buses connected
   by a resistive branch. A constant 2x2 nodal conductance solve eliminates both
   buses' linear KCL equations phase by phase. Synchronized current copies keep
-  the substituted model multi-affine, and the explicit RK4 demonstration
-  evaluates the exact VeraGrid `EmtProblemMultilinear` S/Phi representation.
+  the substituted model multi-affine. The time-domain run uses the ordinary
+  VeraGrid `EmtModelProblem.simulate()` symbolic/trapezoidal path; construction
+  of the exact `EmtProblemMultilinear` S/Phi representation is an additional
+  validation and is not yet used by that time integrator.
