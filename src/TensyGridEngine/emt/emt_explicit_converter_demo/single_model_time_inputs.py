@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+
+# Allow this demo to run directly by path without installing the source tree.
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -375,6 +380,7 @@ def main() -> None:
                     f"native symbolic uniform white noise={AC_VOLTAGE_NOISE_RMS_PU:.4f} pu RMS/phase, "
                     f"seed={NOISE_SEED}"
                 )
+
 
 
 if __name__ == "__main__":
