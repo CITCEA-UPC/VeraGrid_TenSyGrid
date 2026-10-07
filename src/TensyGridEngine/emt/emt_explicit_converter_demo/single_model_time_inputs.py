@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+src_path = Path(__file__).resolve().parents[3]
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
