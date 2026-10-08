@@ -35,6 +35,7 @@ class EmtProblemMultilinear(EmtProblemDae):
         "_ml_idx_vars",
         "_ml_uid_to_basis_idx",
         "_ml_uid_to_idx_full",
+        "_multilinear_fallback_reason",
     )
 
     def __init__(self, *args, **kwargs) -> None:
@@ -47,6 +48,7 @@ class EmtProblemMultilinear(EmtProblemDae):
         self._ml_idx_vars: list[int] | None = None
         self._ml_uid_to_basis_idx: dict[int, int] | None = None
         self._ml_uid_to_idx_full: dict[int, int] | None = None
+        self._multilinear_fallback_reason: str | None = None
 
     def _ensure_multilinear_index_cache(self) -> None:
         """Build and cache multilinear index maps reused across methods."""
