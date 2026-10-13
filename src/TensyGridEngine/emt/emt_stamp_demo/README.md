@@ -17,6 +17,13 @@ PYTHONPATH=src python -m TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_converte
 `stamp_multilinear_converters.py` and `stamp_multilinear_generator.py` contain
 the exact multi-affine lifts used by the SSA scripts.
 
+`stamp_explicit_ode_demo.py` runs the algebraic-free nonlinear GFOR and GFOL
+converter ODEs from `stamp_converters/explicit_converters.py` under prescribed
+three-phase voltage. It saves named input, state, and output time series in
+`stamp_explicit_ode_results/gfor/time_series.mat` and
+`stamp_explicit_ode_results/gfol/time_series.mat` for MATLAB. These standalone
+runs do not include the IEEE-9 network or the synchronous generator.
+
 For a comparison using the full nonlinear GFOR/GFOL controls copied into
 `TensyGridEngine.emt.stamp_converters`, run:
 

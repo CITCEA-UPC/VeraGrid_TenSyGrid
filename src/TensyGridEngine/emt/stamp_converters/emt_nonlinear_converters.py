@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .nonlinear_converters import build_stamp_converter_rms
-from .parameters import OMEGA_BASE, StampConverterParameters
+from .parameters import OMEGA_BASE, STAMP_EMT_Q0_BY_MODE, StampConverterParameters
 
 
 def build_stamp_nonlinear_converter_emt(vf, params: StampConverterParameters,
@@ -51,7 +51,7 @@ def build_stamp_nonlinear_converter_emt(vf, params: StampConverterParameters,
     block.init_eqs[power] = c(params.p_pu_system)
     # The two solved Q values are the same audited operating points used by
     # the established linearized EMT wrapper.
-    q0 = {"GFOR": -0.0437531356548132, "GFOL": -0.139271984262034}[params.mode]
+    q0 = STAMP_EMT_Q0_BY_MODE[params.mode]
     block.init_eqs[reactive] = c(q0)
 
     igq = next(var for var in block.state_vars if var.name.endswith(".ig_q"))

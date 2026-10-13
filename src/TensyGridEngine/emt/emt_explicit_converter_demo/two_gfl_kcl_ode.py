@@ -1,14 +1,19 @@
-"""Two explicit GFL converters on a two-bus, algebraically reduced EMT grid.
+"""Simulate two GFL converters coupled through a resistive two-bus grid.
 
 Run with ``PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.two_gfl_kcl_ode``.
-Each phase uses the same constant 2x2 nodal conductance matrix. The source and
-line conductances make the instantaneous bus-voltage solve nonsingular.
+
+The bus voltages have no dynamics: each phase's two KCL equations are solved
+analytically and substituted into the converter ODEs. Thus the combined model
+has states but no algebraic variables. ``EmtModelProblem`` is appropriate for
+this standalone Block; it already inherits multilinear S/Phi extraction from
+``EmtProblemMultilinear``. The latter's constructor expects a full grid model.
 """
 
 from __future__ import annotations
 
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
@@ -21,11 +26,18 @@ from VeraGridEngine.enumerations import (
 )
 
 
-def build_problem(*, source_conductance: float = 10.0,
-                  line_conductance: float = 5.0,
-                  bus_1_shunt_conductance: float = 0.0,
-                  bus_2_shunt_conductance: float = 0.0,
-                  simulation_time: float = 1.0e-3) -> tuple[EmtModelProblem, dict]:
+PHASES = "ABC"
+GRID_OMEGA = 2.0 * np.pi * 50.0
+
+
+def build_problem(
+    *,
+    source_conductance: float = 10.0,
+    line_conductance: float = 5.0,
+    bus_1_shunt_conductance: float = 0.0,
+    bus_2_shunt_conductance: float = 0.0,
+    simulation_time: float = 1.0e-3,
+) -> tuple[EmtModelProblem, dict]:
     """Eliminate six bus voltages from linear KCL and substitute into both ODEs.
 
     Converter 1 is connected to bus 1 and converter 2 to bus 2. The buses are
@@ -43,50 +55,54 @@ def build_problem(*, source_conductance: float = 10.0,
         block, _ = build_gfl_converter_model_ode(vf, multilinear=True)
         # The builder uses fixed local names; every variable needs a unique
         # compiler name in the flattened two-converter system.
-        variables = [*block.state_vars, *block.diff_vars, *block.in_vars,
-                     *block.event_dict]
+        variables = [*block.state_vars, *block.diff_vars, *block.in_vars, *block.event_dict]
         for variable in variables:
             variable.name = f"{variable.name}_{index}"
         blocks.append(block)
 
     phase_shifts = (0.0, -2.0 * np.pi / 3.0, 2.0 * np.pi / 3.0)
-    omega = 2.0 * np.pi * 50.0
-    source_vars = tuple(vf.add_var(f"v_source_{phase}") for phase in "ABC")
-    source_quadrature = tuple(vf.add_var(f"v_source_quadrature_{phase}") for phase in "ABC")
+    source_vars = tuple(vf.add_var(f"v_source_{phase}") for phase in PHASES)
+    source_quadrature = tuple(vf.add_var(f"v_source_quadrature_{phase}") for phase in PHASES)
     # These copies stay synchronized with the physical converter currents, but
     # give KCL a distinct factor whenever its voltage result is multiplied by
     # the physical current in a converter equation. This preserves multi-affinity.
     network_currents = tuple(
-        tuple(vf.add_var(f"i_network_{converter}_{phase}") for phase in "ABC")
+        tuple(vf.add_var(f"i_network_{converter}_{phase}") for phase in PHASES)
         for converter in (1, 2)
     )
+    # KCL, separately for each phase:
+    # [Gsrc + Gline + Gsh1, -Gline          ] [V1] = [Gsrc*Vsrc - I1]
+    # [-Gline,               Gline + Gsh2 ] [V2]   [-I2            ]
     nodal_matrix = np.array([
         [source_conductance + line_conductance + bus_1_shunt_conductance,
          -line_conductance],
         [-line_conductance, line_conductance + bus_2_shunt_conductance],
     ])
     nodal_inverse = np.linalg.inv(nodal_matrix)
-    voltages = ([], [])
-    for phase in range(3):
+    bus_voltage_expressions = ([], [])
+    for phase in range(len(PHASES)):
         current_rhs = (
             Const(source_conductance) * source_vars[phase] - network_currents[0][phase],
             -network_currents[1][phase],
         )
         for bus in range(2):
-            voltages[bus].append(
+            bus_voltage_expressions[bus].append(
                 Const(nodal_inverse[bus, 0]) * current_rhs[0]
                 + Const(nodal_inverse[bus, 1]) * current_rhs[1]
             )
-    voltages = tuple(tuple(bus_voltages) for bus_voltages in voltages)
+    voltages = tuple(tuple(bus_voltages) for bus_voltages in bus_voltage_expressions)
     converter_eqs = []
     for bus, block in enumerate(blocks):
-        replacements = {block.in_vars[phase]: voltages[bus][phase] for phase in range(3)}
+        replacements = {block.in_vars[phase]: voltages[bus][phase] for phase in range(len(PHASES))}
         converter_eqs.append([expr.subs(replacements) for expr in block.state_eqs])
     state_eqs = [eq for equations in converter_eqs for eq in equations]
-    state_eqs.extend(converter_eqs[0][:3])
-    state_eqs.extend(converter_eqs[1][:3])
-    state_eqs.extend(Const(omega) * value for value in source_quadrature)
-    state_eqs.extend(Const(-omega) * value for value in source_vars)
+    # Network-current copies track each converter's three physical currents.
+    # Keeping distinct symbolic variables prevents a squared-current term when
+    # the substituted bus voltage is multiplied by converter current.
+    state_eqs.extend(equation for equations in converter_eqs for equation in equations[:3])
+    # A rotating source oscillator avoids explicit time-dependent input terms.
+    state_eqs.extend(Const(GRID_OMEGA) * value for value in source_quadrature)
+    state_eqs.extend(Const(-GRID_OMEGA) * value for value in source_vars)
 
     added_states = [value for group in network_currents for value in group]
     added_states.extend(source_vars)
@@ -120,8 +136,8 @@ def build_problem(*, source_conductance: float = 10.0,
     )
     options = EmtOptions(
         time_step=1.0e-5, simulation_time=simulation_time,
-        # The ordinary VeraGrid time-domain path. S/Phi is built below only as
-        # a separate validation that the reduced equations are multi-affine.
+        # Selects the time-domain residual/Jacobian backend, not the problem
+        # class. S/Phi extraction below separately validates multi-affinity.
         solver_type=EmtSolverTypes.Symbolic,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,
@@ -138,16 +154,15 @@ def build_problem(*, source_conductance: float = 10.0,
 
 if __name__ == "__main__":
     problem, network = build_problem()
-    # Validate that VeraGrid can form the exact multilinear representation.
-    # The ordinary ``simulate()`` call below still uses the symbolic EMT
-    # residual and Jacobian backend.
+    # These matrices certify that every equation is multi-affine. The solver
+    # selected above still runs through the symbolic EMT residual/Jacobian.
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     states = problem.get_state_vars()
     S, Phi = problem.build_multilinear_matrices()
-    n_states = len(states)
     # Small phase-A current perturbation reveals the electrical coupling.
+    # State order is converter 1, converter 2, current copies, then source.
     first_network_copy = 2 * len(network["blocks"][0].state_vars)
     problem.init_guess[states[0].uid] = 0.05
     problem.init_guess[states[first_network_copy].uid] = 0.05
@@ -159,8 +174,9 @@ if __name__ == "__main__":
         )
     times = result.time
     values = result.values.T
-    current_1 = values[:3]
-    current_2 = values[len(network["blocks"][0].state_vars):][:3]
+    converter_state_count = len(network["blocks"][0].state_vars)
+    current_1 = values[0:3]
+    current_2 = values[converter_state_count:converter_state_count + 3]
     network_current_1 = values[first_network_copy:first_network_copy + 3]
     network_current_2 = values[first_network_copy + 3:first_network_copy + 6]
     synchronization_error = max(
@@ -169,12 +185,14 @@ if __name__ == "__main__":
     )
     source_start = first_network_copy + 6
     source_trace = values[source_start:source_start + 3]
+    # Reconstruct voltages from the same KCL system used in build_problem(),
+    # using the physical currents to independently check the copy equations.
     current_rhs = np.stack((
         network["source_conductance"] * source_trace - current_1,
         -current_2,
     ))
-    bus_voltage = np.einsum("ij,jpt->ipt", np.linalg.inv(network["nodal_matrix"]),
-                            current_rhs)
+    bus_voltage = np.linalg.solve(network["nodal_matrix"], current_rhs.reshape(2, -1))
+    bus_voltage = bus_voltage.reshape(current_rhs.shape)
     line_current = network["line_conductance"] * (bus_voltage[0] - bus_voltage[1])
     residual_1 = (network["source_conductance"] * (source_trace - bus_voltage[0])
                   - current_1 - line_current

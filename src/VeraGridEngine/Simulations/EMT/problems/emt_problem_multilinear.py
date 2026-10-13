@@ -13,7 +13,7 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_multilinear import (
     RmsProblemMultilinear,
 )
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
-from VeraGridEngine.Utils.Symbolic.symbolic import Const, get_expr_factors
+from VeraGridEngine.Utils.Symbolic.symbolic import BinOp, Const, Func, Func2, UnOp, Var, get_expr_factors
 
 
 class EmtProblemMultilinear(EmtProblemDae):
@@ -178,6 +178,116 @@ class EmtProblemMultilinear(EmtProblemDae):
         Phi = sparse.csr_matrix((p_val, (p_row, p_col)), shape=(n_eq, n_mon))
         self.S = S
         self.Phi = Phi
+        return S, Phi
+
+    def build_multilinear_matrices_fast(self) -> tuple[sparse.csc_matrix, sparse.csr_matrix]:
+        """Build S/Phi directly from polynomial coefficient maps.
+
+        Each monomial is a tuple of distinct basis-variable indices. This
+        avoids creating symbolic expression nodes while distributing products
+        over sums. The existing extractor remains available for comparison.
+        """
+        self._ensure_multilinear_index_cache()
+        basis = self._ml_all_basis_vars
+        uid_to_idx = self._ml_uid_to_basis_idx
+        parameters = {
+            variable.uid: float(value)
+            for variable, value in zip(self._variable_parameters, self._event_params_values)
+        }
+        parameters.update({
+            variable.uid: float(value)
+            for variable, value in zip(self._constant_parameters, self._constant_params_values)
+        })
+        cache: dict[int, dict[tuple[int, ...], float]] = {}
+
+        def add(left, right, sign=1.0):
+            result = dict(left)
+            for monomial, coefficient in right.items():
+                result[monomial] = result.get(monomial, 0.0) + sign * coefficient
+                if result[monomial] == 0.0:
+                    del result[monomial]
+            return result
+
+        def multiply(left, right):
+            result: dict[tuple[int, ...], float] = {}
+            for left_monomial, left_gain in left.items():
+                for right_monomial, right_gain in right.items():
+                    if set(left_monomial).intersection(right_monomial):
+                        raise ValueError("EMT equation is not multi-affine: a state repeats in a product")
+                    monomial = tuple(sorted(left_monomial + right_monomial))
+                    result[monomial] = result.get(monomial, 0.0) + left_gain * right_gain
+            return {monomial: value for monomial, value in result.items() if value != 0.0}
+
+        def polynomial(expr):
+            cached = cache.get(id(expr))
+            if cached is not None:
+                return cached
+            if isinstance(expr, Const):
+                if expr.value is None:
+                    raise ValueError("Undefined constant in EMT equation")
+                result = {(): float(expr.value)}
+            elif isinstance(expr, Var):
+                if expr.uid in uid_to_idx:
+                    result = {(uid_to_idx[expr.uid],): 1.0}
+                elif expr.uid in parameters:
+                    result = {(): parameters[expr.uid]}
+                else:
+                    raise ValueError(f"Unresolved symbol in EMT equation: {expr.name}")
+            elif isinstance(expr, UnOp) and expr.op == "-":
+                result = {monomial: -value for monomial, value in polynomial(expr.operand).items()}
+            elif isinstance(expr, BinOp):
+                left = polynomial(expr.left)
+                right = polynomial(expr.right)
+                if expr.op == "+":
+                    result = add(left, right)
+                elif expr.op == "-":
+                    result = add(left, right, -1.0)
+                elif expr.op == "*":
+                    result = multiply(left, right)
+                elif expr.op == "/" and set(right).issubset({()}):
+                    denominator = right.get((), 0.0)
+                    if abs(denominator) <= 1e-15:
+                        raise ValueError("Zero denominator in EMT equation")
+                    result = {monomial: value / denominator for monomial, value in left.items()}
+                elif expr.op == "**" and set(right).issubset({()}):
+                    exponent = right.get((), 0.0)
+                    if exponent == 0.0:
+                        result = {(): 1.0}
+                    elif exponent == 1.0:
+                        result = left
+                    elif set(left).issubset({()}):
+                        result = {(): left.get((), 0.0) ** exponent}
+                    else:
+                        raise ValueError("State-dependent power is not multi-affine")
+                else:
+                    raise ValueError(f"Unsupported state-dependent EMT operation: {expr.op}")
+            elif isinstance(expr, (Func, Func2)):
+                if any(variable.uid in uid_to_idx for variable in expr.get_vars()):
+                    raise ValueError("State-dependent function is not multi-affine")
+                result = {(): float(expr.eval_uid(parameters))}
+            else:
+                raise ValueError(f"Unsupported EMT expression node: {type(expr).__name__}")
+            cache[id(expr)] = result
+            return result
+
+        equations = list(self._state_eqs) + list(self._algebraic_eqs)
+        rows = [polynomial(equation) for equation in equations]
+        monomials = sorted({monomial for row in rows for monomial in row})
+        col_by_monomial = {monomial: index for index, monomial in enumerate(monomials)}
+        s_rows = [index for monomial in monomials for index in monomial]
+        s_cols = [column for column, monomial in enumerate(monomials) for _ in monomial]
+        S = sparse.csc_matrix(
+            (np.ones(len(s_rows)), (s_rows, s_cols)),
+            shape=(len(basis), len(monomials)),
+        )
+        p_rows = [row_index for row_index, row in enumerate(rows) for _ in row]
+        p_cols = [col_by_monomial[monomial] for row in rows for monomial in row]
+        p_values = [value for row in rows for value in row.values()]
+        Phi = sparse.csr_matrix(
+            (p_values, (p_rows, p_cols)),
+            shape=(len(equations), len(monomials)),
+        )
+        self.S, self.Phi = S, Phi
         return S, Phi
 
     def linearize_matrices(self) -> tuple[sparse.csr_matrix, sparse.csc_matrix]:

@@ -7,61 +7,18 @@ which exercises the established block-based GFM/GFL EMT models.
 from __future__ import annotations
 
 import numpy as np
+from typing import Mapping
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_model_problem import EmtModelProblem
 from VeraGridEngine.Templates.Emt.vsc_gfl_ode import build_gfl_converter_model_ode
-from VeraGridEngine.Utils.Symbolic.symbolic import Const, heaviside, rand, sin
+from VeraGridEngine.Utils.Symbolic.symbolic import Expr, Var
 from VeraGridEngine.enumerations import (
     DynamicIntegrationMethod,
     EmtInitializationMethod,
     EmtSolverTypes,
 )
-
-NOISE_SEED = 20260914
-NOISE_START = 0.02
-
-
-def balanced_grid_abc(time, peak: float, angle: float, noise_rms: float,
-                      noise_kind: str = "white", frequency: float = 50.0):
-    """Return balanced grid voltage with white or frequency-adapted noise."""
-    angle_expr = Const(2.0 * np.pi * frequency) * time + Const(angle)
-    shift = Const(2.0 * np.pi / 3.0)
-    phase_angles = angle_expr, angle_expr - shift, angle_expr + shift
-    clean = tuple(Const(peak) * sin(phase) for phase in phase_angles)
-    if noise_rms <= 0.0:
-        return clean
-
-    gate = heaviside(time - Const(NOISE_START))
-    if noise_kind == "white":
-        return tuple(
-            phase + gate * Const(np.sqrt(12.0) * noise_rms)
-            * (rand(time) - Const(0.5))
-            for phase in clean
-        )
-    if noise_kind != "grid_colored":
-        raise ValueError("noise_kind must be 'white' or 'grid_colored'")
-
-    frequencies = (5.0, 15.0, 35.0)
-    magnitude_phases = (0.31, 2.07, 4.19)
-    angle_phases = (1.13, 3.41, 5.27)
-    normalization = Const(np.sqrt(2.0 / len(frequencies)))
-    magnitude_noise = Const(0.0)
-    angle_noise = Const(0.0)
-    for noise_frequency, magnitude_phase, angle_phase in zip(
-            frequencies, magnitude_phases, angle_phases):
-        noise_angle = Const(2.0 * np.pi * noise_frequency) * time
-        magnitude_noise += sin(noise_angle + Const(magnitude_phase))
-        angle_noise += sin(noise_angle + Const(angle_phase))
-    magnitude_noise *= Const(noise_rms) * normalization
-    angle_noise *= Const(0.5 * noise_rms) * normalization
-    return tuple(
-        Const(peak) * (Const(1.0) + gate * magnitude_noise)
-        * sin(phase + gate * angle_noise)
-        for phase in phase_angles
-    )
-
 
 def _park_initial(values, angle: float):
     a, b, c = values
@@ -76,19 +33,24 @@ def _park_initial(values, angle: float):
 
 def build_gfl_ode_problem(*, multilinear: bool = True, p0: float = 0.0,
                           q0: float = 0.0, voltage: complex = 1.0 + 0.0j,
-                          vdc0: float = 2.0, voltage_noise_rms: float = 0.01,
-                          voltage_noise_kind: str = "white",
+                          vdc0: float = 2.0,
+                          prescribed_inputs: Mapping[str, Expr],
+                          time_variable: Var,
                           dc_state: str = "energy",
                           enable_current_limiter: bool = False,
-                          p_reference_step: tuple[float, float] | None = None,
                           simulation_time: float = 5.0e-2) -> EmtModelProblem:
-    """Build the experimental algebraic-free GFL at a supplied operating point."""
+    """Build the experimental algebraic-free GFL at a supplied operating point.
+
+    ``prescribed_inputs`` maps each model input name to a symbolic expression.
+    ``time_variable`` must be the same Var used in those expressions.
+    """
     vf = VarFactory()
-    time = vf.add_var("gfl_ode_time")
+    time = time_variable
     block, _observables = build_gfl_converter_model_ode(
         vf, multilinear=multilinear,
         enable_current_limiter=enable_current_limiter,
         dc_state=dc_state,
+        fixed_dc_voltage=vdc0,
     )
 
     voltage_angle = float(np.angle(voltage))
@@ -122,14 +84,16 @@ def build_gfl_ode_problem(*, multilinear: bool = True, p0: float = 0.0,
         "i_line_A": current_initial[0],
         "i_line_B": current_initial[1],
         "i_line_C": current_initial[2],
-        ("E_dc" if dc_state == "energy" else "Vdc_"):
-            (0.5 * 10.0 * vdc0 ** 2 if dc_state == "energy" else vdc0),
         "xi_PLL": 0.0,
         "xi_Pac_ctrl": i_q0,
         "xi_Qac_ctrl": i_d0,
         "xi_vd_hat": vc_d0 - vg_d0 - 0.10 * i_q0,
         "xi_vq_hat": vc_q0 - vg_q0 + 0.10 * i_d0,
     }
+    if dc_state != "stiff_voltage":
+        initial_values["E_dc" if dc_state == "energy" else "Vdc_"] = (
+            0.5 * 10.0 * vdc0 ** 2 if dc_state == "energy" else vdc0
+        )
     if multilinear:
         for role in ("v", "i", "o"):
             initial_values[f"u_cos_{role}"] = np.cos(voltage_angle)
@@ -146,33 +110,13 @@ def build_gfl_ode_problem(*, multilinear: bool = True, p0: float = 0.0,
     else:
         initial_values["theta"] = voltage_angle
 
-    phase_voltage = balanced_grid_abc(
-        time, peak=voltage_peak, angle=voltage_angle,
-        noise_rms=voltage_noise_rms, noise_kind=voltage_noise_kind,
-    )
-    input_expressions = {}
-    for variable in block.in_vars:
-        if variable.name == "vg_A":
-            input_expressions[variable] = phase_voltage[0]
-        elif variable.name == "vg_B":
-            input_expressions[variable] = phase_voltage[1]
-        elif variable.name == "vg_C":
-            input_expressions[variable] = phase_voltage[2]
-        elif variable.name == "P_dc_source":
-            input_expressions[variable] = Const(p0)
-        elif variable.name == "i_dc_source":
-            input_expressions[variable] = Const(p0 / vdc0)
-        elif variable.name == "P_ref":
-            input_expressions[variable] = (
-                Const(p0)
-                if p_reference_step is None
-                else Const(p0) + (
-                    Const(p_reference_step[1] - p0)
-                    * heaviside(time - Const(p_reference_step[0]))
-                )
-            )
-        elif variable.name == "Q_ref":
-            input_expressions[variable] = Const(q0)
+    expected = {variable.name for variable in block.in_vars}
+    actual = set(prescribed_inputs)
+    if actual != expected:
+        raise ValueError(f"prescribed_inputs must contain exactly {sorted(expected)}; got {sorted(actual)}")
+    input_expressions = {
+        variable: prescribed_inputs[variable.name] for variable in block.in_vars
+    }
 
     options = EmtOptions(
         time_step=1.0e-5,
@@ -199,9 +143,11 @@ def dc_voltage_trace(problem: EmtModelProblem, result, capacitance: float = 10.0
     return np.sqrt(2.0 * energy / capacitance)
 
 
-def runtime_input_traces(problem: EmtModelProblem, time: np.ndarray) -> dict[str, np.ndarray]:
-    """Replay seeded symbolic input expressions for plotting."""
-    np.random.seed(NOISE_SEED)
+def runtime_input_traces(problem: EmtModelProblem, time: np.ndarray,
+                         seed: int | None = None) -> dict[str, np.ndarray]:
+    """Replay symbolic inputs; pass the simulation seed for random inputs."""
+    if seed is not None:
+        np.random.seed(seed)
     variables = list(problem.sys_block.in_vars)
     traces = {variable.name: np.zeros(len(time)) for variable in variables}
     values = problem.event_params_values.copy()

@@ -8,6 +8,12 @@ from math import pi
 NOMINAL_FREQUENCY_HZ = 50.0
 OMEGA_BASE = 2.0 * pi * NOMINAL_FREQUENCY_HZ
 
+# Audited reactive-power operating points used by the STAMP EMT wrapper.
+STAMP_EMT_Q0_BY_MODE = {
+    "GFOR": -0.0437531356548132,
+    "GFOL": -0.139271984262034,
+}
+
 
 @dataclass(frozen=True)
 class StampConverterParameters:
@@ -105,4 +111,3 @@ STAMP_GFOL = StampConverterParameters(
     active_power_tau=1.0,
     reactive_power_tau=1.0,
 )
-

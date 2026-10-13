@@ -111,6 +111,7 @@ def build_gfl_converter_model_ode(
         multilinear: bool = False,
         enable_current_limiter: bool = False,
         dc_state: str = "energy",
+        fixed_dc_voltage: float = 1.03,
 ) -> tuple[Block, GflOdeObservables]:
     """Build a standalone GFL converter containing no algebraic unknowns.
 
@@ -118,41 +119,52 @@ def build_gfl_converter_model_ode(
     ``[vg_A, vg_B, vg_C, P_dc_source, P_ref, Q_ref]`` and capacitor energy is
     the DC state. With ``dc_state="voltage"``, the fourth input is instead
     ``i_dc_source`` and the original voltage/quotient dynamics are retained.
-    The
-    physical plant (filter currents and DC capacitor) is included, so converter
-    phase voltage is computed internally and line current is a state/output.
+    With ``dc_state="stiff_voltage"``, ``fixed_dc_voltage`` replaces the DC
+    state and source: the five inputs are grid voltages, P_ref, and Q_ref.
+    The physical AC filter is included, so converter phase voltage is computed
+    internally and line current is a state/output.
 
     With ``multilinear=True`` three synchronized differential sine/cosine pairs
     are used by the voltage Park transform, current Park transform, and inverse
     Park transform.  The copies have identical dynamics and initial values, so
     they remain equal in continuous time while preventing repeated factors such
-    as ``u_sin**2`` after symbolic expansion.  The remaining DC quotient and,
-    when enabled, circular current limiter are handled separately.
+    as ``u_sin**2`` after symbolic expansion. The voltage-state mode retains a
+    DC quotient; the stiff-voltage mode has no DC differential state.
     """
-    if dc_state not in {"energy", "voltage"}:
-        raise ValueError("dc_state must be 'energy' or 'voltage'")
+    if dc_state not in {"energy", "voltage", "stiff_voltage"}:
+        raise ValueError("dc_state must be 'energy', 'voltage', or 'stiff_voltage'")
+    if dc_state == "stiff_voltage" and fixed_dc_voltage <= 0:
+        raise ValueError("fixed_dc_voltage must be positive")
     dc_source_name = "P_dc_source" if dc_state == "energy" else "i_dc_source"
     if inputs is None:
-        inputs = [vfactory.add_var(name) for name in (
-            "vg_A", "vg_B", "vg_C", dc_source_name, "P_ref", "Q_ref"
-        )]
-    if len(inputs) != 6:
-        raise ValueError(
-            "GFL ODE requires six inputs: vg_A/B/C, DC source, P_ref, Q_ref"
-        )
+        names = (["vg_A", "vg_B", "vg_C", "P_ref", "Q_ref"]
+                 if dc_state == "stiff_voltage"
+                 else ["vg_A", "vg_B", "vg_C", dc_source_name, "P_ref", "Q_ref"])
+        inputs = [vfactory.add_var(name) for name in names]
+    expected_inputs = 5 if dc_state == "stiff_voltage" else 6
+    if len(inputs) != expected_inputs:
+        raise ValueError(f"GFL ODE with dc_state={dc_state!r} requires {expected_inputs} inputs")
     vg_abc = tuple(inputs[:3])
-    dc_source, p_ref, q_ref = inputs[3:]
+    if dc_state == "stiff_voltage":
+        dc_source = None
+        p_ref, q_ref = inputs[3:]
+    else:
+        dc_source, p_ref, q_ref = inputs[3:]
 
     # Genuine memory elements only.
     i_abc = tuple(vfactory.add_var(f"i_line_{phase}") for phase in "ABC")
-    dc_state_var = vfactory.add_var("E_dc" if dc_state == "energy" else "Vdc_")
+    dc_state_var = (None if dc_state == "stiff_voltage" else
+                    vfactory.add_var("E_dc" if dc_state == "energy" else "Vdc_"))
     xi_pll = vfactory.add_var("xi_PLL")
     xi_p = vfactory.add_var("xi_Pac_ctrl")
     xi_q = vfactory.add_var("xi_Qac_ctrl")
     xi_vd = vfactory.add_var("xi_vd_hat")
     xi_vq = vfactory.add_var("xi_vq_hat")
 
-    state_vars = [*i_abc, dc_state_var, xi_pll, xi_p, xi_q, xi_vd, xi_vq]
+    state_vars = [*i_abc]
+    if dc_state_var is not None:
+        state_vars.append(dc_state_var)
+    state_vars.extend([xi_pll, xi_p, xi_q, xi_vd, xi_vq])
     if multilinear:
         trig_pairs = {
             role: (
@@ -204,12 +216,18 @@ def build_gfl_converter_model_ode(
         dc_energy = dc_state_var
         vdc = sym.sqrt(vfactory.add_const(2.0) * dc_energy / capacitance)
         dc_rhs = dc_source - p
-    else:
+    elif dc_state == "voltage":
         vdc = dc_state_var
         dc_energy = vfactory.add_const(0.5) * capacitance * vdc * vdc
         dc_rhs = (
             dc_source - p / (vdc + vfactory.add_const(1.0e-8))
         ) / capacitance
+    else:
+        # IEEE9's GFL closes its DC port with a prescribed stiff voltage.
+        # There is no DC energy state or independent DC power-source input.
+        vdc = vfactory.add_const(fixed_dc_voltage)
+        dc_energy = vfactory.add_const(0.5 * fixed_dc_voltage ** 2) * capacitance
+        dc_rhs = None
     pll_error = vg_d
     omega = (
         vfactory.add_const(1.0)
@@ -261,7 +279,7 @@ def build_gfl_converter_model_ode(
             omega_base * (vc - vg - resistance * current) / inductance
             for vc, vg, current in zip(vc_abc, vg_abc, i_abc)
         ],
-        dc_rhs,
+        *([dc_rhs] if dc_rhs is not None else []),
         pll_error,
         parameters["Ki_pol"] * p_error,
         parameters["Ki_pol"] * q_error,
@@ -288,10 +306,11 @@ def build_gfl_converter_model_ode(
 
     zero = vfactory.add_const(0.0)
     init_eqs = {state: zero for state in state_vars}
-    init_eqs[dc_state_var] = (
-        vfactory.add_const(20.0) if dc_state == "energy"
-        else vfactory.add_const(2.0)
-    )
+    if dc_state_var is not None:
+        init_eqs[dc_state_var] = (
+            vfactory.add_const(20.0) if dc_state == "energy"
+            else vfactory.add_const(2.0)
+        )
     if multilinear:
         for cosine_state, sine_state in trig_pairs.values():
             init_eqs[cosine_state] = vfactory.add_const(1.0)
@@ -302,7 +321,7 @@ def build_gfl_converter_model_ode(
     block = Block(
         name="gfl_converter_ode",
         in_vars=list(inputs),
-        out_vars=[*i_abc, dc_state_var],
+        out_vars=[*i_abc, *([dc_state_var] if dc_state_var is not None else [])],
         state_vars=state_vars,
         diff_vars=diff_vars,
         state_eqs=state_eqs,

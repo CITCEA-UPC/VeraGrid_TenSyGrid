@@ -9,11 +9,26 @@ from TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode_time_inputs import 
     build_gfl_ode_problem,
     runtime_input_traces,
 )
+from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var, heaviside, sin
 
 OUTPUT = Path(__file__).with_name("gfl_ode_dynamic_limiter.png")
 
 
 def main() -> None:
+    time = Var("gfl_ode_time")
+    phase_angles = (0.0, -2.0 * np.pi / 3.0, 2.0 * np.pi / 3.0)
+    # This experiment has clean grid voltage. Only P_ref changes at 0.02 s;
+    # the large command exercises the current limiter.
+    inputs = {
+        f"vg_{phase}": Const(np.sqrt(2.0))
+        * sin(Const(2.0 * np.pi * 50.0) * time + Const(angle))
+        for phase, angle in zip("ABC", phase_angles)
+    }
+    inputs.update({
+        "P_dc_source": Const(0.5),
+        "P_ref": Const(0.5) + Const(40.0 - 0.5) * heaviside(time - Const(0.02)),
+        "Q_ref": Const(0.0),
+    })
     problem = build_gfl_ode_problem(
         multilinear=True,
         dc_state="energy",
@@ -21,10 +36,8 @@ def main() -> None:
         p0=0.5,
         q0=0.0,
         voltage=1.0 + 0.0j,
-        voltage_noise_rms=0.0,
-        # Deliberately extreme command: the slow outer-loop gains otherwise do
-        # not reach the 2.5 pu current limit within this short EMT experiment.
-        p_reference_step=(0.02, 40.0),
+        prescribed_inputs=inputs,
+        time_variable=time,
         simulation_time=0.06,
     )
     S, phi = problem.build_multilinear_matrices()
