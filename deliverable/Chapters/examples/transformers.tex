@@ -1,0 +1,299 @@
+Transformers connect two network terminals while accounting for series leakage, tap ratios, phase shifts, winding connections, and magnetizing effects. In dynamic simulations they may be represented either as algebraic RMS phasor admittances or as EMT differential-algebraic models with winding-current, core-flux, and terminal-capacitance states.
+
+The VeraGrid transformer templates considered here cover one RMS current-balance phasor model and two EMT phase-domain models. The RMS model exposes rectangular phasor voltages and current injections, making it compatible with current-balance RMS formulations. The EMT models operate directly in the phase domain and expose from-side and to-side terminal voltages and currents, with optional neutral terminals depending on the selected winding connections.
+
+Throughout this chapter, from-side quantities use the subscript $f$ and to-side quantities use the subscript $t$. EMT phase quantities use $x\in\{A,B,C\}$.
+
+\section{RMS Phasor Transformer}
+
+The RMS phasor transformer is a current-injection model for a two-winding transformer. It uses rectangular phasor bus voltages,
+\begin{equation}
+    V_f = V_{rf}+jV_{if}, \qquad V_t = V_{rt}+jV_{it},
+\end{equation}
+and computes the corresponding branch current injections,
+\begin{equation}
+    I_f = I_{rf}+jI_{if}, \qquad I_t = I_{rt}+jI_{it}.
+\end{equation}
+
+\begin{table}[H]
+    \centering
+    \caption{Variables of the RMS phasor transformer.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $V_{rf}$, $V_{if}$ & Real and imaginary parts of the from-side terminal voltage \\
+        $V_{rt}$, $V_{it}$ & Real and imaginary parts of the to-side terminal voltage \\
+        $I_{rf}$, $I_{if}$ & Real and imaginary parts of the from-side current injection \\
+        $I_{rt}$, $I_{it}$ & Real and imaginary parts of the to-side current injection \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Parameters of the RMS phasor transformer.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $g$, $b$ & Series branch conductance and susceptance \\
+        $g_{Fe}$, $b_\mu$ & Core-loss conductance and magnetizing susceptance \\
+        $m$ & Tap-module magnitude \\
+        $\phi$ & Tap phase shift \\
+        $v_{tap,f}$, $v_{tap,t}$ & Virtual tap factors on the from and to sides \\
+        $\phi_{conn}$ & Winding-connection phase displacement \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\paragraph{Base equations.}
+Let
+\begin{align}
+    \theta &= \phi + \phi_{conn}, \\
+    k_f &= m v_{tap,f}, \\
+    k_c &= m v_{tap,f}v_{tap,t}, \\
+    k_t &= v_{tap,t}.
+\end{align}
+The rectangular admittance coefficients used by the template are
+\begin{align}
+    g_{ff} &= \frac{g_{Fe}+g}{k_f^2}, &
+    b_{ff} &= \frac{b_\mu/2+b}{k_f^2}, \\
+    g_{tt} &= \frac{g_{Fe}+g}{k_t^2}, &
+    b_{tt} &= \frac{b_\mu/2+b}{k_t^2}, \\
+    g_{ft} &= -\frac{g\cos\theta-b\sin\theta}{k_c}, &
+    b_{ft} &= -\frac{g\sin\theta+b\cos\theta}{k_c}, \\
+    g_{tf} &= -\frac{g\cos\theta+b\sin\theta}{k_c}, &
+    b_{tf} &= \frac{g\sin\theta-b\cos\theta}{k_c}.
+\end{align}
+The current injections are then
+\begin{align}
+    I_{rf} &= g_{ff}V_{rf}-b_{ff}V_{if}+g_{ft}V_{rt}-b_{ft}V_{it}, \\
+    I_{if} &= b_{ff}V_{rf}+g_{ff}V_{if}+b_{ft}V_{rt}+g_{ft}V_{it}, \\
+    I_{rt} &= g_{tf}V_{rf}-b_{tf}V_{if}+g_{tt}V_{rt}-b_{tt}V_{it}, \\
+    I_{it} &= b_{tf}V_{rf}+g_{tf}V_{if}+b_{tt}V_{rt}+g_{tt}V_{it}.
+\end{align}
+
+\paragraph{Multilinear reformulation.}
+The transformer parameters and tap settings are fixed after initialization. The admittance coefficients are therefore constant during the dynamic simulation, and the current equations are linear in the terminal-voltage variables. No additional multilinear reformulation is required for this RMS phasor model.
+
+\paragraph{Grid connection.}
+The model connects to the RMS current-balance network through $V_{rf}$, $V_{if}$, $V_{rt}$, and $V_{it}$. Its outputs are the current-injection components $I_{rf}$, $I_{if}$, $I_{rt}$, and $I_{it}$, which are mapped directly to the from-side and to-side network current-balance equations.
+
+\section{EMT Coupled-Winding Transformer}
+
+The EMT coupled-winding transformer is a phase-domain two-winding model using the winding currents as dynamic states. It represents each phase with two coupled inductors, one on the from side and one on the to side. The model includes winding resistances and an optional from-side magnetizing conductance contribution in the terminal current equation.
+
+\begin{table}[H]
+    \centering
+    \caption{Variables of the EMT coupled-winding transformer for each phase $x$.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $v_{f,x}$, $v_{t,x}$ & From-side and to-side phase terminal voltages \\
+        $v_{f,N}$, $v_{t,N}$ & Optional neutral voltages for star-connected windings \\
+        $v'_{f,x}$, $v'_{t,x}$ & Winding voltages after subtracting the neutral voltage when present \\
+        $i_{f,x}$, $i_{t,x}$ & Internal from-side and to-side winding-current states \\
+        $i^{port}_{f,x}$, $i^{port}_{t,x}$ & External from-side and to-side terminal current injections \\
+        $i^{port}_{f,N}$, $i^{port}_{t,N}$ & Optional neutral current injections \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Parameters of the EMT coupled-winding transformer.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $r_1$, $r_2$ & From-side and to-side winding resistances \\
+        $l_1$, $l_2$ & From-side and to-side winding inductances \\
+        $m_{12}$ & Mutual inductance between the two windings \\
+        $g_m$ & Magnetizing conductance used in the from-side current injection \\
+        $n_{tot}$ & Total voltage ratio used by the assembler and initialization mapping \\
+        $\varepsilon$ & Small regularization parameter for the inductance-matrix determinant \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\paragraph{Base equations.}
+For each phase $x$, the terminal voltage applied to each winding is
+\begin{equation}
+    v'_{f,x}=v_{f,x}-v_{f,N}, \qquad v'_{t,x}=v_{t,x}-v_{t,N},
+\end{equation}
+when the corresponding neutral exists. If no neutral terminal exists, $v'_{f,x}=v_{f,x}$ or $v'_{t,x}=v_{t,x}$.
+
+The coupled-winding equations are
+\begin{align}
+    l_1\frac{d i_{f,x}}{dt}+m_{12}\frac{d i_{t,x}}{dt} &= v'_{f,x}-r_1 i_{f,x}, \\
+    m_{12}\frac{d i_{f,x}}{dt}+l_2\frac{d i_{t,x}}{dt} &= v'_{t,x}-r_2 i_{t,x}.
+\end{align}
+The implemented state equations invert this $2\times2$ inductance matrix. With
+\begin{equation}
+    \Delta_l = l_1l_2-m_{12}^2,
+\end{equation}
+the state derivatives are
+\begin{align}
+    \frac{d i_{f,x}}{dt} &= \frac{l_2\left(v'_{f,x}-r_1i_{f,x}\right)-m_{12}\left(v'_{t,x}-r_2i_{t,x}\right)}{\Delta_l+\varepsilon}, \\
+    \frac{d i_{t,x}}{dt} &= \frac{l_1\left(v'_{t,x}-r_2i_{t,x}\right)-m_{12}\left(v'_{f,x}-r_1i_{f,x}\right)}{\Delta_l+\varepsilon}.
+\end{align}
+
+The terminal current equations are
+\begin{align}
+    i^{port}_{f,x} &= i_{f,x}+g_m v'_{f,x}, \\
+    i^{port}_{t,x} &= i_{t,x}.
+\end{align}
+For windings with an exposed neutral, the neutral current satisfies
+\begin{align}
+    i^{port}_{f,N}+i^{port}_{f,A}+i^{port}_{f,B}+i^{port}_{f,C}+i^{g}_{f,N} &= 0, \\
+    i^{port}_{t,N}+i^{port}_{t,A}+i^{port}_{t,B}+i^{port}_{t,C}+i^{g}_{t,N} &= 0,
+\end{align}
+where the grounding current terms are present only for grounded-star windings.
+
+\paragraph{Multilinear reformulation.}
+With fixed transformer parameters, the voltage-current equations are linear except for the determinant inversion in the explicit derivative form. A multilinear-oriented implementation can avoid this division by keeping the original coupled equations,
+\begin{align}
+    l_1\frac{d i_{f,x}}{dt}+m_{12}\frac{d i_{t,x}}{dt} - v'_{f,x}+r_1i_{f,x} &= 0, \\
+    m_{12}\frac{d i_{f,x}}{dt}+l_2\frac{d i_{t,x}}{dt} - v'_{t,x}+r_2i_{t,x} &= 0,
+\end{align}
+or by introducing an auxiliary reciprocal $\Delta^{-1}_{aux}$ with
+\begin{equation}
+    \Delta^{-1}_{aux}\left(\Delta_l+\varepsilon\right)=1.
+\end{equation}
+The port-current equations are already affine in the EMT terminal voltages and winding-current states once $g_m$ is fixed.
+
+\paragraph{Grid connection.}
+The model exposes the from-side and to-side phase voltages as inputs and the corresponding current injections as outputs. For grounded-star and neutral-star windings it also exposes the neutral terminal. Grounded-star variants internally attach a solid grounding link to the neutral, while neutral-star variants leave the neutral available as a network terminal. Delta and ungrounded variants do not expose a neutral port.
+
+\section{EMT ATP-Like Transformer}
+
+The EMT ATP-like transformer is a more detailed phase-domain model. It includes a series leakage branch between the two terminals, a magnetic branch referred to the from side, a core-loss branch, optional terminal capacitances, winding-connection matrices, tap magnitude, and selectable linear or nonlinear core behaviour.
+
+\begin{table}[H]
+    \centering
+    \caption{Variables of the EMT ATP-like transformer for each phase or leg $x$.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $v_{f,x}$, $v_{t,x}$ & From-side and to-side terminal voltages in the external phase frame \\
+        $v'_{f,x}$, $v'_{t,x}$ & Terminal voltages after neutral subtraction \\
+        $v^w_{f,x}$, $v^w_{t,x}$ & From-side and to-side winding-frame voltages \\
+        $i_{\sigma,x}$ & Series leakage-current state \\
+        $\lambda_x$ & Core leg flux-linkage state \\
+        $q_{f,x}$, $q_{t,x}$ & From-side and to-side terminal-capacitance charge states \\
+        $i^{core}_x$ & Core-leg current used in the magnetic constitutive law \\
+        $i^{mag}_x$ & Net magnetizing current injected through the from-side winding \\
+        $i^{loss}_x$ & Core-loss current \\
+        $i^C_{f,x}$, $i^C_{t,x}$ & From-side and to-side terminal-capacitance currents \\
+        $i^{port}_{f,x}$, $i^{port}_{t,x}$ & From-side and to-side terminal current injections \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Parameters of the EMT ATP-like transformer.}
+    \begin{tabular}{ll}
+        \toprule
+        Symbol & Description \\
+        \midrule
+        $\omega_b$ & Base angular frequency \\
+        $S_n$ & Transformer rated power \\
+        $I_{oc}$, $P_{oc}$ & Open-circuit current and open-circuit losses \\
+        $V_{sc}$, $P_{sc}$ & Short-circuit voltage and short-circuit losses \\
+        $n$ & Tap-module magnitude \\
+        $C_f$, $C_t$ & From-side and to-side winding-connection matrices \\
+        $c_{term}$ & Terminal capacitance coefficient \\
+        $L_{core}$ & Linear core inductance coefficient \\
+        $a'$, $b'$ & Frolich-type nonlinear core coefficients \\
+        $r_{sc}$, $l_\sigma$ & Leakage resistance and leakage inductance \\
+        $g_{core}$ & Core-loss conductance per leg \\
+        $\varepsilon$ & Small regularization parameter \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\paragraph{Base equations.}
+The winding-connection matrices transform terminal voltages into winding-frame voltages as
+\begin{align}
+    \mathbf{v}^w_f &= C_f^T\mathbf{v}'_f, \\
+    \mathbf{v}^w_t &= C_t^T\mathbf{v}'_t.
+\end{align}
+The leakage voltage and core voltage are
+\begin{align}
+    v_{\sigma,x} &= v^w_{f,x}-n v^w_{t,x}, \\
+    v^{core}_x &= v^w_{f,x}.
+\end{align}
+The leakage-current, core-flux, and terminal-charge dynamics are
+\begin{align}
+    \frac{d i_{\sigma,x}}{dt} &= \frac{v_{\sigma,x}-r_{sc}i_{\sigma,x}}{l_\sigma+\varepsilon}, \\
+    \dot{\lambda}_x &= \omega_b v^{core}_x, \\
+    \dot{q}_{f,x} &= i^C_{f,x}, \\
+    \dot{q}_{t,x} &= i^C_{t,x}.
+\end{align}
+
+The terminal capacitance constraints are
+\begin{align}
+    q_{f,x} &= c_{term}v'_{f,x}, \\
+    q_{t,x} &= c_{term}v'_{t,x}.
+\end{align}
+The core-loss current is referred only to the from-side winding,
+\begin{equation}
+    i^{loss}_x = g_{core}v^w_{f,x}.
+\end{equation}
+
+The magnetic branch can be linear or nonlinear. In linear mode,
+\begin{equation}
+    \lambda_x = L_{core}i^{core}_x.
+\end{equation}
+In nonlinear mode, the leg flux is represented with a Frolich-type law,
+\begin{equation}
+    \lambda_x = \frac{i^{core}_x}{a' + b'\sqrt{{(i^{core}_x)}^2+\varepsilon}}.
+\end{equation}
+The implemented model blends the two equations with a selector parameter so that the same template can run with either a linear or nonlinear core.
+
+For a three-legged or five-legged core, the return-path flux is
+\begin{equation}
+    \lambda_{ret}= -\left(\lambda_A+\lambda_B+\lambda_C\right),
+\end{equation}
+and the return-path current is determined by a topology-dependent yoke and outer-leg constitutive relation. The net magnetizing current in each leg is then
+\begin{equation}
+    i^{mag}_x = i^{core}_x - i_{ret,total}.
+\end{equation}
+
+The winding-frame currents are projected back into the terminal frame with the same connection matrices used for the voltage transformation. If
+\begin{equation}
+    \mathbf{i}^{series}_f=C_f\mathbf{i}_\sigma, \qquad
+    \mathbf{i}^{series}_t=C_t\mathbf{i}_\sigma,
+\end{equation}
+and
+\begin{equation}
+    \mathbf{i}^{core}_f=C_f\left(\mathbf{i}^{mag}+\mathbf{i}^{loss}\right),
+\end{equation}
+the terminal current injections are assembled as
+\begin{align}
+    i^{port}_{f,x} &= i^{series}_{f,x}+i^{core}_{f,x}+i^C_{f,x}, \\
+    i^{port}_{t,x} &= -n i^{series}_{t,x}+i^C_{t,x}.
+\end{align}
+As in the simpler EMT transformer, optional neutral current equations impose neutral KCL and include the grounding-link current when the winding is grounded.
+
+\paragraph{Parameter derivation.}
+Several dynamic parameters are derived from transformer test data. The short-circuit resistance is obtained from short-circuit losses, the leakage reactance from the short-circuit voltage, and the leakage inductance from
+\begin{equation}
+    l_\sigma = \frac{x_{sc}}{\omega_b}.
+\end{equation}
+The core-loss conductance is derived from open-circuit losses and distributed equally over the three core legs. The linear core coefficient is derived from the open-circuit magnetizing current. For nonlinear-core operation, the Frolich coefficients are initialized from knee-flux and knee-current multipliers relative to the nominal operating point.
+
+\paragraph{Multilinear reformulation.}
+The ATP-like EMT transformer contains several nonlinear operations: reciprocal leakage inductance, square roots in the nonlinear magnetic law, topology-dependent selector products, and products between connection-matrix coefficients and voltages or currents if the connection coefficients are treated as variables. When the static parameters and connection matrices are fixed, the leakage dynamics, voltage transformations, current projections, core-loss equations, and capacitance equations are linear in the states and algebraic variables. The nonlinear core law can be made tensor-compatible by introducing auxiliary variables for the smoothed absolute current and return-path terms, for example
+\begin{align}
+    a_{core,x}^2 &= {(i^{core}_x)}^2+\varepsilon, \\
+    \lambda_x\left(a' + b'a_{core,x}\right) &= i^{core}_x.
+\end{align}
+If the core is forced to linear mode, this additional reformulation is not required.
+
+\paragraph{Grid connection.}
+The model connects directly to the EMT network through from-side and to-side phase voltages and returns the corresponding phase current injections. Grounded-star and neutral-star connections expose neutral voltages and neutral currents; grounded-star connections also include an internal solid grounding link. The connection matrices encode the selected winding topology and are used consistently for terminal-to-winding voltage transformation and winding-to-terminal current projection. The branch-current sign convention is the VeraGrid convention: current is positive when it leaves the connected bus.

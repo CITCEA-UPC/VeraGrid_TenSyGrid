@@ -1,0 +1,174 @@
+%% This work is derived from:
+%% 
+%% Project: fraunhofer-latex
+%% Version: 2021/08/14 v1.5.0
+%% Info: LaTeX package to implement the Fraunhofer CI
+%% 
+%% Copyright (c) 2020, 2021 by Matthias Boljen
+%% 
+%% Permission is hereby granted, free of charge, to any person
+%% obtaining a copy of this software and associated documentation
+%% files (the "Software"), to deal in the Software without restriction,
+%% including without limitation the rights to use, copy, modify, merge,
+%% publish, distribute, sublicense, and/or sell copies of the Software,
+%% and to permit persons to whom the Software is furnished to do so,
+%% subject to the following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be
+%% included in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\IfFileExists{tensygrid-scrvars.sty}{
+  \ProvidesPackage{tensygrid-scrvars}
+  [2025/03/18 v0.0.1 TenSyGridr support for KOMA variables]
+    }{
+        \ProvidesClass{./koma/tensygrid-scrvars}[2025/03/18 v0.0.1 TenSyGridr support for KOMA variables]
+    }
+\@ifpackageloaded{tensygrid}{}{
+  \PackageError{tensygrid-scrvars}{%
+    Package `tensygrid' not loaded}{}}
+\RequirePackage{scrbase}
+\scr@ifundefinedorrelax{KOMAClassName}{}{%
+    \@ifclasslater{\KOMAClassName}{2020/07/22}{%
+    \@ifclasslater{\KOMAClassName}{2026/01/01}{%
+        \PackageWarningNoLine{tensygrid-scrvars}{%
+        Compatibility with current version of\MessageBreak
+        KOMA-Script bundle not yet approved}
+    }{}
+    }{%
+    \PackageWarningNoLine{tensygrid-scrvars}{%
+        Deprecated version of KOMA-Script bundle\MessageBreak
+        detected, consider update}
+    }
+}
+\providecommand*{\newkomavar}{%
+  \@ifstar {\@tempswatrue\@newkomavar}{\@tempswafalse\@newkomavar}}
+  \providecommand*{\@newkomavar}[2][\relax]{%
+  \@ifundefined{scr@#2@name}{%
+    \@ifundefined{scr@#2@var}{%
+      \begingroup
+        \def\@tempa{#1}\def\@tempb{\relax}%
+        \ifx\@tempa\@tempb\endgroup\else
+        \endgroup\@namedef{scr@#2@name}{#1}%
+      \fi%
+      \expandafter\let\csname scr@#2@var\endcsname=\@empty
+      \if@tempswa\addtoreffields{#2}\fi
+    }{%
+      \PackageError{tensygrid-scrvars}{%
+        This should never happen%
+      }{%
+        The contents of the KOMA-Script variable `#2'\MessageBreak
+        is undefined, but the name of the variable is
+        defined.\MessageBreak
+        This should never happen. So someone crashs me!%
+      }%
+    }%
+  }{%
+    \PackageError{tensygrid-scrvars}{%
+      Variable `#2' already defined%
+    }{%
+      I'll ignore this command, if you'll continue.%
+    }%
+  }%
+}
+\providecommand*{\setkomavar}{%
+  \@ifstar {\@setkomaname}{\@setkomavar}}
+\providecommand*{\@setkomavar}[1]{%
+  \kernel@ifnextchar [%]
+  {\@@setkomavar{#1}}{\@@setkomavar{#1}[\relax]}}
+\providecommand*{\@setkomaname}[2]{%
+  \@ifundefined{scr@#1@var}{%
+    \@komavar@err{set}{#1}%
+  }{%
+    \@namedef{scr@#1@name}{#2}%
+    \csname scr@#1@postsetname\endcsname
+  }%
+}
+\providecommand*{\@@setkomavar}{}
+\long\def\@@setkomavar#1[#2]#3{%
+  \@ifundefined{scr@#1@var}{%
+    \@komavar@err{set}{#1}%
+  }{%
+    \@namedef{scr@#1@var}{#3}%
+    \csname scr@#1@postsetvar\endcsname
+    \begingroup
+      \def\@tempa{#2}\def\@tempb{\relax}%
+      \ifx\@tempa\@tempb\endgroup\else
+      \endgroup\@namedef{scr@#1@name}{#2}%
+      \csname scr@#1@postsetname\endcsname
+    \fi
+  }%
+}
+\providecommand*{\@komavar@err}[2]{%
+  \PackageError{tensygrid-scrvars}{%
+    KOMA-Script variable not defined%
+  }{%
+    You've tried to #1 the not defined KOMA-Script variable
+    `#2'.\MessageBreak
+    You have to define the variable using \string\newkomavar\space
+    before\MessageBreak
+    you do this.%
+  }%
+}
+\DeclareRobustCommand*{\usekomavar}{%
+  \@ifstar {\@usekomaname}{\@usekomavar}}
+\providecommand*{\@usekomavar}[2][\@firstofone]{%
+  \@ifundefined{scr@#2@var}{%
+    \@komavar@err{use}{#2}%
+  }{%
+    #1{\@nameuse{scr@#2@var}}%
+  }%
+}
+\providecommand*{\@usekomaname}[2][\@firstofone]{%
+  \@ifundefined{scr@#2@var}{%
+    \@komavar@err{use}{#2}%
+  }{%
+    #1{\@nameuse{scr@#2@name}}%
+  }%
+}
+\DeclareRobustCommand*{\Ifkomavar}[1]{%
+  \scr@ifundefinedorrelax{scr@#1@var}{%
+    \expandafter\@secondoftwo
+  }{%
+    \expandafter\@firstoftwo
+  }%
+}
+\DeclareRobustCommand*{\Ifkomavarempty}{%
+  \begingroup
+  \@ifstar {\@tempswatrue\@ifkomavarempty}%
+           {\@tempswafalse\@ifkomavarempty}%
+}
+\providecommand{\@ifkomavarempty}[1]{%
+    \Ifkomavar{#1}{%
+      \if@tempswa
+        \@ifundefined{scr@#1@name}{%
+          \aftergroup\@firstoftwo
+        }{%
+          \expandafter\ifx\csname scr@#1@name\endcsname\@empty
+            \aftergroup\@firstoftwo
+          \else
+            \aftergroup\@secondoftwo
+          \fi
+        }%
+      \else
+        \expandafter\ifx\csname scr@#1@var\endcsname\@empty
+          \aftergroup\@firstoftwo
+        \else
+          \aftergroup\@secondoftwo
+        \fi
+      \fi
+    }{%
+      \@komavar@err{use}{#1}%
+      \aftergroup\@gobbletwo
+    }%
+  \endgroup
+}
+\endinput
+%%
+%% End of file `tensygrid-scrvars.sty'.

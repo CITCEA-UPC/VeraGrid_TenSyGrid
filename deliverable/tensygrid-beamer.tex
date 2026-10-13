@@ -1,0 +1,104 @@
+% !TEX program = xelatex
+\documentclass[aspectratio=169,9pt]{beamer}
+\usepackage[english]{babel}
+\usepackage[eRoots]{tensygrid}
+\usepackage{mathtools}
+\usepackage{IEEEtrantools}
+\author{Luke Skywalker}
+\title{eRoots {\LaTeX} Beamer Template}
+\subtitle{Combine the Beauty of Science with Excellent Typesetting}
+\date[Feb 20]{International Symposium on Typography\\ February 17, 2020}
+\makeatletter
+\newcommand{\thefontsize}[2]
+  {{#1 The \textbackslash #2 font size: \f@size pt\par}}
+\makeatother
+\begin{document}
+
+% Title slide sample
+\begingroup
+\setbeamertemplate{footline}{}% remove footline
+\begin{frame}
+  \titlepage
+\end{frame}
+\endgroup
+
+
+\begin{frame}
+  \frametitle{Font Sizes}
+  \framesubtitle{Scaled to match PowerPoint style}
+  \thefontsize{\tiny}{tiny}
+  \thefontsize{\scriptsize}{scriptsize}
+  \thefontsize{\footnotesize}{footnotesize}
+  \thefontsize{\small}{small}
+  \thefontsize{\normalsize}{normalsize}
+  \thefontsize{\large}{large}
+  \thefontsize{\Large}{Large}
+  \thefontsize{\LARGE}{LARGE}
+  \thefontsize{\huge}{huge}
+  \thefontsize{\Huge}{Huge}
+\end{frame}
+\begin{frame}
+  \frametitle{Objectives}%
+  \framesubtitle{Create Beautiful Presentations with {\LaTeX} Beamer}%
+  \begin{itemize}
+    \item A nice alternative to PowerPoint
+    \begin{itemize}
+      \item Second level
+      \begin{itemize}
+        \item Third level
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  \onslide<2->
+  \begin{columns}[onlytextwidth]
+    \column{.55\columnwidth}%
+      \begin{exampleblock}{How}%
+        \begin{itemize}
+          \item Use {\LaTeX} to present your stuff
+        \end{itemize}
+      \end{exampleblock}%
+    \column{.40\columnwidth}%
+      \begin{alertblock}{Difficulties}
+        \begin{itemize}
+          \item Get used to syntax
+        \end{itemize}
+      \end{alertblock}%
+  \end{columns}
+  \onslide<3->
+  \begin{block}{Outcome}
+    \begin{itemize}
+      \item Beautiful presentations
+    \end{itemize}
+  \end{block}%
+\end{frame}
+
+\begin{frame}
+  \frametitle{Equations}
+  \framesubtitle{The most beautiful math equation}
+  Euler's identity
+  \begin{equation*}
+    e^{i\pi}+1=0
+  \end{equation*}
+  \onslide<2->
+  State-space model
+  \begin{IEEEeqnarray*}{rCl}
+    \frac{\mathrm{d}\mathbf{x}}{\mathrm{d}t} & = & \mathbf{A}\mathbf{x} + \mathbf{B}\mathbf{u}\\
+    y & = & \mathbf{C}\mathbf{x} + \mathbf{D}\mathbf{u}
+  \end{IEEEeqnarray*} 
+\end{frame}
+
+%% Acknowledgement slide sample
+\begingroup
+\setbeamertemplate{footline}{}% remove footline
+\begin{frame}[c]
+  \frametitle{Acknowledgement}
+  \small
+  \insertack % Acknowledgement text
+  \vspace*{3ex}
+  \insertcallorg % Call organizers
+  \vspace*{1ex}
+  \insertagencies %  Funding agencies
+\end{frame}
+\endgroup
+
+\end{document}
