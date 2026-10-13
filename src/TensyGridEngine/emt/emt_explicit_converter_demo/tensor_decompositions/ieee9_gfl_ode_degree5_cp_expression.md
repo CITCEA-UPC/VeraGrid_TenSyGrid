@@ -1,6 +1,6 @@
 # Grouped CP expressions for IEEE-9 converter degree-five terms
 
-Numerical factors fitted with `ieee9_gfl_ode_degree5_cp.py` using `myenv`.
+Numerical factors fitted with `ieee9_gfl_ode_degree5_cp.py`.
 These expressions cover only the degree-five contributions to the listed six equations per converter.
 They are CP expressions over five groups of state variables, not over 49 individual binary modes.
 

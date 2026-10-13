@@ -73,7 +73,7 @@ def timed_call(fn, current: np.ndarray, repetitions: int = 5000) -> float:
 
 def main() -> None:
     from TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_nodal_tensor import nodal_matrix
-    from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+    from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 
     conductance = nodal_matrix(build_problem())
     inverse = linalg.inv(conductance)

@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 from scipy import linalg
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 
 
