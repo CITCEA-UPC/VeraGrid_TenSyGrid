@@ -1,0 +1,179 @@
+%% This work is derived from:
+%% 
+%% Project: fraunhofer-latex
+%% Version: 2021/08/14 v1.5.0
+%% Info: LaTeX package to implement the Fraunhofer CI
+%% 
+%% Copyright (c) 2020, 2021 by Matthias Boljen
+%% 
+%% Permission is hereby granted, free of charge, to any person
+%% obtaining a copy of this software and associated documentation
+%% files (the "Software"), to deal in the Software without restriction,
+%% including without limitation the rights to use, copy, modify, merge,
+%% publish, distribute, sublicense, and/or sell copies of the Software,
+%% and to permit persons to whom the Software is furnished to do so,
+%% subject to the following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be
+%% included in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\IfFileExists{beamerouterthemetensygrids.sty}{
+  \ProvidesPackage{beamerouterthemetensygrid}
+  [2025/03/18 v0.0.1 TenSyGrid beamer outer theme]
+    }{\ProvidesClass{./beamer/beamerouterthemetensygrid}
+        [2025/03/18 v0.0.1 TenSyGrid beamer outer theme]}
+\@ifpackageloaded{beamerthemetensygrid}{}{%
+  \PackageError{beamerouterthemetensygrid}{%
+    Main theme `tensygrid' not loaded}{}
+}
+\ProcessOptionsBeamer
+\mode<presentation>
+\setbeamertemplate{sidebar left}{}
+\setbeamertemplate{sidebar right}{}
+\setbeamersize{sidebar width left=\z@}
+\setbeamersize{sidebar width right=\z@}
+\setbeamersize{text margin left=5\TG@beamer@unitlength}
+\setbeamersize{text margin right=5\TG@beamer@unitlength}
+\setbeamertemplate{headline}{%
+  \begin{beamercolorbox}[center]{headline}%
+    \begin{beamercolorbox}[
+      wd=90\TG@beamer@unitlength,
+      ht=5\TG@beamer@unitlength,right]{navigation symbols}%
+        \usebeamerfont{navigation symbols}%
+        \usebeamertemplate***{navigation symbols}%
+    \end{beamercolorbox}%
+  \end{beamercolorbox}%
+  \ifbeamercolorempty[bg]{headline}{}{\nointerlineskip}%
+  \begin{beamercolorbox}[center]{headline}%
+    \begin{beamercolorbox}[
+      wd=90\TG@beamer@unitlength,
+      colsep=.15\TG@beamer@unitlength]{lower separation line head}%
+    \end{beamercolorbox}%
+  \end{beamercolorbox}%
+}
+\setbeamertemplate{footline}{%
+  % \ifnum \insertpagenumber=1
+  %     \leavevmode%
+  %     \hbox{%
+  %     \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex,center]{}%
+  %       % empty environment to raise height
+  %     \end{beamercolorbox}}%
+  %     \vskip0pt%
+  % \else
+  \begin{beamercolorbox}[center]{footline}%
+    \begin{beamercolorbox}[
+      wd=90\TG@beamer@unitlength,
+      colsep=.15\TG@beamer@unitlength]{upper separation line foot}%
+    \end{beamercolorbox}
+  \end{beamercolorbox}
+  \ifbeamercolorempty[bg]{footline}{}{\nointerlineskip}%
+  \begin{beamercolorbox}[center]{footline}%
+    \leavevmode%
+    \hbox{%
+      \ltx@ifpackageloaded{beamerposter}{%
+        \vbox to 7\TG@beamer@unitlength{%
+          \vskip .5\TG@beamer@unitlength
+          \begin{beamercolorbox}[
+            wd=66\TG@beamer@unitlength,
+            ht=1.5\TG@beamer@unitlength,
+            dp=.5\TG@beamer@unitlength]{date in head/foot}%
+              \usebeamerfont{date in head/foot}%
+              \insertshortdate
+          \end{beamercolorbox}%
+          \vfil%
+        }%
+      }{%
+        \vbox to 7\TG@beamer@unitlength{%
+          \vfil%
+          \begin{beamercolorbox}[
+            wd=10\TG@beamer@unitlength,
+            ht=1.5\TG@beamer@unitlength,
+            dp=.5\TG@beamer@unitlength]{page number in head/foot}%
+              \usebeamerfont{page number in head/foot}%
+              \insertframenumber
+          \end{beamercolorbox}
+          \ifbeamercolorempty[bg]{date in head/foot}{}{%
+            \nointerlineskip}%
+          \begin{beamercolorbox}[
+            wd=10\TG@beamer@unitlength,
+            ht=1.5\TG@beamer@unitlength,
+            dp=.5\TG@beamer@unitlength]{date in head/foot}%
+              \usebeamerfont{date in head/foot}%
+              \insertshortdate
+          \end{beamercolorbox}%
+          \vfil%
+        }%
+        \vbox to 7\TG@beamer@unitlength{%
+          \vfil%
+          \begin{beamercolorbox}[
+            wd=40\TG@beamer@unitlength,
+            ht=1.5\TG@beamer@unitlength,
+            dp=.5\TG@beamer@unitlength]{title in head/foot}%
+              \usebeamerfont{title in head/foot}%
+              \insertshorttitle
+          \end{beamercolorbox}
+          \ifbeamercolorempty[bg]{author in head/foot}{}{%
+            \nointerlineskip}%
+          \begin{beamercolorbox}[
+            wd=40\TG@beamer@unitlength,
+            ht=1.5\TG@beamer@unitlength,
+            dp=.5\TG@beamer@unitlength]{author in head/foot}%
+              \usebeamerfont{author in head/foot}%
+              \insertshortauthor
+          \end{beamercolorbox}%
+          \vfil%
+        }%
+      }%
+      \vbox to 7\TG@beamer@unitlength{%
+        \vfil%
+        \begin{beamercolorbox}[
+          wd=20\TG@beamer@unitlength,
+          ht=5\TG@beamer@unitlength,right]{institute in head/foot}%
+            \usebeamerfont{institute in head/foot}%
+            \IfFileExists{\TG@config-logo.pdf}{\partnerlogo{\includegraphics[height=4\TG@beamer@unitlength]{\TG@config-logo.pdf}}\insertpartnerlogo}{\IfFileExists{./config/\TG@config-logo.pdf}{\partnerlogo{\includegraphics[height=4\TG@beamer@unitlength]{./config/\TG@config-logo.pdf}}
+            \insertpartnerlogo}{}}
+        \end{beamercolorbox}%
+        \vfil%
+      }%
+      \vbox to 7\TG@beamer@unitlength{%
+        \vfil%
+        \begin{beamercolorbox}[
+          wd=20\TG@beamer@unitlength,
+          ht=5\TG@beamer@unitlength,right]{institute in head/foot}%
+            \usebeamerfont{institute in head/foot}%
+            \tglogo[
+              height=4\TG@beamer@unitlength]{\usekomavar{acronym}}%
+        \end{beamercolorbox}%
+        \vspace*{1\TG@beamer@unitlength}
+        \vfil%
+      }%
+    }%
+  \end{beamercolorbox}%
+  %\fi
+}%
+\setbeamertemplate{frametitle}{%
+%%  \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+  \begin{beamercolorbox}{frametitle}%
+    \usebeamerfont{frametitle}%
+    \strut\MakeUppercase{\insertframetitle}\strut
+  \end{beamercolorbox}%
+  \ifthenelse{\equal{\insertframesubtitle}{\@empty}}{}{%
+    \ifbeamercolorempty[bg]{framesubtitle}{}{\nointerlineskip}%
+    \begin{beamercolorbox}{framesubtitle}%
+      \usebeamerfont{framesubtitle}%
+      \strut\insertframesubtitle\strut
+    \end{beamercolorbox}}}%
+\@ifpackageloaded{beamerposter}{%
+  \setbeamertemplate{navigation symbols}{}%
+}{}%
+\mode<all>
+\endinput
+%%
+%% End of file `beamerouterthemetensygrid.sty'.

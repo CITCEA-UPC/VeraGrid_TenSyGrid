@@ -1,0 +1,146 @@
+% !TEX program = lualatex
+\documentclass[
+    bibliography=totoc,
+    listof=totoc,
+    listof=entryprefix,
+    toc=sectionentrywithdots
+]{scrreprt}
+\usepackage[english]{babel}
+\usepackage{lmodern,lipsum,microtype}
+\usepackage[UPC]{tensygrid}
+\geometry{
+  paper=a4paper,
+  left=25mm,
+  right=25mm,
+  top=25mm,
+  bottom=25mm,
+  bindingoffset=0mm,
+  marginparwidth=0pt,
+  marginparsep=0pt,
+  includeheadfoot
+}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{mathtools}
+\usepackage{ieeetrantools}
+\usepackage{siunitx}
+\usepackage{bm}
+\usepackage{circuitikz}
+\usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{xcolor}
+%\usepackage[sections]{placeins}
+\usepackage{booktabs}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\usepackage[backend=biber, sorting=none]{biblatex}
+\addbibresource{ref.bib}  % Adjust to your .bib file name
+
+\author{Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez\\Dr.~Eduardo~Prieto~Araujo}
+\title{TenSyGrid Toolbox: Use cases identification and description }
+\setkomavar{docname}{Deliverable Report}
+\subject{Deliverable Report}
+\setkomavar{docnumber}{D4.1}
+\setkomavar{projectnumber}{CETP-FP-2023-00138}
+\setkomavar{workpackage}{WP 4}
+\setkomavar{version}{v1.1.0}
+\setkomavar{callman}{CETPartnership}
+\setkomavar{toname}{Universitat Politècnica de Catalunya}
+\setkomavar{fromphone}{30/07/2026}
+\setkomavar{toaddress}{%
+CETPartnership \\
+  Call Management}
+\setkomavar{fromname}{Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez\\Dr.~Eduardo~Prieto~Araujo}
+\setkomavar{yourref}{Universitat Politècnica de Catalunya}
+\setkomavar{director}{Dr.~Eduardo~Prieto~Araujo}
+\setkomavar{projectcoordinator}{Dr.~Carlos~Cateriano~Yáñez}
+\setkomavar{classification}{Public} % Confidential or Public
+\colorlet{classificationcolor}{tgred} % tgred CO tglime PU
+\setkomavar{contributions}{}
+\subtitle{Project: Tensors for System Analysis of\\ Converter-dominated Power Grids}
+\date{29. July 2026}
+\tgsigsetup{
+  fromname         = {Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez},
+  fromfunction     = {Phd Student\\Phd Student},
+  headname         = {Dr.~Carlos~Cateriano~Yáñez},
+  headfunction     = {Project Coordinator},
+  reviewername     = {Dr.~John Licari},
+  reviewerfunction = {Principal Investigator at UM},
+}
+
+\BeforeStartingTOC[lof]{\def\autodot{:}}
+\BeforeStartingTOC[lot]{\def\autodot{:}}
+
+\begin{document}
+{\raggedright
+\maketitle}
+\section*{Acknowledgement}
+\insertack
+\vspace*{2ex}
+\newline
+{\center
+\insertcallorg}
+\newline
+{\center
+\insertagencies}
+\clearpage
+\section*{About TenSyGrid}
+\insertabout
+\vspace*{8ex}
+\newline
+\textbf{Project coordinator:}
+{\center
+\insertcoord}
+\vspace*{2ex}
+\newline
+\textbf{Consortium:}
+{\center
+\insertconsortium}
+\newline
+\clearpage
+
+\section*{Summary}
+This deliverable identifies and describes the use cases that the TenSyGrid Toolbox must support to serve network operators in assessing the small-signal stability of converter-dominated power grids. Fourteen use cases are catalogued and described, organised into two groups: six use cases already prototyped in an initial web-based Stability Monitor, and eight additional use cases proposed for discussion with operators during a dedicated workshop.
+
+The implemented use cases cover the core stability-analysis workflow: launching a small-signal eigenvalue computation, inspecting the system status via a dashboard, exploring the eigenvalue spectrum, diagnosing critical oscillation modes through participation factors, verifying bus voltage profiles, and performing N-1 contingency analysis with some recommendations.
+
+
+
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+
+\chapter{Introduction}
+\input{Chapters/introduction.tex}
+
+\chapter{Use Cases}
+\input{Chapters/use_cases.tex}
+
+% \chapter{Lines}
+% \input{Chapters/lines.tex}
+
+% \chapter{Loads}
+% \input{Chapters/loads.tex}
+
+% \chapter{Transformers}
+% \input{Chapters/transformers.tex}
+
+% \chapter{Inverter Based Generation}
+% \input{Chapters/converters.tex}
+
+% \chapter{HVDC}
+% \input{Chapters/hvdc.tex}
+
+% \chapter{FACTS}
+% \input{Chapters/facts.tex}
+
+\chapter{Conclusion}
+\input{Chapters/conclusion.tex}
+
+\clearpage
+\printbibliography
+
+\end{document}

@@ -1,0 +1,20 @@
+stages:
+  - build
+
+compile-pdf:
+  stage: build
+  image: texlive/texlive:latest
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - git config user.email "ci@gitlab.fraunhofer.de"
+    - git config user.name "GitLab CI"
+    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+  script:
+    - latexmk tensygrid-report.tex
+    - latexmk tensygrid-beamer.tex
+    - latexmk -c
+    - git add tensygrid-report.pdf tensygrid-beamer.pdf
+    - git diff --staged --quiet || git commit -m "[CI] Compiled PDFs from commit ${CI_COMMIT_SHORT_SHA}"
+    - git push origin HEAD:${CI_COMMIT_BRANCH}
+  only:
+    - branches

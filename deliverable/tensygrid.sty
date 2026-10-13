@@ -1,0 +1,325 @@
+%% This work is derived from:
+%% 
+%% Project: fraunhofer-latex
+%% Version: 2021/08/14 v1.5.0
+%% Info: LaTeX package to implement the Fraunhofer CI
+%% 
+%% Copyright (c) 2020, 2021 by Matthias Boljen
+%% 
+%% Permission is hereby granted, free of charge, to any person
+%% obtaining a copy of this software and associated documentation
+%% files (the "Software"), to deal in the Software without restriction,
+%% including without limitation the rights to use, copy, modify, merge,
+%% publish, distribute, sublicense, and/or sell copies of the Software,
+%% and to permit persons to whom the Software is furnished to do so,
+%% subject to the following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be
+%% included in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\ProvidesPackage{tensygrid}[2025/03/18 v0.01 TenSyGrid package]
+\RequirePackage{calc,xcolor,graphicx,iflang,nfssext-cfr,xspace}
+\RequirePackage[no-math]{fontspec}
+\setmainfont{Raleway}[
+Path = ./fonts/,
+Extension = .ttf,
+UprightFont = *-Regular,
+BoldFont = *-Bold,
+ItalicFont = *-Italic,
+BoldItalicFont = *-BoldItalic,]
+\RequirePackage{setspace}
+\newcommand*\insertack{This research was funded by CETPartnership, the Clean Energy Transition Partnership under the 2023 joint call for research proposals, co funded by the European Commission (GA 101 069750) and with the funding organizations detailed on https://cetpartnership.eu/funding-agencies-and-call-modules.}
+\newcommand*\insertabout{The demand for the power grid in Europe is undergoing profound changes due to an increasing number of decentralized feed-in points and the fluctuating supply from renewable energies. This complexity in interactions between power grid components poses a challenge for maintaining system stability. To address this, the European project TenSyGrid is developing a toolbox for direct stability assessment using multilinear models to capture the complex dynamics of power grid components. The objective is to support grid operators in assessing large power grids primarily powered by renewable energy. The toolbox will be compatible with existing commercial software packages to facilitate integration into current workflows.}
+\RequirePackage{ifthen}
+\newboolean{TG@digsig}
+\setboolean{TG@digsig}{false}
+\def\TG@config{}
+\define@key{TG@}{digsig}[true]{\setboolean{TG@digsig}{#1}}
+\define@key{TG@}{config}{%
+  \lowercase\expandafter{%
+            \expandafter\def\expandafter\TG@config{#1}}}
+\DeclareOption{IWES}{\setconfig}
+\DeclareOption{HAW}{\setconfig}
+\DeclareOption{UPC}{\setconfig}
+\DeclareOption{eRoots}{\setconfig}
+\DeclareOption{UM}{\setconfig}
+\newcommand*{\setconfig}{%
+  \expandafter\TG@setconfig\expandafter{\CurrentOption}}
+\newcommand{\TG@setconfig}[1]{\setkeys{TG@}{config={#1}}}
+\newcommand*{\TG@kvsetkeys}[1]{\setkeys{TG@}{#1}}
+\DeclareOption*{\expandafter\TG@kvsetkeys\expandafter{\CurrentOption}}
+\ProcessOptions*
+\AtBeginDocument{%
+  \ltx@ifundefined{url}{%
+    \IfFileExists{url.sty}{%
+      \RequirePackage{url}
+      \urlstyle{same}}{%
+      \providecommand{\url}[1]{\mbox{#1}}}
+    \ltx@ifundefined{urlstyle}{%
+      \PackageWarningNoLine{tensygrid}{%
+        Using dummy macro \string\url,
+        consider installing package `url'}}{}}{%
+    \@ifpackageloaded{url}{%
+      \PackageInfo{tensygrid}{%
+        Macro \string\url\space provided by package `url'}}{%
+      \PackageInfo{tensygrid}{%
+        Dummy macro \string\url\space provided}}}}
+\IfFileExists{tensygrid-scrvars.sty}{%
+\RequirePackage{tensygrid-scrvars}}{
+\RequirePackage{./koma/tensygrid-scrvars}}
+\Ifkomavar{frombank}{}{\newkomavar{frombank}}
+\Ifkomavar{fromemail}{}{\newkomavar{fromemail}}
+\Ifkomavar{fromfax}{}{\newkomavar{fromfax}}
+\Ifkomavar{fromname}{}{\newkomavar{fromname}}
+\Ifkomavar{fromphone}{}{\newkomavar{fromphone}}
+\Ifkomavar{fromurl}{}{\newkomavar{fromurl}}
+\Ifkomavar{fromzipcode}{}{\newkomavar{fromzipcode}}
+\Ifkomavar{place}{}{\newkomavar{place}}
+\Ifkomavar{toaddress}{}{\newkomavar{toaddress}}
+\Ifkomavar{toname}{}{\newkomavar{toname}}
+\Ifkomavar{callman}{}{\newkomavar{callman}}
+\Ifkomavar{yourref}{}{\newkomavar{yourref}}
+\Ifkomavar{workpackage}{}{\newkomavar{workpackage}}
+\Ifkomavar{version}{}{\newkomavar{version}}
+\setkomavar*{frombank}{Bank account}
+\setkomavar*{fromfax}{Fax}
+\setkomavar*{fromname}{Name}
+\setkomavar*{fromphone}{Due Date}
+\setkomavar*{toname}{Leading Partner}
+\setkomavar*{callman}{Call Management}
+\setkomavar*{yourref}{Deliverable Responsible}
+\setkomavar*{workpackage}{Work Package}
+\setkomavar*{version}{Version}
+\newcommand{\settomaxwidth}[1]{\TG@settomax{\wd}{#1}}
+\newcommand{\settomaxheight}[1]{\TG@settomax{\ht}{#1}}
+\newcommand{\settomaxdepth}[1]{\TG@settomax{\dp}{#1}}
+\newcommand{\TG@settomax}[3]{%
+  #2=0pt
+  \@for\next:=#3\do{%
+    \sbox\z@{\next}%
+    \ifdim#1\z@>#2%
+      #2=#1\z@
+    \fi}}
+\newkomavar{account}
+\newkomavar{acronym}
+\newkomavar{address}
+\newkomavar{alias}
+\newkomavar{association}
+\newkomavar{bankcode}
+\newkomavar{bic}
+\newkomavar{branch}
+\newkomavar{classification}
+\newkomavar{contributions}
+\newkomavar{director}
+\newkomavar{docname}
+\newkomavar{docnumber}
+\newkomavar{executiveboard}
+\newkomavar{fromfunction}
+\newkomavar{fromunit}
+\newkomavar{iban}
+\newkomavar{institute}
+\newkomavar{manager}
+\newkomavar{reviewer}
+\newkomavar{president}
+\newkomavar{projectcoordinator}
+\newkomavar{projectnumber}
+\newkomavar{taxnumber}
+\newkomavar{vatnumber}
+\setkomavar*{account}{Account}
+\setkomavar*{acronym}{Acronym}
+\setkomavar*{address}{Address}
+\setkomavar*{alias}{Alias}
+\setkomavar*{association}{Association}
+\setkomavar*{bankcode}{Bank code}
+\setkomavar*{bic}{BIC (SWIFT-Code)}
+\setkomavar*{branch}{Branch}
+\setkomavar*{classification}{Classification}
+\setkomavar*{contributions}{Contributions}
+\setkomavar*{director}{Director}
+\setkomavar*{docname}{Document name}
+\setkomavar*{docnumber}{Document No.}
+\setkomavar*{executiveboard}{Executive board}
+\setkomavar*{fromfunction}{Function}
+\setkomavar*{fromunit}{Unit}
+\setkomavar*{iban}{IBAN}
+\setkomavar*{institute}{Institute}
+\setkomavar*{manager}{Management}
+\setkomavar*{reviewer}{Reviewer}
+\setkomavar*{president}{President}
+\setkomavar*{projectcoordinator}{Project Coordinator}
+\setkomavar*{projectnumber}{Project No.}
+\setkomavar*{taxnumber}{Tax Number}
+\setkomavar*{vatnumber}{V.A.T. Ident No.}
+\let\@author\@empty
+\let\@title\@empty
+\AtBeginDocument{%
+  \ifthenelse{\equal{\@author}{\@empty}}{%
+    \Ifkomavarempty{fromname}{}{\usekomavar[\author]{fromname}}}{%
+    \Ifkomavarempty{fromname}{\setkomavar{fromname}{\@author}}{}}}
+\newcaptionname{english}{\authorname}{Reporter}
+\newcaptionname{english}{\authorsname}{Authors}
+\newcaptionname{english}{\distinternalname}{Internal distribution}
+\newcaptionname{english}{\distributionname}{List of distribution}
+\newcaptionname{english}{\procuraname}{p.p.}
+\newcaptionname{english}{\titlename}{Title}
+\IfLanguageName{english}{}{%
+    \PackageWarningNoLine{tensygrid}{%
+      Current language is not `english'}}
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tggreen}{HTML}{179C7D}
+\definecolor{tgaqua}{HTML}{39C1CD}
+\definecolor{tggrey}{HTML}{A6BBC8}
+\definecolor{tglime}{HTML}{B2D235}
+\definecolor{tgred}{rgb}{0.89,0,0.102}
+\ifthenelse{\boolean{TG@digsig}}{
+\IfFileExists{digsig.sty}{%
+\RequirePackage{digsig}}{%
+\PackageWarningNoLine{tensygrid}
+    {Package `digsig' not available}}}{}
+\ifthenelse{\isundefined{\digsigfield}}{}{%
+\renewcommand{\PDFFormExtension@Signature}{%
+/T (\Fld@name)
+/Subtype /Widget
+/FT /Sig
+/F \ifFld@hidden 2\else 4\fi\space
+/Q \Fld@align\space
+/BS << /W 0 >>
+}}
+\def\TG@sig@decoration{line}
+\def\TG@sig@bgcolor{tgpetrol!5}
+\def\TG@sig@linecolor{black}
+\newlength{\TG@sig@width}
+\newlength{\TG@sig@height}
+\newlength{\TG@sig@linewidth}
+\setlength{\TG@sig@width}{18em}
+\setlength{\TG@sig@height}{6ex}
+\setlength{\TG@sig@linewidth}{\fboxrule}
+\define@key{TG@sig@}{decoration}{\def\TG@sig@decoration{#1}}
+\define@key{TG@sig@}{bgcolor}{\def\TG@sig@bgcolor{#1}}
+\define@key{TG@sig@}{linecolor}{\def\TG@sig@linecolor{#1}}
+\define@key{TG@sig@}{width}{\setlength{\TG@sig@width}{#1}}
+\define@key{TG@sig@}{height}{\setlength{\TG@sig@height}{#1}}
+\define@key{TG@sig@}{linewidth}{\setlength{\TG@sig@linewidth}{#1}}
+\newcommand*{\tgsigsetup}[1]{\setkeys{TG@sig@}{#1}}
+\newboolean{TG@sig@procura}
+\newsavebox{\TG@sig@ppbox}
+\newlength{\TG@sig@ppboxwidth}
+\newcommand*{\tgsigfield}[2][false]{{%
+  \setlength{\fboxsep}{0pt}%
+  \setboolean{TG@sig@procura}{#1}%
+  \ifthenelse{\boolean{TG@sig@procura}}{%
+    \savebox{\TG@sig@ppbox}{\procuraname}}{%
+    \savebox{\TG@sig@ppbox}{}}%
+  \settowidth{\TG@sig@ppboxwidth}{\usebox{\TG@sig@ppbox}}%
+  \ifthenelse{\equal{\TG@sig@decoration}{plain}}{%
+    \setlength{\fboxrule}{0pt}%
+    \setlength{\TG@sig@linewidth}{0pt}}{%
+    \ifthenelse{\equal{\TG@sig@decoration}{box}}{%
+      \setlength{\fboxrule}{\TG@sig@linewidth}%
+      \setlength{\TG@sig@linewidth}{0pt}}{%
+      \ifthenelse{\equal{\TG@sig@decoration}{line}}{%
+        \setlength{\fboxrule}{0pt}}{%
+        \PackageError{tensygrid}{Invalid decoration style}{}}}}%
+  \fcolorbox{\TG@sig@linecolor}{\TG@sig@bgcolor}{%
+    \begin{minipage}[b]{\TG@sig@width-2\fboxrule}
+      \begin{minipage}[c][%
+        \dimexpr \TG@sig@height-2\fboxrule-\TG@sig@linewidth]{%
+          \TG@sig@ppboxwidth}
+            \strut\usebox{\TG@sig@ppbox}
+      \end{minipage}%
+      \begin{minipage}[c]{\dimexpr \TG@sig@width-\TG@sig@ppboxwidth}
+        \ifthenelse{\isundefined{\digsigfield}}{}{%
+          \begin{Form}
+            \digsigfield{%
+              \dimexpr \TG@sig@width-2\fboxrule-\TG@sig@ppboxwidth}{%
+              \dimexpr \TG@sig@height-2\fboxrule-\TG@sig@linewidth}{#2}%
+          \end{Form}%
+        }
+      \end{minipage}
+      \ifthenelse{\equal{\TG@sig@decoration}{line}}{%
+        \newline
+        \textcolor{\TG@sig@linecolor}{%
+          \rule{\dimexpr \TG@sig@width-2\fboxrule}{\TG@sig@linewidth}}%
+      }{}%
+    \end{minipage}}}}
+\newlength{\TG@logo@size}
+\setlength{\TG@logo@size}{16mm}
+\newcounter{TG@logo@mode}
+\setcounter{TG@logo@mode}{2}
+\define@key{TG@logo@}{width}{
+    \setcounter{TG@logo@mode}{0}
+    \setlength{\TG@logo@size}{#1}}
+\define@key{TG@logo@}{height}{
+    \setcounter{TG@logo@mode}{1}
+    \setlength{\TG@logo@size}{#1}}
+\define@key{TG@logo@}{iconsize}{
+    \setcounter{TG@logo@mode}{2}
+    \setlength{\TG@logo@size}{#1}}
+\newsavebox{\TG@logo@box}
+\newsavebox{\TG@logo@minibox}
+\newlength{\TG@logo@miniwidth}
+\newlength{\TG@logo@miniheight}
+\newcommand*{\tglogo}[2][iconsize=16mm]{%
+  \setkeys{TG@logo@}{#1}%
+  \IfFileExists{tglogo.pdf}{
+  \savebox{\TG@logo@minibox}{%
+    \includegraphics[height=10pt]{tglogo}}}{
+  \savebox{\TG@logo@minibox}{%
+    \includegraphics[height=10pt]{./config/tglogo}}}%
+  \settowidth{\TG@logo@miniwidth}{\usebox{\TG@logo@minibox}}%
+  \savebox{\TG@logo@box}{%
+  \ifthenelse{\equal{#2}{\@empty}}{%
+    \usebox{\TG@logo@minibox}}{\usebox{\TG@logo@minibox}}}%
+  \ifthenelse{\value{TG@logo@mode}=0}{%
+    \resizebox{\TG@logo@size}{!}{%
+      \usebox{\TG@logo@box}}}{}%
+  \ifthenelse{\value{TG@logo@mode}=1}{%
+    \resizebox{!}{\TG@logo@size}{%
+      \usebox{\TG@logo@box}}}{}%
+  \ifthenelse{\value{TG@logo@mode}=2}{%
+    \settoheight{\TG@logo@miniheight}{\usebox{\TG@logo@box}}%
+    \resizebox{\TG@logo@miniwidth*\ratio{\TG@logo@size}{10pt}}{!}{%
+      \usebox{\TG@logo@box}}}{}}
+\def\TG@PartnerLogo{}
+\newcommand*{\partnerlogo}[1]{\def\TG@PartnerLogo{#1}}
+\newcommand*{\insertpartnerlogo}{\TG@PartnerLogo}
+% \@ifclassloaded{scrartcl}{%
+% \RequirePackage{tensygrid-scrartcl}}{
+% \@ifclassloaded{scrreprt}{%
+%     \RequirePackage{tensygrid-scrreprt}}{
+%     \@ifclassloaded{scrbook}{%
+%     \RequirePackage{tensygrid-scrbook}}{
+%     \@ifclassloaded{scrlttr2}{%
+%         \RequirePackage{tensygrid-scrlttr2}}{
+%         \@ifclassloaded{beamer}{%
+%         \usetheme{tensygrid}}{%
+%         \PackageWarningNoLine{tensygrid}{%
+%             Current document class not supported}}}}}}
+\@ifclassloaded{beamer}{%
+\IfFileExists{beamerthemetensygrid.sty}{
+    \usetheme{tensygrid}}{\IfFileExists{./beamer/beamerthemetensygrid.sty}{\usepackage{./beamer/beamerthemetensygrid}}{}}}{%
+    \@ifclassloaded{scrreprt}{%
+    \IfFileExists{tensygrid-scrreprt.sty}{\RequirePackage{tensygrid-scrreprt}}{\IfFileExists{./koma/tensygrid-scrreprt.sty}{\RequirePackage{./koma/tensygrid-scrreprt}}{}}}{
+    \PackageWarningNoLine{tensygrid}{%
+        Current document class not supported}}}
+\InputIfFileExists{tensygrid.cfg}{}{%
+\InputIfFileExists{./config/tensygrid.cfg}{}{
+\PackageWarningNoLine{tensygrid}{%
+    No configuration file `tensygrid.cfg' found}}}
+\ifthenelse{\equal{\TG@config}{\@empty}}{}{%
+\InputIfFileExists{tensygrid-\TG@config.cfg}{}{%
+\InputIfFileExists{./config/tensygrid-\TG@config.cfg}{}{
+    \PackageWarningNoLine{tensygrid}{%
+    No configuration file `tensygrid-\TG@config.cfg' found}}}}
+\endinput
+%%
+%% End of file `tensygrid.sty'.

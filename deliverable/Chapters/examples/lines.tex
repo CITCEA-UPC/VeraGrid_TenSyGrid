@@ -1,0 +1,230 @@
+Lines connect two network nodes and exchange current with both terminal bus balances. In VeraGrid the two terminals are denoted as the from side, $f$, and the to side, $t$. For a line between buses $f$ and $t$, the terminal voltages are denoted by $v_f$ and $v_t$ in EMT phase-domain models, or by the phasors
+\begin{equation}
+    V_f = V_{rf}+jV_{if}, \qquad V_t = V_{rt}+jV_{it}
+\end{equation}
+in RMS models. The line contributes terminal currents $i_f$ and $i_t$ to the nodal current-balance equations. With the network-injection convention used by the templates, these currents are the currents injected by the line into the corresponding bus current balance. Therefore the KCL equations assembled at the buses contain terms of the form
+\begin{equation}
+    \sum_{d \in \mathcal{D}(n)} i_{d,n} = 0,
+\end{equation}
+where each connected device $d$ contributes its current at node $n$. For a branch this contribution appears at both connected buses: $i_f$ is added to the from-bus balance and $i_t$ is added to the to-bus balance.
+
+For EMT models the line can be phase-selective. The full phase ordering is $NABC$, but only the phases enabled by the line object are instantiated. If $\mathcal{P}$ is the active phase set and $m=|\mathcal{P}|$, vectors such as $\mathbf{v}_f$, $\mathbf{v}_t$, $\mathbf{i}_f$, and $\mathbf{i}_t$ are reduced to the active phases. Matrix parameters are first defined in the full $NABC$ convention and then reduced to the active phase submatrix used by the equations.
+
+\section{RMS Phasor Line}
+
+The RMS phasor line is an algebraic admittance model used directly in current-balance form. It represents a positive-sequence branch with series admittance $Y=g+jb$ and shunt susceptance $b_{sh}$ split equally between the two ends.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Parameter & Symbol & Description \\
+\hline
+Series conductance & $g$ & Real part of the branch series admittance. \\
+Series susceptance & $b$ & Imaginary part of the branch series admittance. \\
+Shunt susceptance & $b_{sh}$ & Total branch shunt susceptance. \\
+\hline
+\end{tabular}
+\caption{Parameters of the RMS phasor line model.}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Variable & Symbol & Description \\
+\hline
+From voltage, real part & $V_{rf}$ & Input from-bus phasor real component. \\
+From voltage, imaginary part & $V_{if}$ & Input from-bus phasor imaginary component. \\
+To voltage, real part & $V_{rt}$ & Input to-bus phasor real component. \\
+To voltage, imaginary part & $V_{it}$ & Input to-bus phasor imaginary component. \\
+From current, real part & $I_{rf}$ & Output current injected at the from bus. \\
+From current, imaginary part & $I_{if}$ & Output current injected at the from bus. \\
+To current, real part & $I_{rt}$ & Output current injected at the to bus. \\
+To current, imaginary part & $I_{it}$ & Output current injected at the to bus. \\
+\hline
+\end{tabular}
+\caption{Variables of the RMS phasor line model.}
+\end{table}
+
+\paragraph{Equations.}
+The self and transfer admittance terms are
+\begin{align}
+    g_{ff} &= g, &
+    b_{ff} &= b+\frac{b_{sh}}{2}, \\
+    g_{tt} &= g, &
+    b_{tt} &= b+\frac{b_{sh}}{2}, \\
+    g_{ft} &= -g, &
+    b_{ft} &= -b.
+\end{align}
+The terminal current equations are
+\begin{align}
+    I_{rf} &= g_{ff}V_{rf}-b_{ff}V_{if}+g_{ft}V_{rt}-b_{ft}V_{it}, \\
+    I_{if} &= b_{ff}V_{rf}+g_{ff}V_{if}+b_{ft}V_{rt}+g_{ft}V_{it}, \\
+    I_{rt} &= g_{ft}V_{rf}-b_{ft}V_{if}+g_{tt}V_{rt}-b_{tt}V_{it}, \\
+    I_{it} &= b_{ft}V_{rf}+g_{ft}V_{if}+b_{tt}V_{rt}+g_{tt}V_{it}.
+\end{align}
+
+\section{EMT Pi Line}
+
+The EMT pi line is a lumped phase-domain model. Its series branch is represented by an $RL$ element, while the terminal shunt capacitances are represented through capacitor charge states. The model is built for the active phase set $\mathcal{P}$, so the resistance, inverse inductance, and capacitance matrices are reduced to $m \times m$ matrices $\mathbf{R}$, $\mathbf{L}^{-1}$, and $\mathbf{C}$.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Parameter & Symbol & Description \\
+\hline
+Phase enable flags & $ph_{N/A/B/C}$ & Select the active phase subset. \\
+Resistance matrix entries & $R_{ab}$ & Full $NABC$ resistance matrix entries, reduced to active phases. \\
+Inverse inductance entries & $L^{-1}_{ab}$ & Full $NABC$ inverse inductance entries, reduced to active phases. \\
+Capacitance matrix entries & $C_{ab}$ & Full $NABC$ capacitance matrix entries, reduced to active phases. \\
+Damping conductance & $G_{damp}$ & Small numerical conductance; implemented as $10^{-5}$. \\
+\hline
+\end{tabular}
+\caption{Parameters of the EMT pi line model.}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Variable & Symbol & Description \\
+\hline
+From-side phase voltages & $\mathbf{v}_f$ & Input active-phase voltages at the from terminal. \\
+To-side phase voltages & $\mathbf{v}_t$ & Input active-phase voltages at the to terminal. \\
+Series currents & $\mathbf{i}_{ser}$ & State vector of series branch currents. \\
+From-side charges & $\mathbf{q}_f$ & State vector of from-side capacitor charges. \\
+To-side charges & $\mathbf{q}_t$ & State vector of to-side capacitor charges. \\
+From-side capacitor currents & $\mathbf{i}_{cap,f}$ & Algebraic from-side shunt capacitor currents. \\
+To-side capacitor currents & $\mathbf{i}_{cap,t}$ & Algebraic to-side shunt capacitor currents. \\
+From terminal currents & $\mathbf{i}_f$ & Output current injected at the from bus. \\
+To terminal currents & $\mathbf{i}_t$ & Output current injected at the to bus. \\
+\hline
+\end{tabular}
+\caption{Variables of the EMT pi line model.}
+\end{table}
+
+\paragraph{Equations.}
+The series-current differential equation is
+\begin{equation}
+    \dot{\mathbf{i}}_{ser}
+    = \mathbf{L}^{-1}\left(\mathbf{v}_f-\mathbf{v}_t-\mathbf{R}\mathbf{i}_{ser}\right).
+\end{equation}
+The capacitor charge states satisfy
+\begin{align}
+    \dot{\mathbf{q}}_f &= \mathbf{i}_{cap,f}, \\
+    \dot{\mathbf{q}}_t &= \mathbf{i}_{cap,t}.
+\end{align}
+The algebraic charge-voltage relations are
+\begin{align}
+    \mathbf{q}_f &= \mathbf{C}\mathbf{v}_f, \\
+    \mathbf{q}_t &= \mathbf{C}\mathbf{v}_t.
+\end{align}
+The terminal currents injected into the EMT nodal balances are
+\begin{align}
+    \mathbf{i}_f &= \mathbf{i}_{ser}+\mathbf{i}_{cap,f}+G_{damp}\mathbf{v}_f, \\
+    \mathbf{i}_t &= -\mathbf{i}_{ser}+\mathbf{i}_{cap,t}+G_{damp}\mathbf{v}_t.
+\end{align}
+
+\section{EMT Bergeron Line}
+
+The Bergeron line is an EMT travelling-wave model. Unlike the pi model, it separates the instantaneous terminal relation from delayed history terms. The symbolic block exposes the active terminal voltages and event parameters for the history currents; the runtime companion computes the characteristic admittance matrix and updates the delayed history values at each time step.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Parameter & Symbol & Description \\
+\hline
+Phase enable flags & $ph_{N/A/B/C}$ & Select the active phase subset. \\
+Resistance matrix & $\mathbf{R}$ & Active-phase total-line resistance matrix. \\
+Inductance matrix & $\mathbf{L}$ & Active-phase total-line inductance matrix. \\
+Capacitance matrix & $\mathbf{C}$ & Active-phase total-line capacitance matrix. \\
+Simulation step & $h$ & EMT integration time step used for delay indexing. \\
+Propagation delay & $\tau$ & Line travelling-wave delay. \\
+Delay samples & $n_\tau$ & Integer delay, $n_\tau=\max(1,\mathrm{round}(\tau/h))$. \\
+Characteristic admittance & $\mathbf{G}_c$ & Matrix multiplying instantaneous terminal voltages. \\
+History mixing matrix & $\mathbf{H}$ & Matrix used to update delayed history currents. \\
+\hline
+\end{tabular}
+\caption{Parameters of the EMT Bergeron line model.}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.23\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\hline
+Variable & Symbol & Description \\
+\hline
+From-side phase voltages & $\mathbf{v}_f$ & Active-phase voltages at the from terminal. \\
+To-side phase voltages & $\mathbf{v}_t$ & Active-phase voltages at the to terminal. \\
+From history current & $\mathbf{I}_{h,f}$ & Event-parameter history current applied at the from side. \\
+To history current & $\mathbf{I}_{h,t}$ & Event-parameter history current applied at the to side. \\
+From terminal current & $\mathbf{i}_f$ & Current injected at the from bus. \\
+To terminal current & $\mathbf{i}_t$ & Current injected at the to bus. \\
+Delayed voltages & $\mathbf{v}_{f,\tau},\mathbf{v}_{t,\tau}$ & Terminal voltages read from the delay buffers. \\
+Delayed currents & $\mathbf{i}_{f,\tau},\mathbf{i}_{t,\tau}$ & Terminal currents read from the delay buffers. \\
+\hline
+\end{tabular}
+\caption{Variables of the EMT Bergeron line model.}
+\end{table}
+
+\paragraph{Equations.}
+The runtime computes a characteristic impedance approximation from the active matrices,
+\begin{equation}
+    \mathbf{Z}_c = \sqrt{\mathbf{L}\mathbf{C}^{-1}},
+\end{equation}
+and forms
+\begin{align}
+    \mathbf{Z}_{eq} &= \Re\{\mathbf{Z}_c\}+\frac{\mathbf{R}}{4}, \\
+    \mathbf{G}_c &= \mathbf{Z}_{eq}^{-1}, \\
+    \mathbf{H} &= \left(\Re\{\mathbf{Z}_c\}-\frac{\mathbf{R}}{4}\right)\mathbf{G}_c.
+\end{align}
+The currents injected into the nodal balances during one time step are
+\begin{align}
+    \mathbf{i}_f &= \mathbf{G}_c\mathbf{v}_f + \mathbf{I}_{h,f}, \\
+    \mathbf{i}_t &= \mathbf{G}_c\mathbf{v}_t + \mathbf{I}_{h,t}.
+\end{align}
+The delayed-wave update uses quantities stored $n_\tau$ samples earlier:
+\begin{align}
+    \mathbf{X}_f &= -\mathbf{G}_c\mathbf{v}_{t,\tau}-\mathbf{i}_{t,\tau}, \\
+    \mathbf{Y}_f &= -\mathbf{G}_c\mathbf{v}_{f,\tau}-\mathbf{i}_{f,\tau}, \\
+    \mathbf{X}_t &= -\mathbf{G}_c\mathbf{v}_{f,\tau}-\mathbf{i}_{f,\tau}, \\
+    \mathbf{Y}_t &= -\mathbf{G}_c\mathbf{v}_{t,\tau}-\mathbf{i}_{t,\tau}.
+\end{align}
+The history currents prepared for the next step are
+\begin{align}
+    \mathbf{I}_{h,f}^{new}
+    &= \frac{1}{2}\left[(\mathbf{I}+\mathbf{H})\mathbf{X}_f+(\mathbf{I}-\mathbf{H})\mathbf{Y}_f\right], \\
+    \mathbf{I}_{h,t}^{new}
+    &= \frac{1}{2}\left[(\mathbf{I}+\mathbf{H})\mathbf{X}_t+(\mathbf{I}-\mathbf{H})\mathbf{Y}_t\right].
+\end{align}
+
+\paragraph{Discrete-time iMTI form.}
+The Bergeron formulation can also be interpreted as a discrete-time multi-terminal interconnection with internal memory, because the travelling time $\tau$ is represented by a finite delay in the EMT time grid. If the EMT step is $h$, the continuous propagation delay is approximated by
+\begin{equation}
+    n_\tau = \max\left(1,\mathrm{round}\left(\frac{\tau}{h}\right)\right),
+\end{equation}
+so that delayed quantities at time step $k$ are read from step $k-n_\tau$.
+
+At each discrete time step the nodal current injections are
+\begin{align}
+    \mathbf{i}_f[k] &= \mathbf{G}_c\mathbf{v}_f[k] + \mathbf{I}_{h,f}[k], \\
+    \mathbf{i}_t[k] &= \mathbf{G}_c\mathbf{v}_t[k] + \mathbf{I}_{h,t}[k].
+\end{align}
+The delayed wave variables are then
+\begin{align}
+    \mathbf{X}_f[k] &= -\mathbf{G}_c\mathbf{v}_t[k-n_\tau]-\mathbf{i}_t[k-n_\tau], \\
+    \mathbf{Y}_f[k] &= -\mathbf{G}_c\mathbf{v}_f[k-n_\tau]-\mathbf{i}_f[k-n_\tau], \\
+    \mathbf{X}_t[k] &= -\mathbf{G}_c\mathbf{v}_f[k-n_\tau]-\mathbf{i}_f[k-n_\tau], \\
+    \mathbf{Y}_t[k] &= -\mathbf{G}_c\mathbf{v}_t[k-n_\tau]-\mathbf{i}_t[k-n_\tau].
+\end{align}
+The internal memory state of the line is the pair of history currents. Their discrete update is
+\begin{align}
+    \mathbf{I}_{h,f}[k+1]
+    &= \frac{1}{2}\left[(\mathbf{I}+\mathbf{H})\mathbf{X}_f[k]+(\mathbf{I}-\mathbf{H})\mathbf{Y}_f[k]\right], \\
+    \mathbf{I}_{h,t}[k+1]
+    &= \frac{1}{2}\left[(\mathbf{I}+\mathbf{H})\mathbf{X}_t[k]+(\mathbf{I}-\mathbf{H})\mathbf{Y}_t[k]\right].
+\end{align}
+This gives an input-output model with present terminal voltages as inputs, present terminal currents as outputs, and delayed terminal information stored in the buffers. In this sense the Bergeron line is naturally represented as a discrete iMTI element with delay $n_\tau$ samples.

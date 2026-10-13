@@ -1,0 +1,283 @@
+%% This work is derived from:
+%% 
+%% Project: fraunhofer-latex
+%% Version: 2021/08/14 v1.5.0
+%% Info: LaTeX package to implement the Fraunhofer CI
+%% 
+%% Copyright (c) 2020, 2021 by Matthias Boljen
+%% 
+%% Permission is hereby granted, free of charge, to any person
+%% obtaining a copy of this software and associated documentation
+%% files (the "Software"), to deal in the Software without restriction,
+%% including without limitation the rights to use, copy, modify, merge,
+%% publish, distribute, sublicense, and/or sell copies of the Software,
+%% and to permit persons to whom the Software is furnished to do so,
+%% subject to the following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be
+%% included in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\IfFileExists{beamerinnerthemetensygrids.sty}{
+  \ProvidesPackage{beamerinnerthemetensygrid}
+  [2025/03/18 v0.0.1 TenSyGrid beamer inner theme]
+    }{\ProvidesClass{./beamer/beamerinnerthemetensygrid}
+        [2025/03/18 v0.0.1 TenSyGrid beamer inner theme]}
+\@ifpackageloaded{beamerthemetensygrid}{}{%
+  \PackageError{beamerinnerthemetensygrid}{%
+    Main theme `tensygrid' not loaded}{}
+}
+\ProcessOptionsBeamer
+\mode<presentation>
+\define@key{beamerframe}{t}[true]{%
+  \beamer@frametopskip=3pt%
+  \beamer@framebottomskip=0pt plus 1fill\relax%
+  \beamer@frametopskipautobreak=\beamer@frametopskip\relax%
+  \beamer@framebottomskipautobreak=\beamer@framebottomskip\relax%
+  \def\beamer@initfirstlineunskip{}%
+}
+\newcommand*\insertfund{
+  \begin{beamercolorbox}[center]{funding}%
+    \leavevmode
+    \hbox{
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=15\TG@beamer@unitlength,
+          ht=7\TG@beamer@unitlength,center]{CETP}%
+          \IfFileExists{CETP-logo.pdf}{\includegraphics[height=7\TG@beamer@unitlength]{CETP-logo.pdf}}{\includegraphics[height=7\TG@beamer@unitlength]{./config/CETP-logo.pdf}}
+        \end{beamercolorbox}
+        \vspace*{1\TG@beamer@unitlength}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=10\TG@beamer@unitlength,
+          ht=10\TG@beamer@unitlength,center]{EU}%
+          \IfFileExists{EU-logo.pdf}{\includegraphics[height=10\TG@beamer@unitlength]{EU-logo.pdf}}{\includegraphics[height=10\TG@beamer@unitlength]{./config/EU-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=10\TG@beamer@unitlength,
+          ht=10\TG@beamer@unitlength,center]{BMWK}%
+          \IfFileExists{BMWK-logo.pdf}{\includegraphics[height=10\TG@beamer@unitlength]{BMWK-logo.pdf}}{\includegraphics[height=10\TG@beamer@unitlength]{./config/BMWK-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=18\TG@beamer@unitlength,
+          ht=5\TG@beamer@unitlength,center]{MCIU}%
+          \IfFileExists{MCIU-logo.pdf}{\includegraphics[height=5\TG@beamer@unitlength]{MCIU-logo.pdf}}{\includegraphics[height=5\TG@beamer@unitlength]{./config/MCIU-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=12\TG@beamer@unitlength,
+          ht=7\TG@beamer@unitlength,center]{AEI}%
+          \IfFileExists{AEI-logo.pdf}{\includegraphics[height=7\TG@beamer@unitlength]{AEI-logo.pdf}}{\includegraphics[height=7\TG@beamer@unitlength]{./config/AEI-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=8\TG@beamer@unitlength,
+          ht=5\TG@beamer@unitlength,center]{CDTI}%
+          \IfFileExists{CDTI-logo.pdf}{\includegraphics[height=5\TG@beamer@unitlength]{CDTI-logo.pdf}}{\includegraphics[height=5\TG@beamer@unitlength]{./config/CDTI-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 10\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=10\TG@beamer@unitlength,
+          ht=7\TG@beamer@unitlength,center]{XJENZA}%
+          \IfFileExists{XJENZA-logo.pdf}{\includegraphics[height=7\TG@beamer@unitlength]{XJENZA-logo.pdf}}{\includegraphics[height=7\TG@beamer@unitlength]{./config/XJENZA-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+    }
+  \end{beamercolorbox}%
+}
+\newcommand*\insertcallorg{
+  \begin{beamercolorbox}[center]{call-organizers}%
+    \leavevmode
+    \hbox{
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=30\TG@beamer@unitlength,
+          ht=12\TG@beamer@unitlength,center]{CETP}%
+          \IfFileExists{CETP-logo.pdf}{\includegraphics[height=12\TG@beamer@unitlength]{CETP-logo.pdf}}{\includegraphics[height=12\TG@beamer@unitlength]{./config/CETP-logo.pdf}}
+        \end{beamercolorbox}
+        \vspace*{3\TG@beamer@unitlength}
+        \vfil
+      }
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=30\TG@beamer@unitlength,
+          ht=15\TG@beamer@unitlength,center]{EU}%
+          \IfFileExists{EU-logo.pdf}{\includegraphics[height=15\TG@beamer@unitlength]{EU-logo.pdf}}{\includegraphics[height=15\TG@beamer@unitlength]{./config/EU-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+    }
+  \end{beamercolorbox}%
+}
+\newcommand*\insertagencies{
+  \begin{beamercolorbox}[center]{funding}%
+    \leavevmode
+    \hbox{
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=15\TG@beamer@unitlength,
+          ht=15\TG@beamer@unitlength,center]{BMWK}%
+          \IfFileExists{BMWK-logo.pdf}{\includegraphics[height=15\TG@beamer@unitlength]{BMWK-logo.pdf}}{\includegraphics[height=15\TG@beamer@unitlength]{./config/BMWK-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=22\TG@beamer@unitlength,
+          ht=7\TG@beamer@unitlength,center]{MCIU}%
+          \IfFileExists{MCIU-logo.pdf}{\includegraphics[height=7\TG@beamer@unitlength]{MCIU-logo.pdf}}{\includegraphics[height=7\TG@beamer@unitlength]{./config/MCIU-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=20\TG@beamer@unitlength,
+          ht=12\TG@beamer@unitlength,center]{AEI}%
+          \IfFileExists{AEI-logo.pdf}{\includegraphics[height=12\TG@beamer@unitlength]{AEI-logo.pdf}}{\includegraphics[height=12\TG@beamer@unitlength]{./config/AEI-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=12\TG@beamer@unitlength,
+          ht=7\TG@beamer@unitlength,center]{CDTI}%
+          \IfFileExists{CDTI-logo.pdf}{\includegraphics[height=7\TG@beamer@unitlength]{CDTI-logo.pdf}}{\includegraphics[height=7\TG@beamer@unitlength]{./config/CDTI-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+      \vbox to 15\TG@beamer@unitlength{
+        \vfil
+        \begin{beamercolorbox}[
+          wd=12\TG@beamer@unitlength,
+          ht=12\TG@beamer@unitlength,center]{XJENZA}%
+          \IfFileExists{XJENZA-logo.pdf}{\includegraphics[height=12\TG@beamer@unitlength]{XJENZA-logo.pdf}}{\includegraphics[height=12\TG@beamer@unitlength]{./config/XJENZA-logo.pdf}}
+        \end{beamercolorbox}
+        \vfil
+      }
+    }
+  \end{beamercolorbox}%
+}
+\beamer@centeredfalse
+\setbeamertemplate{title page}{%
+  \begin{beamercolorbox}{title-subtitle}
+  \leavevmode
+  \hbox{
+  \vbox{
+  \ifbeamercolorempty[bg]{title}{}{\nointerlineskip}%
+    \begin{beamercolorbox}[
+      wd=74\TG@beamer@unitlength,left]{title}%
+      \usebeamerfont{title}%
+      \strut\inserttitle\strut
+    \end{beamercolorbox}%
+    \ifthenelse{\equal{\insertsubtitle}{\@empty}}{}{%
+      \ifbeamercolorempty[bg]{subtitle}{}{\nointerlineskip}%
+      \begin{beamercolorbox}[
+        wd=74\TG@beamer@unitlength,left]{subtitle}%
+       \usebeamerfont{subtitle}%
+        \strut\insertsubtitle\strut
+      \end{beamercolorbox}}
+      \vfil
+    }
+    \vbox to 6\TG@beamer@unitlength{%
+        \vfil%
+        \begin{beamercolorbox}[
+          wd=15\TG@beamer@unitlength,
+          ht=5\TG@beamer@unitlength,right]{institute in head/foot}%
+            \usebeamerfont{institute in head/foot}%
+            \tglogo[
+              height=4\TG@beamer@unitlength]{\usekomavar{acronym}}%
+        \end{beamercolorbox}%
+        \vspace*{1\TG@beamer@unitlength}
+        \vfil%
+      }%
+  }
+    \end{beamercolorbox}
+    \nointerlineskip%
+    \begin{beamercolorbox}[
+      colsep=.1\TG@beamer@unitlength]{separation line}
+    \end{beamercolorbox}%
+    \vskip 3ex %\vfill%
+    \ltx@ifpackageloaded{beamerposter}{}{
+      \inserttitlegraphic%
+      %\vfill%
+    }
+    \ifbeamercolorempty[bg]{author}{}{\nointerlineskip}%
+    \begin{beamercolorbox}{author}%
+      \usebeamerfont{author}%
+      \insertauthor
+    \end{beamercolorbox}%
+    \vskip 1ex
+    \ifbeamercolorempty[bg]{institute}{}{\nointerlineskip}%
+    \begin{beamercolorbox}{institute}
+      \usebeamerfont{institute}%
+      \insertinstitute%
+    \end{beamercolorbox}
+    \ifbeamercolorempty[bg]{date}{}{\nointerlineskip}%
+    \begin{beamercolorbox}{date}%
+      \usebeamerfont{date}%
+      \insertdate
+    \end{beamercolorbox}%
+    \vfill
+    \insertfund
+    \begin{beamercolorbox}{ack}%
+      \usebeamerfont{ack}%
+      \insertack
+    \end{beamercolorbox}%
+    \ltx@ifpackageloaded{beamerposter}{%
+      \vfill}{%
+      \vskip-\beamer@framebottomskip 
+      %\leavevmode%
+      % \hbox{%
+      % \begin{beamercolorbox}[wd=\paperwidth,ht=0.1ex,dp=0.1ex,center]{}%
+      %   % empty environment to raise height
+      % \end{beamercolorbox}}%
+      \vskip5pt
+      }}
+\setbeamertemplate{items}[square]
+\setbeamertemplate{sections/subsections in toc}[square]
+\setbeamertemplate{itemize/enumerate body begin}{\normalsize}
+\setbeamertemplate{itemize/enumerate subbody begin}{\normalsize}
+\setbeamertemplate{itemize/enumerate subsubbody begin}{\normalsize}
+\ltx@ifpackageloaded{beamerposter}{
+\addtobeamertemplate{block alerted end}{}{\vskip 2\bigskipamount}
+\addtobeamertemplate{block example end}{}{\vskip 2\bigskipamount}
+\addtobeamertemplate{block end}{}{\vskip 2\bigskipamount}
+}{}
+\mode<all>
+\endinput
+%%
+%% End of file `beamerinnerthemetensygrid.sty'.

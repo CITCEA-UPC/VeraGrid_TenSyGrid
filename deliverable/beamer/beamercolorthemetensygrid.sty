@@ -1,0 +1,79 @@
+%% This work is derived from:
+%% 
+%% Project: fraunhofer-latex
+%% Version: 2021/08/14 v1.5.0
+%% Info: LaTeX package to implement the Fraunhofer CI
+%% 
+%% Copyright (c) 2020, 2021 by Matthias Boljen
+%% 
+%% Permission is hereby granted, free of charge, to any person
+%% obtaining a copy of this software and associated documentation
+%% files (the "Software"), to deal in the Software without restriction,
+%% including without limitation the rights to use, copy, modify, merge,
+%% publish, distribute, sublicense, and/or sell copies of the Software,
+%% and to permit persons to whom the Software is furnished to do so,
+%% subject to the following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be
+%% included in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\IfFileExists{beamercolorthemetensygrids.sty}{
+  \ProvidesPackage{beamercolorthemetensygrid}
+  [2025/03/18 v0.0.1 TenSyGrid beamer color theme]
+    }{\ProvidesClass{./beamer/beamercolorthemetensygrid}
+        [2025/03/18 v0.0.1 TenSyGrid beamer color theme]}
+\@ifpackageloaded{beamerthemetensygrid}{}{%
+  \PackageError{beamercolorthemetensygrid}{%
+    Main theme `tensygrid' not loaded}{}
+}
+\ProcessOptionsBeamer
+\mode<presentation>
+\setbeamercolor{title}{fg=tggraphit}
+\setbeamercolor{subtitle}{fg=tggraphit}
+\setbeamercolor{frametitle}{fg=tgpetrol}
+\setbeamercolor{framesubtitle}{fg=tggrey}
+\setbeamercolor{headline}{fg=tggraphit}
+\setbeamercolor{footline}{fg=tggraphit}
+\setbeamercolor{title in head/foot}{fg=tggrey}
+\setbeamercolor{author in head/foot}{fg=tggrey}
+\setbeamercolor{date in head/foot}{fg=tggrey}
+\setbeamercolor{page number in head/foot}{fg=tggrey}
+\setbeamercolor{institute in head/foot}{fg=tggraphit}
+\setbeamercolor{alerted text}{fg=tglime}
+\setbeamercolor{structure}{fg=tgpetrol}
+\setbeamercolor{separation line}{bg=tgpetrol}
+\setbeamercolor{lower separation line head}{bg=tgpetrol}
+\setbeamercolor{upper separation line foot}{bg=tgpetrol}
+\setbeamercolor{navigation symbols}{fg=tggrey!50}
+\setbeamercolor*{itemize item}{fg=tgpetrol}
+\setbeamercolor*{itemize subitem}{fg=tggrey}
+\setbeamercolor*{itemize subsubitem}{fg=tggrey!50}
+\setbeamercolor{block title example}{fg=tggreen,bg=tggreen!10}
+\setbeamercolor{block body example}{fg=tggreen}
+\ltx@ifpackageloaded{beamerposter}{}{
+  \setbeamercolor{block body example}{bg=tggreen!5}}
+\addtobeamertemplate{block example begin}{%
+  \setbeamercolor{itemize item}{fg=tggreen}}{}
+\setbeamercolor{block title alerted}{fg=tglime,bg=tglime!10}
+\setbeamercolor{block body alerted}{fg=tglime}
+\ltx@ifpackageloaded{beamerposter}{}{
+  \setbeamercolor{block body alerted}{fg=tglime,bg=tglime!5}}
+\addtobeamertemplate{block alerted begin}{%
+  \setbeamercolor{itemize item}{fg=tglime}}{}
+\setbeamercolor{block title}{fg=tgpetrol,bg=tgpetrol!10}
+\ltx@ifpackageloaded{beamerposter}{
+  \setbeamercolor{block body}{fg=tggraphit}}{
+  \setbeamercolor{block body}{fg=tgpetrol,bg=tgpetrol!5}}
+\addtobeamertemplate{block begin}{%
+  \setbeamercolor{itemize item}{fg=tgpetrol}}{}
+\mode<all>
+\endinput
+%%
+%% End of file `beamercolorthemetensygrid.sty'.
