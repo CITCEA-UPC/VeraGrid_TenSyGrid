@@ -121,6 +121,7 @@ def build_gfl_ode_problem(*, multilinear: bool = True, p0: float = 0.0,
     options = EmtOptions(
         time_step=1.0e-5,
         simulation_time=simulation_time,
+        explicit=True,
         solver_type=EmtSolverTypes.Automatic,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,

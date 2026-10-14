@@ -17,8 +17,8 @@ def case_dir(name: str) -> Path:
 
 
 def save_case_data(folder: Path, *, S, Phi, time, states, state_names,
-                   inputs, input_names, metadata=None) -> None:
-    """Save aligned, named traces and the fixed-parameter S/Phi matrices.
+                   inputs, input_names, metadata=None, basis_names=None) -> None:
+    """Save aligned, named traces and the S/Phi matrices.
 
     Each trace matrix has one row per time sample; the matching names are
     MATLAB cell arrays. ``metadata`` is stored with the traces for provenance.
@@ -32,7 +32,12 @@ def save_case_data(folder: Path, *, S, Phi, time, states, state_names,
     if inputs.shape != (len(time), len(input_names)):
         raise ValueError("Input trace dimensions do not match time and names")
     common = dict(metadata or {})
-    savemat(folder / "S.mat", {"S": S}, do_compression=True)
+    structure = {"S": S}
+    if basis_names is not None:
+        if len(basis_names) != S.shape[0]:
+            raise ValueError("S basis names do not match its row count")
+        structure["basis_names"] = np.asarray(basis_names, dtype=object).reshape(1, -1)
+    savemat(folder / "S.mat", structure, do_compression=True)
     savemat(folder / "Phi.mat", {"Phi": Phi}, do_compression=True)
     savemat(folder / "inputs.mat", {
         "time": time, "inputs": inputs,

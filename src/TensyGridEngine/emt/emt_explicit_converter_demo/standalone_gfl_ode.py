@@ -60,6 +60,7 @@ def main() -> None:
         state_names=[variable.name for variable in state_vars],
         inputs=np.column_stack([inputs[name] for name in input_names]),
         input_names=input_names,
+        basis_names=[variable.name for variable in state_vars] + input_names,
     )
 
     iq_limited = problem.trace(result, "i_q_ref_sat_out")

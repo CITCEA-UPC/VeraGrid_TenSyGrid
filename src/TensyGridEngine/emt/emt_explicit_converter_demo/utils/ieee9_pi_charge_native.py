@@ -29,7 +29,8 @@ from VeraGridEngine.enumerations import (
 
 def build_native_problem(output, initial_state, *, step=2.5e-6,
                          event_output=None, event_step=0.10,
-                         solver_type=EmtSolverTypes.Symbolic):
+                         solver_type=EmtSolverTypes.Symbolic,
+                         explicit=False):
     """Create a state-only EMT Block from sparse polynomial coefficients."""
     if len(output) != len(initial_state):
         raise ValueError("Initial state and polynomial output sizes differ")
@@ -60,7 +61,9 @@ def build_native_problem(output, initial_state, *, step=2.5e-6,
     block = Block(
         name="ieee9_pi_charge_explicit",
         state_vars=states, diff_vars=differentials, state_eqs=equations,
-        algebraic_vars=[], algebraic_eqs=[], in_vars=[], out_vars=[],
+        algebraic_vars=[], algebraic_eqs=[],
+        in_vars=[event_scale] if explicit and event_scale is not None else [],
+        out_vars=[],
         event_dict={event_scale: Const(1.0)} if event_scale is not None else {},
         init_eqs={state: Const(float(value)) for state, value in zip(states, initial_state)},
         diff_init_eqs={differential: Const(float(value))
@@ -68,6 +71,7 @@ def build_native_problem(output, initial_state, *, step=2.5e-6,
     )
     options = EmtOptions(
         time_step=step, simulation_time=1e-4,
+        explicit=explicit,
         solver_type=solver_type,
         integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
         initialization_method=EmtInitializationMethod.Explicit,

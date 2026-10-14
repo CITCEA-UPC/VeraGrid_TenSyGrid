@@ -73,6 +73,8 @@ class EmtProblemMultilinear(EmtProblemDae):
         ``S`` encodes monomial structure as ``variables x monomials`` and
         ``Phi`` encodes equation coefficients as ``equations x monomials``.
         """
+        if getattr(self.options, "explicit", False):
+            return self.build_multilinear_matrices_fast()
         self._ensure_multilinear_index_cache()
         all_eqs = list(self._state_eqs) + list(self._algebraic_eqs)
         all_vars = self._ml_all_basis_vars
@@ -183,16 +185,23 @@ class EmtProblemMultilinear(EmtProblemDae):
     def build_multilinear_matrices_fast(self) -> tuple[sparse.csc_matrix, sparse.csr_matrix]:
         """Build S/Phi directly from polynomial coefficient maps.
 
-        Each monomial is a tuple of distinct basis-variable indices. This
-        avoids creating symbolic expression nodes while distributing products
-        over sums. The existing extractor remains available for comparison.
+        Each monomial is a tuple of distinct basis-variable indices. With
+        ``options.explicit``, the basis is states followed by model inputs;
+        otherwise it includes states, algebraics and derivative variables.
         """
         self._ensure_multilinear_index_cache()
-        basis = self._ml_all_basis_vars
-        uid_to_idx = self._ml_uid_to_basis_idx
+        explicit = getattr(self.options, "explicit", False)
+        if explicit and (self._algebraic_vars or len(self._state_eqs) != len(self._state_vars)):
+            raise ValueError("Explicit S/Phi requires one state equation per state and no algebraic variables")
+        input_vars = list(self.sys_block.in_vars) if explicit else []
+        input_uids = {variable.uid for variable in input_vars}
+        basis = ([*self._state_vars, *input_vars] if explicit
+                 else self._ml_all_basis_vars)
+        uid_to_idx = {variable.uid: index for index, variable in enumerate(basis)}
         parameters = {
             variable.uid: float(value)
             for variable, value in zip(self._variable_parameters, self._event_params_values)
+            if variable.uid not in input_uids
         }
         parameters.update({
             variable.uid: float(value)
@@ -302,6 +311,12 @@ class EmtProblemMultilinear(EmtProblemDae):
         used by ``BlockEmtFloquetOperator`` and returns the discrete residual
         Jacobian for the current integration method.
         """
+        # The explicit export has input rows whose values change over time;
+        # this Floquet adapter expects only state/algebraic/derivative rows.
+        if getattr(self.options, "explicit", False):
+            if default_jacobian_evaluator is not None:
+                return default_jacobian_evaluator
+            raise ValueError("Explicit input-aware S/Phi cannot be used by the DAE Floquet adapter")
         self._ensure_multilinear_index_cache()
         try:
             S, Phi = self.build_multilinear_matrices()

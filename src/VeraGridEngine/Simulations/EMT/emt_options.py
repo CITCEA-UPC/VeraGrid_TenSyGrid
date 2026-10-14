@@ -21,6 +21,7 @@ class EmtOptions(OptionsTemplate):
     __slots__ = (
         "time_step",
         "simulation_time",
+        "explicit",
         "tolerance",
         "solver_type",
         "integration_method",
@@ -67,6 +68,7 @@ class EmtOptions(OptionsTemplate):
     LOCAL_PROPERTY_DECLARATIONS: Tuple[GCProp, ...] = (
         GCProp(key="time_step", tpe=float),
         GCProp(key="simulation_time", tpe=float),
+        GCProp(key="explicit", tpe=bool),
         GCProp(key="tolerance", tpe=float),
         GCProp(key="solver_type", tpe=EmtSolverTypes),
         GCProp(key="integration_method", tpe=DynamicIntegrationMethod),
@@ -153,11 +155,13 @@ class EmtOptions(OptionsTemplate):
                  fmi_me_newton_relative_tolerance: float = 1e-8,
                  fmi_me_newton_max_iterations: int = 20,
                  fmi_me_max_continuous_states: int = 128,
-                 fmi_me_max_runtime_evaluations_per_step: int = 100000) -> None:
+                 fmi_me_max_runtime_evaluations_per_step: int = 100000,
+                 explicit: bool = False) -> None:
         """
         EmtOptions
         :param time_step: time step of the simulations (s)
         :param simulation_time: simulation time (s)
+        :param explicit: Extract S/Phi from an explicit ODE using state and input rows, without derivative rows.
         :param tolerance: Integration tolerance
         :param verbose: Verbosity level
         :param fmi_state_event_time_tolerance: Absolute FMI ME event-time tolerance in seconds.
@@ -174,6 +178,7 @@ class EmtOptions(OptionsTemplate):
 
         self.time_step: float = time_step
         self.simulation_time: float = simulation_time
+        self.explicit: bool = explicit
         self.tolerance: float = tolerance
         self.solver_type: EmtSolverTypes = solver_type
         self.integration_method: DynamicIntegrationMethod = integration_method

@@ -36,6 +36,13 @@ below `4.62e-7` pu. The reduced ODE is multi-affine in all 103 states.
   aligned `time` rows and name arrays. The IEEE-9 event demo also saves
   `S_after.mat`, `Phi_after.mat`, and `timeseries.npz`.
 
+All four runnable ODE demos use `EmtOptions(explicit=True)` for matrix
+extraction. Their `S.mat` rows are states followed by exposed inputs and event
+references (named in `basis_names`); no unused derivative rows appear. The
+source oscillator and bus voltages that are already states appear only once.
+`S`/`Phi` can therefore be evaluated with changing prescribed inputs or event
+references. Fixed physical parameters remain coefficients in `Phi`.
+
 The standalone IEEE-9 demo stores each voltage-disturbance variant in its
 own folder under `simulation_data/standalone_gfl_ode_ieee9/`.
 

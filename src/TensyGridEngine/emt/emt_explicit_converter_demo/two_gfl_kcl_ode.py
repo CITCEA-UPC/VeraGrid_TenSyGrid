@@ -146,7 +146,8 @@ def build_problem(
         state_vars=[state for block in blocks for state in block.state_vars] + added_states,
         diff_vars=[diff for block in blocks for diff in block.diff_vars] + added_diffs,
         state_eqs=state_eqs,
-        algebraic_vars=[], algebraic_eqs=[], in_vars=[],
+        algebraic_vars=[], algebraic_eqs=[],
+        in_vars=[var for block in blocks for var in block.in_vars[3:]],
         out_vars=[state for block in blocks for state in block.out_vars],
         reformulated_vars=[state for block in blocks for state in block.reformulated_vars],
         event_dict=event_dict,
@@ -157,6 +158,7 @@ def build_problem(
     )
     options = EmtOptions(
         time_step=1.0e-5, simulation_time=simulation_time,
+        explicit=True,
         # Selects the time-domain residual/Jacobian backend, not the problem
         # class. S/Phi extraction below separately validates multi-affinity.
         solver_type=EmtSolverTypes.Symbolic,
@@ -216,10 +218,7 @@ def main() -> None:
     EmtProblemTemplate.set_events_group(problem, group)
     # State order is converter 1, converter 2, current copies, then source.
     first_network_copy = 2 * len(network["blocks"][0].state_vars)
-    tracked_parameters = [
-        next(var for var in problem._variable_parameters if var.name == name)
-        for name in ("P_ref_1", "Q_ref_1", "P_ref_2", "Q_ref_2")
-    ]
+    tracked_parameters = list(problem.sys_block.in_vars)
     parameter_indices = [problem.uid2idx_event_params[var.uid] for var in tracked_parameters]
     for event_time, converter_index, parameter_name, value in event_specs:
         name = f"{parameter_name}_{converter_index + 1}"
@@ -263,6 +262,8 @@ def main() -> None:
         inputs=np.column_stack((source_trace.T, parameter_trace)),
         input_names=[f"source_v_{phase}" for phase in PHASES]
                     + [var.name for var in tracked_parameters],
+        basis_names=[state.name for state in states]
+                    + [var.name for var in tracked_parameters],
         metadata={"source_conductance": network["source_conductance"],
                   "line_conductance": network["line_conductance"],
                   "event_times": np.asarray([spec[0] for spec in event_specs]),
@@ -298,8 +299,9 @@ def main() -> None:
     axes[2].set_ylabel("bus 2 − bus 1 (milli-pu)")
     axes[3].set_ylabel("converter current (pu)")
     for column, variable in enumerate(tracked_parameters):
-        axes[4].step(times * 1e3, parameter_trace[:, column], where="post",
-                     label=variable.name)
+        if variable.name.startswith(("P_ref", "Q_ref")):
+            axes[4].step(times * 1e3, parameter_trace[:, column], where="post",
+                         label=variable.name)
     axes[4].set_ylabel("P/Q reference (pu)")
     axes[4].set_xlabel("time (ms)")
     for axis in axes:

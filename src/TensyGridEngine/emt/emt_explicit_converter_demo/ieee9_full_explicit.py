@@ -31,7 +31,7 @@ import numpy as np
 from scipy.io import savemat
 
 from TensyGridEngine.emt.emt_explicit_converter_demo.experiments.ieee9_pi_charge_event_timeseries import (
-    balanced_groups, phase_rms,
+    balanced_groups, compile_terms, phase_rms, polynomial_rhs,
 )
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_native import build_native_problem
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_polynomial import extract
@@ -68,7 +68,8 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
 
     solver_enum = getattr(EmtSolverTypes, solver_type)
     native = build_native_problem(before, z0, step=step, event_output=after,
-                                  event_step=power_step, solver_type=solver_enum)
+                                  event_step=power_step, solver_type=solver_enum,
+                                  explicit=True)
     native.options.simulation_time = end_time
     native.grid = full.grid
     first_gfl = next(generator for generator in full.grid.generators
@@ -124,17 +125,36 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
     state_names = [f"{full.get_state_vars()[index].name}_{index}" for index in dynamic]
     state_names += [f"v_{bus.name}_{phase}" for bus in full.grid.buses for phase in "ABC"]
     S, Phi = native.build_multilinear_matrices_fast()
-    post_model = build_native_problem(after, z0, step=step, solver_type=solver_enum)
+    # One input-aware S/Phi pair must reproduce both event regimes. Check it
+    # against the independently extracted coefficient maps at the initial state.
+    for scale, coefficients in ((1.0, before), (1.0 + power_step, after)):
+        basis = np.r_[z0, scale]
+        monomials = np.asarray([
+            np.prod(basis[S.indices[S.indptr[column]:S.indptr[column + 1]]])
+            for column in range(S.shape[1])
+        ])
+        expected = polynomial_rhs(z0, *compile_terms(coefficients))
+        error = np.max(np.abs(np.asarray(Phi @ monomials).ravel() - expected))
+        if error > 1e-7:
+            raise RuntimeError(f"Input-aware S/Phi mismatch at scale {scale:g}: {error:.3e}")
+    post_model = build_native_problem(after, z0, step=step, solver_type=solver_enum,
+                                      explicit=True)
     S_after, Phi_after = post_model.build_multilinear_matrices_fast()
     save_case_data(
         output_dir, S=S, Phi=Phi, time=time, states=state,
         state_names=state_names,
         inputs=np.column_stack((scale_trace, nominal_power * scale_trace)),
         input_names=["first_gfl_power_scale", "gen_1_P_ref_pu"],
+        basis_names=[var.name for var in native.get_state_vars()]
+                    + [native.event_scale_var.name],
         metadata={"event_time": event_time, "power_step": power_step,
                   "native_step": step, "replacement_line_B": 0.1},
     )
-    savemat(output_dir / "S_after.mat", {"S": S_after}, do_compression=True)
+    savemat(output_dir / "S_after.mat", {
+        "S": S_after,
+        "basis_names": np.asarray([var.name for var in post_model.get_state_vars()],
+                                  dtype=object).reshape(1, -1),
+    }, do_compression=True)
     savemat(output_dir / "Phi_after.mat", {"Phi": Phi_after}, do_compression=True)
     data_path = output_dir / "timeseries.npz"
     plot_path = output_dir / "comparison.png"

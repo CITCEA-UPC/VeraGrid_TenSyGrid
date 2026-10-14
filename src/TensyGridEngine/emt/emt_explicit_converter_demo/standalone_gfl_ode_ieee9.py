@@ -19,6 +19,7 @@ Beginner's map of this example
    ``simulation_data/standalone_gfl_ode_ieee9`` with four
    MATLAB data files: ``S.mat``, ``Phi.mat``, ``inputs.mat``, and
    ``states.mat``. The plot is ``OUTPUT_DIR/comparison.png``.
+   ``S.mat`` includes ``basis_names``: state rows followed by the five inputs.
    ``inputs.mat`` contains ``time``, ``inputs``, and ``input_names``.
    ``states.mat`` contains ``time``, ``states``, and ``state_names``.
    Column j of ``inputs`` has name ``input_names{j}``; column j of ``states``
@@ -176,12 +177,17 @@ def save_case(folder: Path, problem, result, input_traces):
     Both time-series files include time, so either can be loaded alone.
     Names are cell arrays in the same order as their data columns.
     """
-    # S and Phi encode the multilinear form of the ODE. They are sparse, and
-    # scipy.io.savemat preserves them as MATLAB sparse matrices.
+    # Explicit S/Phi use state and input rows; derivative rows are omitted.
+    # scipy.io.savemat preserves these as MATLAB sparse matrices.
     folder.mkdir(parents=True, exist_ok=True)
     if problem.S is None or problem.Phi is None:
         problem.build_multilinear_matrices()
-    savemat(folder / "S.mat", {"S": problem.S}, do_compression=True)
+    basis_names = ([variable.name for variable in problem.get_state_vars()]
+                   + [variable.name for variable in problem.sys_block.in_vars])
+    savemat(folder / "S.mat", {
+        "S": problem.S,
+        "basis_names": np.asarray(basis_names, dtype=object).reshape(1, -1),
+    }, do_compression=True)
     savemat(folder / "Phi.mat", {"Phi": problem.Phi}, do_compression=True)
 
     # result.values can contain more than the differential states. Select only
