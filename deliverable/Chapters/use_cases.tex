@@ -368,19 +368,25 @@ The six use cases described in the previous section correspond to functionalitie
 \subsection{UC-11: Renewable Scenario Assessment}
 % ---------------------------------------------------------------------------
 
-% \begin{description}
-%   \item[Actor.] Planning engineer or policy analyst.
-%   \item[Objective.] Evaluate the small-signal stability of the grid under different renewable energy penetration scenarios, assessing how the progressive substitution of synchronous generation by converter-interfaced resources affects system stability.
-%   \item[Proposed flow.] The operator defines a set of scenarios characterised by the percentage of inverter-based generation (e.g., 30\%, 50\%, 70\%, 100\%) and optionally a set of critical contingencies. For each scenario, the tool adjusts the generation mix (by scaling down synchronous machines and scaling up converter-based sources while respecting the grid model's structure), runs the stability analysis, and records the stability margin and critical modes. Results are presented as a curve of stability margin vs.\ renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold. Eigenvalue trajectories are plotted to show how specific modes migrate as the penetration level increases.
-%   \item[Expected value.] This use case directly addresses the core TenSyGrid objective of assessing converter-dominated grids. It allows grid planners to determine the maximum renewable hosting capacity under stability constraints and to identify the modes most sensitive to the synchronous-to-converter transition.
-% \end{description}
-
 \begin{description}
   \item[Actor.] Planning engineer or policy analyst.
   \item[Objective.] Evaluate the small-signal stability of the grid under different renewable energy penetration scenarios, assessing how the progressive substitution of synchronous generation by converter-interfaced resources affects system stability.
-  \item[Theoretical basis.] dd
-  \item[Possible bottlenecks.] dd 
-  \item[Proposed flow.] The operator defines a set of scenarios characterised by the percentage of inverter-based generation (e.g., 30\%, 50\%, 70\%, 100\%) and optionally a set of critical contingencies. For each scenario, the tool adjusts the generation mix (by scaling down synchronous machines and scaling up converter-based sources while respecting the grid model's structure), runs the stability analysis, and records the stability margin and critical modes. Results are presented as a curve of stability margin vs.\ renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold. Eigenvalue trajectories are plotted to show how specific modes migrate as the penetration level increases.
+  \item[Preconditions.]
+        \begin{itemize}
+          \item A base-case simulation (UC-01) has been completed and serves as the reference operating point.
+          \item The grid model identifies which machines are synchronous generators and which are converter-interfaced resources, so that the generation mix can be modified without altering the network topology.
+          \item At least one converter-interfaced generator model (e.g.\ GFL or GFM) is available to replace the synchronous machines that are scaled down.
+        \end{itemize}
+  \item[Theoretical basis.] A synchronous generator is described by a handful of equations --- the swing equation plus the flux and control dynamics of the machine --- whereas a complete model of an inverter-based generator aggregates many more, adding the converter's inner current and voltage control, the phase-locked loop (or the grid-forming virtual impedance), and any outer power or DC-link dynamics. Its dynamics are therefore richer. Nevertheless, the interface variables exchanged with the network are the same for both: the current (or power) injected at the connection bus. Substituting synchronous machines by converters does not change which quantities couple each device to the grid; it changes the number and the nature of the internal states, so the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ both grow and change shape. Consequently, the modal spectrum is reshaped: the electromechanical modes of the displaced synchronous machines fade, while new converter-driven modes (PLL, current-control, and virtual-impedance dynamics) appear, often lightly damped. Evaluating the margin and the critical modes as a function of the penetration level exposes this transition.
+  \item[Possible bottlenecks.] Substituting the device equations changes the shape of the $\mathbf{E}$ and $\mathbf{A}$ matrices, so the assembly and pre-processing chain must adapt to a spectrum that mixes synchronous and converter states. Code optimisation may require a complete iteration of the software, and the outcome depends on the accuracy of the converter models, which must be agreed upon before scenarios can be compared.
+  \item[Proposed flow.]
+        \begin{enumerate}
+          \item The operator selects a base-case result (UC-01) and defines a set of penetration scenarios (e.g.\ 30\%, 50\%, 70\%, 100\% of inverter-based generation), optionally together with a set of critical contingencies.
+          \item For each scenario, the tool adjusts the generation mix --- scaling down synchronous machines and scaling up converter-interfaced sources while respecting the grid model's structure --- and runs the stability analysis, recording the stability margin and the critical modes.
+          \item Results are presented as a curve of stability margin versus renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold.
+          \item Eigenvalue trajectories are plotted to show how specific modes migrate as the penetration level increases, with the newly introduced converter modes highlighted.
+          \item Critical scenarios can be drilled down via UC-04 (participation factors) and tracked along the progression via UC-08.
+        \end{enumerate}
   \item[Expected value.] This use case directly addresses the core TenSyGrid objective of assessing converter-dominated grids. It allows grid planners to determine the maximum renewable hosting capacity under stability constraints and to identify the modes most sensitive to the synchronous-to-converter transition.
 \end{description}
 
