@@ -287,14 +287,14 @@ def build_gfl_converter_model_ode(
         parameters["Ki_icl"] * i_q_error,
     ]
     if multilinear:
-        # All copies have exactly the same RHS.  The output-role pair is used as
-        # the rotation multiplier because omega depends on the distinct
-        # voltage-role pair; this avoids squared trigonometric states.
-        for _role in ("v", "i", "o"):
-            state_eqs.extend([
-                -omega_base * omega * sine_o,
-                omega_base * omega * cosine_o,
-            ])
+        # All three pairs represent the same angle and have identical RHS.
+        # omega uses the voltage-role pair, so using the output-role pair here
+        # keeps each product multi-affine (no squared trigonometric state).
+        rotation_eqs = [
+            -omega_base * omega * sine_o,
+            omega_base * omega * cosine_o,
+        ]
+        state_eqs.extend(rotation_eqs * len(trig_pairs))
     else:
         state_eqs.append(omega_base * omega)
     state_eqs.extend(limiter_eqs)

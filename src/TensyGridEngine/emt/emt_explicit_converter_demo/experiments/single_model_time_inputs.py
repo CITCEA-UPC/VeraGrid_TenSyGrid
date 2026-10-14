@@ -8,12 +8,12 @@ import sys
 
 # Allow this demo to run directly by path without installing the source tree.
 if __name__ == "__main__":
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-src_path = Path(__file__).resolve().parents[3]
+src_path = Path(__file__).resolve().parents[4]
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
@@ -26,7 +26,7 @@ from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, heaviside, rand, sin
 from VeraGridEngine.enumerations import ConverterControlType, DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes
 
-OUTPUT = Path(__file__).with_name("single_model_time_inputs.png")
+OUTPUT = Path(__file__).resolve().parents[1] / "simulation_data" / "experiments" / "single_model_time_inputs" / "comparison.png"
 NOISE_SEED = 20260914
 AC_VOLTAGE_NOISE_RMS_PU = 0.01
 NOISE_START = 0.02
@@ -359,6 +359,7 @@ def plot_gfm(problem: EmtModelProblem, result) -> None:
     axes[-1].set_xlabel("Time (s)")
     for axis in axes:
         axis.grid(alpha=0.3)
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(OUTPUT, dpi=180)
     plt.close(figure)
 

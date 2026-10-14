@@ -3,10 +3,12 @@
 This is a full ``MultiCircuit`` simulation. Bus KCL and device equations are
 assembled by ``EmtProblemMultilinear``; they are not reduced to an ODE here.
 
-Run with ``PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_grid``.
+Run with ``PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_grid``.
 """
 
 from __future__ import annotations
+
+import numpy as np
 
 from TensyGridEngine.emt.emt_ieee9 import (
     attach_emt_models,
@@ -24,7 +26,10 @@ from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_emt_mod
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 
 
-def attach_gfl_ode_generator(grid, generator=None, *, network_current_copies: bool = False):
+def attach_gfl_ode_generator(grid, generator=None, *, network_current_copies: bool = False,
+                             operating_voltage: complex | None = None,
+                             operating_reactive_power: float = 0.0,
+                             power_reference_scale: float = 1.0):
     """Replace a non-slack machine with the state-only GFL model."""
     if generator is None:
         generator = next(g for g in grid.generators if not g.bus.is_slack)
@@ -45,12 +50,17 @@ def attach_gfl_ode_generator(grid, generator=None, *, network_current_copies: bo
     for variable, reference in zip(block.in_vars[:3], voltage_refs):
         variable.ref = reference
         block.external_mapping[reference] = variable
-    for variable, value in zip(block.in_vars[3:], (generator.P / grid.Sbase, 0.0)):
+    # The filter law L*di/dt = v_converter - v_bus - R*i defines positive
+    # i_line from converter to bus, matching positive generator injection.
+    p_reference = generator.P / grid.Sbase
+    q_reference = (operating_reactive_power / grid.Sbase
+                   if operating_voltage is not None else 0.0)
+    for variable, value in zip(block.in_vars[3:],
+                               (p_reference * power_reference_scale, q_reference)):
         block.event_dict[variable] = Const(value)
     block.in_vars = block.in_vars[:3]
 
-    # The converter's line current flows from the bus into the converter;
-    # the generator injection used by KCL has the opposite sign.
+    # The converter current flows into the bus and is the generator injection.
     current_refs = (
         VarPowerFlowReferenceType.i_A,
         VarPowerFlowReferenceType.i_B,
@@ -75,10 +85,38 @@ def attach_gfl_ode_generator(grid, generator=None, *, network_current_copies: bo
     else:
         network_currents = physical_currents
 
+    if operating_voltage is not None:
+        angle = float(np.angle(operating_voltage))
+        peak = float(np.sqrt(2.0) * abs(operating_voltage))
+        i_q = 2.0 * p_reference / peak
+        i_d = -2.0 * q_reference / peak
+        for phase, current, copy in zip(range(3), physical_currents, network_currents):
+            phase_angle = angle + (0.0, -2.0 * np.pi / 3.0, 2.0 * np.pi / 3.0)[phase]
+            value = i_q * np.sin(phase_angle) + i_d * np.cos(phase_angle)
+            block.init_eqs[current] = Const(value)
+            block.init_eqs[copy] = Const(value)
+        # The PLL frame starts aligned with the power-flow voltage. The two
+        # outer-loop integrators then command the seeded dq current.
+        for state in block.state_vars:
+            if state.name == "xi_Pac_ctrl":
+                block.init_eqs[state] = Const(i_q)
+            elif state.name == "xi_Qac_ctrl":
+                block.init_eqs[state] = Const(i_d)
+            elif state.name.startswith("u_cos_"):
+                block.init_eqs[state] = Const(np.cos(angle))
+            elif state.name.startswith("u_sin_"):
+                block.init_eqs[state] = Const(np.sin(angle))
+            elif state.name == "xi_vd_hat":
+                # The filter feed-forward already supplies the L*omega*i_q
+                # term, so only R*i_d is needed for steady sinusoidal current.
+                block.init_eqs[state] = Const(0.01 * i_d)
+            elif state.name == "xi_vq_hat":
+                block.init_eqs[state] = Const(0.01 * i_q)
+
     for phase, current, reference in zip("ABC", network_currents, current_refs):
         injection = grid.var_factory.add_var(f"i_gfl_inj_{phase}", reference=reference)
         block.algebraic_vars.append(injection)
-        block.algebraic_eqs.append(injection + current)
+        block.algebraic_eqs.append(injection - current)
         block.out_vars.append(injection)
         block.external_mapping[reference] = injection
 

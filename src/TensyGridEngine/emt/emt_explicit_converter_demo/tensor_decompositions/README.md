@@ -1,11 +1,11 @@
 # IEEE-9 EMT tensor decomposition experiments
 
 These experiments use the reduced IEEE-9 model built by
-`../ieee9_gfl_ode_reduced.py`. Run from the repository root with `myenv`:
+`../utils/ieee9_gfl_ode_reduced.py`. Run from the repository root:
 
 ```bash
 VERAGRID_EMT_INIT_CACHE_DIR=/tmp/veragrid_emt_tensor PYTHONPATH=src \
-  /home/pablo/myenv/bin/python -m \
+  python -m \
   TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_full_converter_cp
 ```
 

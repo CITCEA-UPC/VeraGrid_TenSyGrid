@@ -12,7 +12,7 @@ import numpy as np
 from scipy import sparse
 from collections import Counter
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 
 
 def unfolding_rank(phi: sparse.csr_matrix, monomials: list[tuple[int, ...]],

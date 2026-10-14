@@ -18,7 +18,7 @@ import tensorly as tl
 from tensorly.decomposition import parafac
 from numba import njit
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 from TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_full_grouped_tensor import (
     CONVERTERS, NETWORK, full_converter_tensor, grouped_values,
 )

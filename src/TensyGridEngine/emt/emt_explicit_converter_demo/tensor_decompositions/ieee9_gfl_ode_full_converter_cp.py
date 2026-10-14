@@ -18,7 +18,7 @@ import numpy as np
 from scipy import sparse
 
 from TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_cp_rank_probe import unfolding_rank
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 
 
 CONVERTER_ROWS = (slice(6, 23), slice(23, 40))

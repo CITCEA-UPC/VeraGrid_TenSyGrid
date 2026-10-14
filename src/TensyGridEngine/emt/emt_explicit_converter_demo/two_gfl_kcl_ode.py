@@ -1,5 +1,16 @@
 """Simulate two GFL converters coupled through a resistive two-bus grid.
 
+Beginner's map
+--------------
+1. MODEL: ``build_problem`` builds two converter ODEs and the source oscillator.
+   It solves each phase's two linear KCL equations and substitutes both bus
+   voltages into the converter equations. There are no algebraic variables.
+2. EVENTS: ``main`` registers timed P/Q reference changes on the grid and
+   connects that event group to the explicit model's runtime parameters.
+3. SOLVE: ``problem.simulate()`` advances the full substituted state vector.
+4. SAVE: ``simulation_data/two_gfl_kcl_ode`` contains S/Phi, named source
+   voltage, setpoint and state traces in MATLAB files, and a plot.
+
 Run with ``PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.two_gfl_kcl_ode``.
 
 The bus voltages have no dynamics: each phase's two KCL equations are solved
@@ -12,18 +23,28 @@ this standalone Block; it already inherits multilinear S/Phi extraction from
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+
+# Allow direct execution by file path as well as `python -m` from the repo.
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import numpy as np
 
+import VeraGridEngine.api as gce
+from VeraGridEngine.Devices.Events.emt_event import EmtEvent
+from VeraGridEngine.Devices.Events.emt_events_group import EmtEventsGroup
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_model_problem import EmtModelProblem
+from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
 from VeraGridEngine.Templates.Emt.vsc_gfl_ode import build_gfl_converter_model_ode
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 from VeraGridEngine.enumerations import (
     DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes,
 )
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.simulation_data import case_dir, save_case_data
 
 
 PHASES = "ABC"
@@ -36,7 +57,7 @@ def build_problem(
     line_conductance: float = 5.0,
     bus_1_shunt_conductance: float = 0.0,
     bus_2_shunt_conductance: float = 0.0,
-    simulation_time: float = 1.0e-3,
+    simulation_time: float = 2.0e-2,
 ) -> tuple[EmtModelProblem, dict]:
     """Eliminate six bus voltages from linear KCL and substitute into both ODEs.
 
@@ -152,7 +173,9 @@ def build_problem(
                      "nodal_matrix": nodal_matrix}
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run timed two-bus setpoint events and save the complete time series."""
+    # MODEL: build both converters and the analytically substituted network.
     problem, network = build_problem()
     # These matrices certify that every equation is multi-affine. The solver
     # selected above still runs through the symbolic EMT residual/Jacobian.
@@ -161,11 +184,52 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     states = problem.get_state_vars()
     S, Phi = problem.build_multilinear_matrices()
-    # Small phase-A current perturbation reveals the electrical coupling.
+    # This small MultiCircuit owns the devices and events. The physical network
+    # equations above are still the explicitly substituted KCL equations.
+    grid = gce.MultiCircuit(name="Explicit two-GFL event grid", Sbase=100.0, fbase=50.0)
+    generators = []
+    for index in (1, 2):
+        bus = gce.Bus(name=f"bus {index}", Vnom=230.0)
+        grid.add_bus(bus)
+        generator = gce.Generator(name=f"GFL {index}", P=0.0, Snom=100.0)
+        grid.add_generator(bus=bus, api_obj=generator)
+        generators.append(generator)
+    group = EmtEventsGroup(name="two converter setpoint changes")
+    grid.add_emt_events_group(group)
+    # Converter 1 changes active power; converter 2 changes reactive power.
+    # The last event restores converter 1's original active-power reference.
+    event_specs = (
+        (0.005, 0, "P_ref", 0.05),
+        (0.010, 1, "Q_ref", 0.03),
+        (0.015, 0, "P_ref", 0.0),
+    )
+    for event_time, converter_index, parameter_name, value in event_specs:
+        parameter = next(var for var in network["blocks"][converter_index].in_vars
+                         if var.name == f"{parameter_name}_{converter_index + 1}")
+        grid.add_emt_event(EmtEvent(
+            name=f"GFL {converter_index + 1} {parameter_name} to {value:g}",
+            device=generators[converter_index], parameter=parameter,
+            time=event_time, value=value, group=group,
+            force_step_alignment=True,
+        ))
+    problem.grid = grid
+    EmtProblemTemplate.set_events_group(problem, group)
     # State order is converter 1, converter 2, current copies, then source.
     first_network_copy = 2 * len(network["blocks"][0].state_vars)
-    problem.init_guess[states[0].uid] = 0.05
-    problem.init_guess[states[first_network_copy].uid] = 0.05
+    tracked_parameters = [
+        next(var for var in problem._variable_parameters if var.name == name)
+        for name in ("P_ref_1", "Q_ref_1", "P_ref_2", "Q_ref_2")
+    ]
+    parameter_indices = [problem.uid2idx_event_params[var.uid] for var in tracked_parameters]
+    for event_time, converter_index, parameter_name, value in event_specs:
+        name = f"{parameter_name}_{converter_index + 1}"
+        index = parameter_indices[[var.name for var in tracked_parameters].index(name)]
+        actual = problem.def_event_params_fn(
+            problem.event_params_values.copy(), event_time + problem.options.time_step
+        )[index]
+        if not np.isclose(actual, value):
+            raise RuntimeError(f"Event did not update {name}: {actual} != {value}")
+    # SOLVE: the same native method used by the other top-level demos.
     result = problem.simulate()
     if not result.initialized or not result.converged:
         raise RuntimeError(
@@ -185,6 +249,25 @@ if __name__ == "__main__":
     )
     source_start = first_network_copy + 6
     source_trace = values[source_start:source_start + 3]
+    # SAVE: include every requested setpoint at each solver output time. The
+    # oscillator voltages are also included as inputs, though held as states.
+    parameter_trace = np.asarray([
+        problem.def_event_params_fn(problem.event_params_values.copy(), float(t))[
+            parameter_indices]
+        for t in times
+    ])
+    output_dir = case_dir("two_gfl_kcl_ode")
+    save_case_data(
+        output_dir, S=S, Phi=Phi, time=times, states=result.values,
+        state_names=[state.name for state in states],
+        inputs=np.column_stack((source_trace.T, parameter_trace)),
+        input_names=[f"source_v_{phase}" for phase in PHASES]
+                    + [var.name for var in tracked_parameters],
+        metadata={"source_conductance": network["source_conductance"],
+                  "line_conductance": network["line_conductance"],
+                  "event_times": np.asarray([spec[0] for spec in event_specs]),
+                  "event_values": np.asarray([spec[3] for spec in event_specs])},
+    )
     # Reconstruct voltages from the same KCL system used in build_problem(),
     # using the physical currents to independently check the copy equations.
     current_rhs = np.stack((
@@ -200,7 +283,7 @@ if __name__ == "__main__":
     residual_2 = (line_current - current_2
                   - network["bus_2_shunt_conductance"] * bus_voltage[1])
     residual = np.stack((residual_1, residual_2))
-    figure, axes = plt.subplots(4, 1, sharex=True, figsize=(9, 10))
+    figure, axes = plt.subplots(5, 1, sharex=True, figsize=(9, 12))
     for phase, label in enumerate("ABC"):
         axes[0].plot(times * 1e3, source_trace[phase], ls="--", alpha=0.5)
         axes[0].plot(times * 1e3, bus_voltage[0, phase], label=f"bus 1 {label}")
@@ -214,12 +297,18 @@ if __name__ == "__main__":
     axes[1].set_ylabel("bus 2 voltage (pu)")
     axes[2].set_ylabel("bus 2 − bus 1 (milli-pu)")
     axes[3].set_ylabel("converter current (pu)")
-    axes[3].set_xlabel("time (ms)")
+    for column, variable in enumerate(tracked_parameters):
+        axes[4].step(times * 1e3, parameter_trace[:, column], where="post",
+                     label=variable.name)
+    axes[4].set_ylabel("P/Q reference (pu)")
+    axes[4].set_xlabel("time (ms)")
     for axis in axes:
+        for event_time, *_ in event_specs:
+            axis.axvline(event_time * 1e3, color="0.6", alpha=0.45, lw=0.8)
         axis.grid(True, alpha=0.3)
         axis.legend(ncol=3, fontsize=8)
     figure.tight_layout()
-    output = Path(__file__).with_name("two_gfl_kcl_ode.png")
+    output = output_dir / "comparison.png"
     figure.savefig(output, dpi=160)
     plt.close(figure)
     print(f"saved={output}, initialized={result.initialized}, "
@@ -227,3 +316,7 @@ if __name__ == "__main__":
           f"S={S.shape}, Phi={Phi.shape}, "
           f"max_kcl_residual={np.max(np.abs(residual)):.3e}, "
           f"max_copy_error={synchronization_error:.3e}")
+
+
+if __name__ == "__main__":
+    main()

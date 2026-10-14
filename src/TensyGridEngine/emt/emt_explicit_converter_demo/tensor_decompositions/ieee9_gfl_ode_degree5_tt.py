@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 
 
 NETWORK = (0, 1, 2, 20, 21, 22, 37, 38, 39, *range(40, 49))

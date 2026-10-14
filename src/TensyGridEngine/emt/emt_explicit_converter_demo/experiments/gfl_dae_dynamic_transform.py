@@ -7,13 +7,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.single_model_time_inputs import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.experiments.single_model_time_inputs import build_problem
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.problems.emt_model_problem import EmtModelProblem
 from VeraGridEngine.Utils.Symbolic import symbolic_ml
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 
-OUTPUT = Path(__file__).with_name("gfl_dae_dynamic_transform.png")
+OUTPUT = Path(__file__).resolve().parents[1] / "simulation_data" / "experiments" / "gfl_dae_dynamic_transform" / "comparison.png"
 NOISE_SEED = 20260914
 LIFTED_CONTROLLER_VARIABLES = {
     "i_q_ref",
@@ -166,6 +166,7 @@ def main() -> None:
     for axis in axes:
         axis.grid(alpha=0.3)
     figure.suptitle("Fully promoted multilinear GFL DAE")
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(OUTPUT, dpi=180)
     plt.close(figure)
 

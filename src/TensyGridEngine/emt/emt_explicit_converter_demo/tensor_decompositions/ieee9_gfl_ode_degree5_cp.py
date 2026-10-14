@@ -14,7 +14,7 @@ from tensorly.decomposition import parafac
 from TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_degree5_tt import (
     CONVERTERS, NETWORK, degree_five_block,
 )
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 
 
 def evaluate_group_cp(weights, factors, grouped_values):

@@ -1,8 +1,9 @@
 """IEEE 9 connectivity with resistive lines and two GFL ODE generators.
 
-This deliberately uses a resistive network surrogate rather than the standard
-pi-line EMT model: its algebraic subsystem can be eliminated exactly. The
-slack source uses sine/cosine states to keep the model multi-affine.
+The default experiment uses resistive line surrogates. The separate
+``ieee9_gfl_ode_pi_explicit_probe`` retains the IEEE-9 EMT pi-line templates
+and their dynamic line states. The slack source uses sine/cosine states to
+keep the model multi-affine.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ from __future__ import annotations
 import argparse
 import numpy as np
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_grid import (
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_grid import (
     attach_gfl_ode_generator,
 )
 from TensyGridEngine.emt.emt_ieee9 import (
@@ -53,7 +54,8 @@ def attach_resistive_line(grid, line) -> None:
     set_emt_model(line, block, grid.var_factory)
 
 
-def attach_oscillating_slack(grid, generator, voltage: complex) -> None:
+def attach_oscillating_slack(grid, generator, voltage: complex,
+                             injection_phasor: complex = 0j) -> None:
     """Replace the synchronous slack machine with a Norton oscillator."""
     vf = grid.var_factory
     voltage_refs = (Ref.v_A, Ref.v_B, Ref.v_C)
@@ -71,6 +73,8 @@ def attach_oscillating_slack(grid, generator, voltage: complex) -> None:
     conductance = 1000.0
     angle = float(np.angle(voltage))
     amplitude = float(np.sqrt(2.0) * abs(voltage))
+    current_peak = float(np.sqrt(2.0) * abs(injection_phasor))
+    current_angle = float(np.angle(injection_phasor))
     shifts = (0.0, -2.0 * np.pi / 3.0, 2.0 * np.pi / 3.0)
     block = Block(
         name="ieee9_oscillating_slack",
@@ -83,20 +87,37 @@ def attach_oscillating_slack(grid, generator, voltage: complex) -> None:
         algebraic_vars=injection,
         algebraic_eqs=[current - Const(conductance) * (source - bus)
                         for current, source, bus in zip(injection, sine, bus_voltage)],
-        init_eqs={**{state: Const(amplitude * np.sin(angle + shift))
+        # The bus voltage is initialized from power flow. The Norton source
+        # needs an internal voltage phasor offset I/G to inject the power-flow
+        # slack current. Seed both sine and cosine quadratures; seeding only
+        # sine makes the oscillator's first derivative inconsistent and gives
+        # a spurious 50 Hz voltage-envelope transient.
+        init_eqs={**{state: Const(amplitude * np.sin(angle + shift)
+                                        + current_peak * np.sin(current_angle + shift) / conductance)
                      for state, shift in zip(sine, shifts)},
-                   **{state: Const(amplitude * np.cos(angle + shift))
+                   **{state: Const(amplitude * np.cos(angle + shift)
+                                        + current_peak * np.cos(current_angle + shift) / conductance)
                       for state, shift in zip(cosine, shifts)}},
     )
     block.external_mapping = {variable.ref: variable for variable in bus_voltage + injection}
     set_emt_model(generator, block, grid.var_factory)
 
 
-def build_problem() -> EmtProblemLinearReduced:
+def build_problem(*, use_pi_lines: bool = False,
+                  replace_zero_line_B: float | None = None,
+                  first_gfl_power_scale: float = 1.0) -> EmtProblemLinearReduced:
+    """Assemble the experiment; optionally change charging or one GFL setpoint."""
     grid = build_ieee9_grid()
+    if replace_zero_line_B is not None:
+        if not use_pi_lines or replace_zero_line_B <= 0.0:
+            raise ValueError("Positive replacement charging requires pi lines")
+        for line in grid.lines:
+            if abs(float(line.B)) < 1e-15:
+                line.B = replace_zero_line_B
     attach_emt_models(grid)
-    for line in grid.lines:
-        attach_resistive_line(grid, line)
+    if not use_pi_lines:
+        for line in grid.lines:
+            attach_resistive_line(grid, line)
 
     power_flow_options = build_power_flow_options()
     balanced = PowerFlowDriver(grid=grid, options=power_flow_options)
@@ -107,11 +128,23 @@ def build_problem() -> EmtProblemLinearReduced:
         raise RuntimeError("IEEE 9 power flow did not converge")
 
     slack = next(generator for generator in grid.generators if generator.bus.is_slack)
-    slack_voltage = complex(balanced.results.voltage[grid.buses.index(slack.bus)])
-    attach_oscillating_slack(grid, slack, slack_voltage)
-    for generator in grid.generators:
+    slack_index = grid.buses.index(slack.bus)
+    slack_voltage = complex(balanced.results.voltage[slack_index])
+    slack_power = complex(balanced.results.Sbus[slack_index]) / grid.Sbase
+    slack_injection = np.conj(slack_power / slack_voltage)
+    attach_oscillating_slack(grid, slack, slack_voltage, slack_injection)
+    first_gfl = True
+    for generator_index, generator in enumerate(grid.generators):
         if not generator.bus.is_slack:
-            attach_gfl_ode_generator(grid, generator, network_current_copies=True)
+            voltage = complex(balanced.results.voltage[grid.buses.index(generator.bus)])
+            reactive_power = float(balanced.results.gen_q[generator_index])
+            attach_gfl_ode_generator(
+                grid, generator, network_current_copies=True,
+                operating_voltage=voltage,
+                operating_reactive_power=reactive_power,
+                power_reference_scale=first_gfl_power_scale if first_gfl else 1.0,
+            )
+            first_gfl = False
 
     return EmtProblemLinearReduced(
         grid=grid,

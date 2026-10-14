@@ -1,17 +1,24 @@
 """Exercise the experimental dynamic multilinear current limiter."""
 
 from pathlib import Path
+import sys
+
+# Allow direct execution by file path as well as `python -m` from the repo.
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode_time_inputs import (
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.gfl_ode_time_inputs import (
     build_gfl_ode_problem,
     runtime_input_traces,
 )
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.simulation_data import case_dir, save_case_data
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var, heaviside, sin
 
-OUTPUT = Path(__file__).with_name("gfl_ode_dynamic_limiter.png")
+OUTPUT_DIR = case_dir("standalone_gfl_ode")
+OUTPUT = OUTPUT_DIR / "comparison.png"
 
 
 def main() -> None:
@@ -42,7 +49,18 @@ def main() -> None:
     )
     S, phi = problem.build_multilinear_matrices()
     result = problem.simulate()
+    if not result.initialized or not result.converged:
+        raise RuntimeError("Standalone GFL simulation failed")
     inputs = runtime_input_traces(problem, result.time)
+    state_vars = problem.get_state_vars()
+    input_names = [variable.name for variable in problem.sys_block.in_vars]
+    save_case_data(
+        OUTPUT_DIR, S=S, Phi=phi, time=result.time,
+        states=np.column_stack([problem.trace(result, variable) for variable in state_vars]),
+        state_names=[variable.name for variable in state_vars],
+        inputs=np.column_stack([inputs[name] for name in input_names]),
+        input_names=input_names,
+    )
 
     iq_limited = problem.trace(result, "i_q_ref_sat_out")
     id_limited = problem.trace(result, "i_d_ref_sat_out")

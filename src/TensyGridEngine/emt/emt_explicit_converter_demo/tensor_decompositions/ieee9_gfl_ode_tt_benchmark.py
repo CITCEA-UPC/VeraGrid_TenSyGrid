@@ -12,7 +12,7 @@ from time import perf_counter
 
 import numpy as np
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.ieee9_gfl_ode_reduced import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_gfl_ode_reduced import build_problem
 from TensyGridEngine.emt.emt_explicit_converter_demo.tensor_decompositions.ieee9_gfl_ode_degree5_tt import (
     evaluate_tt, tt_svd,
 )

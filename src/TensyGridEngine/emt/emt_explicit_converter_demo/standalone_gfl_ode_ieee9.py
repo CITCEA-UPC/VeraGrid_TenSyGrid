@@ -15,7 +15,8 @@ Beginner's map of this example
    or power references. ``CASES`` selects which expressions to simulate.
 3. SOLVE: ``problem.simulate()`` returns sampled time, model values, and solver
    status. The runs use the same random seed for repeatability.
-4. SAVE: ``save_case`` creates a folder per case in ``OUTPUT_DIR`` with four
+4. SAVE: ``save_case`` creates a folder per disturbance in
+   ``simulation_data/standalone_gfl_ode_ieee9`` with four
    MATLAB data files: ``S.mat``, ``Phi.mat``, ``inputs.mat``, and
    ``states.mat``. The plot is ``OUTPUT_DIR/comparison.png``.
    ``inputs.mat`` contains ``time``, ``inputs``, and ``input_names``.
@@ -23,7 +24,8 @@ Beginner's map of this example
    Column j of ``inputs`` has name ``input_names{j}``; column j of ``states``
    has name ``state_names{j}``. Rows in both arrays follow ``time``.
 
-Run with:  PYTHONPATH=src /home/pablo/myenv/bin/python <this file>
+Run from the repository root with:
+    PYTHONPATH=src python -m TensyGridEngine.emt.emt_explicit_converter_demo.standalone_gfl_ode_ieee9
 In MATLAB: x = load('random_phase_voltage_changes/states.mat');
            plot(x.time, x.states(:,1))
            x.state_names{1}  % name of the plotted state
@@ -43,16 +45,17 @@ import numpy as np
 from scipy.io import savemat
 
 from TensyGridEngine.emt import ieee9_emt_ibr_simulation as ieee9
-from TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode_time_inputs import (
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.gfl_ode_time_inputs import (
     build_gfl_ode_problem,
     runtime_input_traces,
 )
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.simulation_data import case_dir
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var, cos, heaviside, rand, sin
 
 
-# Put all generated files beside this script, in one clearly named folder.
-OUTPUT_DIR = Path(__file__).with_name("ieee9_gfl_ode_noise_results")
+# Each disturbance gets a folder under this standalone simulation.
+OUTPUT_DIR = case_dir("standalone_gfl_ode_ieee9")
 NOISE_SEED = 20260914       # Makes random disturbances repeatable between runs.
 SIMULATION_TIME = 0.15      # Seconds of simulated physical time, not wall time.
 FIXED_DC_VOLTAGE_PU = 1.03  # Stiff DC voltage used by the IEEE9 GFL adapter.

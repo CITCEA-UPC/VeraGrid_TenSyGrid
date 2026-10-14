@@ -16,18 +16,18 @@ from pathlib import Path
 import sys
 
 if __name__ == "__main__":
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.io import savemat
 
-from TensyGridEngine.emt.emt_explicit_converter_demo.gfl_ode_time_inputs import build_gfl_ode_problem
-from TensyGridEngine.emt.emt_explicit_converter_demo.single_model_time_inputs import build_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.gfl_ode_time_inputs import build_gfl_ode_problem
+from TensyGridEngine.emt.emt_explicit_converter_demo.experiments.single_model_time_inputs import build_problem
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var, heaviside, sin
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 
-OUTPUT_DIR = Path(__file__).with_name("gfl_ode_model_comparison")
+OUTPUT_DIR = Path(__file__).resolve().parents[1] / "simulation_data" / "experiments" / "gfl_ode_model_comparison"
 P0 = 0.25                 # Initial active power (pu).
 Q0 = 0.02                 # Initial reactive power (pu).
 VDC0 = 2.0                # Initial DC voltage (pu).
