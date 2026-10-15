@@ -182,21 +182,32 @@ class EmtProblemMultilinear(EmtProblemDae):
         self.Phi = Phi
         return S, Phi
 
-    def build_multilinear_matrices_fast(self) -> tuple[sparse.csc_matrix, sparse.csr_matrix]:
+    def build_multilinear_matrices_fast(
+        self, *, symbolic_inputs: list[Var] | None = None,
+    ) -> tuple[sparse.csc_matrix, sparse.csr_matrix]:
         """Build S/Phi directly from polynomial coefficient maps.
 
         Each monomial is a tuple of distinct basis-variable indices. With
         ``options.explicit``, the basis is states followed by model inputs;
         otherwise it includes states, algebraics and derivative variables.
+        ``symbolic_inputs`` keeps selected runtime parameters as extra basis
+        variables during extraction, allowing a grid reduction to retain an
+        event reference instead of fixing it to its current numeric value.
         """
         self._ensure_multilinear_index_cache()
         explicit = getattr(self.options, "explicit", False)
         if explicit and (self._algebraic_vars or len(self._state_eqs) != len(self._state_vars)):
             raise ValueError("Explicit S/Phi requires one state equation per state and no algebraic variables")
-        input_vars = list(self.sys_block.in_vars) if explicit else []
+        input_vars = (list(self.sys_block.in_vars) if explicit else [])
+        if symbolic_inputs:
+            known_uids = {var.uid for var in input_vars}
+            for variable in symbolic_inputs:
+                if variable.uid not in known_uids:
+                    input_vars.append(variable)
+                    known_uids.add(variable.uid)
         input_uids = {variable.uid for variable in input_vars}
         basis = ([*self._state_vars, *input_vars] if explicit
-                 else self._ml_all_basis_vars)
+                 else [*self._ml_all_basis_vars, *input_vars])
         uid_to_idx = {variable.uid: index for index, variable in enumerate(basis)}
         parameters = {
             variable.uid: float(value)
@@ -296,7 +307,8 @@ class EmtProblemMultilinear(EmtProblemDae):
             (p_values, (p_rows, p_cols)),
             shape=(len(equations), len(monomials)),
         )
-        self.S, self.Phi = S, Phi
+        if not symbolic_inputs:
+            self.S, self.Phi = S, Phi
         return S, Phi
 
     def linearize_matrices(self) -> tuple[sparse.csr_matrix, sparse.csc_matrix]:

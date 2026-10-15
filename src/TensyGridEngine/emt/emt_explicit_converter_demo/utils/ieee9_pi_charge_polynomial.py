@@ -26,12 +26,40 @@ def multiply(left, right):
     return product
 
 
-def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
+def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0,
+            symbolic_first_gfl_reference=False, symbolic_references=()):
+    """Assemble the grid DAE, then eliminate it into polynomial ODE rows.
+
+    This is the indirect ``build_problem`` call used by ieee9_full_explicit.py.
+    ``output[i]`` maps a tuple of reduced-state indices to its coefficient in
+    dz_i/dt. For example, ``(2, 7): c`` means ``c*z_2*z_7``. When the first
+    GFL reference stays symbolic, mode 103 is its P_ref input.
+    """
+    # The original device equations live in the EMT templates. build_problem
+    # attaches them to the MultiCircuit and assembles the full grid DAE.
     problem = build_problem(use_pi_lines=True, replace_zero_line_B=replacement_B,
                             first_gfl_power_scale=first_gfl_power_scale)
     states = problem.get_state_vars()
     n, m = len(states), len(problem.get_algebraic_vars())
-    S, Phi = problem.build_multilinear_matrices_fast()
+    # Extract the assembled DAE as polynomial terms. State rows are ODE RHSs;
+    # algebraic rows contain KCL and device constraints to be eliminated.
+    references = list(symbolic_references)
+    if symbolic_first_gfl_reference:
+        references.insert(0, ("gen 1", "P_ref"))
+    reference_vars = []
+    for generator_name, parameter_name in dict.fromkeys(references):
+        generator = next((g for g in problem.grid.generators if g.name == generator_name), None)
+        if generator is None or generator.emt_model is None:
+            raise ValueError(f"Unknown EMT generator {generator_name!r}")
+        matches = [var for var in generator.emt_model.event_dict
+                   if var.name == parameter_name]
+        if len(matches) != 1:
+            raise ValueError(f"Expected one {parameter_name!r} on {generator_name!r}")
+        reference_vars.append(matches[0])
+    problem.explicit_input_keys = list(dict.fromkeys(references))
+    problem.explicit_input_vars = reference_vars
+    S, Phi = problem.build_multilinear_matrices_fast(
+        symbolic_inputs=reference_vars or None)
     monomials = [tuple(map(int, S.indices[S.indptr[j]:S.indptr[j + 1]]))
                  for j in range(S.shape[1])]
     A = np.zeros((m, m))
@@ -53,6 +81,8 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
             else:
                 raise ValueError(f"Nonlinear algebraic term: {term}")
 
+    # Replace each π-line terminal-charge state by q = Q*v. The resulting
+    # reduced coordinates are non-charge dynamic states plus 27 bus voltages.
     charge = np.array([i for i, state in enumerate(states)
                        if state.name.startswith(("q_f_", "q_t_"))])
     dynamic = np.array([i for i in range(n) if i not in set(charge)])
@@ -71,6 +101,7 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
         raise ValueError("Bus-voltage replacement needs all 27 charged modes")
 
     z_count = len(dynamic) + 27
+    reference_modes = {n + m + i: z_count + i for i in range(len(reference_vars))}
     z_index = {int(index): position for position, index in enumerate(dynamic)}
     x_poly = [{} for _ in range(n)]
     for index in dynamic:
@@ -90,10 +121,14 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
         for index in term:
             if index < n:
                 x_part = multiply(x_part, x_poly[index])
-            else:
+            elif index < n + m:
                 if y_index is not None:
                     raise ValueError(f"Multiple algebraics in state term: {term}")
                 y_index = index - n
+            elif index in reference_modes:
+                x_part = multiply(x_part, {(reference_modes[index],): 1.0})
+            else:
+                raise ValueError(f"Unexpected variable in state term: {term}")
         target = state_only[row] if y_index is None else state_y[row][y_index]
         for key, value in x_part.items():
             add(target, key, value)
@@ -102,6 +137,8 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
             charge_current[i, j] = state_y[row][col].get((), 0.0)
             if any(key for key in state_y[row][col]):
                 raise ValueError("State-dependent charge-current coefficient")
+    # This constant matrix solves the remaining algebraic device/network
+    # equations and the voltage derivatives after charge substitution.
     matrix = np.block([
         [A[np.ix_(remaining, other)], np.zeros((len(remaining), 27))],
         [charge_current, -Q],
@@ -138,6 +175,8 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
                        if value != 0})
     y_poly += v_poly
 
+    # Substitute that solve into the differential equations. `output` is the
+    # final explicit ODE, still stored as sparse polynomial coefficient maps.
     output = [dict(state_only[row]) for row in dynamic]
     for out_row, source_row in enumerate(dynamic):
         for j in range(m):
@@ -148,6 +187,40 @@ def extract(*, replacement_B=0.1, first_gfl_power_scale=1.0):
         output.append({key: float(value) for key, value in zip(keys, solution[len(other) + j])
                        if value != 0})
     return problem, output, dynamic, charge, Q, matrix
+
+
+def specialize_reference(output, reference_value):
+    """Fix the one input mode (index len(output)) without reducing the grid again."""
+    reference_mode = len(output)
+    specialized = []
+    for row in output:
+        fixed_row = {}
+        for support, coefficient in row.items():
+            if reference_mode in support:
+                reduced_support = tuple(index for index in support if index != reference_mode)
+                add(fixed_row, reduced_support, coefficient * reference_value)
+            else:
+                add(fixed_row, support, coefficient)
+        specialized.append(fixed_row)
+    return specialized
+
+
+def specialize_inputs(output, values):
+    """Fix input modes len(output), len(output)+1, ... at supplied values."""
+    specialized = []
+    for row in output:
+        fixed_row = {}
+        for support, coefficient in row.items():
+            remaining = []
+            value = coefficient
+            for mode in support:
+                if mode < len(output):
+                    remaining.append(mode)
+                else:
+                    value *= values[mode - len(output)]
+            add(fixed_row, tuple(remaining), value)
+        specialized.append(fixed_row)
+    return specialized
 
 
 def exact_monomial_cp(output, *, tolerance=1e-10):

@@ -2,15 +2,19 @@
 
 Beginner's map
 --------------
-1. MODEL: ``extract`` assembles IEEE-9 π lines and two GFL converters, then
-   substitutes terminal charge and bus KCL to obtain a 103-state ODE.
+1. MODEL: this script calls ``extract`` in ``utils/ieee9_pi_charge_polynomial.py``.
+   That helper calls ``build_problem`` in ``utils/ieee9_gfl_ode_reduced.py``
+   to assemble the IEEE-9 device and network equations. ``extract`` then
+   eliminates charge constraints and network algebraics to obtain a 103-state
+   polynomial ODE. ``build_native_problem`` in ``utils/ieee9_pi_charge_native.py``
+   turns its coefficient maps into the Block equations that we simulate.
 2. EVENT: a grid ``EmtEvent`` raises generator 1's active-power reference.
 3. SOLVE: one native ``EmtModelProblem.simulate()`` call spans the event.
-4. SAVE: ``simulation_data/ieee9_full_explicit`` contains pre/post-event
-   S/Phi matrices, named input and state traces, an NPZ, and a plot.
+4. SAVE: ``simulation_data/ieee9_full_explicit`` contains one input-aware
+   S/Phi pair, named input and state traces, an NPZ, and a plot.
 
 The three original zero-charging lines use B=0.1, as in the charge-reduction
-experiment. An EmtEvent changes the first GFL's P-reference scale at 0.05 s.
+experiment. An EmtEvent changes the first GFL's P_ref directly at 0.05 s.
 The complete 103-coordinate ODE is integrated without phase projection.
 """
 
@@ -28,17 +32,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.io import savemat
 
 from TensyGridEngine.emt.emt_explicit_converter_demo.experiments.ieee9_pi_charge_event_timeseries import (
     balanced_groups, compile_terms, phase_rms, polynomial_rhs,
 )
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_native import build_native_problem
-from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_polynomial import extract
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_polynomial import extract, specialize_reference
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.explicit_input_events import ExplicitInputEvents
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.simulation_data import case_dir, save_case_data
-from VeraGridEngine.Devices.Events.emt_event import EmtEvent
-from VeraGridEngine.Devices.Events.emt_events_group import EmtEventsGroup
-from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
 from VeraGridEngine.enumerations import EmtSolverTypes
 
 
@@ -51,12 +52,28 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
     output_dir = Path(output_dir) if output_dir is not None else case_dir("ieee9_full_explicit")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # MODEL: assemble and extract both parameter values of the same grid.
-    full, before, dynamic, charges, Q, _ = extract(replacement_B=0.1)
-    _, after, dynamic_after, _, _, _ = extract(
-        replacement_B=0.1, first_gfl_power_scale=1.0 + power_step)
-    if not np.array_equal(dynamic, dynamic_after):
-        raise RuntimeError("Reduced state ordering changed after the power event")
+    # MODEL CALL CHAIN: extract() calls build_problem() to assemble the original
+    # IEEE-9 EMT DAE from π-line, converter, and source templates. It then
+    # eliminates terminal-charge constraints and network algebraic variables.
+    # `output` contains all 103 RHS polynomials. Its final mode is the first
+    # GFL's actual P_ref, carried symbolically through this ONE grid reduction.
+    events = ExplicitInputEvents("first_gfl_P_reference_step")
+    # Register event-controlled references before extraction. This makes each
+    # reference a symbolic input mode in the reduced ODE and in S/Phi.
+    nominal_power = 1.63  # IEEE-9 gen 1 active power, pu on the grid base.
+    stepped_power = nominal_power * (1.0 + power_step)
+    events.add_event_to_inputs(
+        generator="gen 1", parameter="P_ref", time=event_time,
+        value=stepped_power, name="first GFL P reference +10%")
+    full, output, dynamic, charges, Q, _ = extract(
+        replacement_B=0.1, symbolic_references=events.references)
+    first_gfl = next(generator for generator in full.grid.generators
+                     if not generator.bus.is_slack)
+    nominal_power = first_gfl.P / full.grid.Sbase
+    stepped_power = nominal_power * (1.0 + power_step)
+    # The initialized grid parameter must match the generator operating point.
+    if not np.isclose(events.initial_values(full)[0], nominal_power):
+        raise RuntimeError("Extracted P_ref differs from the grid operating point")
     n, m = len(full.get_state_vars()), len(full.get_algebraic_vars())
     # The slack Norton source is initialized to supply the PF current, so
     # the raw model initialization can be used directly here.
@@ -67,32 +84,27 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
         raise RuntimeError(f"Initial charge inconsistency: {charge_error:.3e}")
 
     solver_enum = getattr(EmtSolverTypes, solver_type)
-    native = build_native_problem(before, z0, step=step, event_output=after,
-                                  event_step=power_step, solver_type=solver_enum,
+    # This is where the reduced polynomial becomes executable equations:
+    # build_native_problem creates z_0,...,z_102 and one symbolic RHS per z_i,
+    # stores those expressions in Block.state_eqs, and wraps the Block in an
+    # EmtModelProblem. `.simulate()` below integrates that Block, not the
+    # original grid DAE returned by extract().
+    input_names, input_values = events.input_names, events.initial_values(full)
+    native = build_native_problem(output, z0, step=step,
+                                  input_names=input_names, input_values=input_values,
+                                  solver_type=solver_enum,
                                   explicit=True)
     native.options.simulation_time = end_time
-    native.grid = full.grid
-    first_gfl = next(generator for generator in full.grid.generators
-                     if not generator.bus.is_slack)
-    nominal_power = first_gfl.P / full.grid.Sbase
-    # EVENT: VeraGrid updates the runtime scale in one continuous simulation.
-    group = EmtEventsGroup(name="first_gfl_P_reference_step")
-    full.grid.add_emt_events_group(group)
-    full.grid.add_emt_event(EmtEvent(
-        name="first GFL P reference +10%", device=first_gfl,
-        parameter=native.event_scale_var, time=event_time,
-        value=1.0 + power_step, group=group, force_step_alignment=True,
-    ))
-    # EmtModelProblem bypasses the network constructor, but the generic EMT
-    # event machinery can use its attached grid and matching runtime Var UID.
-    EmtProblemTemplate.set_events_group(native, group)
-    event_index = native.uid2idx_event_params[native.event_scale_var.uid]
-    before_scale = native.def_event_params_fn(native.event_params_values.copy(),
-                                              event_time - step)[event_index]
-    after_scale = native.def_event_params_fn(native.event_params_values.copy(),
-                                             event_time + step)[event_index]
-    if not (np.isclose(before_scale, 1.0) and np.isclose(after_scale, 1.0 + power_step)):
-        raise RuntimeError(f"Grid event did not update the reduced runtime parameter: {before_scale=}, {after_scale=}")
+    # EVENT: the helper binds the declared grid events to the reduced inputs.
+    events.install(full, native)
+    reference_var = native.input_vars_by_name[input_names[0]]
+    event_index = native.uid2idx_event_params[reference_var.uid]
+    before_ref = native.def_event_params_fn(native.event_params_values.copy(),
+                                            event_time - step)[event_index]
+    after_ref = native.def_event_params_fn(native.event_params_values.copy(),
+                                           event_time + step)[event_index]
+    if not (np.isclose(before_ref, nominal_power) and np.isclose(after_ref, stepped_power)):
+        raise RuntimeError(f"Grid event did not update P_ref: {before_ref=}, {after_ref=}")
     # SOLVE: native symbolic EMT integration uses the initialized ODE slopes.
     print(f"starting native .simulate(): step={step:g} s, samples≈{end_time / step:.0f}", flush=True)
     result = native.simulate(t0=0.0, t_end=end_time)
@@ -116,46 +128,38 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
     max_zero_sequence = max(float(np.max(abs(np.mean(state[:, indices], axis=1))))
                             for indices in groups)
 
-    # SAVE: the event parameter is one during the first segment and 1.1
-    # afterwards. Save its evaluated trace alongside the named ODE states.
-    scale_trace = np.array([
+    # Save the actual P_ref trace and its convenient dimensionless scale.
+    reference_trace = np.array([
         native.def_event_params_fn(native.event_params_values.copy(), float(t))[event_index]
         for t in time
     ])
+    scale_trace = reference_trace / nominal_power
     state_names = [f"{full.get_state_vars()[index].name}_{index}" for index in dynamic]
     state_names += [f"v_{bus.name}_{phase}" for bus in full.grid.buses for phase in "ABC"]
     S, Phi = native.build_multilinear_matrices_fast()
-    # One input-aware S/Phi pair must reproduce both event regimes. Check it
-    # against the independently extracted coefficient maps at the initial state.
-    for scale, coefficients in ((1.0, before), (1.0 + power_step, after)):
-        basis = np.r_[z0, scale]
+    # Check the same input-aware S/Phi at both reference values. The event
+    # changes an input value, not the equations or their matrices.
+    for reference_value in (nominal_power, stepped_power):
+        basis = np.r_[z0, reference_value]
         monomials = np.asarray([
             np.prod(basis[S.indices[S.indptr[column]:S.indptr[column + 1]]])
             for column in range(S.shape[1])
         ])
-        expected = polynomial_rhs(z0, *compile_terms(coefficients))
+        fixed = specialize_reference(output, reference_value)
+        expected = polynomial_rhs(z0, *compile_terms(fixed))
         error = np.max(np.abs(np.asarray(Phi @ monomials).ravel() - expected))
         if error > 1e-7:
-            raise RuntimeError(f"Input-aware S/Phi mismatch at scale {scale:g}: {error:.3e}")
-    post_model = build_native_problem(after, z0, step=step, solver_type=solver_enum,
-                                      explicit=True)
-    S_after, Phi_after = post_model.build_multilinear_matrices_fast()
+            raise RuntimeError(f"Input-aware S/Phi mismatch at P_ref {reference_value:g}: {error:.3e}")
     save_case_data(
         output_dir, S=S, Phi=Phi, time=time, states=state,
         state_names=state_names,
-        inputs=np.column_stack((scale_trace, nominal_power * scale_trace)),
+        inputs=np.column_stack((scale_trace, reference_trace)),
         input_names=["first_gfl_power_scale", "gen_1_P_ref_pu"],
         basis_names=[var.name for var in native.get_state_vars()]
-                    + [native.event_scale_var.name],
+                    + [var.name for var in native.sys_block.in_vars],
         metadata={"event_time": event_time, "power_step": power_step,
                   "native_step": step, "replacement_line_B": 0.1},
     )
-    savemat(output_dir / "S_after.mat", {
-        "S": S_after,
-        "basis_names": np.asarray([var.name for var in post_model.get_state_vars()],
-                                  dtype=object).reshape(1, -1),
-    }, do_compression=True)
-    savemat(output_dir / "Phi_after.mat", {"Phi": Phi_after}, do_compression=True)
     data_path = output_dir / "timeseries.npz"
     plot_path = output_dir / "comparison.png"
     np.savez_compressed(data_path, time=time, state=state,
@@ -182,7 +186,7 @@ def main(*, event_time=0.05, end_time=0.2, power_step=0.10,
     plt.close(fig)
     event_sample = np.searchsorted(time, event_time)
     print(f"native samples={len(time)}, final time={time[-1]:.6g} s")
-    print(f"event scale={before_scale:g}->{after_scale:g} at {event_time:g} s")
+    print(f"event P_ref={before_ref:g}->{after_ref:g} pu at {event_time:g} s")
     print(f"gen 1 power pre/final={active_power[event_sample - 1, 0]:.6g}/{active_power[-1, 0]:.6g} pu")
     print(f"maximum ABC mean={max_zero_sequence:.3e}")
     print(f"plot={plot_path}\ndata={data_path}")

@@ -13,6 +13,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_polynomial import extract
+from TensyGridEngine.emt.emt_explicit_converter_demo.utils.ieee9_pi_charge_polynomial import specialize_inputs
 from TensyGridEngine.emt.emt_explicit_converter_demo.experiments.ieee9_pi_charge_event_timeseries import (
     compile_terms, polynomial_rhs,
 )
@@ -28,43 +29,60 @@ from VeraGridEngine.enumerations import (
 
 
 def build_native_problem(output, initial_state, *, step=2.5e-6,
-                         event_output=None, event_step=0.10,
+                         reference_value=None,
+                         input_names=(), input_values=(),
                          solver_type=EmtSolverTypes.Symbolic,
                          explicit=False):
-    """Create a state-only EMT Block from sparse polynomial coefficients."""
+    """Turn extract()'s sparse polynomial rows into a state-only EMT Block.
+
+    ``output[i]`` defines dz_i/dt. The polynomial map is the actual reduced
+    equation; this helper rebuilds it as symbolic expressions for .simulate().
+    """
     if len(output) != len(initial_state):
         raise ValueError("Initial state and polynomial output sizes differ")
     factory = VarFactory()
     states = [factory.add_var(f"z_{i}") for i in range(len(output))]
-    event_scale = factory.add_var("first_gfl_power_scale") if event_output is not None else None
+    if reference_value is not None:
+        if input_names or input_values:
+            raise ValueError("Use either reference_value or input_names/input_values")
+        input_names, input_values = ("first_gfl_P_ref",), (reference_value,)
+    if len(input_names) != len(input_values):
+        raise ValueError("Each symbolic input needs a name and initial value")
+    inputs = [factory.add_var(name) for name in input_names]
+    if any(mode >= len(states) + len(inputs) for row in output
+           for support in row for mode in support):
+        raise ValueError("Polynomial contains an unknown state/input index")
     differentials = [factory.add_diff_var(f"d_z_{i}", base_var=state)
                      for i, state in enumerate(states)]
     # Trapezoidal integration uses dx0 in its very first step. A zero seed
     # would give the rotating 50 Hz states an artificial half-step lag.
+    initial_polynomial = specialize_inputs(output, input_values)
     initial_derivative = polynomial_rhs(
-        np.asarray(initial_state, dtype=np.float64), *compile_terms(output))
+        np.asarray(initial_state, dtype=np.float64), *compile_terms(initial_polynomial))
+    # The final mode is the first GFL's actual P_ref (pu), carried through the
+    # grid reduction as a symbol. No second set of grid equations is needed.
     equations = []
     for index, row in enumerate(output):
         expression = Const(0.0)
-        changed = {} if event_output is None else event_output[index]
-        for support in row.keys() | changed.keys():
-            coefficient = row.get(support, 0.0)
-            slope = (changed.get(support, 0.0) - coefficient) / event_step if event_scale is not None else 0.0
-            if abs(coefficient) <= 1e-10 and abs(slope) <= 1e-10:
+        for support, coefficient in row.items():
+            if abs(coefficient) <= 1e-10:
                 continue
-            term = (Const(float(coefficient - slope)) + Const(float(slope)) * event_scale
-                    if abs(slope) > 1e-10 else Const(float(coefficient)))
+            term = Const(float(coefficient))
             for mode in support:
-                term = term * states[mode]
+                term = term * (inputs[mode - len(states)] if mode >= len(states)
+                               else states[mode])
             expression = expression + term
         equations.append(expression)
+    # These state_eqs are the final equations integrated by ieee9_full_explicit.
+    # P_ref is an input row in explicit S/Phi extraction, so one
+    # matrix pair represents both pre- and post-event equations.
     block = Block(
         name="ieee9_pi_charge_explicit",
         state_vars=states, diff_vars=differentials, state_eqs=equations,
         algebraic_vars=[], algebraic_eqs=[],
-        in_vars=[event_scale] if explicit and event_scale is not None else [],
+        in_vars=inputs if explicit else [],
         out_vars=[],
-        event_dict={event_scale: Const(1.0)} if event_scale is not None else {},
+        event_dict={var: Const(float(value)) for var, value in zip(inputs, input_values)},
         init_eqs={state: Const(float(value)) for state, value in zip(states, initial_state)},
         diff_init_eqs={differential: Const(float(value))
                        for differential, value in zip(differentials, initial_derivative)},
@@ -77,7 +95,8 @@ def build_native_problem(output, initial_state, *, step=2.5e-6,
         initialization_method=EmtInitializationMethod.Explicit,
     )
     problem = EmtModelProblem(block, inputs={}, options=options)
-    problem.event_scale_var = event_scale
+    problem.reference_var = inputs[0] if len(inputs) == 1 else None
+    problem.input_vars_by_name = dict(zip(input_names, inputs))
     return problem
 
 
