@@ -65,16 +65,16 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Actor.] Network operator or planning engineer.
   \item[Objective.] Load a grid model and compute its small-signal stability properties using the tensor-based multilinear formulation.
   \item[Preconditions.]
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item The TenSyGrid Stability Monitor is running and accessible via a web browser.
           \item At least one valid grid model file (in \texttt{.veragrid} format) is available in the grids directory.
           \item The computational environment (virtual environment with required dependencies) is properly configured.
         \end{itemize}
 
   \item[Theoretical basis.] Given an $\mathbf{E}\dot{\mathbf{x}}-\mathbf{A}\mathbf{x}=0$ iMTI model of the system, eigenvalues $\lambda\in\mathbb{C}$ arising from the generalized eigenvalue problem $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$. $\lambda$ can be expressed as a linear combination of its real and imaginary part, being $\sigma$ the real --if it is positive, it indicates instability while negative indicates damping-- and $\omega$ the angular speed of oscillation such that $f=\omega/(2\pi)$. Therefore, we want that $\sigma$ to be negative. Nevertheless, the system response should be quick enough to be physically acceptable. Because of that, we define the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$.
-  \item[Possible bottlenecks.] No multilinear implementation of a model yet. Scaling issues to be determined.
+  \item[Possible bottlenecks.] No multilinear implementation of a model yet~\cite{deJuanVela2026TenSyGridD33}. Scaling issues to be determined.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator opens the \textbf{Run Simulation} tab.
           \item The dropdown list is populated with all available \texttt{.veragrid} files. The operator selects the desired grid.
           \item The operator clicks the \textbf{Run Simulation} button.
@@ -114,10 +114,10 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
         Therefore, if $\sigma_1>0$, the dominant term blows up to positive infinity, causing a clear instability, whereas $\sigma_1<0$ drives all modes to decay. The remaining singular case is a null eigenvalue $\lambda=0$ ($\sigma=\omega=0$): the argument above rests on the gap $\sigma_1-\sigma_n>0$, but here $\sigma_1=\sigma_n=0$ makes the exponent $\lambda_n-\lambda_1$ vanish, so the ratio does not tend to zero and the mode is not negligible relative to the dominant one. This equilibrium mode neither decays nor grows, i.e.\ a marginally stable regime that the dashboard classifies as \emph{yellow}. It is important, however, to distinguish this genuine marginal mode from spurious null eigenvalues that arise purely from the algebraic structure of the generalised eigenproblem $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$: whenever the leading matrix $\mathbf{E}$ (or the pencil $\lambda\mathbf{E}-\mathbf{A}$) is singular, the spectrum contains null eigenvalues that are not associated with any decaying, growing, or oscillating dynamic mode. These structural zeros must be identified and excluded before classifying the system, so that the \emph{yellow} verdict is reserved for actual marginal dynamics.
     \item{Possible bottlenecks.} To identify the origin of zero eigenvalues that lead to an inconclusive response.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Status \& Forecast} tab.
           \item A traffic lights-like indicator displays the overall stability classification:
-                \begin{itemize}
+                \begin{itemize}[before=\leavevmode, leftmargin=*]
                   \item \textbf{Green} --- Stable: all eigenvalues have negative real parts with sufficient damping.
                   \item \textbf{Yellow} --- Marginal: the stability margin is below a predefined threshold ($<10^{-3}$) or some modes exhibit low damping ($\zeta < 0.05$).
                   \item \textbf{Red} --- Unstable: at least one eigenvalue has a positive real part.
@@ -148,7 +148,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Preconditions.] A simulation (UC-01) has been completed.
   \item[Theoretical basis.] Each oscillation mode is represented by a conjugate pair of eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay-or-growth and $\omega$ the angular frequency, so that $f=\omega/(2\pi)$ is the frequency in Hz. In the complex plane, the ratio of $\sigma$ to $|\lambda|$ gives the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$, which equals the cosine of the mode's angle with the negative real axis: $\zeta=\cos\theta$. Constant-damping loci therefore appear as straight lines (cones) through the origin, which is precisely what the threshold lines used in this view (e.g.\ $\zeta=0$ and $\zeta=0.05$) represent. Modes close to the imaginary axis $\sigma\approx 0$ fall inside the low-damping cone and are flagged as the ones of concern; From UC-01 theoretical basis, this view adds a frequency-domain perspective: the spectrum is inspected to identify which modes concentrate the disturbance. From control theory, the participation factors $p_{ki}=\dfrac{\lvert v_{ki}w_{ki}\rvert}{\lvert w_k^{\top}\mathbf{E}v_k\rvert}$ (with $v_k$ and $w_k$ the right and left eigenvectors of the pencil) quantify how much each state variable contributes to a given mode, linking each critical frequency to the plant that is responsible for it, since every device exhibits a characteristic dynamic behaviour. This attribution, however, is the object of UC-04.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Eigenvalues} tab.
           \item A full-page complex-plane scatter plot displays all eigenvalues: horizontal axis = real part $\sigma$, vertical axis = imaginary part $\omega$ (angular frequency). A red dashed vertical line marks the stability boundary ($\sigma = 0$).
           \item The operator can \textbf{scroll to zoom} and \textbf{drag to pan} across the plot, allowing inspection of dense clusters or outlying modes.
@@ -179,7 +179,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Theoretical basis.] Each eigenvalue corresponds to an oscillation mode that is a specific combination of perturbations in the state vector. The participation factor $p_{ki}=\dfrac{\lvert v_{ki}w_{ki}\rvert}{\lvert w_k^{\top}\mathbf{E}v_k\rvert}$ quantifies the joint contribution of the $k$-th mode to the $i$-th state variable and vice versa: $v_k$ and $w_k$ are the right and left eigenvectors of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$, satisfying $\mathbf{A}v_k=\lambda_k\mathbf{E}v_k$ and $w_k^{\top}\mathbf{A}=\lambda_k w_k^{\top}\mathbf{E}$, and $v_{ki}=e_i^{\top}v_k$, $w_{ki}=w_k^{\top}e_i$ denote their $i$-th components, with $e_i$ the $i$-th canonical vector. A large $p_{ki}$ means that the $k$-th mode strongly excites the $i$-th state, and that state in turn strongly feeds the mode back, making it a primary candidate for intervention (PSS retuning, FACTS placement).
   \item[Possible bottlenecks.] In sparse computations of the eigenvalues is difficult to compute their corresponding left and right eigenvectors that are both needed for this UC.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Critical Modes} tab.
           \item A table lists the modes with the lowest damping ratios, sorted from most to least critical. Each row shows the mode index, real part, imaginary part, frequency, damping ratio, and a stability badge.
           \item The operator clicks on a mode row to expand its \textbf{participation factors}.
@@ -207,11 +207,11 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Preconditions.] A simulation (UC-01) has been completed and the power-flow solution is available.
   \item[Theoretical basis.] The power-flow solution provides the steady-state voltage magnitude and angle at each bus of the network. The per-unit voltage magnitude $V_\mathrm{p.u.}$ is compared against operational limits: normal operating range (e.g.\ $0.95$--$1.05$ p.u.) and emergency limits (e.g.\ $0.90$--$1.10$ p.u.). Buses outside the normal range but within emergency limits are flagged as WARNING; buses beyond emergency limits would indicate a severe violation. This snapshot check complements the eigenvalue-based stability assessment: a system can be small-signal stable yet have unacceptable voltage profiles, especially in weak or converter-heavy networks.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Bus Voltages} tab.
           \item A table lists every bus in the network with its name (or index) and its voltage magnitude in per-unit (p.u.).
           \item Each bus row carries a colour-coded status badge:
-                \begin{itemize}
+                \begin{itemize}[before=\leavevmode, leftmargin=*]
                   \item \textbf{OK} (green) --- voltage is within the normal operating range (e.g., $0.95$--$1.05$ p.u.).
                   \item \textbf{WARNING} (orange) --- voltage is outside the normal range but within emergency limits (e.g., $0.90$--$1.10$ p.u.).
                 \end{itemize}
@@ -260,13 +260,13 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Actor.] Network operator or planning engineer.
   \item[Objective.] Evaluate the impact of a single-element outage (generator, line, or load) on the small-signal stability of the grid.
   \item[Preconditions.]
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item A base-case simulation (UC-01) has been completed and serves as the pre-contingency reference.
           \item The grid model contains the values of the element to be removed.
         \end{itemize}
   \item[Theoretical basis.] When a device is selected, it goes from \texttt{active} to \texttt{inactive}. Then, a new power flow, enforcing that their variables are null, is computed to find the new equilibrium point and the small signal is performed.
   \item[Main flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Contingencies} tab.
           \item The operator selects the contingency type from a dropdown: \textbf{Generator}, \textbf{Line}, or \textbf{Load}.
           \item A second dropdown is populated with the available elements of the selected type (e.g., "Generator 0", "Line 3"). The operator selects the specific element to be removed.
@@ -274,7 +274,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
           \item The backend launches the contingency analysis script, which removes the selected element from the grid model, re-computes the power flow and the small-signal stability, and returns the post-contingency eigenvalues.
           \item The results are displayed as a side-by-side comparison: two complex-plane eigenvalue plots (pre-contingency vs.~post-contingency) sharing the same axis scales, plus a summary table listing the contingency type, the element removed, and the change in stability margin.
           \item The tool generates \textbf{automatic recommendations} based on the observed change:
-                \begin{itemize}
+                \begin{itemize}[before=\leavevmode, leftmargin=*]
                   \item If the system becomes unstable: ``Consider installing PSS at the most participating generators or adding a STATCOM/SVC near the affected bus''
                   \item If damping degrades below the 5\% threshold: ``Low-damped modes detected; evaluate PSS retuning or FACTS placement''
                   \item If the stability margin decreases significantly: ``Re-dispatch generation or reinforce the affected corridor to recover margin''
@@ -372,7 +372,7 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Actor.] Planning engineer or policy analyst.
   \item[Objective.] Evaluate the small-signal stability of the grid under different renewable energy penetration scenarios, assessing how the progressive substitution of synchronous generation by converter-interfaced resources affects system stability.
   \item[Preconditions.]
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item A base-case simulation (UC-01) has been completed and serves as the reference operating point.
           \item The grid model identifies which machines are synchronous generators and which are converter-interfaced resources, so that the generation mix can be modified without altering the network topology.
           \item At least one converter-interfaced generator model (e.g.\ GFL or GFM) is available to replace the synchronous machines that are scaled down.
@@ -380,7 +380,7 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Theoretical basis.] A synchronous generator is described by a handful of equations --- the swing equation plus the flux and control dynamics of the machine --- whereas a complete model of an inverter-based generator aggregates many more, adding the converter's inner current and voltage control, the phase-locked loop (or the grid-forming virtual impedance), and any outer power or DC-link dynamics. Its dynamics are therefore richer. Nevertheless, the interface variables exchanged with the network are the same for both: the current (or power) injected at the connection bus. Substituting synchronous machines by converters does not change which quantities couple each device to the grid; it changes the number and the nature of the internal states, so the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ both grow and change shape. Consequently, the modal spectrum is reshaped: the electromechanical modes of the displaced synchronous machines fade, while new converter-driven modes (PLL, current-control, and virtual-impedance dynamics) appear, often lightly damped. Evaluating the margin and the critical modes as a function of the penetration level exposes this transition.
   \item[Possible bottlenecks.] Substituting the device equations changes the shape of the $\mathbf{E}$ and $\mathbf{A}$ matrices, so the assembly and pre-processing chain must adapt to a spectrum that mixes synchronous and converter states. Code optimisation may require a complete iteration of the software, and the outcome depends on the accuracy of the converter models, which must be agreed upon before scenarios can be compared.
   \item[Proposed flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator selects a base-case result (UC-01) and defines a set of penetration scenarios (e.g.\ 30\%, 50\%, 70\%, 100\% of inverter-based generation), optionally together with a set of critical contingencies.
           \item For each scenario, the tool adjusts the generation mix --- scaling down synchronous machines and scaling up converter-interfaced sources while respecting the grid model's structure --- and runs the stability analysis, recording the stability margin and the critical modes.
           \item Results are presented as a curve of stability margin versus renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold.
@@ -409,7 +409,7 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Actor.] Stability engineer or control designer.
   \item[Objective.] Determine the local behaviour of the equilibrium when the linearised model exhibits zero (or near-zero) eigenvalues, by reducing the dynamics onto the centre manifold, so that the tool can distinguish genuine marginal modes from structural zeros and report whether the equilibrium is attracting, repelling, or incipiently bifurcating.
   \item[Preconditions.]
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item A simulation (UC-01) has been completed and its result is loaded.
           \item The spectrum contains eigenvalues with $\sigma = 0$ (or $\lvert\sigma\rvert$ below a configurable tolerance).
           \item Structural null eigenvalues arising from a singular pencil $\lambda\mathbf{E}-\mathbf{A}$ have been identified and excluded, as required by UC-02.
@@ -417,7 +417,7 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Theoretical basis.] Linearisation only characterises hyperbolic equilibria, i.e.\ those whose eigenvalues satisfy $\Re(\lambda)\neq 0$; when a real (or purely imaginary) eigenvalue lies on the imaginary axis, the linear model is inconclusive and the Centre Manifold Theorem (CMT) must be applied. Before computing the invariant sub-manifolds, an ODE must be obtained from the differential-algebraic (DAE) formulation, so that the structural zeros caused by a singular $\mathbf{E}$ are discarded. Then, given the centre subspace $\mathcal{E}^{c}=\operatorname{span}\{\mathbf{v}_i:\lambda_i=0\}$ and a complementary stable subspace $\mathcal{E}^{s}$, one can split the state as $\mathbf{x}=\mathbf{x}_0+q+p$ (with $q\in\mathcal{E}^{c}$, $p\in\mathcal{E}^{s}$) and look for an invariant graph $p=h(q)$, tangent to $\mathcal{E}^{c}$ at the equilibrium, whose reduced dynamics $\dot{q}=g(q)$ govern the local behaviour. The sign of the first non-vanishing term of $g$ classifies the equilibrium as asymptotically stable, unstable, or (for an even leading term) semistable, and the same coefficients locate the bifurcation (saddle-node for a real zero, Hopf for a complex pair) announced by the zero eigenvalue.
   \item[Possible bottlenecks.] Deriving an equivalent ODE from the DAE is not as trivial as it may seem. Although one could consider rewriting the algebraic constraints as generalised coordinates, in the spirit of Hamiltonian systems, this is not feasible in the present setting. An alternative is index reduction by repeated differentiation, which fits the proposed multilinear methodology but whose scaling behaviour on large systems is still unknown. Direct approaches based on Gaussian elimination (e.g.\ for the structural analysis of the descriptor) could also be explored, but it is not suitable for sparse matrices since it could break that behaviour.
   \item[Proposed flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator selects a result containing zero or near-zero eigenvalues and opens the \textbf{Centre Manifold} view.
           \item The tool separates structural zeros (singular pencil) from genuine equilibrium modes and reports which ones are retained, so that the \emph{yellow} verdict of UC-02 can be justified rather than assumed.
           \item For the retained modes, the tool computes the centre manifold reduction and returns the leading normal-form coefficient together with its sign.
@@ -436,20 +436,20 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Actor.] Planning engineer or security analyst.
   \item[Objective.] Estimate the region of the state space from which the system returns to the current operating point after a disturbance, and express it as an interpretable security margin (e.g.\ maximum tolerable disturbance magnitude or critical clearing time) for a user-selected family of disturbances.
   \item[Preconditions.]
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item A simulation (UC-01) has been completed and the equilibrium, state matrix, and tensor expansion are available.
           \item The equilibrium is small-signal stable (all $\sigma<0$); otherwise the basin is empty and the tool reports instability directly.
           \item A family of disturbances has been defined (fault location and clearing time, or a load/generation step at a given bus).
         \end{itemize}
   \item[Theoretical basis.] Eigenvalue analysis certifies only \emph{local} asymptotic stability: it says that sufficiently small perturbations decay, but not how large a perturbation can be ridden through. For the nonlinear system $\dot{\mathbf{x}}=f(\mathbf{x})$, the boundary of the basin is a geometric object: it is carried by the stable manifold of the controlling unstable equilibrium (UEP) together with the heteroclinic orbits that link the boundary equilibria, so that computing it yields the stability region and the associated security margin directly. The multilinear tensor representation provides the vector field and its Jacobian directly, so the UEP can be located by Newton's method and its eigenvectors span the local stable and unstable directions. Backward integration of the system then traces the stable manifold, using the variational equations only when the manifold is grown in more than one dimension or the boundary is computed by continuation, complementing trajectory-based sampling from perturbed initial conditions. This route is especially attractive on a low-dimensional reduction (UC-13) and avoids the exhaustive time-domain EMT/RMS sweep listed in the deferred section, complementing it rather than replacing it, since full time-domain simulation remains the final validation step for the most severe contingencies.
   \item[Possible bottlenecks.] Unlike the DAE reduction of UC-13, the difficulties here are conceptual and geometric, and they define most of the research agenda:
-        \begin{itemize}
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item \textbf{Controlling unstable equilibrium.} Identifying the equilibrium on the stability boundary that is closest to the current operating point is a non-convex, multi-start search without global guarantees.
           \item \textbf{Curse of dimensionality and visualisation.} The true basin lives in $n$ dimensions, whereas the GUI can only show a 2D or 3D projection; the projected region is not the actual basin, so the visualisation may mislead the operator.
           \item \textbf{From geometry to operator margin.} Translating the distance (or time) to the stability boundary into a critical clearing time or a disturbance magnitude requires fault-on trajectory information that a small-signal snapshot does not contain.
         \end{itemize}
   \item[Proposed flow.]
-        \begin{enumerate}
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator selects a result and a disturbance family (e.g.\ three-phase fault at bus $k$ with variable clearing time, or a step change in load or generation).
           \item The tool locates the controlling UEP (Newton) and traces the stable manifold by backward integration of the tensor model, optionally sampling trajectories from the perturbed initial conditions.
           \item The basin is rendered on a selectable state plane (e.g.\ rotor angle versus speed of the most critical machine) with the equilibrium, the estimated boundary, and a set of sample trajectories inside and outside it.
@@ -473,16 +473,16 @@ The six use cases described in the previous section correspond to functionalitie
 %   \item[Actor.] <who uses it (role or profile)>
 %   \item[Objective.] <what is achieved and why it matters>
 %   \item[Preconditions.]
-%         \begin{itemize}
+%         \begin{itemize}[before=\leavevmode, leftmargin=*]
 %           \item <required inputs, prior simulations, or environment>
 %         \end{itemize}
 %   \item[Theoretical basis.] <mathematical or engineering principle behind it>
 %   \item[Possible bottlenecks.] <conceptual, numerical, or data limitations to investigate>
-%         \begin{itemize}
+%         \begin{itemize}[before=\leavevmode, leftmargin=*]
 %           \item <bottleneck>
 %         \end{itemize}
 %   \item[Proposed flow.]
-%         \begin{enumerate}
+%         \begin{enumerate}[before=\leavevmode, leftmargin=*]
 %           \item <step>
 %         \end{enumerate}
 %   \item[Expected value.] <operational benefit delivered to the user>
