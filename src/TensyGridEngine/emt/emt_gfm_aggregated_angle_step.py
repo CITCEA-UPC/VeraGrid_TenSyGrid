@@ -6,6 +6,9 @@ import os
 import sys
 from pathlib import Path
 
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import matplotlib
 import numpy as np
 
@@ -14,7 +17,6 @@ from matplotlib import pyplot as plt
 
 
 HERE = Path(__file__).resolve().parent
-VALIDATION_DIR = HERE.parents[3] / "VeraGrid" / "trunk" / "dynamics" / "model_validation"
 OUTPUT_DIR = HERE / "results" / "gfm_aggregated_angle_step"
 
 os.environ.setdefault("VERAGRID_GFM_EMT_SLACK_SOURCE", "balanced")
@@ -22,13 +24,11 @@ os.environ.setdefault("VERAGRID_GFM_EMT_TIME_STEP", "1e-5")
 os.environ.setdefault("VERAGRID_GFM_EMT_COMPUTE_DENSE_COND", "0")
 os.environ.setdefault("VERAGRID_EMT_INIT_CACHE_DIR", "/tmp/gfm-aggregated-angle-cache")
 
-sys.path.insert(0, str(VALIDATION_DIR))
-
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDae
 from VeraGridEngine.enumerations import EmtInitializationMethod, EmtSolverTypes
 
-import emt_gfm_model_validation as harness
+from TensyGridEngine.emt.validation_helpers import emt_gfm_model_validation as harness
 
 
 STEP_RAD = float(os.environ.get("VERAGRID_GFM_ANGLE_STEP_RAD", "0.001"))

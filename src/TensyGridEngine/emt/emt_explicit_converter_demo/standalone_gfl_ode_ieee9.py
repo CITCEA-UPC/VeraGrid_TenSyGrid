@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.io import savemat
 
-from TensyGridEngine.emt import ieee9_emt_ibr_simulation as ieee9
+from TensyGridEngine.emt.emt_ieee9 import build_ieee9_grid, build_power_flow_options
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.gfl_ode_time_inputs import (
     build_gfl_ode_problem,
     runtime_input_traces,
@@ -318,23 +318,25 @@ def main() -> None:
     # ------------------------------------------------------------------
     # MODEL, PART 1: Find a physically consistent starting operating point.
     # ------------------------------------------------------------------
-    # IEEE9 is a small nine-bus test grid. The (1, 0) arguments request one
-    # grid-following inverter and zero grid-forming inverters. We use the grid
-    # only to determine the converter's initial bus voltage and P/Q power.
-    grid, gfl_devices, _gfl_buses, _gfm_buses, _gfm_blocks, _validation = (
-        ieee9.build_ibr_grid(1, 0, multilinear_inverters=True)
-    )
+    # The standalone converter only needs the IEEE-9 power-flow operating
+    # point. Building the full IBR grid would also construct EMT devices that
+    # are not simulated here.
+    grid = build_ieee9_grid()
     # Power flow solves steady-state bus voltages before the time-domain ODE.
-    power_flow = PowerFlowDriver(grid=grid, options=ieee9.build_power_flow_options())
+    power_flow = PowerFlowDriver(grid=grid, options=build_power_flow_options())
     power_flow.run()
     if not power_flow.results.converged:
         raise RuntimeError("IEEE9 power flow did not converge")
 
-    # Unused tuple entries have an underscore prefix. The chosen bus tells us
-    # which solved voltage belongs to this converter.
-    _generator, bus, _grid_model, (p_mw, q_mvar) = gfl_devices[0]
+    # Choose the first non-slack generator in the same bus order as the full
+    # IEEE-9 IBR example, then read its solved voltage and power.
+    generator = sorted((g for g in grid.generators if not g.bus.is_slack),
+                       key=lambda g: g.bus.name)[0]
+    bus = generator.bus
     bus_index = grid.buses.index(bus)
     voltage = complex(power_flow.results.voltage[bus_index])
+    p_mw = float(generator.P)
+    q_mvar = float(complex(power_flow.results.Sbus[bus_index]).imag)
     # MW and MVAr are divided by the grid's MVA base to obtain per-unit power.
     # The builder accepts voltage, active power p0, and reactive power q0 in pu.
     p0 = float(p_mw / grid.Sbase)
