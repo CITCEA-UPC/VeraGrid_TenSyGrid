@@ -21,6 +21,20 @@ It is important to note that all use cases are designed to follow Shneiderman's 
 
 This structure ensures that the toolbox supports both rapid operational screening and deeper technical diagnosis when required.
 
+\section{Operator interviews}
+To ground the use-case catalogue in real operational practice, three semi-structured interviews were conducted with transmission-system stakeholders; the key findings that shaped the use cases are summarised below.
+
+\paragraph{Andrés Mauricio Díaz Caicedo (eRoots; former TSO planner and control-room analyst at XM, Colombia).}
+Interviewed on 22 July 2026. Andrés described the operational workflow at XM: economic dispatch coordinated in 8-hour shifts, system validation every 15--30 minutes, and \mbox{$N-1$} contingency screening complemented by short-circuit and RMS dynamic simulations for critical cases. On the planning side, detailed modelling of low-voltage networks and IBRs (including protection systems) overloaded the state-space representation, making small-signal studies (SSTI, SSSI, SSOS) take 3--4 hours. Key operational metrics were the frequency nadir, ROCOF, and the settling time $T_{1090}$; in planning, eigenvalue position, damping, SCR variation, and participation factors were used to avoid out-of-band interactions. Regarding the GUI prototype, he recommended: (i) removing traffic-light indicators while keeping colour coding in the complex plane; (ii) providing explicit error debugging when a simulation fails; (iii) linking eigenvalues and participation factors to specific devices and state variables ($\omega$) to distinguish local from inter-area oscillations; (iv) adding visualisation of operational bands (P-V curves); and (v) supporting sequential contingencies (chains of events, $N$-$2$) and multiple simultaneous contingency selection (e.g.\ via YAML configuration).
+
+\paragraph{Enric Sánchez Sánchez (with Eduardo Prieto-Araujo).}
+Interviewed on 29 June 2026. Enric outlined three families of studies performed in the HVDC context: (i) \emph{dynamic performance} of an HVDC link under grid events, run in EMT with hundreds of PSCAD cases over 1--2 days; (ii) \emph{RMS} whole-country contingency screening ($N$-$1$) on AC networks of the order of 500\,km radius (e.g.\ UK GB network), taking a few hours; and (iii) \emph{screening studies} to identify synchronous generators that may interact problematically with the HVDC, run as load-flow and short-circuit analyses in minutes. He noted that small-signal studies are currently performed through impedance scanning (SS-SFI), with the frequency response obtained from PSCAD; clients are beginning to request state-space models (grey-box, per subsystem) for which a Laplace transfer function may be delivered instead, keeping the full model confidential for security reasons. He also highlighted harmonic-stability assessment based on gain/phase margins rather than eigenvalues, and the need to study voltage collapse in weak grids, which linear mode analysis does not capture. Automation of simulation campaigns and of result post-processing was identified as a key unmet need.
+
+\paragraph{Vahid Moshari Mamaghani (Elia Grid International).}
+Interviewed on 29 June 2026. Vahid described the planning and operational processes at Elia: long-term grid development (TYDP, every two years), short-term planning, and operational processes from week-ahead down to intraday and real-time (SCADA/EMS with state estimation). Models are exchanged in CGMES; PowerFactory, PSCAD, and SCADA are the three main software tools. Dynamic security assessment (DSA) involves thousands of contingency cases; computation time limits model detail, and the trade-off is managed by increasing the number of cores. Day-ahead studies use RMS (PowerFactory); close to real time, about 100 cases are run with reduced detail. Outage management is not automatic and there is interest in AI tools to judge criticality. Regarding HVDC, he noted that all operators previously provided Thevenin equivalents and now need to provide reduced models; any tool deployed must integrate with the existing commercial software stack. On model exchange, he questioned how complete CGMES is for dynamic data and mentioned German colleagues working on software-independent EMT models, pointing to VeraGrid as a relevant platform.
+
+These interviews directly motivated the proposed use cases: scenario comparison and trend analysis (UC-07, UC-08) address the need to track stability across the planning horizon and multiple contingencies; critical-element ranking (UC-09) and damping-controller placement (UC-10) respond to the request to link modes to specific devices; centre-manifold analysis (UC-13) and basin-of-attraction estimation (UC-14) target the weak-grid and large-disturbance questions raised by Enric and Vahid. The request for clear error debugging, device-level attribution, and operational bands feeds directly into the GUI interaction design of the implemented use cases (UC-01 to UC-06).
+
 \section{Use case inventory}
 
 Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, grouped by their current implementation status. The first six have been prototyped in the Stability Monitor GUI; the remaining eight are candidates to be presented and discussed with network operators.
@@ -70,22 +84,11 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
           \item At least one valid grid model file (in \texttt{.veragrid} format) is available in the grids directory.
         \end{itemize}
 
-  \item[Theoretical basis.] Given an $\mathbf{E}\dot{\mathbf{x}}-\mathbf{A}\mathbf{x}=0$ iMTI model of the system, the eigenvalues $\lambda\in\mathbb{C}$ arise from the generalized eigenvalue problem
+  \item[Theoretical basis.] The iMTI formulation leads to the descriptor system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$, from which the generalized eigenvalue problem
         \[
-          \lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}.
+          \lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}
         \]
-        The eigenvalue $\lambda$ can be expressed in terms of its real and imaginary parts as
-        \[
-          \lambda = \sigma + \mathrm{j}\omega,
-        \]
-        where $\sigma$ is the real part (with $\sigma > 0$ indicating instability, while $\sigma < 0$ indicates damping) and $\omega$ is the angular speed of oscillation such that $f=\omega/(2\pi)$.
-
-        Therefore, we want $\sigma$ to be negative. Nevertheless, the system response should be quick enough to be physically acceptable; because of that, we define the damping ratio
-        \[
-          \zeta = -\frac{\sigma}{\lvert\lambda\rvert}.
-        \]
-
-
+        is obtained. The solution provides the eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay/growth and $\omega$ the angular speed ($f=\omega/(2\pi)$). The damping ratio is $\zeta=-\sigma/\lvert\lambda\rvert$. In the tensor-based multilinear framework, the system matrices $\mathbf{S}$ and $\mathbf{\Phi}$ are assembled from the iMTI model, and the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ are constructed accordingly, from which the eigenpairs used in the subsequent analysis are derived~\cite{Kaufmann2025TenSyGridD11}.
   \item[Possible bottlenecks.] No multilinear implementation of a model yet~\cite{deJuanVela2026TenSyGridD33}. Scaling issues to be determined.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
@@ -165,7 +168,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Actor.] Planning engineer or stability analyst.
   \item[Objective.] Explore the full eigenvalue distribution in the complex plane to identify clusters, assess damping ratios, and detect modes of concern.
   \item[Preconditions.] A simulation (UC-01) has been completed.
-  \item[Theoretical basis.] Each oscillation mode is represented by a conjugate pair of eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay-or-growth and $\omega$ the angular frequency, so that $f=\omega/(2\pi)$ is the frequency in Hz. In the complex plane, the ratio of $\sigma$ to $|\lambda|$ gives the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$, which equals the cosine of the mode's angle with the negative real axis: $\zeta=\cos\theta$. Constant-damping loci therefore appear as straight lines (cones) through the origin, which is precisely what the threshold lines used in this view (e.g.\ $\zeta=0$ and $\zeta=0.05$) represent. Modes close to the imaginary axis $\sigma\approx 0$ fall inside the low-damping cone and are flagged as the ones of concern; From UC-01 theoretical basis, this view adds a frequency-domain perspective: the spectrum is inspected to identify which modes concentrate the disturbance. From control theory, the participation factors $p_{ki}=\dfrac{\lvert v_{ki}w_{ki}\rvert}{\lvert w_k^{\top}\mathbf{E}v_k\rvert}$ (with $v_k$ and $w_k$ the right and left eigenvectors of the pencil) quantify how much each state variable contributes to a given mode, linking each critical frequency to the plant that is responsible for it, since every device exhibits a characteristic dynamic behaviour. This attribution, however, is the object of UC-04.
+  \item[Theoretical basis.] Each oscillation mode is represented by a conjugate pair of eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay-or-growth and $\omega$ the angular frequency, so that $f=\omega/(2\pi)$ is the frequency in Hz. In the complex plane, the ratio of $\sigma$ to $|\lambda|$ gives the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$, which equals the cosine of the mode's angle with the negative real axis: $\zeta=\cos\theta$. Constant-damping loci therefore appear as straight lines (cones) through the origin, which is precisely what the threshold lines used in this view (e.g.\ $\zeta=0$ and $\zeta=0.05$) represent. Modes close to the imaginary axis $\sigma\approx 0$ fall inside the low-damping cone and are flagged as the ones of concern; From UC-01 theoretical basis, this view adds a frequency-domain perspective: the spectrum is inspected to identify which modes concentrate the disturbance. This attribution, however, is the object of UC-04.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Eigenvalues} tab.
@@ -195,7 +198,15 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Actor.] Stability engineer or control designer.
   \item[Objective.] Identify the least-damped oscillation modes and determine which state variables (generators, controls, components) contribute most to each mode.
   \item[Preconditions.] A simulation (UC-01) has been completed. Eigenvalues have been computed.
-  \item[Theoretical basis.] Each eigenvalue corresponds to an oscillation mode that is a specific combination of perturbations in the state vector. The participation factor $p_{ki}=\dfrac{\lvert v_{ki}w_{ki}\rvert}{\lvert w_k^{\top}\mathbf{E}v_k\rvert}$ quantifies the joint contribution of the $k$-th mode to the $i$-th state variable and vice versa: $v_k$ and $w_k$ are the right and left eigenvectors of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$, satisfying $\mathbf{A}v_k=\lambda_k\mathbf{E}v_k$ and $w_k^{\top}\mathbf{A}=\lambda_k w_k^{\top}\mathbf{E}$, and $v_{ki}=e_i^{\top}v_k$, $w_{ki}=w_k^{\top}e_i$ denote their $i$-th components, with $e_i$ the $i$-th canonical vector. A large $p_{ki}$ means that the $k$-th mode strongly excites the $i$-th state, and that state in turn strongly feeds the mode back, making it a primary candidate for intervention (PSS retuning, FACTS placement).
+  \item[Theoretical basis.] Each eigenvalue corresponds to an oscillation mode that is a specific combination of perturbations in the state vector. The modal participation factor is defined as
+        \[
+          p_{ki}=\frac{v_{ki}\,(\mathbf{w}_k^{\top}\mathbf{E})_i}{\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{v}_k},
+        \]
+        where $\mathbf{v}_k$ and $\mathbf{w}_k$ are the right and left eigenvectors of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ (with $\mathbf{A}\mathbf{v}_k=\lambda_k\mathbf{E}\mathbf{v}_k$, $\mathbf{w}_k^{\top}\mathbf{A}=\lambda_k\mathbf{w}_k^{\top}\mathbf{E}$), $v_{ki}=\mathbf{e}_i^{\top}\mathbf{v}_k$ and $(\mathbf{w}_k^{\top}\mathbf{E})_i=\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{e}_i$~\cite{tzounas2019modal}. The GUI displays normalised magnitudes
+        \[
+          \bar{p}_{ki}=\frac{\lvert p_{ki}\rvert}{\sum_{j}\lvert p_{kj}\rvert},
+        \]
+        which sum to 100\% per mode. A large $\bar{p}_{ki}$ indicates that the $k$-th mode is strongly associated with the $i$-th state, making it a primary candidate for intervention (PSS retuning, FACTS placement).
   \item[Possible bottlenecks.] In sparse computations of the eigenvalues is difficult to compute their corresponding left and right eigenvectors that are both needed for this UC.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
