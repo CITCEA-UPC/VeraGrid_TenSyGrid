@@ -8,11 +8,13 @@ filter models exercised by the Deliverable 3.3 validation scripts.
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import sys
 from pathlib import Path
 from typing import Any, Callable, cast
+
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -46,6 +48,10 @@ from VeraGridEngine.enumerations import (
     EmtSolverTypes,
     VarPowerFlowReferenceType,
 )
+from TensyGridEngine.emt.validation_helpers import (
+    emt_gfm_model_validation,
+    gfl_vsc_emt_internal_filter_validation,
+)
 
 try:
     from .emt_ieee9 import (
@@ -63,10 +69,6 @@ except ImportError:  # Allow running this file directly.
     )
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-EROOTS_ROOT = REPO_ROOT.parent
-VERAGRID_VALIDATION = EROOTS_ROOT / "VeraGrid" / "trunk" / "dynamics" / "model_validation"
-
 N_GFL = int(os.environ.get("VERAGRID_IEEE9_N_GFL", "1"))
 N_GFM = int(os.environ.get("VERAGRID_IEEE9_N_GFM", "0"))
 TIME_STEP = float(os.environ.get("VERAGRID_IEEE9_IBR_TIME_STEP", "2.5e-6"))
@@ -75,31 +77,11 @@ SOLVER_TOLERANCE = float(os.environ.get("VERAGRID_IEEE9_IBR_TOLERANCE", "1e-9"))
 MULTILINEAR_INVERTERS = os.environ.get("VERAGRID_IEEE9_IBR_MULTILINEAR", "0") == "1"
 
 
-def _load_module(module_name: str, path: Path):
-    if not path.is_file():
-        raise FileNotFoundError(path)
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 def _load_deliverable_models():
     # The detailed Colib-aligned GFM is now a proper VeraGrid EMT template.
     gfm = emt_gfm_upc
-    if str(VERAGRID_VALIDATION) not in sys.path:
-        sys.path.insert(0, str(VERAGRID_VALIDATION))
-    gfm_validation = _load_module(
-        "ieee9_deliverable_gfm_initialization",
-        VERAGRID_VALIDATION / "emt_gfm_model_validation.py",
-    )
-    gfl = _load_module(
-        "ieee9_veragrid_gfl_internal_filter",
-        VERAGRID_VALIDATION / "gfl_vsc_emt_internal_filter_validation.py",
-    )
+    gfm_validation = emt_gfm_model_validation
+    gfl = gfl_vsc_emt_internal_filter_validation
     # The combined GFM builder suffixes every variable with its instance name,
     # while the validation initializer asks for unsuffixed logical names.  Its
     # original exact-name lookup therefore silently skips nearly all seeds.

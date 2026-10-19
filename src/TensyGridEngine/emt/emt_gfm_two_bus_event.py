@@ -11,6 +11,9 @@ import os
 import sys
 from pathlib import Path
 
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import matplotlib
 import numpy as np
 
@@ -19,9 +22,6 @@ from matplotlib import pyplot as plt
 
 
 HERE = Path(__file__).resolve().parent
-TENSYGRID_ROOT = HERE.parents[2]
-EROOTS_ROOT = TENSYGRID_ROOT.parent
-VALIDATION_DIR = EROOTS_ROOT / "VeraGrid" / "trunk" / "dynamics" / "model_validation"
 OUTPUT_DIR = HERE / "results" / "gfm_two_bus_event"
 
 # Set test defaults before importing the validation harness, which reads its
@@ -33,15 +33,13 @@ os.environ.setdefault("VERAGRID_GFM_EMT_P_REF_STEP_TIME", "0.02")
 os.environ.setdefault("VERAGRID_GFM_EMT_P_REF_STEP", "0.01")
 os.environ.setdefault("VERAGRID_GFM_EMT_COMPUTE_DENSE_COND", "0")
 
-sys.path.insert(0, str(VALIDATION_DIR))
-
 import VeraGridEngine.api as vge
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDae
 from VeraGridEngine.Templates.Emt.emt_gfm_upc import build_emt_gfm_aggregated_model
 from VeraGridEngine.enumerations import EmtInitializationMethod, EmtSolverTypes
 
-import emt_gfm_model_validation as harness
+from TensyGridEngine.emt.validation_helpers import emt_gfm_model_validation as harness
 
 
 def _tail_span(values: np.ndarray) -> float:
