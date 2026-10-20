@@ -304,9 +304,9 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Expected result.] The operator determines whether the grid remains stable under the selected N-1 contingency. If instability or marginal stability is detected, the operator receives targeted, actionable recommendations. This use case supports transmission planning studies and operational security assessment, enabling the operator to identify critical contingencies and plan mitigation measures.
 \end{description}
 
-\section{Proposed use cases for operator workshop}
+\section{Proposed use cases to be implemented}
 
-The five use cases described in the previous section correspond to functionalities already prototyped in the Stability Monitor. The following nine use cases are proposed extensions to be discussed with network operators during the forthcoming workshop. They address workflows that operators may consider essential for integration into their daily planning and operational routines. The descriptions below are intentionally less detailed, as they represent initial concepts subject to operator feedback. UC-13 and UC-14 are the most technical of the proposals and address questions that are likely to be raised by stability engineers rather than by control-room staff; both are included so that their theoretical assumptions can be challenged early.
+The five use cases described in the previous section correspond to functionalities already prototyped in the Stability Monitor. The following nine use cases are proposed extensions that either come from talks with operators or extend the already implemented features. They address workflows that operators may consider essential for integration into their daily planning and operational routines. The descriptions below are intentionally less detailed, as they represent initial concepts subject to operator feedback. UC-13 and UC-14 are the most technical of the proposals and address questions that are likely to be raised by stability engineers rather than by control-room staff; both are included so that their theoretical assumptions can be challenged early.
 
 % ---------------------------------------------------------------------------
 \subsection{UC-06: Operating Scenario Comparison}
@@ -550,6 +550,20 @@ During the use-case identification process, several potential workflows were con
 
   \item \textbf{Multi-area oscillation and inter-area mode analysis.} Identifying and characterising inter-area modes involving geographically separated groups of generators, and computing metrics such as mode shape, observability, and controllability, is partially addressed by UC-03 (participation factors). However, a dedicated inter-area-mode tool with geographical visualisation of mode shapes would require additional development and is proposed as a candidate for operator feedback.
 \end{itemize}
+
+\section{Organization}
+
+The proposed use cases answer two different kinds of questions: the current status and short-term forecast of the system, and planning studies over longer horizons. Because these questions call for different workflows, mixing them in a single view would overload the operator, so the toolbox is organised around a small number of tabs, each one grouping the use cases that share a purpose:
+
+\begin{itemize}
+  \item \textbf{Run simulation.} UC-01: execute the small-signal stability computation that feeds the rest of the views.
+  \item \textbf{Grid information.} UC-04: inspect the steady-state voltage profile of the loaded model.
+  \item \textbf{Status and forecast.} UC-02, UC-03, UC-07, UC-08.1, UC-13 and UC-14: stability verdict and eigenvalue spectrum, critical modes, device-level participation, online trend monitoring, and the centre-manifold and basin analyses.
+  \item \textbf{Planning.} UC-05, UC-06, UC-08, UC-09, UC-10 and UC-11: N-1 contingencies, scenario comparison, trend analysis, critical-element ranking, damping-controller placement, and renewable-penetration assessment.
+  \item \textbf{Queue and reports.} UC-12: batch execution and automated report generation.
+\end{itemize}
+
+This grouping is indicative: the exact distribution of the tabs will be refined with the feedback of colleagues and our experience while implementing it.
 
 \section{Next steps}
 \textcolor{orange}{\textbf{TODO:} NO REVISAT, PENDENT DE DISCUTIR AMB EDU.}
