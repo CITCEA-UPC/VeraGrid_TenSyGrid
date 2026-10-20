@@ -380,6 +380,7 @@ def gather_model_as_data_frames(circuit: MultiCircuit,
         # configuration ################################################################################################
         obj = list()
         obj.append(['BaseMVA', circuit.Sbase])
+        obj.append(['BaseFrequency', circuit.fBase])
         obj.append(['Version', 5])
         obj.append(['Name', str(circuit.name)])
         obj.append(['Comments', str(circuit.comments)])
@@ -2001,6 +2002,8 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
     # set the base magnitudes
     if 'baseMVA' in data.keys():
         circuit.Sbase = data['baseMVA']
+    if 'baseFrequency' in data.keys():
+        circuit.fBase = data['baseFrequency']
 
     # Set comments
     if 'Comments' in data.keys():

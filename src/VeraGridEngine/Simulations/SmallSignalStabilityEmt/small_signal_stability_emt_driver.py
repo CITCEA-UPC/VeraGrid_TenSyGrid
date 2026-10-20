@@ -18,6 +18,10 @@ from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import Power
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator import (EmtFloquetOperator,
                                                                                      BlockEmtFloquetOperator,
                                                                                      AkStackBlockEmtFloquetOperator)
+from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_consistent_tangent import (
+    ProjectedEmtFloquetOperator,
+    build_consistent_emt_tangent,
+)
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options import \
     SmallSignalStabilityEmtOptions
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_results import \
@@ -25,7 +29,7 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import NUMBA_AVAILABLE, \
     bmgs_twice_numba
 from VeraGridEngine.basic_structures import Vec, CxVec, Mat, CxMat
-from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes
+from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes, DynamicIntegrationMethod
 
 
 def build_restart_seed(U_sel: CxMat, p_target: int, seed: int = 42) -> Mat:
@@ -263,6 +267,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         "last_monodromy_matrix",
         "last_period_trajectory",
         "last_period_derivative_trajectory",
+        "_consistent_basis",
     )
 
     def __init__(self,
@@ -308,6 +313,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         # Diagnostics from the most recent Arnoldi run.  The monodromy matrix
         # is populated only when the dense/full-spectrum path is selected.
         self.last_monodromy_matrix: Mat | None = None
+        self._consistent_basis: Mat | None = None
         self.last_period_trajectory: Mat | None = None
         self.last_period_derivative_trajectory: Mat | None = None
 
@@ -388,9 +394,10 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         self.last_period_trajectory = y_traj
         self.last_period_derivative_trajectory = d_traj
         self.last_monodromy_matrix = None
+        tangent = self._build_consistent_tangent(y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params)
 
         # 2. Operator initialized with HPC LU Caching
-        monodromy_op = EmtFloquetOperator(  # O BlockEmtFloquetOperator
+        full_op = EmtFloquetOperator(  # O BlockEmtFloquetOperator
             problem=self.problem,
             trajectory=y_traj,
             h=h,
@@ -401,7 +408,10 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             n_event_params=n_ev_params,
             t_trajectory=t_traj,
             d_trajectory=d_traj,
+            initial_tangent_derivative=tangent.initial_derivative_map if tangent is not None else None,
         )
+        monodromy_op = (ProjectedEmtFloquetOperator(full_op, tangent.basis)
+                        if tangent is not None else full_op)
         operator_states = monodromy_op.shape[0]
 
         # 3. Eigenvalue Extraction
@@ -421,7 +431,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             # High-Performance Sparse Arnoldi
             search_k = min(self.sss_options.k * 2, operator_states - 2)
             v0 = np.zeros(operator_states, dtype=np.float64)
-            v0[:n_states] = np.random.default_rng(42).standard_normal(n_states)
+            v0[:] = np.random.default_rng(42).standard_normal(operator_states)
             mu, v = spla.eigs(monodromy_op, k=search_k, which='LM', tol=1e-8, v0=v0)
 
         # 4. SPECTRAL SHIFT FILTERING (Resonance Hunt)
@@ -444,6 +454,8 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             v = v[:, sort_indices]
 
         # 5. Krylov Left-Eigenvector Projection (Lifting)
+        if tangent is not None:
+            v = tangent.basis @ v
         w = np.linalg.pinv(v).conj().T
 
         # 6. Results Mapping
@@ -461,6 +473,19 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         self.toc()
 
+    def _build_consistent_tangent(self, y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params):
+        """Construct admissible initial DAE perturbations when requested."""
+        self._consistent_basis = None
+        if not self.sss_options.consistent_dae_tangent:
+            return None
+        if self.emt_options.integration_method != DynamicIntegrationMethod.DaeTrapezoidal:
+            raise ValueError("Consistent DAE tangent currently requires DAE trapezoidal integration")
+        tangent = build_consistent_emt_tangent(
+            self.problem, y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params
+        )
+        self._consistent_basis = tangent.basis
+        return tangent
+
     def _make_monodromy_operator(self, h: float, n_states: int):
         """
         Creates the Monodromy Operator. Uses the HPC Ak-Stack if available,
@@ -472,8 +497,10 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         """
 
         y_traj, d_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
+        tangent = self._build_consistent_tangent(y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params)
+        initial_tangent_derivative = tangent.initial_derivative_map if tangent is not None else None
 
-        if self.sss_options.prefer_ak_operator:
+        if self.sss_options.prefer_ak_operator and initial_tangent_derivative is None:
             Ak_stack = self.problem.get_floquet_ak_stack(
                 trajectory=y_traj,
                 h=h,
@@ -486,7 +513,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
                     print('Using explicit EMT A_k stack operator (Numba path if available).')
                 return AkStackBlockEmtFloquetOperator(Ak_stack, use_numba=self.sss_options.use_numba_kernels)
 
-        return BlockEmtFloquetOperator(
+        full_op = BlockEmtFloquetOperator(
             problem=self.problem,
             trajectory=y_traj,
             h=h,
@@ -497,7 +524,10 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             n_event_params=n_ev_params,
             t_trajectory=t_traj,
             d_trajectory=d_traj,
+            initial_tangent_derivative=initial_tangent_derivative,
         )
+        return (ProjectedEmtFloquetOperator(full_op, tangent.basis)
+                if tangent is not None else full_op)
 
     @staticmethod
     def _apply_operator_complex(monodromy_op: BlockEmtFloquetOperator, Xc: CxMat) -> CxMat:
@@ -617,7 +647,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         rng = np.random.default_rng(42)
         raw_seed = np.zeros((n_states, p_seed), dtype=np.float64)
-        raw_seed[:physical_states, :] = rng.standard_normal((physical_states, p_seed))
+        raw_seed[:min(n_states, physical_states), :] = rng.standard_normal((min(n_states, physical_states), p_seed))
         V_seed, _ = np.linalg.qr(raw_seed)
 
         best_pack = BestPack()
@@ -707,6 +737,8 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         sort_idx = np.argsort(-np.abs(mu_sel), kind="stable")[:k_target]
         mu: CxVec = mu_sel[sort_idx]
         v: CxVec = U_sel[:, sort_idx]
+        if self._consistent_basis is not None:
+            v = self._consistent_basis @ v
 
         # Pseudo-inverse dual space lifting (Cleaned)
         w = np.linalg.pinv(v).conj().T

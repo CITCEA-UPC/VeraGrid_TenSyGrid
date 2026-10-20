@@ -50,6 +50,8 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
     -----------------
     prefer_ak_operator : bool
         Prefer an explicit EMT A_k operator if the problem exposes it.
+    consistent_dae_tangent : bool
+        Restrict trapezoidal Floquet analysis to consistent DAE perturbations.
     use_numba_kernels : bool
         Enable Numba-accelerated kernels (BMGS / A_k block propagator) when available.
     min_block_size, max_block_size : int | None
@@ -73,6 +75,7 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
         "stagnation_patience",
         "deflation_tol",
         "prefer_ak_operator",
+        "consistent_dae_tangent",
         "use_numba_kernels",
         "min_block_size",
         "max_block_size",
@@ -95,6 +98,7 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
         GCProp(key="stagnation_patience", tpe=int),
         GCProp(key="deflation_tol", tpe=float),
         GCProp(key="prefer_ak_operator", tpe=bool),
+        GCProp(key="consistent_dae_tangent", tpe=bool),
         GCProp(key="use_numba_kernels", tpe=bool),
         GCProp(key="min_block_size", tpe=int),
         GCProp(key="max_block_size", tpe=int),
@@ -121,7 +125,8 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
                  min_block_size: Optional[int] = None,
                  max_block_size: Optional[int] = None,
                  max_krylov_dim_cap: Optional[int] = None,
-                 build_type: SmallSignalEmtBuildTypes = SmallSignalEmtBuildTypes.Arnoldi):
+                 build_type: SmallSignalEmtBuildTypes = SmallSignalEmtBuildTypes.Arnoldi,
+                 consistent_dae_tangent: bool = False):
         OptionsTemplate.__init__(self, name='EmtFloquetOptions')
 
         self.k: int = k
@@ -140,12 +145,11 @@ class SmallSignalStabilityEmtOptions(OptionsTemplate):
         self.deflation_tol: float = deflation_tol
 
         self.prefer_ak_operator: bool = prefer_ak_operator
+        self.consistent_dae_tangent: bool = consistent_dae_tangent
         self.use_numba_kernels: bool = use_numba_kernels
         self.min_block_size: Optional[int] = min_block_size
         self.max_block_size: Optional[int] = max_block_size
         self.max_krylov_dim_cap: Optional[int] = max_krylov_dim_cap
         self.build_type: SmallSignalEmtBuildTypes = build_type
-
-
 
 

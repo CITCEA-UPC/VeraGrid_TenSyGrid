@@ -1188,6 +1188,7 @@ class SparseADJacobian:
 class StructuralVectorizedSolver:
     __slots__ = [
         'problem', 't0', 't_end', 'h', 'method', 'pred_method', 'dense_threshold', 'verbose', 'newton_max_iter',
+        'newton_tolerance',
         'vec_jacobian', 'vec_flat_args', 'fused_residual', 'vec_kernels',
         '_state_vars', '_algebraic_vars', '_diff_vars', '_state_eqs', '_algebraic_eqs',
         'sorted_vars', '_n_state', '_n_vars', '_n_diff', 'uid2idx_vars',
@@ -1213,7 +1214,8 @@ class StructuralVectorizedSolver:
                  sparse_solver_backend_provider: SparseLinearSolverBackendProvider | None = None,
                  newton_diag_config: NewtonDiagnosticsConfig | None = None,
                  progress_signal: DummySignal | None = None,
-                 cancel_checker: Callable[[], bool] | None = None)-> None:
+                 cancel_checker: Callable[[], bool] | None = None,
+                 newton_tolerance: float = 1e-6)-> None:
         """
         :param problem: The DAE problem definition.
         :param t0: Initial time.
@@ -1224,6 +1226,7 @@ class StructuralVectorizedSolver:
         :param dense_threshold: Threshold to switch between dense and sparse linear solvers.
         :param verbose: Print compilation and simulation timings.
         :param newton_max_iter: Maximum Newton iterations per local EMT substep.
+        :param newton_tolerance: Infinity-norm residual threshold for Newton convergence.
         :param sparse_solver_backend_provider: Sparse linear solver backend provider.
         :type sparse_solver_backend_provider: SparseLinearSolverBackendProvider | None
         :param progress_signal: Optional progress signal updated during the simulation loop.
@@ -1238,6 +1241,9 @@ class StructuralVectorizedSolver:
         self.dense_threshold = dense_threshold
         self.verbose = verbose
         self.newton_max_iter: int = int(newton_max_iter)
+        if not np.isfinite(newton_tolerance) or newton_tolerance <= 0:
+            raise ValueError("newton_tolerance must be positive and finite")
+        self.newton_tolerance = float(newton_tolerance)
         self._newton_diag_config = newton_diag_config or NewtonDiagnosticsConfig(
             compute_dense_cond=False,
             enable_fallback=False,
@@ -1776,7 +1782,7 @@ class StructuralVectorizedSolver:
                         residual_out=res_global,
                     )
 
-                    if res_norm < 1e-6:
+                    if res_norm < self.newton_tolerance:
                         substep_converged = True
                         break
                     else:
