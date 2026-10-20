@@ -60,16 +60,16 @@ Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, gro
     UC-10       & Damping Controller Placement Guidance & Proposed        & Suggest candidate locations for PSS or FACTS devices         \\
     UC-11       & Renewable Scenario Assessment         & Proposed        & Evaluate stability at different renewable penetration levels \\
     UC-12       & Automated Stability Report Generation & Proposed        & Produce a standardised stability report for stakeholders     \\
-    UC-13       & Centre Manifold Analysis             & Proposed        & Characterise the dynamics behind zero eigenvalues           \\
-    UC-14       & Basin of Attraction Estimation       & Proposed        & Quantify security margins against specified disturbances    \\
-%   UC-15       & <name>                                & Proposed        & <objective>                                                  \\
+    UC-13       & Centre Manifold Analysis              & Proposed        & Characterise the dynamics behind zero eigenvalues            \\
+    UC-14       & Basin of Attraction Estimation        & Proposed        & Quantify security margins against specified disturbances     \\
+    %   UC-15       & <name>                                & Proposed        & <objective>                                                  \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \section{Implemented use cases}
 
-The following six use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the tensor-based computation engine. The GUI layout is (now) organised around six tabs, each corresponding to one use case, allowing the operator to navigate from simulation setup to detailed diagnostic views.
+The following six use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the TenSyGrid engine, running in a sepparate backend server. The GUI layout is (now) organised around six tabs, each corresponding to one use case, allowing the operator to navigate from simulation setup to detailed diagnostic views.
 
 % ---------------------------------------------------------------------------
 \subsection{UC-01: Run Small-Signal Stability Simulation}
@@ -80,16 +80,15 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Objective.] Load a grid model and compute its small-signal stability properties using the tensor-based multilinear formulation.
   \item[Preconditions.]
         \begin{itemize}[before=\leavevmode, leftmargin=*]
-          \item The TenSyGrid Stability Monitor is running and accessible via a web browser.
+          \item The TenSyGrid engine backend is running and accessible via a web browser.
           \item At least one valid grid model file (in \texttt{.veragrid} format) is available in the grids directory.
-          \item The computational environment (virtual environment with required dependencies) is properly configured.
         \end{itemize}
 
   \item[Theoretical basis.] The iMTI formulation leads to the descriptor system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$, from which the generalized eigenvalue problem
-  \[
-    \lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}
-  \]
-  is obtained. The solution provides the eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay/growth and $\omega$ the angular speed ($f=\omega/(2\pi)$). The damping ratio is $\zeta=-\sigma/\lvert\lambda\rvert$. In the tensor-based multilinear framework, the system matrices $\mathbf{S}$ and $\mathbf{\Phi}$ are assembled from the iMTI model, and the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ are constructed accordingly, from which the eigenpairs used in the subsequent analysis are derived~\cite{Kaufmann2025TenSyGridD11}.
+        \[
+          \lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}
+        \]
+        is obtained. The solution provides the eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay/growth and $\omega$ the angular speed ($f=\omega/(2\pi)$). The damping ratio is $\zeta=-\sigma/\lvert\lambda\rvert$. In the tensor-based multilinear framework, the system matrices $\mathbf{S}$ and $\mathbf{\Phi}$ are assembled from the iMTI model, and the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ are constructed accordingly, from which the eigenpairs used in the subsequent analysis are derived~\cite{Kaufmann2025TenSyGridD11}.
   \item[Possible bottlenecks.] No multilinear implementation of a model yet~\cite{deJuanVela2026TenSyGridD33}. Scaling issues to be determined.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
@@ -97,9 +96,9 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
           \item The dropdown list is populated with all available \texttt{.veragrid} files. The operator selects the desired grid.
           \item The operator clicks the \textbf{Run Simulation} button.
           \item The backend launches the computational script as a subprocess, using the selected grid file as input.
-          \item A log output panel displays the simulation progress (power-flow solution, state matrix assembly, eigenvalue computation) in real time.
+          \item A log output panel displays the simulation progress (power-flow solution, state matrix assembly, eigenvalue computation) results.
           \item Upon completion, the result is stored as a \texttt{.tensygrid} file in the precomputed-results directory.
-          \item The status indicator changes from \textit{Running} to \textit{Completed}, and the new result appears in the result list with a colour-coded stability badge (green: stable, yellow: marginal, red: unstable).
+          \item The status indicator changes from \textit{Running} to \textit{Completed}, and the new result appears in the result list with a colour-coded stability badge (green: stable, yellow: marginal, red: unstable). It should be emphasized that the numerical threshold (currently \texttt{STABLE\_MAX\_REAL\_PART} $= 10^{-6}$) determines whether the system is classified as stable within the margin of error.
           \item If the operator needs to abort, the \textbf{Stop} button terminates the subprocess gracefully.
         \end{enumerate}
 
@@ -129,15 +128,20 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
           \frac{\mathrm{e}^{\lambda_n t}}{\mathrm{e}^{\lambda_1 t}}
           = \mathrm{e}^{(\lambda_n-\lambda_1)t} \xrightarrow[t\to\infty]{} 0 \quad \text{for } n\neq 1 \ \text{with } \sigma_1>\sigma_n .
         \]
-        Therefore, if $\sigma_1>0$, the dominant term blows up to positive infinity, causing a clear instability, whereas $\sigma_1<0$ drives all modes to decay. The remaining singular case is a null eigenvalue $\lambda=0$ ($\sigma=\omega=0$): the argument above rests on the gap $\sigma_1-\sigma_n>0$, but here $\sigma_1=\sigma_n=0$ makes the exponent $\lambda_n-\lambda_1$ vanish, so the ratio does not tend to zero and the mode is not negligible relative to the dominant one. This equilibrium mode neither decays nor grows, i.e.\ a marginally stable regime that the dashboard classifies as \emph{yellow}. It is important, however, to distinguish this genuine marginal mode from spurious null eigenvalues that arise purely from the algebraic structure of the generalised eigenproblem $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$: whenever the leading matrix $\mathbf{E}$ (or the pencil $\lambda\mathbf{E}-\mathbf{A}$) is singular, the spectrum contains null eigenvalues that are not associated with any decaying, growing, or oscillating dynamic mode. These structural zeros must be identified and excluded before classifying the system, so that the \emph{yellow} verdict is reserved for actual marginal dynamics.
-    \item{Possible bottlenecks.} To identify the origin of zero eigenvalues that lead to an inconclusive response.
+        Therefore, if $\sigma_1>0$, the dominant term blows up to positive infinity, causing a clear instability, whereas $\sigma_1<0$ drives all modes to decay.
+
+        The remaining singular case is a null eigenvalue $\lambda=0$ ($\sigma=\omega=0$): the argument above rests on the gap $\sigma_1-\sigma_n>0$, but here $\sigma_1=\sigma_n=0$ makes the exponent $\lambda_n-\lambda_1$ vanish, so the ratio does not tend to zero and the mode is not negligible relative to the dominant one. This equilibrium mode neither decays nor grows, i.e.\ a marginally stable regime that the dashboard classifies as \emph{yellow}.
+
+        It is important, however, to distinguish this genuine marginal mode from spurious null eigenvalues that arise purely from the algebraic structure of the generalised eigenproblem $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$: whenever the leading matrix $\mathbf{E}$ (or the pencil $\lambda\mathbf{E}-\mathbf{A}$) is singular, the spectrum contains null eigenvalues that are not associated with any decaying, growing, or oscillating dynamic mode. These structural zeros must be identified and excluded before classifying the system, so that the \emph{yellow} verdict is reserved for actual marginal dynamics.
+  \item[Possible bottlenecks.] To identify the origin of zero eigenvalues that lead to an inconclusive response.
+
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Status \& Forecast} tab.
           \item A traffic lights-like indicator displays the overall stability classification:
                 \begin{itemize}[before=\leavevmode, leftmargin=*]
                   \item \textbf{Green} --- Stable: all eigenvalues have negative real parts with sufficient damping.
-                  \item \textbf{Yellow} --- Marginal: the stability margin is below a predefined threshold ($<10^{-3}$) or some modes exhibit low damping ($\zeta < 0.05$).
+                  \item \textbf{Yellow} --- Marginal: the stability margin is below a predefined threshold (\texttt{STABLE\_MAX\_REAL\_PART} $< 10^{-6}$) or some modes exhibit low damping ($\zeta < 0.05$).
                   \item \textbf{Red} --- Unstable: at least one eigenvalue has a positive real part.
                 \end{itemize}
           \item The \textbf{Grid Information} card shows the network topology: number of buses, generators, lines, loads, and transformers.
@@ -195,14 +199,14 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
   \item[Objective.] Identify the least-damped oscillation modes and determine which state variables (generators, controls, components) contribute most to each mode.
   \item[Preconditions.] A simulation (UC-01) has been completed. Eigenvalues have been computed.
   \item[Theoretical basis.] Each eigenvalue corresponds to an oscillation mode that is a specific combination of perturbations in the state vector. The modal participation factor is defined as
-  \[
-    p_{ki}=\frac{v_{ki}\,(\mathbf{w}_k^{\top}\mathbf{E})_i}{\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{v}_k},
-  \]
-  where $\mathbf{v}_k$ and $\mathbf{w}_k$ are the right and left eigenvectors of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ (with $\mathbf{A}\mathbf{v}_k=\lambda_k\mathbf{E}\mathbf{v}_k$, $\mathbf{w}_k^{\top}\mathbf{A}=\lambda_k\mathbf{w}_k^{\top}\mathbf{E}$), $v_{ki}=\mathbf{e}_i^{\top}\mathbf{v}_k$ and $(\mathbf{w}_k^{\top}\mathbf{E})_i=\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{e}_i$~\cite{tzounas2019modal}. The GUI displays normalised magnitudes
-  \[
-    \bar{p}_{ki}=\frac{\lvert p_{ki}\rvert}{\sum_{j}\lvert p_{kj}\rvert},
-  \]
-  which sum to 100\% per mode. A large $\bar{p}_{ki}$ indicates that the $k$-th mode is strongly associated with the $i$-th state, making it a primary candidate for intervention (PSS retuning, FACTS placement).
+        \[
+          p_{ki}=\frac{v_{ki}\,(\mathbf{w}_k^{\top}\mathbf{E})_i}{\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{v}_k},
+        \]
+        where $\mathbf{v}_k$ and $\mathbf{w}_k$ are the right and left eigenvectors of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ (with $\mathbf{A}\mathbf{v}_k=\lambda_k\mathbf{E}\mathbf{v}_k$, $\mathbf{w}_k^{\top}\mathbf{A}=\lambda_k\mathbf{w}_k^{\top}\mathbf{E}$), $v_{ki}=\mathbf{e}_i^{\top}\mathbf{v}_k$ and $(\mathbf{w}_k^{\top}\mathbf{E})_i=\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{e}_i$~\cite{tzounas2019modal}. The GUI displays normalised magnitudes
+        \[
+          \bar{p}_{ki}=\frac{\lvert p_{ki}\rvert}{\sum_{j}\lvert p_{kj}\rvert},
+        \]
+        which sum to 100\% per mode. A large $\bar{p}_{ki}$ indicates that the $k$-th mode is strongly associated with the $i$-th state, making it a primary candidate for intervention (PSS retuning, FACTS placement).
   \item[Possible bottlenecks.] In sparse computations of the eigenvalues is difficult to compute their corresponding left and right eigenvectors that are both needed for this UC.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
