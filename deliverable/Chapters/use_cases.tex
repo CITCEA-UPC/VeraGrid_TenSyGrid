@@ -4,8 +4,8 @@ The identification of use cases for the \textit{TenSyGrid} Toolbox follows a use
 
 \begin{enumerate}
   \item \textbf{Project objectives.} The TenSyGrid proposal defines the toolbox as a stability assessment platform for converter-dominated power grids. The core workflow --- load a grid model, run a small-signal stability analysis, and interpret the results --- directly informs the first set of use cases.
-  \item \textbf{Existing GUI prototype.} An initial web-based Stability Monitor has been developed, implementing six core interaction flows: simulation execution (UC-01), system status monitoring (UC-02), eigenvalue analysis (UC-03), critical mode inspection (UC-04), bus voltage evaluation (UC-05), and N-1 contingency assessment (UC-06). These flows were formalised as the implemented use cases.
-  \item \textbf{Operator needs analysis.} Anticipating the meeting with network operators, additional use cases (UC-07 to UC-14) have been drafted to explore workflows that go beyond single-snapshot analysis, including scenario comparison, trend monitoring, and actionable recommendations.
+  \item \textbf{Existing GUI prototype.} An initial web-based Stability Monitor has been developed, implementing five core interaction flows: simulation execution (UC-01), system status monitoring and eigenvalue analysis (UC-02), critical mode inspection (UC-03), bus voltage evaluation (UC-04), and N-1 contingency assessment (UC-05). These flows were formalised as the implemented use cases.
+  \item \textbf{Operator needs analysis.} Anticipating the meeting with network operators, additional use cases (UC-06 to UC-14) have been drafted to explore workflows that go beyond single-snapshot analysis, including scenario comparison, trend monitoring, and actionable recommendations.
 \end{enumerate}
 
 Each use case is described following a structured template that includes \textbf{identifier} and \textbf{name}, \textbf{actor}, \textbf{objective}, \textbf{preconditions}, \textbf{theoretical basis}, \textbf{possible bottlenecks}, \textbf{main flow}, \textbf{GUI interaction}, and \textbf{expected result}. The level of detail is tailored to facilitate discussion with operators, who will validate, prioritise, and refine the proposals during the forthcoming workshop.
@@ -27,34 +27,34 @@ To ground the use-case catalogue in real operational practice, three semi-struct
 \paragraph{Andrés Mauricio Díaz Caicedo (eRoots; former TSO planner and control-room analyst at XM, Colombia).}
 Interviewed on 22 July 2026. Andrés described the operational workflow at XM: economic dispatch coordinated in 8-hour shifts, system validation every 15--30 minutes, and \mbox{$N-1$} contingency screening complemented by short-circuit and RMS dynamic simulations for critical cases. On the planning side, detailed modelling of low-voltage networks and IBRs (including protection systems) overloaded the state-space representation, making small-signal studies (SSTI, SSSI, SSOS) take 3--4 hours. Key operational metrics were the frequency nadir, ROCOF, and the settling time $T_{1090}$; in planning, eigenvalue position, damping, SCR variation, and participation factors were used to avoid out-of-band interactions. Regarding the GUI prototype, he recommended: (i) removing traffic-light indicators while keeping colour coding in the complex plane; (ii) providing explicit error debugging when a simulation fails; (iii) linking eigenvalues and participation factors to specific devices and state variables ($\omega$) to distinguish local from inter-area oscillations; (iv) adding visualisation of operational bands (P-V curves); and (v) supporting sequential contingencies (chains of events, $N$-$2$) and multiple simultaneous contingency selection (e.g.\ via YAML configuration).
 
-\paragraph{Enric Sánchez Sánchez (with Eduardo Prieto-Araujo).}
+\paragraph{Enric Sánchez Sánchez (Project Leader of HDVC at Siemens Energy).}
 Interviewed on 29 June 2026. Enric outlined three families of studies performed in the HVDC context: (i) \emph{dynamic performance} of an HVDC link under grid events, run in EMT with hundreds of PSCAD cases over 1--2 days; (ii) \emph{RMS} whole-country contingency screening ($N$-$1$) on AC networks of the order of 500\,km radius (e.g.\ UK GB network), taking a few hours; and (iii) \emph{screening studies} to identify synchronous generators that may interact problematically with the HVDC, run as load-flow and short-circuit analyses in minutes. He noted that small-signal studies are currently performed through impedance scanning (SS-SFI), with the frequency response obtained from PSCAD; clients are beginning to request state-space models (grey-box, per subsystem) for which a Laplace transfer function may be delivered instead, keeping the full model confidential for security reasons. He also highlighted harmonic-stability assessment based on gain/phase margins rather than eigenvalues, and the need to study voltage collapse in weak grids, which linear mode analysis does not capture. Automation of simulation campaigns and of result post-processing was identified as a key unmet need.
 
 \paragraph{Vahid Moshari Mamaghani (Elia Grid International).}
 Interviewed on 29 June 2026. Vahid described the planning and operational processes at Elia: long-term grid development (TYDP, every two years), short-term planning, and operational processes from week-ahead down to intraday and real-time (SCADA/EMS with state estimation). Models are exchanged in CGMES; PowerFactory, PSCAD, and SCADA are the three main software tools. Dynamic security assessment (DSA) involves thousands of contingency cases; computation time limits model detail, and the trade-off is managed by increasing the number of cores. Day-ahead studies use RMS (PowerFactory); close to real time, about 100 cases are run with reduced detail. Outage management is not automatic and there is interest in AI tools to judge criticality. Regarding HVDC, he noted that all operators previously provided Thevenin equivalents and now need to provide reduced models; any tool deployed must integrate with the existing commercial software stack. On model exchange, he questioned how complete CGMES is for dynamic data and mentioned German colleagues working on software-independent EMT models, pointing to VeraGrid as a relevant platform.
 
-These interviews directly motivated the proposed use cases: scenario comparison and trend analysis (UC-07, UC-08) address the need to track stability across the planning horizon and multiple contingencies; critical-element ranking (UC-09) and damping-controller placement (UC-10) respond to the request to link modes to specific devices; centre-manifold analysis (UC-13) and basin-of-attraction estimation (UC-14) target the weak-grid and large-disturbance questions raised by Enric and Vahid. The request for clear error debugging, device-level attribution, and operational bands feeds directly into the GUI interaction design of the implemented use cases (UC-01 to UC-06).
+These interviews directly motivated the proposed use cases: scenario comparison and trend analysis (UC-06, UC-08) address the need to track stability across the planning horizon and multiple contingencies; critical-element ranking (UC-09) and damping-controller placement (UC-10) respond to the request to link modes to specific devices; centre-manifold analysis (UC-13) and basin-of-attraction estimation (UC-14) target the weak-grid and large-disturbance questions raised by Enric and Vahid. The request for clear error debugging, device-level attribution, and operational bands feeds directly into the GUI interaction design of the implemented use cases (UC-01 to UC-05).
 
 \section{Use case inventory}
 
-Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, grouped by their current implementation status. The first six have been prototyped in the Stability Monitor GUI; the remaining eight are candidates to be presented and discussed with network operators.
+Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, grouped by their current implementation status. The first five have been prototyped in the Stability Monitor GUI; the remaining eight are candidates to be presented and discussed with network operators.
 
 \begin{table}[H]
   \centering
   \caption{Use case inventory for the TenSyGrid Toolbox.}
   \label{tab:uc-inventory}
-  \begin{tabular}{p{0.07\textwidth}p{0.33\textwidth}p{0.14\textwidth}p{0.36\textwidth}}
+  \begin{tabular}{lp{0.31\textwidth}p{0.13\textwidth}p{0.36\textwidth}}
     \toprule
     \textbf{ID} & \textbf{Name}                         & \textbf{Status} & \textbf{Objective}                                           \\
     \midrule
     UC-01       & Run Small-Signal Stability Simulation & Implemented     & Execute a stability computation on a grid model              \\
-    UC-02       & System Status Dashboard               & Implemented     & Obtain an at-a-glance stability classification               \\
-    UC-03       & Eigenvalue Spectrum Analysis          & Implemented     & Visualise and explore the eigenvalue distribution            \\
-    UC-04       & Critical Mode Diagnosis               & Implemented     & Identify low-damped modes and their physical origin          \\
-    UC-05       & Bus Voltage Assessment                & Implemented     & Verify voltage profile from the power-flow solution          \\
-    UC-06       & N-1 Contingency Analysis              & Implemented     & Evaluate stability impact of single-element outages          \\
+    UC-02       & System Status Dashboard \& Eigenvalue Spectrum & Implemented & Obtain an at-a-glance stability classification and explore the eigenvalue distribution \\
+    UC-03       & Critical Mode Diagnosis               & Implemented     & Identify low-damped modes and their physical origin          \\
+    UC-04       & Bus Voltage Assessment                & Implemented     & Verify voltage profile from the power-flow solution          \\
+    UC-05       & N-1 Contingency Analysis              & Implemented     & Evaluate stability impact of single-element outages          \\
     \midrule
-    UC-07       & Operating Scenario Comparison         & Proposed        & Compare stability between two grid snapshots                 \\
+    UC-06       & Operating Scenario Comparison         & Proposed        & Compare stability between two grid snapshots                 \\
+    UC-07       & Critical Device List                  & Proposed        & Rank devices by their participation in the critical modes    \\
     UC-08       & Stability Trend Analysis              & Proposed        & Track stability evolution across multiple operating points   \\
     UC-09       & Critical Element Ranking              & Proposed        & Rank elements by their contribution to stability degradation \\
     UC-10       & Damping Controller Placement Guidance & Proposed        & Suggest candidate locations for PSS or FACTS devices         \\
@@ -69,7 +69,7 @@ Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, gro
 
 \section{Implemented use cases}
 
-The following six use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the TenSyGrid engine, running in a sepparate backend server. The GUI layout is (now) organised around six tabs, each corresponding to one use case, allowing the operator to navigate from simulation setup to detailed diagnostic views.
+The following five use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the TenSyGrid engine, running in a sepparate backend server. The GUI layout is (now) organised around six tabs --- UC-02 spans two of them, \textbf{Status \& Forecast} and \textbf{Eigenvalues} --- allowing the operator to navigate from simulation setup to detailed diagnostic views.
 
 % ---------------------------------------------------------------------------
 \subsection{UC-01: Run Small-Signal Stability Simulation}
@@ -109,19 +109,19 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
         \end{figure}
 
   \item[GUI interaction.] The \textbf{Run Simulation} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the simulation timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete results.
-  \item[Expected result.] A \texttt{.tensygrid} file containing the full stability analysis output: eigenvalues, critical modes with participation factors, bus voltages from the power flow, grid topology information, the stability margin, and an operation hash for traceability. This file serves as input for all subsequent use cases (UC-02 to UC-06).
+  \item[Expected result.] A \texttt{.tensygrid} file containing the full stability analysis output: eigenvalues, critical modes with participation factors, bus voltages from the power flow, grid topology information, the stability margin, and an operation hash for traceability. This file serves as input for all subsequent use cases (UC-02 to UC-05).
 \end{description}
 
 
 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-02: System Status Dashboard}
+\subsection{UC-02: System Status Dashboard \& Eigenvalue Spectrum}
 % ---------------------------------------------------------------------------
 
 \begin{description}
-  \item[Actor.] Network operator.
-  \item[Objective.] Obtain an immediate, at-a-glance classification of grid stability together with key topological and operational metrics.
+  \item[Actor.] Network operator; planning engineer or stability analyst for the detailed spectrum exploration.
+  \item[Objective.] Obtain an immediate, at-a-glance classification of grid stability together with key topological and operational metrics, and explore the full eigenvalue distribution in the complex plane to identify clusters, assess damping ratios, and detect modes of concern.
   \item[Preconditions.] At least one simulation (UC-01) has been completed and its result is loaded.
   \item[Theoretical basis.] Using UC-01 theoretical basis, we find different regimes in the system stability. We define the dominant eigenvalue $\lambda_1$ as the one with the biggest $\Re(\lambda)=\sigma$. For a sufficiently large time $t$, any other mode becomes negligible relative to the dominant one, since
         \[
@@ -133,6 +133,8 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
         The remaining singular case is a null eigenvalue $\lambda=0$ ($\sigma=\omega=0$): the argument above rests on the gap $\sigma_1-\sigma_n>0$, but here $\sigma_1=\sigma_n=0$ makes the exponent $\lambda_n-\lambda_1$ vanish, so the ratio does not tend to zero and the mode is not negligible relative to the dominant one. This equilibrium mode neither decays nor grows, i.e.\ a marginally stable regime that the dashboard classifies as \emph{yellow}.
 
         It is important, however, to distinguish this genuine marginal mode from spurious null eigenvalues that arise purely from the algebraic structure of the generalised eigenproblem $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$: whenever the leading matrix $\mathbf{E}$ (or the pencil $\lambda\mathbf{E}-\mathbf{A}$) is singular, the spectrum contains null eigenvalues that are not associated with any decaying, growing, or oscillating dynamic mode. These structural zeros must be identified and excluded before classifying the system, so that the \emph{yellow} verdict is reserved for actual marginal dynamics.
+
+        In addition, each oscillation mode is represented by a conjugate pair of eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay-or-growth and $\omega$ the angular frequency, so that $f=\omega/(2\pi)$ is the frequency in Hz. In the complex plane, the ratio of $\sigma$ to $|\lambda|$ gives the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$, which equals the cosine of the mode's angle with the negative real axis: $\zeta=\cos\theta$. Constant-damping loci therefore appear as straight lines (cones) through the origin, which is precisely what the threshold lines used in the eigenvalue view (e.g.\ $\zeta=0$ and $\zeta=0.05$) represent. Modes close to the imaginary axis $\sigma\approx 0$ fall inside the low-damping cone and are flagged as the ones of concern; the spectrum is inspected to identify which modes concentrate the disturbance. This attribution, however, is the object of UC-03.
   \item[Possible bottlenecks.] To identify the origin of zero eigenvalues that lead to an inconclusive response.
 
   \item[Main flow.]
@@ -148,31 +150,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
           \item The \textbf{Key Metrics} card reports the stability margin, the number of critical modes, the total eigenvalue count, and the number of state variables.
           \item A compact complex-plane eigenvalue plot provides a visual overview of the spectrum, with a red dashed line marking the stability boundary ($\Re(\lambda) = 0$).
           \item The \textbf{Stability Assessment} card presents a textual summary with colour-coded recommendations (e.g., ``All modes stable'', ``Caution: low damping detected'', or ``Warning: positive real parts --- system is unstable'').
-        \end{enumerate}
-
-        \begin{figure}[H]
-          \centering
-          \includegraphics[width=0.7\textwidth]{pictures/UC-02.status_dashboard.png}
-          \caption[UC-02: Status \& Forecast.]{UC-02: Status \& Forecast. The operator views the grid's stability status and related information in a consolidated dashboard.}
-        \end{figure}
-
-  \item[GUI interaction.] The \textbf{Status \& Forecast} tab is designed as a control-room dashboard. The traffic lights have a glowing animation when active, drawing the operator's attention to abnormal conditions. All metrics are displayed in large-format cards for quick scanning.
-  \item[Expected result.] The operator obtains a clear answer to the question \textit{``Is the grid stable''?} together with enough context (topology, metrics) to decide whether further investigation is needed. If the status is yellow or red, the operator is expected to proceed to UC-03 and UC-04 for detailed diagnosis.
-\end{description}
-
-% ---------------------------------------------------------------------------
-\subsection{UC-03: Eigenvalue Analysis}
-% ---------------------------------------------------------------------------
-
-\begin{description}
-  \item[Actor.] Planning engineer or stability analyst.
-  \item[Objective.] Explore the full eigenvalue distribution in the complex plane to identify clusters, assess damping ratios, and detect modes of concern.
-  \item[Preconditions.] A simulation (UC-01) has been completed.
-  \item[Theoretical basis.] Each oscillation mode is represented by a conjugate pair of eigenvalues $\lambda=\sigma\pm j\omega$, where $\sigma$ governs decay-or-growth and $\omega$ the angular frequency, so that $f=\omega/(2\pi)$ is the frequency in Hz. In the complex plane, the ratio of $\sigma$ to $|\lambda|$ gives the damping ratio $\zeta=-\sigma/\lvert\lambda\rvert$, which equals the cosine of the mode's angle with the negative real axis: $\zeta=\cos\theta$. Constant-damping loci therefore appear as straight lines (cones) through the origin, which is precisely what the threshold lines used in this view (e.g.\ $\zeta=0$ and $\zeta=0.05$) represent. Modes close to the imaginary axis $\sigma\approx 0$ fall inside the low-damping cone and are flagged as the ones of concern; From UC-01 theoretical basis, this view adds a frequency-domain perspective: the spectrum is inspected to identify which modes concentrate the disturbance. This attribution, however, is the object of UC-04.
-  \item[Main flow.]
-        \begin{enumerate}[before=\leavevmode, leftmargin=*]
-          \item The operator navigates to the \textbf{Eigenvalues} tab.
-          \item A full-page complex-plane scatter plot displays all eigenvalues: horizontal axis = real part $\sigma$, vertical axis = imaginary part $\omega$ (angular frequency). A red dashed vertical line marks the stability boundary ($\sigma = 0$).
+          \item When a detailed exploration is required, the operator navigates to the \textbf{Eigenvalues} tab, where a full-page complex-plane scatter plot displays all eigenvalues: horizontal axis = real part $\sigma$, vertical axis = imaginary part $\omega$ (angular frequency). A red dashed vertical line marks the stability boundary ($\sigma = 0$).
           \item The operator can \textbf{scroll to zoom} and \textbf{drag to pan} across the plot, allowing inspection of dense clusters or outlying modes.
           \item Hovering over a point displays a tooltip with the eigenvalue's real part, imaginary part, frequency in Hz, and damping ratio $\zeta$.
           \item A \textbf{Damping vs.~Frequency} scatter plot shows $\zeta$ against frequency. Critical threshold lines at $\zeta = 0$ and $\zeta = 0.05$ are drawn for reference.
@@ -182,16 +160,22 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
 
         \begin{figure}[H]
           \centering
-          \includegraphics[width=0.7\textwidth]{pictures/UC-03.eigenvalues.png}
-          \caption[UC-03: Eigenvalue Analysis.]{UC-03: Eigenvalue Analysis. The operator explores the eigenvalue distribution in the complex plane.}
+          \includegraphics[width=0.7\textwidth]{pictures/UC-02.status_dashboard.png}
+          \caption[UC-02: Status \& Forecast.]{UC-02: Status \& Forecast. The operator views the grid's stability status and related information in a consolidated dashboard.}
         \end{figure}
 
-  \item[GUI interaction.] The eigenvalue canvas supports interactive zoom and pan via mouse or touch gestures. The damping plot and table are synchronised with the same data set and update when a different simulation result is loaded.
-  \item[Expected result.] The operator gains a detailed understanding of the oscillatory modes present in the system: their frequencies, damping levels, and proximity to instability. This view is used to decide which modes require further investigation (UC-04) and to evaluate the effectiveness of remedial measures in contingency scenarios (UC-06).
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=0.7\textwidth]{pictures/UC-02.eigenvalues.png}
+          \caption[UC-02: Eigenvalue Analysis.]{UC-02: Eigenvalue Analysis. The operator explores the eigenvalue distribution in the complex plane from the Eigenvalues tab.}
+        \end{figure}
+
+  \item[GUI interaction.] The \textbf{Status \& Forecast} tab is designed as a control-room dashboard. The traffic lights have a glowing animation when active, drawing the operator's attention to abnormal conditions. All metrics are displayed in large-format cards for quick scanning. The eigenvalue canvas of the \textbf{Eigenvalues} tab supports interactive zoom and pan via mouse or touch gestures. The damping plot and table are synchronised with the same data set and update when a different simulation result is loaded.
+  \item[Expected result.] The operator obtains a clear answer to the question \textit{``Is the grid stable''?} together with enough context (topology, metrics) and a detailed understanding of the oscillatory modes --- their frequencies, damping levels, and proximity to instability --- to decide whether further investigation is needed. If the status is yellow or red, the operator is expected to proceed to UC-03 for detailed diagnosis of the critical modes, and uses this view to evaluate the effectiveness of remedial measures in contingency scenarios (UC-05).
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-04: Critical Mode Diagnosis}
+\subsection{UC-03: Critical Mode Diagnosis}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -220,15 +204,15 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
 
         \begin{figure}[H]
           \centering
-          \includegraphics[width=0.7\textwidth]{pictures/UC-04.critical_modes.png}
-          \caption[UC-04: Critical Modes.]{UC-04: Critical Modes. The operator identifies the least-damped oscillation modes.}
+          \includegraphics[width=0.7\textwidth]{pictures/UC-03.critical_modes.png}
+          \caption[UC-03: Critical Modes.]{UC-03: Critical Modes. The operator identifies the least-damped oscillation modes.}
         \end{figure}
   \item[GUI interaction.] Participation factors are rendered as horizontal bar charts inside expandable table rows. The expansion is animated. The operator can collapse a row and expand another to compare participation profiles across different modes.
   \item[Expected result.] The operator learns \textit{which physical components are responsible for each critical oscillation}. For example, Mode 3 with $\zeta = 0.02$ at 1.2 Hz may show strong participation from Generator 7's speed and AVR states, indicating that retuning the PSS at that generator would be the most effective mitigation. This directly informs the decisions proposed in next use cases.
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-05: Bus Voltage Assessment}
+\subsection{UC-04: Bus Voltage Assessment}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -250,8 +234,8 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
 
         \begin{figure}[H]
           \centering
-          \includegraphics[width=0.7\textwidth]{pictures/UC-05.bus_voltages.png}
-          \caption[UC-05: Bus Voltage Assessment.]{UC-05: Bus Voltage Assessment. The operator validates the voltage profile under the current operating point.}
+          \includegraphics[width=0.7\textwidth]{pictures/UC-04.bus_voltages.png}
+          \caption[UC-04: Bus Voltage Assessment.]{UC-04: Bus Voltage Assessment. The operator validates the voltage profile under the current operating point.}
         \end{figure}
   \item[GUI interaction.] The bus voltage table is a scrollable table with sortable columns. The OK/WARNING badges use the same colour semantics as the stability traffic lights, maintaining visual consistency across the interface.
   \item[Expected result.] The operator obtains a quick validation of the voltage profile under the current operating point. Buses with voltage excursions are highlighted, prompting further investigation into reactive power support, tap-changer settings, or load behaviour.
@@ -283,7 +267,7 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
 \end{tikzpicture}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-06: N-1 Contingency Analysis}
+\subsection{UC-05: N-1 Contingency Analysis}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -313,8 +297,8 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
         \end{enumerate}
         \begin{figure}[H]
           \centering
-          \includegraphics[width=0.7\textwidth]{pictures/UC-06.contingencies.png}
-          \caption[UC-06: Contingency Analysis.]{UC-06: Contingency Analysis. The operator evaluates the impact of different contingencies on system stability.}
+          \includegraphics[width=0.7\textwidth]{pictures/UC-05.contingencies.png}
+          \caption[UC-05: Contingency Analysis.]{UC-05: Contingency Analysis. The operator evaluates the impact of different contingencies on system stability.}
         \end{figure}
   \item[GUI interaction.] The Contingencies tab uses a three-column layout: controls on the left, eigenvalue comparison in the centre, and recommendations on the right. The before/after plots share the same axis scales for direct visual comparison.
   \item[Expected result.] The operator determines whether the grid remains stable under the selected N-1 contingency. If instability or marginal stability is detected, the operator receives targeted, actionable recommendations. This use case supports transmission planning studies and operational security assessment, enabling the operator to identify critical contingencies and plan mitigation measures.
@@ -322,10 +306,10 @@ The following six use cases have been prototyped in the TenSyGrid Stability Moni
 
 \section{Proposed use cases for operator workshop}
 
-The six use cases described in the previous section correspond to functionalities already prototyped in the Stability Monitor. The following eight use cases are proposed extensions to be discussed with network operators during the forthcoming workshop. They address workflows that operators may consider essential for integration into their daily planning and operational routines. The descriptions below are intentionally less detailed, as they represent initial concepts subject to operator feedback. UC-13 and UC-14 are the most technical of the proposals and address questions that are likely to be raised by stability engineers rather than by control-room staff; both are included so that their theoretical assumptions can be challenged early.
+The five use cases described in the previous section correspond to functionalities already prototyped in the Stability Monitor. The following nine use cases are proposed extensions to be discussed with network operators during the forthcoming workshop. They address workflows that operators may consider essential for integration into their daily planning and operational routines. The descriptions below are intentionally less detailed, as they represent initial concepts subject to operator feedback. UC-13 and UC-14 are the most technical of the proposals and address questions that are likely to be raised by stability engineers rather than by control-room staff; both are included so that their theoretical assumptions can be challenged early.
 
 % ---------------------------------------------------------------------------
-\subsection{UC-07: Operating Scenario Comparison}
+\subsection{UC-06: Operating Scenario Comparison}
 % ---------------------------------------------------------------------------
 
 % \begin{description}
@@ -340,6 +324,37 @@ The six use cases described in the previous section correspond to functionalitie
   \item[Objective.] Compare the stability characteristics of two distinct grid operating points, such as day peak vs.\ night off-peak, high vs.\ low renewable generation, or pre- and post-reinforcement scenarios.
   \item[Proposed flow.] The operator loads two previously computed \texttt{.tensygrid} results. The tool performs a differential modal analysis, directly mapping eigenvalues between the two states to track modal shifts. It renders comparative plots and highlights critical structural changes: modes that emerge or disappear, significant drops in damping, and shifts in participation factors that indicate the oscillatory problem has relocated geographically.
   \item[Expected value.] Operators can assess how seasonal, daily, or structural changes in the network affect stability without manually switching between result sets. This supports both operational planning and infrastructure investment decisions.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-07: Critical Device List}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Planning engineer.
+  \item[Objective.] Rank the devices of the network by their participation in the critical modes, so that the equipment that most affects the stability of the system can be identified and prioritised.
+  \item[Preconditions.]
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item A simulation (UC-01) has been completed and the critical modes have been diagnosed (UC-03).
+          \item The participation factors of the state variables are available in the result file.
+        \end{itemize}
+  \item[Theoretical basis.] Each participation factor relates a state variable to a critical mode, so the variables with the largest participation identify the dynamics that dominate that mode. Mapping each state variable onto the device that owns it (generator, AVR, PSS, converter, load) and aggregating the participation factors per device yields a ranking that links every critical eigenvalue to the physical equipment responsible for it. This is the step from the state-level diagnosis of UC-03 to a device-level decision.
+  \item[Possible bottlenecks.] The aggregation is only as good as the metadata that maps states to devices, and several choices must be made explicit:
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item \textbf{State-to-device mapping.} The result file must retain which device owns each state; otherwise the mapping has to be reconstructed from the model.
+          \item \textbf{Aggregation criterion.} Summing the participation factors of all the states of a device favours devices with many states, whereas taking the maximum ignores their combined effect, so the criterion must be configurable.
+          \item \textbf{Normalisation and operating point.} Participation factors depend on the mode normalisation and on the operating point, so the ranking may change between scenarios and should be reported with that caveat.
+          \item \textbf{Number of critical modes.} A ranking per mode is easy to read, but a global ranking across the critical modes requires weighting them by criticality.
+        \end{itemize}
+  \item[Proposed flow.]
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
+          \item The operator selects a result and the critical mode to inspect.
+          \item The tool groups the state variables by owning device and aggregates their participation factors with the selected criterion.
+          \item A table ranks the devices by aggregated participation, and a bar chart shows their relative weight in the mode.
+          \item The operator can expand a device to see the state-level participation factors behind its position in the ranking, and switch between the per-mode and the global views.
+          \item The ranking can be exported as the starting point for the controller-placement analysis of UC-10.
+        \end{enumerate}
+  \item[Expected value.] The planning engineer obtains a device-level list that translates the modal diagnosis into concrete equipment priorities: which generators, controls, or loads dominate each critical mode and therefore concentrate the mitigation effort. This supports maintenance and retuning plans, the siting of PSS or FACTS devices, and the discussion with asset managers about where stability investment is most effective.
 \end{description}
 
 % ---------------------------------------------------------------------------
@@ -379,7 +394,7 @@ The six use cases described in the previous section correspond to functionalitie
 \begin{description}
   \item[Actor.] Network operator, planning engineer, or asset manager.
   \item[Objective.] Rank generators, lines, and loads by their individual contribution to stability degradation, going beyond single $N-1$ analysis.
-  \item[Proposed flow.] The operator triggers a batch contingency analysis ($N-1$ or $N-2$) across all elements of a selected type. For each contingency, the change in stability margin is recorded. The tool then produces a ranked bar chart or heat map showing which elements cause the largest margin reduction when removed. The operator can click on any element to drill down into the detailed contingency result (as in UC-06).
+  \item[Proposed flow.] The operator triggers a batch contingency analysis ($N-1$ or $N-2$) across all elements of a selected type. For each contingency, the change in stability margin is recorded. The tool then produces a ranked bar chart or heat map showing which elements cause the largest margin reduction when removed. The operator can click on any element to drill down into the detailed contingency result (as in UC-05).
   \item[Expected value.] This use case transforms contingency analysis from a \textit{what-if} exploration into a systematic vulnerability assessment. It directly supports critical-asset identification, maintenance prioritisation, and transmission expansion planning.
 \end{description}
 
@@ -390,7 +405,7 @@ The six use cases described in the previous section correspond to functionalitie
 \begin{description}
   \item[Actor.] Stability engineer or control designer.
   \item[Objective.] Obtain evidence-based suggestions for where to install or retune power system stabilisers (PSS) or where to place FACTS devices to improve the damping of critical modes.
-  \item[Proposed flow.] Building on UC-04, the tool analyses participation factors and residues across the current operating point and across contingency scenarios. It identifies the generators with the highest participation in low-damped modes and recommends them as primary candidates for PSS installation or retuning. For inter-area modes involving geographically separated groups of machines, the tool suggests candidate buses for FACTS devices (STATCOM, SVC, TCSC) based on modal observability and controllability indices. The output is a ranked list of candidate locations with a qualitative effectiveness score.
+  \item[Proposed flow.] Building on UC-03, the tool analyses participation factors and residues across the current operating point and across contingency scenarios. It identifies the generators with the highest participation in low-damped modes and recommends them as primary candidates for PSS installation or retuning. For inter-area modes involving geographically separated groups of machines, the tool suggests candidate buses for FACTS devices (STATCOM, SVC, TCSC) based on modal observability and controllability indices. The output is a ranked list of candidate locations with a qualitative effectiveness score.
   \item[Expected value.] This use case bridges the gap between eigenvalue analysis and actionable control design, helping operators and engineers translate stability diagnostics into concrete hardware or tuning decisions.
 \end{description}
 
@@ -415,7 +430,7 @@ The six use cases described in the previous section correspond to functionalitie
           \item For each scenario, the tool adjusts the generation mix --- scaling down synchronous machines and scaling up converter-interfaced sources while respecting the grid model's structure --- and runs the stability analysis, recording the stability margin and the critical modes.
           \item Results are presented as a curve of stability margin versus renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold.
           \item Eigenvalue trajectories are plotted to show how specific modes migrate as the penetration level increases, with the newly introduced converter modes highlighted.
-          \item Critical scenarios can be drilled down via UC-04 (participation factors) and tracked along the progression via UC-08.
+          \item Critical scenarios can be drilled down via UC-03 (participation factors) and tracked along the progression via UC-08.
         \end{enumerate}
   \item[Expected value.] This use case directly addresses the core TenSyGrid objective of assessing converter-dominated grids. It allows grid planners to determine the maximum renewable hosting capacity under stability constraints and to identify the modes most sensitive to the synchronous-to-converter transition.
 \end{description}
@@ -455,7 +470,7 @@ The six use cases described in the previous section correspond to functionalitie
           \item A one-dimensional phase portrait of the reduced flow $\dot{x}_c=g(x_c)$ is plotted, showing the equilibrium and the direction of the trajectories.
           \item If the coefficient is close to zero (degenerate case), the tool flags the result as inconclusive and recommends computing higher-order terms or moving the operating point.
         \end{enumerate}
-  \item[Expected value.] The operator or engineer resolves the ambiguity left by a null eigenvalue: instead of a generic \emph{yellow} status, the tool states whether the operating point is a benign equilibrium, an incipient bifurcation, or an artefact of the descriptor formulation. This feeds the recommendation logic of UC-06 and clarifies which parameter (load, dispatch, penetration) must be watched before the equilibrium disappears.
+  \item[Expected value.] The operator or engineer resolves the ambiguity left by a null eigenvalue: instead of a generic \emph{yellow} status, the tool states whether the operating point is a benign equilibrium, an incipient bifurcation, or an artefact of the descriptor formulation. This feeds the recommendation logic of UC-05 and clarifies which parameter (load, dispatch, penetration) must be watched before the equilibrium disappears.
 \end{description}
 
 % ---------------------------------------------------------------------------
@@ -485,7 +500,7 @@ The six use cases described in the previous section correspond to functionalitie
           \item The basin is rendered on a selectable state plane (e.g.\ rotor angle versus speed of the most critical machine) with the equilibrium, the estimated boundary, and a set of sample trajectories inside and outside it.
           \item The disturbed operating point is overlaid on the same plot, so that the operator sees immediately whether it falls inside or outside the estimated region.
           \item The margin is reported as a scalar quantity (critical clearing time, or maximum power step) together with a colour-coded verdict: secure, marginal, or insecure.
-          \item The result can be compared across operating points (linking to UC-07 and UC-08) and the tool recommends drill-down into UC-06, UC-09, or UC-10 when the margin falls below the configured threshold.
+          \item The result can be compared across operating points (linking to UC-06 and UC-08) and the tool recommends drill-down into UC-05, UC-09, or UC-10 when the margin falls below the configured threshold.
         \end{enumerate}
   \item[Expected value.] The operator obtains a quantitative large-disturbance security margin that complements the small-signal verdict of UC-02: the tool answers not only \emph{``is the equilibrium stable''} but also \emph{``how much can happen before it is lost''}. This supports disturbance-limit setting, protective-relay coordination, and the identification of operating points that are formally stable but practically fragile.
 \end{description}
@@ -527,22 +542,22 @@ During the use-case identification process, several potential workflows were con
 
   \item \textbf{Transient (large-disturbance) stability assessment.} The current toolbox focuses on small-signal stability via eigenvalue analysis of the linearised state matrix. Transient stability --- concerned with the system's ability to remain in synchronism after large disturbances such as short circuits --- requires time-domain simulation (EMT or RMS) and involves different modelling assumptions and metrics. UC-14 deliberately narrows this scope: instead of a time-domain sweep, it computes the stability-region boundary geometrically --- the stable manifold of the controlling unstable equilibrium and the associated heteroclinic orbits, obtained from the multilinear representation --- which yields a security margin for a given disturbance family. Full time-domain validation of the most severe contingencies remains a future extension of the TenSyGrid platform.
 
-  \item \textbf{Voltage collapse and PV curve analysis.} Voltage stability, particularly long-term voltage collapse driven by load restoration dynamics and reactive power limitations, involves different modelling assumptions and analysis techniques (continuation power flow, QV sensitivity). Although bus voltage assessment (UC-05) provides a snapshot of the voltage profile, a full voltage stability study is outside the current scope. Similarly, UC-13 only resolves the behaviour of zero-eigenvalue modes \emph{at} the current operating point through a centre-manifold reduction and reports the direction in which a bifurcation is approached; it does not trace a PV or bifurcation diagram along a loading path, which would require continuation techniques.
+  \item \textbf{Voltage collapse and PV curve analysis.} Voltage stability, particularly long-term voltage collapse driven by load restoration dynamics and reactive power limitations, involves different modelling assumptions and analysis techniques (continuation power flow, QV sensitivity). Although bus voltage assessment (UC-04) provides a snapshot of the voltage profile, a full voltage stability study is outside the current scope. Similarly, UC-13 only resolves the behaviour of zero-eigenvalue modes \emph{at} the current operating point through a centre-manifold reduction and reports the direction in which a bifurcation is approached; it does not trace a PV or bifurcation diagram along a loading path, which would require continuation techniques.
 
   \item \textbf{Optimal power flow with stability constraints.} Integrating stability constraints directly into an optimal power flow formulation would allow the toolbox to suggest generation re-dispatches or other control actions that guarantee a minimum stability margin. This involves solving a non-convex, constrained optimisation problem and is considered a longer-term research direction.
 
   \item \textbf{Automated control parameter tuning.} While UC-10 proposes to suggest \textit{where} to place damping controllers, automatically computing the optimal PSS or FACTS parameters (gain, time constants) requires solving a control-design optimisation problem that is beyond the scope of the current deliverable.
 
-  \item \textbf{Multi-area oscillation and inter-area mode analysis.} Identifying and characterising inter-area modes involving geographically separated groups of generators, and computing metrics such as mode shape, observability, and controllability, is partially addressed by UC-04 (participation factors). However, a dedicated inter-area-mode tool with geographical visualisation of mode shapes would require additional development and is proposed as a candidate for operator feedback.
+  \item \textbf{Multi-area oscillation and inter-area mode analysis.} Identifying and characterising inter-area modes involving geographically separated groups of generators, and computing metrics such as mode shape, observability, and controllability, is partially addressed by UC-03 (participation factors). However, a dedicated inter-area-mode tool with geographical visualisation of mode shapes would require additional development and is proposed as a candidate for operator feedback.
 \end{itemize}
 
 \section{Next steps}
 \textcolor{orange}{\textbf{TODO:} NO REVISAT, PENDENT DE DISCUTIR AMB EDU.}
-The use cases described in this chapter, particularly UC-07 to UC-14, are intended as a starting point for the forthcoming workshop with network operators. The objectives of the workshop are:
+The use cases described in this chapter, particularly UC-06 to UC-14, are intended as a starting point for the forthcoming workshop with network operators. The objectives of the workshop are:
 
 \begin{enumerate}
-  \item \textbf{Validate} the implemented use cases (UC-01 to UC-06) against real operator workflows --- do they address the problems that operators actually face?
-  \item \textbf{Prioritise} the proposed use cases (UC-07 to UC-14) according to operator needs and impact.
+  \item \textbf{Validate} the implemented use cases (UC-01 to UC-05) against real operator workflows --- do they address the problems that operators actually face?
+  \item \textbf{Prioritise} the proposed use cases (UC-06 to UC-14) according to operator needs and impact.
   \item \textbf{Discover} additional use cases that may have been overlooked in the initial analysis.
   \item \textbf{Refine} the interaction flows, terminology, and visual representations to ensure the toolbox is intuitive and actionable for its intended users.
 \end{enumerate}
