@@ -109,6 +109,51 @@ def test_trapezoidal_zero_dynamics_has_only_the_physical_unit_multiplier() -> No
     np.testing.assert_allclose(np.linalg.eigvals(dense), [1.0])
 
 
+def test_trapezoidal_initial_tangent_derivative_matches_rotation_step() -> None:
+    """An initialized lifted oscillator must use the same Cayley rotation as EMT."""
+    class OscillatorProblem:
+        def __init__(self):
+            self.states = [_StateVariable(1), _StateVariable(2)]
+            self.diffs = [_DifferentialVariable(3, self.states[0]),
+                          _DifferentialVariable(4, self.states[1])]
+
+        def get_state_vars(self):
+            return self.states
+
+        def get_diff_vars(self):
+            return self.diffs
+
+        def get_states_number(self):
+            return 2
+
+        def get_algebraic_var_number(self):
+            return 0
+
+    h = 0.01
+    omega = 7.0
+    dynamics = np.array([[0.0, -omega], [omega, 0.0]])
+    expected = np.linalg.solve(np.eye(2) - 0.5 * h * dynamics,
+                               np.eye(2) + 0.5 * h * dynamics)
+    initial = np.array([1.0, 0.0])
+    trajectory = np.vstack((initial, expected @ initial))
+
+    def jacobian(*, h, **_kwargs):
+        return sparse.csc_matrix((2.0 / h) * np.eye(2) - dynamics)
+
+    for operator_type in (EmtFloquetOperator, BlockEmtFloquetOperator):
+        operator = operator_type(
+            problem=OscillatorProblem(), trajectory=trajectory, h=h, n_states=2,
+            method=DynamicIntegrationMethod.DaeTrapezoidal,
+            jac_evaluator=jacobian, static_params=np.empty(0), n_event_params=0,
+            t_trajectory=np.array([0.0, h]), d_trajectory=np.zeros_like(trajectory),
+            initial_tangent_derivative=dynamics,
+        )
+        actual = (operator.matvec(initial) if operator_type is EmtFloquetOperator
+                  else operator.matmat(initial[:, None])[:, 0])
+        np.testing.assert_allclose(actual, expected @ initial, rtol=1e-13, atol=1e-13)
+        np.testing.assert_allclose(np.linalg.norm(actual), 1.0, rtol=1e-13)
+
+
 def test_emt_ssa_driver_uses_problem_factory_and_forwards_both_pf_results() -> None:
     """The selected EMT problem type must reach the canonical problem factory."""
     grid = MultiCircuit()

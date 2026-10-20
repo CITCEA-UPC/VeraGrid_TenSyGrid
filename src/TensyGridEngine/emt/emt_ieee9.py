@@ -118,8 +118,10 @@ def _find_model_variable_by_name(block: Any, var_name: str) -> Var | None:
     return None
 
 
-def build_ieee9_grid() -> gce.MultiCircuit:
-    grid_path = REPO_ROOT / "Grids_and_profiles" / "grids" / "IEEE 9 Bus.gridcal"
+def build_ieee9_grid(grid_path: str | Path | None = None) -> gce.MultiCircuit:
+    if grid_path is None:
+        grid_path = REPO_ROOT / "Grids_and_profiles" / "grids" / "IEEE 9 Bus.gridcal"
+    grid_path = Path(grid_path)
     if not grid_path.exists():
         raise FileNotFoundError(f"Grid file not found: {grid_path}")
 
@@ -143,6 +145,7 @@ def attach_emt_models(
     frozen_controls: bool = False,
     multilinear_controls: bool = True,
     multilinear_machine: bool = True,
+    governor_k: float = 40.0,
 ) -> None:
     for bus in grid.buses:
         get_bus_emt_template(grid=grid, bus=bus)
@@ -161,7 +164,7 @@ def attach_emt_models(
         # original non-lifted IEEE9 electromechanical mode while retaining zero
         # artificial mechanical damping.
         if not frozen_controls:
-            model.set_parameter_in_model(var_name="K", new_value=40.0)
+            model.set_parameter_in_model(var_name="K", new_value=governor_k)
 
     for transformer in grid.transformers2w:
         model = get_series_transformer_emt_template(

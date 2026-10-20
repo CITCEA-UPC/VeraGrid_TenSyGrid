@@ -1528,7 +1528,7 @@ def get_governor_emt(vf: VarFactory, name: str = "Governor") -> EmtModelTemplate
         name=name,
 
         init_eqs={
-            y_gov0: vf.add_const(0.0),
+            y_gov0: K * speed_error + torque_tracking_error,
             y2_3: ramped_torque_order,
             Tm: ramped_torque_order
         },

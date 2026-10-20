@@ -53,6 +53,19 @@ def _structural_mass_matrices(n_total: int, n_states: int,
     return mass_state, mass_derivative
 
 
+def _initial_tangent_derivative_map(mapping: Optional[Mat], n_diff: int,
+                                    n_states: int) -> Mat:
+    """Validate the initial derivative sensitivity; unspecified rows stay zero."""
+    if mapping is None:
+        return np.zeros((n_diff, n_states), dtype=np.float64)
+    result = np.asarray(mapping, dtype=np.float64)
+    if result.shape != (n_diff, n_states) or not np.all(np.isfinite(result)):
+        raise ValueError(
+            f"Initial tangent derivative map must be finite with shape {(n_diff, n_states)}"
+        )
+    return result
+
+
 class EmtFloquetOperator(spla.LinearOperator):
     """
     HPC Matrix-Free Monodromy Operator for abc-frame EMT systems.
@@ -69,12 +82,14 @@ class EmtFloquetOperator(spla.LinearOperator):
         "method",
         "n_total",
         "lu_solvers",
+        "initial_tangent_derivative",
     )
 
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
                  jac_evaluator: Optional[Any] = None, static_params:Optional[Vec] = None, n_event_params: int = 0,
-                 t_trajectory: Optional[Vec] = None, d_trajectory: Optional[Mat] = None):
+                 t_trajectory: Optional[Vec] = None, d_trajectory: Optional[Mat] = None,
+                 initial_tangent_derivative: Optional[Mat] = None):
 
         """
         Initializes the standard EmtFloquetOperator.
@@ -93,6 +108,9 @@ class EmtFloquetOperator(spla.LinearOperator):
 
         self.n_diff = len(problem.get_diff_vars())
         self.diff_base_indices = _differential_base_indices(problem)
+        self.initial_tangent_derivative = _initial_tangent_derivative_map(
+            initial_tangent_derivative, self.n_diff, n_states
+        )
         # Derivative history is an internal integration coordinate, not an
         # independent physical perturbation.  Exposing it to Arnoldi doubles
         # the trapezoidal eigenproblem and introduces non-physical modes near
@@ -201,10 +219,10 @@ class EmtFloquetOperator(spla.LinearOperator):
 
         v_prev = v_curr.copy()
         v_prev2 = v_curr.copy()
-        # Scaled derivative history remains internal to the trapezoidal
-        # propagation.  The compatibility baseline uses zero initial tangent
-        # history, matching the stable physical-state Floquet implementation.
-        eta_prev = np.zeros(self.n_diff, dtype=np.float64)
+        # Scaled derivative history remains internal to trapezoidal propagation.
+        # A supplied DAE-consistent derivative seeds the initial history;
+        # the default remains zero for analyses without a tangent map.
+        eta_prev = self.h * (self.initial_tangent_derivative @ v0)
         rhs = np.zeros_like(v_curr)
 
         for step_index, lu in enumerate(self.lu_solvers):
@@ -285,12 +303,14 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         "method",
         "n_total",
         "lu_solvers",
+        "initial_tangent_derivative",
     )
 
     def __init__(self, problem: Any, trajectory: Mat, h: float, n_states: int,
                  method: DynamicIntegrationMethod = DynamicIntegrationMethod.DaeBackEuler,
                  jac_evaluator: Optional[Any]=None, static_params:Optional[Vec]=None, n_event_params:int =0,
-                 t_trajectory:Optional[Vec]=None, d_trajectory: Optional[Mat] = None):
+                 t_trajectory:Optional[Vec]=None, d_trajectory: Optional[Mat] = None,
+                 initial_tangent_derivative: Optional[Mat] = None):
         """
         Initializes the BlockEmtFloquetOperator.
 
@@ -309,6 +329,9 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         n_total_calc = problem.get_states_number() + problem.get_algebraic_var_number()
         self.n_diff = len(problem.get_diff_vars())
         self.diff_base_indices = _differential_base_indices(problem)
+        self.initial_tangent_derivative = _initial_tangent_derivative_map(
+            initial_tangent_derivative, self.n_diff, n_states
+        )
         # Keep Arnoldi in the physical state space.  Trapezoidal derivative
         # history is propagated internally and must not become an independent
         # eigenvector coordinate.
@@ -423,7 +446,7 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         X_prev = X_curr.copy()
         X_prev2 = X_curr.copy()
         # Scaled derivative history eta = h * delta(xdot), internal only.
-        eta_prev = np.zeros((self.n_diff, p_cols), dtype=X.dtype)
+        eta_prev = self.h * (self.initial_tangent_derivative @ X)
         rhs_block = np.zeros_like(X_curr)
 
         for step_index, lu in enumerate(self.lu_solvers):

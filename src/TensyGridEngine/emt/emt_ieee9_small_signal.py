@@ -3,11 +3,12 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Floquet small-signal analysis of the nine-line IEEE9 EMT model."""
+"""Floquet analysis of the IEEE9 EMT model using its non-lifted machine by default."""
 
 from __future__ import annotations
 
 from pathlib import Path
+import argparse
 import csv
 
 import matplotlib.pyplot as plt
@@ -31,9 +32,13 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
 from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes
 
 
+# Reference timing for standalone IEEE 9 studies. The analysis below derives
+# its actual period and step from the loaded grid's fBase.
 FREQUENCY_HZ = 60.0
 PERIOD = 1.0 / FREQUENCY_HZ
 STEPS_PER_PERIOD = 600
+LIFTED_STEPS_PER_PERIOD = 1200
+MARGINAL_MULTIPLIER_TOLERANCE = 1.0e-4
 TIME_STEP = PERIOD / STEPS_PER_PERIOD
 N_MODES = 12
 
@@ -42,10 +47,25 @@ def run_small_signal_analysis(
     event_overrides: dict[str, float] | None = None,
     multilinear_controls: bool = True,
     n_modes: int = N_MODES,
+    grid_path: str | Path | None = None,
+    governor_k: float = 40.0,
+    multilinear_machine: bool = False,
+    steps_per_period: int | None = None,
 ):
-    """Build the periodic IEEE9 DAE and calculate dominant Floquet modes."""
-    grid = build_ieee9_grid()
-    attach_emt_models(grid, multilinear_controls=multilinear_controls)
+    """Analyze a source or reloaded IEEE9 grid with the physical machine states."""
+    grid = build_ieee9_grid(grid_path=grid_path)
+    period = 1.0 / float(grid.fBase)
+    if steps_per_period is None:
+        steps_per_period = LIFTED_STEPS_PER_PERIOD if multilinear_machine else STEPS_PER_PERIOD
+    if steps_per_period <= 0:
+        raise ValueError("steps_per_period must be positive")
+    time_step = period / steps_per_period
+    attach_emt_models(
+        grid,
+        multilinear_controls=multilinear_controls,
+        multilinear_machine=multilinear_machine,
+        governor_k=governor_k,
+    )
     if event_overrides:
         for generator in grid.generators:
             for parameter_name, value in event_overrides.items():
@@ -60,8 +80,8 @@ def run_small_signal_analysis(
         raise RuntimeError("IEEE9 power flow failed before EMT small-signal analysis")
 
     emt_options = build_emt_options()
-    emt_options.time_step = TIME_STEP
-    emt_options.simulation_time = PERIOD
+    emt_options.time_step = time_step
+    emt_options.simulation_time = period
     problem = build_emt_problem(
         grid=grid,
         options=emt_options,
@@ -71,12 +91,13 @@ def run_small_signal_analysis(
 
     small_signal_options = SmallSignalStabilityEmtOptions(
         k=n_modes,
-        target_period=PERIOD,
+        target_period=period,
         max_krylov_dim=max(30, 2 * n_modes),
-        ss_assessment_time=PERIOD,
+        ss_assessment_time=period,
         verbose=1,
         max_restarts=0,
         build_type=SmallSignalEmtBuildTypes.Arnoldi,
+        consistent_dae_tangent=multilinear_machine,
     )
     driver = SmallSignalStabilityEmtDriver(
         grid=grid,
@@ -121,9 +142,15 @@ def save_results(results) -> tuple[Path, Path, Path]:
     figure, axis = plt.subplots(figsize=(7.2, 7.2), constrained_layout=True)
     angle = np.linspace(0.0, 2.0 * np.pi, 500)
     axis.plot(np.cos(angle), np.sin(angle), "k--", linewidth=1.0, label="unit circle")
-    stable = np.abs(results.multipliers) <= 1.0
+    magnitudes = np.abs(results.multipliers)
+    stable = magnitudes < 1.0 - MARGINAL_MULTIPLIER_TOLERANCE
+    marginal = np.abs(magnitudes - 1.0) <= MARGINAL_MULTIPLIER_TOLERANCE
+    unstable = magnitudes > 1.0 + MARGINAL_MULTIPLIER_TOLERANCE
     axis.scatter(results.multipliers.real[stable], results.multipliers.imag[stable], s=55, label="stable")
-    axis.scatter(results.multipliers.real[~stable], results.multipliers.imag[~stable], s=65, marker="x", label="outside unit circle")
+    axis.scatter(results.multipliers.real[marginal], results.multipliers.imag[marginal],
+                 s=60, label="near-neutral")
+    axis.scatter(results.multipliers.real[unstable], results.multipliers.imag[unstable],
+                 s=65, marker="x", label="outside tolerance")
     for index, multiplier in enumerate(results.multipliers):
         axis.annotate(str(index), (multiplier.real, multiplier.imag), xytext=(4, 4), textcoords="offset points")
     axis.set_aspect("equal", adjustable="box")
@@ -154,9 +181,11 @@ def save_results(results) -> tuple[Path, Path, Path]:
 
 def report_unstable_mode_participation(results, top_n: int = 15) -> None:
     """Print the states that participate most strongly in each unstable mode."""
-    unstable = np.flatnonzero(np.abs(results.multipliers) > 1.0 + 1e-6)
+    unstable = np.flatnonzero(
+        np.abs(results.multipliers) > 1.0 + MARGINAL_MULTIPLIER_TOLERANCE
+    )
     if unstable.size == 0:
-        print("No Floquet multipliers outside the unit circle.")
+        print("No Floquet multipliers outside the near-neutral tolerance.")
         return
 
     state_names = np.asarray(results.stat_vars_array, dtype=str)
@@ -185,9 +214,24 @@ def report_unstable_mode_participation(results, top_n: int = 15) -> None:
 
 
 def main() -> None:
-    results = run_small_signal_analysis()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--grid", type=Path, help="IEEE 9 .gridcal file to reload for analysis")
+    parser.add_argument("--governor-k", type=float, default=40.0, help="Governor inverse-droop gain")
+    parser.add_argument("--lifted-machine", action="store_true", help="Use the experimental trig-lifted machine")
+    parser.add_argument("--steps-per-period", type=int,
+                        help="Integration steps per grid-frequency period (default: 1200 lifted, 600 non-lifted)")
+    args = parser.parse_args()
+    results = run_small_signal_analysis(
+        grid_path=args.grid,
+        governor_k=args.governor_k,
+        multilinear_machine=args.lifted_machine,
+        steps_per_period=args.steps_per_period,
+    )
     csv_path, plot_path, eigenvalue_plot_path = save_results(results)
-    print(results.report_stability())
+    print("machine=lifted" if args.lifted_machine else "machine=non_lifted")
+    rho = float(np.max(np.abs(results.multipliers)))
+    verdict = "STABLE within near-neutral tolerance" if rho <= 1.0 + MARGINAL_MULTIPLIER_TOLERANCE else "UNSTABLE"
+    print(f"Spectral radius rho={rho:.9f}. {verdict} ({MARGINAL_MULTIPLIER_TOLERANCE:g}).")
     print(f"states={len(results.stat_vars)}, modes={len(results.multipliers)}")
     for index in np.argsort(-np.abs(results.multipliers)):
         multiplier = results.multipliers[index]
