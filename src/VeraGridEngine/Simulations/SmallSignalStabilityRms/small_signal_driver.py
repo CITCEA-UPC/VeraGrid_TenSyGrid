@@ -198,7 +198,7 @@ def compute_participation_factors_generalized(v: np.ndarray,
     else:
         Etw = E_arr.T @ w_c
 
-    PF = np.abs(v_c * w_c)
+    PF = np.abs(v_c * Etw)
 
     col_sum = np.sum(PF, axis=0)
     PF_norm = PF.copy()

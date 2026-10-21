@@ -1,0 +1,252 @@
+% !TEX program = lualatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{
+  paper=a4paper,
+  left=22mm,
+  right=22mm,
+  top=22mm,
+  bottom=22mm,
+  headheight=24pt
+}
+
+\usepackage{fontspec}
+\setmainfont{Raleway}[
+  Path = ./fonts/,
+  Extension = .ttf,
+  UprightFont = *-Regular,
+  BoldFont = *-Bold,
+  ItalicFont = *-Italic,
+  BoldItalicFont = *-BoldItalic,
+]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true, linkcolor=tgblue, urlcolor=tgpetrol, citecolor=tgpetrol]{hyperref}
+
+% --- Official TenSyGrid Color Palette ---
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tggreen}{HTML}{179C7D}
+\definecolor{tgaqua}{HTML}{39C1CD}
+\definecolor{tglime}{HTML}{B2D235}
+\definecolor{tgred}{HTML}{E3001A}
+\definecolor{tggrey}{HTML}{A6BBC8}
+\definecolor{tgbg}{HTML}{F4F8FA}
+
+% --- Header & Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textcolor{tgpetrol}{\small\textbf{TenSyGrid $\times$ VeraGrid}} \textcolor{tggrey}{|} \textcolor{tggraphit}{\small 1-Day Hackathon Challenge}}
+\rhead{\textcolor{tggraphit}{\small April 2026}}
+\cfoot{\textcolor{tggraphit}{\small Page \thepage}}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{tgpetrol}\leaders\hrule height 0.8pt\hfill}}
+
+% --- Section Formats ---
+\titleformat{\section}
+  {\Large\bfseries\color{tgblue}}
+  {\thesection}{1em}{}
+  [{\color{tgpetrol}\titlerule[0.8pt]}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{tgpetrol}}
+  {\thesubsection}{0.8em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{tggraphit}}
+  {\thesubsubsection}{0.6em}{}
+
+% Custom box for Challenge Phases
+\newtcolorbox{challengebox}[2][]{%
+  enhanced,
+  colback=tgbg,
+  colframe=tgpetrol,
+  coltitle=white,
+  fonttitle=\bfseries\color{white},
+  title={#2},
+  arc=2mm,
+  boxrule=0.8pt,
+  left=3mm,
+  right=3mm,
+  top=2.5mm,
+  bottom=2.5mm,
+  #1
+}
+
+\begin{document}
+
+% --- HEADER WITH LOGO ---
+\noindent
+\begin{minipage}[c]{0.70\textwidth}
+  {\fontsize{22pt}{26pt}\selectfont \textbf{\color{tgblue}Keep the Grid Stable}}\\[3pt]
+  {\fontsize{13pt}{16pt}\selectfont \textbf{\color{tgpetrol}Dynamic Topology Optimization \& Converter Tuning}}\\[4pt]
+  {\small \textbf{\color{tggraphit}TenSyGrid 1-Day Hackathon Challenge Proposal}}\\[2pt]
+  {\footnotesize \color{tggrey}Universitat Politècnica de Catalunya · CETPartnership Horizon Europe (GA 101069750)}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.26\textwidth}
+  \raggedleft
+  \includegraphics[height=1.35cm]{./config/tglogo.pdf}\\[3pt]
+  \vspace{1pt}
+  \includegraphics[height=0.75cm]{./config/UPC-logo.pdf}
+\end{minipage}
+
+\vspace{6pt}
+\noindent{\color{tglime}\rule{\textwidth}{2pt}}
+\vspace{10pt}
+
+% ===========================================================================
+\section{Background \& Motivation}
+% ===========================================================================
+
+Power systems across Europe are undergoing the most radical transition since the inception of alternating current networks. Massive integration of renewable energy sources is progressively displacing traditional synchronous generation in favor of \textbf{Inverter-Based Resources (IBRs)}, including utility-scale wind farms, solar PV arrays, and battery energy storage systems (BESS).
+
+While power electronic converters allow high controllability, their fast dynamics and lack of physical inertia radically alter power system stability. Transmission System Operators (TSOs) must constantly navigate two conflicting operational priorities:
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Static Efficiency:} Minimizing ohmic active power transmission losses ($\sum P_{\text{loss}}$) and relieving line congestion by optimizing the network topology (line switching / breaker opening and closing).
+  \item \textbf{Dynamic Stability:} Guaranteeing that the resulting operating point does not trigger sub-synchronous resonances, control-loop interactions, or undamped electromechanical oscillations ($\min \zeta \ge 5\%$).
+\end{itemize}
+
+The European research project \textbf{TenSyGrid} (\textit{Tensors for System Analysis of Converter-Dominated Power Grids}) develops accelerated tensor and multilinear modeling tools to evaluate system stability orders of magnitude faster than classical numerical routines. Working natively with the open-source \textbf{VeraGrid} simulation platform, this hackathon challenges teams to find optimal, stability-certified grid operating points.
+
+% ===========================================================================
+\section{The Challenge Overview}
+% ===========================================================================
+
+\paragraph{Mission Statement.}
+Participating teams are given a benchmark transmission grid in native \texttt{.veragrid} format with multiple candidate corridors and converter-interfaced generation. Your mission is to:
+\begin{enumerate}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Decide line breaker switching} ($u_{\text{line}, k} \in \{0, 1\}$) to minimize steady-state transmission losses.
+  \item \textbf{Tune converter control parameters} (virtual damping, droop gains, voltage controls) to ensure the system is small-signal stable.
+  \item \textbf{Automate your strategy across 300 test scenarios} with variable renewable generation, loads, and $N-1$ line outages.
+\end{enumerate}
+
+\subsection{Phase-by-Phase Roadmap}
+
+\begin{challengebox}{Phase 1: Static Topology \& Power Dispatch (Morning)}
+  \textbf{Focus: Steady-State Optimization.} Given candidate line corridors and fixed demand, teams decide which breakers to keep closed or opened and schedule generation setpoints.
+  \begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \textbf{Tool:} Solve the non-linear AC power flow via VeraGrid's Python API (\texttt{power\_flow()}).
+    \item \textbf{Constraints:} Bus voltage magnitudes must stay within $0.95 \le V_i \le 1.05\,\text{p.u.}$, and line flows must not exceed thermal ratings.
+    \item \textbf{Target:} Minimize total active power transmission losses $P_{\text{loss}} = \sum_{k} P_{\text{loss}, k}$.
+  \end{itemize}
+\end{challengebox}
+
+\begin{challengebox}{Phase 2: Converter Control Tuning \& Dynamic Stability (Midday)}
+  \textbf{Focus: Small-Signal Stability.} Opening lines alters the electrical distance and impedance between converter-interfaced resources. The dynamic layer is activated!
+  \begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \textbf{Descriptor System:} VeraGrid reformulates the grid into a linearised descriptor state-space pencil: $\mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}\,\mathbf{x}$.
+    \item \textbf{Modal Analysis:} Compute generalised eigenvalues $\det(\mathbf{A} - \lambda \mathbf{E}) = 0$, where $\lambda_i = \sigma_i \pm j\omega_i$.
+    \item \textbf{Actions:} Teams tune converter control parameters (frequency droop $R_p$, virtual damping $D_v$, and voltage gains $K_v, K_p^{\text{pll}}$).
+    \item \textbf{Dynamic Target:} Ensure strict asymptotic stability ($\max \sigma_i < -10^{-5}$) and maximize the minimum damping ratio:
+    \begin{equation*}
+      \zeta_i = \frac{-\sigma_i}{\sqrt{\sigma_i^2 + \omega_i^2}} \ge 5\% \quad \text{for all oscillatory modes } (f_i > 0.05\,\text{Hz}).
+    \end{equation*}
+  \end{itemize}
+\end{challengebox}
+
+\begin{challengebox}{Phase 3: Automated Multi-Scenario Batch Sweep (Afternoon)}
+  \textbf{Focus: Algorithmic Resilience \& Speed.} Real power systems never operate at a single fixed snapshot!
+  \begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \textbf{Stress Test:} The evaluation engine tests each team's script against a batch of $N = 300$ operating conditions: variable renewable penetration (from 20\% to 100\%), demand fluctuations, and $N-1$ line contingencies.
+    \item \textbf{Automation Requirement:} Teams must deliver an automated Python script that dynamically evaluates and outputs stable, low-loss configurations in seconds, leveraging VeraGrid batch capabilities without manual intervention.
+  \end{itemize}
+\end{challengebox}
+
+% ===========================================================================
+\section{Evaluation Metrics \& Scoreboard}
+% ===========================================================================
+
+At the end of the hackathon, an automated scoring harness runs each team's submission against a hidden evaluation test suite of 100 operating points.
+
+\subsection{Composite Scoring Function}
+The final score is computed as:
+\begin{equation}
+  \text{Score} = 0.35 \cdot \mathcal{S}_{\text{damping}} + 0.25 \cdot \mathcal{S}_{\text{loss}} + 0.25 \cdot \mathcal{S}_{\text{robustness}} + 0.15 \cdot \mathcal{S}_{\text{code}} - \mathcal{P}_{\text{penalties}}
+\end{equation}
+where:
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item $\mathcal{S}_{\text{damping}} = \min_{i} (\zeta_i)$: Minimum damping ratio achieved across all electromechanical and converter modes.
+  \item $\mathcal{S}_{\text{loss}} = \max\left(0, 1 - \frac{P_{\text{loss}}}{P_{\text{loss, baseline}}}\right)$: Relative loss reduction achieved compared to the unoptimized baseline grid.
+  \item $\mathcal{S}_{\text{robustness}} = \frac{N_{\text{stable}}}{N_{\text{total}}}$: Proportion of scenarios surviving without voltage violations or instability.
+  \item $\mathcal{S}_{\text{code}}$: Computational efficiency and clean use of the VeraGrid/TenSyGrid Python API.
+  \item $\mathcal{P}_{\text{penalties}}$: Severe penalties for voltage limit excursions ($V_i < 0.90$ or $V_i > 1.10\,\text{p.u.}$) or unstable modes ($\sigma_i \ge 0$).
+\end{itemize}
+
+\subsection{Scoring Breakdown Table}
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{lcX}
+    \toprule
+    \textbf{\color{tgblue}Criterion} & \textbf{\color{tgblue}Weight} & \textbf{\color{tgblue}Description} \\
+    \midrule
+    \textbf{Dynamic Stability} & \textbf{35\%} & Small-signal damping margin ($\zeta_{\min}$) and absence of undamped modes. \\
+    \textbf{Static Loss Reduction} & \textbf{25\%} & Active power transmission loss minimization via topology switching. \\
+    \textbf{Multi-Scenario Robustness} & \textbf{25\%} & Stability and constraint compliance across 100 hidden stress scenarios. \\
+    \textbf{Automation \& Code Quality} & \textbf{15\%} & Execution speed, modularity, and clean interaction with VeraGrid API. \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ===========================================================================
+\section{1-Day Hackathon Schedule}
+% ===========================================================================
+
+The hackathon is structured to run in parallel with the consortium's plenary sessions, with rotating mentor support from TenSyGrid researchers:
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session \& Milestone} \\
+    \midrule
+    \textbf{09:00 -- 09:30} & \textbf{Kick-off \& Onboarding:} Introduction to TenSyGrid, converter stability fundamentals, and hands-on tutorial with the VeraGrid Python API. \\
+    \textbf{09:30 -- 10:45} & \textbf{Sprint 1: Static Grid \& Topology Switching.} Setting up the network, running power flows, and finding low-loss line configurations. \\
+    \textbf{10:45 -- 11:15} & \textit{\color{tgpetrol}Coffee Break \& Informal Mentorship Discussion with Consortium Partners.} \\
+    \textbf{11:15 -- 13:30} & \textbf{Sprint 2: Dynamic Layer \& Converter Control Tuning.} Computing eigenvalues, plotting participation factors, and stabilizing critical oscillation modes. \\
+    \textbf{13:30 -- 14:30} & \textit{\color{tgpetrol}Lunch Break.} \\
+    \textbf{14:30 -- 16:45} & \textbf{Sprint 3: Automation \& Batch Resilience.} Scaling scripts to evaluate hundreds of scenarios without timeouts; fine-tuning the submission pipeline. \\
+    \textbf{16:45 -- 17:30} & \textbf{Code Freeze \& Automated Scoreboard Execution.} Scripts are frozen and evaluated on the hidden test set. \\
+    \textbf{17:30 -- 18:30} & \textbf{Live Leaderboard Reveal, 3-minute Pitch Presentations \& Awards!} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ===========================================================================
+\section{Resources Provided to Participants}
+% ===========================================================================
+
+Each team will receive a starter Git repository containing:
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item \texttt{benchmark\_grid.veragrid}: Benchmark grid with synchronous generators and grid-following/grid-forming converters.
+  \item \texttt{starter\_script.py}: Template demonstrating model loading, AC power flow execution, descriptor state matrix assembly, and eigenvalue calculation in VeraGrid.
+  \item \texttt{evaluate\_local.py}: Local validation tool that computes loss and damping KPIs on sample scenarios.
+  \item \textbf{Documentation \& Cheatsheets}: Quick-reference guide on converter parameters (PLL, virtual inertia, droop) and modal analysis interpretation.
+  \item \textbf{Dedicated Mentors}: Support from TenSyGrid researchers (UPC, eRoots, HAW Hamburg, IWES, UM) throughout the day.
+\end{itemize}
+
+% ===========================================================================
+\section{Why This Matters}
+% ===========================================================================
+
+In a 100\% renewable power grid, transmission line switching and converter control are tightly intertwined. An uncoordinated line opening that minimizes losses under steady state might inadvertently push a nearby grid-forming converter into an unstable oscillatory mode!
+
+By tackling this problem, participants solve the exact stability-constrained optimization challenge that European Transmission System Operators (TSOs) face today.
+
+\end{document}

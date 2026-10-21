@@ -240,7 +240,7 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
                 "damping": damping,
                 "freq_hz": float(_freq_hz(im)),
                 "critical": bool(abs(damping) < 0.05),
-                "participation_factors": top_participation,
+                "participation_factors": {item["variable"]: item["value"] for item in top_participation},
             }
         )
     critical_modes.sort(key=lambda m: m["damping"])
