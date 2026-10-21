@@ -1,5 +1,7 @@
 # STAMP EMT demos
 
+Run the examples from the repository root with `myenv` activated.
+
 The IEEE9 saved-grid workflow, including the separate 60 Hz generator examples,
 is described in [Saved IEEE9 EMT examples](../README_saved_grid_examples.md).
 
@@ -16,7 +18,7 @@ To save the STAMP GFOR/GFOL case and its multilinear version as model-bearing
 models, run:
 
 ```bash
-PYTHONPATH=src python -m TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_converter_roundtrip
+python src/TensyGridEngine/emt/emt_stamp_demo/ieee9_stamp_converter_roundtrip.py
 ```
 
 The files are written to `saved_grids/`. Both cases retain STAMP's 50 Hz

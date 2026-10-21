@@ -10,6 +10,11 @@ from __future__ import annotations
 from pathlib import Path
 import argparse
 import csv
+import sys
+
+if not __package__:
+    # Direct execution from the repository root does not add src to sys.path.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -9,6 +9,11 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
+
+if not __package__:
+    # Direct execution from the repository root does not add src to sys.path.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
