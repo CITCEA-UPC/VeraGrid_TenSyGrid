@@ -1,5 +1,7 @@
 """IEEE 9 data-only grids must receive the reference EMT governor gain."""
 
+from pathlib import Path
+
 import pytest
 
 from TensyGridEngine.emt.emt_ieee9 import attach_emt_models, build_ieee9_grid
@@ -9,6 +11,25 @@ from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriv
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
 from VeraGridEngine.Utils.Symbolic.block import Const, find_name_in_block
 from VeraGridEngine.api import save_file
+
+
+@pytest.mark.parametrize("multilinear_machine, filename", [
+    (False, "IEEE 9 Bus EMT.veragrid"),
+    (True, "IEEE 9 Bus EMT Multilinear.veragrid"),
+])
+def test_saved_ieee9_emt_veragrid_retains_frequency_models_and_governor_gain(multilinear_machine, filename):
+    path = Path(__file__).resolve().parents[3] / "Grids_and_profiles" / "grids" / filename
+    grid = build_ieee9_grid(path)
+
+    assert grid.fBase == 60.0
+    devices = [device for group in (grid.buses, grid.generators, grid.transformers2w,
+                                    grid.lines, grid.shunts, grid.loads) for device in group]
+    assert all(not device.emt_model.empty() for device in devices)
+    assert [_governor_gains(generator.emt_model) for generator in grid.generators] == [[40.0]] * 3
+    for generator in grid.generators:
+        machine_states = {state.name for state in generator.emt_model.children[0].state_vars}
+        assert ("u_cos_sauer_pai" in machine_states) == multilinear_machine
+        assert ("u_sin_sauer_pai" in machine_states) == multilinear_machine
 
 
 def _governor_gains(block):

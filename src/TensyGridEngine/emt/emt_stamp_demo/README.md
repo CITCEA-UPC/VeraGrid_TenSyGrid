@@ -1,5 +1,8 @@
 # STAMP EMT demos
 
+The IEEE9 saved-grid workflow, including the separate 60 Hz generator examples,
+is described in [Saved IEEE9 EMT examples](../README_saved_grid_examples.md).
+
 IEEE-9/WSCC experiments based on the public STAMP SG, GFOR, and GFOL models.
 The scripts discover a sibling `STAMP_Public` checkout automatically. For any
 other location, set:
@@ -7,6 +10,18 @@ other location, set:
 ```bash
 export STAMP_PUBLIC_ROOT=/absolute/path/to/STAMP_Public
 ```
+
+To save the STAMP GFOR/GFOL case and its multilinear version as model-bearing
+`.veragrid` files, then verify their Floquet spectra against the in-memory
+models, run:
+
+```bash
+PYTHONPATH=src python -m TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_converter_roundtrip --verify-floquet
+```
+
+The files are written to `saved_grids/`. Both cases retain STAMP's 50 Hz
+network, SG, GFOR, and GFOL parameters. The multilinear case uses the lifts
+already defined in this directory.
 
 Run from the VeraGrid repository root with `PYTHONPATH=src`, for example:
 

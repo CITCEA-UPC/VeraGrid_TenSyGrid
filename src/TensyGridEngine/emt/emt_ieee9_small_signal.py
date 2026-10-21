@@ -48,7 +48,7 @@ def run_small_signal_analysis(
     multilinear_controls: bool = True,
     n_modes: int = N_MODES,
     grid_path: str | Path | None = None,
-    governor_k: float = 40.0,
+    governor_k: float | None = None,
     multilinear_machine: bool = False,
     steps_per_period: int | None = None,
 ):
@@ -60,12 +60,26 @@ def run_small_signal_analysis(
     if steps_per_period <= 0:
         raise ValueError("steps_per_period must be positive")
     time_step = period / steps_per_period
-    attach_emt_models(
-        grid,
-        multilinear_controls=multilinear_controls,
-        multilinear_machine=multilinear_machine,
-        governor_k=governor_k,
-    )
+    emt_devices = [device for group in (grid.buses, grid.generators, grid.transformers2w,
+                                        grid.lines, grid.shunts, grid.loads) for device in group]
+    populated = [not device.emt_model.empty() for device in emt_devices]
+    if any(populated):
+        if not all(populated):
+            raise ValueError("IEEE9 grid contains an incomplete set of saved EMT models")
+        saved_lifted = any(state.name == "u_cos_sauer_pai"
+                           for state in grid.generators[0].emt_model.children[0].state_vars)
+        if saved_lifted != multilinear_machine:
+            raise ValueError("Saved EMT machine type does not match --lifted-machine")
+        if governor_k is not None:
+            for generator in grid.generators:
+                generator.emt_model.set_parameter_in_model("K", float(governor_k))
+    else:
+        attach_emt_models(
+            grid,
+            multilinear_controls=multilinear_controls,
+            multilinear_machine=multilinear_machine,
+            governor_k=40.0 if governor_k is None else governor_k,
+        )
     if event_overrides:
         for generator in grid.generators:
             for parameter_name, value in event_overrides.items():
@@ -215,8 +229,9 @@ def report_unstable_mode_participation(results, top_n: int = 15) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--grid", type=Path, help="IEEE 9 .gridcal file to reload for analysis")
-    parser.add_argument("--governor-k", type=float, default=40.0, help="Governor inverse-droop gain")
+    parser.add_argument("--grid", type=Path, help="IEEE 9 .gridcal or .veragrid file to reload for analysis")
+    parser.add_argument("--governor-k", type=float, default=None,
+                        help="Override governor inverse-droop gain (default: saved model K, or 40 for data-only grids)")
     parser.add_argument("--lifted-machine", action="store_true", help="Use the experimental trig-lifted machine")
     parser.add_argument("--steps-per-period", type=int,
                         help="Integration steps per grid-frequency period (default: 1200 lifted, 600 non-lifted)")
