@@ -144,7 +144,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=("stamp", "multilinear", "both"), default="both")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
-    parser.add_argument("--verify-floquet", action="store_true")
+    parser.add_argument("--no-verify-floquet", dest="verify_floquet", action="store_false",
+                        help="Save and inspect the grids without running Floquet analysis")
+    parser.set_defaults(verify_floquet=True)
     parser.add_argument("--steps-per-period", type=int, default=1000)
     parser.add_argument("--settling-periods", type=int, default=3)
     parser.add_argument("--modes", type=int, default=30)

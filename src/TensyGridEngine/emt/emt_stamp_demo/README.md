@@ -16,7 +16,7 @@ To save the STAMP GFOR/GFOL case and its multilinear version as model-bearing
 models, run:
 
 ```bash
-PYTHONPATH=src python -m TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_converter_roundtrip --verify-floquet
+PYTHONPATH=src python -m TensyGridEngine.emt.emt_stamp_demo.ieee9_stamp_converter_roundtrip
 ```
 
 The files are written to `saved_grids/`. Both cases retain STAMP's 50 Hz

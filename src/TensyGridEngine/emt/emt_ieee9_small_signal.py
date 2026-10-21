@@ -41,6 +41,11 @@ LIFTED_STEPS_PER_PERIOD = 1200
 MARGINAL_MULTIPLIER_TOLERANCE = 1.0e-4
 TIME_STEP = PERIOD / STEPS_PER_PERIOD
 N_MODES = 12
+DEFAULT_MULTILINEAR_MACHINE = False  # Set True to run the saved lifted grid without CLI options.
+SAVED_IEEE9_GRIDS = {
+    False: Path(__file__).resolve().parents[3] / "Grids_and_profiles/grids/IEEE 9 Bus EMT.veragrid",
+    True: Path(__file__).resolve().parents[3] / "Grids_and_profiles/grids/IEEE 9 Bus EMT Multilinear.veragrid",
+}
 
 
 def run_small_signal_analysis(
@@ -232,12 +237,13 @@ def main() -> None:
     parser.add_argument("--grid", type=Path, help="IEEE 9 .gridcal or .veragrid file to reload for analysis")
     parser.add_argument("--governor-k", type=float, default=None,
                         help="Override governor inverse-droop gain (default: saved model K, or 40 for data-only grids)")
-    parser.add_argument("--lifted-machine", action="store_true", help="Use the experimental trig-lifted machine")
+    parser.add_argument("--lifted-machine", action="store_true", default=DEFAULT_MULTILINEAR_MACHINE,
+                        help="Use the experimental trig-lifted machine")
     parser.add_argument("--steps-per-period", type=int,
                         help="Integration steps per grid-frequency period (default: 1200 lifted, 600 non-lifted)")
     args = parser.parse_args()
     results = run_small_signal_analysis(
-        grid_path=args.grid,
+        grid_path=args.grid if args.grid is not None else SAVED_IEEE9_GRIDS[args.lifted_machine],
         governor_k=args.governor_k,
         multilinear_machine=args.lifted_machine,
         steps_per_period=args.steps_per_period,
