@@ -20,7 +20,7 @@ import numpy as np
 from TensyGridEngine.emt.emt_stamp_demo.stamp_common import add_stamp_public_to_path
 
 STAMP_ROOT = add_stamp_public_to_path()
-STAMP_PERIODIC_X0 = STAMP_ROOT / "scripts/stamp_wscc_emt_periodic_x0.csv"
+STAMP_PERIODIC_X0 = STAMP_ROOT / "veragrid_stamp/data/stamp_wscc_emt_periodic_x0.csv"
 
 from veragrid_stamp.emt_case import build_stamp_wscc_emt_grid
 

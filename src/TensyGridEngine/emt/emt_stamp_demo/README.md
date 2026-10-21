@@ -1,21 +1,18 @@
 # STAMP EMT demos
 
-Run the examples from the repository root with `myenv` activated.
+Run the examples from the repository root with the project dependencies installed.
 
 The IEEE9 saved-grid workflow, including the separate 60 Hz generator examples,
 is described in [Saved IEEE9 EMT examples](../README_saved_grid_examples.md).
 
 IEEE-9/WSCC experiments based on the public STAMP SG, GFOR, and GFOL models.
-The scripts discover a sibling `STAMP_Public` checkout automatically. For any
-other location, set:
+The editable network and model sources are bundled in `src/veragrid_stamp/`.
+Their MPL 2.0 license is in `src/veragrid_stamp/LICENSE.md`. No sibling
+`STAMP_Public` checkout is needed.
 
-```bash
-export STAMP_PUBLIC_ROOT=/absolute/path/to/STAMP_Public
-```
-
-To save the STAMP GFOR/GFOL case and its multilinear version as model-bearing
-`.veragrid` files, then verify their Floquet spectra against the in-memory
-models, run:
+To build the original and multilinear model-bearing `.veragrid` files from
+the bundled sources, then compare their Floquet spectra before and after
+saving and reloading, run:
 
 ```bash
 python src/TensyGridEngine/emt/emt_stamp_demo/ieee9_stamp_converter_roundtrip.py
@@ -23,7 +20,7 @@ python src/TensyGridEngine/emt/emt_stamp_demo/ieee9_stamp_converter_roundtrip.py
 
 The files are written to `saved_grids/`. Both cases retain STAMP's 50 Hz
 network, SG, GFOR, and GFOL parameters. The multilinear case uses the lifts
-already defined in this directory.
+defined in this directory.
 
 Run from the VeraGrid repository root with `PYTHONPATH=src`, for example:
 
@@ -51,5 +48,5 @@ MPLCONFIGDIR=/tmp/mpl-stamp-demo VERAGRID_EMT_INIT_CACHE_DIR=/tmp/veragrid-emt-i
 This runs both full nonlinear and linear-deviation converter models on the
 same STAMP IEEE-9 network and generator, then writes two `.npz` spectra and
 `ieee9_stamp_full_nonlinear_vs_linear_deviation.png` in this directory.
-The network and generator still come from `STAMP_Public`; the full nonlinear
-converter blocks come from this repository.
+The network and generator come from the bundled `src/veragrid_stamp/` sources;
+the full nonlinear converter blocks come from this repository.

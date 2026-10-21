@@ -1,39 +1,21 @@
-"""Locate the external STAMP_Public checkout used by the STAMP demos."""
+"""Locate the STAMP reference sources bundled with this repository."""
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
 
 def find_stamp_public_root() -> Path:
-    """Return a usable STAMP_Public checkout or raise an actionable error."""
-    candidates = []
-    configured = os.environ.get("STAMP_PUBLIC_ROOT")
-    if configured:
-        candidates.append(Path(configured).expanduser())
-
-    repository_root = Path(__file__).resolve().parents[4]
-    candidates.extend(
-        (
-            repository_root.parent / "STAMP_Public",
-            Path.cwd() / "STAMP_Public",
-        )
-    )
-    for candidate in candidates:
-        if (candidate / "veragrid_stamp").is_dir():
-            return candidate.resolve()
-
-    searched = ", ".join(str(path) for path in candidates)
-    raise ModuleNotFoundError(
-        "STAMP demos require a STAMP_Public checkout. Set STAMP_PUBLIC_ROOT "
-        f"to its directory. Searched: {searched}"
-    )
+    """Return this repository's source directory containing veragrid_stamp."""
+    source_root = Path(__file__).resolve().parents[3]
+    if not (source_root / "veragrid_stamp").is_dir():
+        raise ModuleNotFoundError("Bundled veragrid_stamp sources are missing")
+    return source_root
 
 
 def add_stamp_public_to_path() -> Path:
-    """Make STAMP_Public importable and return its resolved root."""
+    """Make the bundled STAMP sources importable for existing demos."""
     root = find_stamp_public_root()
     root_text = str(root)
     if root_text not in sys.path:

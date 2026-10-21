@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Save and compare STAMP IEEE9 GFOR/GFOL EMT models across .veragrid reloads.
-
-``STAMP_Public`` supplies the 50 Hz WSCC network and the published SG, GFOR,
-and GFOL parameters. The multilinear case uses the local STAMP lift builders.
-"""
+"""Build and verify the local STAMP IEEE9 EMT grids across .veragrid reloads."""
 
 from __future__ import annotations
 
@@ -35,13 +31,7 @@ from VeraGridEngine.enumerations import (
     EmtProblemTypes,
     EmtSolverTypes,
 )
-
-from TensyGridEngine.emt.emt_stamp_demo.stamp_common import add_stamp_public_to_path
-
-add_stamp_public_to_path()
-
-from veragrid_stamp.emt_case import build_stamp_wscc_emt_grid  # noqa: E402
-
+from veragrid_stamp.emt_case import build_stamp_wscc_emt_grid
 
 OUTPUT_DIR = Path(__file__).resolve().parent / "saved_grids"
 CASE_NAMES = {"stamp": "ieee9_stamp_gfor_gfol.veragrid",
@@ -49,7 +39,7 @@ CASE_NAMES = {"stamp": "ieee9_stamp_gfor_gfol.veragrid",
 
 
 def build_case(case: str):
-    """Create the STAMP case without changing any STAMP parameters."""
+    """Build the case from the editable STAMP sources in this repository."""
     if case == "stamp":
         return build_stamp_wscc_emt_grid()
     if case == "multilinear":
@@ -70,14 +60,14 @@ def _model_parameter_values(block) -> dict[str, float]:
 
 
 def verify_saved_grid(source, reloaded) -> None:
-    """Check frequency, device allocation, and all GFOR/GFOL model constants."""
+    """Check frequency, device allocation, and saved EMT model constants."""
     if source.fBase != reloaded.fBase:
         raise AssertionError(f"fBase changed: {source.fBase} -> {reloaded.fBase}")
     before = {device.name: device for device in source.generators}
     after = {device.name: device for device in reloaded.generators}
     if before.keys() != after.keys():
         raise AssertionError("The saved generator allocation changed")
-    for name in ("STAMP GFOR1", "STAMP GFOL2"):
+    for name in ("STAMP SG1", "STAMP GFOR1", "STAMP GFOL2"):
         lhs = before[name].emt_model
         rhs = after[name].emt_model
         if lhs.empty() or rhs.empty():
@@ -130,7 +120,7 @@ def run_case(case: str, output_dir: Path, verify_floquet: bool,
     reloaded = open_file(str(destination))
     verify_saved_grid(source, reloaded)
     print(f"{case}: saved={destination} fBase={reloaded.fBase:g} Hz; "
-          "GFOR/GFOL parameters preserved", flush=True)
+          "SG/GFOR/GFOL parameters preserved", flush=True)
 
     if verify_floquet:
         before = floquet_multipliers(source, steps_per_period, settling_periods, modes)

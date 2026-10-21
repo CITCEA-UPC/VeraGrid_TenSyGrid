@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Compare full nonlinear and linear-deviation STAMP converters on IEEE-9 EMT.
 
-The full nonlinear GFOR/GFOL blocks come from this repository. STAMP_Public is
-used only for the shared IEEE-9 case, synchronous generator, and reference
-linear-deviation converters.
+The full nonlinear GFOR/GFOL blocks, shared IEEE-9 case, synchronous
+generator, and reference linear-deviation converters are bundled here.
 """
 
 from __future__ import annotations
