@@ -1,0 +1,228 @@
+\section{Proposed use cases to be implemented}
+
+The five use cases described in the previous section correspond to functionalities already prototyped in the Stability Monitor. The following nine use cases are proposed extensions that either come from talks with operators or extend the already implemented features. They address workflows that operators may consider essential for integration into their daily planning and operational routines. The descriptions below are intentionally less detailed, as they represent initial concepts subject to operator feedback. UC-13 and UC-14 are the most technical of the proposals and address questions that are likely to be raised by stability engineers rather than by control-room staff; both are included so that their theoretical assumptions can be challenged early.
+
+% ---------------------------------------------------------------------------
+\subsection{UC-06: Operating Scenario Comparison}
+% ---------------------------------------------------------------------------
+
+% \begin{description}
+%   \item[Actor.] Network operator or planning engineer.
+%   \item[Objective.] Compare the stability characteristics of two distinct grid operating points, such as summer peak vs.\ winter off-peak, high vs.\ low renewable generation, or pre- and post-reinforcement scenarios.
+%   \item[Proposed flow.] The operator loads two previously computed \texttt{.tensygrid} results. The tool renders side-by-side eigenvalue plots, a table comparing key metrics (margin, critical mode count, lowest damping), and highlights modes that appear or disappear between the two scenarios. Differences in participation factors are flagged to identify shifts in the dominant oscillatory behaviour.
+%   \item[Expected value.] Operators can assess how seasonal, daily, or structural changes in the network affect stability without manually switching between result sets. This supports both operational planning and infrastructure investment decisions.
+% \end{description}
+
+\begin{description}
+  \item[Actor.] Network operator or planning engineer.
+  \item[Objective.] Compare the stability characteristics of two distinct grid operating points, such as day peak vs.\ night off-peak, high vs.\ low renewable generation, or pre- and post-reinforcement scenarios.
+  \item[Proposed flow.] The operator loads two previously computed \texttt{.tensygrid} results. The tool performs a differential modal analysis, directly mapping eigenvalues between the two states to track modal shifts. It renders comparative plots and highlights critical structural changes: modes that emerge or disappear, significant drops in damping, and shifts in participation factors that indicate the oscillatory problem has relocated geographically.
+  \item[Expected value.] Operators can assess how seasonal, daily, or structural changes in the network affect stability without manually switching between result sets. This supports both operational planning and infrastructure investment decisions.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-07: Critical Device List}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Planning engineer.
+  \item[Objective.] Rank the devices of the network by their participation in the critical modes, so that the equipment that most affects the stability of the system can be identified and prioritised.
+  \item[Preconditions.]
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item A simulation (UC-01) has been completed and the critical modes have been diagnosed (UC-03).
+          \item The participation factors of the state variables are available in the result file.
+        \end{itemize}
+  \item[Theoretical basis.] Each participation factor relates a state variable to a critical mode, so the variables with the largest participation identify the dynamics that dominate that mode. Mapping each state variable onto the device that owns it (generator, AVR, PSS, converter, load) and aggregating the participation factors per device yields a ranking that links every critical eigenvalue to the physical equipment responsible for it. This is the step from the state-level diagnosis of UC-03 to a device-level decision.
+  \item[Possible bottlenecks.] The aggregation is only as good as the metadata that maps states to devices, and several choices must be made explicit:
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item \textbf{State-to-device mapping.} The result file must retain which device owns each state; otherwise the mapping has to be reconstructed from the model.
+          \item \textbf{Aggregation criterion.} Summing the participation factors of all the states of a device favours devices with many states, whereas taking the maximum ignores their combined effect, so the criterion must be configurable.
+          \item \textbf{Normalisation and operating point.} Participation factors depend on the mode normalisation and on the operating point, so the ranking may change between scenarios and should be reported with that caveat.
+          \item \textbf{Number of critical modes.} A ranking per mode is easy to read, but a global ranking across the critical modes requires weighting them by criticality.
+        \end{itemize}
+  \item[Proposed flow.]
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
+          \item The operator selects a result and the critical mode to inspect.
+          \item The tool groups the state variables by owning device and aggregates their participation factors with the selected criterion.
+          \item A table ranks the devices by aggregated participation, and a bar chart shows their relative weight in the mode.
+          \item The operator can expand a device to see the state-level participation factors behind its position in the ranking, and switch between the per-mode and the global views.
+          \item The ranking can be exported as the starting point for the controller-placement analysis of UC-10.
+        \end{enumerate}
+  \item[Expected value.] The planning engineer obtains a device-level list that translates the modal diagnosis into concrete equipment priorities: which generators, controls, or loads dominate each critical mode and therefore concentrate the mitigation effort. This supports maintenance and retuning plans, the siting of PSS or FACTS devices, and the discussion with asset managers about where stability investment is most effective.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-08: Stability Trend Analysis}
+% ---------------------------------------------------------------------------
+
+% \begin{description}
+%   \item[Actor.] Network operator or planning engineer.
+%   \item[Objective.] Track the evolution of the stability margin across a sequence of operating points, such as a daily load curve, a weekly dispatch schedule, or a time series of snapshots from a historical database.
+%   \item[Proposed flow.] The operator selects a set of precomputed results (ordered by time or by a parameter such as total demand). The tool plots the stability margin and the damping of the most critical mode as a function of the ordering parameter. A threshold line indicates when the margin enters the marginal or unstable region, enabling early warning of degradation trends.
+%   \item[Expected value.] Operators can identify \textit{when} during the day or the year the grid is most vulnerable, and at which operating condition proactive measures (e.g., generation re-dispatch) should be considered.
+% \end{description}
+
+\begin{description}
+  \item[Actor.] Network operator or planning engineer.
+  \item[Objective.] Track the evolution of the stability margin near an operating point, bridging both static and dynamic stability dimensions, to evaluate maximum loadability and proactively anticipate the need for a full Continuation Power-Flow (CPF) study.
+  \item[Proposed flow.] The operator selects a precomputed operating state. By utilizing sensitivity analysis or linearizations of the Jacobian matrix, the tool extrapolates nearby critical points before they are reached in real-world operation. Bridging both static and dynamic stability perspectives, the system simultaneously plots the voltage stability margin (static) and the damping ratio of the most critical electromechanical mode (dynamic) obtained via eigenvalue analysis as a function of the loading parameter. A configurable threshold line indicates when either margin enters a marginal or unstable region, triggering an early warning that a full CPF study or preventive actions are required.
+  \item[Expected value.] Operators gain a unified, comprehensive view of grid vulnerability. They can identify specific windows (e.g., peak hours or seasonal conditions) and determine exactly at which operating thresholds proactive measures, such as generation re-dispatch or topology changes, must be deployed before dynamic oscillations or voltage collapse compromise the system.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-08.1: Stability Trend Analysis online}
+% ---------------------------------------------------------------------------
+
+
+\begin{description}
+  \item[Actor.] Network operator or planning engineer.
+  \item[Objective.] Using UC-08 as a base, track the evolution in almost real time to check if the grid is approaching to a critical operating point. This use case is intended to be used in an online environment, where the operator can monitor the grid's stability as it evolves.
+  \item[Proposed flow.] The operator selects a precomputed result of critical paths from UC-08. The tool then checks if the current operating point is approaching any of the critical points identified in the previous use case. The system continuously monitors the stability margin and the damping ratio of the most critical mode, providing real-time feedback on the grid's stability status. If the system detects that the grid is approaching a critical point, it triggers an alert to notify the operator.
+  \item[Expected value.] Operators can proactively manage the grid's stability in real time, allowing for timely interventions to prevent instability. This use case enhances situational awareness and supports decision-making during dynamic operating conditions.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-09: Critical Element Ranking}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Network operator, planning engineer, or asset manager.
+  \item[Objective.] Rank generators, lines, and loads by their individual contribution to stability degradation, going beyond single $N-1$ analysis.
+  \item[Proposed flow.] The operator triggers a batch contingency analysis ($N-1$ or $N-2$) across all elements of a selected type. For each contingency, the change in stability margin is recorded. The tool then produces a ranked bar chart or heat map showing which elements cause the largest margin reduction when removed. The operator can click on any element to drill down into the detailed contingency result (as in UC-05).
+  \item[Expected value.] This use case transforms contingency analysis from a \textit{what-if} exploration into a systematic vulnerability assessment. It directly supports critical-asset identification, maintenance prioritisation, and transmission expansion planning.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-10: Damping Controller Placement Guidance}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Stability engineer or control designer.
+  \item[Objective.] Obtain evidence-based suggestions for where to install or retune power system stabilisers (PSS) or where to place FACTS devices to improve the damping of critical modes.
+  \item[Proposed flow.] Building on UC-03, the tool analyses participation factors and residues across the current operating point and across contingency scenarios. It identifies the generators with the highest participation in low-damped modes and recommends them as primary candidates for PSS installation or retuning. For inter-area modes involving geographically separated groups of machines, the tool suggests candidate buses for FACTS devices (STATCOM, SVC, TCSC) based on modal observability and controllability indices. The output is a ranked list of candidate locations with a qualitative effectiveness score.
+  \item[Expected value.] This use case bridges the gap between eigenvalue analysis and actionable control design, helping operators and engineers translate stability diagnostics into concrete hardware or tuning decisions.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-11: Renewable Scenario Assessment}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Planning engineer or policy analyst.
+  \item[Objective.] Evaluate the small-signal stability of the grid under different renewable energy penetration scenarios, assessing how the progressive substitution of synchronous generation by converter-interfaced resources affects system stability.
+  \item[Preconditions.]
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item A base-case simulation (UC-01) has been completed and serves as the reference operating point.
+          \item The grid model identifies which machines are synchronous generators and which are converter-interfaced resources, so that the generation mix can be modified without altering the network topology.
+          \item At least one converter-interfaced generator model (e.g.\ GFL or GFM) is available to replace the synchronous machines that are scaled down.
+        \end{itemize}
+  \item[Theoretical basis.] A synchronous generator is described by a handful of equations --- the swing equation plus the flux and control dynamics of the machine --- whereas a complete model of an inverter-based generator aggregates many more, adding the converter's inner current and voltage control, the phase-locked loop (or the grid-forming virtual impedance), and any outer power or DC-link dynamics. Its dynamics are therefore richer. Nevertheless, the interface variables exchanged with the network are the same for both: the current (or power) injected at the connection bus. Substituting synchronous machines by converters does not change which quantities couple each device to the grid; it changes the number and the nature of the internal states, so the descriptor matrices $\mathbf{E}$ and $\mathbf{A}$ of the pencil $\lambda\mathbf{E}\mathbf{x}=\mathbf{A}\mathbf{x}$ both grow and change shape. Consequently, the modal spectrum is reshaped: the electromechanical modes of the displaced synchronous machines fade, while new converter-driven modes (PLL, current-control, and virtual-impedance dynamics) appear, often lightly damped. Evaluating the margin and the critical modes as a function of the penetration level exposes this transition.
+  \item[Possible bottlenecks.] Substituting the device equations changes the shape of the $\mathbf{E}$ and $\mathbf{A}$ matrices, so the assembly and pre-processing chain must adapt to a spectrum that mixes synchronous and converter states. Code optimisation may require a complete iteration of the software, and the outcome depends on the accuracy of the converter models, which must be agreed upon before scenarios can be compared.
+  \item[Proposed flow.]
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
+          \item The operator selects a base-case result (UC-01) and defines a set of penetration scenarios (e.g.\ 30\%, 50\%, 70\%, 100\% of inverter-based generation), optionally together with a set of critical contingencies.
+          \item For each scenario, the tool adjusts the generation mix --- scaling down synchronous machines and scaling up converter-interfaced sources while respecting the grid model's structure --- and runs the stability analysis, recording the stability margin and the critical modes.
+          \item Results are presented as a curve of stability margin versus renewable penetration, with flags for the penetration level at which the margin crosses the marginal or unstable threshold.
+          \item Eigenvalue trajectories are plotted to show how specific modes migrate as the penetration level increases, with the newly introduced converter modes highlighted.
+          \item Critical scenarios can be drilled down via UC-03 (participation factors) and tracked along the progression via UC-08.
+        \end{enumerate}
+  \item[Expected value.] This use case directly addresses the core TenSyGrid objective of assessing converter-dominated grids. It allows grid planners to determine the maximum renewable hosting capacity under stability constraints and to identify the modes most sensitive to the synchronous-to-converter transition.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-12: Automated Stability Report Generation}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Network operator, planning engineer, or regulatory compliance officer.
+  \item[Objective.] Produce a self-contained stability assessment report in a standardised, exportable format (PDF or HTML) suitable for internal documentation, regulatory submission, or stakeholder communication.
+  \item[Proposed flow.] The operator selects one or more simulation results and a report template (e.g., \textit{Standard Stability Assessment}, \textit{Contingency Analysis Summary}, \textit{Renewable Integration Study}). The tool compiles in bakcground the following sections into the report: (i) executive summary with stability classification; (ii) grid topology and operating point description; (iii) eigenvalue plot and critical mode table; (iv) contingency analysis results, if available; (v) recommendations. The report includes the operator's logo, author name, date, and a disclaimer. The operator can preview the report before exporting.
+  \item[Expected value.] Automating report generation reduces the manual effort required to document stability studies, ensures consistency across assessments, and facilitates communication with non-technical stakeholders (regulators, management, public authorities).
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-13: Centre Manifold Analysis}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Stability engineer or control designer.
+  \item[Objective.] Determine the local behaviour of the equilibrium when the linearised model exhibits zero (or near-zero) eigenvalues, by reducing the dynamics onto the centre manifold, so that the tool can distinguish genuine marginal modes from structural zeros and report whether the equilibrium is attracting, repelling, or incipiently bifurcating.
+  \item[Preconditions.]
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item A simulation (UC-01) has been completed and its result is loaded.
+          \item The spectrum contains eigenvalues with $\sigma = 0$ (or $\lvert\sigma\rvert$ below a configurable tolerance).
+          \item Structural null eigenvalues arising from a singular pencil $\lambda\mathbf{E}-\mathbf{A}$ have been identified and excluded, as required by UC-02.
+        \end{itemize}
+  \item[Theoretical basis.] The Hartman--Grobman theorem guarantees that the linearisation reproduces the local behaviour of the nonlinear system only when the equilibrium is hyperbolic, i.e.\ when every eigenvalue satisfies $\Re(\lambda)\neq 0$. When any eigenvalue lies on the imaginary axis, $\Re(\lambda)=0$ --- a real zero (saddle-node) or a purely imaginary conjugate pair (Hopf) --- the theorem does not apply, the linear model is inconclusive, and the Centre Manifold Theorem (CMT) must be used instead. Before computing the invariant sub-manifolds, an ODE must be obtained from the differential-algebraic (DAE) formulation, so that the structural zeros caused by a singular $\mathbf{E}$ are discarded. Then, given the centre subspace $\mathcal{E}^{c}=\operatorname{span}\{\mathbf{v}_i:\lambda_i=0\}$ and a complementary stable subspace $\mathcal{E}^{s}$, one can split the state as $\mathbf{x}=\mathbf{x}_0+q+p$ (with $q\in\mathcal{E}^{c}$, $p\in\mathcal{E}^{s}$) and look for an invariant graph $p=h(q)$, tangent to $\mathcal{E}^{c}$ at the equilibrium, whose reduced dynamics $\dot{q}=g(q)$ govern the local behaviour. The sign of the first non-vanishing term of $g$ classifies the equilibrium as asymptotically stable, unstable, or (for an even leading term) semistable, and the same coefficients locate the bifurcation (saddle-node for a real zero, Hopf for a complex pair) announced by the zero eigenvalue.
+  \item[Possible bottlenecks.] Deriving an equivalent ODE from the DAE is not as trivial as it may seem. Although one could consider rewriting the algebraic constraints as generalised coordinates, in the spirit of Hamiltonian systems, this is not feasible in the present setting. An alternative is index reduction by repeated differentiation, which fits the proposed multilinear methodology but whose scaling behaviour on large systems is still unknown. Direct approaches based on Gaussian elimination (e.g.\ for the structural analysis of the descriptor) could also be explored, but it is not suitable for sparse matrices since it could break that behaviour.
+  \item[Proposed flow.]
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
+          \item The operator selects a result containing zero or near-zero eigenvalues and opens the \textbf{Centre Manifold} view.
+          \item The tool separates structural zeros (singular pencil) from genuine equilibrium modes and reports which ones are retained, so that the \emph{yellow} verdict of UC-02 can be justified rather than assumed.
+          \item For the retained modes, the tool computes the centre manifold reduction and returns the leading normal-form coefficient together with its sign.
+          \item The equilibrium is classified as asymptotically stable, unstable, or semistable on the centre manifold, and the associated bifurcation type and critical parameter direction are reported.
+          \item A one-dimensional phase portrait of the reduced flow $\dot{x}_c=g(x_c)$ is plotted, showing the equilibrium and the direction of the trajectories.
+          \item If the coefficient is close to zero (degenerate case), the tool flags the result as inconclusive and recommends computing higher-order terms or moving the operating point.
+        \end{enumerate}
+  \item[Expected value.] The operator or engineer resolves the ambiguity left by a null eigenvalue: instead of a generic \emph{yellow} status, the tool states whether the operating point is a benign equilibrium, an incipient bifurcation, or an artefact of the descriptor formulation. This feeds the recommendation logic of UC-05 and clarifies which parameter (load, dispatch, penetration) must be watched before the equilibrium disappears.
+\end{description}
+
+% ---------------------------------------------------------------------------
+\subsection{UC-14: Basin of Attraction Estimation}
+% ---------------------------------------------------------------------------
+
+\begin{description}
+  \item[Actor.] Planning engineer or security analyst.
+  \item[Objective.] Estimate the region of the state space from which the system returns to the current operating point after a disturbance, and express it as an interpretable security margin (e.g.\ maximum tolerable disturbance magnitude or critical clearing time) for a user-selected family of disturbances.
+  \item[Preconditions.]
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item A simulation (UC-01) has been completed and the equilibrium, state matrix, and tensor expansion are available.
+          \item The equilibrium is hyperbolic and small-signal stable (all $\sigma<0$); if some mode has $\sigma>0$ the basin is empty and the tool reports the instability directly, whereas a mode with $\sigma=0$ is non-hyperbolic and is redirected to UC-13.
+          \item A family of disturbances has been defined (fault location and clearing time, or a load/generation step at a given bus).
+        \end{itemize}
+  \item[Theoretical basis.] Eigenvalue analysis certifies only \emph{local} asymptotic stability: it says that sufficiently small perturbations decay, but not how large a perturbation can be ridden through. For the nonlinear system $\dot{\mathbf{x}}=f(\mathbf{x})$, the boundary of the basin is a geometric object: it is carried by the stable manifold of the controlling unstable equilibrium (UEP) together with the heteroclinic orbits that link the boundary equilibria, so that computing it yields the stability region and the associated security margin directly. The multilinear tensor representation provides the vector field and its Jacobian directly, so the UEP can be located by Newton's method and its eigenvectors span the local stable and unstable directions. Backward integration of the system then traces the stable manifold, using the variational equations only when the manifold is grown in more than one dimension or the boundary is computed by continuation, complementing trajectory-based sampling from perturbed initial conditions. This route is especially attractive on a low-dimensional reduction (UC-13) and avoids the exhaustive time-domain EMT/RMS sweep listed in the deferred section, complementing it rather than replacing it, since full time-domain simulation remains the final validation step for the most severe contingencies.
+  \item[Possible bottlenecks.] Unlike the DAE reduction of UC-13, the difficulties here are conceptual and geometric, and they define most of the research agenda:
+        \begin{itemize}[before=\leavevmode, leftmargin=*]
+          \item \textbf{Controlling unstable equilibrium.} Identifying the equilibrium on the stability boundary that is closest to the current operating point is a non-convex, multi-start search without global guarantees.
+          \item \textbf{Curse of dimensionality and visualisation.} The true basin lives in $n$ dimensions, whereas the GUI can only show a 2D or 3D projection; the projected region is not the actual basin, so the visualisation may mislead the operator.
+          \item \textbf{From geometry to operator margin.} Translating the distance (or time) to the stability boundary into a critical clearing time or a disturbance magnitude requires fault-on trajectory information that a small-signal snapshot does not contain.
+        \end{itemize}
+  \item[Proposed flow.]
+        \begin{enumerate}[before=\leavevmode, leftmargin=*]
+          \item The operator selects a result and a disturbance family (e.g.\ three-phase fault at bus $k$ with variable clearing time, or a step change in load or generation).
+          \item The tool locates the controlling UEP (Newton) and traces the stable manifold by backward integration of the tensor model, optionally sampling trajectories from the perturbed initial conditions.
+          \item The basin is rendered on a selectable state plane (e.g.\ rotor angle versus speed of the most critical machine) with the equilibrium, the estimated boundary, and a set of sample trajectories inside and outside it.
+          \item The disturbed operating point is overlaid on the same plot, so that the operator sees immediately whether it falls inside or outside the estimated region.
+          \item The margin is reported as a scalar quantity (critical clearing time, or maximum power step) together with a colour-coded verdict: secure, marginal, or insecure.
+          \item The result can be compared across operating points (linking to UC-06 and UC-08) and the tool recommends drill-down into UC-05, UC-09, or UC-10 when the margin falls below the configured threshold.
+        \end{enumerate}
+  \item[Expected value.] The operator obtains a quantitative large-disturbance security margin that complements the small-signal verdict of UC-02: the tool answers not only \emph{``is the equilibrium stable''} but also \emph{``how much can happen before it is lost''}. This supports disturbance-limit setting, protective-relay coordination, and the identification of operating points that are formally stable but practically fragile.
+\end{description}
+
+% ---------------------------------------------------------------------------
+% TEMPLATE FOR A NEW USE CASE (e.g.\ UC-15). Copy the block, uncomment it, and
+% fill in the fields. Remember to also uncomment the matching row in
+% Table~\ref{tab:uc-inventory} and to update the use-case counts in the
+% introduction, the conclusion, and the summary.
+% ---------------------------------------------------------------------------
+% \subsection{UC-15: <name>}
+% ---------------------------------------------------------------------------
+%
+% \begin{description}
+%   \item[Actor.] <who uses it (role or profile)>
+%   \item[Objective.] <what is achieved and why it matters>
+%   \item[Preconditions.]
+%         \begin{itemize}[before=\leavevmode, leftmargin=*]
+%           \item <required inputs, prior simulations, or environment>
+%         \end{itemize}
+%   \item[Theoretical basis.] <mathematical or engineering principle behind it>
+%   \item[Possible bottlenecks.] <conceptual, numerical, or data limitations to investigate>
+%         \begin{itemize}[before=\leavevmode, leftmargin=*]
+%           \item <bottleneck>
+%         \end{itemize}
+%   \item[Proposed flow.]
+%         \begin{enumerate}[before=\leavevmode, leftmargin=*]
+%           \item <step>
+%         \end{enumerate}
+%   \item[Expected value.] <operational benefit delivered to the user>
+% \end{description}
