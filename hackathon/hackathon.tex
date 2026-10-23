@@ -261,28 +261,38 @@ Traditional tools force operators to choose between overly optimistic linear app
 
 \subsection*{From matrices to tensors}
 
-A classical linearised power system is described by a state matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$.  When converter control parameters $\mathbf{p} = (p_1, \ldots, p_d)$ vary, the system becomes a \textbf{matrix-valued function} $\mathbf{A}(\mathbf{p})$, and evaluating stability across the full parameter space naively requires one eigendecomposition per grid point.  With $d$ parameters each discretised over $I$ values, a full grid sweep demands $I^d$ eigendecompositions --- this is the \textbf{curse of dimensionality}: the cost grows exponentially with the number of parameters, making brute-force approaches completely intractable for real grids.
+A classical linearised power system is described by a state matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$. When converter control parameters $\mathbf{p} = (p_1, \ldots, p_d)$ vary, the system becomes a \textbf{matrix-valued function} $\mathbf{A}(\mathbf{p})$, and evaluating stability across the parameter space naively requires one eigendecomposition per operating point. Discretising each of the $d$ parameters into $m$ values gives $m^d$ operating points in total, so $m^d$ eigendecompositions would be needed to evaluate the entire grid --- the \textbf{curse of dimensionality}, whose cost grows exponentially with $d$.
 
-TenSyGrid breaks this exponential scaling by rewriting this family as a \textbf{multi-way (order-$(d+2)$) tensor}
-\[
-  \mathcal{A} \in \mathbb{R}^{n \times n \times I_1 \times \cdots \times I_d},
-\]
-where each mode $k$ spans the discretised range of parameter $p_k$.  A \textbf{low-rank Canonical Polyadic (CP) decomposition}
-\[
-  \mathcal{A} \approx \sum_{r=1}^{R} \mathbf{u}_r^{(1)} \otimes \mathbf{u}_r^{(2)} \otimes \cdots \otimes \mathbf{u}_r^{(d+2)}
-\]
-compresses the entire parameter-dependent model into $R$ rank-1 terms (typically $R \ll n \cdot I_1 \cdots I_d$).  Once the decomposition is computed \emph{offline}, evaluating $\mathbf{A}(\mathbf{p})$ at any new operating point costs $\mathcal{O}(Rn^2)$ instead of $\mathcal{O}(n^3)$, and eigenvalues can be tracked continuously across parameter sweeps without repeating full factorisations.
+Consider now a \textbf{multi-affine} (multilinear) polynomial system in $N$ variables, i.e. each variable appears with power at most one. The number of monomials is then $2^{N}$, so expanding the full basis has complexity $\mathcal{O}(2^{N})$ --- exponential again.
 
+TenSyGrid avoids materialising this basis by rewriting it as a \textbf{multi-way ($N$-order) tensor}
+\[
+  \mathcal{M} = \begin{pmatrix}
+  	1\\ {x}_1
+  \end{pmatrix}  \otimes \cdots \otimes \begin{pmatrix}
+  	1\\ {x}_{N}
+  \end{pmatrix}.
+\]
+This is a \textbf{rank-1 tensor written in Canonical Polyadic (CP) form}: although it has $2^{N}$ entries, it is stored and evaluated implicitly from only $N$ factors, so its memory footprint and the cost of a contracted product grow linearly, $\mathcal{O}(N)$, rather than exponentially. The number of monomials itself is unchanged; the gain comes from never forming the dense tensor.
+
+Defining the structural matrix $\mathbf{S}$ (which variables compose each monomial) and the unfolded coefficient matrix $\boldsymbol{\Phi}$ (the associated coefficients), the original system can be expressed as
+\begin{equation}
+	\mathbf{f}(\mathbf{x})=\boldsymbol{\Phi}\,\mathbf{m}(\mathbf{x})=\mathbf{0},
+	\qquad \mathbf{m}(\mathbf{x})\ \text{generated from}\ \mathbf{S},
+\end{equation}
+and, thanks to the linear behaviour of tensor algebra, quantities such as the Jacobian are obtained through multi-way contracted products, without ever assembling the full dense Jacobian.
+
+Last but not least, this format exploits the sparsity of the power grid --- in both $\boldsymbol{\Phi}$ and $\mathbf{S}$ --- to further reduce storage and computational time.
 \subsection*{Hybrid implicit multilinear time-invariant (iMTI) descriptor models}
 
 Converter-dominated grids are not purely ordinary differential equation systems: algebraic network constraints couple the differential dynamics, leading to \textbf{descriptor (DAE) pencils}
 \[
-  \mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}(\mathbf{p})\,\mathbf{x}, \qquad \det(\mathbf{A}(\mathbf{p}) - \lambda\,\mathbf{E}) = 0.
+  \mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}\,\mathbf{x}, \qquad \det(\mathbf{A} - \lambda\,\mathbf{E}) = 0.
 \]
-VeraGrid assembles the system matrices from physical component models and exposes them directly through its Python API.  TenSyGrid then lifts this pencil family into the iMTI tensor framework, enabling \textbf{simultaneous sweeping of topology switches and converter parameters} without re-assembling the full model for each scenario.
+VeraGrid assembles the system matrices from physical component models and exposes them directly through its Python API. TenSyGrid then lifts this pencil family into the iMTI tensor framework, with the goal of \textbf{sweeping topology switches and converter parameters} while avoiding a full model re-assembly for every scenario. This is an active research target: the current toolchain provides the multilinear $\mathbf{S}/\boldsymbol{\Phi}$ representation and sparse evaluators, while compact tensor integrators remain under development.
 
 \subsection*{Why it matters for this hackathon}
 
-The 300-scenario batch sweep in Phase 3 is the direct practical payoff: teams that exploit the tensor structure (or the batch VeraGrid API that wraps it) will evaluate stability margins orders of magnitude faster than those using brute-force per-scenario eigensolvers --- and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
+The 300-scenario batch sweep in Phase 3 is the practical motivation: teams that exploit the multilinear structure --- or simply profile and batch the VeraGrid API efficiently --- can evaluate stability margins substantially faster than a brute-force eigensolve per scenario, and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
 
 \end{document}
