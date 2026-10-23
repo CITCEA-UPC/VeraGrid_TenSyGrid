@@ -1,12 +1,16 @@
 import asyncio
 import json
+import os
 import pickle
+import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,6 +25,7 @@ TENSYGRID_DIR = Path(__file__).resolve().parents[1]
 GRIDS_DIR = PROJECT_ROOT / "Grids_and_profiles" / "grids"
 PRECOMPUTED_DIR = TENSYGRID_DIR / "precomputed_builds"
 SCRIPT_PATH = TENSYGRID_DIR / "small_signal_analysis_main.py"
+EMT_SCRIPT_PATH = TENSYGRID_DIR / "small_signal_analysis_main_emt.py"
 CONTINGENCY_SCRIPT_PATH = TENSYGRID_DIR / "run_contingency.py"
 
 
@@ -70,19 +75,92 @@ VENV_PYTHON = _find_venv_python()
 
 _running_process: Optional[subprocess.Popen] = None
 _current_grid: Optional[str] = None
+_running_logs: Optional[tuple[Path, Path]] = None
 
 _contingency_process: Optional[subprocess.Popen] = None
 _contingency_info: Optional[str] = None
+_contingency_logs: Optional[tuple[Path, Path]] = None
 
 
 class RunRequest(BaseModel):
     grid_filename: str
+    study_type: str = "RMS"
 
 
 class ContingencyRequest(BaseModel):
     grid_filename: str
     contingency_type: str
     contingency_element: str
+    study_type: str = "RMS"
+
+
+def _new_log_paths(prefix: str) -> tuple[Path, Path]:
+    """Create a pair of temporary log files for a child process.
+
+    Child output must never go through an unread ``subprocess.PIPE``: if the
+    process writes more than the OS pipe buffer, it blocks before finishing and
+    the parent waits for it forever. Temporary files avoid that deadlock.
+    """
+    log_dir = Path(tempfile.gettempdir()) / "tensygrid_dashboard"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stamp = f"{os.getpid()}_{time.time_ns()}"
+    return (
+        log_dir / f"{prefix}_{stamp}_stdout.log",
+        log_dir / f"{prefix}_{stamp}_stderr.log",
+    )
+
+
+def _read_log(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def _read_process_logs(logs: Optional[tuple[Path, Path]]) -> tuple[str, str]:
+    if logs is None:
+        return "", ""
+    stdout = _read_log(logs[0])
+    stderr = _read_log(logs[1])
+    _remove_logs(logs)
+    return stdout, stderr
+
+
+def _remove_logs(logs: Optional[tuple[Path, Path]]) -> None:
+    if logs is None:
+        return
+    for path in logs:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _spawn_logged(command: list[str],
+                  prefix: str,
+                  cwd: Path,
+                  env: Optional[dict[str, str]] = None) -> tuple[subprocess.Popen, tuple[Path, Path]]:
+    """Start a child process with its output redirected to temporary files."""
+    logs = _new_log_paths(prefix)
+    with open(logs[0], "w", encoding="utf-8") as stdout_file, \
+            open(logs[1], "w", encoding="utf-8") as stderr_file:
+        process = subprocess.Popen(
+            command,
+            cwd=str(cwd),
+            env=env,
+            stdout=stdout_file,
+            stderr=stderr_file,
+            text=True,
+        )
+    return process, logs
+
+
+def _infer_study_type(data: dict, filename: str) -> str:
+    """Read the study type, falling back to the result filename for old files."""
+    study = data.get("study")
+    if study:
+        return str(study).upper()
+    return "EMT" if "_emt_" in Path(filename).stem else "RMS"
 
 
 def get_available_grids() -> list[dict]:
@@ -91,10 +169,10 @@ def get_available_grids() -> list[dict]:
         return grids
     
     for f in sorted(GRIDS_DIR.iterdir()):
-        if f.suffix == '.gridcal':
+        if f.suffix in ('.gridcal', '.veragrid'):
             grids.append({
                 'filename': f.name,
-                'name': f.stem,
+                'name': f.name,
                 'size_kb': round(f.stat().st_size / 1024, 1),
             })
     return grids
@@ -113,6 +191,7 @@ def get_precomputed_results() -> list[dict]:
                 results.append({
                     'filename': f.name,
                     'grid_name': data.get('grid_name', f.stem),
+                    'study': _infer_study_type(data, f.name),
                     'stable': data.get('stable'),
                     'margin': data.get('margin'),
                     'n_eigenvalues': data.get('n_eigenvalues', 0),
@@ -123,9 +202,11 @@ def get_precomputed_results() -> list[dict]:
                 results.append({
                     'filename': f.name,
                     'grid_name': f.stem,
+                    'study': 'RMS',
                     'error': str(e),
                     'modified': f.stat().st_mtime,
                 })
+    results.sort(key=lambda r: r.get('modified', 0.0), reverse=True)
     return results
 
 
@@ -140,8 +221,12 @@ def load_result(filename: str) -> dict:
         
         result = {
             'grid_name': data.get('grid_name', 'Unknown'),
+            'study': _infer_study_type(data, filename),
             'stable': data.get('stable', False),
             'margin': data.get('margin', 0.0),
+            'margin_definition': data.get('margin_definition'),
+            'unstable_threshold': data.get('unstable_threshold'),
+            'period': data.get('period'),
             'n_eigenvalues': data.get('n_eigenvalues', 0),
             'n_state_vars': data.get('n_state_vars', 0),
             'eigenvalues': data.get('eigenvalues', []),
@@ -189,8 +274,8 @@ async def get_result(filename: str):
 
 @app.post("/api/run")
 async def run_simulation(request: RunRequest):
-    global _running_process, _current_grid
-    
+    global _running_process, _current_grid, _running_logs
+
     if _running_process is not None and _running_process.poll() is None:
         raise HTTPException(
             status_code=409, 
@@ -202,15 +287,16 @@ async def run_simulation(request: RunRequest):
         raise HTTPException(status_code=404, detail="Grid file not found")
     
     _current_grid = request.grid_filename
-    
-    _running_process = subprocess.Popen(
-        [str(VENV_PYTHON), str(SCRIPT_PATH), request.grid_filename],
-        cwd=str(TENSYGRID_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
+
+    script_path = EMT_SCRIPT_PATH if request.study_type.upper() == "EMT" else SCRIPT_PATH
+
+    _remove_logs(_running_logs)
+    _running_process, _running_logs = _spawn_logged(
+        [str(VENV_PYTHON), str(script_path), request.grid_filename],
+        prefix="simulation",
+        cwd=TENSYGRID_DIR,
     )
-    
+
     return {
         "status": "started",
         "grid": request.grid_filename,
@@ -220,8 +306,8 @@ async def run_simulation(request: RunRequest):
 
 @app.get("/api/status")
 async def get_status():
-    global _running_process, _current_grid
-    
+    global _running_process, _current_grid, _running_logs
+
     if _running_process is None:
         return {"status": "idle", "grid": None}
     
@@ -233,10 +319,10 @@ async def get_status():
             "grid": _current_grid,
             "pid": _running_process.pid,
         }
-    
-    stdout = _running_process.stdout.read() if _running_process.stdout else ""
-    stderr = _running_process.stderr.read() if _running_process.stderr else ""
-    
+
+    stdout, stderr = _read_process_logs(_running_logs)
+    _running_logs = None
+
     result = {
         "status": "completed" if poll == 0 else "failed",
         "grid": _current_grid,
@@ -253,7 +339,7 @@ async def get_status():
 
 @app.post("/api/cancel")
 async def cancel_simulation():
-    global _running_process, _current_grid
+    global _running_process, _current_grid, _running_logs
 
     if _running_process is None or _running_process.poll() is not None:
         raise HTTPException(status_code=404, detail="No simulation running")
@@ -267,12 +353,14 @@ async def cancel_simulation():
     grid = _current_grid
     _running_process = None
     _current_grid = None
+    _remove_logs(_running_logs)
+    _running_logs = None
     return {"status": "cancelled", "grid": grid}
 
 
 @app.post("/api/cancel-contingency")
 async def cancel_contingency():
-    global _contingency_process, _contingency_info
+    global _contingency_process, _contingency_info, _contingency_logs
 
     if _contingency_process is None or _contingency_process.poll() is not None:
         raise HTTPException(status_code=404, detail="No contingency running")
@@ -286,6 +374,8 @@ async def cancel_contingency():
     info = _contingency_info
     _contingency_process = None
     _contingency_info = None
+    _remove_logs(_contingency_logs)
+    _contingency_logs = None
     return {"status": "cancelled", "info": info}
 
 
@@ -302,7 +392,7 @@ async def delete_result(filename: str):
 
 @app.post("/api/run-contingency")
 async def run_contingency(request: ContingencyRequest):
-    global _contingency_process, _contingency_info
+    global _contingency_process, _contingency_info, _contingency_logs
     
     if _contingency_process is not None and _contingency_process.poll() is None:
         raise HTTPException(
@@ -316,20 +406,24 @@ async def run_contingency(request: ContingencyRequest):
     
     _contingency_info = f"{request.contingency_type}:{request.contingency_element} on {request.grid_filename}"
     
-    _contingency_process = subprocess.Popen(
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+    env["CONTINGENCY_GRID"] = request.grid_filename
+    env["CONTINGENCY_TYPE"] = request.contingency_type
+    env["CONTINGENCY_ELEMENT"] = request.contingency_element
+    env["CONTINGENCY_STUDY"] = request.study_type.upper()
+
+    _remove_logs(_contingency_logs)
+    _contingency_process, _contingency_logs = _spawn_logged(
         [
             str(VENV_PYTHON),
             str(CONTINGENCY_SCRIPT_PATH),
-            "--grid", request.grid_filename,
-            "--type", request.contingency_type,
-            "--element", request.contingency_element,
         ],
-        cwd=str(TENSYGRID_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
+        prefix="contingency",
+        cwd=TENSYGRID_DIR,
+        env=env,
     )
-    
+
     return {
         "status": "started",
         "info": _contingency_info,
@@ -339,8 +433,8 @@ async def run_contingency(request: ContingencyRequest):
 
 @app.get("/api/contingency-status")
 async def get_contingency_status():
-    global _contingency_process, _contingency_info
-    
+    global _contingency_process, _contingency_info, _contingency_logs
+
     if _contingency_process is None:
         return {"status": "idle", "info": None}
     
@@ -352,13 +446,26 @@ async def get_contingency_status():
             "info": _contingency_info,
             "pid": _contingency_process.pid,
         }
-    
-    stdout = _contingency_process.stdout.read() if _contingency_process.stdout else ""
-    stderr = _contingency_process.stderr.read() if _contingency_process.stderr else ""
-    
+
+    stdout, stderr = _read_process_logs(_contingency_logs)
+    _contingency_logs = None
+
     if poll == 0:
         try:
-            data = json.loads(stdout)
+            data = None
+            combined = (stdout or "") + "\n" + (stderr or "")
+            # Try greedy from end to find largest JSON object
+            for m in re.finditer(r'\{.*\}', combined, re.DOTALL):
+                try:
+                    candidate = m.group(0)
+                    data = json.loads(candidate)
+                    if isinstance(data, dict) and ("grid_name" in data or "error" in data or "status" in data):
+                        break
+                except Exception:
+                    data = None
+                    continue
+            if data is None:
+                raise json.JSONDecodeError("No JSON found", "", 0)
             result = {
                 "status": "completed",
                 "info": _contingency_info,

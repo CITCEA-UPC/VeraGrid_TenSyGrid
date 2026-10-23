@@ -506,6 +506,10 @@ canvas {
           <select id="grid-select">
             <option value="">Loading grids...</option>
           </select>
+          <select id="study-select">
+            <option value="RMS">RMS small-signal</option>
+            <option value="EMT">EMT Floquet</option>
+          </select>
           <button id="run-btn" class="btn btn-primary" onclick="runSimulation()">Run Simulation</button>
           <button id="cancel-btn" class="btn btn-danger" onclick="cancelSimulation()" style="display:none">Stop</button>
         </div>
@@ -778,10 +782,10 @@ document.querySelectorAll('.tab').forEach(tab => {
     if (currentData) {
       setTimeout(() => {
         if (tab.dataset.tab === 'status') {
-          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas', eigZoom);
+          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas', eigZoom, _unstableThreshold(currentData));
         } else if (tab.dataset.tab === 'eigenvalues') {
-          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-full', eigZoomFull);
-          renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level);
+          renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-full', eigZoomFull, _unstableThreshold(currentData));
+          renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level, _unstableThreshold(currentData));
         } else if (tab.dataset.tab === 'contingencies') {
           loadContingencyElements();
         }
@@ -896,6 +900,8 @@ async function deleteResult(filename) {
 
 async function runSimulation() {
   const gridFilename = document.getElementById('grid-select').value;
+  const studySelect = document.getElementById('study-select');
+  const studyType = studySelect ? studySelect.value : 'RMS';
   if (!gridFilename) {
     alert('Please select a grid first');
     return;
@@ -918,7 +924,7 @@ async function runSimulation() {
     const res = await fetch('/api/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ grid_filename: gridFilename }),
+      body: JSON.stringify({ grid_filename: gridFilename, study_type: studyType }),
     });
     
     if (!res.ok) {
@@ -978,8 +984,11 @@ async function pollStatus() {
       await loadResults();
       
       const gridName = status.grid;
+      const studySelect = document.getElementById('study-select');
+      const wantedStudy = (studySelect ? studySelect.value : 'RMS') === 'EMT' ? 'EMT' : 'RMS';
       const results = await (await fetch('/api/results')).json();
-      const latestResult = results.find(r => r.grid_name === gridName);
+      const latestResult = results.find(r => r.grid_name === gridName && (r.study || 'RMS') === wantedStudy)
+        || results.find(r => r.grid_name === gridName);
       if (latestResult) {
         await loadResult(latestResult.filename, null);
       }
@@ -1027,7 +1036,7 @@ function displayResults(data) {
   
   const mv = document.getElementById('margin-value');
   mv.textContent = data.margin.toExponential(4);
-  mv.style.color = data.margin < -0.001 ? '#10b981' : data.margin < 0.001 ? '#f59e0b' : '#ef4444';
+  mv.style.color = data.status === 'STABLE' ? '#10b981' : data.status === 'MARGINAL' ? '#f59e0b' : '#ef4444';
   
   const critCount = (data.critical_modes || []).filter(m => m.critical).length;
   document.getElementById('n-critical').textContent = critCount;
@@ -1055,7 +1064,7 @@ function displayResults(data) {
   `;
   
   const assessmentDiv = document.getElementById('stability-assessment');
-  const unstableCount = (data.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const unstableCount = _countUnstableModes(data);
   const stableCount = (data.eigenvalues || []).length - unstableCount;
   
   let assessmentHTML = `
@@ -1092,15 +1101,16 @@ function displayResults(data) {
   
   assessmentDiv.innerHTML = assessmentHTML;
   
-  renderModes(data.critical_modes || []);
+  renderModes(data.critical_modes || [], _unstableThreshold(data));
   renderVoltages(data.bus_voltages || []);
 }
 
 function renderAllCharts(data) {
-  renderEigenvalues(data.eigenvalues || [], 'eig-canvas', eigZoom);
-  renderEigenvalues(data.eigenvalues || [], 'eig-canvas-full', eigZoomFull);
-  renderDampingFreq(data.eigenvalues || [], dampingZoom.level);
-  renderEigenvalueTable(data.eigenvalues || []);
+  const threshold = _unstableThreshold(data);
+  renderEigenvalues(data.eigenvalues || [], 'eig-canvas', eigZoom, threshold);
+  renderEigenvalues(data.eigenvalues || [], 'eig-canvas-full', eigZoomFull, threshold);
+  renderDampingFreq(data.eigenvalues || [], dampingZoom.level, threshold);
+  renderEigenvalueTable(data.eigenvalues || [], threshold);
 }
 
 function _damping(re, im) {
@@ -1112,11 +1122,30 @@ function _freqHz(im) {
   return Math.abs(im) / (2 * Math.PI);
 }
 
-function renderEigenvalues(eigs, canvasId, zoomState) {
+function _unstableThreshold(data) {
+  if (data && Number.isFinite(Number(data.unstable_threshold))) {
+    return Number(data.unstable_threshold);
+  }
+  if (data && String(data.study || '').toUpperCase() === 'EMT') {
+    const period = Number(data.period);
+    const p = Number.isFinite(period) && period > 0 ? period : 0.02;
+    return Math.log(1 + 1.0e-4) / p;
+  }
+  return 0.001;
+}
+
+function _countUnstableModes(data) {
+  const threshold = _unstableThreshold(data);
+  return (data && data.eigenvalues ? data.eigenvalues : []).filter(e => e.re > threshold).length;
+}
+
+function renderEigenvalues(eigs, canvasId, zoomState, unstableThreshold) {
   const canvas = document.getElementById(canvasId);
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * 2;
   canvas.height = rect.height * 2;
+  const threshold = Number.isFinite(unstableThreshold) ? unstableThreshold : 0.001;
+  canvas._unstableThreshold = threshold;
   const ctx = canvas.getContext('2d');
   ctx.scale(2, 2);
   const W = rect.width, H = rect.height;
@@ -1191,7 +1220,7 @@ function renderEigenvalues(eigs, canvasId, zoomState) {
   eigs.forEach(e => {
     const x = cx + e.re * sx;
     const y = cy - e.im * sy;
-    const unstable = e.re > 0.001;
+    const unstable = e.re > threshold;
     
     ctx.fillStyle = unstable ? '#E3001A' : '#008598';
     ctx.beginPath();
@@ -1210,11 +1239,12 @@ function renderEigenvalues(eigs, canvasId, zoomState) {
   canvas._eigData = { eigs, cx, cy, sx, sy };
 }
 
-function renderDampingFreq(eigs, zoomLevel = 1) {
+function renderDampingFreq(eigs, zoomLevel = 1, unstableThreshold = 0.001) {
   const canvas = document.getElementById('damping-freq-canvas');
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * 2;
   canvas.height = rect.height * 2;
+  const threshold = Number.isFinite(unstableThreshold) ? unstableThreshold : 0.001;
   const ctx = canvas.getContext('2d');
   ctx.scale(2, 2);
   const W = rect.width, H = rect.height;
@@ -1290,7 +1320,7 @@ function renderDampingFreq(eigs, zoomLevel = 1) {
   modes.forEach(m => {
     const x = ox + m.freq * sx;
     const y = oy + (dampMaxZ - m.damping) * sy;
-    const unstable = m.damping < 0;
+    const unstable = m.re > threshold;
     const critical = m.damping >= 0 && m.damping < 0.05;
     
     ctx.fillStyle = unstable ? '#E3001A' : critical ? '#B2D235' : '#179C7D';
@@ -1310,12 +1340,13 @@ function renderDampingFreq(eigs, zoomLevel = 1) {
   canvas._dampData = { modes, ox, oy, sx, sy, dampMax: dampMaxZ };
 }
 
-function renderEigenvalueTable(eigs) {
+function renderEigenvalueTable(eigs, unstableThreshold = 0.001) {
   const tbody = document.getElementById('eig-body');
+  const threshold = Number.isFinite(unstableThreshold) ? unstableThreshold : 0.001;
   tbody.innerHTML = eigs.map((e, i) => {
     const damping = _damping(e.re, e.im);
     const freq = _freqHz(e.im);
-    const unstable = e.re > 0.001;
+    const unstable = e.re > threshold;
     const critical = Math.abs(damping) < 0.05;
     const rowStyle = unstable ? 'background:rgba(227,0,26,0.05)' : critical ? 'background:rgba(178,210,53,0.05)' : '';
     const dampColor = unstable ? 'color:var(--red);font-weight:700' : critical ? 'color:var(--yellow);font-weight:700' : '';
@@ -1329,14 +1360,15 @@ function renderEigenvalueTable(eigs) {
   }).join('');
 }
 
-function renderModes(modes) {
+function renderModes(modes, unstableThreshold = 0.001) {
   const tbody = document.getElementById('modes-body');
+  const threshold = Number.isFinite(unstableThreshold) ? unstableThreshold : 0.001;
   if (modes.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No oscillatory modes found</td></tr>';
     return;
   }
   tbody.innerHTML = modes.map((m, idx) => {
-    const unstable = m.re > 0.001;
+    const unstable = m.re > threshold;
     const critical = m.damping >= 0 && m.damping < 0.05;
     const rowStyle = unstable ? 'background:rgba(227,0,26,0.05)' : critical ? 'background:rgba(178,210,53,0.05)' : '';
     const dampColor = unstable ? 'color:var(--red);font-weight:700' : critical ? 'color:var(--yellow);font-weight:700' : '';
@@ -1484,7 +1516,7 @@ function renderVoltages(buses) {
     const zoomState = canvasId === 'eig-canvas' ? eigZoom : eigZoomFull;
     zoomState.level = Math.max(0.5, Math.min(5, zoomState.level * factor));
     if (currentData) {
-      renderEigenvalues(currentData.eigenvalues || [], canvasId, zoomState);
+      renderEigenvalues(currentData.eigenvalues || [], canvasId, zoomState, canvas._unstableThreshold);
     }
   });
 });
@@ -1514,7 +1546,7 @@ function loadContingencyElements() {
   document.getElementById('before-grid-label').textContent = currentData.grid_name || '';
   document.getElementById('before-status').innerHTML = renderStatusCard(currentData);
   setTimeout(() => {
-    renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-before', { level: 1 });
+    renderEigenvalues(currentData.eigenvalues || [], 'eig-canvas-before', { level: 1 }, _unstableThreshold(currentData));
   }, 50);
 }
 
@@ -1635,6 +1667,7 @@ async function runContingency() {
         grid_filename: currentData.grid_name,
         contingency_type: type,
         contingency_element: element,
+        study_type: currentData.study || 'RMS',
       }),
     });
     
@@ -1723,8 +1756,8 @@ function displayContingencyResults() {
 
   // Render eigenvalue canvases
   setTimeout(() => {
-    renderEigenvalues(before.eigenvalues || [], 'eig-canvas-before', { level: 1 });
-    renderEigenvalues(after.eigenvalues || [], 'eig-canvas-after', { level: 1 });
+    renderEigenvalues(before.eigenvalues || [], 'eig-canvas-before', { level: 1 }, _unstableThreshold(before));
+    renderEigenvalues(after.eigenvalues || [], 'eig-canvas-after', { level: 1 }, _unstableThreshold(after));
   }, 50);
 
   // Show recommendations
@@ -1738,7 +1771,7 @@ function renderStatusCard(data) {
                       data.status === 'MARGINAL' ? '#f59e0b' : '#ef4444';
   const statusBadge = data.status === 'STABLE' ? 'green' :
                       data.status === 'MARGINAL' ? 'yellow' : 'red';
-  const unstableCount = (data.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const unstableCount = _countUnstableModes(data);
   const criticalCount = (data.critical_modes || []).filter(m => m.critical).length;
 
   return `
@@ -1772,8 +1805,8 @@ function renderStatusCard(data) {
 }
 
 function generateRecommendations(before, after) {
-  const beforeUnstable = (before.eigenvalues || []).filter(e => e.re > 0.001).length;
-  const afterUnstable = (after.eigenvalues || []).filter(e => e.re > 0.001).length;
+  const beforeUnstable = _countUnstableModes(before);
+  const afterUnstable = _countUnstableModes(after);
   
   const beforeCritical = (before.critical_modes || []).filter(m => m.critical).length;
   const afterCritical = (after.critical_modes || []).filter(m => m.critical).length;
@@ -1857,7 +1890,7 @@ function generateRecommendations(before, after) {
             <td>Stability Margin</td>
             <td>${before.margin.toExponential(3)}</td>
             <td>${after.margin.toExponential(3)}</td>
-            <td style="color:${(after.margin - before.margin) < 0 ? 'var(--red)' : 'var(--green)'}">
+            <td style="color:${(after.margin - before.margin) > 0 ? 'var(--red)' : 'var(--green)'}">
               ${(after.margin - before.margin).toExponential(2)}
             </td>
           </tr>
@@ -1929,7 +1962,7 @@ dampCanvas.addEventListener('wheel', (e) => {
   const factor = e.deltaY > 0 ? 0.9 : 1.1;
   dampingZoom.level = Math.max(0.5, Math.min(5, dampingZoom.level * factor));
   if (currentData) {
-    renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level);
+    renderDampingFreq(currentData.eigenvalues || [], dampingZoom.level, _unstableThreshold(currentData));
   }
 });
 
