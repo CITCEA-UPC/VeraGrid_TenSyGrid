@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.17.0 (TeX Live 2023/Debian)  (format=lualatex 2026.3.24)  23 OCT 2026 12:26
+This is LuaHBTeX, Version 1.17.0 (TeX Live 2023/Debian)  (format=lualatex 2026.3.24)  23 OCT 2026 12:34
  restricted system commands enabled.
  file:line:error style messages enabled.
 **/home/alexandre/git/VeraGrid_TenSyGrid/hackathon/hackathon
@@ -874,10 +874,9 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
 )
 \Hy@SectionHShift=\skip72
-)
-No file hackathon.aux.
-
+) (./hackathon.aux)
 \openout1 = hackathon.aux
+
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 89.
 LaTeX Font Info:    ... okay on input line 89.
 LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 89.
@@ -888,7 +887,7 @@ LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 89.
 LaTeX Font Info:    ... okay on input line 89.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 89.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 89.
-(/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 89.
@@ -1034,6 +1033,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 \c@lstlisting=\count357
 Package hyperref Info: Link coloring ON on input line 89.
+ (./hackathon.out) (./hackathon.out)
 \@outlinefile=\write4
 
 \openout4 = hackathon.out
@@ -1056,7 +1056,7 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 ) (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
 )
-<./config/tglogo.pdf, id=43, 143.47853pt x 38.12242pt>
+<./config/tglogo.pdf, id=79, 143.47853pt x 38.12242pt>
 File: ./config/tglogo.pdf Graphic file (type pdf)
 <use ./config/tglogo.pdf>
 Package luatex.def Info: ./config/tglogo.pdf  used on input line 102.
@@ -1066,7 +1066,7 @@ Overfull \hbox (21.77112pt too wide) in paragraph at lines 102--102
  [][]
  []
 
-<./config/UPC-logo.pdf, id=44, 562.57677pt x 188.42897pt>
+<./config/UPC-logo.pdf, id=80, 562.57677pt x 188.42897pt>
 File: ./config/UPC-logo.pdf Graphic file (type pdf)
 <use ./config/UPC-logo.pdf>
 Package luatex.def Info: ./config/UPC-logo.pdf  used on input line 104.
@@ -1082,45 +1082,29 @@ Overfull \hbox (16.04546pt too wide) in paragraph at lines 248--249
 []\TU/lmtt/m/n/10.95 benchmark_grid.veragrid\TU/Raleway(0)/m/n/10.95 : Bench-mark grid with syn-chronous gen-er-a-tors and grid-following/grid-
  []
 
-
-LaTeX Warning: Reference `sec:tensor' on page 4 undefined on input line 254.
-
 [4] [5] [6] (./hackathon.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `hackathon.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `hackathon.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  59F0FC53BD81728D66C3174328E55786;1725.
+Package rerunfilecheck Info: File `hackathon.out' has not changed.
+(rerunfilecheck)             Checksum: 59F0FC53BD81728D66C3174328E55786;1725.
 )
 
 Here is how much of LuaTeX's memory you used:
- 34719 strings out of 476553
+ 34746 strings out of 476553
  125240,1977958 words of node,token memory allocated
  1428 words of node memory still in use:
    31 hlist, 2 vlist, 14 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 1 margin_kern, 3 glyph, 101 attribute, 61 glue_spec, 88 attribute_list, 2 write, 24 pdf_literal, 24 pdf_colorstack nodes
    avail lists: 1:2,2:2158,3:648,4:234,5:1837,6:67,7:10561,8:65,9:555,10:15,11:1001
- 55888 multiletter control sequences out of 65536+600000
+ 55900 multiletter control sequences out of 65536+600000
  100 fonts using 9273327 bytes
  91i,14n,95p,1050b,898s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/opentype/public/lm/lmmono10-regular.otf><./fonts/Raleway-Italic.ttf><./fonts/Raleway-Regular.ttf><./fonts/Raleway-Bold.ttf></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on hackathon.pdf (6 pages, 154436 bytes).
+Output written on hackathon.pdf (6 pages, 155086 bytes).
 
-PDF statistics: 205 PDF objects out of 1000 (max. 8388607)
- 132 compressed objects within 2 object streams
+PDF statistics: 235 PDF objects out of 1000 (max. 8388607)
+ 162 compressed objects within 2 object streams
  25 named destinations out of 1000 (max. 131072)
- 256 words of extra memory for PDF output out of 10000 (max. 100000000)
+ 328 words of extra memory for PDF output out of 10000 (max. 100000000)
 
