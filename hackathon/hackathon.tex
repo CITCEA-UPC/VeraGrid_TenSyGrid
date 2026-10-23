@@ -154,8 +154,8 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
 \begin{challengebox}{Phase 2: Converter control tuning and dynamic stability (midday)}
   \textbf{Focus: Small-signal stability.} Opening lines alters the electrical distance and impedance between converter-interfaced resources. The dynamic layer is activated!
   \begin{itemize}[leftmargin=*, itemsep=1pt]
-    \item \textbf{Tensor \& Descriptor Model:} Converter interactions and parameter variations exhibit a multilinear structure. VeraGrid expresses the grid as a parameterized descriptor pencil $\mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}(\mathbf{p})\,\mathbf{x}$, where the parameter space $\mathbf{p}$ (droops, damping, virtual inertia) maps into a structured tensor representation.
-    \item \textbf{Modal Analysis:} Compute generalised eigenvalues $\det(\mathbf{A}(\mathbf{p}) - \lambda \mathbf{E}) = 0$, where $\lambda_i = \sigma_i \pm j\omega_i$.
+    \item \textbf{Tensor \& Descriptor Model:} Converter interactions and parameter variations exhibit a non-linear structure that can be multilinearized. VeraGrid expresses the grid as a descriptor pencil $\mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}\,\mathbf{x}$, where $\mathbf{A}$ stores the linearized interactions between the parameter space $\mathbf{p}$ (droops, damping, virtual inertia).
+    \item \textbf{Modal Analysis:} Compute generalised eigenvalues $\det(\mathbf{A} - \lambda \mathbf{E}) = 0$, where $\lambda_i = \sigma_i \pm j\omega_i$.
     \item \textbf{Actions:} Teams tune converter control parameters (frequency droop $R_p$, virtual damping $D_v$, and voltage gains $K_v, K_p^{\text{pll}}$).
     \item \textbf{Dynamic Target:} Ensure strict asymptotic stability ($\max \sigma_i < -10^{-5}$) and maximize the minimum damping ratio:
           \begin{equation*}
@@ -277,14 +277,14 @@ TenSyGrid avoids materialising this basis by rewriting it as a \textbf{multi-way
     1 \\ {x}_{N}
   \end{pmatrix}.
 \]
-This is a \textbf{rank-1 tensor written in Canonical Polyadic (CP) form}: although it has $2^{N}$ entries, it is stored and evaluated implicitly from only $N$ factors, so its memory footprint and the cost of a contracted product grow linearly, $\mathcal{O}(N)$, rather than exponentially. The number of monomials itself is unchanged; the gain comes from never forming the dense tensor.
+This is a \textbf{rank-1 tensor written in Canonical Polyadic (CP) form}: although it has $2^{N}$ entries, it is stored and evaluated implicitly from only $N$ factors, so its memory footprint and the cost of a contracted product grow linearly, $\mathcal{O}(N)$, rather than exponentially. The number of monomials itself is unchanged; the gain comes from never forming the dense tensor.\\
 
 Defining the structural matrix $\mathbf{S}$ (which variables compose each monomial) and the unfolded coefficient matrix $\boldsymbol{\Phi}$ (the associated coefficients), the original system can be expressed as
 \begin{equation}
   \mathbf{f}(\mathbf{x})=\boldsymbol{\Phi}\,\mathbf{m}(\mathbf{x})=\mathbf{0},
   \qquad \mathbf{m}(\mathbf{x})\ \text{generated from}\ \mathbf{S},
 \end{equation}
-and, thanks to the linear behaviour of tensor algebra, quantities such as the Jacobian are obtained through multi-way contracted products, without ever assembling the full dense Jacobian.
+and, thanks to the linear behaviour of tensor algebra, quantities such as the Jacobian are obtained through multi-way contracted products, without ever assembling the full dense Jacobian.\\
 
 Last but not least, this format exploits the sparsity of the power grid --- in both $\boldsymbol{\Phi}$ and $\mathbf{S}$ --- to further reduce storage and computational time.
 \subsection*{Hybrid implicit multilinear time-invariant (iMTI) descriptor models}
