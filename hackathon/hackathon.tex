@@ -134,6 +134,9 @@ Participating teams are given a benchmark transmission grid in native \texttt{.v
   \item \textbf{Automate your strategy across 300 test scenarios} with variable renewable generation, loads, and $N-1$ line outages.
 \end{enumerate}
 
+\paragraph{Target audience.}
+This hackathon is aimed at \textbf{Bachelor's, Master's and PhD students} in Electrical Engineering, Industrial Engineering, Physics, Mathematics, and Computer Science with a background or strong interest in power systems. Participants are expected to be comfortable with Python and have some familiarity with concepts such as power flow, dynamic modelling, or numerical linear algebra.
+
 \paragraph{Team format and recommended profiles.}
 Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly encouraged: combining expertise in power systems and converter control (system dynamics, droop controls, modal analysis) with strong Python scripting and algorithmic optimization skills.
 
@@ -165,7 +168,7 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
   \textbf{Focus: Algorithmic resilience and speed.} Real power systems never operate at a single fixed snapshot!
   \begin{itemize}[leftmargin=*, itemsep=1pt]
     \item \textbf{Stress Test:} The evaluation engine tests each team's script against a batch of $N = 300$ operating conditions: variable renewable penetration (from 20\% to 100\%), demand fluctuations, and $N-1$ line contingencies.
-    \item \textbf{Tensor-Accelerated Automation:} Leveraging low-rank tensor representations and VeraGrid batch capabilities, teams must deliver an automated Python script that swiftly evaluates multi-scenario stability and outputs certified low-loss configurations without manual intervention.
+    \item \textbf{Tensor-Accelerated Automation:} Leveraging low-rank tensor representations and VeraGrid batch capabilities, teams must deliver an automated Python script that swiftly evaluates multi-scenario stability and outputs certified low-loss configurations without manual intervention. The integrated TenSyGrid tensor engine --- already available in the repository --- provides the $( \mathbf{S}, \boldsymbol{\Phi})$ evaluators to avoid re-assembling system matrices for every scenario.
   \end{itemize}
 \end{challengebox}
 
@@ -196,11 +199,11 @@ where:
   \small
   \begin{tabularx}{\textwidth}{lcX}
     \toprule
-    \textbf{\color{tgblue}Criterion}    & \textbf{\color{tgblue}Weight} & \textbf{\color{tgblue}Description}                                          \\
+    \textbf{\color{tgblue}Criterion}     & \textbf{\color{tgblue}Weight} & \textbf{\color{tgblue}Description}                                          \\
     \midrule
-    \textbf{Dynamic stability}          & \textbf{35\%}                 & Small-signal damping margin ($\zeta_{\min}$) and absence of undamped modes. \\
-    \textbf{Static loss reduction}      & \textbf{25\%}                 & Active power transmission loss minimization via topology switching.         \\
-    \textbf{Multi-scenario robustness}  & \textbf{25\%}                 & Stability and constraint compliance across 100 hidden stress scenarios.     \\
+    \textbf{Dynamic stability}           & \textbf{35\%}                 & Small-signal damping margin ($\zeta_{\min}$) and absence of undamped modes. \\
+    \textbf{Static loss reduction}       & \textbf{25\%}                 & Active power transmission loss minimization via topology switching.         \\
+    \textbf{Multi-scenario robustness}   & \textbf{25\%}                 & Stability and constraint compliance across 100 hidden stress scenarios.     \\
     \textbf{Automation and code quality} & \textbf{15\%}                 & Execution speed, modularity, and clean interaction with VeraGrid API.       \\
     \bottomrule
   \end{tabularx}
@@ -222,17 +225,17 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
   \renewcommand{\arraystretch}{0.90}
   \begin{tabularx}{\textwidth}{lX}
     \toprule
-    \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone} \\
+    \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone}                                                                                                                                              \\
     \midrule
-    \textbf{09:00 -- 09:15} & \textbf{Hackathon kick-off:} Challenge presentation by Eduardo Prieto Araujo, problem statement, stability criteria, and VeraGrid platform introduction. \\
-    \textbf{09:15 -- 11:00} & \textbf{Welcome and sprint 1: Static grid and topology switching.} Team setup, onboarding with VeraGrid Python API, and line loss optimization. \\
-    \textbf{11:00 -- 11:30} & \textit{\color{tgpetrol}Coffee break.} \\
-    \textbf{11:30 -- 12:00} & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers. \\
-    \textbf{12:00 -- 13:00} & \textbf{Sprint 2: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes (parallel to Plenary WP1--WP2 overview). \\
-    \textbf{13:00 -- 14:00} & \textit{\color{tgpetrol}Lunch break.} \\
-    \textbf{14:00 -- 15:30} & \textbf{Sprint 3: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization (parallel to Plenary WP3--WP5 overview). \\
-    \textbf{15:30 -- 16:00} & \textit{\color{tgpetrol}Coffee break and code freeze.} Submission of final scripts to the automated scoring harness. \\
-    \textbf{16:00 -- 17:00} & \textbf{Hackathon wrap-up and winners announcement:} Team presentations, live leaderboard reveal, and awards ceremony. \\
+    \textbf{09:00 -- 09:15}     & \textbf{Hackathon kick-off:} Challenge presentation by Eduardo Prieto Araujo, problem statement, stability criteria, and VeraGrid platform introduction.                                  \\
+    \textbf{09:15 -- 11:00}     & \textbf{Welcome and sprint 1: Static grid and topology switching.} Team setup, onboarding with VeraGrid Python API, and line loss optimization.                                           \\
+    \textbf{11:00 -- 11:30}     & \textit{\color{tgpetrol}Coffee break.}                                                                                                                                                    \\
+    \textbf{11:30 -- 12:00}     & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers.                                                                                 \\
+    \textbf{12:00 -- 13:00}     & \textbf{Sprint 2: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes (parallel to Plenary WP1--WP2 overview). \\
+    \textbf{13:00 -- 14:00}     & \textit{\color{tgpetrol}Lunch break.}                                                                                                                                                     \\
+    \textbf{14:00 -- 15:30}     & \textbf{Sprint 3: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization (parallel to Plenary WP3--WP5 overview).       \\
+    \textbf{15:30 -- 16:00}     & \textit{\color{tgpetrol}Coffee break and code freeze.} Submission of final scripts to the automated scoring harness.                                                                      \\
+    \textbf{16:00 -- 17:00}     & \textbf{Hackathon wrap-up and winners announcement:} Team presentations, live leaderboard reveal, and awards ceremony.                                                                    \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -249,10 +252,12 @@ Each team will receive a starter Git repository containing:
   \item \texttt{evaluate\_local.py}: Local validation tool that computes loss and damping KPIs across sample scenarios before final submission.
   \item \textbf{Documentation and cheatsheets}: Quick-reference guide on converter parameters (PLL, virtual inertia, droop) and modal analysis interpretation.
   \item \textbf{Dedicated mentors}: Support from TenSyGrid researchers (UPC, eRoots, HAW Hamburg, IWES, UM) throughout the day.
+  \item \textbf{TenSyGrid tensor engine}: The iMTI toolbox --- originally developed in MATLAB and now fully migrated into the VeraGrid\,TenSyGrid Python codebase --- provides the $(\mathbf{S}, \boldsymbol{\Phi})$ multilinear representation and low-rank CP tensor evaluators described in Section~\ref{sec:tensor}, enabling fast stability sweeps across the parameter space without re-assembling system matrices from scratch.
 \end{itemize}
 
 % ===========================================================================
 \section{Why this matters: the tensor paradigm}
+\label{sec:tensor}
 % ===========================================================================
 
 In a 100\% renewable power grid, transmission line switching and converter control are tightly intertwined: an uncoordinated line opening that minimizes steady-state losses might inadvertently push a nearby grid-forming converter into an unstable oscillatory mode.
@@ -268,17 +273,17 @@ Consider now a \textbf{multi-affine} (multilinear) polynomial system in $N$ vari
 TenSyGrid avoids materialising this basis by rewriting it as a \textbf{multi-way ($N$-order) tensor}
 \[
   \mathcal{M} = \begin{pmatrix}
-  	1\\ {x}_1
+    1 \\ {x}_1
   \end{pmatrix}  \otimes \cdots \otimes \begin{pmatrix}
-  	1\\ {x}_{N}
+    1 \\ {x}_{N}
   \end{pmatrix}.
 \]
 This is a \textbf{rank-1 tensor written in Canonical Polyadic (CP) form}: although it has $2^{N}$ entries, it is stored and evaluated implicitly from only $N$ factors, so its memory footprint and the cost of a contracted product grow linearly, $\mathcal{O}(N)$, rather than exponentially. The number of monomials itself is unchanged; the gain comes from never forming the dense tensor.
 
 Defining the structural matrix $\mathbf{S}$ (which variables compose each monomial) and the unfolded coefficient matrix $\boldsymbol{\Phi}$ (the associated coefficients), the original system can be expressed as
 \begin{equation}
-	\mathbf{f}(\mathbf{x})=\boldsymbol{\Phi}\,\mathbf{m}(\mathbf{x})=\mathbf{0},
-	\qquad \mathbf{m}(\mathbf{x})\ \text{generated from}\ \mathbf{S},
+  \mathbf{f}(\mathbf{x})=\boldsymbol{\Phi}\,\mathbf{m}(\mathbf{x})=\mathbf{0},
+  \qquad \mathbf{m}(\mathbf{x})\ \text{generated from}\ \mathbf{S},
 \end{equation}
 and, thanks to the linear behaviour of tensor algebra, quantities such as the Jacobian are obtained through multi-way contracted products, without ever assembling the full dense Jacobian.
 
