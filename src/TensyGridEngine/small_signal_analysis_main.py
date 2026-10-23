@@ -49,8 +49,101 @@ def load_grid(grid_filename: str = DEFAULT_GRID):
     return grid
 
 
+PARAM_MAP = {
+    # Machine reactances & time constants
+    "H": "M",          # M = 2*H
+    "D": "D",
+    "ra": "Ra",
+    "rs": "Rs",
+    "xd": "Xd",
+    "xq": "Xq",
+    "xdp": "Xd_prime",
+    "xqp": "Xq_prime",
+    "xdpp": "Xd_2prime",
+    "xqpp": "Xq_2prime",
+    "xl": "Xl",
+    "Td0p": "Td0_prime",
+    "Tq0p": "Tq0_prime",
+    "Td0pp": "Td0_2prime",
+    "Tq0pp": "Tq0_2prime",
+    # Governor
+    "K": "K",
+    "Kp": "Kp",
+    "Ki": "Ki",
+    "p0": "p0",
+    "P0": "P0",
+    "omega_ref": "omega_ref",
+    "Pmax": "Pmax",
+    "Pmin": "Pmin",
+    "Uc": "Uc",
+    "Uo": "Uo",
+    "T_aux": "T_aux",
+    "T1_gov": "T1",
+    "T3_gov": "T3",
+    # Stabilizer
+    "Ks": "Ks",
+    "VPssMaxPu": "VPssMaxPu",
+    "VPssMinPu": "VPssMinPu",
+    "SNom": "SNom",
+    # Exciter
+    "Ka": "Ka",
+    "tA": "tA",
+    "AEz": "AEz",
+    "BEz": "BEz",
+    "EfeMaxPu": "EfeMaxPu",
+    "EfeMinPu": "EfeMinPu",
+    "TolLi": "TolLi",
+    "ToLLi": "ToLLi",
+    "VaMaxPu": "VaMaxPu",
+    "VaMinPu": "VaMinPu",
+    "VeMinPu": "VeMinPu",
+    "VfeMaxPu": "VfeMaxPu",
+    "AEx": "AEx",
+    "BEx": "BEx",
+    "Se_threshold": "Se_threshold",
+}
+
+
+def _extract_saved_device_parameters(device) -> dict[str, float]:
+    """Extract parameters from device's EMT model or direct device properties."""
+    params: dict[str, float] = {}
+    emt_model = getattr(device, "emt_model", None)
+    if emt_model is not None and not emt_model.empty():
+        def _walk_block(blk):
+            for var, expr in list(blk.event_dict.items()) + list(blk.parameters.items()):
+                val = getattr(expr, "value", expr)
+                if val is not None and isinstance(val, (int, float)):
+                    params[var.name] = float(val)
+            for child in blk.children:
+                _walk_block(child)
+        _walk_block(emt_model)
+
+    for attr in ("H", "D", "ra", "rs", "xd", "xq", "xdp", "xqp", "xdpp", "xqpp", "xl",
+                 "Td0p", "Tq0p", "Td0pp", "Tq0pp", "K", "Ks", "Ka"):
+        if hasattr(device, attr):
+            v = getattr(device, attr)
+            if v is not None and isinstance(v, (int, float)):
+                params[attr] = float(v)
+
+    return params
+
+
+def _apply_parameters_to_block(blk, param_values: dict[str, float]) -> None:
+    """Recursively set parameter values in a block tree's event_dict and parameters."""
+    from VeraGridEngine.Utils.Symbolic.symbolic import Const
+    for var in list(blk.event_dict.keys()):
+        if var.name in param_values:
+            blk.event_dict[var] = Const(param_values[var.name])
+    for var in list(blk.parameters.keys()):
+        if var.name in param_values:
+            blk.parameters[var] = Const(param_values[var.name])
+    for child in blk.children:
+        _apply_parameters_to_block(child, param_values)
+
+
 def set_models(grid) -> None:
-    """Attach phasor RMS models to buses, generators, branches, loads, and shunts."""
+    """Attach phasor RMS models to buses, generators, branches, loads, and shunts,
+    preserving and inheriting all parameters saved in the grid or EMT models."""
     def ensure_unique_device_names(devices, prefix: str) -> None:
         seen: dict[str, int] = {}
         for i, dev in enumerate(devices):
@@ -68,6 +161,8 @@ def set_models(grid) -> None:
     ensure_unique_device_names(list(grid.loads), "load")
     ensure_unique_device_names(list(grid.shunts), "shunt")
 
+    f_base = float(getattr(grid, "fBase", 60.0) or 60.0)
+
     for bus in grid.buses:
         if bus.rms_model.empty():
             vge.initialize_bus_phasor_rms(bus, vf=grid.var_factory)
@@ -76,7 +171,26 @@ def set_models(grid) -> None:
         if not gen.active or not gen.rms_model.empty():
             continue
         model = vge.get_complete_generator_template_phasor(grid.var_factory, name=f"Gen{igen}").block
-        #model = vge.get_complete_generator_templatgete_phasor(grid.var_factory, name=f"Gen{igen}").block
+
+        # 1. Base frequency
+        _apply_parameters_to_block(model, {
+            "fn": f_base,
+            "ws": 2.0 * np.pi * f_base,
+        })
+
+        # 2. Extract and inherit saved parameters from .veragrid (EMT models or device)
+        saved_params = _extract_saved_device_parameters(gen)
+        if saved_params:
+            mapped_params = {}
+            for k, v in saved_params.items():
+                if k == "H":
+                    mapped_params["M"] = 2.0 * v
+                elif k in PARAM_MAP:
+                    mapped_params[PARAM_MAP[k]] = v
+                else:
+                    mapped_params[k] = v
+            _apply_parameters_to_block(model, mapped_params)
+
         model = vge.to_implicit(model, grid.var_factory)
         set_rms_model(device=gen, model=model, var_factory=grid.var_factory)
 
@@ -84,6 +198,12 @@ def set_models(grid) -> None:
         if not line.active or not line.rms_model.empty():
             continue
         model = vge.get_line_phasor_rms_template(grid.var_factory, name=line.name).block
+        denom = float(line.R**2 + line.X**2)
+        if denom > 1e-15:
+            g_val = float(line.R / denom)
+            b_val = float(-line.X / denom)
+            bsh_val = float(line.B)
+            _apply_parameters_to_block(model, {"g": g_val, "b": b_val, "bsh": bsh_val})
         model = vge.to_implicit(model, grid.var_factory)
         set_rms_model(device=line, model=model, var_factory=grid.var_factory)
 
@@ -107,7 +227,7 @@ def set_models(grid) -> None:
         model = vge.to_implicit(model, grid.var_factory)
         set_rms_model(device=shunt, model=model, var_factory=grid.var_factory)
 
-    print("Attached RMS phasor models")
+    print("Attached RMS phasor models using saved grid parameters")
 
 
 def run_small_signal_analysis(grid) -> dict:
@@ -280,8 +400,12 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
 
     output = {
         "grid_name": grid_filename,
+        "study": "RMS",
         "stable": results["stable"],
         "margin": results["margin"],
+        "margin_definition": "max_real_part",
+        "unstable_threshold": 0.001,
+        "period": None,
         "matches": 0,
         "op_hash": op_hash,
         "eigenvalues": eigenvalues_list,
