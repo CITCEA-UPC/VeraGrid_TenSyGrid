@@ -93,7 +93,7 @@
 \begin{minipage}[c]{0.70\textwidth}
   {\fontsize{22pt}{26pt}\selectfont \textbf{\color{tgblue}Keep the grid stable}}\\[3pt]
   {\fontsize{13pt}{16pt}\selectfont \textbf{\color{tgpetrol}Dynamic topology optimization \& converter tuning}}\\[4pt]
-  {\small \textbf{\color{tggraphit}TenSyGrid 1-day hackathon challenge proposal}}\\[2pt]
+  {\small \textbf{\color{tggraphit}TenSyGrid 1-day hackathon challenge proposal · Version 0.1}}\\[2pt]
   {\footnotesize \color{tggrey}Universitat Politècnica de Catalunya · CETPartnership Horizon Europe (GA 101069750)}
 \end{minipage}
 \hfill
@@ -181,16 +181,15 @@ At the end of the hackathon, an automated scoring harness runs each team's submi
 \subsection{Composite scoring function}
 The final score is computed as:
 \begin{equation}
-  \text{Score} = 0.35 \cdot \mathcal{S}_{\text{damping}} + 0.25 \cdot \mathcal{S}_{\text{loss}} + 0.25 \cdot \mathcal{S}_{\text{robustness}} + 0.15 \cdot \mathcal{S}_{\text{code}} - \mathcal{P}_{\text{penalties}}
+  \text{Score} = 0.35 \cdot \mathcal{S}_{\text{damping}} + 0.25 \cdot \mathcal{S}_{\text{loss}} + 0.25 \cdot \mathcal{S}_{\text{robustness}} + 0.15 \cdot \mathcal{S}_{\text{code}}
 \end{equation}
 where:
 \begin{itemize}[leftmargin=*, itemsep=2pt]
-  \item $\mathcal{S}_{\text{damping}} = \min_{i} (\zeta_i)$: Minimum damping ratio achieved across all electromechanical and converter modes.
+  \item $\mathcal{S}_{\text{damping}} = \min\!\left(1,\ \max\!\left(0,\ \frac{\min_{i} \zeta_i}{\zeta_{\text{ref}}}\right)\right)$ with $\zeta_{\text{ref}} = 10\%$: Minimum damping ratio across all electromechanical and converter modes, normalised to $[0,1]$ (0 if any mode is unstable).
   \item $\mathcal{S}_{\text{loss}} = \max\left(0, 1 - \frac{P_{\text{loss}}}{P_{\text{loss, baseline}}}\right)$: Relative loss reduction achieved compared to the unoptimized baseline grid.
   \item $\mathcal{S}_{\text{robustness}} = \frac{N_{\text{stable}}}{N_{\text{total}}}$: Proportion of scenarios surviving without voltage violations or instability.
-  \item $\mathcal{S}_{\text{code}}$: Computational efficiency and clean use of the VeraGrid/TenSyGrid Python API.
-  \item $\mathcal{P}_{\text{penalties}}$: Severe penalties for voltage limit excursions ($V_i < 0.90$ or $V_i > 1.10\,\text{p.u.}$) or unstable modes ($\sigma_i \ge 0$).
-\end{itemize}
+  \item $\mathcal{S}_{\text{code}}$: Code quality and speed, between 0 and 1. Half of the score comes from an automatic code-quality check (free tool \emph{Ruff}: fewer warnings is better), and half from how fast the script runs compared to a reference solution (as fast or faster gives full marks).
+  \end{itemize}
 
 \subsection{Scoring breakdown table}
 
@@ -298,5 +297,8 @@ VeraGrid assembles the system matrices from physical component models and expose
 \subsection*{Why it matters for this hackathon}
 
 The 300-scenario batch sweep in Phase 3 is the practical motivation: teams that exploit the multilinear structure --- or simply profile and batch the VeraGrid API efficiently --- can evaluate stability margins substantially faster than a brute-force eigensolve per scenario, and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
+
+\bigskip
+\noindent\textit{Note: this document is a first iteration. The challenge definition and the scoring function will be refined and improved over the coming days.}
 
 \end{document}

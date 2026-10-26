@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.17.0 (TeX Live 2023/Debian)  (format=lualatex 2026.3.24)  23 OCT 2026 12:46
+This is LuaHBTeX, Version 1.17.0 (TeX Live 2023/Debian)  (format=lualatex 2026.3.24)  26 OCT 2026 15:14
  restricted system commands enabled.
  file:line:error style messages enabled.
 **/home/alexandre/git/VeraGrid_TenSyGrid/hackathon/hackathon
@@ -1078,11 +1078,21 @@ Package microtype Info: Loading generic protrusion settings for font family
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 <./config/tglogo.pdf><./config/UPC-logo.pdf>] [2] [3]
-Overfull \hbox (16.04546pt too wide) in paragraph at lines 248--249
+Overfull \hbox (16.04546pt too wide) in paragraph at lines 247--248
 []\TU/lmtt/m/n/10.95 benchmark_grid.veragrid\TU/Raleway(0)/m/n/10.95 : Bench-mark grid with syn-chronous gen-er-a-tors and grid-following/grid-
  []
 
-[4] [5] [6] (./hackathon.aux)
+[4]
+Underfull \hbox (badness 10000) in paragraph at lines 278--280
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 285--287
+
+ []
+
+[5] [6] (./hackathon.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1096,15 +1106,15 @@ Here is how much of LuaTeX's memory you used:
  125240,1977958 words of node,token memory allocated
  1428 words of node memory still in use:
    31 hlist, 2 vlist, 14 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 1 margin_kern, 3 glyph, 101 attribute, 61 glue_spec, 88 attribute_list, 2 write, 24 pdf_literal, 24 pdf_colorstack nodes
-   avail lists: 1:2,2:2158,3:648,4:235,5:1843,6:67,7:10646,8:65,9:555,10:15,11:1008
+   avail lists: 1:1,2:2158,3:648,4:235,5:1849,6:67,7:10691,8:59,9:571,10:15,11:1011
  55900 multiletter control sequences out of 65536+600000
  100 fonts using 9273327 bytes
  91i,14n,95p,1050b,898s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/opentype/public/lm/lmmono10-regular.otf><./fonts/Raleway-Italic.ttf><./fonts/Raleway-Regular.ttf><./fonts/Raleway-Bold.ttf></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on hackathon.pdf (6 pages, 155156 bytes).
+</usr/share/texmf/fonts/opentype/public/lm/lmmono10-regular.otf><./fonts/Raleway-Italic.ttf><./fonts/Raleway-Regular.ttf><./fonts/Raleway-Bold.ttf></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on hackathon.pdf (6 pages, 163679 bytes).
 
-PDF statistics: 235 PDF objects out of 1000 (max. 8388607)
- 162 compressed objects within 2 object streams
+PDF statistics: 239 PDF objects out of 1000 (max. 8388607)
+ 165 compressed objects within 2 object streams
  25 named destinations out of 1000 (max. 131072)
  328 words of extra memory for PDF output out of 10000 (max. 100000000)
 
