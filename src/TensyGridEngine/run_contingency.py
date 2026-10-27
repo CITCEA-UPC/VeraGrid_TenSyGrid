@@ -38,11 +38,15 @@ def main():
     parser.add_argument('--type', required=True, choices=['generator', 'line', 'transformer'],
                        help='Element type to disconnect')
     parser.add_argument('--element', required=True, help='Element index (e.g., gen_0, line_2, transformer_1)')
-
+    parser.add_argument('--study', default='RMS', type=str.upper, choices=['RMS', 'EMT'],
+                       help='Study type to run')
     args = parser.parse_args()
+    is_emt = args.study == 'EMT'
+    if is_emt:
+        import small_signal_analysis_main_emt as emt_main
 
     try:
-        grid = load_grid(args.grid)
+        grid = emt_main.load_grid(args.grid) if is_emt else load_grid(args.grid)
 
         element_idx = int(args.element.split("_")[1])
 
@@ -62,11 +66,16 @@ def main():
                 raise ValueError(f"Transformer index {element_idx} out of range ({len(trafos)} transformers)")
             trafos[element_idx].active = False
 
-        set_models(grid)
-        results = run_small_signal_analysis(grid)
+        if is_emt:
+            results = emt_main.run_emt_small_signal_analysis(grid)
+            pf_matrix = results["results"].participation_factors
+        else:
+            set_models(grid)
+            results = run_small_signal_analysis(grid)
+            pf_matrix = results["participation_factors"]
 
         eigenvalues = results["eigenvalues"]
-        pf_matrix = results["participation_factors"]
+        min_im = 1.0e-9 if is_emt else 0.1
 
         eigenvalues_list = [
             {"re": float(np.real(ev)), "im": float(np.imag(ev))}
@@ -75,20 +84,24 @@ def main():
 
         problem = results["problem"]
         var_to_device: dict[int, str] = {}
-        for dev, var_list in problem.get_device_vars_dict().items():
-            dev_name = dev.name if hasattr(dev, "name") else type(dev).__name__
-            for var in var_list:
-                var_to_device[var.uid] = dev_name
+        if is_emt:
+            state_vars = list(problem.get_state_vars())
+        else:
+            state_vars = list(problem.state_and_algebraic_vars)
+            for dev, var_list in problem.get_device_vars_dict().items():
+                dev_name = dev.name if hasattr(dev, "name") else type(dev).__name__
+                for var in var_list:
+                    var_to_device[var.uid] = dev_name
 
         state_var_names = [
             str(v.name) if hasattr(v, "name") else f"state_{i}"
-            for i, v in enumerate(problem.state_and_algebraic_vars)
+            for i, v in enumerate(state_vars)
         ]
 
         critical_modes = []
         for i, ev in enumerate(eigenvalues):
             re, im = float(np.real(ev)), float(np.imag(ev))
-            if abs(im) <= 0.1:
+            if abs(im) <= min_im:
                 continue
             damping = float(_damping(re, im))
 
@@ -97,10 +110,10 @@ def main():
                 pf_col = pf_matrix[:, i]
                 for j, var_name in enumerate(state_var_names):
                     if j < len(pf_col):
-                        v = problem.state_and_algebraic_vars[j]
+                        v = state_vars[j]
                         participation.append({
                             "variable": str(var_name),
-                            "device": var_to_device.get(v.uid, ""),
+                            "device": var_to_device.get(getattr(v, "uid", None), ""),
                             "value": float(pf_col[j]),
                         })
 
@@ -119,10 +132,12 @@ def main():
 
         result = {
             "grid_name": args.grid,
+            "study": args.study,
             "stable": results["stable"],
             "margin": results["margin"],
             "n_eigenvalues": len(eigenvalues),
-            "n_state_vars": len(results["problem"].get_x0()),
+            "n_state_vars": (problem.get_states_number() + problem.get_diff_var_number()
+                             if is_emt else len(problem.get_x0())),
             "eigenvalues": eigenvalues_list,
             "critical_modes": critical_modes[:10],
             "grid_info": {

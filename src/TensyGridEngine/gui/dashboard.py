@@ -406,22 +406,18 @@ async def run_contingency(request: ContingencyRequest):
     
     _contingency_info = f"{request.contingency_type}:{request.contingency_element} on {request.grid_filename}"
     
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
-    env["CONTINGENCY_GRID"] = request.grid_filename
-    env["CONTINGENCY_TYPE"] = request.contingency_type
-    env["CONTINGENCY_ELEMENT"] = request.contingency_element
-    env["CONTINGENCY_STUDY"] = request.study_type.upper()
-
     _remove_logs(_contingency_logs)
     _contingency_process, _contingency_logs = _spawn_logged(
         [
             str(VENV_PYTHON),
             str(CONTINGENCY_SCRIPT_PATH),
+            "--grid", request.grid_filename,
+            "--type", request.contingency_type,
+            "--element", request.contingency_element,
+            "--study", request.study_type.upper(),
         ],
         prefix="contingency",
         cwd=TENSYGRID_DIR,
-        env=env,
     )
 
     return {

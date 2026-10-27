@@ -178,6 +178,8 @@ tr:hover { background: rgba(0,133,152,0.03); }
 .badge.yellow { background: rgba(245,158,11,0.12); color: #d97706; }
 .badge.red { background: rgba(239,68,68,0.12); color: #dc2626; }
 .badge.blue { background: rgba(0,133,152,0.12); color: var(--blue); }
+.badge.floquet { background: rgba(139,92,246,0.12); color: #7c3aed; }
+.badge.rms { background: rgba(0,133,152,0.12); color: var(--blue); }
 canvas {
   width: 100%;
   background: var(--bg);
@@ -560,6 +562,7 @@ canvas {
             </div>
             <div style="text-align:center;margin-top:16px">
               <div id="status-text" class="status-text stable">—</div>
+              <div id="study-badge-container" style="margin-top:12px"></div>
             </div>
           </div>
 
@@ -590,6 +593,10 @@ canvas {
               <div class="metric">
                 <div id="elapsed-time" class="metric-value">—</div>
                 <div class="metric-label">Computation Time</div>
+              </div>
+              <div class="metric">
+                <div id="study-type" class="metric-value" style="font-size:20px;line-height:1.6">—</div>
+                <div class="metric-label">Analysis Method</div>
               </div>
             </div>
           </div>
@@ -773,6 +780,18 @@ let eigZoom = { level: 1 };
 let eigZoomFull = { level: 1 };
 let dampingZoom = { level: 1 };
 
+function studyLabel(study) {
+  return String(study || '').toUpperCase() === 'EMT' ? 'Floquet' : 'RMS';
+}
+
+function studyBadgeClass(study) {
+  return String(study || '').toUpperCase() === 'EMT' ? 'floquet' : 'rms';
+}
+
+function studyBadge(study) {
+  return `<span class="badge ${studyBadgeClass(study)}">${studyLabel(study)}</span>`;
+}
+
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -844,6 +863,7 @@ async function loadResults() {
             </div>
           </div>
           <div class="result-actions">
+            ${studyBadge(r.study)}
             ${statusBadge}
             <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteResult('${r.filename}')">Delete</button>
           </div>
@@ -914,7 +934,7 @@ async function runSimulation() {
   btn.disabled = true;
   cancelBtn.style.display = 'inline-flex';
   statusEl.className = 'status-indicator running';
-  statusEl.innerHTML = '<span class="spinner"></span><span>Running simulation...</span>';
+  statusEl.innerHTML = `<span class="spinner"></span><span>Running ${studyLabel(studyType)} simulation...</span>`;
   startSimulationTimer();
   
   document.getElementById('log-card').style.display = 'block';
@@ -973,7 +993,9 @@ async function pollStatus() {
     } else if (status.status === 'completed') {
       stopSimulationTimer();
       statusEl.className = 'status-indicator completed';
-      statusEl.innerHTML = '<span>Completed</span>';
+      const studySelect = document.getElementById('study-select');
+      const studyType = studySelect ? studySelect.value : 'RMS';
+      statusEl.innerHTML = `<span>Completed — ${studyLabel(studyType)}</span>`;
       btn.disabled = false;
       cancelBtn.style.display = 'none';
       
@@ -984,8 +1006,7 @@ async function pollStatus() {
       await loadResults();
       
       const gridName = status.grid;
-      const studySelect = document.getElementById('study-select');
-      const wantedStudy = (studySelect ? studySelect.value : 'RMS') === 'EMT' ? 'EMT' : 'RMS';
+      const wantedStudy = studyType === 'EMT' ? 'EMT' : 'RMS';
       const results = await (await fetch('/api/results')).json();
       const latestResult = results.find(r => r.grid_name === gridName && (r.study || 'RMS') === wantedStudy)
         || results.find(r => r.grid_name === gridName);
@@ -1029,6 +1050,16 @@ function displayResults(data) {
   const statusText = document.getElementById('status-text');
   statusText.textContent = data.status;
   statusText.className = 'status-text ' + data.status.toLowerCase();
+
+  const studyBadgeContainer = document.getElementById('study-badge-container');
+  if (studyBadgeContainer) {
+    studyBadgeContainer.innerHTML = `${studyBadge(data.study)} <span style="font-size:11px;color:var(--muted);margin-left:6px">Analysis Method</span>`;
+  }
+  const studyTypeEl = document.getElementById('study-type');
+  if (studyTypeEl) {
+    studyTypeEl.textContent = studyLabel(data.study);
+    studyTypeEl.style.color = String(data.study || '').toUpperCase() === 'EMT' ? '#7c3aed' : 'var(--blue)';
+  }
   
   document.getElementById('light-green').classList.toggle('active', data.status === 'STABLE');
   document.getElementById('light-yellow').classList.toggle('active', data.status === 'MARGINAL');
