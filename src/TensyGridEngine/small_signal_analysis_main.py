@@ -292,7 +292,7 @@ def plot_results(results: dict, output_path: Path | None = None) -> None:
     ax.set_title(f"RMS Multilinear Small-Signal Eigenvalues, margin={results['margin']:.3e}")
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    fig.savefig(output_path, dpi=200, bbox_inches="tight")
+    #fig.savefig(output_path, dpi=200, bbox_inches="tight")
     print(f"Saved plot: {output_path}")
 
 
