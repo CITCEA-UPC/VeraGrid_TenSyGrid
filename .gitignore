@@ -44,3 +44,5 @@ demo_5_node.json
 .aider*
 .env
 profile.pstat
+
+src/TensyGridEngine/precomputed_builds/*
