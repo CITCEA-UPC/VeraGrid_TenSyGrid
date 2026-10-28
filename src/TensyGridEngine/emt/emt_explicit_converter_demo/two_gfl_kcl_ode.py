@@ -38,17 +38,61 @@ from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_model_problem import EmtModelProblem
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
+from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
+from VeraGridEngine.Simulations.PowerFlow.power_flow_options import PowerFlowOptions
 from VeraGridEngine.Templates.Emt.vsc_gfl_ode import build_gfl_converter_model_ode
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 from VeraGridEngine.enumerations import (
-    DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes,
+    DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes, GeneratorControlMode,
 )
 from TensyGridEngine.emt.emt_explicit_converter_demo.utils.simulation_data import case_dir, save_case_data
 
 
 PHASES = "ABC"
 GRID_OMEGA = 2.0 * np.pi * 50.0
+
+
+def solve_initial_power_flow(source_conductance, line_conductance,
+                             bus_1_shunt_conductance, bus_2_shunt_conductance,
+                             powers):
+    """Solve the same resistive network used by the explicit EMT equations."""
+    grid = gce.MultiCircuit(name="Two-GFL power-flow initialization", Sbase=100.0, fbase=50.0)
+    source = gce.Bus(name="source", Vnom=230.0, is_slack=True)
+    buses = [gce.Bus(name=f"bus {i}", Vnom=230.0) for i in (1, 2)]
+    for bus in (source, *buses):
+        grid.add_bus(bus)
+    grid.add_generator(bus=source, api_obj=gce.Generator(name="source slack", vset=1.0))
+    generators = []
+    for i, (bus, power, shunt_g) in enumerate(zip(
+            buses, powers, (bus_1_shunt_conductance, bus_2_shunt_conductance)), 1):
+        generator = gce.Generator(name=f"GFL {i}", P=power * grid.Sbase, Q=0.0,
+                                  control_mode=GeneratorControlMode.Q, Snom=grid.Sbase)
+        grid.add_generator(bus=bus, api_obj=generator)
+        generators.append(generator)
+        if shunt_g:
+            grid.add_shunt(bus=bus, api_obj=gce.Shunt(
+                name=f"bus {i} conductance", G=shunt_g * grid.Sbase))
+    grid.add_line(gce.Line(name="source conductance", bus_from=source, bus_to=buses[0],
+                           r=1.0 / source_conductance, x=0.0, b=0.0))
+    grid.add_line(gce.Line(name="interbus conductance", bus_from=buses[0], bus_to=buses[1],
+                           r=1.0 / line_conductance, x=0.0, b=0.0))
+    driver = PowerFlowDriver(grid=grid, options=PowerFlowOptions(control_q=False))
+    driver.run()
+    if not driver.results.converged:
+        raise RuntimeError("Two-bus initialization power flow did not converge")
+    voltage = np.asarray(driver.results.voltage, dtype=complex)
+    source_voltage, bus_voltage = voltage[0], voltage[1:3]
+    current = np.asarray([np.conj(complex(power, 0.0) / bus_voltage[i])
+                          for i, power in enumerate(powers)])
+    nodal = np.array([[source_conductance + line_conductance + bus_1_shunt_conductance,
+                       -line_conductance],
+                      [-line_conductance, line_conductance + bus_2_shunt_conductance]])
+    error = nodal @ bus_voltage - np.array([source_conductance * source_voltage + current[0],
+                                             current[1]])
+    if np.max(np.abs(error)) > 1e-6:
+        raise RuntimeError(f"Power flow and EMT KCL disagree: {np.max(np.abs(error)):.3e}")
+    return grid, generators, source_voltage, bus_voltage, current
 
 
 def build_problem(
@@ -69,6 +113,10 @@ def build_problem(
         raise ValueError("Source and line conductances must be positive")
     if bus_1_shunt_conductance < 0 or bus_2_shunt_conductance < 0:
         raise ValueError("Shunt conductances must be nonnegative")
+    operating_powers = (0.05, 0.03)
+    grid, generators, source_phasor, bus_phasors, current_phasors = solve_initial_power_flow(
+        source_conductance, line_conductance, bus_1_shunt_conductance,
+        bus_2_shunt_conductance, operating_powers)
     vf = VarFactory()
     time = vf.add_var("grid_time")
     blocks = []
@@ -92,8 +140,8 @@ def build_problem(
         for converter in (1, 2)
     )
     # KCL, separately for each phase:
-    # [Gsrc + Gline + Gsh1, -Gline          ] [V1] = [Gsrc*Vsrc - I1]
-    # [-Gline,               Gline + Gsh2 ] [V2]   [-I2            ]
+    # [Gsrc + Gline + Gsh1, -Gline          ] [V1] = [Gsrc*Vsrc + I1]
+    # [-Gline,               Gline + Gsh2 ] [V2]   [I2             ]
     nodal_matrix = np.array([
         [source_conductance + line_conductance + bus_1_shunt_conductance,
          -line_conductance],
@@ -103,8 +151,8 @@ def build_problem(
     bus_voltage_expressions = ([], [])
     for phase in range(len(PHASES)):
         current_rhs = (
-            Const(source_conductance) * source_vars[phase] - network_currents[0][phase],
-            -network_currents[1][phase],
+            Const(source_conductance) * source_vars[phase] + network_currents[0][phase],
+            network_currents[1][phase],
         )
         for bus in range(2):
             bus_voltage_expressions[bus].append(
@@ -132,15 +180,41 @@ def build_problem(
                    for state in added_states]
 
     event_dict = {}
-    for block in blocks:
+    for block, power in zip(blocks, operating_powers):
         event_dict.update(block.event_dict)
         for variable in block.in_vars[3:]:
-            event_dict[variable] = Const(0.0)
-    source_initial = [np.sqrt(2.0) * np.sin(shift) for shift in phase_shifts]
-    quadrature_initial = [np.sqrt(2.0) * np.cos(shift) for shift in phase_shifts]
+            event_dict[variable] = Const(power if variable.name.startswith(("P_dc_source", "P_ref"))
+                                         else 0.0)
+    source_initial = [np.sqrt(2.0) * np.imag(source_phasor * np.exp(1j * shift))
+                      for shift in phase_shifts]
+    quadrature_initial = [np.sqrt(2.0) * np.real(source_phasor * np.exp(1j * shift))
+                          for shift in phase_shifts]
     added_init = {state: Const(0.0) for state in added_states}
     added_init.update(zip(source_vars, map(Const, source_initial)))
     added_init.update(zip(source_quadrature, map(Const, quadrature_initial)))
+    for block, bus_voltage, current, power, copies in zip(
+            blocks, bus_phasors, current_phasors, operating_powers, network_currents):
+        angle = np.angle(bus_voltage)
+        peak = np.sqrt(2.0) * abs(bus_voltage)
+        i_q = 2.0 * power / peak
+        i_d = 0.0
+        for phase, physical, copy in zip(range(3), block.state_vars[:3], copies):
+            value = np.sqrt(2.0) * np.imag(current * np.exp(1j * phase_shifts[phase]))
+            block.init_eqs[physical] = Const(value)
+            added_init[copy] = Const(value)
+        for state in block.state_vars:
+            if state.name.startswith("xi_Pac_ctrl"):
+                block.init_eqs[state] = Const(i_q)
+            elif state.name.startswith("xi_Qac_ctrl"):
+                block.init_eqs[state] = Const(i_d)
+            elif state.name.startswith("xi_vd_hat"):
+                block.init_eqs[state] = Const(0.01 * i_d)
+            elif state.name.startswith("xi_vq_hat"):
+                block.init_eqs[state] = Const(0.01 * i_q)
+            elif state.name.startswith("u_cos_"):
+                block.init_eqs[state] = Const(np.cos(angle))
+            elif state.name.startswith("u_sin_"):
+                block.init_eqs[state] = Const(np.sin(angle))
     combined = Block(
         name="two_gfl_kcl_ode",
         state_vars=[state for block in blocks for state in block.state_vars] + added_states,
@@ -166,7 +240,10 @@ def build_problem(
         initialization_method=EmtInitializationMethod.Explicit,
     )
     problem = EmtModelProblem(combined, inputs={}, options=options, glob_time=time)
-    return problem, {"source_vars": source_vars, "network_currents": network_currents,
+    return problem, {"grid": grid, "generators": generators,
+                     "operating_powers": operating_powers,
+                     "bus_phasors": bus_phasors, "source_phasor": source_phasor,
+                     "source_vars": source_vars, "network_currents": network_currents,
                      "voltage": voltages, "blocks": blocks,
                      "source_conductance": source_conductance,
                      "line_conductance": line_conductance,
@@ -186,24 +263,16 @@ def main() -> None:
     import matplotlib.pyplot as plt
     states = problem.get_state_vars()
     S, Phi = problem.build_multilinear_matrices()
-    # This small MultiCircuit owns the devices and events. The physical network
-    # equations above are still the explicitly substituted KCL equations.
-    grid = gce.MultiCircuit(name="Explicit two-GFL event grid", Sbase=100.0, fbase=50.0)
-    generators = []
-    for index in (1, 2):
-        bus = gce.Bus(name=f"bus {index}", Vnom=230.0)
-        grid.add_bus(bus)
-        generator = gce.Generator(name=f"GFL {index}", P=0.0, Snom=100.0)
-        grid.add_generator(bus=bus, api_obj=generator)
-        generators.append(generator)
+    # Reuse the exact grid solved by power flow for the timed events.
+    grid, generators = network["grid"], network["generators"]
     group = EmtEventsGroup(name="two converter setpoint changes")
     grid.add_emt_events_group(group)
     # Converter 1 changes active power; converter 2 changes reactive power.
     # The last event restores converter 1's original active-power reference.
     event_specs = (
-        (0.005, 0, "P_ref", 0.05),
+        (0.005, 0, "P_ref", 0.06),
         (0.010, 1, "Q_ref", 0.03),
-        (0.015, 0, "P_ref", 0.0),
+        (0.015, 0, "P_ref", network["operating_powers"][0]),
     )
     for event_time, converter_index, parameter_name, value in event_specs:
         parameter = next(var for var in network["blocks"][converter_index].in_vars
@@ -248,6 +317,19 @@ def main() -> None:
     )
     source_start = first_network_copy + 6
     source_trace = values[source_start:source_start + 3]
+    # Compare the pre-event currents with the power-flow phasor waveform.
+    pre_event = times < event_specs[0][0] - 0.5 * problem.options.time_step
+    phase_shifts = np.array([0.0, -2.0 * np.pi / 3.0, 2.0 * np.pi / 3.0])
+    expected_currents = [np.sqrt(2.0) * np.imag(
+        phasor * np.exp(1j * (GRID_OMEGA * times[pre_event][None, :]
+                              + phase_shifts[:, None])))
+        for phasor in (np.conj(network["operating_powers"][0] / network["bus_phasors"][0]),
+                       np.conj(network["operating_powers"][1] / network["bus_phasors"][1]))]
+    pre_event_current_error = max(np.max(np.abs(current_1[:, pre_event] - expected_currents[0])),
+                                  np.max(np.abs(current_2[:, pre_event] - expected_currents[1])))
+    if pre_event_current_error > 2e-4:
+        raise RuntimeError(f"Two-bus initial operating point drifted: "
+                           f"pre-event current error={pre_event_current_error:.3e} pu")
     # SAVE: include every requested setpoint at each solver output time. The
     # oscillator voltages are also included as inputs, though held as states.
     parameter_trace = np.asarray([
@@ -272,16 +354,16 @@ def main() -> None:
     # Reconstruct voltages from the same KCL system used in build_problem(),
     # using the physical currents to independently check the copy equations.
     current_rhs = np.stack((
-        network["source_conductance"] * source_trace - current_1,
-        -current_2,
+        network["source_conductance"] * source_trace + current_1,
+        current_2,
     ))
     bus_voltage = np.linalg.solve(network["nodal_matrix"], current_rhs.reshape(2, -1))
     bus_voltage = bus_voltage.reshape(current_rhs.shape)
     line_current = network["line_conductance"] * (bus_voltage[0] - bus_voltage[1])
     residual_1 = (network["source_conductance"] * (source_trace - bus_voltage[0])
-                  - current_1 - line_current
+                  + current_1 - line_current
                   - network["bus_1_shunt_conductance"] * bus_voltage[0])
-    residual_2 = (line_current - current_2
+    residual_2 = (line_current + current_2
                   - network["bus_2_shunt_conductance"] * bus_voltage[1])
     residual = np.stack((residual_1, residual_2))
     figure, axes = plt.subplots(5, 1, sharex=True, figsize=(9, 12))
@@ -316,6 +398,7 @@ def main() -> None:
     print(f"saved={output}, initialized={result.initialized}, "
           f"converged={result.converged}, states={len(states)}, algebraics=0, "
           f"S={S.shape}, Phi={Phi.shape}, "
+          f"max_pre_event_current_error={pre_event_current_error:.3e}, "
           f"max_kcl_residual={np.max(np.abs(residual)):.3e}, "
           f"max_copy_error={synchronization_error:.3e}")
 

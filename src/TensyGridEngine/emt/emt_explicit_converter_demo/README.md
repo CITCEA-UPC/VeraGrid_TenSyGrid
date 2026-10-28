@@ -14,6 +14,12 @@ Each uses VeraGrid's native `.simulate()` method.
 | `two_gfl_kcl_ode.py` | Two GFL converters on a two-bus resistive network; KCL is substituted into the ODE. |
 | `ieee9_full_explicit.py` | The complete 103-state charge-reduced IEEE-9 ODE with dynamic π lines, a grid `EmtEvent` at 0.05 s, and a native 0.2 s simulation. |
 
+The two-bus demo runs a power flow on the source bus and both converter buses
+with nonzero active-power injections. It maps solved voltage and current
+phasors into converter, source, and network-copy initial states, and checks
+pre-event currents against the power-flow sinusoidal waveforms. Its resistive
+network KCL is then substituted into the ODE for time integration.
+
 For example:
 
 ```bash
