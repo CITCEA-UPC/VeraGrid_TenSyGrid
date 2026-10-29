@@ -38,10 +38,11 @@ def main():
     parser.add_argument('--type', required=True, choices=['generator', 'line', 'transformer'],
                        help='Element type to disconnect')
     parser.add_argument('--element', required=True, help='Element index (e.g., gen_0, line_2, transformer_1)')
-    parser.add_argument('--study', default='RMS', type=str.upper, choices=['RMS', 'EMT'],
+    parser.add_argument('--study', default='RMS', type=str.upper, choices=['RMS', 'EMT', 'EMT_FAST'],
                        help='Study type to run')
     args = parser.parse_args()
-    is_emt = args.study == 'EMT'
+    is_emt = args.study in ('EMT', 'EMT_FAST')
+    is_fast = args.study == 'EMT_FAST'
     if is_emt:
         import small_signal_analysis_main_emt as emt_main
 
@@ -67,7 +68,7 @@ def main():
             trafos[element_idx].active = False
 
         if is_emt:
-            results = emt_main.run_emt_small_signal_analysis(grid)
+            results = emt_main.run_emt_small_signal_analysis(grid, fast=is_fast)
             pf_matrix = results["results"].participation_factors
         else:
             set_models(grid)
@@ -133,8 +134,17 @@ def main():
         result = {
             "grid_name": args.grid,
             "study": args.study,
+            "build_type": results.get("build_type") if is_emt else None,
+            "solver": results.get("solver") if is_emt else None,
             "stable": results["stable"],
+            "status": results.get("status"),
             "margin": results["margin"],
+            "margin_definition": results.get("margin_definition", "max_real_part" if is_emt else None),
+            "unstable_threshold": results.get("unstable_threshold"),
+            "period": results.get("period"),
+            "has_zero_eigenvalue": results.get("has_zero_eigenvalue", False) if is_emt else False,
+            "zero_eigenvalues": results.get("zero_eigenvalues", []) if is_emt else [],
+            "warnings": results.get("warnings", []) if is_emt else [],
             "n_eigenvalues": len(eigenvalues),
             "n_state_vars": (problem.get_states_number() + problem.get_diff_var_number()
                              if is_emt else len(problem.get_x0())),
@@ -149,12 +159,15 @@ def main():
             },
         }
 
-        if result["stable"]:
-            result["status"] = "STABLE"
-        elif result["margin"] < 0.001:
+        if result["has_zero_eigenvalue"]:
             result["status"] = "MARGINAL"
-        else:
-            result["status"] = "UNSTABLE"
+        elif result["status"] not in ("STABLE", "MARGINAL", "UNSTABLE"):
+            if result["stable"]:
+                result["status"] = "STABLE"
+            elif result["margin"] < 0.001:
+                result["status"] = "MARGINAL"
+            else:
+                result["status"] = "UNSTABLE"
 
         sys.stdout = _real_stdout
         print(json.dumps(result))

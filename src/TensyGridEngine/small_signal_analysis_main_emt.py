@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import pickle
 import sys
@@ -37,10 +38,23 @@ from TensyGridEngine.emt.emt_ieee9 import attach_emt_models, build_emt_options, 
 DEFAULT_GRID = "IEEE 9 Bus EMT.veragrid"
 N_MODES = 20
 MARGINAL_MULTIPLIER_TOLERANCE = 1.0e-4
+# A structural zero eigenvalue (Floquet multiplier mu = 1) makes the periodic
+# equilibrium non-hyperbolic. In that case Hartman-Grobman linearization cannot
+# certify stability, so the result must always be reported as MARGINAL.
+# The tolerance is expressed on the continuous exponent (1/s) and is well below
+# the slowest physical modes (>= 3e-4 1/s in the IEEE 9 test case).
+ZERO_EIGENVALUE_TOLERANCE = 1.0e-6
 STEPS_PER_PERIOD = 600
 LIFTED_STEPS_PER_PERIOD = 1200
 FORCE_MULTILINEAR_MACHINE = True
 GOVERNOR_K = 40.0
+# Fast path: matrix-free block-Arnoldi (BIRAM) on the same period map. It needs
+# the full 1200-step discretization to reproduce the reference multipliers, but
+# refined Ritz vectors are disabled because they re-apply the operator to the
+# whole Krylov basis and dominate the runtime.
+FAST_STEPS_PER_PERIOD = 1200
+FAST_MAX_KRYLOV_DIM = 160
+FAST_MAX_RESTARTS = 0
 
 
 def load_grid(grid_filename: str = DEFAULT_GRID):
@@ -76,8 +90,13 @@ def _is_lifted_machine(grid) -> bool:
     return False
 
 
-def run_emt_small_signal_analysis(grid):
-    """Run power flow and EMT Floquet small-signal analysis."""
+def run_emt_small_signal_analysis(grid, fast: bool = False):
+    """Run power flow and EMT Floquet small-signal analysis.
+
+    :param grid: Loaded VeraGrid circuit with EMT models.
+    :param fast: Use the matrix-free Hybrid Block-Arnoldi (BIRAM) backend
+        instead of the standard ARPACK Arnoldi backend.
+    """
     if not _has_emt_models(grid):
         raise RuntimeError("The loaded grid does not contain EMT models")
 
@@ -90,7 +109,8 @@ def run_emt_small_signal_analysis(grid):
         )
         lifted_machine = True
 
-    steps_per_period = LIFTED_STEPS_PER_PERIOD if lifted_machine else STEPS_PER_PERIOD
+    steps_per_period = FAST_STEPS_PER_PERIOD if fast else (
+        LIFTED_STEPS_PER_PERIOD if lifted_machine else STEPS_PER_PERIOD)
     period = 1.0 / float(grid.fBase)
 
     power_flow_options = build_power_flow_options()
@@ -108,11 +128,13 @@ def run_emt_small_signal_analysis(grid):
     small_signal_options = SmallSignalStabilityEmtOptions(
         k=N_MODES,
         target_period=period,
-        max_krylov_dim=max(30, 2 * N_MODES),
+        max_krylov_dim=(FAST_MAX_KRYLOV_DIM if fast else max(30, 2 * N_MODES)),
         ss_assessment_time=period,
         verbose=0,
-        max_restarts=0,
-        build_type=SmallSignalEmtBuildTypes.Arnoldi,
+        max_restarts=(FAST_MAX_RESTARTS if fast else 0),
+        use_refined_ritz=(not fast),
+        build_type=(SmallSignalEmtBuildTypes.HybridArnoldi
+                    if fast else SmallSignalEmtBuildTypes.Arnoldi),
         consistent_dae_tangent=lifted_machine,
     )
     driver = SmallSignalStabilityEmtDriver(
@@ -132,15 +154,63 @@ def run_emt_small_signal_analysis(grid):
     multipliers = np.asarray(driver.results.multipliers)
     finite_mu = multipliers[np.isfinite(multipliers)]
     rho = float(np.max(np.abs(finite_mu))) if len(finite_mu) else float("nan")
-    margin = float(rho - 1.0) if len(finite_mu) else float("nan")
-    stable = bool(rho <= 1.0 + MARGINAL_MULTIPLIER_TOLERANCE) if len(finite_mu) else False
     unstable_threshold = float(np.log(1.0 + MARGINAL_MULTIPLIER_TOLERANCE) / period)
+
+    # Stability margin in 1/s: the real part of the dominant continuous
+    # eigenvalue. This is coherent with the eigenvalue axis and with
+    # ``unstable_threshold`` (also 1/s), unlike the old dimensionless rho - 1.
+    margin = float(np.max(np.real(finite))) if len(finite) else float("nan")
+    stable = bool(margin <= unstable_threshold) if len(finite) else False
+
+    zero_mask = np.abs(finite) <= ZERO_EIGENVALUE_TOLERANCE
+    has_zero_eigenvalue = bool(np.any(zero_mask))
+    zero_eigenvalues = [
+        {
+            "re": float(np.real(ev)),
+            "im": float(np.imag(ev)),
+            "mu_re": float(np.exp(np.real(ev) * period)),
+            "mu_im": float(np.exp(np.real(ev) * period) * np.sin(np.imag(ev) * period)),
+        }
+        for ev in finite[zero_mask]
+    ]
+
+    warnings: list[str] = []
+    if has_zero_eigenvalue:
+        status = "MARGINAL"
+        warnings.append(
+            "Zero eigenvalue detected (Floquet multiplier |mu| ≈ 1). The "
+            "equilibrium is non-hyperbolic, so the Hartman-Grobman theorem may "
+            "not apply and the linear stability assessment is indeterminate."
+        )
+    elif stable:
+        status = "STABLE"
+    else:
+        status = "UNSTABLE"
+        warnings.append(
+            f"The dominant eigenvalue has a positive real part "
+            f"({margin:.3e} 1/s), above the stability threshold "
+            f"({unstable_threshold:.3e} 1/s)."
+        )
+
+    dominant_index = int(np.argmax(np.real(finite))) if len(finite) else -1
+    dominant_eigenvalue = (
+        {
+            "re": float(np.real(finite[dominant_index])),
+            "im": float(np.imag(finite[dominant_index])),
+            "mu_abs": float(np.exp(np.real(finite[dominant_index]) * period)),
+        }
+        if dominant_index >= 0 else None
+    )
 
     print(f"EMT machine={'multilinear' if lifted_machine else 'original'} "
           f"steps_per_period={steps_per_period}")
+    print(f"EMT solver={'Hybrid Block-Arnoldi (matrix-free)' if fast else 'Arnoldi (ARPACK)'}")
     print(f"EMT states={problem.get_states_number()} diff_vars={problem.get_diff_var_number()}")
-    print(f"Finite eigenvalues={len(finite)} rho={rho:.9f} "
-          f"stable={stable} margin={margin:.6e}")
+    print(f"Finite eigenvalues={len(finite)} rho={rho:.9f} status={status} "
+          f"margin={margin:.6e} 1/s threshold={unstable_threshold:.6e} 1/s")
+    if has_zero_eigenvalue:
+        print(f"Zero eigenvalue(s)={len(zero_eigenvalues)} -> MARGINAL "
+              f"(Hartman-Grobman may not apply)")
 
     return {
         "problem": problem,
@@ -148,9 +218,19 @@ def run_emt_small_signal_analysis(grid):
         "results": driver.results,
         "eigenvalues": finite,
         "stable": stable,
+        "status": status,
         "margin": margin,
+        "margin_definition": "max_real_part",
+        "rho": rho,
+        "dominant_eigenvalue": dominant_eigenvalue,
+        "has_zero_eigenvalue": has_zero_eigenvalue,
+        "zero_eigenvalues": zero_eigenvalues,
+        "warnings": warnings,
         "unstable_threshold": unstable_threshold,
         "period": period,
+        "fast": fast,
+        "build_type": str(small_signal_options.build_type),
+        "solver": "Hybrid Block-Arnoldi (matrix-free)" if fast else "Arnoldi (ARPACK)",
     }
 
 
@@ -168,7 +248,8 @@ def plot_results(results: dict, output_path: Path | None = None) -> None:
     ax.axhline(0.0, color="k", linewidth=0.7, alpha=0.4)
     ax.set_xlabel("Real Part [1/s]")
     ax.set_ylabel("Imaginary Part [rad/s]")
-    ax.set_title(f"EMT Floquet Eigenvalues, rho-1={results['margin']:.3e}")
+    ax.set_title(f"EMT Floquet Eigenvalues ({results.get('solver', 'Arnoldi')}), "
+                 f"max Re={results['margin']:.3e} 1/s (rho={results.get('rho', float('nan')):.6f})")
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
     fig.savefig(output_path, dpi=200, bbox_inches="tight")
@@ -194,6 +275,7 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
     pf_results = results["pf_results"]
     emt_results = results["results"]
     problem = results["problem"]
+    fast = bool(results.get("fast", False))
 
     eigenvalues_list = [
         {"re": float(np.real(ev)), "im": float(np.imag(ev))}
@@ -265,10 +347,18 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
 
     output = {
         "grid_name": grid_filename,
-        "study": "EMT",
+        "study": "EMT_FAST" if fast else "EMT",
+        "build_type": results.get("build_type", "Arnoldi"),
+        "solver": results.get("solver", "Arnoldi (ARPACK)"),
         "stable": results["stable"],
+        "status": results["status"],
         "margin": results["margin"],
-        "margin_definition": "rho_minus_one",
+        "margin_definition": results.get("margin_definition", "max_real_part"),
+        "rho": results.get("rho"),
+        "dominant_eigenvalue": results.get("dominant_eigenvalue"),
+        "has_zero_eigenvalue": results.get("has_zero_eigenvalue", False),
+        "zero_eigenvalues": results.get("zero_eigenvalues", []),
+        "warnings": results.get("warnings", []),
         "unstable_threshold": results["unstable_threshold"],
         "period": results["period"],
         "matches": 0,
@@ -284,7 +374,8 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
 
     output_dir = Path("precomputed_builds")
     output_dir.mkdir(exist_ok=True)
-    output_path = output_dir / f"{Path(grid_filename).stem}_emt_{op_hash[:6]}.tensygrid"
+    study_tag = "emt_fast" if fast else "emt"
+    output_path = output_dir / f"{Path(grid_filename).stem}_{study_tag}_{op_hash[:6]}.tensygrid"
     with open(output_path, "wb") as f:
         pickle.dump(output, f)
 
@@ -292,12 +383,39 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the EMT Floquet small-signal analysis."
+    )
+    parser.add_argument(
+        "grid_filename",
+        nargs="?",
+        default=DEFAULT_GRID,
+        help="Grid file name inside Grids_and_profiles/grids.",
+    )
+    parser.add_argument(
+        "--fast",
+        action="store_true",
+        help="Use the faster matrix-free Hybrid Block-Arnoldi (BIRAM) backend.",
+    )
+    parser.add_argument(
+        "--build-type",
+        dest="build_type",
+        choices=("arnoldi", "hybrid"),
+        default=None,
+        help="Explicit Floquet eigensolver backend (overrides --fast).",
+    )
+    args = parser.parse_args()
+
+    if args.build_type is None:
+        fast = bool(args.fast)
+    else:
+        fast = args.build_type == "hybrid"
+
     t_start = time.perf_counter()
-    grid_filename = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_GRID
-    grid = load_grid(grid_filename)
-    results = run_emt_small_signal_analysis(grid)
+    grid = load_grid(args.grid_filename)
+    results = run_emt_small_signal_analysis(grid, fast=fast)
     plot_results(results)
-    save_results(results, grid, grid_filename, time.perf_counter() - t_start)
+    save_results(results, grid, args.grid_filename, time.perf_counter() - t_start)
 
 
 if __name__ == "__main__":

@@ -28,6 +28,9 @@ SCRIPT_PATH = TENSYGRID_DIR / "small_signal_analysis_main.py"
 EMT_SCRIPT_PATH = TENSYGRID_DIR / "small_signal_analysis_main_emt.py"
 CONTINGENCY_SCRIPT_PATH = TENSYGRID_DIR / "run_contingency.py"
 
+EMT_STUDY_TYPES = ("EMT", "EMT_FAST")
+STUDY_TYPES = ("RMS",) + EMT_STUDY_TYPES
+
 
 def _find_venv_python() -> Path:
     """Find the venv Python executable, searching several candidate locations.
@@ -160,7 +163,86 @@ def _infer_study_type(data: dict, filename: str) -> str:
     study = data.get("study")
     if study:
         return str(study).upper()
-    return "EMT" if "_emt_" in Path(filename).stem else "RMS"
+
+    stem = Path(filename).stem
+    if "_emt_fast_" in stem:
+        return "EMT_FAST"
+    if "_emt_" in stem:
+        return "EMT"
+    return "RMS"
+
+
+# Continuous-exponent tolerance (1/s) used to flag a structural zero eigenvalue
+# (Floquet multiplier mu = 1) in older result files.
+ZERO_EIGENVALUE_TOLERANCE = 1.0e-6
+
+
+def _assess_result(data: dict, study: str) -> dict:
+    """Normalise margin, stability status and zero-eigenvalue metadata.
+
+    New EMT results already carry ``status``, ``margin_definition`` and
+    ``has_zero_eigenvalue``. This helper keeps older files (dimensionless
+    ``rho - 1`` margin, no status) coherent with the dominant eigenvalue and
+    makes sure a zero eigenvalue always forces the MARGINAL status.
+    """
+    is_emt = study in EMT_STUDY_TYPES
+    eigen_pairs = [
+        (float(ev.get("re", 0.0)), float(ev.get("im", 0.0)))
+        for ev in (data.get("eigenvalues") or [])
+        if isinstance(ev, dict)
+    ]
+
+    margin = data.get("margin")
+    margin_definition = data.get("margin_definition")
+
+    # Legacy EMT files stored the dimensionless rho - 1. Recompute the margin
+    # as the dominant continuous eigenvalue (1/s), matching the eigen plot and
+    # the unstable threshold axis.
+    if is_emt and eigen_pairs and margin_definition != "max_real_part":
+        margin = max(re for re, _ in eigen_pairs)
+        margin_definition = "max_real_part"
+
+    stable = data.get("stable")
+    if stable is None and eigen_pairs:
+        if is_emt and data.get("unstable_threshold") is not None:
+            stable = max(re for re, _ in eigen_pairs) <= float(data["unstable_threshold"])
+        else:
+            stable = max(re for re, _ in eigen_pairs) <= 0.0
+
+    has_zero = data.get("has_zero_eigenvalue")
+    if has_zero is None:
+        has_zero = bool(is_emt and any(
+            abs(complex(re, im)) <= ZERO_EIGENVALUE_TOLERANCE
+            for re, im in eigen_pairs
+        ))
+
+    warnings = list(data.get("warnings") or [])
+    if is_emt and has_zero and not warnings:
+        warnings.append(
+            "Zero eigenvalue detected (Floquet multiplier |mu| ≈ 1). The "
+            "equilibrium is non-hyperbolic, so the Hartman-Grobman theorem may "
+            "not apply and the linear stability assessment is indeterminate."
+        )
+
+    status = data.get("status")
+    if is_emt and has_zero:
+        status = "MARGINAL"
+    elif status not in ("STABLE", "MARGINAL", "UNSTABLE"):
+        if stable:
+            status = "STABLE"
+        elif margin is not None and float(margin) < 0.001:
+            status = "MARGINAL"
+        else:
+            status = "UNSTABLE"
+
+    return {
+        "stable": bool(stable) if stable is not None else False,
+        "status": status,
+        "margin": margin,
+        "margin_definition": margin_definition,
+        "has_zero_eigenvalue": bool(has_zero),
+        "warnings": warnings,
+    }
 
 
 def get_available_grids() -> list[dict]:
@@ -188,12 +270,19 @@ def get_precomputed_results() -> list[dict]:
             try:
                 with open(f, 'rb') as fp:
                     data = pickle.load(fp)
+                study = _infer_study_type(data, f.name)
+                assessment = _assess_result(data, study)
                 results.append({
                     'filename': f.name,
                     'grid_name': data.get('grid_name', f.stem),
-                    'study': _infer_study_type(data, f.name),
-                    'stable': data.get('stable'),
-                    'margin': data.get('margin'),
+                    'study': study,
+                    'build_type': data.get('build_type'),
+                    'solver': data.get('solver'),
+                    'stable': assessment['stable'],
+                    'status': assessment['status'],
+                    'has_zero_eigenvalue': assessment['has_zero_eigenvalue'],
+                    'margin': assessment['margin'],
+                    'margin_definition': assessment['margin_definition'],
                     'n_eigenvalues': data.get('n_eigenvalues', 0),
                     'modified': f.stat().st_mtime,
                     'elapsed_seconds': data.get('elapsed_seconds'),
@@ -218,15 +307,25 @@ def load_result(filename: str) -> dict:
     try:
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
-        
+
+        study = _infer_study_type(data, filename)
+        assessment = _assess_result(data, study)
         result = {
             'grid_name': data.get('grid_name', 'Unknown'),
-            'study': _infer_study_type(data, filename),
-            'stable': data.get('stable', False),
-            'margin': data.get('margin', 0.0),
-            'margin_definition': data.get('margin_definition'),
+            'study': study,
+            'build_type': data.get('build_type'),
+            'solver': data.get('solver'),
+            'stable': assessment['stable'],
+            'status': assessment['status'],
+            'margin': assessment['margin'],
+            'margin_definition': assessment['margin_definition'],
             'unstable_threshold': data.get('unstable_threshold'),
             'period': data.get('period'),
+            'rho': data.get('rho'),
+            'dominant_eigenvalue': data.get('dominant_eigenvalue'),
+            'has_zero_eigenvalue': assessment['has_zero_eigenvalue'],
+            'zero_eigenvalues': data.get('zero_eigenvalues', []),
+            'warnings': assessment['warnings'],
             'n_eigenvalues': data.get('n_eigenvalues', 0),
             'n_state_vars': data.get('n_state_vars', 0),
             'eigenvalues': data.get('eigenvalues', []),
@@ -238,14 +337,7 @@ def load_result(filename: str) -> dict:
             'timestamp': filepath.stat().st_mtime,
             'elapsed_seconds': data.get('elapsed_seconds'),
         }
-        
-        if result['stable']:
-            result['status'] = 'STABLE'
-        elif result['margin'] < 0.001:
-            result['status'] = 'MARGINAL'
-        else:
-            result['status'] = 'UNSTABLE'
-        
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading result: {str(e)}")
@@ -285,14 +377,23 @@ async def run_simulation(request: RunRequest):
     grid_path = GRIDS_DIR / request.grid_filename
     if not grid_path.exists():
         raise HTTPException(status_code=404, detail="Grid file not found")
-    
+
+    study_type = request.study_type.upper()
+    if study_type not in STUDY_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unknown study type: {request.study_type}")
+
     _current_grid = request.grid_filename
 
-    script_path = EMT_SCRIPT_PATH if request.study_type.upper() == "EMT" else SCRIPT_PATH
+    if study_type in EMT_STUDY_TYPES:
+        script_path = EMT_SCRIPT_PATH
+        extra_args = ["--fast"] if study_type == "EMT_FAST" else []
+    else:
+        script_path = SCRIPT_PATH
+        extra_args = []
 
     _remove_logs(_running_logs)
     _running_process, _running_logs = _spawn_logged(
-        [str(VENV_PYTHON), str(script_path), request.grid_filename],
+        [str(VENV_PYTHON), str(script_path), request.grid_filename, *extra_args],
         prefix="simulation",
         cwd=TENSYGRID_DIR,
     )
@@ -300,6 +401,7 @@ async def run_simulation(request: RunRequest):
     return {
         "status": "started",
         "grid": request.grid_filename,
+        "study": study_type,
         "pid": _running_process.pid,
     }
 
@@ -403,9 +505,13 @@ async def run_contingency(request: ContingencyRequest):
     grid_path = GRIDS_DIR / request.grid_filename
     if not grid_path.exists():
         raise HTTPException(status_code=404, detail="Grid file not found")
-    
+
+    study_type = request.study_type.upper()
+    if study_type not in STUDY_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unknown study type: {request.study_type}")
+
     _contingency_info = f"{request.contingency_type}:{request.contingency_element} on {request.grid_filename}"
-    
+
     _remove_logs(_contingency_logs)
     _contingency_process, _contingency_logs = _spawn_logged(
         [
@@ -414,7 +520,7 @@ async def run_contingency(request: ContingencyRequest):
             "--grid", request.grid_filename,
             "--type", request.contingency_type,
             "--element", request.contingency_element,
-            "--study", request.study_type.upper(),
+            "--study", study_type,
         ],
         prefix="contingency",
         cwd=TENSYGRID_DIR,
