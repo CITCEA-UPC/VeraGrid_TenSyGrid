@@ -56,9 +56,21 @@ choices before power flow, then applies controller values before building the
 final RMS problem and running SSA. It returns active losses,
 the largest eigenvalue real part, minimum damping for modes above 0.05 Hz,
 voltage violations outside 0.95–1.05 p.u., thermal violations, and a stability
-flag using the brief's `-1e-5` real-part and 5% damping thresholds. These are
-single-snapshot metrics; scenario robustness and code-quality scores require
-separate evaluation.
+flag using the brief's `-1e-5` real-part and 5% damping thresholds. It also
+runs a three-second RMS simulation with a 2% increase in the first load at
+0.2 seconds, reporting peak generator frequency and bus voltage deviations
+from their initial values. A failed transient marks the tuning unstable.
+The peak deviations measure excursion size, not settled-value overshoot.
+Scenario robustness and code-quality scores require separate evaluation.
+
+Run `python -m hackaton_files.control_response_experiment` with `PYTHONPATH=src:.`
+to compare baseline, increased `Kp`, and increased `Ki` on the Kundur grid.
+In the current case, raising `Kp` from 0 to 20 reduces minimum damping from
+5.43% to 4.23% and increases peak frequency deviation from 0.0246 to
+0.0292 Hz. Raising `Ki` to 5 reduces that three-second peak to 0.0235 Hz,
+but introduces a positive-real-part SSA mode. Thus these settings do not
+support the hypothesis that stronger gains improve stability at the cost of
+larger excursions.
 
 Participants can subclass `RmsTuner`, implement `tune(tunable_grid)`, and call
 `test_tuning(my_tuner, grid)` to run that single-grid evaluation themselves.
@@ -93,6 +105,38 @@ metrics = test_tuning(MyTuner(), case.grid, case.evaluator)
 These cases share one underlying network. Hidden seeds and varied operating
 conditions reduce the usefulness of memorizing one answer, but do not prevent
 all strategies from transferring between similar cases.
+
+## Additional verified RMS grids
+
+`ADDITIONAL_STABLE_GRID_FILES` contains IEEE9, IEEE30, and IEEE39 snapshots,
+including two IEEE9 inverter variants.
+`build_additional_grid()` regenerates them from the repository's source grids;
+`verify_additional_grid()` requires converged power flow, stable physical SSA
+modes, no voltage violations, and no thermal violations. The saved `.veragrid`
+files were reloaded and verified after serialization.
+
+The IEEE9 cases have three generator step-up branches represented by actual
+transformer devices, plus line and constant-power load RMS models. The
+`ieee9_rms_gfl.veragrid` variant replaces one synchronous generator model
+with the dynamic PVD1 grid-following inverter model. The
+`ieee9_rms_mixed_ibr.veragrid` variant also replaces a second generator
+model with an ideal grid-forming voltage source. This source holds terminal
+voltage and angle but has no converter inner-loop states; it is an idealized
+grid-forming limit, not a detailed GFM converter.
+IEEE30 has six generator RMS models and 21 loads; its demand and generation
+are at 90% of the source case to avoid an overloaded branch. IEEE39 has ten
+generator RMS models and 21 loads; its demand and generation are at 95% and
+generator voltage targets have been adjusted to meet the voltage limit.
+The synchronous model construction uses the same `genrow1` generator family
+as Kundur, with fixed `D=100` on IEEE30 and IEEE39. The IEEE9 inverter cases
+passed power flow, SSA, and a load-step transient after saving and reloading.
+The existing detailed STAMP GFOR/GFOL example was assessed but remains
+unstable in this evaluator, so it is not in the stable pool.
+
+Use `additional_grid_evaluator()` for these grids. It supplies controller,
+PVD1 droop and response-time, and dispatch tuning without Kundur-specific line
+corridors or shunt locations. `ALL_STABLE_GRID_FILES` lists all five saved IEEE
+cases alongside the Kundur pool.
 
 ## Unstable control case
 
