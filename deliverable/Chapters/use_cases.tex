@@ -57,7 +57,7 @@ Figure~\ref{fig:implemented_uc_workflow} shows how the five implemented use case
     \draw[flow] (uc2) -- (uc3);
     \draw[flow] (uc1.south) |- (uc4.west);
     \draw[flow] (uc2.south) -- (uc4.north);
-    \draw[flow] (uc3.south) |- (uc5.north);
+    \draw[flow] (uc3.south) -- (uc5.north);
     \draw[flow] (uc4) -- (uc5);
   \end{tikzpicture}
   \caption[Workflow of the implemented use cases.]{Workflow of UC-01 to UC-05. Yellow boxes directly use the iMTI calculation engine; the green box is a complementary power-flow assessment.}
@@ -80,10 +80,10 @@ Figure~\ref{fig:proposed_uc_map} groups the proposed cases by the decision that 
     \node[group, below right=3mm and 5mm of base] (actions) {\textbf{Diagnosis and mitigation}\\UC-07 ranks participating devices.\\UC-09 ranks critical network elements.\\UC-10 separates controller retuning from new-device placement.};
     \node[group, right=5mm of scenarios] (nonlinear) {\textbf{Advanced nonlinear security}\\UC-13 resolves non-hyperbolic local behaviour.\\UC-14 estimates the region of attraction and disturbance margins.};
     \node[report, below=of nonlinear] (report) {\textbf{UC-12}\\Document and report results from the selected analyses};
-    \draw[flow] (base) -- (scenarios.west);
-    \draw[flow] (base) -- (actions.west);
+    \draw[flow] (base) |- (scenarios.west);
+    \draw[flow] (base) |- (actions.west);
     \draw[flow] (scenarios) -- (nonlinear);
-    \draw[flow] (actions.east) -- (report.west);
+    \draw[flow] (actions.east) -| (report.south);
     \draw[flow] (nonlinear) -- (report);
   \end{tikzpicture}
   \caption[Decision map of the proposed use cases.]{Decision-oriented map of UC-06 to UC-14, showing how the proposed analyses extend the implemented Stability Monitor and feed the reporting workflow.}

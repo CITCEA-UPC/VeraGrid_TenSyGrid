@@ -11,16 +11,16 @@ The identification of use cases for the \textit{TenSyGrid} Toolbox follows a use
 
 Each use case is described following a structured template that includes \textbf{identifier} and \textbf{name}, \textbf{actor}, \textbf{objective}, \textbf{preconditions}, \textbf{theoretical basis}, \textbf{possible bottlenecks}, \textbf{main flow}, \textbf{GUI interaction}, and \textbf{expected result}.
 
-It is important to note that all use cases are designed to follow Shneiderman's approach \cite{shneiderman1996eyes} and support a progressive analysis workflow. In practical terms, the user can:
+The toolbox interface follows Shneiderman's visual-information-seeking approach: \textit{overview first, zoom and filter, then details on demand}~\cite{shneiderman1996eyes}. In practical terms, the user can:
 
 \begin{enumerate}
-  \item Obtain an overview of the system status.
-  \item Zoom into critical modes and their physical origin.
-  \item Filter and sort the eigenvalue spectrum to focus on the most relevant dynamics.
-  \item Derive actionable recommendations for control design or contingency mitigation.
+  \item obtain an overview of the system status and its principal stability indicators;
+  \item zoom into critical modes and regions of the eigenvalue spectrum;
+  \item filter and sort the results to focus on the most relevant dynamics; and
+  \item request details on demand, including modal metrics, participation factors, and the physical devices associated with each mode.
 \end{enumerate}
 
-This structure ensures that the toolbox supports both rapid operational screening and deeper technical diagnosis when required broadening the information about the grid getting into each of the proposed use cases.
+This interaction sequence supports both rapid operational screening and deeper technical diagnosis. Once the relevant modes and devices have been identified, the resulting evidence can be used in subsequent use cases to formulate recommendations for controller retuning, contingency mitigation, or further studies.
 
 \section{Tool scheme and structure}
 
@@ -47,8 +47,8 @@ This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_sche
 While this initial hybrid layout enabled rapid early prototyping by leveraging existing research codebases, detailed evaluation during the architectural definition phase showed that maintaining multiple distinct software packages and heterogeneous runtimes introduced significant operational and maintenance complexity. To establish a production-grade, highly cohesive toolbox for Transmission System Operators (TSOs), the consortium identified substantial advantages in consolidating the entire calculation pipeline into a unified, native Python framework centered around VeraGrid:
 \begin{itemize}[before=\leavevmode, leftmargin=*]
   \item \textbf{Single-Stack Architectural Simplicity and Cohesion:} Interfacing separate runtimes across language boundaries required dedicated inter-process communication (IPC) bridges, serialization adapters, and dual-environment management. Consolidating the core multilinear routines natively within VeraGrid's architecture removes multi-package glue code, eliminates data marshaling overhead, and ensures unified memory structures directly shared between the power flow, descriptor assembly, and eigenvalue solvers.
-  \item \textbf{Direct VeraGrid Integration and Codebase Maintainability:} Embedding the multilinear formulation directly into the \texttt{VeraGridEngine} ecosystem leverages VeraGrid's native high-performance data model and compiled extensions (C++/Python). This streamlines continuous integration, simplifies testing, and provides a single, uniform API for developers, researchers, and operators alike.
-  \item \textbf{Turnkey Deployment in HPC and Cloud Environments:} Assessing small-signal stability in modern converter-dominated grids demands computationally intensive batch runs, including massive $N-1$ contingency evaluations, broad parameter sweeps, and Monte Carlo-based renewable scenario assessments. A unified Python stack facilitates turnkey containerization (e.g., Docker, Apptainer/Singularity) and frictionless deployment across distributed Linux clusters and cloud environments, avoiding the configuration complexity of multi-platform execution environments on worker nodes.
+  \item \textbf{Direct VeraGrid Integration and Codebase Maintainability:} Embedding the multilinear formulation directly into the \texttt{VeraGridEngine} ecosystem leverages VeraGrid's native high-performance data model and compiled extensions (Python). This streamlines continuous integration, simplifies testing, and provides a single, uniform API for developers, researchers, and operators alike.
+  \item \textbf{Automated Batch Studies:} A unified Python and VeraGrid environment supports repeated studies, such as $N-1$ contingency evaluations and parameter sweeps, through a common codebase. This reduces configuration and maintenance effort across the analysis workflow.
   \item \textbf{Open-Source Accessibility and Reproducibility:} A primary pillar of the European CETPartnership initiative is the creation of openly accessible, transparent, and easily reproducible tools for the broader power systems community. Delivering a fully open-source Python codebase enables TSOs, research institutions, and industry stakeholders to readily inspect, customize, and extend the algorithms without prerequisite software barriers.
   \item \textbf{Seamless Web and Modern Service Coupling:} Python's extensive ecosystem natively bridges scientific computing libraries (NumPy, SciPy, optimized sparse solvers) with modern asynchronous web frameworks (such as FastAPI). This architecture enables high-throughput data streaming to the operator-facing browser interface with minimal overhead.
 \end{itemize}
@@ -128,7 +128,7 @@ Following this architectural consolidation, the multi-branch concept of Figure~\
 The modular decoupling illustrated in Figure~\ref{fig:tool_pipeline} ensures clear separation of concerns across the pipeline:
 \begin{enumerate}[before=\leavevmode, leftmargin=*]
   \item \textbf{Ingestion and standardisation:} Downstream computational modules remain completely agnostic to the proprietary origins of the network models, relying exclusively on standard internal interfaces.
-  \item \textbf{High-performance core computing:} Heavy numerical operations (power flow, descriptor matrix assembly, generalized eigenvalue solves, and batch contingency runs) run natively in optimized C++/Python libraries on dedicated servers or HPC compute nodes.
+  \item \textbf{High-performance core computing:} Heavy numerical operations (power flow, descriptor matrix assembly, generalized eigenvalue solves, and batch contingency runs) run natively in optimized Python libraries on dedicated servers or HPC compute nodes.
   \item \textbf{Browser-based operator access:} Transmission operators access results through an intuitive, lightweight web browser interface without needing local numerical software or specialized compiler toolchains installed on control-room workstations.
 \end{enumerate}
 
