@@ -179,6 +179,7 @@ tr:hover { background: rgba(0,133,152,0.03); }
 .badge.red { background: rgba(239,68,68,0.12); color: #dc2626; }
 .badge.blue { background: rgba(0,133,152,0.12); color: var(--blue); }
 .badge.floquet { background: rgba(139,92,246,0.12); color: #7c3aed; }
+.badge.floquet-fast { background: rgba(236,72,153,0.12); color: #db2777; }
 .badge.rms { background: rgba(0,133,152,0.12); color: var(--blue); }
 canvas {
   width: 100%;
@@ -511,6 +512,7 @@ canvas {
           <select id="study-select">
             <option value="RMS">RMS small-signal</option>
             <option value="EMT">EMT Floquet</option>
+            <option value="EMT_FAST">EMT Floquet (fast · matrix-free Arnoldi)</option>
           </select>
           <button id="run-btn" class="btn btn-primary" onclick="runSimulation()">Run Simulation</button>
           <button id="cancel-btn" class="btn btn-danger" onclick="cancelSimulation()" style="display:none">Stop</button>
@@ -576,7 +578,7 @@ canvas {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <div class="metric">
                 <div id="margin-value" class="metric-value" style="color:#10b981">—</div>
-                <div class="metric-label">Stability Margin</div>
+                <div id="margin-label" class="metric-label">Stability Margin</div>
               </div>
               <div class="metric">
                 <div id="n-critical" class="metric-value" style="color:var(--green)">—</div>
@@ -780,12 +782,29 @@ let eigZoom = { level: 1 };
 let eigZoomFull = { level: 1 };
 let dampingZoom = { level: 1 };
 
+function studyKind(study) {
+  const value = String(study || '').toUpperCase();
+  if (value === 'EMT_FAST') return 'EMT_FAST';
+  if (value === 'EMT') return 'EMT';
+  return 'RMS';
+}
+
+function isEmtStudy(study) {
+  return studyKind(study) !== 'RMS';
+}
+
 function studyLabel(study) {
-  return String(study || '').toUpperCase() === 'EMT' ? 'Floquet' : 'RMS';
+  const kind = studyKind(study);
+  if (kind === 'EMT_FAST') return 'Floquet (fast)';
+  if (kind === 'EMT') return 'Floquet';
+  return 'RMS';
 }
 
 function studyBadgeClass(study) {
-  return String(study || '').toUpperCase() === 'EMT' ? 'floquet' : 'rms';
+  const kind = studyKind(study);
+  if (kind === 'EMT_FAST') return 'floquet-fast';
+  if (kind === 'EMT') return 'floquet';
+  return 'rms';
 }
 
 function studyBadge(study) {
@@ -843,9 +862,10 @@ async function loadResults() {
     }
     
     container.innerHTML = results.map(r => {
+      const resultStatus = r.status || (r.stable ? 'STABLE' : (r.margin < 0.001 ? 'MARGINAL' : 'UNSTABLE'));
       const statusBadge = r.error ? '<span class="badge red">ERROR</span>' :
-                         r.stable ? '<span class="badge green">STABLE</span>' :
-                         r.margin < 0.001 ? '<span class="badge yellow">MARGINAL</span>' :
+                         resultStatus === 'STABLE' ? '<span class="badge green">STABLE</span>' :
+                         resultStatus === 'MARGINAL' ? '<span class="badge yellow">MARGINAL</span>' :
                          '<span class="badge red">UNSTABLE</span>';
       const date = new Date(r.modified * 1000).toLocaleString();
       const elapsed = r.elapsed_seconds != null 
@@ -1006,9 +1026,9 @@ async function pollStatus() {
       await loadResults();
       
       const gridName = status.grid;
-      const wantedStudy = studyType === 'EMT' ? 'EMT' : 'RMS';
+      const wantedStudy = studyKind(studyType);
       const results = await (await fetch('/api/results')).json();
-      const latestResult = results.find(r => r.grid_name === gridName && (r.study || 'RMS') === wantedStudy)
+      const latestResult = results.find(r => r.grid_name === gridName && studyKind(r.study) === wantedStudy)
         || results.find(r => r.grid_name === gridName);
       if (latestResult) {
         await loadResult(latestResult.filename, null);
@@ -1058,7 +1078,9 @@ function displayResults(data) {
   const studyTypeEl = document.getElementById('study-type');
   if (studyTypeEl) {
     studyTypeEl.textContent = studyLabel(data.study);
-    studyTypeEl.style.color = String(data.study || '').toUpperCase() === 'EMT' ? '#7c3aed' : 'var(--blue)';
+    studyTypeEl.style.color = isEmtStudy(data.study) ? '#7c3aed' : 'var(--blue)';
+    const method = [data.build_type, data.solver].filter(Boolean).join(' · ');
+    if (method) studyTypeEl.title = method;
   }
   
   document.getElementById('light-green').classList.toggle('active', data.status === 'STABLE');
@@ -1068,6 +1090,10 @@ function displayResults(data) {
   const mv = document.getElementById('margin-value');
   mv.textContent = data.margin.toExponential(4);
   mv.style.color = data.status === 'STABLE' ? '#10b981' : data.status === 'MARGINAL' ? '#f59e0b' : '#ef4444';
+  const marginLabel = document.getElementById('margin-label');
+  if (marginLabel) {
+    marginLabel.textContent = isEmtStudy(data.study) ? 'Stability Margin (1/s)' : 'Stability Margin';
+  }
   
   const critCount = (data.critical_modes || []).filter(m => m.critical).length;
   document.getElementById('n-critical').textContent = critCount;
@@ -1110,19 +1136,30 @@ function displayResults(data) {
     </div>
   `;
   
+  if (data.has_zero_eigenvalue) {
+    const zeroWarning = (data.warnings || []).find(w => /zero|hartman/i.test(w)) ||
+      'Zero eigenvalue detected (Floquet multiplier |mu| ≈ 1). The equilibrium is non-hyperbolic, so the Hartman-Grobman theorem may not apply.';
+    assessmentHTML += `
+      <div style="padding:12px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:4px solid var(--yellow);margin-bottom:12px">
+        <strong style="color:var(--yellow)">⚠ Zero eigenvalue:</strong> ${zeroWarning}
+        <br><span style="font-size:12px;color:var(--muted)">Reported as MARGINAL regardless of the dominant eigenvalue.</span>
+      </div>
+    `;
+  }
+
   if (unstableCount > 0) {
     assessmentHTML += `
       <div style="padding:12px;background:rgba(227,0,26,0.1);border-radius:6px;border-left:4px solid var(--red)">
         <strong style="color:var(--red)">⚠ Warning:</strong> ${unstableCount} eigenvalue(s) have positive real parts, indicating potential instability.
       </div>
     `;
-  } else if (critCount > 0) {
+  } else if (!data.has_zero_eigenvalue && critCount > 0) {
     assessmentHTML += `
       <div style="padding:12px;background:rgba(178,210,53,0.1);border-radius:6px;border-left:4px solid var(--yellow)">
         <strong style="color:var(--yellow)">⚠ Caution:</strong> ${critCount} mode(s) have low damping (ζ < 0.05).
       </div>
     `;
-  } else {
+  } else if (!data.has_zero_eigenvalue) {
     assessmentHTML += `
       <div style="padding:12px;background:rgba(23,156,125,0.1);border-radius:6px;border-left:4px solid var(--green)">
         <strong style="color:var(--green)">✓ Good:</strong> All modes are stable with adequate damping.
@@ -1157,7 +1194,7 @@ function _unstableThreshold(data) {
   if (data && Number.isFinite(Number(data.unstable_threshold))) {
     return Number(data.unstable_threshold);
   }
-  if (data && String(data.study || '').toUpperCase() === 'EMT') {
+  if (data && isEmtStudy(data.study)) {
     const period = Number(data.period);
     const p = Number.isFinite(period) && period > 0 ? period : 0.02;
     return Math.log(1 + 1.0e-4) / p;
@@ -1804,6 +1841,12 @@ function renderStatusCard(data) {
                       data.status === 'MARGINAL' ? 'yellow' : 'red';
   const unstableCount = _countUnstableModes(data);
   const criticalCount = (data.critical_modes || []).filter(m => m.critical).length;
+  const marginLabel = isEmtStudy(data.study) ? 'Margin (1/s)' : 'Margin';
+  const zeroWarning = data.has_zero_eigenvalue ? `
+    <div style="padding:10px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:4px solid #f59e0b;margin-bottom:12px;font-size:12px">
+      <strong style="color:#f59e0b">⚠ Zero eigenvalue:</strong>
+      the equilibrium is non-hyperbolic and Hartman's theorem may not apply.
+    </div>` : '';
 
   return `
     <div class="semaphore" style="margin-bottom:16px">
@@ -1814,10 +1857,11 @@ function renderStatusCard(data) {
     <div style="text-align:center;margin-bottom:16px">
       <span class="badge ${statusBadge}" style="font-size:14px;padding:6px 16px">${data.status}</span>
     </div>
+    ${zeroWarning}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="metric">
         <div class="metric-value" style="color:${statusColor};font-size:22px">${data.margin.toExponential(2)}</div>
-        <div class="metric-label">Margin</div>
+        <div class="metric-label">${marginLabel}</div>
       </div>
       <div class="metric">
         <div class="metric-value" style="font-size:22px">${data.n_eigenvalues}</div>

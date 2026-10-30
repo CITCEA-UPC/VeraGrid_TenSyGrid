@@ -2,14 +2,15 @@ The transition towards converter-dominated power systems, driven by the massive 
 
 The European project \textit{TenSyGrid} addresses this need by developing a toolbox for direct stability assessment based on a tensor (multilinear) reformulation of power system component models. By expressing the nonlinear dynamics of generators, converters, lines, loads, and transformers in a multilinear form, the toolbox enables efficient computation of the system's state matrix and its eigenvalues, which are the fundamental indicators of small-signal stability. The toolbox is designed to be compatible with existing commercial software packages, facilitating its integration into current operator workflows.
 
-This deliverable (D4.1) constitutes the first step in Work Package~4 (\textit{TenSyGrid Toolbox Development}). Its objective is to identify, describe, and catalogue the use cases that the toolbox must support, taking the network operator as the primary user. The use cases are derived from three complementary sources:
+This deliverable (D4.1) constitutes the first step in Work Package~4 (\textit{TenSyGrid Toolbox Development}). Its objective is to identify, describe, and catalogue the use cases that the toolbox should support, taking network operators, planning engineers, stability analysts, and converter specialists as its principal user profiles. The use cases are derived from four complementary sources:
 
 \begin{enumerate}
   \item The TenSyGrid project objectives, as defined in the CETPartnership proposal.
-  \item An initial web-based \textit{Stability Monitor} prototype that implements core stability-analysis workflows.
-  \item An anticipated operator-needs analysis, to be validated during a dedicated workshop with grid operators.
+  \item A review of existing stability-analysis tools and the research group's experience with them.
+  \item An initial web-based \textit{Stability Monitor} prototype and the technical feedback gathered from the research group while developing it.
+  \item Semi-structured interviews with industry stakeholders, including transmission-system, consulting, and equipment-manufacturing perspectives.
 \end{enumerate}
 
-The document is structured as follows. Chapter~2 describes the methodological approach, the evolution of the software architecture towards a native open-source Python framework, and the insights gathered from operator interviews. Chapter~3 presents the use case inventory, organised into implemented and proposed use cases, and outlines the organization of the toolbox interface. Each use case is described in terms of its actor, objective, theoretical basis, interaction flow, and expected outcome. The chapter also documents use cases that were considered but discarded or deferred, together with the rationale for their exclusion. Chapter~4 concludes the deliverable and outlines the next steps towards the operator workshop and the subsequent development cycle.
+The document is structured as follows. Chapter~2 describes the methodological approach, the evolution of the software architecture towards a native open-source Python framework, and the insights gathered from industry interviews. Chapter~3 presents the use case inventory, organised into implemented and proposed use cases, and outlines the organisation of the toolbox interface. Each use case is described in terms of its actor, objective, theoretical basis, interaction flow, and expected outcome. The chapter also records candidate workflows that fall outside the current implementation scope and explains why they have not been prioritised. Chapter~4 summarises the conclusions and identifies the next development steps to be agreed within the consortium.
 
-The intended audience for this deliverable includes the TenSyGrid consortium partners, the CETPartnership review bodies, and --- after the operator workshop --- the network operators who will ultimately use and benefit from the toolbox.
+The intended audience for this deliverable includes the TenSyGrid consortium partners, the CETPartnership review bodies, and the industrial partners and stakeholders who will ultimately use and benefit from the toolbox.

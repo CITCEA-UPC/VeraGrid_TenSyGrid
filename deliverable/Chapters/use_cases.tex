@@ -1,48 +1,106 @@
+The computational core of the use-case catalogue is the implicit Multilinear Time-Invariant (iMTI) and tensor formulation developed within the TenSyGrid project~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21}. Originally researched and prototyped as a dedicated MTI Toolbox in MATLAB, its algorithms and tensor routines have been ported to Python and integrated into the open-source VeraGrid platform as the \texttt{TenSyGridEngine}.
+
+The formulation represents the time-invariant component models in multilinear form~\cite{deJuanVela2026TenSyGridD33}. The complete system of equations is then transformed following~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21} into a tensor representation whose contractions can accelerate Jacobian-matrix computation~\cite{kaufmann2026small}.
+
+The dependency on this engine differs by use case. UC-01, UC-02, UC-03, and UC-05 directly consume iMTI-based eigenvalues, eigenvectors, participation factors, or repeated post-contingency linearisations. UC-04 is a complementary power-flow voltage check included to keep the operating-point assessment coherent, but it is not itself an iMTI calculation. The proposed analytical use cases build on the same engine to different degrees, whereas UC-12 packages results produced by the other use cases into a report. These distinctions are made explicit in the descriptions and workflow maps below.
+
 \section{Use case inventory}
 
-Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, grouped by their current implementation status. The first five have been prototyped in the Stability Monitor GUI; the remaining nine are candidates to be presented and discussed with network operators.
+Table~\ref{tab:uc-inventory} summarises the fourteen identified use cases by implementation status. The first five have been prototyped in the Stability Monitor GUI; the remaining nine are candidates for consortium prioritisation according to technical feasibility and expected value for industry and the wider community.
 
+Among the proposed use cases, UC-13 and UC-14 are particularly research-oriented: they go beyond conventional small-signal analysis and may exploit the higher-order capabilities of the iMTI formulation described in \cite{Kaufmann2025TenSyGridD11}.
 \begin{table}[H]
   \centering
   \caption{Use case inventory for the TenSyGrid Toolbox.}
   \label{tab:uc-inventory}
-  \begin{tabular}{lp{0.30\textwidth}p{0.15\textwidth}p{0.40\textwidth}}
+  {\small\begin{tabular}{lp{0.32\textwidth}lp{0.38\textwidth}}
     \toprule
     \textbf{ID} & \textbf{Name}                                  & \textbf{Status} & \textbf{Objective}                                                                     \\
     \midrule
-    UC-01       & Run Small-Signal Stability Simulation          & Implemented     & Execute a stability computation on a grid model                                        \\
-    UC-02       & System Status Dashboard \& Eigenvalue Spectrum & Implemented     & Obtain an at-a-glance stability classification and explore the eigenvalue distribution \\
-    UC-03       & Critical Mode Diagnosis                        & Implemented     & Identify low-damped modes and their physical origin                                    \\
-    UC-04       & Bus Voltage Assessment                         & Implemented     & Verify voltage profile from the power-flow solution                                    \\
-    UC-05       & N-1 Contingency Analysis                       & Implemented     & Evaluate stability impact of single-element outages                                    \\
+    UC-01       & Assessment of small-signal stability under given operating conditions & Implemented     & Execute a stability computation on a grid model                                        \\
+    UC-02       & Monitoring and screening of power system small-signal stability margins & Implemented     & Obtain an at-a-glance stability classification and explore the eigenvalue distribution \\
+    UC-03       & Identification and diagnosis of critical oscillatory modes & Implemented     & Identify low-damped modes and their physical origin                                    \\
+    UC-04       & Assessment of bus voltage profiles and operating limit violations & Implemented     & Verify voltage profile from the power-flow solution                                    \\
+    UC-05       & Identification of stability risks under $N-1$ contingencies & Implemented     & Evaluate stability impact of single-element outages                                    \\
     \midrule
-    UC-06       & Operating Scenario Comparison                  & Proposed        & Compare stability between two grid snapshots                                           \\
-    UC-07       & Critical Device List                           & Proposed        & Rank devices by their participation in the critical modes                              \\
-    UC-08       & Stability Trend Analysis                       & Proposed        & Track stability evolution across multiple operating points                             \\
-    UC-09       & Critical Element Ranking                       & Proposed        & Rank elements by their contribution to stability degradation                           \\
-    UC-10       & Damping Controller Placement Guidance          & Proposed        & Suggest candidate locations for PSS or FACTS devices                                   \\
-    UC-11       & Renewable Scenario Assessment                  & Proposed        & Evaluate stability at different renewable penetration levels                           \\
-    UC-12       & Automated Stability Report Generation          & Proposed        & Produce a standardised stability report for stakeholders                               \\
-    UC-13       & Centre Manifold Analysis                       & Proposed        & Characterise the dynamics behind zero eigenvalues                                      \\
-    UC-14       & Basin of Attraction Estimation                 & Proposed        & Quantify security margins against specified disturbances                               \\
+    UC-06       & Comparative stability assessment across operating scenarios & Proposed        & Compare stability between two grid snapshots                                           \\
+    UC-07       & Identification of devices contributing to stability issues & Proposed        & Rank devices by their participation in the critical modes                              \\
+    UC-08       & Assessment of stability margins under increasing system loading & Proposed        & Track stability evolution across multiple operating points                             \\
+    UC-09       & Ranking of critical system elements affecting stability & Proposed        & Rank elements by their contribution to stability degradation                           \\
+    UC-10       & Identification of suitable locations for damping controller installation & Proposed        & Separate controller-retuning options from new-device placement                          \\
+    UC-11       & Assessment of renewable energy integration impact on system stability & Proposed        & Evaluate stability at different renewable penetration levels                           \\
+    UC-12       & Automated documentation and reporting of stability assessment results & Proposed        & Produce a standardised stability report for stakeholders                               \\
+    UC-13       & Assessment of nonlinear system behaviour near critical operating points & Proposed        & Characterise the dynamics behind zero eigenvalues                                      \\
+    UC-14       & Assessment of the region of attraction following system disturbances & Proposed        & Quantify security margins against specified disturbances                               \\
     %   UC-15       & <name>                                & Proposed        & <objective>                                                  \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 \end{table}
+
+Figure~\ref{fig:implemented_uc_workflow} shows how the five implemented use cases form a single analysis workflow while preserving the distinction between the iMTI-based calculations and the complementary power-flow check.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=7mm and 8mm,
+      ucbox/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, minimum height=11mm, text width=3.2cm},
+      imtibox/.style={ucbox, fill=yellow!30},
+      supportbox/.style={ucbox, fill=green!18},
+      flow/.style={->, >=Latex, line width=0.8pt}
+    ]
+    \node[imtibox] (uc1) {\textbf{UC-01}\\Run the iMTI small-signal analysis};
+    \node[imtibox, right=of uc1] (uc2) {\textbf{UC-02}\\Screen eigenvalues and stability margins};
+    \node[imtibox, right=of uc2] (uc3) {\textbf{UC-03}\\Diagnose critical modes and devices};
+    \node[supportbox, below=of uc2] (uc4) {\textbf{UC-04}\\Check the power-flow voltage profile};
+    \node[imtibox, right=of uc4] (uc5) {\textbf{UC-05}\\Repeat the analysis for $N-1$ contingencies};
+    \draw[flow] (uc1) -- (uc2);
+    \draw[flow] (uc2) -- (uc3);
+    \draw[flow] (uc1.south) |- (uc4.west);
+    \draw[flow] (uc2.south) -- (uc4.north);
+    \draw[flow] (uc3.south) -- (uc5.north);
+    \draw[flow] (uc4) -- (uc5);
+  \end{tikzpicture}
+  \caption[Workflow of the implemented use cases.]{Workflow of UC-01 to UC-05. Yellow boxes directly use the iMTI calculation engine; the green box is a complementary power-flow assessment.}
+  \label{fig:implemented_uc_workflow}
+\end{figure}
+
+Figure~\ref{fig:proposed_uc_map} groups the proposed cases by the decision that they support. The arrows indicate result dependencies rather than a mandatory execution order.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=7mm and 7mm,
+      base/.style={draw, rounded corners=2pt, fill=yellow!30, align=center, font=\footnotesize, minimum height=10mm, text width=2.8cm},
+      group/.style={draw, rounded corners=2pt, fill=blue!12, align=left, font=\scriptsize, inner sep=5pt, text width=4.7cm},
+      report/.style={draw, rounded corners=2pt, fill=green!18, align=center, font=\footnotesize, minimum height=10mm, text width=4.2cm},
+      flow/.style={->, >=Latex, line width=0.8pt}
+    ]
+    \node[base] (base) {Results from\\\textbf{UC-01 to UC-05}};
+    \node[group, above right=3mm and 5mm of base] (scenarios) {\textbf{Scenario and trajectory assessment}\\UC-06 compares operating scenarios.\\UC-08 traces offline loading margins and includes an online monitoring variant.\\UC-11 studies converter penetration.};
+    \node[group, below right=3mm and 5mm of base] (actions) {\textbf{Diagnosis and mitigation}\\UC-07 ranks participating devices.\\UC-09 ranks critical network elements.\\UC-10 separates controller retuning from new-device placement.};
+    \node[group, right=5mm of scenarios] (nonlinear) {\textbf{Advanced nonlinear security}\\UC-13 resolves non-hyperbolic local behaviour.\\UC-14 estimates the region of attraction and disturbance margins.};
+    \node[report, below=of nonlinear] (report) {\textbf{UC-12}\\Document and report results from the selected analyses};
+    \draw[flow] (base) |- (scenarios.west);
+    \draw[flow] (base) |- (actions.west);
+    \draw[flow] (scenarios) -- (nonlinear);
+    \draw[flow] (actions.east) -| (report.south);
+    \draw[flow] (nonlinear) -- (report);
+  \end{tikzpicture}
+  \caption[Decision map of the proposed use cases.]{Decision-oriented map of UC-06 to UC-14, showing how the proposed analyses extend the implemented Stability Monitor and feed the reporting workflow.}
+  \label{fig:proposed_uc_map}
+\end{figure}
 
 \input{Chapters/use_cases_implemented.tex}
 
 \input{Chapters/use_cases_proposed.tex}
 
-\section{Discarded or deferred use cases}
-During the use-case identification process, several potential workflows were considered but were either set aside or deferred to future work packages. The main criteria for discarding or deferring a use case were: (i) it lies outside the current scope of the TenSyGrid toolbox as an offline stability assessment platform, (ii) it requires data or infrastructure not available within the project, or (iii) it corresponds to a different stability phenomenon that the toolbox does not currently address.
+\section{Candidate workflows outside the current implementation scope}
+During the use-case identification process, several potential workflows were considered but not included in the current implementation plan. The main reasons were that a workflow requires data or infrastructure that is not available within the project, addresses a different stability phenomenon, or depends on research that must mature before it can be specified as an implementable use case.
 
 \begin{itemize}
-  \item \textbf{Real-time stability monitoring.} Continuous, online stability assessment would require a real-time data feed from SCADA or PMU systems, streaming state estimation, and periodic re-linearisation. While the TenSyGrid multilinear framework could in principle support fast re-evaluation of the state matrix, the integration with real-time operational systems is considered out of scope for D4.1 and is deferred to a potential follow-up work package.
+  \item \textbf{Full real-time operational integration.} The online variant of UC-08 proposes tracking stability margins at a conceptual level. A production deployment with continuous SCADA or PMU feeds, streaming state estimation, cybersecurity controls, and periodic re-linearisation requires operational infrastructure that is outside the scope of D4.1.
 
-  \item \textbf{Transient (large-disturbance) stability assessment.} The current toolbox focuses on small-signal stability via eigenvalue analysis of the linearised state matrix. Transient stability --- concerned with the system's ability to remain in synchronism after large disturbances such as short circuits --- requires time-domain simulation (EMT or RMS) and involves different modelling assumptions and metrics. UC-14 deliberately narrows this scope: instead of a time-domain sweep, it computes the stability-region boundary geometrically --- the stable manifold of the controlling unstable equilibrium and the associated heteroclinic orbits, obtained from the multilinear representation --- which yields a security margin for a given disturbance family. Full time-domain validation of the most severe contingencies remains a future extension of the TenSyGrid platform.
-
-  \item \textbf{Voltage collapse and PV curve analysis.} Voltage stability, particularly long-term voltage collapse driven by load restoration dynamics and reactive power limitations, involves different modelling assumptions and analysis techniques (continuation power flow, QV sensitivity). Although bus voltage assessment (UC-04) provides a snapshot of the voltage profile, a full voltage stability study is outside the current scope. Similarly, UC-13 only resolves the behaviour of zero-eigenvalue modes \emph{at} the current operating point through a centre-manifold reduction and reports the direction in which a bifurcation is approached; it does not trace a PV or bifurcation diagram along a loading path, which would require continuation techniques.
+  \item \textbf{Exhaustive time-domain transient-stability simulation.} Large-disturbance stability assessment remains represented by UC-14, consistently with the project proposal. UC-14 computes the stability-region boundary geometrically, using the stable manifold of the controlling unstable equilibrium and the associated heteroclinic orbits obtained from the multilinear representation. Exhaustive EMT or RMS sweeps require additional modelling assumptions, computational infrastructure, and validation metrics. Full time-domain validation of the most severe contingencies is therefore recorded as a possible future extension that would complement, rather than replace, UC-14.
 
   \item \textbf{Optimal power flow with stability constraints.} Integrating stability constraints directly into an optimal power flow formulation would allow the toolbox to suggest generation re-dispatches or other control actions that guarantee a minimum stability margin. This involves solving a non-convex, constrained optimisation problem and is considered a longer-term research direction.
 
@@ -53,12 +111,12 @@ During the use-case identification process, several potential workflows were con
 
 \section{Organization}
 
-The proposed use cases answer two different kinds of questions: the current status and short-term forecast of the system, and planning studies over longer horizons. Because these questions call for different workflows, mixing them in a single view would overload the operator, so the toolbox is organised around a small number of tabs, each one grouping the use cases that share a purpose:
+The proposed use cases answer two different kinds of questions: the current system status and its evolution along monitored operating trajectories, and planning studies over longer horizons. Because these questions call for different workflows, the toolbox is organised around a small number of tabs, each grouping the use cases that share a purpose:
 
 \begin{itemize}
-  \item \textbf{Run simulation.} UC-01: execute the small-signal stability computation that feeds the rest of the views.
+  \item \textbf{Run analysis.} UC-01: execute the small-signal stability computation that feeds the rest of the views.
   \item \textbf{Grid information.} UC-04: inspect the steady-state voltage profile of the loaded model.
-  \item \textbf{Status and forecast.} UC-02, UC-03, UC-07, UC-08.1, UC-13 and UC-14: stability verdict and eigenvalue spectrum, critical modes, device-level participation, online trend monitoring, and the centre-manifold and basin analyses.
+  \item \textbf{Status and monitoring.} UC-02, UC-03, UC-07, the online variant of UC-08, UC-13 and UC-14: stability verdict and eigenvalue spectrum, critical modes, device-level participation, online trajectory monitoring, and the centre-manifold and region-of-attraction analyses.
   \item \textbf{Planning.} UC-05, UC-06, UC-08, UC-09, UC-10 and UC-11: N-1 contingencies, scenario comparison, trend analysis, critical-element ranking, damping-controller placement, and renewable-penetration assessment.
   \item \textbf{Queue and reports.} UC-12: batch execution and automated report generation.
 \end{itemize}

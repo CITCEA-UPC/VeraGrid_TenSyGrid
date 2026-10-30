@@ -1,31 +1,32 @@
 \section{Methodology}
 
-The identification of use cases for the \textit{TenSyGrid} Toolbox follows a user-centred design approach, placing the network operator as the primary actor. Use cases were derived from three complementary sources:
+The identification of use cases for the \textit{TenSyGrid} Toolbox follows a user-centred design approach and considers the different roles involved in stability studies. The catalogue was derived from four complementary sources:
 
 \begin{enumerate}
-  \item \textbf{Project objectives.} The TenSyGrid proposal defines the toolbox as a stability assessment platform for converter-dominated power grids. The core workflow --- load a grid model, run a small-signal stability analysis, and interpret the results --- directly informs the first set of use cases.
-  \item \textbf{Existing GUI prototype.} An initial web-based Stability Monitor has been developed, implementing five core interaction flows: simulation execution (UC-01), system status monitoring and eigenvalue analysis (UC-02), critical mode inspection (UC-03), bus voltage evaluation (UC-04), and N-1 contingency assessment (UC-05). These flows were formalised as the implemented use cases.
-  \item \textbf{Operator needs analysis.} Anticipating the meeting with network operators, additional use cases (UC-06 to UC-14) have been drafted to explore workflows that go beyond single-snapshot analysis, including scenario comparison, trend monitoring, and actionable recommendations.
+  \item \textbf{Project objectives.} The TenSyGrid proposal defines the toolbox as a stability-assessment platform for converter-dominated power grids. Its core workflow consists of loading a grid model, running a small-signal stability analysis, and interpreting the results.
+  \item \textbf{Review of existing tools.} The research group's experience with established stability-analysis software was used to identify recurring study tasks, expected outputs, and limitations that a new toolbox should address.
+  \item \textbf{Prototype and internal technical feedback.} An initial web-based Stability Monitor implements five core interaction flows: analysis execution (UC-01), system-status monitoring and eigenvalue analysis (UC-02), critical-mode inspection (UC-03), bus-voltage evaluation (UC-04), and $N-1$ contingency assessment (UC-05). Feedback gathered while developing the prototype was used to formalise these implemented use cases and identify candidate extensions.
+  \item \textbf{Industry interviews.} Semi-structured interviews with transmission-system, consulting, and equipment-manufacturing stakeholders were used to validate the relevance of the implemented workflows and formulate additional needs. These needs informed the proposed use cases UC-06 to UC-14, including scenario comparison, trend monitoring, device attribution, and advanced nonlinear assessment.
 \end{enumerate}
 
-Each use case is described following a structured template that includes \textbf{identifier} and \textbf{name}, \textbf{actor}, \textbf{objective}, \textbf{preconditions}, \textbf{theoretical basis}, \textbf{possible bottlenecks}, \textbf{main flow}, \textbf{GUI interaction}, and \textbf{expected result}. The level of detail is tailored to facilitate discussion with operators, who will validate, prioritise, and refine the proposals during the forthcoming workshop.
+Each use case is described following a structured template that includes \textbf{identifier} and \textbf{name}, \textbf{actor}, \textbf{objective}, \textbf{preconditions}, \textbf{theoretical basis}, \textbf{possible bottlenecks}, \textbf{main flow}, \textbf{GUI interaction}, and \textbf{expected result}.
 
-It is important to note that all use cases are designed to follow Shneiderman's mantra \cite{shneiderman1996eyes} and support a progressive analysis workflow. In practical terms, the user can:
+The toolbox interface follows Shneiderman's visual-information-seeking approach: \textit{overview first, zoom and filter, then details on demand}~\cite{shneiderman1996eyes}. In practical terms, the user can:
 
 \begin{enumerate}
-  \item Obtain an overview of the system status.
-  \item Zoom into critical modes and their physical origin.
-  \item Filter and sort the eigenvalue spectrum to focus on the most relevant dynamics.
-  \item Derive actionable recommendations for control design or contingency mitigation.
+  \item obtain an overview of the system status and its principal stability indicators;
+  \item zoom into critical modes and regions of the eigenvalue spectrum;
+  \item filter and sort the results to focus on the most relevant dynamics; and
+  \item request details on demand, including modal metrics, participation factors, and the physical devices associated with each mode.
 \end{enumerate}
 
-This structure ensures that the toolbox supports both rapid operational screening and deeper technical diagnosis when required.
+This interaction sequence supports both rapid operational screening and deeper technical diagnosis. Once the relevant modes and devices have been identified, the resulting evidence can be used in subsequent use cases to formulate recommendations for controller retuning, contingency mitigation, or further studies.
 
 \section{Tool scheme and structure}
 
 \subsection{Initial tool scheme and architectural evolution}
 
-\paragraph{Initial Conceptual Scheme (Figure~\ref{fig:tool_scheme}).}
+\paragraph{Initial conceptual scheme (Figure~\ref{fig:tool_scheme}).}
 At the outset of the TenSyGrid project, the preliminary architectural roadmap considered MATLAB as a key foundation of the development platform. This initial strategy was primarily motivated by the pre-existing research legacy within the consortium, specifically the Multilinear Time-Invariant (MTI) Toolbox developed in earlier and concurrent project stages~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21}, alongside the STAMP simulation framework. In this early phase, before key design decisions regarding runtime dependencies were finalized, the toolbox was conceived as a hybrid, multi-branch framework connecting open-source components with existing MATLAB prototypes through dedicated runtime adapters.
 
 This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_scheme}. As originally planned, the platform established two parallel simulation branches:
@@ -38,25 +39,26 @@ This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_sche
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{pictures/esquema.png}
-  \caption[Initial TenSyGrid modular scheme and hybrid integration concept.]{Initial conceptual scheme of the TenSyGrid toolbox, conceived during early project stages prior to resolving the MATLAB software dependency. In this preliminary design, external models fed into VeraGrid (Python) while relying on runtime adapters to bridge into MATLAB-based MTI and STAMP simulation packages.}
+  \caption[Initial TenSyGrid modular scheme and hybrid integration concept.]{Initial conceptual scheme of the TenSyGrid toolbox, conceived during early project stages to explore multi-environment integration. In this preliminary design, external models fed into VeraGrid (Python) while relying on runtime adapters to bridge into MATLAB-based research prototypes for the MTI formulation and STAMP routines.}
   \label{fig:tool_scheme}
 \end{figure}
 
-\paragraph{The MATLAB Decision and Strategic Architectural Pivot.}
-Although this initial hybrid layout enabled early prototyping by recycling legacy MATLAB scripts, in-depth evaluation revealed that maintaining a dependency on MATLAB was incompatible with the operational, technical, and regulatory requirements of a production-grade toolbox for Transmission System Operators (TSOs):
+\paragraph{Strategic architectural consolidation within VeraGrid.}
+While this initial hybrid layout enabled rapid early prototyping by leveraging existing research codebases, detailed evaluation during the architectural definition phase showed that maintaining multiple distinct software packages and heterogeneous runtimes introduced significant operational and maintenance complexity. To establish a production-grade, highly cohesive toolbox for Transmission System Operators (TSOs), the consortium identified substantial advantages in consolidating the entire calculation pipeline into a unified, native Python framework centered around VeraGrid:
 \begin{itemize}[before=\leavevmode, leftmargin=*]
-  \item \textbf{Licensing and Open-Source Distribution:} MATLAB is commercial proprietary software subject to strict per-seat or concurrent network licensing. Requiring proprietary licenses creates a severe barrier for widespread dissemination among TSOs, academic researchers, and industrial stakeholders. A core requirement of the European CETPartnership initiative is fostering fully accessible, transparent, and reproducible tooling, necessitating a zero-cost, open-source distribution model.
-  \item \textbf{Supercomputing and Cloud Scalability:} Assessing small-signal stability in modern converter-dominated grids demands computationally intensive batch runs, including massive $N-1$ contingency evaluations, broad parameter sweeps, and Monte Carlo-based renewable scenario assessments. In High-Performance Computing (HPC) clusters and cloud environments (e.g., managed via SLURM or container orchestration platforms), MATLAB license-token checkouts severely constrain parallel scaling across hundreds of worker nodes. In contrast, Python runs natively in headless Linux containers (e.g., Docker, Apptainer/Singularity) and leverages distributed computing paradigms without licensing bottlenecks.
-  \item \textbf{Adapter Complexity and Runtime Fragility:} Bridging Python and MATLAB at runtime required IPC adapters, cross-language data serialization, and dual-runtime environments. This increased software maintenance overhead, introduced memory transfer latencies, and complicated installation on control-room workstations.
-  \item \textbf{Unified Scientific and Web Ecosystem:} The modern Python scientific stack (NumPy, SciPy, sparse matrix solvers, and compiled acceleration libraries) provides numerical performance on par with or exceeding MATLAB, while modern asynchronous frameworks (such as FastAPI) enable seamless coupling with web-based operational monitoring interfaces.
+  \item \textbf{Single-Stack Architectural Simplicity and Cohesion:} Interfacing separate runtimes across language boundaries required dedicated inter-process communication (IPC) bridges, serialization adapters, and dual-environment management. Consolidating the core multilinear routines natively within VeraGrid's architecture removes multi-package glue code, eliminates data marshaling overhead, and ensures unified memory structures directly shared between the power flow, descriptor assembly, and eigenvalue solvers.
+  \item \textbf{Direct VeraGrid Integration and Codebase Maintainability:} Embedding the multilinear formulation directly into the \texttt{VeraGridEngine} ecosystem leverages VeraGrid's native high-performance data model and compiled extensions (Python). This streamlines continuous integration, simplifies testing, and provides a single, uniform API for developers, researchers, and operators alike.
+  \item \textbf{Automated Batch Studies:} A unified Python and VeraGrid environment supports repeated studies, such as $N-1$ contingency evaluations and parameter sweeps, through a common codebase. This reduces configuration and maintenance effort across the analysis workflow.
+  \item \textbf{Open-Source Accessibility and Reproducibility:} A primary pillar of the European CETPartnership initiative is the creation of openly accessible, transparent, and easily reproducible tools for the broader power systems community. Delivering a fully open-source Python codebase enables TSOs, research institutions, and industry stakeholders to readily inspect, customize, and extend the algorithms without prerequisite software barriers.
+  \item \textbf{Seamless Web and Modern Service Coupling:} Python's extensive ecosystem natively bridges scientific computing libraries (NumPy, SciPy, optimized sparse solvers) with modern asynchronous web frameworks (such as FastAPI). This architecture enables high-throughput data streaming to the operator-facing browser interface with minimal overhead.
 \end{itemize}
 
-Consequently, the consortium formally decided to eliminate the MATLAB dependency entirely and pivot to a 100\% native Python architecture. The tensor formulation and multilinear algorithms of the MTI Toolbox were re-engineered directly into Python within the dedicated \texttt{TensyGridEngine}, built seamlessly on top of \texttt{VeraGridEngine}.
+Consequently, the consortium agreed to consolidate the computational core natively within Python and VeraGrid. The multilinear algorithms and tensor formulations of the MTI framework were re-engineered directly into the dedicated \texttt{TensyGridEngine}, running seamlessly as an integrated calculation layer built directly on top of \texttt{VeraGridEngine}.
 
 
 \subsection{Integrated tool architecture and operational workflow}
 
-Following the decision to transition away from MATLAB, the initial hybrid concept of Figure~\ref{fig:tool_scheme} evolved into the streamlined, end-to-end computational and visualization pipeline shown in Figure~\ref{fig:tool_pipeline}. This final architecture eliminates all external runtime bridges and provides a clean, four-stage data flow from external model ingestion to the operator interface:
+Following this architectural consolidation, the multi-branch concept of Figure~\ref{fig:tool_scheme} evolved into the streamlined, end-to-end computational and visualization pipeline shown in Figure~\ref{fig:tool_pipeline}. This unified architecture eliminates multi-runtime bridges and provides a clean, four-stage data flow from external model ingestion to the operator interface:
 
 \begin{figure}[H]
   \centering
@@ -83,16 +85,17 @@ Following the decision to transition away from MATLAB, the initial hybrid concep
         }
     ]
 
-    % Stage 1: Ingestion (IPSA Green)
+    % Stage 1: Model and data ingestion
     \node[stagebox, fill=schemepass] (stage1) {
-      \textbf{\normalsize 1. External Model Ingestion} \hfill \textsf{\footnotesize [IPSA Adapter]} \\[2pt]
-      \textbullet~Ingests grid topology, equipment parameters, and dynamic controller models from external commercial tools (PSCAD, DIgSILENT PowerFactory, PSS/E, MATLAB/Simulink). \\
-      \textbullet~Standardizes network definitions and dynamic parameter structures for downstream simulation.
+      \textbf{\normalsize 1. Model and data ingestion} \hfill \textsf{\footnotesize [VeraGrid import layer \& IPSA adapter]} \\[2pt]
+      \textbullet~Accepts native \texttt{.veragrid} files and the network-model formats supported by VeraGrid, including CIM/CGMES, PSS/E RAW/RAWX, PowerFactory DGS, UCTE, MATPOWER, and PSLF EPC. \\
+      \textbullet~Uses the IPSA adapter as an integration layer for models originating from external tools such as PSCAD, DIgSILENT PowerFactory, PSS/E, and MATLAB/Simulink. \\
+      \textbullet~Provides an extensible API entry point for additional model sources and converts all validated inputs into VeraGrid's internal \texttt{MultiCircuit} representation.
     };
 
     % Stage 2: VeraGrid Engine (Python Yellow)
     \node[stagebox, fill=schemepython, below=of stage1] (stage2) {
-      \textbf{\normalsize 2. Grid Modeling \& Operating Point Solution} \hfill \textsf{\footnotesize [VeraGridEngine]} \\[2pt]
+      \textbf{\normalsize 2. Grid modeling \& operating point solution} \hfill \textsf{\footnotesize [VeraGridEngine]} \\[2pt]
       \textbullet~Instantiates internal \texttt{MultiCircuit} model (buses, branches, generators, converters, loads, shunts). \\
       \textbullet~Attaches dynamic phasor RMS templates and performs algebraic descriptor conversion (\texttt{to\_implicit}). \\
       \textbullet~Solves AC/DC Power Flow (\texttt{vge.power\_flow}) to establish the pre-disturbance equilibrium state $\mathbf{x}_0$.
@@ -100,34 +103,36 @@ Following the decision to transition away from MATLAB, the initial hybrid concep
 
     % Stage 3: TenSyGrid Engine (Python Yellow)
     \node[stagebox, fill=schemepython, below=of stage2] (stage3) {
-      \textbf{\normalsize 3. Multilinear Stability \& Contingency Engine} \hfill \textsf{\footnotesize [TensyGridEngine]} \\[2pt]
-      \textbullet~\textbf{Descriptor Assembly:} Builds multilinear system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$ using \texttt{RmsProblemMultilinear}. \\
-      \textbullet~\textbf{Modal Analysis:} Solves $\lambda_k\mathbf{E}\mathbf{v}_k=\mathbf{A}\mathbf{v}_k$ to extract damping ratios $\zeta_k$, frequencies $f_k$, and participation factors $p_{ki}$ (\texttt{small\_signal\_analysis\_main.py}). \\
-      \textbullet~\textbf{$N-1$ Contingency Screening:} Iteratively disconnects transmission elements to evaluate post-fault security margins (\texttt{run\_contingency.py}), caching results into \texttt{.tensygrid} files.
+      \textbf{\normalsize 3. Multilinear stability \& contingency engine} \hfill \textsf{\footnotesize [TenSyGridEngine]} \\[2pt]
+      \textbullet~\textbf{Descriptor assembly:} Builds multilinear system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$ using \texttt{RmsProblemMultilinear}. \\
+      \textbullet~\textbf{Modal analysis:} Solves $\lambda_k\mathbf{E}\mathbf{v}_k=\mathbf{A}\mathbf{v}_k$ to extract damping ratios $\zeta_k$, frequencies $f_k$, and participation factors $p_{ki}$ (\texttt{small\_signal\_analysis\_main.py}). \\
+      \textbullet~\textbf{$N-1$ contingency screening:} Iteratively disconnects transmission elements to evaluate post-fault security margins (\texttt{run\_contingency.py}), caching results into \texttt{.tensygrid} files.
     };
 
     % Stage 4: GUI / Stability Monitor (Web / Soft Blue)
     \node[stagebox, fill=schemematlab, below=of stage3] (stage4) {
-      \textbf{\normalsize 4. Operational \& Diagnostic Interface} \hfill \textsf{\footnotesize [FastAPI Backend \& Web GUI]} \\[2pt]
-      \textbullet~\textbf{REST Backend:} Asynchronous service (\texttt{dashboard.py}) managing runs and precomputed caches. \\
+      \textbf{\normalsize 4. Operational \& diagnostic interface} \hfill \textsf{\footnotesize [FastAPI backend \& web GUI]} \\[2pt]
+      \textbullet~\textbf{REST backend:} Asynchronous service (\texttt{dashboard.py}) managing runs and precomputed caches. \\
       \textbullet~\textbf{Stability Monitor (\texttt{index.html}):} Executive status badges (green/yellow/red), complex-plane eigenvalue plot ($\sigma \pm j\omega$), critical mode participation ranking, $N-1$ contingency tables, and voltage profiles.
     };
 
     % Connections with clear vertical space and visible arrows
-    \draw[flowarrow] (stage1.south) -- node[arrowlabel, midway] {Standardized grid definitions \& dynamic parameters} (stage2.north);
+    \draw[flowarrow] (stage1.south) -- node[arrowlabel, midway] {Validated \texttt{MultiCircuit} model \& operating-point data} (stage2.north);
     \draw[flowarrow] (stage2.south) -- node[arrowlabel, midway] {Operating point $\mathbf{x}_0$ \& implicit phasor equations} (stage3.north);
     \draw[flowarrow] (stage3.south) -- node[arrowlabel, midway] {Eigenvalues, damping ratios, participation factors \& contingency outcomes} (stage4.north);
 
   \end{tikzpicture}
-  \caption[Final integrated tool architecture and operational workflow.]{Final integrated architecture and computational workflow of the TenSyGrid toolbox, adopted following the architectural decision to transition from the initial MATLAB-dependent hybrid scheme to a fully native open-source Python stack. The four-stage pipeline spans external model ingestion, VeraGrid modeling, native TenSyGrid multilinear stability analysis, and the operator web interface.}
+  \caption[Final integrated tool architecture and operational workflow.]{Final integrated architecture and computational workflow of the TenSyGrid toolbox, adopted following the architectural consolidation from the initial hybrid multi-language concept into a unified, native open-source Python/VeraGrid environment. The four-stage pipeline spans external model ingestion, VeraGrid modeling, native TenSyGrid multilinear stability analysis, and the operator web interface.}
   \label{fig:tool_pipeline}
 \end{figure}
+
+All downstream analyses operate on VeraGrid's internal \texttt{MultiCircuit} representation and are therefore independent of the original input channel. A model may be loaded directly from any format supported by VeraGrid, obtained through the IPSA integration layer from tools such as PSCAD, DIgSILENT PowerFactory, PSS/E, or MATLAB/Simulink, or supplied through a configured API endpoint. In every case, the input must provide the topology, equipment parameters, operating point, and dynamic-model information required by the selected analysis and must pass the same conversion and validation process before execution.
 
 The modular decoupling illustrated in Figure~\ref{fig:tool_pipeline} ensures clear separation of concerns across the pipeline:
 \begin{enumerate}[before=\leavevmode, leftmargin=*]
   \item \textbf{Ingestion and standardisation:} Downstream computational modules remain completely agnostic to the proprietary origins of the network models, relying exclusively on standard internal interfaces.
-  \item \textbf{High-performance core computing:} Heavy numerical operations (power flow, descriptor matrix assembly, generalized eigenvalue solves, and batch contingency runs) run natively in optimized C++/Python libraries on dedicated servers or HPC compute nodes.
-  \item \textbf{Zero-footprint operator access:} Transmission operators access results through an intuitive, lightweight web browser interface without needing local numerical software or specialized compiler toolchains installed on control-room workstations.
+  \item \textbf{High-performance core computing:} Heavy numerical operations (power flow, descriptor matrix assembly, generalized eigenvalue solves, and batch contingency runs) run natively in optimized Python libraries on dedicated servers or HPC compute nodes.
+  \item \textbf{Browser-based operator access:} Transmission operators access results through an intuitive, lightweight web browser interface without needing local numerical software or specialized compiler toolchains installed on control-room workstations.
 \end{enumerate}
 
 
@@ -135,10 +140,17 @@ The modular decoupling illustrated in Figure~\ref{fig:tool_pipeline} ensures cle
 \section{Operator interviews}
 To ground the use-case catalogue in real operational practice, three semi-structured interviews were conducted with transmission-system stakeholders; the key findings that shaped the use cases are summarised below.
 
-\paragraph{Andrés Mauricio Díaz Caicedo (eRoots; former TSO planner and control-room analyst at XM, Colombia).} Andrés described the operational workflow at XM: economic dispatch coordinated in 8-hour shifts, system validation every 15--30 minutes, and \mbox{$N-1$} contingency screening complemented by short-circuit and RMS dynamic simulations for critical cases. On the planning side, detailed modelling of low-voltage networks and IBRs (including protection systems) overloaded the state-space representation, making small-signal studies (SSTI, SSSI, SSOS) take 3--4 hours. Key operational metrics were the frequency nadir, ROCOF, and the settling time $T_{1090}$; in planning, eigenvalue position, damping, SCR variation, and participation factors were used to avoid out-of-band interactions. Regarding the GUI prototype, he recommended: (i) removing traffic-light indicators while keeping colour coding in the complex plane; (ii) providing explicit error debugging when a simulation fails; (iii) linking eigenvalues and participation factors to specific devices and state variables ($\omega$) to distinguish local from inter-area oscillations; (iv) adding visualisation of operational bands (P-V curves); and (v) supporting sequential contingencies (chains of events, $N$-$2$) and multiple simultaneous contingency selection (e.g.\ via YAML configuration).
+\paragraph{Former TSO planner and control-room analyst in South America.} The interview described an operational workflow based on economic dispatch coordinated in 8-hour shifts, system validation every 15--30 minutes, and \mbox{$N-1$} contingency screening complemented by short-circuit and RMS dynamic simulations for critical cases. On the planning side, detailed modelling of low-voltage networks and IBRs (including protection systems) overloaded the state-space representation, making small-signal studies (SSTI, SSSI, SSOS) take 3--4 hours. Key operational metrics were the frequency nadir, ROCOF, and the settling time $T_{1090}$; in planning, eigenvalue position, damping, SCR variation, and participation factors were used to avoid out-of-band interactions. Regarding the GUI prototype, the interviewee recommended: (i) simplifying status indicators while keeping colour coding in the complex plane; (ii) providing explicit error diagnostics when an analysis fails; (iii) linking eigenvalues and participation factors to specific devices and state variables ($\omega$) to distinguish local from inter-area oscillations; (iv) adding visualisation of operational bands (P-V curves); and (v) supporting sequential contingencies (chains of events, $N$-$2$) and multiple simultaneous contingency selection (e.g.\ via YAML configuration).
 
-\paragraph{Enric Sánchez Sánchez (Project Leader of HDVC at Siemens Energy).} Enric outlined three families of studies performed in the HVDC context: (i) \emph{dynamic performance} of an HVDC link under grid events, run in EMT with hundreds of PSCAD cases over 1--2 days; (ii) \emph{RMS} whole-country contingency screening ($N$-$1$) on AC networks of the order of 500\,km radius (e.g.\ UK GB network), taking a few hours; and (iii) \emph{screening studies} to identify synchronous generators that may interact problematically with the HVDC, run as load-flow and short-circuit analyses in minutes. He noted that small-signal studies are currently performed through impedance scanning (SS-SFI), with the frequency response obtained from PSCAD; clients are beginning to request state-space models (grey-box, per subsystem) for which a Laplace transfer function may be delivered instead, keeping the full model confidential for security reasons. He also highlighted harmonic-stability assessment based on gain/phase margins rather than eigenvalues, and the need to study voltage collapse in weak grids, which linear mode analysis does not capture. Automation of simulation campaigns and of result post-processing was identified as a key unmet need.
+\paragraph{HVDC project leader at an equipment manufacturer.} The interview outlined three families of studies performed in the HVDC context: (i) \emph{dynamic performance} of an HVDC link under grid events, run in EMT with hundreds of PSCAD cases over 1-2 days; (ii) \emph{RMS} whole-country contingency screening ($N$-$1$) on AC networks of the order of 500\,km radius (e.g.\ the UK transmission network), taking a few hours; and (iii) \emph{screening studies} to identify synchronous generators that may interact problematically with the HVDC, run as load-flow and short-circuit analyses in minutes. Small-signal studies are currently performed through impedance scanning (SS-SFI), with the frequency response obtained from PSCAD; clients are beginning to request state-space models (grey-box, per subsystem) for which a Laplace transfer function may be delivered instead, keeping the full model confidential for security reasons. The interview also highlighted harmonic-stability assessment based on gain/phase margins rather than eigenvalues, the need to study voltage collapse in weak grids, and the value of automating time-domain study campaigns and result post-processing.
 
-\paragraph{Vahid Moshari Mamaghani (Elia Grid International).} Vahid described the planning and operational processes at Elia: long-term grid development (TYDP, every two years), short-term planning, and operational processes from week-ahead down to intraday and real-time (SCADA/EMS with state estimation). Models are exchanged in CGMES; PowerFactory, PSCAD, and SCADA are the three main software tools. Dynamic security assessment (DSA) involves thousands of contingency cases; computation time limits model detail, and the trade-off is managed by increasing the number of cores. Day-ahead studies use RMS (PowerFactory); close to real time, about 100 cases are run with reduced detail. Outage management is not automatic and there is interest in AI tools to judge criticality. Regarding HVDC, he noted that all operators previously provided Thevenin equivalents and now need to provide reduced models; any tool deployed must integrate with the existing commercial software stack. On model exchange, he questioned how complete CGMES is for dynamic data and mentioned German colleagues working on software-independent EMT models, pointing to VeraGrid as a relevant platform.
+\paragraph{European mainland TSO specialist.} The interview described long-term grid development, short-term planning, and operational processes from week-ahead down to intraday and real-time operation (SCADA/EMS with state estimation). Models are exchanged in CGMES; PowerFactory, PSCAD, and SCADA are the three main software tools. Dynamic security assessment (DSA) involves thousands of contingency cases; computation time limits model detail, and the trade-off is managed by increasing the number of cores. Day-ahead studies use RMS models, while close-to-real-time studies run about 100 cases with reduced detail. Outage management is not automatic, and there is interest in decision-support tools for judging criticality. Regarding HVDC, the interviewee noted the move from Thevenin equivalents towards reduced models and stressed that any deployed tool must integrate with the existing commercial software stack. The completeness of CGMES for dynamic data and the value of software-independent EMT models were also discussed, with VeraGrid identified as a relevant integration platform.
 
-These interviews directly motivated the proposed use cases: scenario comparison and trend analysis (UC-06, UC-08) address the need to track stability across the planning horizon and multiple contingencies; critical-element ranking (UC-09) and damping-controller placement (UC-10) respond to the request to link modes to specific devices; centre-manifold analysis (UC-13) and basin-of-attraction estimation (UC-14) target the weak-grid and large-disturbance questions raised by Enric and Vahid. The request for clear error debugging, device-level attribution, and operational bands feeds directly into the GUI interaction design of the implemented use cases (UC-01 to UC-05).
+The evidence from the interviews was separated into validation of existing work and requirements for further development:
+
+\begin{itemize}[before=\leavevmode, leftmargin=*]
+  \item \textbf{Implemented workflows validated by the interviews.} The stakeholders confirmed the relevance of loading representative operating points (UC-01), inspecting eigenvalues and damping (UC-02), linking critical modes to state variables and physical devices (UC-03), checking operating-point quantities (UC-04), and screening $N-1$ contingencies (UC-05). They also identified improvements required in these workflows, notably clearer error diagnostics, device-level attribution, operational bands, and support for multiple or sequential contingencies.
+  \item \textbf{Additional requirements identified through the interviews.} Scenario comparison and stability-margin tracking motivated UC-06 and UC-08; device attribution and systematic contingency ranking motivated UC-07 and UC-09; actionable mitigation guidance motivated UC-10; converter-penetration studies motivated UC-11; and repeatable documentation motivated UC-12. The weak-grid and large-disturbance questions provided additional motivation for the research-oriented UC-13 and UC-14.
+\end{itemize}
+
+The interviews therefore validate the direction of the five implemented use cases while providing evidence for, rather than a commitment to implement, the nine proposed extensions.
