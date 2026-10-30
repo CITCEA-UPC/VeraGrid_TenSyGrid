@@ -639,11 +639,12 @@ def emt_terminal_current_contribution_from_data(
 class DynamicModelContract:
     """Store typed dynamic-behavior declarations owned by one symbolic block.
 
-    The contract contains semantic references, scalar flags and symbolic UIDs.
-    It therefore preserves the canonical ``Block`` object graph instead of
-    retaining import parser objects or references to a second dynamic-model
-    representation. Physical declarations state quantity ownership while
-    ``MultiCircuit`` remains the only source of bus topology.
+    The contract contains semantic references, scalar flags, symbolic UIDs and
+    serializable template selections. It therefore preserves the canonical
+    ``Block`` object graph instead of retaining import parser objects or
+    references to a second dynamic-model representation. Physical declarations
+    state quantity ownership while ``MultiCircuit`` remains the only source of
+    bus topology.
     """
 
     __slots__ = (
@@ -663,10 +664,10 @@ class DynamicModelContract:
         "dgs_open_resistance_ohm",
         "rms_conduction_status_var_uid",
         "rms_topology_constraint_status_var_uid",
-        "rms_terminal_power_contributions",
         "rms_physical_measurement_point",
         "emt_terminal_current_contributions",
         "emt_internal_grounding_link",
+        "emt_finite_reciprocal_source_mode_var_uid",
         "rms_ideal_ac_connector",
         "rms_ideal_transformer",
         "skip_device_local_explicit_init",
@@ -684,6 +685,8 @@ class DynamicModelContract:
         "startup_final_init_replay_var_names",
         "dgs_elmsvs_runtime_adapter",
         "dgs_elmsvs_remote_voltage_var_uid",
+        "modal_template_kind",
+        "modal_template_config",
     )
 
     def __init__(self) -> None:
@@ -716,10 +719,11 @@ class DynamicModelContract:
         self.dgs_open_resistance_ohm: float | None = None
         self.rms_conduction_status_var_uid: int | None = None
         self.rms_topology_constraint_status_var_uid: int | None = None
-        self.rms_terminal_power_contributions: List[RmsTerminalPowerContribution] = list()
         self.rms_physical_measurement_point: RmsPhysicalMeasurementPoint | None = None
         self.emt_terminal_current_contributions: List[EmtTerminalCurrentContribution] = list()
         self.emt_internal_grounding_link: bool = False
+        # The source owns its mode parameter; the contract stores only its UID.
+        self.emt_finite_reciprocal_source_mode_var_uid: int | None = None
         self.rms_ideal_ac_connector: bool = False
         self.rms_ideal_transformer: bool = False
         self.skip_device_local_explicit_init: bool = False
@@ -744,13 +748,18 @@ class DynamicModelContract:
         self.dgs_elmsvs_runtime_adapter: bool = False
         self.dgs_elmsvs_remote_voltage_var_uid: int | None = None
 
+        # Modal template selections are declarative editor inputs. Persisting
+        # them avoids reconstructing user choices from mutable variable names.
+        self.modal_template_kind: str | None = None
+        self.modal_template_config: Dict[str, object] | None = None
+
     def to_data(self) -> Dict[str, object]:
         """Return the versioned declarative dynamic-model contract.
 
         :return: Data-only contract suitable for canonical block persistence.
         """
         return {
-            "version": 5,
+            "version": 8,
             "dgs_elmsym_runtime_adapter": self.dgs_elmsym_runtime_adapter,
             "dgs_elmsym_runtime_adapter_pending": self.dgs_elmsym_runtime_adapter_pending,
             "dgs_elmsym_round_rotor": self.dgs_elmsym_round_rotor,
@@ -767,10 +776,6 @@ class DynamicModelContract:
             "dgs_open_resistance_ohm": self.dgs_open_resistance_ohm,
             "rms_conduction_status_var_uid": self.rms_conduction_status_var_uid,
             "rms_topology_constraint_status_var_uid": self.rms_topology_constraint_status_var_uid,
-            "rms_terminal_power_contributions": list(
-                contribution.to_data()
-                for contribution in self.rms_terminal_power_contributions
-            ),
             "rms_physical_measurement_point": (
                 None
                 if self.rms_physical_measurement_point is None
@@ -781,6 +786,7 @@ class DynamicModelContract:
                 for contribution in self.emt_terminal_current_contributions
             ),
             "emt_internal_grounding_link": self.emt_internal_grounding_link,
+            "emt_finite_reciprocal_source_mode_var_uid": self.emt_finite_reciprocal_source_mode_var_uid,
             "rms_ideal_ac_connector": self.rms_ideal_ac_connector,
             "rms_ideal_transformer": self.rms_ideal_transformer,
             "skip_device_local_explicit_init": self.skip_device_local_explicit_init,
@@ -817,6 +823,12 @@ class DynamicModelContract:
             ),
             "dgs_elmsvs_runtime_adapter": self.dgs_elmsvs_runtime_adapter,
             "dgs_elmsvs_remote_voltage_var_uid": self.dgs_elmsvs_remote_voltage_var_uid,
+            "modal_template_kind": self.modal_template_kind,
+            "modal_template_config": (
+                None
+                if self.modal_template_config is None
+                else dict(self.modal_template_config)
+            ),
         }
 
 
@@ -1029,6 +1041,74 @@ def _read_dynamic_contract_symbolic_uid_sequence(
         )
 
 
+def _read_nullable_modal_template_kind(
+        data: Dict[str, object],
+) -> str | None:
+    """Read the optional generated-template identifier.
+
+    :param data: Versioned dynamic-model contract data.
+    :return: Persisted template identifier, or ``None`` when not applicable.
+    """
+    value: object = _read_required_dynamic_contract_field(
+        data,
+        "modal_template_kind",
+    )
+    if value is None:
+        return None
+    else:
+        if isinstance(value, str):
+            return value
+        else:
+            raise TypeError(
+                "Dynamic-model contract field 'modal_template_kind' must be a string or null"
+            )
+
+
+def _read_nullable_modal_template_config(
+        data: Dict[str, object],
+) -> Dict[str, object] | None:
+    """Read scalar modal-template selections without interpreting their names.
+
+    Template builders own the meaning of each field. The symbolic persistence
+    layer only validates that the mapping is data-only and can be serialized
+    safely without retaining GUI objects or enum instances.
+
+    :param data: Versioned dynamic-model contract data.
+    :return: Independent scalar configuration mapping, or ``None``.
+    """
+    value: object = _read_required_dynamic_contract_field(
+        data,
+        "modal_template_config",
+    )
+    if value is None:
+        return None
+    else:
+        if isinstance(value, dict):
+            result: Dict[str, object] = dict()
+            raw_key: object
+            raw_value: object
+            for raw_key, raw_value in value.items():
+                has_valid_key: bool = isinstance(raw_key, str)
+                has_valid_value: bool = (
+                    raw_value is None
+                    or isinstance(raw_value, (str, bool, int, float))
+                )
+                if has_valid_key and has_valid_value:
+                    result[raw_key] = raw_value
+                else:
+                    raise TypeError(
+                        "Dynamic-model modal template configuration must contain "
+                        "string keys and scalar values"
+                    )
+            else:
+                pass
+            return result
+        else:
+            raise TypeError(
+                "Dynamic-model contract field 'modal_template_config' must be a mapping or null"
+            )
+
+
 def _read_rms_terminal_power_contributions(
         data: Dict[str, object],
 ) -> List[RmsTerminalPowerContribution]:
@@ -1126,15 +1206,21 @@ def dynamic_model_contract_from_data(data: Dict[str, object]) -> DynamicModelCon
         version_number: int = version
     else:
         raise TypeError("Dynamic-model contract version must be an integer")
-    if version_number in (1, 2, 3, 4, 5):
+    if version_number in (1, 2, 3, 4, 5, 6, 7, 8):
         pass
     else:
         raise ValueError("Unsupported dynamic-model contract version")
 
     result: DynamicModelContract = DynamicModelContract()
     expected_keys: set[str] = set(result.to_data().keys())
-    if version_number == 1:
-        expected_keys.remove("rms_terminal_power_contributions")
+    actual_keys: set[str] = set(data.keys())
+    # Older declarations carry no source capability; do not infer or migrate it.
+    if version_number < 7:
+        expected_keys.remove("emt_finite_reciprocal_source_mode_var_uid")
+    else:
+        pass
+    if version_number in (2, 3, 4, 5):
+        expected_keys.add("rms_terminal_power_contributions")
     else:
         pass
     if version_number in (1, 2):
@@ -1149,7 +1235,28 @@ def dynamic_model_contract_from_data(data: Dict[str, object]) -> DynamicModelCon
         expected_keys.remove("rms_physical_measurement_point")
     else:
         pass
-    actual_keys: set[str] = set(data.keys())
+    if version_number in (1, 2, 3, 4, 5, 6):
+        expected_keys.remove("modal_template_kind")
+        expected_keys.remove("modal_template_config")
+    else:
+        pass
+    # Both parent branches wrote version 7 with different complete schemas.
+    # Select only an exact parent shape before reading its typed declarations.
+    if version_number == 7:
+        source_keys: set[str] = expected_keys - set((
+            "modal_template_kind", "modal_template_config"
+        ))
+        modal_keys: set[str] = expected_keys - set((
+            "emt_finite_reciprocal_source_mode_var_uid",
+        ))
+        if actual_keys == source_keys:
+            expected_keys = source_keys
+        elif actual_keys == modal_keys:
+            expected_keys = modal_keys
+        else:
+            raise KeyError("Dynamic-model contract keys do not match either version 7 schema")
+    else:
+        pass
     if actual_keys == expected_keys:
         pass
     else:
@@ -1209,12 +1316,12 @@ def dynamic_model_contract_from_data(data: Dict[str, object]) -> DynamicModelCon
     result.rms_topology_constraint_status_var_uid = _read_nullable_dynamic_contract_symbolic_uid(
         data, "rms_topology_constraint_status_var_uid"
     )
-    if version_number == 1:
-        result.rms_terminal_power_contributions = list()
+    if version_number in (2, 3, 4, 5):
+        # Validate and discard obsolete terminal-power metadata. Runtime
+        # assembly derives terminal ownership from canonical mapped references.
+        _read_rms_terminal_power_contributions(data)
     else:
-        result.rms_terminal_power_contributions = (
-            _read_rms_terminal_power_contributions(data)
-        )
+        pass
     if version_number in (1, 2, 3, 4):
         result.rms_physical_measurement_point = None
     else:
@@ -1326,6 +1433,20 @@ def dynamic_model_contract_from_data(data: Dict[str, object]) -> DynamicModelCon
     result.dgs_elmsvs_remote_voltage_var_uid = _read_nullable_dynamic_contract_symbolic_uid(
         data, "dgs_elmsvs_remote_voltage_var_uid"
     )
+    # Missing branch metadata keeps its constructor default, never an inferred
+    # source capability. Exact key validation above has already identified it.
+    if "emt_finite_reciprocal_source_mode_var_uid" in expected_keys:
+        result.emt_finite_reciprocal_source_mode_var_uid = _read_nullable_dynamic_contract_symbolic_uid(
+            data, "emt_finite_reciprocal_source_mode_var_uid"
+        )
+    else:
+        pass
+    if "modal_template_kind" in expected_keys:
+        result.modal_template_kind = _read_nullable_modal_template_kind(data)
+        result.modal_template_config = _read_nullable_modal_template_config(data)
+    else:
+        result.modal_template_kind = None
+        result.modal_template_config = None
     return result
 
 
@@ -1442,65 +1563,6 @@ def _collect_contract_reachable_uids(
     return result
 
 
-def validate_rms_terminal_power_contributions(block: "Block") -> None:
-    """Reject ambiguous or unresolved RMS terminal power declarations.
-
-    :param block: Canonical symbolic block owning the declarations.
-    :return: None.
-    """
-    contract: DynamicModelContract = block.dynamic_model_contract
-    # Terminal declarations resolve semantic references through the owning
-    # block. No copied Var is retained, and duplicate topology sides fail
-    # before the network assembler can count one device twice.
-    terminal_sides: set[RmsTerminalSide] = set()
-    terminal_contribution: RmsTerminalPowerContribution
-    for terminal_contribution in contract.rms_terminal_power_contributions:
-        if isinstance(terminal_contribution, RmsTerminalPowerContribution):
-            pass
-        else:
-            raise TypeError(
-                "RMS terminal power contract contains an invalid declaration"
-            )
-        terminal_side: RmsTerminalSide = terminal_contribution.get_terminal_side()
-        if terminal_side in terminal_sides:
-            raise ValueError(
-                f"RMS terminal power contract duplicates side '{terminal_side.value}'"
-            )
-        else:
-            terminal_sides.add(terminal_side)
-
-        active_reference: VarPowerFlowReferenceType = (
-            terminal_contribution.get_active_power_reference()
-        )
-        active_variable: Var | None = block.external_mapping.get(
-            active_reference,
-            None,
-        )
-        if active_variable is None:
-            raise ValueError(
-                "RMS terminal power contract references an absent active-power variable"
-            )
-        else:
-            pass
-
-        reactive_reference: VarPowerFlowReferenceType | None = (
-            terminal_contribution.get_reactive_power_reference()
-        )
-        if reactive_reference is None:
-            pass
-        else:
-            reactive_variable: Var | None = block.external_mapping.get(
-                reactive_reference,
-                None,
-            )
-            if reactive_variable is None:
-                raise ValueError(
-                    "RMS terminal power contract references an absent reactive-power variable"
-                )
-            else:
-                pass
-
-
 def validate_emt_terminal_current_contributions(block: "Block") -> None:
     """Reject duplicate or unresolved EMT terminal current declarations.
 
@@ -1551,8 +1613,89 @@ def validate_dynamic_model_contract(block: "Block") -> None:
     """
     reachable_uids: set[int] = _collect_contract_reachable_uids(block)
     contract: DynamicModelContract = block.dynamic_model_contract
-    validate_rms_terminal_power_contributions(block=block)
     validate_emt_terminal_current_contributions(block=block)
+    # Constant source capability must survive runtime alias registration. Check
+    # the entire canonical validation tree because a parent or sibling can hold
+    # a different Var object with the same UID as the source-owned parameter.
+    contract_tree: List[Block] = block.get_all_blocks()
+    source_mode_uids: set[int] = set()
+    contract_block: Block
+    for contract_block in contract_tree:
+        candidate_mode_uid: int | None = contract_block.dynamic_model_contract.emt_finite_reciprocal_source_mode_var_uid
+        if candidate_mode_uid is None:
+            pass
+        else:
+            if isinstance(candidate_mode_uid, int) and not isinstance(candidate_mode_uid, bool):
+                source_mode_uids.add(candidate_mode_uid)
+            else:
+                raise TypeError("EMT source mode UID must be an integer or null")
+    else:
+        pass
+    if len(source_mode_uids) > 0:
+        runtime_block: Block
+        runtime_variables: Iterable[Var]
+        runtime_variable: Var
+        for runtime_block in contract_tree:
+            for runtime_variables in (runtime_block.event_dict, runtime_block.mode_dict, runtime_block.diff_vars):
+                for runtime_variable in runtime_variables:
+                    if runtime_variable.uid in source_mode_uids:
+                        raise ValueError("EMT source mode UID must not be registered as an event, mode or derivative")
+                    else:
+                        pass
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+    else:
+        pass
+    # This declaration belongs to the electrical source itself. A descendant's
+    # mode or a runtime expression cannot establish the local source capability.
+    source_mode_uid: int | None = contract.emt_finite_reciprocal_source_mode_var_uid
+    if source_mode_uid is None:
+        pass
+    else:
+        source_mode_var: Var | None = None
+        local_parameter: Var
+        for local_parameter in block.parameters:
+            if local_parameter.uid == source_mode_uid:
+                source_mode_var = local_parameter
+            else:
+                pass
+        else:
+            pass
+        if source_mode_var is None:
+            raise KeyError("EMT source mode must reference a parameter owned by the declaring Block")
+        else:
+            source_mode_expression: Expr = block.parameters[source_mode_var]
+            if isinstance(source_mode_expression, Const):
+                if (
+                        isinstance(source_mode_expression.value, (int, float))
+                        and not isinstance(source_mode_expression.value, bool)
+                        and source_mode_expression.value in (0, 1)
+                ):
+                    pass
+                else:
+                    raise ValueError("EMT source mode must be the static code 0 or 1")
+            else:
+                raise TypeError("EMT source mode must be a constant parameter")
+        # Required aliases identify the existing reciprocal sequence-impedance
+        # boundary; their values remain owned by the normal static mapper.
+        source_alias: ParamPowerFlowReferenceType
+        for source_alias in (
+                ParamPowerFlowReferenceType.R1,
+                ParamPowerFlowReferenceType.X1,
+                ParamPowerFlowReferenceType.thevenin_source_r0_pu,
+                ParamPowerFlowReferenceType.thevenin_source_x0_pu,
+        ):
+            source_impedance_var: Var | None = block.api_obj_mapping.get(source_alias, None)
+            if source_impedance_var is not None and source_impedance_var in block.parameters:
+                pass
+            else:
+                raise KeyError("EMT source impedance aliases must reference locally owned parameters")
+        else:
+            pass
     if contract.rms_physical_measurement_point is None:
         pass
     else:
@@ -1782,6 +1925,7 @@ def validate_dynamic_model_contract(block: "Block") -> None:
             contract.rms_conduction_status_var_uid,
             contract.rms_topology_constraint_status_var_uid,
             contract.dgs_elmsvs_remote_voltage_var_uid,
+            contract.emt_finite_reciprocal_source_mode_var_uid,
     ):
         if optional_uid is None:
             pass
@@ -2543,7 +2687,14 @@ def _parse_api_object_mapping(
             reference: ParamPowerFlowReferenceType = raw_reference
         else:
             if isinstance(raw_reference, str):
-                reference = ParamPowerFlowReferenceType(raw_reference)
+                # Files saved before ``freq`` became the single canonical
+                # frequency reference used the legacy serialized key ``fn``.
+                # Convert that persisted spelling while keeping it out of the
+                # live enum and every newly saved model.
+                if raw_reference == "fn":
+                    reference = ParamPowerFlowReferenceType.freq
+                else:
+                    reference = ParamPowerFlowReferenceType(raw_reference)
             else:
                 raise TypeError(
                     "Persisted API-mapping keys must be device-property references"
@@ -2664,7 +2815,9 @@ class Block:
         :param procedural_logic: Runtime procedural-logic objects attached to the block.
         :param connection_intents: Semantic dynamic connections retained across interface reconstruction.
         :param external_mapping: Variables initialized from power-flow result references.
-        :param api_obj_mapping: Static parameters mapped to properties of the associated grid device.
+        :param api_obj_mapping: Device-property sources for parameter initial values. A resolved mapping overrides
+            the local declaration during initialization without changing whether ``parameters`` or ``event_dict``
+            owns the target's runtime role.
         :param is_decomposable: Whether the editor and compiler may expose the block's internal structure.
         :param name: Human-readable block name.
         :param uid: Stable block identifier, or ``None`` to allocate a new identifier.
@@ -2817,7 +2970,10 @@ class Block:
 
         :return: Template kind or ``None`` when no modal metadata is attached.
         """
-        return self._modal_template_kind
+        if self.dynamic_model_contract.modal_template_kind is None:
+            return self._modal_template_kind
+        else:
+            return self.dynamic_model_contract.modal_template_kind
 
     @modal_template_kind.setter
     def modal_template_kind(self, kind: str | None) -> None:
@@ -2827,6 +2983,7 @@ class Block:
         :return: None.
         """
         self._modal_template_kind = kind
+        self.dynamic_model_contract.modal_template_kind = kind
 
     @property
     def modal_template_config(self) -> Dict[str, object] | None:
@@ -2834,7 +2991,10 @@ class Block:
 
         :return: Template configuration or ``None`` when it is not attached.
         """
-        return self._modal_template_config
+        if self.dynamic_model_contract.modal_template_config is None:
+            return self._modal_template_config
+        else:
+            return self.dynamic_model_contract.modal_template_config
 
     @modal_template_config.setter
     def modal_template_config(self, config: Dict[str, object] | None) -> None:
@@ -2843,7 +3003,12 @@ class Block:
         :param config: Template configuration, or ``None`` to clear it.
         :return: None.
         """
-        self._modal_template_config = config
+        if config is None:
+            stored_config: Dict[str, object] | None = None
+        else:
+            stored_config = dict(config)
+        self._modal_template_config = stored_config
+        self.dynamic_model_contract.modal_template_config = stored_config
 
     @property
     def jmarti_fit_bundle(self) -> object | None:
@@ -2952,6 +3117,8 @@ class Block:
             "procedural_logic": self.serialize_procedural_logic_entries(),
             "connection_intents": [dynamic_connection_intent_to_dict(intent) for intent in self.connection_intents],
             "dynamic_model_contract": self.dynamic_model_contract.to_data(),
+            "modal_template_kind": self.modal_template_kind,
+            "modal_template_config": copy.deepcopy(self.modal_template_config),
 
             "parameters": {
                 k.uid: {
@@ -2970,7 +3137,7 @@ class Block:
             },
 
             "external_mapping": {
-                k: _expr_to_dict(v) if v is not None else None
+                k.value: _expr_to_dict(v) if v is not None else None
                 for k, v in self.external_mapping.items()
             },
 
@@ -3089,6 +3256,14 @@ class Block:
             model_family_name=reader.read_model_family_name(),
             uid=reader.read_block_uid(),
         )
+        template_kind: object = reader.read_optional_value("modal_template_kind", None)
+        template_config: object = reader.read_optional_value("modal_template_config", None)
+        if template_kind is not None and not isinstance(template_kind, str):
+            raise TypeError("Modal template kind must be a string or null")
+        if template_config is not None and not isinstance(template_config, dict):
+            raise TypeError("Modal template config must be a mapping or null")
+        block.modal_template_kind = template_kind
+        block.modal_template_config = copy.deepcopy(template_config)
 
         # Diagram data is attached only after the symbolic hierarchy validates.
         diagram_record: Dict[str, object] = reader.read_diagram_record()
@@ -3128,6 +3303,9 @@ class Block:
             block.dynamic_model_contract = dynamic_model_contract_from_data(
                 contract_record
             )
+            # The typed contract takes precedence over legacy top-level metadata.
+            block.modal_template_kind = block.dynamic_model_contract.modal_template_kind
+            block.modal_template_config = block.dynamic_model_contract.modal_template_config
             contract_version_data: object = contract_record["version"]
             if (
                     isinstance(contract_version_data, int)
@@ -3277,6 +3455,10 @@ class Block:
             result.procedural_logic = copy.deepcopy(self.procedural_logic, memo)
             result.connection_intents = copy.deepcopy(self.connection_intents, memo)
             result.dynamic_model_contract = copy.deepcopy(self.dynamic_model_contract, memo)
+            result._modal_template_kind = copy.deepcopy(self._modal_template_kind, memo)
+            result._modal_template_config = copy.deepcopy(self._modal_template_config, memo)
+            result._jmarti_fit_bundle = copy.deepcopy(self._jmarti_fit_bundle, memo)
+            result._jmarti_runtime_data = None
             result._diagram = copy.deepcopy(self._diagram, memo)
 
             return result
@@ -3387,8 +3569,7 @@ class Block:
                 not self.boolean_guards and
                 not self.procedural_logic and
                 not self.external_mapping and
-                not self.api_obj_mapping and
-                not self.name
+                not self.api_obj_mapping
         )
 
     def empty(self) -> bool:
@@ -3463,6 +3644,29 @@ class Block:
             flat.extend(el.get_all_blocks())
 
         return flat
+
+    def get_static_mapping_keys_for_parameter(self,
+                                              parameter: Var) -> List[ParamPowerFlowReferenceType]:
+        """Find declared static mappings targeting a parameter across this model.
+
+        Mapping targets may be absent; those entries are ignored. Matching uses
+        the current symbolic ``uid``. Repeated matching keys are retained across
+        the existing depth-first block traversal.
+
+        :param parameter: Symbolic parameter whose source mappings are requested.
+        :return: Matching mapping keys in existing depth-first model order.
+        """
+        mapping_keys: List[ParamPowerFlowReferenceType] = list()
+        candidate_block: Block
+        mapping_key: ParamPowerFlowReferenceType
+        mapping_target: Var | None
+        for candidate_block in self.get_all_blocks():
+            for mapping_key, mapping_target in candidate_block.api_obj_mapping.items():
+                if isinstance(mapping_target, Var) and mapping_target.uid == parameter.uid:
+                    mapping_keys.append(mapping_key)
+                else:
+                    pass
+        return mapping_keys
 
     def merge_incoming_block(self, block: Block):
         block.unify_blocks()
@@ -3597,10 +3801,32 @@ class Block:
         :rtype:
         """
 
-        for lst in [self.state_vars, self.algebraic_vars, self.diff_vars]:
+        # Ports and solved-variable collections form one symbolic interface.
+        # Replacing only the solved owner leaves inputs/outputs pointing to a
+        # stale UID even though equations already consume the replacement.
+        for lst in [
+            self.in_vars,
+            self.out_vars,
+            self.state_vars,
+            self.algebraic_vars,
+            self.diff_vars,
+        ]:
             for i, var in enumerate(lst):
                 if var.uid == old.uid:
                     lst[i] = new
+                else:
+                    pass
+
+        if isinstance(new, Var):
+            mapped_name: str
+            mapped_var: Var
+            for mapped_name, mapped_var in self.var_mapping.items():
+                if mapped_var.uid == old.uid:
+                    self.var_mapping[mapped_name] = new
+                else:
+                    pass
+        else:
+            pass
 
     def update_equations(self, old: Var | Expr, new: Var | Expr) -> None:
         """
@@ -3718,12 +3944,28 @@ class Block:
         i: int
         var: Var
 
-        for lst in [self.state_vars, self.algebraic_vars, self.diff_vars]:
+        for lst in [
+            self.in_vars,
+            self.out_vars,
+            self.state_vars,
+            self.algebraic_vars,
+            self.diff_vars,
+        ]:
             for i, var in enumerate(lst):
                 if var.uid in uid_mapping:
                     lst[i] = uid_mapping[var.uid]
                 else:
                     pass
+
+        mapped_name: str
+        mapped_var: Var
+        mapped_replacement: Var | None
+        for mapped_name, mapped_var in self.var_mapping.items():
+            mapped_replacement = uid_mapping.get(mapped_var.uid, None)
+            if mapped_replacement is None:
+                pass
+            else:
+                self.var_mapping[mapped_name] = mapped_replacement
 
     def update_equations_bulk(self, var_mapping: Dict[Var, Var]) -> None:
         """
@@ -3930,7 +4172,7 @@ def find_connections(mdl1: Block, mdl2: Block) -> tuple[List[tuple[Var, Var]], L
         for inpt in mdl2.in_vars
         if
         # outp.shared_ref == inpt.shared_ref and outp.shared_ref is not None and inpt.shared_ref is not None and outp.uid == inpt.uid
-        outp.shared_ref == inpt.shared_ref and outp.shared_ref is not None and inpt.shared_ref is not None
+        outp.shared_ref == inpt.shared_ref and outp.shared_ref is not None and inpt.shared_ref is not None or outp.uid == inpt.uid
     ]
 
     power_flow_pairs = [
@@ -3939,7 +4181,7 @@ def find_connections(mdl1: Block, mdl2: Block) -> tuple[List[tuple[Var, Var]], L
         for inpt in mdl2.in_vars
         if
         # outp.ref == inpt.ref and outp.ref is not None and inpt.ref is not None and outp.uid == inpt.uid
-        outp.ref == inpt.ref and outp.ref is not None and inpt.ref is not None
+        outp.ref == inpt.ref and outp.ref is not None and inpt.ref is not None or outp.uid == inpt.uid
     ]
 
     return pairs, power_flow_pairs
@@ -4518,3 +4760,57 @@ def build_name_to_vars_lookup(block: Block) -> Dict[str, List[Var]]:
                             seen_uids.add(variable.uid)
 
     return lookup
+
+
+def flatten_block(block: Block) -> Block:
+    """Create one flat block from a hierarchical block tree.
+
+    The source block remains unchanged. Every primitive block is visited in
+    depth-first order so declarations and equations retain the hierarchy's
+    existing deterministic order while the returned block owns independent
+    aggregate containers.
+
+    :param block: Root block whose child hierarchy is to be flattened.
+    :return: New block containing the declarations from the full hierarchy.
+    """
+    flat_block: Block = Block(name=block.name, uid=block.uid)
+    flat_block.diagram = block.diagram.to_dict()
+    known_input_uids: set[int] = set()
+    known_output_uids: set[int] = set()
+
+    for current_block in block.get_all_blocks():
+        flat_block.state_vars.extend(current_block.state_vars)
+        flat_block.state_eqs.extend(current_block.state_eqs)
+        flat_block.algebraic_vars.extend(current_block.algebraic_vars)
+        flat_block.algebraic_eqs.extend(current_block.algebraic_eqs)
+        flat_block.inequalities.extend(current_block.inequalities)
+        flat_block.diff_vars.extend(current_block.diff_vars)
+        flat_block.reformulated_vars.extend(current_block.reformulated_vars)
+        flat_block.differential_eqs.extend(current_block.differential_eqs)
+        for variable in current_block.in_vars:
+            if variable.uid not in known_input_uids:
+                flat_block.in_vars.append(variable)
+                known_input_uids.add(variable.uid)
+        for variable in current_block.out_vars:
+            if variable.uid not in known_output_uids:
+                flat_block.out_vars.append(variable)
+                known_output_uids.add(variable.uid)
+        flat_block.parameters.update(current_block.parameters)
+        flat_block.init_values.update(current_block.init_values)
+        flat_block.init_eqs.update(current_block.init_eqs)
+        flat_block.diff_init_eqs.update(current_block.diff_init_eqs)
+        flat_block.discrete_eqs.update(current_block.discrete_eqs)
+        flat_block.post_init_seed_eqs.update(current_block.post_init_seed_eqs)
+        flat_block.event_dict.update(current_block.event_dict)
+        flat_block.mode_dict.update(current_block.mode_dict)
+        flat_block.boolean_guards.update(current_block.boolean_guards)
+        flat_block.external_mapping.update(current_block.external_mapping)
+        flat_block.api_obj_mapping.update(current_block.api_obj_mapping)
+        flat_block.procedural_logic.extend(current_block.procedural_logic)
+
+    flat_block.children = list()
+    flat_block.var_mapping = {
+        variable.name: variable
+        for variable in flat_block.algebraic_vars + flat_block.state_vars + flat_block.diff_vars
+    }
+    return flat_block

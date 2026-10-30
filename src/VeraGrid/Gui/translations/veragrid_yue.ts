@@ -213,6 +213,201 @@ li.checked::標記 { content: &quot;\2612&quot;; }
     </message>
 </context>
 <context>
+    <name>AddSymbolDialog</name>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="12"/>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="26"/>
+        <source>Add block property</source>
+        <translation>添加區塊屬性</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="31"/>
+        <source>Define a new property for the selected block.</source>
+        <translation>為選定嘅區塊定義一個新屬性。</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="48"/>
+        <source>Owner block</source>
+        <translation>擁有者區塊</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="58"/>
+        <source>Name</source>
+        <translation>名稱</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="64"/>
+        <source>Enter a valid symbol name</source>
+        <translation>輸入一個有效嘅符號名稱</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="70"/>
+        <source>Variable type</source>
+        <translation>變數類型</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="80"/>
+        <source>Choose how this symbol participates in the dynamic model.</source>
+        <translation>選擇呢個符號點樣參與動態模型。</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="98"/>
+        <source>Options</source>
+        <translation>選項</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="111"/>
+        <source>Expose as output</source>
+        <translation>輸出公開</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="116"/>
+        <source>Create derivative variable</source>
+        <translation>創建導數變數</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="130"/>
+        <source>Power-flow variable used to initialize this dynamic variable.</source>
+        <translation>用於初始化此動態變數的電力潮流變數。</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="131"/>
+        <source>Power-flow initialization source</source>
+        <translation>電力潮流初始化來源</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="154"/>
+        <source>Local initial value</source>
+        <translation>本地初始值</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="167"/>
+        <source>Device initial value</source>
+        <translation>設備初始值</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="186"/>
+        <source>Retained modes preserve discrete state between simulation steps.</source>
+        <translation>保留模式會喺模擬步驟之間保留離散狀態。</translation>
+    </message>
+    <message>
+        <source>Add parameter</source>
+        <translation>添加參數</translation>
+    </message>
+    <message>
+        <source>Add retained mode</source>
+        <translation>添加保留模式</translation>
+    </message>
+    <message>
+        <source>Add variable</source>
+        <translation>添加變數</translation>
+    </message>
+    <message>
+        <source>Algebraic</source>
+        <translation>代數</translation>
+    </message>
+    <message>
+        <source>Declare a configurable value owned by the selected dynamic block.</source>
+        <translation>宣告一個由選定動態區塊擁有的可配置值。</translation>
+    </message>
+    <message>
+        <source>Declare a variable owned by the selected dynamic block.</source>
+        <translation>宣告一個由選定動態區塊擁有的變數。</translation>
+    </message>
+    <message>
+        <source>Declare discrete state that persists between simulation steps.</source>
+        <translation>宣告一個喺模擬步驟之間持續嘅離散狀態。</translation>
+    </message>
+    <message>
+        <source>Dynamic parameter</source>
+        <translation>動態參數</translation>
+    </message>
+    <message>
+        <source>Enter a valid Python symbol name.</source>
+        <translation>輸入一個有效嘅 Python 符號名稱。</translation>
+    </message>
+    <message>
+        <source>Input</source>
+        <translation>輸入</translation>
+    </message>
+    <message>
+        <source>May change during the simulation and can optionally start from a grid-device value.</source>
+        <translation>模擬期間可能會改變，可選擇從電網設備值開始。</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>無</translation>
+    </message>
+    <message>
+        <source>Nothing was added: {message}</source>
+        <translation>未添加任何內容：{message}</translation>
+    </message>
+    <message>
+        <source>Parameter type</source>
+        <translation>參數類型</translation>
+    </message>
+    <message>
+        <source>Preserves discrete state between simulation steps.</source>
+        <translation>保留模擬步驟之間的離散狀態。</translation>
+    </message>
+    <message>
+        <source>Receives its value from an incoming block connection.</source>
+        <translation>從一個輸入嘅區塊連接接收其值。</translation>
+    </message>
+    <message>
+        <source>Remains fixed during the simulation and can optionally start from a grid-device value.</source>
+        <translation>模擬期間保持固定，可選擇從電網設備值開始。</translation>
+    </message>
+    <message>
+        <source>Represents a differential state integrated during the simulation.</source>
+        <translation>代表喺模擬期間積分嘅微分狀態。</translation>
+    </message>
+    <message>
+        <source>Represents a value solved by the algebraic equations.</source>
+        <translation>代表由代數方程式求解嘅值。</translation>
+    </message>
+    <message>
+        <source>Retained mode</source>
+        <translation>保留模式</translation>
+    </message>
+    <message>
+        <source>Search device parameters</source>
+        <translation>搜尋設備參數</translation>
+    </message>
+    <message>
+        <source>Search power-flow variables</source>
+        <translation>搜尋電力潮流變數</translation>
+    </message>
+    <message>
+        <source>Select a device initialization source from the list.</source>
+        <translation>從列表選擇一個設備初始化來源。</translation>
+    </message>
+    <message>
+        <source>Select a power-flow initialization source from the list.</source>
+        <translation>從列表選擇一個電力潮流初始化來源。</translation>
+    </message>
+    <message>
+        <source>Select a valid owner block.</source>
+        <translation>選擇一個有效嘅擁有者區塊。</translation>
+    </message>
+    <message>
+        <source>Select a valid symbol type.</source>
+        <translation>選擇一個有效嘅符號類型。</translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation>狀態</translation>
+    </message>
+    <message>
+        <source>Static parameter</source>
+        <translation>靜態參數</translation>
+    </message>
+    <message>
+        <source>Use local numeric value</source>
+        <translation>使用本地數值</translation>
+    </message>
+</context>
+<context>
     <name>AdmittanceMatrixEditorWidget</name>
     <message>
         <location filename="../DeviceEditors/AdmittanceMatrixEditor/admittance_matrix_editor_gui.ui" line="19"/>
@@ -804,7 +999,7 @@ li.checked::標記 { content: &quot;\2612&quot;; }
     <name>BlockPropertyTreeModel</name>
     <message>
         <source>Missing PF mapping</source>
-        <translation>缺少 PF 映射</translation>
+        <translation type="vanished">缺少 PF 映射</translation>
     </message>
     <message>
         <source>Name</source>
@@ -820,7 +1015,7 @@ li.checked::標記 { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Template issue: static parameters require api_obj_mapping. An independently editable parameter should be in event_dict. This refactor does not migrate templates automatically.</source>
-        <translation>模板問題：靜態參數需要 api_obj_mapping。獨立可編輯的參數應在 event_dict 中。此重構不會自動遷移模板。</translation>
+        <translation type="vanished">模板問題：靜態參數需要 api_obj_mapping。獨立可編輯的參數應在 event_dict 中。此重構不會自動遷移模板。</translation>
     </message>
     <message>
         <source>Type</source>
@@ -829,6 +1024,14 @@ li.checked::標記 { content: &quot;\2612&quot;; }
     <message>
         <source>Value / PF reference</source>
         <translation>值 / PF 參考</translation>
+    </message>
+    <message>
+        <source>Fixed local value. Select a device initialization mapping only when this value must come from the associated grid device.</source>
+        <translation>固定本地值。僅當此值必須來自相關電網設備時，才選擇設備初始化映射。</translation>
+    </message>
+    <message>
+        <source>Invalid device initialization mapping: the target is not declared in this block&apos;s parameters or event_dict.</source>
+        <translation>無效設備初始化映射：目標未喺此區塊嘅參數或 event_dict 中宣告。</translation>
     </message>
 </context>
 <context>
@@ -1344,7 +1547,7 @@ li.checked::標記 { content: &quot;\2612&quot;; }
     </message>
     <message>
         <source>Are you sure that you want to delete_with_dialogue the selected elements?</source>
-        <translation>您確定要刪除_with_dialogue 選定的元素嗎？</translation>
+        <translation type="vanished">您確定要刪除_with_dialogue 選定的元素嗎？</translation>
     </message>
     <message>
         <source>Are you sure that you want to duplicate the selected elements?</source>
@@ -1566,6 +1769,18 @@ Are you sure?</source>
         <source>{device_type} {property_name} distribution</source>
         <translation>{device_type} {property_name} 分佈</translation>
     </message>
+    <message>
+        <source>Are you sure that you want to delete the selected elements?</source>
+        <translation>確定要刪除選定的元素嗎？</translation>
+    </message>
+    <message>
+        <source>Element in use</source>
+        <translation>元素正在使用</translation>
+    </message>
+    <message>
+        <source>The element is still referenced by: {names}</source>
+        <translation>該元素仍被以下項目引用：{names}</translation>
+    </message>
 </context>
 <context>
     <name>DcLineDeviceEditor</name>
@@ -1582,15 +1797,43 @@ Are you sure?</source>
     <name>DcLineEditor</name>
     <message>
         <source>Line editor</source>
-        <translation>行編輯器</translation>
+        <translation type="vanished">行編輯器</translation>
     </message>
     <message>
         <source>Load template</source>
-        <translation>載入範本</translation>
+        <translation type="vanished">載入範本</translation>
     </message>
     <message>
         <source>The template {template_name} contains errors</source>
-        <translation>範本 {template_name} 包含錯誤</translation>
+        <translation type="vanished">範本 {template_name} 包含錯誤</translation>
+    </message>
+    <message>
+        <source>Apply Cable System</source>
+        <translation>套用電纜系統</translation>
+    </message>
+    <message>
+        <source>Available Cable Systems</source>
+        <translation>可用電纜系統</translation>
+    </message>
+    <message>
+        <source>Branch current rating [kA] @ {voltage:g} kV</source>
+        <translation>分支電流額定值 [kA] @ {voltage:g} kV</translation>
+    </message>
+    <message>
+        <source>Cable System conductor</source>
+        <translation>電纜系統導體</translation>
+    </message>
+    <message>
+        <source>DC line editor</source>
+        <translation>DC線編輯器</translation>
+    </message>
+    <message>
+        <source>Positive length, voltage and power base are required</source>
+        <translation>需要正長度、電壓和功率基值</translation>
+    </message>
+    <message>
+        <source>Use Cable System</source>
+        <translation>使用電纜系統</translation>
     </message>
 </context>
 <context>
@@ -2010,6 +2253,26 @@ Are you sure?</source>
     <message>
         <source>only has values for the snapshot</source>
         <translation>僅有快照值</translation>
+    </message>
+    <message>
+        <source>Are you sure that you want to delete folder &apos;{0}&apos; and all its contents?</source>
+        <translation>確定要刪除資料夾 &apos;{0}&apos; 及其所有內容嗎？</translation>
+    </message>
+    <message>
+        <source>Folder name:</source>
+        <translation>資料夾名稱：</translation>
+    </message>
+    <message>
+        <source>New Folder</source>
+        <translation>新資料夾</translation>
+    </message>
+    <message>
+        <source>New folder</source>
+        <translation>新資料夾</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>重命名</translation>
     </message>
 </context>
 <context>
@@ -2573,7 +2836,7 @@ Are you sure?</source>
         <translation>沒有 {mode} 繪圖。請先在 {mode} 繪圖中創建繪圖。</translation>
     </message>
     <message>
-        <source>Remove item's connections to edit</source>
+        <source>Remove item&apos;s connections to edit</source>
         <translation>移除項目編輯的連接</translation>
     </message>
     <message>
@@ -2595,6 +2858,90 @@ Are you sure?</source>
     <message>
         <source>This symbol is not available in dynamic results. Apply and save model changes before adding a new symbol to a plot.</source>
         <translation>此符號在動態結果中不可用。請在添加新符號到繪圖前，應用並保存模型更改。</translation>
+    </message>
+    <message>
+        <source>Invalid — ModelInfo digest mismatch</source>
+        <translation>無效 — ModelInfo摘要不匹配</translation>
+    </message>
+    <message>
+        <source>Invalid — provider not found</source>
+        <translation>無效 — 未找到提供者</translation>
+    </message>
+    <message>
+        <source>Manufacturer native controller
+Provider: {provider}
+Interface: {interface}    Domain: {domain}
+Inputs: {input_count}    Outputs: {output_count}
+Reference: {status}</source>
+        <translation>製造商原生控制器
+提供者：{provider}
+介面：{interface}    域：{domain}
+輸入：{input_count}    輸出：{output_count}
+參考：{status}</translation>
+    </message>
+    <message>
+        <source>Missing provider</source>
+        <translation>缺少提供者</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <source>Valid</source>
+        <translation>有效</translation>
+    </message>
+    <message>
+        <source>Equation counts</source>
+        <translation>方程式計數</translation>
+    </message>
+    <message>
+        <source>Repeated variable names</source>
+        <translation>重複變數名稱</translation>
+    </message>
+    <message>
+        <source>Static parameter mappings</source>
+        <translation>靜態參數映射</translation>
+    </message>
+    <message>
+        <source>Unnamed block</source>
+        <translation>未命名區塊</translation>
+    </message>
+    <message>
+        <source>Variable initialization</source>
+        <translation>變數初始化</translation>
+    </message>
+    <message>
+        <source>algebraic variables={variable_count}, algebraic equations={equation_count}</source>
+        <translation>代數變數={variable_count}，代數方程式={equation_count}</translation>
+    </message>
+    <message>
+        <source>derivative variables missing initialization or a power-flow source: {variable_names}</source>
+        <translation>缺少初始化或電力潮流來源嘅微分變數：{variable_names}</translation>
+    </message>
+    <message>
+        <source>event parameters with no value: {parameter_names}</source>
+        <translation>沒有值嘅事件參數：{parameter_names}</translation>
+    </message>
+    <message>
+        <source>mapping targets not declared as local parameters: {parameter_names}</source>
+        <translation>映射目標未宣告為本地參數：{parameter_names}</translation>
+    </message>
+    <message>
+        <source>parameters missing a static mapping: {parameter_names}</source>
+        <translation>缺少靜態映射嘅參數：{parameter_names}</translation>
+    </message>
+    <message>
+        <source>state variables={variable_count}, state equations={equation_count}</source>
+        <translation>狀態變數={variable_count}，狀態方程式={equation_count}</translation>
+    </message>
+    <message>
+        <source>variables missing initialization or a power-flow source: {variable_names}</source>
+        <translation>缺少初始化或電力潮流來源嘅變數：{variable_names}</translation>
+    </message>
+    <message>
+        <source>variables: {variable_names}</source>
+        <translation>變數：{variable_names}</translation>
     </message>
 </context>
 <context>
@@ -2700,7 +3047,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>Enter a valid Python symbol name.</source>
-        <translation>輸入有效的 Python 符號名稱。</translation>
+        <translation type="vanished">輸入有效的 Python 符號名稱。</translation>
     </message>
     <message>
         <source>Equation PDF created: {path}</source>
@@ -2803,7 +3150,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>None</source>
-        <translation>無</translation>
+        <translation type="vanished">無</translation>
     </message>
     <message>
         <source>Nothing was applied: {message}</source>
@@ -2835,7 +3182,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>Parameter whose value may change during the simulation.</source>
-        <translation>參數值喺模擬期間可能會改變。</translation>
+        <translation type="vanished">參數值喺模擬期間可能會改變。</translation>
     </message>
     <message>
         <source>Parameters</source>
@@ -2884,11 +3231,11 @@ Are you sure?</source>
     </message>
     <message>
         <source>Select a valid owner block.</source>
-        <translation>選擇一個有效的擁有者區塊。</translation>
+        <translation type="vanished">選擇一個有效的擁有者區塊。</translation>
     </message>
     <message>
         <source>Select a valid symbol type.</source>
-        <translation>選擇一個有效的符號類型。</translation>
+        <translation type="vanished">選擇一個有效的符號類型。</translation>
     </message>
     <message>
         <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="319"/>
@@ -2989,7 +3336,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>Retained mode</source>
-        <translation>保留模式</translation>
+        <translation type="vanished">保留模式</translation>
     </message>
     <message>
         <location filename="../DynamicModelEditor/Editor/BlockProperties/dynamic_block_properties.ui" line="82"/>
@@ -3044,7 +3391,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>Nothing was added: {message}</source>
-        <translation>未添加任何內容：{message}</translation>
+        <translation type="vanished">未添加任何內容：{message}</translation>
     </message>
     <message>
         <source>Add to plot...</source>
@@ -3053,6 +3400,18 @@ Are you sure?</source>
     <message>
         <source>Apply the new symbol before adding it to a plot</source>
         <translation>在添加至繪圖前應用新符號</translation>
+    </message>
+    <message>
+        <source>Block properties - {name} (read-only manufacturer model)</source>
+        <translation>區塊屬性 - {name} (唯讀製造商模型)</translation>
+    </message>
+    <message>
+        <source>Manufacturer model bindings are managed by their provider and are read-only here.</source>
+        <translation>製造商模型綁定由其提供者管理，此處為唯讀。</translation>
+    </message>
+    <message>
+        <source>Manufacturer model bindings are read-only in Block Properties.</source>
+        <translation>製造商模型綁定在區塊屬性中為唯讀。</translation>
     </message>
 </context>
 <context>
@@ -3523,6 +3882,13 @@ Are you sure?</source>
     </message>
 </context>
 <context>
+    <name>DynamicEventParametersTreeModel</name>
+    <message>
+        <source>Parameters</source>
+        <translation>參數</translation>
+    </message>
+</context>
+<context>
     <name>DynamicEventsDraftSession</name>
     <message>
         <source>An event and its events group use different simulation modes.</source>
@@ -3635,12 +4001,11 @@ Are you sure?</source>
         <translation>編輯事件組及其事件</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="130"/>
         <source>Add Events Group</source>
         <translation>添加事件組</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="139"/>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="143"/>
         <source>Add an event to the selected event group</source>
         <translation>為選定嘅事件組添加一個事件</translation>
     </message>
@@ -3686,7 +4051,7 @@ Are you sure?</source>
         <translation type="vanished">建立事件組</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="131"/>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="135"/>
         <source>Create an event group</source>
         <translation>建立一個事件組</translation>
     </message>
@@ -3747,7 +4112,7 @@ Are you sure?</source>
         <translation type="vanished">移除事件組</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="147"/>
+        <location filename="../DynamicModelEditor/Events/dynamic_events_page_ui.ui" line="151"/>
         <source>Remove the selected event or event group</source>
         <translation>移除選定嘅事件或事件組</translation>
     </message>
@@ -4282,74 +4647,60 @@ select the expected processing format</source>
 <context>
     <name>Form</name>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="14"/>
         <source>Add block property</source>
-        <translation>添加區塊屬性</translation>
+        <translation type="vanished">添加區塊屬性</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="26"/>
         <source>Add symbol to selected block</source>
-        <translation>將符號添加到選定區塊</translation>
+        <translation type="vanished">將符號添加到選定區塊</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="71"/>
         <source>Output</source>
-        <translation>輸出</translation>
+        <translation type="vanished">輸出</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="78"/>
         <source>Create derivative variable</source>
-        <translation>創建導數變數</translation>
+        <translation type="vanished">創建導數變數</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="144"/>
         <source>New symbol name</source>
-        <translation>新符號名稱</translation>
+        <translation type="vanished">新符號名稱</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="151"/>
         <source>Symbol category</source>
-        <translation>符號類別</translation>
+        <translation type="vanished">符號類別</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="158"/>
         <source>Owner block</source>
-        <translation>擁有者區塊</translation>
+        <translation type="vanished">擁有者區塊</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="165"/>
         <source>Type</source>
-        <translation>類型</translation>
+        <translation type="vanished">類型</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="172"/>
         <source>Add symbol</source>
-        <translation>添加符號</translation>
+        <translation type="vanished">添加符號</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="195"/>
         <source>Static device mapping</source>
-        <translation>靜態設備映射</translation>
+        <translation type="vanished">靜態設備映射</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="202"/>
         <source>Power-flow variable used to initialize this dynamic variable.</source>
-        <translation>用於初始化此動態變數的電力潮流變數。</translation>
+        <translation type="vanished">用於初始化此動態變數的電力潮流變數。</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="205"/>
         <source>Power-flow variable</source>
-        <translation>電力潮流變數</translation>
+        <translation type="vanished">電力潮流變數</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="266"/>
         <source>Enter a name</source>
-        <translation>輸入名稱</translation>
+        <translation type="vanished">輸入名稱</translation>
     </message>
     <message>
-        <location filename="../DynamicModelEditor/Editor/BlockProperties/add_symbol_widget.ui" line="273"/>
         <source>Initial numeric value</source>
-        <translation>初始數值</translation>
+        <translation type="vanished">初始數值</translation>
     </message>
 </context>
 <context>
@@ -4418,13 +4769,26 @@ select the expected processing format</source>
     </message>
     <message>
         <location filename="../DeviceEditors/GeneratorEditor/generator_editor_gui.ui" line="75"/>
-        <source>Add</source>
-        <translation>添加</translation>
+        <source>Add entry</source>
+        <translation>添加項目</translation>
     </message>
     <message>
-        <location filename="../DeviceEditors/GeneratorEditor/generator_editor_gui.ui" line="95"/>
+        <location filename="../DeviceEditors/GeneratorEditor/generator_editor_gui.ui" line="89"/>
+        <source>Delete selected</source>
+        <translation>刪除所選內容</translation>
+    </message>
+    <message>
+        <location filename="../DeviceEditors/GeneratorEditor/generator_editor_gui.ui" line="116"/>
+        <source>Apply curve to Qmin, Qmax, Pmin, Pmax</source>
+        <translation>將曲線應用於 Qmin, Qmax, Pmin, Pmax</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="vanished">添加</translation>
+    </message>
+    <message>
         <source>Del</source>
-        <translation>德爾</translation>
+        <translation type="vanished">德爾</translation>
     </message>
 </context>
 <context>
@@ -4443,6 +4807,73 @@ select the expected processing format</source>
     <message>
         <source>Editor launch is not implemented for {class_name}</source>
         <translation>{class_name} 的編輯器啟動尚未實作</translation>
+    </message>
+</context>
+<context>
+    <name>GraphsWidget</name>
+    <message>
+        <source>Center data</source>
+        <translation>置中數據</translation>
+    </message>
+    <message>
+        <source>Edit X maximum…</source>
+        <translation>編輯 X 最大值…</translation>
+    </message>
+    <message>
+        <source>Edit X minimum…</source>
+        <translation>編輯 X 最小值…</translation>
+    </message>
+    <message>
+        <source>Edit Y maximum…</source>
+        <translation>編輯 Y 最大值…</translation>
+    </message>
+    <message>
+        <source>Edit Y minimum…</source>
+        <translation>編輯 Y 最小值…</translation>
+    </message>
+    <message>
+        <source>Enter a finite axis limit and press Enter</source>
+        <translation>輸入有限軸限並按 Enter</translation>
+    </message>
+    <message>
+        <source>Mouse wheel: zoom
+Left drag: select zoom area
+Ctrl + left drag: pan
+Right-click: chart options
+Double-click: reset view</source>
+        <translation type="vanished">滑鼠滾輪：縮放
+左拖：選取縮放區域
+Ctrl + 左拖：平移
+右鍵：圖表選項
+雙擊：重設視圖</translation>
+    </message>
+    <message>
+        <source>Negative</source>
+        <translation>負數</translation>
+    </message>
+    <message>
+        <source>PNG image (*.png)</source>
+        <translation>PNG 圖像 (*.png)</translation>
+    </message>
+    <message>
+        <source>Positive</source>
+        <translation>正數</translation>
+    </message>
+    <message>
+        <source>SVG image (*.svg)</source>
+        <translation>SVG 圖像 (*.svg)</translation>
+    </message>
+    <message>
+        <source>Save chart</source>
+        <translation>儲存圖表</translation>
+    </message>
+    <message>
+        <source>Save image…</source>
+        <translation>儲存圖片…</translation>
+    </message>
+    <message>
+        <source>Probability</source>
+        <translation>概率</translation>
     </message>
 </context>
 <context>
@@ -4955,7 +5386,7 @@ IMPORTANT: This will take into account every movement of substation and line loc
     </message>
     <message>
         <source>Power Grid Models not installed :/</source>
-        <translation>電網模型未安裝 :/</translation>
+        <translation type="vanished">電網模型未安裝 :/</translation>
     </message>
     <message>
         <source>Random grid {bus_count} buses</source>
@@ -5100,6 +5531,10 @@ Cancel and retry?</source>
     <message>
         <source>The current save is still finishing. Please retry when it is done.</source>
         <translation>儲存過程仲未完成。請等佢完成再重試。</translation>
+    </message>
+    <message>
+        <source>Power Grid Model unavailable: {reason}</source>
+        <translation>電網模型不可用：{reason}</translation>
     </message>
 </context>
 <context>
@@ -5497,6 +5932,87 @@ Do you want to continue without a template?</source>
     <message>
         <source>Value</source>
         <translation>值</translation>
+    </message>
+</context>
+<context>
+    <name>Lookup1DConfigTab</name>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="35"/>
+        <source>Generate points from f(x)</source>
+        <translation>從 f(x) 生成點</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="41"/>
+        <source>f(x) =</source>
+        <translation>f(x) =</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="48"/>
+        <source>Expression using x, pi, e, and supported symbolic functions; for example sin(pi*x) or x**2</source>
+        <translation>使用 x、π、e 和支援的符號函數表達式；例如 sin(π*x) 或 x**2</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="51"/>
+        <source>x</source>
+        <translation>x</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="54"/>
+        <source>Example: sin(x)</source>
+        <translation>範例：sin(x)</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="61"/>
+        <source>Replace the table with evenly spaced samples of f(x)</source>
+        <translation>用 f(x) 的等間距樣本替換表格</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="64"/>
+        <source>Generate</source>
+        <translation>生成</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="71"/>
+        <source>x min</source>
+        <translation>x 最小值</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="94"/>
+        <source>x max</source>
+        <translation>x 最大值</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="120"/>
+        <source>Points</source>
+        <translation>點</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="231"/>
+        <source>Add point</source>
+        <translation>添加點</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="248"/>
+        <source>Remove selected points</source>
+        <translation>移除選取點</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="265"/>
+        <source>Sort points by x</source>
+        <translation>根據 x 排序點</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/BlockProperties/SpecialConfigTabs/lookup_1d_config_tab.ui" line="268"/>
+        <source>Sort by x</source>
+        <translation>依 x 排序</translation>
+    </message>
+    <message>
+        <source>Lookup curve</source>
+        <translation>查找曲線</translation>
+    </message>
+    <message>
+        <source>This lookup builder does not expose a points configuration.</source>
+        <translation>此查找建構器不提供點配置。</translation>
     </message>
 </context>
 <context>
@@ -6967,6 +7483,195 @@ Do you want to continue without a template?</source>
     </message>
 </context>
 <context>
+    <name>ManufacturerNativeImporterDialog</name>
+    <message>
+        <source>Both declarations are part of the manufacturer delivery contract and are required before qualification.</source>
+        <translation>兩項聲明均屬於製造商交付合約的一部分，在認證前是必需的。</translation>
+    </message>
+    <message>
+        <source>Browse...</source>
+        <translation>瀏覽...</translation>
+    </message>
+    <message>
+        <source>Choose an existing manufacturer binary.</source>
+        <translation>選擇現有的製造商二進制文件。</translation>
+    </message>
+    <message>
+        <source>Complete the manufacturer declarations required by the selected interface.</source>
+        <translation>完成所選介面所需的製造商聲明。</translation>
+    </message>
+    <message>
+        <source>Destination provider</source>
+        <translation>目標提供者</translation>
+    </message>
+    <message>
+        <source>Each comma-separated value is the destination ordinal for the source ordinal at that position. Example: 1,0 maps source 0 to destination 1 and source 1 to destination 0.</source>
+        <translation>每個逗號分隔的值是該位置源序數對應的目標序數。範例：1,0 將源 0 對應到目標 1，將源 1 對應到目標 0。</translation>
+    </message>
+    <message>
+        <source>Example: 0,1</source>
+        <translation>範例：0,1</translation>
+    </message>
+    <message>
+        <source>Example: 1,0</source>
+        <translation>範例：1,0</translation>
+    </message>
+    <message>
+        <source>Example: 2,0,1</source>
+        <translation>範例：2,0,1</translation>
+    </message>
+    <message>
+        <source>Import manufacturer native model</source>
+        <translation>匯入製造商原生模型</translation>
+    </message>
+    <message>
+        <source>Input destination ordinals</source>
+        <translation>輸入目標序數</translation>
+    </message>
+    <message>
+        <source>Inspect and attach variant</source>
+        <translation>檢查並附加變體</translation>
+    </message>
+    <message>
+        <source>Inspect and import</source>
+        <translation>檢查並匯入</translation>
+    </message>
+    <message>
+        <source>Inspecting the binary in an isolated worker...</source>
+        <translation>正在隔離工作器中檢查二進制文件...</translation>
+    </message>
+    <message>
+        <source>Linux libraries (*.so)</source>
+        <translation>Linux 函式庫 (*.so)</translation>
+    </message>
+    <message>
+        <source>Manufacturer binary</source>
+        <translation>製造商二進制文件</translation>
+    </message>
+    <message>
+        <source>Manufacturer interface</source>
+        <translation>製造商介面</translation>
+    </message>
+    <message>
+        <source>Manufacturer native model ready</source>
+        <translation>製造商原生模型已準備好</translation>
+    </message>
+    <message>
+        <source>Manufacturer native model variants</source>
+        <translation>製造商原生模型變體</translation>
+    </message>
+    <message>
+        <source>No provider has been imported yet.</source>
+        <translation>尚未匯入任何提供者。</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>無</translation>
+    </message>
+    <message>
+        <source>Output destination ordinals</source>
+        <translation>輸出目標序數</translation>
+    </message>
+    <message>
+        <source>Parameter destination ordinals</source>
+        <translation>參數目標序數</translation>
+    </message>
+    <message>
+        <source>Platform variant</source>
+        <translation>平台變體</translation>
+    </message>
+    <message>
+        <source>Provider: {name}</source>
+        <translation>提供者：{name}</translation>
+    </message>
+    <message>
+        <source>Provider: {provider}
+Platform attached: {platform}
+Templates created: None (existing templates retained).</source>
+        <translation>提供者：{provider}
+已附加平台：{platform}
+創建的範本：無 (保留現有範本)。</translation>
+    </message>
+    <message>
+        <source>Provider: {provider}
+Platform: {platform}
+RMS templates created: {rms}
+EMT templates created: {emt}</source>
+        <translation>提供者：{provider}
+平台：{platform}
+創建的 RMS 範本：{rms}
+創建的 EMT 範本：{emt}</translation>
+    </message>
+    <message>
+        <source>Qualified and attached {platform}: {digest}</source>
+        <translation>已認證並附加 {platform}：{digest}</translation>
+    </message>
+    <message>
+        <source>Qualified and imported {name}. Created {rms} RMS and {emt} EMT template(s).</source>
+        <translation>已認證並匯入 {name}。創建了 {rms} 個 RMS 和 {emt} 個 EMT 範本。</translation>
+    </message>
+    <message>
+        <source>Rebind an existing template</source>
+        <translation>重新綁定現有模板</translation>
+    </message>
+    <message>
+        <source>Rebind selected template</source>
+        <translation>重新綁定所選模板</translation>
+    </message>
+    <message>
+        <source>Rebound {consumer} to {provider}.</source>
+        <translation>將 {consumer} 重新連接至 {provider}。</translation>
+    </message>
+    <message>
+        <source>Select a source, destination and template.</source>
+        <translation>選擇一個來源、目的地和模板。</translation>
+    </message>
+    <message>
+        <source>Select manufacturer library</source>
+        <translation>選擇製造商庫</translation>
+    </message>
+    <message>
+        <source>Select the manufacturer contract and its precompiled platform library. VeraGrid validates and runs the binary in an isolated worker.</source>
+        <translation>選擇製造商合約及其預編譯平台庫。VeraGrid 會在隔離的工作器中驗證並運行二進制文件。</translation>
+    </message>
+    <message>
+        <source>Template</source>
+        <translation>模板</translation>
+    </message>
+    <message>
+        <source>The manufacturer declares that all mutable model state is owned by each Instance.</source>
+        <translation>製造商聲明所有可變模型狀態均由每個實例擁有。</translation>
+    </message>
+    <message>
+        <source>The manufacturer declares that the library performs no late native loading.</source>
+        <translation>製造商聲明該庫不會執行延遲原生加載。</translation>
+    </message>
+    <message>
+        <source>Windows libraries (*.dll)</source>
+        <translation>Windows 庫 (*.dll)</translation>
+    </message>
+    <message>
+        <source>{platform}: missing</source>
+        <translation>{platform}: 缺失</translation>
+    </message>
+    <message>
+        <source>{platform}: {status}, SHA-256 {digest}</source>
+        <translation>{platform}: {status}，SHA-256 {digest}</translation>
+    </message>
+    <message>
+        <source>Choose the LLVM bin directory</source>
+        <translation>選擇 LLVM 二進位目錄</translation>
+    </message>
+    <message>
+        <source>Choose the MinGW/UCRT support directory</source>
+        <translation>選擇 MinGW/UCRT 支援目錄</translation>
+    </message>
+    <message>
+        <source>LLVM selection was cancelled; the manufacturer model was not imported.</source>
+        <translation>LLVM 選擇已取消；製造商模型未匯入。</translation>
+    </message>
+</context>
+<context>
     <name>MapGeneratorGraphicItem</name>
     <message>
         <source>Are you sure that you want to convert this generator into a battery?</source>
@@ -7218,64 +7923,119 @@ Cancel it and close the window?</source>
     <name>PlotDialogue</name>
     <message>
         <location filename="../PlotDialogue/plot_dialogue.ui" line="14"/>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="157"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="166"/>
         <source>Plot</source>
         <translation>情節</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="90"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="99"/>
         <source>Search series</source>
         <translation>搜尋系列</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="97"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="106"/>
         <source>Select all series</source>
         <translation>選擇所有系列</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="111"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="120"/>
         <source>Select no series</source>
         <translation>不選擇系列</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="187"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="197"/>
         <source>Save image</source>
         <translation>儲存圖像</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="190"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="200"/>
         <source>Save the current plot as SVG or PNG</source>
         <translation>將當前圖表儲存為 SVG 或 PNG</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="199"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="209"/>
         <source>Center data</source>
         <translation>置中數據</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="202"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="212"/>
         <source>Reset zoom and pan to show all data</source>
         <translation>重置縮放和平移以顯示所有數據</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="214"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="224"/>
         <source>Series list</source>
         <translation>系列列表</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="217"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="227"/>
         <source>Show or hide the series list</source>
         <translation>顯示或隱藏系列列表</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="229"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="239"/>
         <source>Add plot</source>
         <translation>添加圖表</translation>
     </message>
     <message>
-        <location filename="../PlotDialogue/plot_dialogue.ui" line="232"/>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="242"/>
         <source>Add another plot tab</source>
         <translation>添加另一個圖表分頁</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="254"/>
+        <source>CDF</source>
+        <translation>累積分佈函數</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="257"/>
+        <source>Cummulative density function plot</source>
+        <translation>累積密度函數圖</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="272"/>
+        <source>Abs</source>
+        <translation>絕對值</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="275"/>
+        <source>Absolute of values</source>
+        <translation>數值的絕對值</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="287"/>
+        <source>x,y</source>
+        <translation>x,y</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="290"/>
+        <source>New X, Y plot from thie current data</source>
+        <translation>從當前數據建立 X, Y 圖</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="305"/>
+        <source>Transpose</source>
+        <translation>轉置</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="308"/>
+        <source>Traspose data</source>
+        <translation>轉置數據</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="323"/>
+        <source>Stacked plot</source>
+        <translation>堆積圖</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="338"/>
+        <source>Bar plot</source>
+        <translation>條形圖</translation>
+    </message>
+    <message>
+        <location filename="../PlotDialogue/plot_dialogue.ui" line="341"/>
+        <source>Bar plot mode</source>
+        <translation>條形圖模式</translation>
     </message>
     <message>
         <source>No unit</source>
@@ -7291,7 +8051,7 @@ Cancel it and close the window?</source>
     </message>
     <message>
         <source>Plot {number}</source>
-        <translation>圖表 {number}</translation>
+        <translation type="vanished">圖表 {number}</translation>
     </message>
     <message>
         <source>Power Flow Time Series</source>
@@ -7316,6 +8076,50 @@ Cancel it and close the window?</source>
     <message>
         <source>Time</source>
         <translation>時間</translation>
+    </message>
+    <message>
+        <source>Choose series with matching sample coordinates.</source>
+        <translation>選擇具有匹配樣本坐標的系列。</translation>
+    </message>
+    <message>
+        <source>Convert to X, Y plot</source>
+        <translation>轉換為 X, Y 圖</translation>
+    </message>
+    <message>
+        <source>Plot view</source>
+        <translation>圖形檢視</translation>
+    </message>
+    <message>
+        <source>Select X and Y series</source>
+        <translation>選擇 X 和 Y 系列</translation>
+    </message>
+    <message>
+        <source>Show grouped bars with source row labels on the X axis</source>
+        <translation>在 X 軸上顯示帶有來源行標籤的分組條形圖</translation>
+    </message>
+    <message>
+        <source>The current plot needs at least two XY series.</source>
+        <translation>當前圖表至少需要兩個 XY 系列。</translation>
+    </message>
+    <message>
+        <source>This view needs nonempty series with matching sample coordinates.</source>
+        <translation>此檢視需要具有匹配樣本坐標的非空系列。</translation>
+    </message>
+    <message>
+        <source>X</source>
+        <translation>X</translation>
+    </message>
+    <message>
+        <source>X,Y plot</source>
+        <translation>X,Y 圖</translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <translation>Y</translation>
+    </message>
+    <message>
+        <source>{title} copy</source>
+        <translation>{title} 複製</translation>
     </message>
 </context>
 <context>
@@ -7516,6 +8320,13 @@ Consider loading a valid source of data.</source>
     <message>
         <source>PSS/e import</source>
         <translation>PSS/e 匯入</translation>
+    </message>
+</context>
+<context>
+    <name>PythonConsole</name>
+    <message>
+        <source>Copy</source>
+        <translation>複製</translation>
     </message>
 </context>
 <context>
@@ -7721,7 +8532,7 @@ Are you ok with potentially waiting a lot?</source>
     </message>
     <message>
         <source>Components</source>
-        <translation>組件</translation>
+        <translation type="vanished">組件</translation>
     </message>
     <message>
         <source>Dynamic parameter unavailable</source>
@@ -7790,6 +8601,18 @@ Are you ok with potentially waiting a lot?</source>
     <message>
         <source>Unit circle</source>
         <translation>單位圓</translation>
+    </message>
+    <message>
+        <source>5% damping ratio</source>
+        <translation>5% 阻尼比</translation>
+    </message>
+    <message>
+        <source>Select at least one valid X and Y column.</source>
+        <translation>請至少選擇一個有效的 X 和 Y 欄位。</translation>
+    </message>
+    <message>
+        <source>Unstable modes</source>
+        <translation>不穩定模式</translation>
     </message>
 </context>
 <context>
@@ -9663,6 +10486,22 @@ Modify the number of clusters in the ML settings.</source>
         <source>The short-circuit worker finished without results.</source>
         <translation>短路工作器完成，但沒有結果。</translation>
     </message>
+    <message>
+        <source>Power flow 3ph failed</source>
+        <translation>三相電力潮流計算失敗</translation>
+    </message>
+    <message>
+        <source>OPF results to power flow</source>
+        <translation>OPF 結果到潮流</translation>
+    </message>
+    <message>
+        <source>Results to set into the power flow:</source>
+        <translation>結果將設置到潮流中：</translation>
+    </message>
+    <message>
+        <source>There are no OPF or NTC results, therefore this operation will not use optimization information.</source>
+        <translation>沒有 OPF 或 NTC 結果，因此此操作不會使用優化信息。</translation>
+    </message>
 </context>
 <context>
     <name>SolarPvWizard</name>
@@ -10533,18 +11372,152 @@ You need to load or create a grid!</source>
     </message>
 </context>
 <context>
+    <name>UndergroundCableBuilderGUI</name>
+    <message>
+        <source>Cable calculation</source>
+        <translation>電纜計算</translation>
+    </message>
+    <message>
+        <source>Cable positions</source>
+        <translation>電纜位置</translation>
+    </message>
+    <message>
+        <source>Depth (m)</source>
+        <translation>深度 (m)</translation>
+    </message>
+    <message>
+        <source>Horizontal position (m)</source>
+        <translation>水平位置 (m)</translation>
+    </message>
+    <message>
+        <source>Primitive series impedance [Ω/km]</source>
+        <translation>基本串聯阻抗 [Ω/km]</translation>
+    </message>
+    <message>
+        <source>Primitive shunt admittance [μS/km]</source>
+        <translation>基本並聯導納 [μS/km]</translation>
+    </message>
+    <message>
+        <source>Reduced series impedance [Ω/km]</source>
+        <translation>減小串聯阻抗 [Ω/km]</translation>
+    </message>
+    <message>
+        <source>Reduced shunt admittance [μS/km]</source>
+        <translation>減小並聯導納 [μS/km]</translation>
+    </message>
+    <message>
+        <source>Select a cable construction from the catalogue.</source>
+        <translation>從目錄中選擇電纜結構。</translation>
+    </message>
+    <message>
+        <source>Select a cable from the system composition.</source>
+        <translation>從系統組件中選擇電纜。</translation>
+    </message>
+    <message>
+        <source>Sequence series impedance [Ω/km]</source>
+        <translation>相序串聯阻抗 [Ω/km]</translation>
+    </message>
+    <message>
+        <source>Sequence shunt admittance [μS/km]</source>
+        <translation>相序並聯導納 [μS/km]</translation>
+    </message>
+    <message>
+        <source>Underground cable position</source>
+        <translation>地下電纜位置</translation>
+    </message>
+</context>
+<context>
     <name>ValidationSectionDialog</name>
     <message>
         <source>Issues found in this section</source>
         <translation type="vanished">此區段發現問題</translation>
     </message>
     <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="20"/>
         <source>Model Consistency Validation</source>
-        <translation type="vanished">模型一致性驗證</translation>
+        <translation>模型一致性驗證</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="31"/>
+        <source>Check the edited model&apos;s equation counts, variable names, parameter mappings, and variable initialization. This report is informational and does not block saving the model.</source>
+        <translation>請檢查編輯模型嘅方程式數量、變數名稱、參數映射和變數初始化。此報告僅供參考，不會阻止儲存模型。</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="53"/>
+        <source>Show:</source>
+        <translation>顯示：</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="60"/>
+        <source>Filter validation results by check</source>
+        <translation>按檢查篩選驗證結果</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="85"/>
+        <source>No validation results match this filter.</source>
+        <translation>無驗證結果符合此篩選條件。</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="95"/>
+        <source>Show issues in the model</source>
+        <translation>顯示模型中的問題</translation>
+    </message>
+    <message>
+        <location filename="../DynamicModelEditor/Editor/dynamic_editor_validation_dialog.ui" line="96"/>
+        <source>Show Issues</source>
+        <translation>顯示問題</translation>
     </message>
     <message>
         <source>Run an informational validation of the edited model structure, mappings, initialization, and port connectivity. This check reports issues but does not block saving the model.</source>
         <translation type="vanished">運行對編輯後的模型結構、映射、初始化和端口連接的資訊驗證。此檢查會報告問題，但不會阻止儲存模型。</translation>
+    </message>
+    <message>
+        <source>All checks</source>
+        <translation>所有檢查</translation>
+    </message>
+    <message>
+        <source>Block</source>
+        <translation>阻止</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>檢查</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>詳細資訊</translation>
+    </message>
+    <message>
+        <source>Issue</source>
+        <translation>問題</translation>
+    </message>
+    <message>
+        <source>Issues only</source>
+        <translation>僅顯示問題</translation>
+    </message>
+    <message>
+        <source>No issues found</source>
+        <translation>未發現問題</translation>
+    </message>
+    <message>
+        <source>No issues found.</source>
+        <translation>No issues found.</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>好的</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>狀態</translation>
+    </message>
+    <message>
+        <source>{check_count} checks · No issues found</source>
+        <translation>{check_count} 個檢查 · 未發現問題</translation>
+    </message>
+    <message>
+        <source>{check_count} checks · {issue_section_count} checks with issues · {finding_count} findings</source>
+        <translation>{check_count} 個檢查 · {issue_section_count} 個有問題的檢查 · {finding_count} 個發現</translation>
     </message>
 </context>
 <context>
@@ -12812,6 +13785,14 @@ You need to load or create a grid!</source>
         <source>Underground cable</source>
         <translation>地下電纜</translation>
     </message>
+    <message>
+        <source>PhysicalDeviceType</source>
+        <translation>實體設備類型</translation>
+    </message>
+    <message>
+        <source>Manufacturer native model</source>
+        <translation>製造商原生模型</translation>
+    </message>
 </context>
 <context>
     <name>VerticalHeaderWidthResizer</name>
@@ -13024,7 +14005,7 @@ You need to load or create a grid!</source>
     </message>
     <message>
         <location filename="../Main/MainWindow.ui" line="86"/>
-        <location filename="../Main/MainWindow.ui" line="11231"/>
+        <location filename="../Main/MainWindow.ui" line="11255"/>
         <source>Model</source>
         <translation>模型</translation>
     </message>
@@ -13046,211 +14027,210 @@ You need to load or create a grid!</source>
         <translation>按名稱搜尋圖表</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="354"/>
         <source>List of available diagrams</source>
-        <translation>可用圖表列表</translation>
+        <translation type="vanished">可用圖表列表</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="377"/>
+        <location filename="../Main/MainWindow.ui" line="389"/>
         <source>Map settings</source>
         <translation>地圖設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="404"/>
+        <location filename="../Main/MainWindow.ui" line="416"/>
         <source>Map tile provider</source>
         <translation>地圖瓦片提供商</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="411"/>
+        <location filename="../Main/MainWindow.ui" line="423"/>
         <source>Map tile provides (map background)</source>
         <translation>地圖瓦片提供（地圖背景）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="424"/>
+        <location filename="../Main/MainWindow.ui" line="436"/>
         <source>Preset</source>
         <translation>預設</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="452"/>
+        <location filename="../Main/MainWindow.ui" line="464"/>
         <source>Apply country meaningful sizes</source>
         <translation>應用國家/地區有意義的尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="466"/>
+        <location filename="../Main/MainWindow.ui" line="478"/>
         <source>Apply region meaningful sizes</source>
         <translation>應用區域有意義的大小</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="480"/>
+        <location filename="../Main/MainWindow.ui" line="492"/>
         <source>Apply municipality meaningful sizes</source>
         <translation>應用市政府有意義的尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="494"/>
+        <location filename="../Main/MainWindow.ui" line="506"/>
         <source>Apply street meaningful sizes</source>
         <translation>應用街道有意義的尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="517"/>
+        <location filename="../Main/MainWindow.ui" line="529"/>
         <source>Node size</source>
         <translation>節點大小</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="545"/>
+        <location filename="../Main/MainWindow.ui" line="557"/>
         <source>Maximum node / substation sizes</source>
         <translation>最大節點/變電站尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="548"/>
-        <location filename="../Main/MainWindow.ui" line="573"/>
-        <location filename="../Main/MainWindow.ui" line="635"/>
-        <location filename="../Main/MainWindow.ui" line="660"/>
-        <location filename="../Main/MainWindow.ui" line="701"/>
+        <location filename="../Main/MainWindow.ui" line="560"/>
+        <location filename="../Main/MainWindow.ui" line="585"/>
+        <location filename="../Main/MainWindow.ui" line="647"/>
+        <location filename="../Main/MainWindow.ui" line="672"/>
+        <location filename="../Main/MainWindow.ui" line="713"/>
         <source> px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="570"/>
+        <location filename="../Main/MainWindow.ui" line="582"/>
         <source>Minimum node / substation sizes</source>
         <translation>最小節點/變電站尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="604"/>
+        <location filename="../Main/MainWindow.ui" line="616"/>
         <source>Branch size</source>
         <translation>分支尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="632"/>
+        <location filename="../Main/MainWindow.ui" line="644"/>
         <source>Minimum branch sizes</source>
         <translation>最小分支尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="657"/>
+        <location filename="../Main/MainWindow.ui" line="669"/>
         <source>Maximum branch sizes</source>
         <translation>最大分支尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="691"/>
+        <location filename="../Main/MainWindow.ui" line="703"/>
         <source>Arrow size</source>
         <translation>箭頭大小</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="698"/>
+        <location filename="../Main/MainWindow.ui" line="710"/>
         <source>Branch arrow sizes</source>
         <translation>分支箭頭尺寸</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="723"/>
+        <location filename="../Main/MainWindow.ui" line="735"/>
         <source>Width based on flow</source>
         <translation>基於流量的寬度</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="733"/>
+        <location filename="../Main/MainWindow.ui" line="745"/>
         <source>Redraw the map or schematic with the new parameters</source>
         <translation>使用新參數重新繪製地圖或原理圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="736"/>
+        <location filename="../Main/MainWindow.ui" line="748"/>
         <source>Redraw</source>
         <translation>重畫</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="772"/>
+        <location filename="../Main/MainWindow.ui" line="784"/>
         <source>Schematic settings</source>
         <translation>原理圖設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="799"/>
+        <location filename="../Main/MainWindow.ui" line="811"/>
         <source>Default voltage</source>
         <translation>默認電壓</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="806"/>
+        <location filename="../Main/MainWindow.ui" line="818"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Bus default voltage&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This is the voltage that drag&amp;amp;drop buses have when they are created from the schematic.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;匯流排默認電壓&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這是從原理圖創建拖放匯流排時所具有的電壓。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="809"/>
+        <location filename="../Main/MainWindow.ui" line="821"/>
         <source> kV</source>
         <translation>kV</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="825"/>
+        <location filename="../Main/MainWindow.ui" line="837"/>
         <source>Node expansion factor</source>
         <translation>節點擴展因子</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="832"/>
+        <location filename="../Main/MainWindow.ui" line="844"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When expanding or contracting the distances between nodes, this is the factor that applies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;當擴大或縮小節點之間的距離時，這是適用的因素。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="854"/>
-        <location filename="../Main/MainWindow.ui" line="878"/>
+        <location filename="../Main/MainWindow.ui" line="866"/>
+        <location filename="../Main/MainWindow.ui" line="890"/>
         <source>Ask before running the automatic grid layout. This is because you might have a layout already and ruin it accidentally.</source>
         <translation>在運行自動網格佈局之前詢問。這是因為您可能已經有一個佈局並意外地破壞了它。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="857"/>
+        <location filename="../Main/MainWindow.ui" line="869"/>
         <source>Layout algorithm 
 (mark to ask)</source>
         <translation>佈局算法 
 （標記詢問）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="871"/>
+        <location filename="../Main/MainWindow.ui" line="883"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Algorithm to use for the automatic &lt;/p&gt;&lt;p&gt;layout of the grid nodes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用於自動計算的算法 &lt;/p&gt;&lt;p&gt;網格節點的佈局&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="881"/>
+        <location filename="../Main/MainWindow.ui" line="893"/>
         <source>Use the objects&apos; color</source>
         <translation>使用物體的顏色</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="923"/>
-        <location filename="../Main/MainWindow.ui" line="3682"/>
-        <location filename="../Main/MainWindow.ui" line="5964"/>
+        <location filename="../Main/MainWindow.ui" line="935"/>
+        <location filename="../Main/MainWindow.ui" line="3694"/>
+        <location filename="../Main/MainWindow.ui" line="5989"/>
         <source>General settings</source>
         <translation>常規設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="956"/>
+        <location filename="../Main/MainWindow.ui" line="968"/>
         <source>Palette</source>
         <translation>調色板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="963"/>
+        <location filename="../Main/MainWindow.ui" line="975"/>
         <source>Select the colour palette</source>
         <translation>選擇調色板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="970"/>
+        <location filename="../Main/MainWindow.ui" line="982"/>
         <source>Export resolution</source>
         <translation>匯出分辨率</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="977"/>
+        <location filename="../Main/MainWindow.ui" line="989"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resolution factor.&lt;/p&gt;&lt;p&gt;1K = 1920 x 1080 pixels&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;分辨率係數。&lt;/p&gt;&lt;p&gt;1K = 1920 x 1080 像素&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="980"/>
+        <location filename="../Main/MainWindow.ui" line="992"/>
         <source> K</source>
         <translation>K</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="996"/>
+        <location filename="../Main/MainWindow.ui" line="1008"/>
         <source>Video FPS</source>
         <translation>視頻幀率</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1003"/>
+        <location filename="../Main/MainWindow.ui" line="1015"/>
         <source>Video frames per second</source>
         <translation>每秒視頻幀數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1006"/>
+        <location filename="../Main/MainWindow.ui" line="1018"/>
         <source> FPS</source>
         <translation>FPS</translation>
     </message>
@@ -13263,347 +14243,347 @@ You need to load or create a grid!</source>
         <translation type="vanished">MatPlotlib 繪圖樣式可供選擇</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1069"/>
+        <location filename="../Main/MainWindow.ui" line="1081"/>
         <source>Available results</source>
         <translation>可用結果</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1082"/>
+        <location filename="../Main/MainWindow.ui" line="1094"/>
         <source>Color the grid with the selected study</source>
         <translation>使用所選研究為網格着色</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1123"/>
-        <location filename="../Main/MainWindow.ui" line="1576"/>
-        <location filename="../Main/MainWindow.ui" line="2266"/>
+        <location filename="../Main/MainWindow.ui" line="1135"/>
+        <location filename="../Main/MainWindow.ui" line="1588"/>
+        <location filename="../Main/MainWindow.ui" line="2278"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time slider&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Move this time slider to select the appropriate time slot to view.&lt;/p&gt;&lt;p&gt;The first position sets the snapshot values, the rest attend to the time series values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;時間滑塊&lt;/span&gt;&lt;/p&gt;&lt;p&gt;移動此時間滑塊以選擇要查看的適當時間段。&lt;/p&gt;&lt;p&gt;第一個位置設定快照值，其餘位置設定時間序列值。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1138"/>
-        <location filename="../Main/MainWindow.ui" line="1592"/>
-        <location filename="../Main/MainWindow.ui" line="2335"/>
+        <location filename="../Main/MainWindow.ui" line="1150"/>
+        <location filename="../Main/MainWindow.ui" line="1604"/>
+        <location filename="../Main/MainWindow.ui" line="2347"/>
         <source>Snapshot</source>
         <translation>快照</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1159"/>
+        <location filename="../Main/MainWindow.ui" line="1171"/>
         <source>Scenarios</source>
         <translation>應用場景</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1162"/>
+        <location filename="../Main/MainWindow.ui" line="1174"/>
         <source>Scenarios selection and control</source>
         <translation>場景選擇與控制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1209"/>
-        <location filename="../Main/MainWindow.ui" line="1706"/>
-        <location filename="../Main/MainWindow.ui" line="2704"/>
-        <location filename="../Main/MainWindow.ui" line="10676"/>
-        <location filename="../Main/MainWindow.ui" line="10690"/>
-        <location filename="../Main/MainWindow.ui" line="10697"/>
-        <location filename="../Main/MainWindow.ui" line="10760"/>
-        <location filename="../Main/MainWindow.ui" line="10962"/>
+        <location filename="../Main/MainWindow.ui" line="1221"/>
+        <location filename="../Main/MainWindow.ui" line="1718"/>
+        <location filename="../Main/MainWindow.ui" line="2716"/>
+        <location filename="../Main/MainWindow.ui" line="10698"/>
+        <location filename="../Main/MainWindow.ui" line="10712"/>
+        <location filename="../Main/MainWindow.ui" line="10719"/>
+        <location filename="../Main/MainWindow.ui" line="10782"/>
+        <location filename="../Main/MainWindow.ui" line="10984"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1224"/>
+        <location filename="../Main/MainWindow.ui" line="1236"/>
         <source>Variations</source>
         <translation>變化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1227"/>
+        <location filename="../Main/MainWindow.ui" line="1239"/>
         <source>Results variations control</source>
         <translation>結果變化控制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1268"/>
+        <location filename="../Main/MainWindow.ui" line="1280"/>
         <source>Database</source>
         <translation>數據庫</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1335"/>
+        <location filename="../Main/MainWindow.ui" line="1347"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search the device. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;輸入任何內容以搜尋設備。 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1338"/>
+        <location filename="../Main/MainWindow.ui" line="1350"/>
         <source>Search device type</source>
         <translation>搜尋設備類型</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1403"/>
+        <location filename="../Main/MainWindow.ui" line="1415"/>
         <source>Objects</source>
         <translation>物件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1454"/>
+        <location filename="../Main/MainWindow.ui" line="1466"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type anything to search on the name property. &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For more advanced searches you can compose a filter expression:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;If none is specified idxobj is taken&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Filter all object names that are similar to &apos;alba&apos; and their Vnom property &amp;gt; 200&lt;/p&gt;&lt;p&gt;-&amp;gt; idx&lt;span style=&quot; font-style:italic;&quot;&gt;obj.name like alba and idxobj.Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Equivalently:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;-&amp;gt; name like alba and Vnom &amp;gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Enter] to search &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;在 name 屬性上鍵入任何內容進行搜尋。 &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;對於更高級的搜尋，您可以編寫過濾表達式：&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;科目：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col、idx、val、colobj、idxobj&lt;/p&gt;&lt;p&gt;colobj 和 idxobj 允許訪問可能在索引或列處表示的物件。通過這些，您可以訪問它們的內部屬性以進行過濾。&lt;/p&gt;&lt;p&gt;如果未指定，則採用 idxobj&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;運營商：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&gt;、&lt;、&gt;=、&lt;=、!=、=、喜歡、不喜歡、開始、結束&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;示例：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;過濾所有與“alba”類似且 Vnom 屬性 &gt; 200 的物件名稱&lt;/p&gt;&lt;p&gt;-&gt; idx&lt;span style=&quot; font-style:italic;&quot;&gt;obj.name 如 alba 和 idxobj.Vnom &gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;等效地：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;-&gt; 名稱如 alba 和 Vnom &gt; 200&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[輸入]進行搜尋 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1457"/>
+        <location filename="../Main/MainWindow.ui" line="1469"/>
         <source>Device smart search</source>
         <translation>設備智能搜尋</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1464"/>
+        <location filename="../Main/MainWindow.ui" line="1476"/>
         <source>Smart filter</source>
         <translation>智能過濾器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1494"/>
+        <location filename="../Main/MainWindow.ui" line="1506"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Histogram&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the histogram analysis of the selected data structure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;直方圖&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行所選數據結構的直方圖分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1541"/>
+        <location filename="../Main/MainWindow.ui" line="1553"/>
         <source>Select the time series point to search</source>
         <translation>選擇要搜尋的時間序列點</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1548"/>
+        <location filename="../Main/MainWindow.ui" line="1560"/>
         <source>Search and navigate to the selected time series point</source>
         <translation>搜尋並跳到選定的時間序列點</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1562"/>
+        <location filename="../Main/MainWindow.ui" line="1574"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Snapshot&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Assign the values of the selected time step into the snapshot&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;快照&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將所選時間步長的值分配到快照中&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1615"/>
+        <location filename="../Main/MainWindow.ui" line="1627"/>
         <source>Add new object</source>
         <translation>添加新物件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1629"/>
+        <location filename="../Main/MainWindow.ui" line="1641"/>
         <source>Delete selection</source>
         <translation>刪除所選項目</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1651"/>
+        <location filename="../Main/MainWindow.ui" line="1663"/>
         <source>Associations</source>
         <translation>協會</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1761"/>
+        <location filename="../Main/MainWindow.ui" line="1773"/>
         <source>Time series</source>
         <translation>時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1806"/>
+        <location filename="../Main/MainWindow.ui" line="1818"/>
         <source>Magnitude with profile</source>
         <translation>幅度與輪廓</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1813"/>
+        <location filename="../Main/MainWindow.ui" line="1825"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Create profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will create all the object&apos;s profiles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;創建個人資料&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這將創建所有物件的配置檔案&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1827"/>
+        <location filename="../Main/MainWindow.ui" line="1839"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Delete profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will delete all the profiles and leave the snapshot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;刪除個人資料&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這將刪除所有配置檔案並保留快照。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1841"/>
+        <location filename="../Main/MainWindow.ui" line="1853"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Import profiles&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Import from data in CSV or Excel files&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;匯入配置檔案&lt;/span&gt;&lt;/p&gt;&lt;p&gt;從 CSV 或 Excel 檔案中的數據匯入&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1858"/>
+        <location filename="../Main/MainWindow.ui" line="1870"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Import profiles from grid models. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;This is, load many individual grids in any of the supported VeraGrid formats and take the operational data from them, aplying them to all the profiles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;從網格模型匯入配置檔案。 &lt;/span&gt;&lt;/p&gt;&lt;p&gt;也就是説，以任何受支持的 VeraGrid 格式載入許多單獨的網格，並從中獲取操作數據，將其應用於所有配置檔案。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1875"/>
+        <location filename="../Main/MainWindow.ui" line="1887"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time series  crop to the selected time interval&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;時間序列裁剪到選定的時間間隔&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1892"/>
+        <location filename="../Main/MainWindow.ui" line="1904"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time series crop to the clusteres time indices.&lt;/p&gt;&lt;p&gt;For that you need cluster simulation in memory&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;時間序列裁剪為集羣時間索引。&lt;/p&gt;&lt;p&gt;為此，您需要在內存中進行集羣模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1922"/>
+        <location filename="../Main/MainWindow.ui" line="1934"/>
         <source>Plot the selected object&apos;s profile</source>
         <translation>繪製所選物件的輪廓</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1973"/>
+        <location filename="../Main/MainWindow.ui" line="1985"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copy displayed profile&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;複製數據&lt;/span&gt;&lt;/p&gt;&lt;p&gt;複製顯示的個人資料&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="1990"/>
+        <location filename="../Main/MainWindow.ui" line="2002"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Paste data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Paste clipboard into the displayed profile&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;粘貼數據&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將剪貼板粘貼到顯示的配置檔案中&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2004"/>
+        <location filename="../Main/MainWindow.ui" line="2016"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy profile&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Copy the current profile into the profile selected by the drop-down selector&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;複製個人資料&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將當前配置檔案複製到下拉選擇器選擇的配置檔案中&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2024"/>
+        <location filename="../Main/MainWindow.ui" line="2036"/>
         <source>Profile where to copy the current profile</source>
         <translation>配置檔案複製當前配置檔案的位置</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2044"/>
+        <location filename="../Main/MainWindow.ui" line="2056"/>
         <source>Add value to the profile</source>
         <translation>為個人資料增加價值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2058"/>
+        <location filename="../Main/MainWindow.ui" line="2070"/>
         <source>Subtract value from the profile</source>
         <translation>從配置檔案中減去價值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2072"/>
+        <location filename="../Main/MainWindow.ui" line="2084"/>
         <source>Multiply the profile by a value</source>
         <translation>將配置檔案乘以一個值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2086"/>
+        <location filename="../Main/MainWindow.ui" line="2098"/>
         <source>Divide the profile by a value</source>
         <translation>將配置檔案除以一個值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2100"/>
+        <location filename="../Main/MainWindow.ui" line="2112"/>
         <source>Set the value to all or to the selection</source>
         <translation>將值設定為全部或選擇</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2143"/>
+        <location filename="../Main/MainWindow.ui" line="2155"/>
         <source>Compiled arrays</source>
         <translation>編譯數組</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2192"/>
+        <location filename="../Main/MainWindow.ui" line="2204"/>
         <source>Export simulation data</source>
         <translation>匯出模擬數據</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2212"/>
+        <location filename="../Main/MainWindow.ui" line="2224"/>
         <source>Update the islands dispayed</source>
         <translation>更新顯示的島嶼</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2252"/>
+        <location filename="../Main/MainWindow.ui" line="2264"/>
         <source>Copy to data frame to clipboard in array format</source>
         <translation>以數組格式將數據框複製到剪貼板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2295"/>
+        <location filename="../Main/MainWindow.ui" line="2307"/>
         <source>Plot values</source>
         <translation>繪製值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2318"/>
+        <location filename="../Main/MainWindow.ui" line="2330"/>
         <source>Copy array to clipboard</source>
         <translation>將數組複製到剪貼板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2354"/>
+        <location filename="../Main/MainWindow.ui" line="2366"/>
         <source>Comments</source>
         <translation>備註</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2360"/>
+        <location filename="../Main/MainWindow.ui" line="2372"/>
         <source>Write here some comments about the grid</source>
         <translation>在這裏寫一些關於網格的評論</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2363"/>
+        <location filename="../Main/MainWindow.ui" line="2375"/>
         <source>Type here your comments about the model</source>
         <translation>請在此輸入關於模型的評論</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2379"/>
-        <location filename="../Main/MainWindow.ui" line="2444"/>
-        <location filename="../Main/MainWindow.ui" line="13003"/>
+        <location filename="../Main/MainWindow.ui" line="2391"/>
+        <location filename="../Main/MainWindow.ui" line="2456"/>
+        <location filename="../Main/MainWindow.ui" line="13051"/>
         <source>Results</source>
         <translation>結果</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2500"/>
+        <location filename="../Main/MainWindow.ui" line="2512"/>
         <source>Saved results in this file</source>
         <translation>儲存在該檔案中的結果</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2556"/>
+        <location filename="../Main/MainWindow.ui" line="2568"/>
         <source>Tables</source>
         <translation>表格</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2652"/>
+        <location filename="../Main/MainWindow.ui" line="2664"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Subjects:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col, idx, val, colobj, idxobj&lt;/p&gt;&lt;p&gt;colobj and idxobj allow accessing the objects that may be represented at the index or the columns. With these you can access their internal properties for filtering.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Operators:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;gt;, &amp;lt;, &amp;gt;=, &amp;lt;=, !=, =, like, notlike, starts, ends&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;The columns should not be column1 or column2, the values should be &amp;gt; 5 and the index be like ab of mn&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;col != [column1, column2] and val &amp;gt; 5 or idx like [ab, mn]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Filter the table values that are between 0.5 and 20&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&amp;gt; &lt;span style=&quot; font-style:italic;&quot;&gt;val &amp;gt; 0.5 and val &amp;lt; 20.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;科目：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;col、idx、val、colobj、idxobj&lt;/p&gt;&lt;p&gt;colobj 和 idxobj 允許訪問可能在索引或列處表示的物件。通過這些，您可以訪問它們的內部屬性以進行過濾。&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;運營商：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&gt;、&lt;、&gt;=、&lt;=、!=、=、喜歡、不喜歡、開始、結束&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;示例：&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;列不應該是column1或column2，值應該&gt; 5並且索引類似於mn的ab&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&gt; &lt;span style=&quot; font-style:italic;&quot;&gt;col!= [column1, column2] 且 val &gt; 5 或 idx 如 [ab, mn]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;過濾 0.5 到 20 之間的表值&lt;/span&gt;&lt;/p&gt;&lt;p&gt;-&gt; &lt;span style=&quot; font-style:italic;&quot;&gt;值 &gt; 0.5 且值 &lt; 20.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2655"/>
+        <location filename="../Main/MainWindow.ui" line="2667"/>
         <source>Results smart query</source>
         <translation>智能查詢結果</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2674"/>
-        <location filename="../Main/MainWindow.ui" line="2929"/>
+        <location filename="../Main/MainWindow.ui" line="2686"/>
+        <location filename="../Main/MainWindow.ui" line="2941"/>
         <source>Smart search</source>
         <translation>智能搜尋</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2711"/>
+        <location filename="../Main/MainWindow.ui" line="2723"/>
         <source>Transpose the results</source>
         <translation>轉置結果</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2725"/>
+        <location filename="../Main/MainWindow.ui" line="2737"/>
         <source>Results as cummulative density functions</source>
         <translation>結果為累積密度函數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2742"/>
+        <location filename="../Main/MainWindow.ui" line="2754"/>
         <source>Results as absolute values</source>
         <translation>結果為絕對值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2759"/>
+        <location filename="../Main/MainWindow.ui" line="2771"/>
         <source>Stacked plot</source>
         <translation>堆積圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2776"/>
+        <location filename="../Main/MainWindow.ui" line="2788"/>
         <source>Copy to data frame to clipboard</source>
         <translation>複製到數據框到剪貼板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2790"/>
+        <location filename="../Main/MainWindow.ui" line="2802"/>
         <source>Copy data in numpy format to clipboard</source>
         <translation>將 numpy 格式的數據複製到剪貼板</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2804"/>
-        <location filename="../Main/MainWindow.ui" line="11132"/>
+        <location filename="../Main/MainWindow.ui" line="2816"/>
+        <location filename="../Main/MainWindow.ui" line="11154"/>
         <source>Export data</source>
         <translation>匯出數據</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2818"/>
+        <location filename="../Main/MainWindow.ui" line="2830"/>
         <source>Plot the data in a separated window</source>
         <translation>在單獨的窗口中繪製數據</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2856"/>
+        <location filename="../Main/MainWindow.ui" line="2868"/>
         <source>Dynamics</source>
         <translation>動態</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2910"/>
+        <location filename="../Main/MainWindow.ui" line="2922"/>
         <source>Type the search term</source>
         <translation>輸入搜尋詞</translation>
     </message>
@@ -13612,7 +14592,7 @@ You need to load or create a grid!</source>
         <translation type="vanished">開啟RMS預仿真動態繪圖編輯器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3868"/>
+        <location filename="../Main/MainWindow.ui" line="3880"/>
         <source>Name of the grid</source>
         <translation>電網名稱</translation>
     </message>
@@ -13621,37 +14601,37 @@ You need to load or create a grid!</source>
         <translation type="vanished">解鎖介面</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12829"/>
+        <location filename="../Main/MainWindow.ui" line="12877"/>
         <source>Add RMS event</source>
         <translation>添加 RMS 事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12832"/>
+        <location filename="../Main/MainWindow.ui" line="12880"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add RMS event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring RMS events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加 RMS 事件&lt;/span&gt;&lt;/p&gt;&lt;p&gt;開啟偏好 RMS 事件的動態事件編輯器&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13054"/>
+        <location filename="../Main/MainWindow.ui" line="13102"/>
         <source>Candidate investment generator</source>
         <translation>候選投資生成器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13057"/>
+        <location filename="../Main/MainWindow.ui" line="13105"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Candidate investment generator&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Generate candidate reinforcements (new lines and upgrades) for N-1 violations via LODF/PTDF screening&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;候選投資生成器&lt;/span&gt;&lt;/p&gt;&lt;p&gt;透過 LODF/PTDF 篩選，為 N-1 違規生成候選加強（新線和升級）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13160"/>
+        <location filename="../Main/MainWindow.ui" line="13208"/>
         <source>Add EMT event</source>
         <translation>添加 EMT 事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13163"/>
+        <location filename="../Main/MainWindow.ui" line="13211"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add EMT event&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the Dynamic events editor preferring EMT events&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加 EMT 事件&lt;/span&gt;&lt;/p&gt;&lt;p&gt;開啟偏好 EMT 事件的動態事件編輯器&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13235"/>
+        <location filename="../Main/MainWindow.ui" line="13283"/>
         <source>Community chat</source>
         <translation>社區聊天</translation>
     </message>
@@ -13668,1304 +14648,1319 @@ You need to load or create a grid!</source>
         <translation type="vanished">EMT 繪圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2959"/>
+        <location filename="../Main/MainWindow.ui" line="2971"/>
         <source>Add new plot</source>
         <translation>添加新情節</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2973"/>
+        <location filename="../Main/MainWindow.ui" line="2985"/>
         <source>Remove selected plot</source>
         <translation>刪除選定的圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="2987"/>
+        <location filename="../Main/MainWindow.ui" line="2999"/>
         <source>Display selected plot</source>
         <translation>顯示選定的圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3032"/>
+        <location filename="../Main/MainWindow.ui" line="3044"/>
         <source>Drag and drop the Var to the desired plot. Double click to plot directly.</source>
         <translation>將 Var 拖放到所需的繪圖中。雙擊直接繪圖。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3103"/>
+        <location filename="../Main/MainWindow.ui" line="3115"/>
         <source>Logs</source>
         <translation>日誌</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3146"/>
+        <location filename="../Main/MainWindow.ui" line="3158"/>
         <source>Save the logs to a file</source>
         <translation>將日誌儲存到檔案中</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3175"/>
+        <location filename="../Main/MainWindow.ui" line="3187"/>
         <source>Report</source>
         <translation>報告</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3200"/>
+        <location filename="../Main/MainWindow.ui" line="3212"/>
         <source>Scripting</source>
         <translation>腳本</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3285"/>
+        <location filename="../Main/MainWindow.ui" line="3297"/>
         <source>New script, will delete the existing code.</source>
         <translation>新腳本，將刪除現有代碼。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3299"/>
+        <location filename="../Main/MainWindow.ui" line="3311"/>
         <source>Save the current source code</source>
         <translation>儲存當前源代碼</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3320"/>
+        <location filename="../Main/MainWindow.ui" line="3332"/>
         <source>Name of the source code file</source>
         <translation>源代碼檔案名</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3334"/>
+        <location filename="../Main/MainWindow.ui" line="3346"/>
         <source>Run the source code in the console</source>
         <translation>在控制枱運行源代碼</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3400"/>
+        <location filename="../Main/MainWindow.ui" line="3412"/>
         <source>Python console</source>
         <translation>Python控制枱</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3473"/>
+        <location filename="../Main/MainWindow.ui" line="3485"/>
         <source>Clear the console</source>
         <translation>清除控制枱</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3501"/>
+        <location filename="../Main/MainWindow.ui" line="3513"/>
         <source>Source code</source>
         <translation>源代碼</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3543"/>
+        <location filename="../Main/MainWindow.ui" line="3555"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3882"/>
+        <location filename="../Main/MainWindow.ui" line="3894"/>
         <source>Frequency</source>
         <translation>頻率</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3772"/>
+        <location filename="../Main/MainWindow.ui" line="3784"/>
         <source>Snapshot time</source>
         <translation>快照時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3829"/>
+        <location filename="../Main/MainWindow.ui" line="3841"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;System frequency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This only has an effect in the program when computing lines&apos; per-unit impedance from ohm values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;系統頻率&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這僅在根據歐姆值計算線路的單位阻抗時對程式產生影響。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3832"/>
+        <location filename="../Main/MainWindow.ui" line="3844"/>
         <source> Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3800"/>
+        <location filename="../Main/MainWindow.ui" line="3812"/>
         <source>Base power</source>
         <translation>基礎功率</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3865"/>
+        <location filename="../Main/MainWindow.ui" line="3877"/>
         <source>Name of the grid model</source>
         <translation>網格模型名稱</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3786"/>
+        <location filename="../Main/MainWindow.ui" line="3798"/>
         <source>Grid name</source>
         <translation>網格名稱</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3807"/>
+        <location filename="../Main/MainWindow.ui" line="3819"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Base power&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Despite all the bibliography, changing this number to anything other than 100 MVA, might change the meaning of what sensible per-unit voltage are.&lt;/p&gt;&lt;p&gt;So, don&apos;t touch it. To have power in kW, use the option at the loads, geneerators, etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;基礎功率&lt;/span&gt;&lt;/p&gt;&lt;p&gt;儘管有所有參考書目，但將此數字更改為 100 MVA 以外的任何數字，可能會改變每單位電壓的合理含義。&lt;/p&gt;&lt;p&gt;所以，不要碰它。要為 kW 供電，請在負載、發電機等處使用該選項。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3810"/>
+        <location filename="../Main/MainWindow.ui" line="3822"/>
         <source> MVA</source>
         <translation>MVA</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3916"/>
+        <location filename="../Main/MainWindow.ui" line="3928"/>
         <source>Engine to be used when available</source>
         <translation>可用時使用的引擎</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3851"/>
+        <location filename="../Main/MainWindow.ui" line="3863"/>
         <source>Engine</source>
         <translation>發動機</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3875"/>
+        <location filename="../Main/MainWindow.ui" line="3887"/>
         <source>Language</source>
         <translation>語言</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3858"/>
+        <location filename="../Main/MainWindow.ui" line="3870"/>
         <source>Dark mode</source>
         <translation>深色模式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3945"/>
+        <location filename="../Main/MainWindow.ui" line="3957"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for state estimation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;狀態估計的設定。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3982"/>
-        <location filename="../Main/MainWindow.ui" line="3992"/>
+        <location filename="../Main/MainWindow.ui" line="3994"/>
+        <location filename="../Main/MainWindow.ui" line="4004"/>
         <source>Power flow settings</source>
         <translation>潮流設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="3989"/>
+        <location filename="../Main/MainWindow.ui" line="4001"/>
         <source>Pf</source>
         <translation>普夫</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4065"/>
+        <location filename="../Main/MainWindow.ui" line="4077"/>
         <source>Power flow</source>
         <translation>潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4205"/>
+        <location filename="../Main/MainWindow.ui" line="4217"/>
         <source>PTDF / LODF</source>
         <translation>PTDF/LODF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4277"/>
+        <location filename="../Main/MainWindow.ui" line="4289"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Theoretically PTDF and LODF values should be in the range (-1, 1)&lt;br/&gt;However, this is not true in general for any grid due to the existence of antennas.&lt;br/&gt;With this option the values are truncated to the range (-1, 1)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;理論上 PTDF 和 LODF 值應在 (-1, 1) 範圍內&lt;br/&gt;然而，由於天線的存在，對於任何網格來説，通常情況並非如此。&lt;br/&gt;使用此選項，值將被截斷到範圍 (-1, 1)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4280"/>
+        <location filename="../Main/MainWindow.ui" line="4292"/>
         <source>Correct nonsense values</source>
         <translation>糾正無意義的價值觀</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4290"/>
+        <location filename="../Main/MainWindow.ui" line="4302"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this option, the PTDF is computed such that the slack effects are distributed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;使用此選項，計算 PTDF，以便分佈鬆弛效應&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4293"/>
-        <location filename="../Main/MainWindow.ui" line="4522"/>
+        <location filename="../Main/MainWindow.ui" line="4305"/>
+        <location filename="../Main/MainWindow.ui" line="4547"/>
         <source>Distributed slack</source>
         <translation>分佈式鬆弛</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4303"/>
+        <location filename="../Main/MainWindow.ui" line="4315"/>
         <source>Threshold under which sensitivities are ignored when the PTDF is converted to sparse</source>
         <translation>PTDF 轉換為稀疏時忽略靈敏度的閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4322"/>
+        <location filename="../Main/MainWindow.ui" line="4334"/>
         <source>LODF threshold</source>
         <translation>LODF閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4366"/>
+        <location filename="../Main/MainWindow.ui" line="4378"/>
         <source>Threshold under which sensitivities are ignored when the LODF is converted to sparse</source>
         <translation>LODF 轉換為稀疏時忽略靈敏度的閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4385"/>
+        <location filename="../Main/MainWindow.ui" line="4397"/>
         <source>PTDF threshold</source>
         <translation>PTDF閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4411"/>
+        <location filename="../Main/MainWindow.ui" line="4436"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum numberof iterations to use.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Tipical values: &lt;/p&gt;&lt;p&gt;Newton Raphson: 5&lt;/p&gt;&lt;p&gt;Levenberg-Marquards: 20&lt;/p&gt;&lt;p&gt;Fast decoupled: 10&lt;/p&gt;&lt;p&gt;Others: 20&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;使用的最大迭代次數。&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;典型值： &lt;/p&gt;&lt;p&gt;牛頓拉夫森：5&lt;/p&gt;&lt;p&gt;萊文伯格-馬誇茲：20&lt;/p&gt;&lt;p&gt;快速解耦：10&lt;/p&gt;&lt;p&gt;其他：20&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4414"/>
+        <location filename="../Main/MainWindow.ui" line="4439"/>
         <source> iterations</source>
         <translation>迭代</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4436"/>
+        <location filename="../Main/MainWindow.ui" line="4461"/>
         <source>Find the tolerance that best represents the load values for power flow</source>
         <translation>找到最能代表功率流負載值的容差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4463"/>
+        <location filename="../Main/MainWindow.ui" line="4488"/>
         <source>Max. iterations</source>
         <translation>最大。迭代</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4479"/>
+        <location filename="../Main/MainWindow.ui" line="4504"/>
         <source>General switch for generators remote voltage control</source>
         <translation>發電機遠程電壓控制總開關</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4482"/>
+        <location filename="../Main/MainWindow.ui" line="4507"/>
         <source>Control remote voltage</source>
         <translation>控制遠程電壓</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4489"/>
+        <location filename="../Main/MainWindow.ui" line="4514"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the selected method does not converge, try a list of methods that may help&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果所選方法不收斂，請嘗試一系列可能有說明的方法&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4492"/>
+        <location filename="../Main/MainWindow.ui" line="4517"/>
         <source>Retry with other methods</source>
         <translation>用其他方法重試</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4502"/>
+        <location filename="../Main/MainWindow.ui" line="4527"/>
         <source>General switch for branches tap module control</source>
         <translation>分支分接模塊控制總開關</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4505"/>
+        <location filename="../Main/MainWindow.ui" line="4530"/>
         <source>Control tap module</source>
         <translation>控制抽頭模塊</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4512"/>
+        <location filename="../Main/MainWindow.ui" line="4537"/>
         <source>Apply impedance tolerances</source>
         <translation>應用阻抗容差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4519"/>
+        <location filename="../Main/MainWindow.ui" line="4544"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If active, the slack power is distributed among the generators according to their installed power &amp;quot;Snom&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果處於活動狀態，則根據其裝機功率“Snom”在發電機之間分配閒置功率&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4529"/>
+        <location filename="../Main/MainWindow.ui" line="4554"/>
         <source>If checked, the power flow solution is initialized with a linear (so called DC) power flow first</source>
         <translation>如果選中，則首先使用線性（所謂的 DC）功率流初始化功率流解</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4532"/>
+        <location filename="../Main/MainWindow.ui" line="4557"/>
         <source>Initialize angles</source>
         <translation>初始化角度</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4539"/>
+        <location filename="../Main/MainWindow.ui" line="4564"/>
         <source>If active, the islands of a single node are ignored.</source>
         <translation>如果處於活動狀態，單個節點的島嶼將被忽略。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4542"/>
+        <location filename="../Main/MainWindow.ui" line="4567"/>
         <source>Ignore single node islands</source>
         <translation>忽略單節點孤島</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4552"/>
+        <location filename="../Main/MainWindow.ui" line="4577"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If active, the Vm0 and Va0 properties of the bus objects are used to initialize the power flow simulation.&lt;/p&gt;&lt;p&gt;If you need this it is a sign of grid ill conditioning by something else like incorrect impedances of too much loading, specially reactive power that cannot be transported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果處於活動狀態，匯流排物件的 Vm0 和 Va0 屬性將用於初始化潮流仿真。&lt;/p&gt;&lt;p&gt;如果您需要這個，則表明電網狀況不佳，例如負載過多導致的不正確阻抗，特別是無法傳輸的無功功率。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4555"/>
+        <location filename="../Main/MainWindow.ui" line="4580"/>
         <source>Use voltage guess</source>
         <translation>使用電壓猜測</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4562"/>
-        <location filename="../Main/MainWindow.ui" line="6048"/>
+        <location filename="../Main/MainWindow.ui" line="4587"/>
+        <location filename="../Main/MainWindow.ui" line="6073"/>
         <source>Add a results report in the logs</source>
         <translation>在日誌中添加結果報告</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4565"/>
-        <location filename="../Main/MainWindow.ui" line="6051"/>
+        <location filename="../Main/MainWindow.ui" line="4590"/>
+        <location filename="../Main/MainWindow.ui" line="6076"/>
         <source>Add report</source>
         <translation>添加報告</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4572"/>
+        <location filename="../Main/MainWindow.ui" line="4597"/>
         <source>General switch for reactive power limits control</source>
         <translation>無功功率限制控制通用開關</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4575"/>
-        <location filename="../Main/MainWindow.ui" line="5948"/>
+        <location filename="../Main/MainWindow.ui" line="4600"/>
+        <location filename="../Main/MainWindow.ui" line="5973"/>
         <source>Control Q limits</source>
         <translation>控制 Q 限值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4582"/>
+        <location filename="../Main/MainWindow.ui" line="4607"/>
         <source>General switch for branches tap phase control</source>
         <translation>支路抽頭相位控制總開關</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4585"/>
+        <location filename="../Main/MainWindow.ui" line="4610"/>
         <source>Control tap phase</source>
         <translation>控制抽頭相位</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4592"/>
+        <location filename="../Main/MainWindow.ui" line="4617"/>
         <source>If checked, the controls are adjusted to their closest tap</source>
         <translation>如果選中，控件將調整到最近的點擊</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4595"/>
+        <location filename="../Main/MainWindow.ui" line="4620"/>
         <source>Orthogonalize controls</source>
         <translation>正交化控制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4602"/>
+        <location filename="../Main/MainWindow.ui" line="4627"/>
         <source>Correct the branches resistance using the temperature</source>
         <translation>使用温度校正分支電阻</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4605"/>
+        <location filename="../Main/MainWindow.ui" line="4630"/>
         <source>Apply temperature correction</source>
         <translation>應用温度校正</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4615"/>
-        <location filename="../Main/MainWindow.ui" line="5907"/>
+        <location filename="../Main/MainWindow.ui" line="4640"/>
+        <location filename="../Main/MainWindow.ui" line="5932"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor that multiplies each increment solution. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;乘以每個增量解的因數。 &lt;/p&gt;&lt;p&gt;實際上，這用於減緩麻煩的解決方案。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4618"/>
-        <location filename="../Main/MainWindow.ui" line="4667"/>
-        <location filename="../Main/MainWindow.ui" line="4720"/>
+        <location filename="../Main/MainWindow.ui" line="4643"/>
+        <location filename="../Main/MainWindow.ui" line="4692"/>
+        <location filename="../Main/MainWindow.ui" line="4745"/>
         <source> p.u.</source>
         <translation>p.u.</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4640"/>
+        <location filename="../Main/MainWindow.ui" line="4665"/>
         <source>Level of console information. 0: None, 1: some information, 2: all the information</source>
         <translation>控制枱信息級別。 0：無，1：部分信息，2：全部信息</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4650"/>
-        <location filename="../Main/MainWindow.ui" line="5192"/>
-        <location filename="../Main/MainWindow.ui" line="8659"/>
+        <location filename="../Main/MainWindow.ui" line="4675"/>
+        <location filename="../Main/MainWindow.ui" line="5217"/>
+        <location filename="../Main/MainWindow.ui" line="8681"/>
         <source>Solver</source>
         <translation>求解器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4657"/>
-        <location filename="../Main/MainWindow.ui" line="5932"/>
+        <location filename="../Main/MainWindow.ui" line="4682"/>
+        <location filename="../Main/MainWindow.ui" line="5957"/>
         <source>Trust radius</source>
         <translation>信任半徑</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4664"/>
-        <location filename="../Main/MainWindow.ui" line="5320"/>
-        <location filename="../Main/MainWindow.ui" line="5866"/>
-        <location filename="../Main/MainWindow.ui" line="8138"/>
-        <location filename="../Main/MainWindow.ui" line="8562"/>
+        <location filename="../Main/MainWindow.ui" line="4689"/>
+        <location filename="../Main/MainWindow.ui" line="5345"/>
+        <location filename="../Main/MainWindow.ui" line="5891"/>
+        <location filename="../Main/MainWindow.ui" line="8160"/>
+        <location filename="../Main/MainWindow.ui" line="8584"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error tolerance of the method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;方法的容錯性&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4670"/>
-        <location filename="../Main/MainWindow.ui" line="4723"/>
-        <location filename="../Main/MainWindow.ui" line="5323"/>
-        <location filename="../Main/MainWindow.ui" line="5869"/>
-        <location filename="../Main/MainWindow.ui" line="8141"/>
-        <location filename="../Main/MainWindow.ui" line="8565"/>
-        <location filename="../Main/MainWindow.ui" line="10097"/>
-        <location filename="../Main/MainWindow.ui" line="10359"/>
+        <location filename="../Main/MainWindow.ui" line="4695"/>
+        <location filename="../Main/MainWindow.ui" line="4748"/>
+        <location filename="../Main/MainWindow.ui" line="5348"/>
+        <location filename="../Main/MainWindow.ui" line="5894"/>
+        <location filename="../Main/MainWindow.ui" line="8163"/>
+        <location filename="../Main/MainWindow.ui" line="8587"/>
+        <location filename="../Main/MainWindow.ui" line="10119"/>
+        <location filename="../Main/MainWindow.ui" line="10381"/>
         <source>1e-</source>
         <translation>1e-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4696"/>
+        <location filename="../Main/MainWindow.ui" line="4721"/>
         <source>Verbosity</source>
         <translation>冗長</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4703"/>
-        <location filename="../Main/MainWindow.ui" line="5300"/>
-        <location filename="../Main/MainWindow.ui" line="5853"/>
-        <location filename="../Main/MainWindow.ui" line="8218"/>
-        <location filename="../Main/MainWindow.ui" line="8601"/>
+        <location filename="../Main/MainWindow.ui" line="4728"/>
+        <location filename="../Main/MainWindow.ui" line="5325"/>
+        <location filename="../Main/MainWindow.ui" line="5878"/>
+        <location filename="../Main/MainWindow.ui" line="8240"/>
+        <location filename="../Main/MainWindow.ui" line="8623"/>
         <source>Tolerance</source>
         <translation>公差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4710"/>
+        <location filename="../Main/MainWindow.ui" line="4735"/>
         <source>Controls apply after</source>
         <translation>控制措施適用於</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4717"/>
+        <location filename="../Main/MainWindow.ui" line="4742"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;VeraGrid does not have an &amp;quot;outer loop&amp;quot;&lt;br/&gt;Instead, in iterative numerical methods (Newton-Raphson, Levenberg-Marquardt, Powell Dog Leg) the controls apply after a certain error threshold has been reached.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;VeraGrid沒有“外環”&lt;br/&gt;相反，在迭代數值方法（Newton-Raphson、Levenberg-Marquardt、Powell Dog Leg）中，控制在達到某個誤差閾值後應用。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4743"/>
+        <location filename="../Main/MainWindow.ui" line="4768"/>
         <source>Continuation power flow settings</source>
         <translation>持續潮流設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4750"/>
+        <location filename="../Main/MainWindow.ui" line="4775"/>
         <source>Cpf</source>
         <translation>CPF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4753"/>
+        <location filename="../Main/MainWindow.ui" line="4778"/>
         <source>Continuation power flow related settings</source>
         <translation>持續潮流相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4784"/>
+        <location filename="../Main/MainWindow.ui" line="4809"/>
         <source>Stop at</source>
         <translation>停在</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4791"/>
+        <location filename="../Main/MainWindow.ui" line="4816"/>
         <source>Refer to the NTC areas (Linear tab)</source>
         <translation>請參閲 NTC 區域（線性選項卡）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4871"/>
+        <location filename="../Main/MainWindow.ui" line="4896"/>
         <source>Now</source>
         <translation>現在</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4878"/>
+        <location filename="../Main/MainWindow.ui" line="4903"/>
         <source>Use departure and target points from time series</source>
         <translation>使用時間序列的出發點和目標點</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4888"/>
+        <location filename="../Main/MainWindow.ui" line="4913"/>
         <source>Available transfer capacity</source>
         <translation>可用傳輸容量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4902"/>
+        <location filename="../Main/MainWindow.ui" line="4927"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lambda factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;拉姆達係數&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4909"/>
-        <location filename="../Main/MainWindow.ui" line="5105"/>
+        <location filename="../Main/MainWindow.ui" line="4934"/>
+        <location filename="../Main/MainWindow.ui" line="5130"/>
         <source>Max. Iterations</source>
         <translation>最大。迭代</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="4916"/>
+        <location filename="../Main/MainWindow.ui" line="4941"/>
         <source>Target</source>
         <translation>目標</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5018"/>
-        <location filename="../Main/MainWindow.ui" line="11545"/>
+        <location filename="../Main/MainWindow.ui" line="5043"/>
+        <location filename="../Main/MainWindow.ui" line="11569"/>
         <source>Continuation power flow</source>
         <translation>持續潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5036"/>
+        <location filename="../Main/MainWindow.ui" line="5061"/>
         <source>Simulation mode</source>
         <translation>模擬模式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5043"/>
+        <location filename="../Main/MainWindow.ui" line="5068"/>
         <source>Increase system loading</source>
         <translation>增加系統負載</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5087"/>
+        <location filename="../Main/MainWindow.ui" line="5112"/>
         <source>SE</source>
         <translation>東南歐</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5115"/>
+        <location filename="../Main/MainWindow.ui" line="5140"/>
         <source>Observability analysis</source>
         <translation>可觀測性分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5185"/>
+        <location filename="../Main/MainWindow.ui" line="5210"/>
         <source>Fixed slack</source>
         <translation>固定鬆弛</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5287"/>
-        <location filename="../Main/MainWindow.ui" line="12859"/>
+        <location filename="../Main/MainWindow.ui" line="5312"/>
+        <location filename="../Main/MainWindow.ui" line="12907"/>
         <source>State estimation</source>
         <translation>狀態估計</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5339"/>
+        <location filename="../Main/MainWindow.ui" line="5364"/>
         <source>Prefer correct</source>
         <translation>更喜歡正確的</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5346"/>
+        <location filename="../Main/MainWindow.ui" line="5371"/>
         <source>Add pseudo measurements</source>
         <translation>添加偽測量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5353"/>
+        <location filename="../Main/MainWindow.ui" line="5378"/>
         <source>Measurements profiling</source>
         <translation>測量分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5377"/>
-        <location filename="../Main/MainWindow.ui" line="5387"/>
+        <location filename="../Main/MainWindow.ui" line="5402"/>
+        <location filename="../Main/MainWindow.ui" line="5412"/>
         <source>Optimal power flow settings</source>
         <translation>最佳潮流設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5384"/>
+        <location filename="../Main/MainWindow.ui" line="5409"/>
         <source>Opf</source>
         <translation>奧普夫</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5399"/>
+        <location filename="../Main/MainWindow.ui" line="5424"/>
         <source>Linear settings</source>
         <translation>線性設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5535"/>
+        <location filename="../Main/MainWindow.ui" line="5560"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the time grouping to possibly shorten the solution time.&lt;/p&gt;&lt;p&gt;This splits the time series by week, month, etc. and the subproblems are solved sequentially.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;選擇時間分組可能會縮短求解時間。&lt;/p&gt;&lt;p&gt;這會將時間序列按周、月等分割，並按順序解決子問題。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5569"/>
+        <location filename="../Main/MainWindow.ui" line="5594"/>
         <source>Consider per-area generation spinning reserve</source>
         <translation>考慮每個區域的發電旋轉儲備</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5572"/>
+        <location filename="../Main/MainWindow.ui" line="5597"/>
         <source>Spinning reserve</source>
         <translation>旋轉儲備</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5684"/>
+        <location filename="../Main/MainWindow.ui" line="5709"/>
         <source>Instead of using the generation, loads cost for dispatching, use the GLSK (Generation, Load Shift Keys)</source>
         <translation>不使用生成、負載調度成本，而是使用 GLSK（生成、負載轉移鍵）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5687"/>
+        <location filename="../Main/MainWindow.ui" line="5712"/>
         <source>Use GSLK as costs</source>
         <translation>使用 GSLK 作為成本</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5450"/>
+        <location filename="../Main/MainWindow.ui" line="5475"/>
         <source>MIP framework</source>
         <translation>MIP框架</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5668"/>
+        <location filename="../Main/MainWindow.ui" line="5693"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the generation costs will use the quadratic coefficients cost, which will trigger a more complex formulation to approximate the quadratic thermal generation curve. Otherwise a linear model is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;勾選後，發電成本會使用二次成本係數，並啟用較複雜嘅公式去近似二次火電發電曲線。否則會使用線性模型。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5671"/>
+        <location filename="../Main/MainWindow.ui" line="5696"/>
         <source>Use quadratic costs</source>
         <translation>使用二次成本</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5496"/>
+        <location filename="../Main/MainWindow.ui" line="5521"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the zonal grouping.&lt;br/&gt;When All (Copper plate) is selected, the branch restrictions are ignored&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;選擇區域分組。&lt;br/&gt;當選擇全部（銅板）時，忽略分支限制&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5509"/>
+        <location filename="../Main/MainWindow.ui" line="5534"/>
         <source>Choose the external mixed integer framework</source>
         <translation>選擇外部混合整數框架</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5476"/>
+        <location filename="../Main/MainWindow.ui" line="5501"/>
         <source>Time grouping</source>
         <translation>時間分組</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5585"/>
+        <location filename="../Main/MainWindow.ui" line="5610"/>
         <source>Consider generation minimum up/down time</source>
         <translation>考慮發電最小啓動/停機時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5588"/>
+        <location filename="../Main/MainWindow.ui" line="5613"/>
         <source>Consider min up/down time</source>
         <translation>考慮最短啓動/停機時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5700"/>
+        <location filename="../Main/MainWindow.ui" line="5725"/>
         <source>When checked, the branch losses will be aproximated by a factor r * rate / (V^2)</source>
         <translation>檢查後，支路損耗將通過因子 r * 速率 / (V^2) 進行近似</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5703"/>
+        <location filename="../Main/MainWindow.ui" line="5728"/>
         <source>Approximate losses</source>
         <translation>大約損失</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5424"/>
+        <location filename="../Main/MainWindow.ui" line="5449"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how the generation dispatch should behave&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;選擇發電調度的行為方式&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5655"/>
+        <location filename="../Main/MainWindow.ui" line="5680"/>
         <source>Contingency tolerance</source>
         <translation>意外事件容忍度</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5617"/>
+        <location filename="../Main/MainWindow.ui" line="5642"/>
         <source>LODF matrix tolerance choosing contingencies</source>
         <translation>LODF 矩陣容差選擇意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5601"/>
+        <location filename="../Main/MainWindow.ui" line="5626"/>
         <source>Consider the contingencies when dispatching</source>
         <translation>調度時考慮意外情況</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5604"/>
+        <location filename="../Main/MainWindow.ui" line="5629"/>
         <source>Compute contingencies</source>
         <translation>計算意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5732"/>
+        <location filename="../Main/MainWindow.ui" line="5757"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The program will save the MIP formulation and be displayed in the text tab of the results&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;程式將儲存 MIP 公式並顯示在結果的文本選項卡中&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5735"/>
+        <location filename="../Main/MainWindow.ui" line="5760"/>
         <source>Report MIP formulation</source>
         <translation>報告 MIP 制定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5716"/>
+        <location filename="../Main/MainWindow.ui" line="5741"/>
         <source>Fix infeasible problems and rey with the relaxed problem. Applies to OPF and NTC</source>
         <translation>解決不可行的問題並解決寬鬆的問題。適用於OPF和NTC</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5719"/>
+        <location filename="../Main/MainWindow.ui" line="5744"/>
         <source>Fix infeasibilities and retry</source>
         <translation>修復不可行性並重試</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5639"/>
+        <location filename="../Main/MainWindow.ui" line="5664"/>
         <source>Consider generation ramps</source>
         <translation>考慮發電斜坡</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5642"/>
+        <location filename="../Main/MainWindow.ui" line="5667"/>
         <source>Consider ramps</source>
         <translation>考慮坡道</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5437"/>
+        <location filename="../Main/MainWindow.ui" line="5462"/>
         <source>Dispatch mode</source>
         <translation>調度方式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5463"/>
+        <location filename="../Main/MainWindow.ui" line="5488"/>
         <source>Choose the external mixed integer programming solver</source>
         <translation>選擇外部混合整數規劃求解器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5411"/>
+        <location filename="../Main/MainWindow.ui" line="5436"/>
         <source>Zone grouping</source>
         <translation>區域分組</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5754"/>
+        <location filename="../Main/MainWindow.ui" line="354"/>
+        <source>Tree of available diagrams and categories</source>
+        <translation>可用圖表和類別樹狀結構</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="4411"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the PTDF will be computed using the Jacobian matricex instead of the Susceptance matrices, hence taking into account the initial voltage&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果勾選，PTDF 將使用雅可比矩陣 (Jacobian matricex) 而非導納矩陣 (Susceptance matrices) 進行計算，從而考慮到初始電壓&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="4414"/>
+        <source>Use Jacobian based PTDF</source>
+        <translation>使用基於雅可比的 PTDF</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="5779"/>
         <source>Nonlinear settings</source>
         <translation>非線性設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5779"/>
+        <location filename="../Main/MainWindow.ui" line="5804"/>
         <source>Interior point solver maximum number of iterations</source>
         <translation>內點求解器最大迭代次數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5782"/>
+        <location filename="../Main/MainWindow.ui" line="5807"/>
         <source>Iterations</source>
         <translation>迭代</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5795"/>
+        <location filename="../Main/MainWindow.ui" line="5820"/>
         <source>Initialize the interior point OPF with the power flow solution</source>
         <translation>用潮流解初始化內點OPF</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5798"/>
+        <location filename="../Main/MainWindow.ui" line="5823"/>
         <source>Initialize with power flow</source>
         <translation>初始化潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5821"/>
+        <location filename="../Main/MainWindow.ui" line="5846"/>
         <source>Number of iterations of the method</source>
         <translation>方法的迭代次數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5850"/>
+        <location filename="../Main/MainWindow.ui" line="5875"/>
         <source>Interior point solver tolerance</source>
         <translation>內點解算器容差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5891"/>
+        <location filename="../Main/MainWindow.ui" line="5916"/>
         <source>Interior point solver method</source>
         <translation>內點求解器方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5894"/>
+        <location filename="../Main/MainWindow.ui" line="5919"/>
         <source>IPS method</source>
         <translation>IPS法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5929"/>
+        <location filename="../Main/MainWindow.ui" line="5954"/>
         <source>Interior point trust radius</source>
         <translation>內點信任半徑</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5945"/>
+        <location filename="../Main/MainWindow.ui" line="5970"/>
         <source>General switch for reactive power limits control in the nonlinear optimal power flow</source>
         <translation>非線性最優潮流中無功功率限制控制的通用開關</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5976"/>
+        <location filename="../Main/MainWindow.ui" line="6001"/>
         <source>Verbosity level</source>
         <translation>詳細程度</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="5989"/>
-        <location filename="../Main/MainWindow.ui" line="6265"/>
+        <location filename="../Main/MainWindow.ui" line="6014"/>
+        <location filename="../Main/MainWindow.ui" line="6290"/>
         <source>Skip generation limits</source>
         <translation>跳過世代限制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6002"/>
+        <location filename="../Main/MainWindow.ui" line="6027"/>
         <source>Verbose</source>
         <translation>冗長</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6022"/>
+        <location filename="../Main/MainWindow.ui" line="6047"/>
         <source>Choose the optimal power flow method</source>
         <translation>選擇最佳潮流方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6035"/>
-        <location filename="../Main/MainWindow.ui" line="6925"/>
-        <location filename="../Main/MainWindow.ui" line="9150"/>
-        <location filename="../Main/MainWindow.ui" line="10055"/>
-        <location filename="../Main/MainWindow.ui" line="10120"/>
+        <location filename="../Main/MainWindow.ui" line="6060"/>
+        <location filename="../Main/MainWindow.ui" line="6947"/>
+        <location filename="../Main/MainWindow.ui" line="9172"/>
+        <location filename="../Main/MainWindow.ui" line="10077"/>
+        <location filename="../Main/MainWindow.ui" line="10142"/>
         <source>Method</source>
         <translation>方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6204"/>
+        <location filename="../Main/MainWindow.ui" line="6229"/>
         <source>Optimal Power Flow</source>
         <translation>最佳潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6215"/>
+        <location filename="../Main/MainWindow.ui" line="6240"/>
         <source>Net transfer capacity settings</source>
         <translation>淨傳輸容量設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6222"/>
+        <location filename="../Main/MainWindow.ui" line="6247"/>
         <source>Ntc</source>
         <translation>NTC</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6225"/>
+        <location filename="../Main/MainWindow.ui" line="6250"/>
         <source>Network transfer capacity related settings</source>
         <translation>網絡傳輸容量相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6236"/>
+        <location filename="../Main/MainWindow.ui" line="6261"/>
         <source>Optimization</source>
         <translation>優化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6247"/>
+        <location filename="../Main/MainWindow.ui" line="6272"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This criteria springs from the ACER (Agency for the Cooperation for Energy Regulators).&lt;/p&gt;&lt;p&gt;It determines that a branch is only relevant to be considered in a NTC calculation if the flow due to the exchange is over a percentage (70%) &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;A branch is monitored only if:&lt;/p&gt;&lt;p&gt;(branch_rate * 70%) / branch_alpha &amp;lt;= total exchange rating&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;該標準源自 ACER（能源監管合作機構）。&lt;/p&gt;&lt;p&gt;它確定只有當交換產生的流量超過一定百分比 (70%) 時，才需要在 NTC 計算中考慮分支 &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;僅在以下情況下才會監視分支：&lt;/p&gt;&lt;p&gt;（branch_rate * 70%）/branch_alpha &lt;= 總彙率評級&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6250"/>
+        <location filename="../Main/MainWindow.ui" line="6275"/>
         <source>Branch rating contribution (ACER)</source>
         <translation>分行評級貢獻 (ACER)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6262"/>
+        <location filename="../Main/MainWindow.ui" line="6287"/>
         <source>If activated, the generation limits are not considered</source>
         <translation>如果激活，則不考慮生成限制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6280"/>
-        <location filename="../Main/MainWindow.ui" line="7623"/>
+        <location filename="../Main/MainWindow.ui" line="6305"/>
+        <location filename="../Main/MainWindow.ui" line="7645"/>
         <source> MW</source>
         <translation>MW</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6304"/>
+        <location filename="../Main/MainWindow.ui" line="6329"/>
         <source>If checked, the NTC optimization will use the system declared contingencies</source>
         <translation>如果選中，NTC 優化將使用系統聲明的意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6307"/>
+        <location filename="../Main/MainWindow.ui" line="6332"/>
         <source>Consider constingencies</source>
         <translation>考慮意外情況</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6319"/>
+        <location filename="../Main/MainWindow.ui" line="6344"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A branch is monitored solely based on its contribution to the inter-area excahge sensitivity. Therefore a branch is selected if it&apos;s alpha value is greater than the set alpha %&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;僅根據分支對區域間交換敏感性的貢獻來對其進行監控。因此，如果分支的 alpha 值大於設定的 alpha %，則選擇該分支&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6322"/>
+        <location filename="../Main/MainWindow.ui" line="6347"/>
         <source>Branch exchange sensitivity (α)</source>
         <translation>支鏈交換敏感性 (α)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6337"/>
-        <location filename="../Main/MainWindow.ui" line="6487"/>
-        <location filename="../Main/MainWindow.ui" line="6586"/>
+        <location filename="../Main/MainWindow.ui" line="6362"/>
+        <location filename="../Main/MainWindow.ui" line="6512"/>
+        <location filename="../Main/MainWindow.ui" line="6611"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6420"/>
+        <location filename="../Main/MainWindow.ui" line="6445"/>
         <source>Determine the branches that enter the optimization</source>
         <translation>確定進入優化的分支</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6423"/>
+        <location filename="../Main/MainWindow.ui" line="6448"/>
         <source>Branch monitoring selection criteria</source>
         <translation>分支機構監控選擇標準</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6472"/>
-        <location filename="../Main/MainWindow.ui" line="7544"/>
-        <location filename="../Main/MainWindow.ui" line="12994"/>
-        <location filename="../Main/MainWindow.ui" line="13021"/>
+        <location filename="../Main/MainWindow.ui" line="6497"/>
+        <location filename="../Main/MainWindow.ui" line="7566"/>
+        <location filename="../Main/MainWindow.ui" line="13042"/>
+        <location filename="../Main/MainWindow.ui" line="13069"/>
         <source>Contingencies</source>
         <translation>意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6484"/>
+        <location filename="../Main/MainWindow.ui" line="6509"/>
         <source>Minimum exchange contribution (Alpha)</source>
         <translation>最低交換貢獻（Alpha）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6505"/>
-        <location filename="../Main/MainWindow.ui" line="6508"/>
+        <location filename="../Main/MainWindow.ui" line="6530"/>
+        <location filename="../Main/MainWindow.ui" line="6533"/>
         <source>Transmission reliability margin (TRM)</source>
         <translation>傳輸可靠性裕度 (TRM)</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6520"/>
+        <location filename="../Main/MainWindow.ui" line="6545"/>
         <source>More strict NTC Formulation: No slacks of any type and specific monitoring criteria</source>
         <translation>更嚴格的NTC配方：沒有任何類型的鬆弛和具體的監控標準</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6523"/>
+        <location filename="../Main/MainWindow.ui" line="6548"/>
         <source>Strict formulation</source>
         <translation>嚴格配方</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6538"/>
-        <location filename="../Main/MainWindow.ui" line="6875"/>
+        <location filename="../Main/MainWindow.ui" line="6563"/>
+        <location filename="../Main/MainWindow.ui" line="6897"/>
         <source>General</source>
         <translation>一般</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6562"/>
+        <location filename="../Main/MainWindow.ui" line="6587"/>
         <source>Loading threshold to report</source>
         <translation>報告負載閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6574"/>
+        <location filename="../Main/MainWindow.ui" line="6599"/>
         <source>Transfer method</source>
         <translation>轉移方式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6704"/>
+        <location filename="../Main/MainWindow.ui" line="6729"/>
         <source>Linear</source>
         <translation>線性</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6721"/>
+        <location filename="../Main/MainWindow.ui" line="6746"/>
         <source>Transfer sensitivity threshold</source>
         <translation>傳輸靈敏度閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6733"/>
+        <location filename="../Main/MainWindow.ui" line="6758"/>
         <source>n-1 sensibility consideration</source>
         <translation>n-1 感性考慮</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6761"/>
+        <location filename="../Main/MainWindow.ui" line="6786"/>
         <source>Threshold used to discard insensitive branches</source>
         <translation>用於丟棄不敏感分支的閾值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6785"/>
+        <location filename="../Main/MainWindow.ui" line="6810"/>
         <source>Use existing power flow values for the contingency initialization in the net transfer capacity and contingency simulations</source>
         <translation>使用現有潮流值進行淨傳輸容量和應急模擬中的應急初始化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6788"/>
+        <location filename="../Main/MainWindow.ui" line="6813"/>
         <source>Use power flow values for initialization</source>
         <translation>使用潮流值進行初始化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6843"/>
-        <location filename="../Main/MainWindow.ui" line="7087"/>
+        <location filename="../Main/MainWindow.ui" line="6865"/>
+        <location filename="../Main/MainWindow.ui" line="7109"/>
         <source>Select the solver in the OPF tab and the areas in the areas tab</source>
         <translation>在 OPF 選項卡中選擇求解器，並在區域選項卡中選擇區域</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6846"/>
+        <location filename="../Main/MainWindow.ui" line="6868"/>
         <source>Net transfer capacity</source>
         <translation>淨傳輸容量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6854"/>
+        <location filename="../Main/MainWindow.ui" line="6876"/>
         <source>Nodal capacity hosting options</source>
         <translation>節點容量託管選項</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6861"/>
+        <location filename="../Main/MainWindow.ui" line="6883"/>
         <source>Nhc</source>
         <translation>國家衞生健康委員會</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6864"/>
+        <location filename="../Main/MainWindow.ui" line="6886"/>
         <source>Nodal hosting capacity related settings</source>
         <translation>節點託管容量相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6886"/>
-        <location filename="../Main/MainWindow.ui" line="6904"/>
+        <location filename="../Main/MainWindow.ui" line="6908"/>
+        <location filename="../Main/MainWindow.ui" line="6926"/>
         <source>If the sense is positive, the algorithm will assess the maximum generation capacity in the selected nodes. If it is negative it will asses the maximum loading capacity in the selected nodes.</source>
         <translation>如果意義為正，算法將評估所選節點的最大發電容量。如果為負數，它將評估所選節點的最大負載能力。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6892"/>
+        <location filename="../Main/MainWindow.ui" line="6914"/>
         <source>Sense</source>
         <translation>感覺</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="6937"/>
+        <location filename="../Main/MainWindow.ui" line="6959"/>
         <source>Optimization method to use</source>
         <translation>使用的優化方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7090"/>
+        <location filename="../Main/MainWindow.ui" line="7112"/>
         <source>Nodal hosting capacity</source>
         <translation>節點承載能力</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7111"/>
+        <location filename="../Main/MainWindow.ui" line="7133"/>
         <source>Area transfer settings</source>
         <translation>區域傳送設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7118"/>
+        <location filename="../Main/MainWindow.ui" line="7140"/>
         <source>Txfr</source>
         <translation>TXFR</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7121"/>
+        <location filename="../Main/MainWindow.ui" line="7143"/>
         <source>Area, Zone, etc related settings</source>
         <translation>區域、區域等相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7228"/>
+        <location filename="../Main/MainWindow.ui" line="7250"/>
         <source>Transfer configuration</source>
         <translation>傳輸配置</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7273"/>
+        <location filename="../Main/MainWindow.ui" line="7295"/>
         <source>From</source>
         <translation>來自</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7296"/>
+        <location filename="../Main/MainWindow.ui" line="7318"/>
         <source>To</source>
         <translation>至</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7317"/>
+        <location filename="../Main/MainWindow.ui" line="7339"/>
         <source>Contingencies settings</source>
         <translation>意外事件設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7324"/>
+        <location filename="../Main/MainWindow.ui" line="7346"/>
         <source>Con</source>
         <translation>騙局</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7327"/>
+        <location filename="../Main/MainWindow.ui" line="7349"/>
         <source>Contingencies related settings</source>
         <translation>意外事件相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7354"/>
+        <location filename="../Main/MainWindow.ui" line="7376"/>
         <source>Contingency filter</source>
         <translation>應急過濾器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7367"/>
+        <location filename="../Main/MainWindow.ui" line="7389"/>
         <source>Filter by</source>
         <translation>過濾依據</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7383"/>
+        <location filename="../Main/MainWindow.ui" line="7405"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Filter contingencies&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This option allows you to only consider the contingencies that fall in ceratain groupings such as Area, Zone or Country. The filtering is performed based on the information stored in the Buses.&lt;/p&gt;&lt;p&gt;This is highly discouraged. We trully advise you to not to filter the contingencies and select All Contingencies. Use this feature at your own risk.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;過濾意外事件&lt;/span&gt;&lt;/p&gt;&lt;p&gt;此選項允許您僅考慮屬於某些分組（例如地區、地區或國家/地區）的意外情況。過濾是根據存儲在匯流排中的信息來執行的。&lt;/p&gt;&lt;p&gt;這是非常不鼓勵的。我們真心建議您不要過濾意外事件並選擇所有意外事件。使用此功能的風險由您自行承擔。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7566"/>
+        <location filename="../Main/MainWindow.ui" line="7588"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dead band over the SRAP rating.&lt;/p&gt;&lt;p&gt;If greater than zero, the SRAP is investigated for values over the branch protections rating until the specified value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SRAP 等級上的死區。&lt;/p&gt;&lt;p&gt;如果大於零，則檢查 SRAP 是否超過支路保護額定值，直至達到指定值。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7569"/>
+        <location filename="../Main/MainWindow.ui" line="7591"/>
         <source>SRAP dead band</source>
         <translation>SRAP死區</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7583"/>
+        <location filename="../Main/MainWindow.ui" line="7605"/>
         <source>SRAP limit</source>
         <translation>SRAP限制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7590"/>
+        <location filename="../Main/MainWindow.ui" line="7612"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked the SRAP objective solution is the branch nominal rate. Otherwise, the objective rating is the contingency rating.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果選中，SRAP 目標解決方案是分支名義利率。否則，客觀評級就是應急評級。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7593"/>
+        <location filename="../Main/MainWindow.ui" line="7615"/>
         <source>Revert to nominal rating</source>
         <translation>恢復至標稱額定值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7600"/>
+        <location filename="../Main/MainWindow.ui" line="7622"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activate SRAP (Sistema de reducción automática de potencia)&lt;/p&gt;&lt;p&gt;It is a mechanism that helps avoiding considering a contingency if it would be eventually resolved by nearby generation shifting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;激活 SRAP（Sistema de reducción automática de potencia）&lt;/p&gt;&lt;p&gt;這種機制有助於避免考慮意外事件（如果該意外事件最終可以通過附近的代際轉移來解決）。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7603"/>
+        <location filename="../Main/MainWindow.ui" line="7625"/>
         <source>Use SRAP</source>
         <translation>使用SRAP</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7610"/>
+        <location filename="../Main/MainWindow.ui" line="7632"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, a massive posibly intractable report is generated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果選中，則會生成大量可能難以處理的報告。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7613"/>
+        <location filename="../Main/MainWindow.ui" line="7635"/>
         <source>Detailed report</source>
         <translation>詳細報告</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7620"/>
+        <location filename="../Main/MainWindow.ui" line="7642"/>
         <source>Maximum overload power that is solvable using the SRAP technique.</source>
         <translation>使用 SRAP 技術可解決的最大過載功率。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7652"/>
-        <location filename="../Main/MainWindow.ui" line="7692"/>
-        <location filename="../Main/MainWindow.ui" line="9212"/>
+        <location filename="../Main/MainWindow.ui" line="7674"/>
+        <location filename="../Main/MainWindow.ui" line="7714"/>
+        <location filename="../Main/MainWindow.ui" line="9234"/>
         <source> %</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7665"/>
+        <location filename="../Main/MainWindow.ui" line="7687"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amount of contingency loading with respect to the base situation loading that triggers the report of the contingency. This is specially useful when we want to avoig reporting contingencies that are not significant with respect to the base situation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;相對於觸發意外事件報告的基本情況負載的意外負載量。當我們想要避免報告相對於基本情況而言並不重要的意外事件時，這特別有用。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7668"/>
+        <location filename="../Main/MainWindow.ui" line="7690"/>
         <source>Contingency dead band</source>
         <translation>應急死區</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7675"/>
+        <location filename="../Main/MainWindow.ui" line="7697"/>
         <source>Maximum number of generation nodes to participate in the SRAP</source>
         <translation>參與SRAP的最大生成節點數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7678"/>
+        <location filename="../Main/MainWindow.ui" line="7700"/>
         <source>SRAP top N</source>
         <translation>SRAP 前 N</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7685"/>
+        <location filename="../Main/MainWindow.ui" line="7707"/>
         <source>Contingency engine</source>
         <translation>應急引擎</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7735"/>
+        <location filename="../Main/MainWindow.ui" line="7757"/>
         <source>Dyn</source>
         <translation>動力</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7738"/>
+        <location filename="../Main/MainWindow.ui" line="7760"/>
         <source>Rms simulation settings</source>
         <translation>均方根模擬設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7866"/>
+        <location filename="../Main/MainWindow.ui" line="7888"/>
         <source>RMS</source>
         <translation>RMS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7964"/>
-        <location filename="../Main/MainWindow.ui" line="8631"/>
+        <location filename="../Main/MainWindow.ui" line="7986"/>
+        <location filename="../Main/MainWindow.ui" line="8653"/>
         <source>bdf2</source>
         <translation>bdf2</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7969"/>
+        <location filename="../Main/MainWindow.ui" line="7991"/>
         <source>euler</source>
         <translation>euler</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7984"/>
-        <location filename="../Main/MainWindow.ui" line="8030"/>
-        <location filename="../Main/MainWindow.ui" line="8157"/>
-        <location filename="../Main/MainWindow.ui" line="8505"/>
-        <location filename="../Main/MainWindow.ui" line="8530"/>
-        <location filename="../Main/MainWindow.ui" line="8883"/>
+        <location filename="../Main/MainWindow.ui" line="8006"/>
+        <location filename="../Main/MainWindow.ui" line="8052"/>
+        <location filename="../Main/MainWindow.ui" line="8179"/>
+        <location filename="../Main/MainWindow.ui" line="8527"/>
+        <location filename="../Main/MainWindow.ui" line="8552"/>
+        <location filename="../Main/MainWindow.ui" line="8905"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Initial time for the simulation. &lt;/p&gt;&lt;p&gt;In practice this is used to slow down troublesome solutions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;模擬的初始時間。 &lt;/p&gt;&lt;p&gt;實際上，這用於減緩麻煩的解決方案。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8033"/>
-        <location filename="../Main/MainWindow.ui" line="8160"/>
-        <location filename="../Main/MainWindow.ui" line="8508"/>
-        <location filename="../Main/MainWindow.ui" line="8533"/>
-        <location filename="../Main/MainWindow.ui" line="8870"/>
-        <location filename="../Main/MainWindow.ui" line="8886"/>
+        <location filename="../Main/MainWindow.ui" line="8055"/>
+        <location filename="../Main/MainWindow.ui" line="8182"/>
+        <location filename="../Main/MainWindow.ui" line="8530"/>
+        <location filename="../Main/MainWindow.ui" line="8555"/>
+        <location filename="../Main/MainWindow.ui" line="8892"/>
+        <location filename="../Main/MainWindow.ui" line="8908"/>
         <source> s</source>
         <translation>s</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8131"/>
-        <location filename="../Main/MainWindow.ui" line="8730"/>
+        <location filename="../Main/MainWindow.ui" line="8153"/>
+        <location filename="../Main/MainWindow.ui" line="8752"/>
         <source>Assessment time</source>
         <translation>評估時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7977"/>
-        <location filename="../Main/MainWindow.ui" line="8908"/>
+        <location filename="../Main/MainWindow.ui" line="7999"/>
+        <location filename="../Main/MainWindow.ui" line="8930"/>
         <source>Initialization</source>
         <translation>初始化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8238"/>
-        <location filename="../Main/MainWindow.ui" line="8737"/>
+        <location filename="../Main/MainWindow.ui" line="8260"/>
+        <location filename="../Main/MainWindow.ui" line="8759"/>
         <source>Time step</source>
         <translation>時間步長</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8009"/>
-        <location filename="../Main/MainWindow.ui" line="8666"/>
+        <location filename="../Main/MainWindow.ui" line="8031"/>
+        <location filename="../Main/MainWindow.ui" line="8688"/>
         <source>Integration</source>
         <translation>整合</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7987"/>
+        <location filename="../Main/MainWindow.ui" line="8009"/>
         <source>s</source>
         <translation>s</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8192"/>
-        <location filename="../Main/MainWindow.ui" line="8673"/>
+        <location filename="../Main/MainWindow.ui" line="8214"/>
+        <location filename="../Main/MainWindow.ui" line="8695"/>
         <source>Simulation time</source>
         <translation>模擬時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8294"/>
+        <location filename="../Main/MainWindow.ui" line="8316"/>
         <source>RMS Small-Signal</source>
         <translation>RMS 小信號</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7959"/>
-        <location filename="../Main/MainWindow.ui" line="8617"/>
-        <location filename="../Main/MainWindow.ui" line="8621"/>
+        <location filename="../Main/MainWindow.ui" line="7981"/>
+        <location filename="../Main/MainWindow.ui" line="8639"/>
+        <location filename="../Main/MainWindow.ui" line="8643"/>
         <source>trapezoid</source>
         <translation>梯形</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="7954"/>
-        <location filename="../Main/MainWindow.ui" line="8626"/>
+        <location filename="../Main/MainWindow.ui" line="7976"/>
+        <location filename="../Main/MainWindow.ui" line="8648"/>
         <source>implicit euler</source>
         <translation>隱式歐拉</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8185"/>
-        <location filename="../Main/MainWindow.ui" line="8642"/>
+        <location filename="../Main/MainWindow.ui" line="8207"/>
+        <location filename="../Main/MainWindow.ui" line="8664"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of modes.&lt;br/&gt;If zero, all modes are included and the calculation is done using dense matrices.&lt;br/&gt;If a number of modes greater than zero is given the calculation is sparse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;模式數量。&lt;br/&gt;如果為零，則包括所有模式並使用稠密矩陣進行計算。&lt;br/&gt;如果給出的模式數量大於零，則計算是稀疏的。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8055"/>
-        <location filename="../Main/MainWindow.ui" line="8763"/>
+        <location filename="../Main/MainWindow.ui" line="8077"/>
+        <location filename="../Main/MainWindow.ui" line="8785"/>
         <source>Modes</source>
         <translation>模式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8017"/>
-        <location filename="../Main/MainWindow.ui" line="8854"/>
+        <location filename="../Main/MainWindow.ui" line="8039"/>
+        <location filename="../Main/MainWindow.ui" line="8876"/>
         <source>standard</source>
         <translation>標準</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8022"/>
-        <location filename="../Main/MainWindow.ui" line="8859"/>
+        <location filename="../Main/MainWindow.ui" line="8044"/>
+        <location filename="../Main/MainWindow.ui" line="8881"/>
         <source>vectorized</source>
         <translation>向量化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8245"/>
-        <location filename="../Main/MainWindow.ui" line="8594"/>
+        <location filename="../Main/MainWindow.ui" line="8267"/>
+        <location filename="../Main/MainWindow.ui" line="8616"/>
         <source>Problem</source>
         <translation>問題</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8432"/>
+        <location filename="../Main/MainWindow.ui" line="8454"/>
         <source>EMT</source>
         <translation>EMT</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8485"/>
+        <location filename="../Main/MainWindow.ui" line="8507"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Subspace build type. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;子空間建構類型。 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8488"/>
-        <location filename="../Main/MainWindow.ui" line="8492"/>
+        <location filename="../Main/MainWindow.ui" line="8510"/>
+        <location filename="../Main/MainWindow.ui" line="8514"/>
         <source>Arnoldi</source>
         <translation>Arnoldi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8497"/>
+        <location filename="../Main/MainWindow.ui" line="8519"/>
         <source>Hybrid Arnoldi</source>
         <translation>Hybrid Arnoldi</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8555"/>
+        <location filename="../Main/MainWindow.ui" line="8577"/>
         <source>Build type</source>
         <translation>建構類型</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8652"/>
+        <location filename="../Main/MainWindow.ui" line="8674"/>
         <source>Target period</source>
         <translation>目標週期</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8812"/>
+        <location filename="../Main/MainWindow.ui" line="8834"/>
         <source>EMT Small-Signal</source>
         <translation>EMT 小信號</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8867"/>
+        <location filename="../Main/MainWindow.ui" line="8889"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Period of the periodic orbit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;週期軌道嘅週期。 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -14974,443 +15969,443 @@ You need to load or create a grid!</source>
         <translation type="vanished">Hz</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8951"/>
+        <location filename="../Main/MainWindow.ui" line="8973"/>
         <source>Machine-learning related settings</source>
         <translation>機器學習相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8958"/>
+        <location filename="../Main/MainWindow.ui" line="8980"/>
         <source>ML</source>
         <translation>機器學習</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8961"/>
+        <location filename="../Main/MainWindow.ui" line="8983"/>
         <source>Machine learning related settings</source>
         <translation>機器學習相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="8979"/>
+        <location filename="../Main/MainWindow.ui" line="9001"/>
         <source>Objective function</source>
         <translation>目標函數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9143"/>
+        <location filename="../Main/MainWindow.ui" line="9165"/>
         <source>Minimum form capacity</source>
         <translation>最小表格容量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9199"/>
+        <location filename="../Main/MainWindow.ui" line="9221"/>
         <source>Node grouping</source>
         <translation>節點分組</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9209"/>
+        <location filename="../Main/MainWindow.ui" line="9231"/>
         <source>In adequecy and simple dispatch indicated the minimum share of total firm capacity of the system to be in desirable, less is penalized</source>
         <translation>充分且簡單的調度表明系統總容量的最小份額是理想的，較少的受到懲罰</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9228"/>
+        <location filename="../Main/MainWindow.ui" line="9250"/>
         <source>Number of maximum evaluations for the optimization methods</source>
         <translation>優化方法的最大評估次數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9231"/>
+        <location filename="../Main/MainWindow.ui" line="9253"/>
         <source> x number of investments</source>
         <translation>x 投資數量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9310"/>
-        <location filename="../Main/MainWindow.ui" line="12349"/>
+        <location filename="../Main/MainWindow.ui" line="9332"/>
+        <location filename="../Main/MainWindow.ui" line="12397"/>
         <source>Clustering</source>
         <translation>聚類</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9323"/>
+        <location filename="../Main/MainWindow.ui" line="9345"/>
         <source>Nodal distances</source>
         <translation>節點距離</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9330"/>
+        <location filename="../Main/MainWindow.ui" line="9352"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of clusters, this affects all the simulations that deal with clustering&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;集羣數量，這會影響所有處理集羣的模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9333"/>
+        <location filename="../Main/MainWindow.ui" line="9355"/>
         <source> Clusters</source>
         <translation>集羣</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9349"/>
+        <location filename="../Main/MainWindow.ui" line="9371"/>
         <source>Maximum evaluations</source>
         <translation>最大評價</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9383"/>
+        <location filename="../Main/MainWindow.ui" line="9405"/>
         <source>Máximum standard deviation to determine the groups</source>
         <translation>確定組的最大標準差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9386"/>
+        <location filename="../Main/MainWindow.ui" line="9408"/>
         <source> σ</source>
         <translation>σ</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9402"/>
+        <location filename="../Main/MainWindow.ui" line="9424"/>
         <source>Min. group size</source>
         <translation>分鐘。團體規模</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9409"/>
+        <location filename="../Main/MainWindow.ui" line="9431"/>
         <source>Select the investment evaluation method</source>
         <translation>選擇投資評估方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9416"/>
+        <location filename="../Main/MainWindow.ui" line="9438"/>
         <source>Minimum size of the group</source>
         <translation>團體最小規模</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9422"/>
+        <location filename="../Main/MainWindow.ui" line="9444"/>
         <source> elements</source>
         <translation>元素</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9480"/>
+        <location filename="../Main/MainWindow.ui" line="9502"/>
         <source>Investment evaluation</source>
         <translation>投資評估</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9490"/>
+        <location filename="../Main/MainWindow.ui" line="9512"/>
         <source>Number of clusters</source>
         <translation>簇數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9596"/>
+        <location filename="../Main/MainWindow.ui" line="9618"/>
         <source>Number of islands produced until the analysis stops</source>
         <translation>分析停止之前產生的島嶼數量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9637"/>
+        <location filename="../Main/MainWindow.ui" line="9659"/>
         <source>Reliability evaluation method</source>
         <translation>可靠性評價方法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9644"/>
+        <location filename="../Main/MainWindow.ui" line="9666"/>
         <source>Maximum number of samples</source>
         <translation>最大樣本數</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9702"/>
+        <location filename="../Main/MainWindow.ui" line="9724"/>
         <source>Reliability</source>
         <translation>可靠性</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9712"/>
-        <location filename="../Main/MainWindow.ui" line="10048"/>
+        <location filename="../Main/MainWindow.ui" line="9734"/>
+        <location filename="../Main/MainWindow.ui" line="10070"/>
         <source>Samples</source>
         <translation>樣品</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9761"/>
+        <location filename="../Main/MainWindow.ui" line="9783"/>
         <source>Cascading</source>
         <translation>級聯</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9958"/>
-        <location filename="../Main/MainWindow.ui" line="11530"/>
+        <location filename="../Main/MainWindow.ui" line="9980"/>
+        <location filename="../Main/MainWindow.ui" line="11554"/>
         <source>Stochastic power flow</source>
         <translation>隨機潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9968"/>
+        <location filename="../Main/MainWindow.ui" line="9990"/>
         <source>Maximum number of Monte Carlo samples</source>
         <translation>蒙特卡羅樣本的最大數量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9984"/>
+        <location filename="../Main/MainWindow.ui" line="10006"/>
         <source>Aditional islands until stop</source>
         <translation>其他島嶼直至停止</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="9991"/>
+        <location filename="../Main/MainWindow.ui" line="10013"/>
         <source>Voltage variance</source>
         <translation>電壓方差</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10062"/>
+        <location filename="../Main/MainWindow.ui" line="10084"/>
         <source>Stochastic power flow method</source>
         <translation>隨機潮流法</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10094"/>
+        <location filename="../Main/MainWindow.ui" line="10116"/>
         <source>Monte Carlo variance until stop</source>
         <translation>蒙特卡羅方差直到停止</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10144"/>
+        <location filename="../Main/MainWindow.ui" line="10166"/>
         <source>Topology settings</source>
         <translation>拓撲設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10151"/>
+        <location filename="../Main/MainWindow.ui" line="10173"/>
         <source>Tplgy</source>
         <translation>特普吉</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10154"/>
+        <location filename="../Main/MainWindow.ui" line="10176"/>
         <source>Topology related settings</source>
         <translation>拓撲相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10273"/>
-        <location filename="../Main/MainWindow.ui" line="12766"/>
+        <location filename="../Main/MainWindow.ui" line="10295"/>
+        <location filename="../Main/MainWindow.ui" line="12814"/>
         <source>Grid reduction</source>
         <translation>網格縮減</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10336"/>
+        <location filename="../Main/MainWindow.ui" line="10358"/>
         <source>Select branch types to reduce</source>
         <translation>選擇要減少的分支類型</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10346"/>
+        <location filename="../Main/MainWindow.ui" line="10368"/>
         <source>Filter by r+x under threshold</source>
         <translation>在閾值下按 r+x 過濾</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10356"/>
+        <location filename="../Main/MainWindow.ui" line="10378"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Exponent of the threshold to use.&lt;/p&gt;&lt;p&gt;threshold = 1x10^-factor&lt;/p&gt;&lt;p&gt;i.e.&lt;/p&gt;&lt;p&gt;factor=3&lt;/p&gt;&lt;p&gt;threshold = 1e-3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;要使用的閾值的指數。&lt;/p&gt;&lt;p&gt;閾值 = 1x10^-因子&lt;/p&gt;&lt;p&gt;即&lt;/p&gt;&lt;p&gt;係數=3&lt;/p&gt;&lt;p&gt;閾值 = 1e-3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10485"/>
+        <location filename="../Main/MainWindow.ui" line="10507"/>
         <source>Branch rating</source>
         <translation>分行評級</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10557"/>
+        <location filename="../Main/MainWindow.ui" line="10579"/>
         <source>Branch rating factor</source>
         <translation>分支評級因子</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10564"/>
+        <location filename="../Main/MainWindow.ui" line="10586"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor to aply to the branch calculated power to use as rating&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;應用於分支計算功率以用作額定值的係數&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10583"/>
+        <location filename="../Main/MainWindow.ui" line="10605"/>
         <source>override values</source>
         <translation>覆蓋值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10610"/>
+        <location filename="../Main/MainWindow.ui" line="10632"/>
         <source>File settings</source>
         <translation>檔案設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10617"/>
-        <location filename="../Main/MainWindow.ui" line="11111"/>
+        <location filename="../Main/MainWindow.ui" line="10639"/>
+        <location filename="../Main/MainWindow.ui" line="11133"/>
         <source>File</source>
         <translation>檔案</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10620"/>
+        <location filename="../Main/MainWindow.ui" line="10642"/>
         <source>File related settings</source>
         <translation>檔案相關設定</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10641"/>
+        <location filename="../Main/MainWindow.ui" line="10663"/>
         <source>If checked, the results are stored inside the VeraGrid file in a compressed format.</source>
         <translation>如果選中，結果將以壓縮格式存儲在 VeraGrid 檔案中。</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10644"/>
+        <location filename="../Main/MainWindow.ui" line="10666"/>
         <source>Save results in .veragrid files</source>
         <translation>將結果儲存在.veragrid 檔案中</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10683"/>
+        <location filename="../Main/MainWindow.ui" line="10705"/>
         <source>File path</source>
         <translation>檔案路徑</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10809"/>
+        <location filename="../Main/MainWindow.ui" line="10831"/>
         <source>File Information</source>
         <translation>檔案信息</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10857"/>
+        <location filename="../Main/MainWindow.ui" line="10879"/>
         <source>Server</source>
         <translation>服務器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10863"/>
+        <location filename="../Main/MainWindow.ui" line="10885"/>
         <source>Server jobs currently on cue</source>
         <translation>當前正在提示的服務器作業</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10891"/>
+        <location filename="../Main/MainWindow.ui" line="10913"/>
         <source>Url</source>
         <translation>網址</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10898"/>
+        <location filename="../Main/MainWindow.ui" line="10920"/>
         <source>Type here the VeraGrid server URL (ask your IT team)</source>
         <translation>在此處輸入 VeraGrid 服務器 URL（詢問您的 IT 團隊）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10905"/>
+        <location filename="../Main/MainWindow.ui" line="10927"/>
         <source>Port</source>
         <translation>港口</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10912"/>
+        <location filename="../Main/MainWindow.ui" line="10934"/>
         <source>Type here the VeraGrid server Port (ask your IT team)</source>
         <translation>在此輸入 VeraGrid 服務器端口（詢問您的 IT 團隊）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10925"/>
+        <location filename="../Main/MainWindow.ui" line="10947"/>
         <source>Password</source>
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10932"/>
+        <location filename="../Main/MainWindow.ui" line="10954"/>
         <source>Type here the VeraGrid server password (ask your IT team)</source>
         <translation>在此輸入 VeraGrid 服務器密碼（詢問您的 IT 團隊）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="10942"/>
+        <location filename="../Main/MainWindow.ui" line="10964"/>
         <source>Secure</source>
         <translation>安全</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11076"/>
+        <location filename="../Main/MainWindow.ui" line="11098"/>
         <source>Cancel process</source>
         <translation>取消流程</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11115"/>
+        <location filename="../Main/MainWindow.ui" line="11137"/>
         <source>Export grid</source>
         <translation>匯出網格</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11141"/>
+        <location filename="../Main/MainWindow.ui" line="11163"/>
         <source>Import data</source>
         <translation>匯入數據</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11162"/>
+        <location filename="../Main/MainWindow.ui" line="11186"/>
         <source>Help</source>
         <translation>說明</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11171"/>
+        <location filename="../Main/MainWindow.ui" line="11195"/>
         <source>Actions</source>
         <translation>行動</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11184"/>
+        <location filename="../Main/MainWindow.ui" line="11208"/>
         <source>Simulations</source>
         <translation>模擬</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11261"/>
+        <location filename="../Main/MainWindow.ui" line="11285"/>
         <source>Diagram</source>
         <translation>圖解</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11265"/>
+        <location filename="../Main/MainWindow.ui" line="11289"/>
         <source>Branches drawing style</source>
         <translation>樹枝繪圖風格</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11305"/>
+        <location filename="../Main/MainWindow.ui" line="11329"/>
         <source>plugins</source>
         <translation>插件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11310"/>
+        <location filename="../Main/MainWindow.ui" line="11334"/>
         <source>Events</source>
         <translation>活動</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11331"/>
+        <location filename="../Main/MainWindow.ui" line="11355"/>
         <source>toolBar</source>
         <translation>toolBar</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11398"/>
+        <location filename="../Main/MainWindow.ui" line="11422"/>
         <source>Open file</source>
         <translation>開啟檔案</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11404"/>
+        <location filename="../Main/MainWindow.ui" line="11428"/>
         <source>Ctrl+O</source>
         <translation>Ctrl+O</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11413"/>
+        <location filename="../Main/MainWindow.ui" line="11437"/>
         <source>Save</source>
         <translation>儲存</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11419"/>
-        <location filename="../Main/MainWindow.ui" line="13217"/>
+        <location filename="../Main/MainWindow.ui" line="11443"/>
+        <location filename="../Main/MainWindow.ui" line="13265"/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11428"/>
+        <location filename="../Main/MainWindow.ui" line="11452"/>
         <source>Take picture</source>
         <translation>拍照</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11440"/>
+        <location filename="../Main/MainWindow.ui" line="11464"/>
         <source>New project</source>
         <translation>新項目</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11446"/>
+        <location filename="../Main/MainWindow.ui" line="11470"/>
         <source>Ctrl+N</source>
         <translation>Ctrl+N</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11455"/>
+        <location filename="../Main/MainWindow.ui" line="11479"/>
         <source>Power Flow</source>
         <translation>潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11458"/>
+        <location filename="../Main/MainWindow.ui" line="11482"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power Flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a power flow analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行潮流分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11464"/>
+        <location filename="../Main/MainWindow.ui" line="11488"/>
         <source>F5</source>
         <translation>F5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11476"/>
+        <location filename="../Main/MainWindow.ui" line="11500"/>
         <source>Power flow time series</source>
         <translation>潮流時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11479"/>
+        <location filename="../Main/MainWindow.ui" line="11503"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the power flow study with time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;使用時間序列數據運行潮流研究&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11485"/>
+        <location filename="../Main/MainWindow.ui" line="11509"/>
         <source>Ctrl+F5</source>
         <translation>Ctrl+F5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11494"/>
+        <location filename="../Main/MainWindow.ui" line="11518"/>
         <source>Expand</source>
         <translation>展開</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11497"/>
+        <location filename="../Main/MainWindow.ui" line="11521"/>
         <source>Expand distances</source>
         <translation>擴大距離</translation>
     </message>
@@ -15419,12 +16414,12 @@ You need to load or create a grid!</source>
         <translation type="vanished">Ctrl+Alt++</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11512"/>
+        <location filename="../Main/MainWindow.ui" line="11536"/>
         <source>Shrink</source>
         <translation>收縮</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11515"/>
+        <location filename="../Main/MainWindow.ui" line="11539"/>
         <source>Shrink distances</source>
         <translation>縮短距離</translation>
     </message>
@@ -15433,282 +16428,302 @@ You need to load or create a grid!</source>
         <translation type="vanished">Ctrl+Alt+-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11503"/>
+        <location filename="../Main/MainWindow.ui" line="11527"/>
         <source>Ctrl+Shift++</source>
         <translation>Ctrl+Shift++</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11521"/>
+        <location filename="../Main/MainWindow.ui" line="11545"/>
         <source>Ctrl+Shift+-</source>
         <translation>Ctrl+Shift+-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11533"/>
+        <location filename="../Main/MainWindow.ui" line="11557"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Stochastic power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a stochastic power flow over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;隨機潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對時間序列數據執行隨機功率流&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11548"/>
+        <location filename="../Main/MainWindow.ui" line="11572"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Continuation power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a continuation power flow over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;持續潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對快照數據運行連續潮流&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11560"/>
+        <location filename="../Main/MainWindow.ui" line="11584"/>
         <source>About</source>
         <translation>關於</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11572"/>
+        <location filename="../Main/MainWindow.ui" line="11596"/>
         <source>center view</source>
         <translation>中心視圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11575"/>
+        <location filename="../Main/MainWindow.ui" line="11599"/>
         <source>Center view</source>
         <translation>中心視圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11581"/>
+        <location filename="../Main/MainWindow.ui" line="11605"/>
         <source>Ctrl+E</source>
         <translation>Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11590"/>
+        <location filename="../Main/MainWindow.ui" line="11614"/>
         <source>Short Circuit</source>
         <translation>短路</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11593"/>
+        <location filename="../Main/MainWindow.ui" line="11617"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Short Circuit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a short circuit study over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;短路&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對快照數據進行短路研究&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11605"/>
+        <location filename="../Main/MainWindow.ui" line="11629"/>
         <source>Automatic grid layout</source>
         <translation>自動網格佈局</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11608"/>
+        <location filename="../Main/MainWindow.ui" line="11632"/>
         <source>Automatic layout the of the grid</source>
         <translation>自動佈局網格</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11623"/>
+        <location filename="../Main/MainWindow.ui" line="11647"/>
         <source>Blackout cascade</source>
         <translation>停電級聯</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11626"/>
+        <location filename="../Main/MainWindow.ui" line="11650"/>
         <source>Run a simulation or step by step blackout cascade</source>
         <translation>運行模擬或逐步停電級聯</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11638"/>
+        <location filename="../Main/MainWindow.ui" line="11662"/>
         <source>Optimal power flow</source>
         <translation>最佳潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11641"/>
+        <location filename="../Main/MainWindow.ui" line="11665"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This runs an optimal power flow&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;最佳潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這會運行最佳功率流&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11647"/>
+        <location filename="../Main/MainWindow.ui" line="11671"/>
         <source>F6</source>
         <translation>F6</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11656"/>
+        <location filename="../Main/MainWindow.ui" line="11680"/>
         <source>Optimal power flow time series</source>
         <translation>最優潮流時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11659"/>
+        <location filename="../Main/MainWindow.ui" line="11683"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal power flow&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This runs an optimal power flow for the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;最佳潮流&lt;/span&gt;&lt;/p&gt;&lt;p&gt;這會為時間序列數據運行最佳功率流&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11665"/>
+        <location filename="../Main/MainWindow.ui" line="11689"/>
         <source>Ctrl+F6</source>
         <translation>Ctrl+F6</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11674"/>
+        <location filename="../Main/MainWindow.ui" line="11698"/>
         <source>Detect transformers</source>
         <translation>檢測變壓器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11677"/>
+        <location filename="../Main/MainWindow.ui" line="11701"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Detect transformers.&lt;/p&gt;&lt;p&gt;Use the nodes nominal voltage to determine which branches should be a transformer.&lt;/p&gt;&lt;p&gt;If a branch joins two nodes with different voltage levels, the branch should be a transformer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;檢測變壓器。&lt;/p&gt;&lt;p&gt;使用節點標稱電壓來確定哪些分支應該是變壓器。&lt;/p&gt;&lt;p&gt;如果支路連接兩個不同電壓等級的節點，則該支路應該是變壓器。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11689"/>
+        <location filename="../Main/MainWindow.ui" line="11713"/>
         <source>Auto rate branches</source>
         <translation>自動評級分支機構</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11692"/>
+        <location filename="../Main/MainWindow.ui" line="11716"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Automatic rating of the branches.&lt;/p&gt;&lt;p&gt;Use the branches calculated power to establish a rate, if the branch rate is unknown. A factor is available in the settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;自動對分支機構進行評級。&lt;/p&gt;&lt;p&gt;如果分支速率未知，則使用分支計算功率來建立速率。設定中可以使用一個因素。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11707"/>
+        <location filename="../Main/MainWindow.ui" line="11731"/>
         <source>Storage location suggestion</source>
         <translation>存儲位置建議</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11710"/>
+        <location filename="../Main/MainWindow.ui" line="11734"/>
         <source>Suggest places where storage devices are useful</source>
         <translation>建議存儲設備有用的地方</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11722"/>
+        <location filename="../Main/MainWindow.ui" line="11746"/>
         <source>Launch data analysis tool</source>
         <translation>啓動數據分析工具</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11725"/>
+        <location filename="../Main/MainWindow.ui" line="11749"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Data analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Launch the data analysis tool that finds and tries to repair common grid modelling issues&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;數據分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;啓動數據分析工具來查找並嘗試修復常見的網格建模問題&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11731"/>
+        <location filename="../Main/MainWindow.ui" line="11755"/>
         <source>F12</source>
         <translation>F12</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11740"/>
+        <location filename="../Main/MainWindow.ui" line="11764"/>
         <source>Online documentation</source>
         <translation>在線文檔</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11746"/>
+        <location filename="../Main/MainWindow.ui" line="11770"/>
         <source>F1</source>
         <translation>F1</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11755"/>
+        <location filename="../Main/MainWindow.ui" line="11779"/>
         <source>Save as</source>
         <translation>另存為</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11767"/>
+        <location filename="../Main/MainWindow.ui" line="11791"/>
         <source>Delete selected</source>
         <translation>刪除所選內容</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11770"/>
+        <location filename="../Main/MainWindow.ui" line="11794"/>
         <source>Delete selected objects from the diagrams and optionally from the database</source>
         <translation>從圖表中刪除選定的物件，也可以從數據庫中刪除選定的物件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11776"/>
+        <location filename="../Main/MainWindow.ui" line="11800"/>
         <source>Del</source>
         <translation>德爾</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11785"/>
+        <location filename="../Main/MainWindow.ui" line="11809"/>
         <source>Linear analysis</source>
         <translation>線性分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11788"/>
+        <location filename="../Main/MainWindow.ui" line="11812"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Linear analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform linear analysis with distribution factors (PTDF, LODF)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;線性分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;使用分佈因子（PTDF、LODF）執行線性分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11794"/>
+        <location filename="../Main/MainWindow.ui" line="11818"/>
         <source>F7</source>
         <translation>F7</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11803"/>
+        <location filename="../Main/MainWindow.ui" line="11827"/>
         <source>Reset console</source>
         <translation>重置控制枱</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11818"/>
+        <location filename="../Main/MainWindow.ui" line="11842"/>
         <source>Set OPF results to power flow (non destructive)</source>
         <translation>將 OPF 結果設定為潮流（非破壞性）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11821"/>
+        <location filename="../Main/MainWindow.ui" line="11845"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy OPF data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Set the OPF results into the power flow or time series simulations (non destructive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;複製OPF數據&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將 OPF 結果設定為潮流或時間序列模擬（非破壞性）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11833"/>
+        <location filename="../Main/MainWindow.ui" line="11857"/>
         <source>Correct buses location</source>
         <translation>正確的巴士位置</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11836"/>
+        <location filename="../Main/MainWindow.ui" line="11860"/>
         <source>Set selected buses location closer to their neighbours</source>
         <translation>將選定的公交車位置設定為更靠近鄰居</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11848"/>
+        <location filename="../Main/MainWindow.ui" line="11872"/>
         <source>Copy OPF generation to database (destructive)</source>
         <translation>將 OPF 生成複製到數據庫（破壞性）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11851"/>
+        <location filename="../Main/MainWindow.ui" line="11875"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Copy OPF data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Destructive copy of the OPF generation results to the input profiles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;複製OPF數據&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將 OPF 生成結果破壞性複製到輸入配置檔案&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11863"/>
+        <location filename="../Main/MainWindow.ui" line="11887"/>
         <source>Linear analysis time series power flow</source>
         <translation>線性分析時間序列潮流</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11866"/>
+        <location filename="../Main/MainWindow.ui" line="11890"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Linear analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;PTDF based time series power flow&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;線性分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;基於PTDF的時間序列潮流&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11872"/>
+        <location filename="../Main/MainWindow.ui" line="11896"/>
         <source>Ctrl+F7</source>
         <translation>Ctrl+F7</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11881"/>
+        <location filename="../Main/MainWindow.ui" line="11905"/>
         <source>Import circuit</source>
         <translation>進口電路</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11884"/>
+        <location filename="../Main/MainWindow.ui" line="11908"/>
         <source>Add circuit to the current circuit</source>
         <translation>將電路添加到當前電路</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11890"/>
+        <location filename="../Main/MainWindow.ui" line="11914"/>
         <source>Ctrl+N, Ctrl+O</source>
         <translation>Ctrl+N、Ctrl+O</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11902"/>
+        <location filename="../Main/MainWindow.ui" line="11923"/>
+        <source>FMU</source>
+        <translation>FMU</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11926"/>
+        <source>Import a manufacturer FMU as a reusable dynamic model</source>
+        <translation>匯入製造商 FMU 作為可重用動態模型</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11935"/>
+        <source>Native library (IEEE/CIGRE or IEC ESE)...</source>
+        <translation>原生函式庫 (IEEE/CIGRE 或 IEC ESE)...</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11938"/>
+        <source>Import a manufacturer supplied native model library</source>
+        <translation>匯入製造商提供的原生模型函式庫</translation>
+    </message>
+    <message>
+        <location filename="../Main/MainWindow.ui" line="11950"/>
         <source>Sync</source>
         <translation>同步</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11905"/>
+        <location filename="../Main/MainWindow.ui" line="11953"/>
         <source>Sync with the file for colaborative editing of the grid</source>
         <translation>與檔案同步以協作編輯網格</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11914"/>
+        <location filename="../Main/MainWindow.ui" line="11962"/>
         <source>Draw schematic</source>
         <translation>畫原理圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11923"/>
+        <location filename="../Main/MainWindow.ui" line="11971"/>
         <source>Sigma analysis</source>
         <translation>西格瑪分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11926"/>
+        <location filename="../Main/MainWindow.ui" line="11974"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Sigma analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform HELM-Sigma analysis over the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;西格瑪分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對快照數據執行 HELM-Sigma 分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -15717,72 +16732,72 @@ You need to load or create a grid!</source>
         <translation type="vanished">清除“現在正在運行的內容”</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11953"/>
+        <location filename="../Main/MainWindow.ui" line="12001"/>
         <source>Add default catalogue</source>
         <translation>添加默認目錄</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11968"/>
+        <location filename="../Main/MainWindow.ui" line="12016"/>
         <source>Find node groups</source>
         <translation>查找節點組</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11971"/>
+        <location filename="../Main/MainWindow.ui" line="12019"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Finds the electrically related nodes by using their electrical distance and the DBSCAN clustering method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;利用電氣距離和 DBSCAN 聚類方法查找電氣相關節點&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11983"/>
+        <location filename="../Main/MainWindow.ui" line="12031"/>
         <source>Grid Generator</source>
         <translation>網格生成器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11989"/>
+        <location filename="../Main/MainWindow.ui" line="12037"/>
         <source>Ctrl+G</source>
         <translation>Ctrl+G</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11998"/>
+        <location filename="../Main/MainWindow.ui" line="12046"/>
         <source>Node load</source>
         <translation>節點負載</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12007"/>
+        <location filename="../Main/MainWindow.ui" line="12055"/>
         <source>Generator generation</source>
         <translation>發電機發電</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12016"/>
+        <location filename="../Main/MainWindow.ui" line="12064"/>
         <source>Contingency analysis time series</source>
         <translation>偶然事件分析時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12019"/>
+        <location filename="../Main/MainWindow.ui" line="12067"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingency analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Per form a contingency analysis with the selected method over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;應急分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;使用所選方法對時間序列數據執行應急分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12025"/>
+        <location filename="../Main/MainWindow.ui" line="12073"/>
         <source>Ctrl+F8</source>
         <translation>Ctrl+F8</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12034"/>
+        <location filename="../Main/MainWindow.ui" line="12082"/>
         <source>Branch rates</source>
         <translation>分行費率</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12043"/>
+        <location filename="../Main/MainWindow.ui" line="12091"/>
         <source>Set selected buses&apos; Area</source>
         <translation>設定所選公交車的區域</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12055"/>
+        <location filename="../Main/MainWindow.ui" line="12103"/>
         <source>Set selected buses&apos; Zone</source>
         <translation>設定所選公交車的區域</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12067"/>
+        <location filename="../Main/MainWindow.ui" line="12115"/>
         <source>Set seleted buses&apos; Country</source>
         <translation>設定所選巴士的國家/地區</translation>
     </message>
@@ -15791,420 +16806,420 @@ You need to load or create a grid!</source>
         <translation type="vanished">匯入公交車座標</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="11938"/>
-        <location filename="../Main/MainWindow.ui" line="11941"/>
+        <location filename="../Main/MainWindow.ui" line="11986"/>
+        <location filename="../Main/MainWindow.ui" line="11989"/>
         <source>Stop &quot;stuff running right now&quot;</source>
         <translation>停止「正在運行的內容」</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12079"/>
+        <location filename="../Main/MainWindow.ui" line="12127"/>
         <source>Coordinates</source>
         <translation>座標</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12091"/>
+        <location filename="../Main/MainWindow.ui" line="12139"/>
         <source>Available Transfer Capacity</source>
         <translation>可用傳輸容量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12094"/>
+        <location filename="../Main/MainWindow.ui" line="12142"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a linear net transfer capacity assesment for the snapshot data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;淨傳輸容量&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對快照數據執行線性淨傳輸容量評估&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12106"/>
+        <location filename="../Main/MainWindow.ui" line="12154"/>
         <source>Available Transfer Capacity Time Series</source>
         <translation>可用傳輸容量時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12109"/>
+        <location filename="../Main/MainWindow.ui" line="12157"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a linear net transfer capacity assesment for the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;淨傳輸容量&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對時間序列數據執行線性淨傳輸容量評估&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12121"/>
+        <location filename="../Main/MainWindow.ui" line="12169"/>
         <source>Contingency analysis</source>
         <translation>應急分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12124"/>
+        <location filename="../Main/MainWindow.ui" line="12172"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingency analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a contingency analysis with the selected method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;應急分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;使用所選方法執行應急分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12130"/>
+        <location filename="../Main/MainWindow.ui" line="12178"/>
         <source>F8</source>
         <translation>F8</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12139"/>
+        <location filename="../Main/MainWindow.ui" line="12187"/>
         <source>Optimal net transfer capacity</source>
         <translation>最佳淨傳輸能力</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12142"/>
+        <location filename="../Main/MainWindow.ui" line="12190"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Optimal Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform an optimal net transfer capacity optimization&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;最佳淨傳輸容量&lt;/span&gt;&lt;/p&gt;&lt;p&gt;執行最佳的淨傳輸容量優化&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12154"/>
+        <location filename="../Main/MainWindow.ui" line="12202"/>
         <source>Set schematic (x,y) from (lat,lon)</source>
         <translation>從（緯度，經度）設定示意圖（x，y）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12166"/>
+        <location filename="../Main/MainWindow.ui" line="12214"/>
         <source>Inputs analysis</source>
         <translation>輸入分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12169"/>
+        <location filename="../Main/MainWindow.ui" line="12217"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Inputs analysis&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform an analysis of the inputs for both the snapshot and time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;輸入分析&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對快照和時間序列數據的輸入進行分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12175"/>
+        <location filename="../Main/MainWindow.ui" line="12223"/>
         <source>F11</source>
         <translation>F11</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12184"/>
+        <location filename="../Main/MainWindow.ui" line="12232"/>
         <source>Fuse devices</source>
         <translation>保險絲裝置</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12187"/>
+        <location filename="../Main/MainWindow.ui" line="12235"/>
         <source>Fuse devices into a single device of each category per node</source>
         <translation>將設備融合到每個節點的每個類別的單個設備中</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12199"/>
-        <location filename="../Main/MainWindow.ui" line="12202"/>
+        <location filename="../Main/MainWindow.ui" line="12247"/>
+        <location filename="../Main/MainWindow.ui" line="12250"/>
         <source>Delete inconsistencies</source>
         <translation>刪除不一致的地方</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12214"/>
+        <location filename="../Main/MainWindow.ui" line="12262"/>
         <source>Optimal NTC time series</source>
         <translation>最佳 NTC 時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12217"/>
+        <location filename="../Main/MainWindow.ui" line="12265"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Net Transfer Capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a net transfer capacity optimization over the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;淨傳輸容量&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對時間序列數據執行淨傳輸容量優化&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12229"/>
+        <location filename="../Main/MainWindow.ui" line="12277"/>
         <source>re-index time</source>
         <translation>重新索引時間</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12241"/>
+        <location filename="../Main/MainWindow.ui" line="12289"/>
         <source>Fix generators active based on the power</source>
         <translation>根據功率修復發電機處於活動狀態</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12253"/>
-        <location filename="../Main/MainWindow.ui" line="12256"/>
+        <location filename="../Main/MainWindow.ui" line="12301"/>
+        <location filename="../Main/MainWindow.ui" line="12304"/>
         <source>Fix loads active based on the power</source>
         <translation>根據功率固定負載活動</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12268"/>
+        <location filename="../Main/MainWindow.ui" line="12316"/>
         <source>Initialize contingencies</source>
         <translation>初始化意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12271"/>
+        <location filename="../Main/MainWindow.ui" line="12319"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Contingencies wizard&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Launch the contingencies wizard to automatically set up the contingency objects&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;意外事件嚮導&lt;/span&gt;&lt;/p&gt;&lt;p&gt;啓動意外事件嚮導以自動設定意外事件物件&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12283"/>
+        <location filename="../Main/MainWindow.ui" line="12331"/>
         <source>Add selected as new contingency</source>
         <translation>添加所選內容作為新的意外事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12286"/>
+        <location filename="../Main/MainWindow.ui" line="12334"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add contingency&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new contingency from the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加應急措施&lt;/span&gt;&lt;/p&gt;&lt;p&gt;從原理圖選擇中創建新的意外事件&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12292"/>
+        <location filename="../Main/MainWindow.ui" line="12340"/>
         <source>Ctrl+A, Ctrl+C</source>
         <translation>Ctrl+A、Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12301"/>
+        <location filename="../Main/MainWindow.ui" line="12349"/>
         <source>Add selected as new investment</source>
         <translation>添加選擇作為新投資</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12304"/>
+        <location filename="../Main/MainWindow.ui" line="12352"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investments&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create new investment with the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;投資&lt;/span&gt;&lt;/p&gt;&lt;p&gt;通過原理圖選擇創建新的投資&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12310"/>
+        <location filename="../Main/MainWindow.ui" line="12358"/>
         <source>Ctrl+A, Ctrl+I</source>
         <translation>Ctrl+A、Ctrl+I</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12319"/>
+        <location filename="../Main/MainWindow.ui" line="12367"/>
         <source>Zoom in</source>
         <translation>放大</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12325"/>
+        <location filename="../Main/MainWindow.ui" line="12373"/>
         <source>Ctrl++</source>
         <translation>Ctrl++</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12334"/>
+        <location filename="../Main/MainWindow.ui" line="12382"/>
         <source>Zoom out</source>
         <translation>縮小</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12340"/>
+        <location filename="../Main/MainWindow.ui" line="12388"/>
         <source>Ctrl+-</source>
         <translation>Ctrl+-</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12352"/>
+        <location filename="../Main/MainWindow.ui" line="12400"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Clustering&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform a clustering study of the time series data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;聚類&lt;/span&gt;&lt;/p&gt;&lt;p&gt;對時間序列數據進行聚類研究&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12370"/>
+        <location filename="../Main/MainWindow.ui" line="12418"/>
         <source>Use clustering</source>
         <translation>使用聚類</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12373"/>
+        <location filename="../Main/MainWindow.ui" line="12421"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Clustering&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If active, the available clustering results are used in all the simulations that handle time series data non-destructivelly&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;聚類&lt;/span&gt;&lt;/p&gt;&lt;p&gt;如果處於活動狀態，則可用的聚類結果將用於所有非破壞性處理時間序列數據的模擬中&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12385"/>
+        <location filename="../Main/MainWindow.ui" line="12433"/>
         <source>Investments evaluation</source>
         <translation>投資評估</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12388"/>
+        <location filename="../Main/MainWindow.ui" line="12436"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Investments&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Perform the investments evaluation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;投資&lt;/span&gt;&lt;/p&gt;&lt;p&gt;進行投資評估&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12394"/>
+        <location filename="../Main/MainWindow.ui" line="12442"/>
         <source>Ctrl+I, Ctrl+E</source>
         <translation>Ctrl+I、Ctrl+E</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12403"/>
+        <location filename="../Main/MainWindow.ui" line="12451"/>
         <source>New schematic from selection</source>
         <translation>選擇的新原理圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12415"/>
+        <location filename="../Main/MainWindow.ui" line="12463"/>
         <source>New schematic</source>
         <translation>新原理圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12427"/>
+        <location filename="../Main/MainWindow.ui" line="12475"/>
         <source>New map</source>
         <translation>新地圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12439"/>
+        <location filename="../Main/MainWindow.ui" line="12487"/>
         <source>Remove selected diagram</source>
         <translation>刪除選定的圖表</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12448"/>
+        <location filename="../Main/MainWindow.ui" line="12496"/>
         <source>Report a bug or feature</source>
         <translation>報告錯誤或功能</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12460"/>
+        <location filename="../Main/MainWindow.ui" line="12508"/>
         <source>Search</source>
         <translation>搜尋</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12472"/>
+        <location filename="../Main/MainWindow.ui" line="12520"/>
         <source>Process topology</source>
         <translation>流程拓撲</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12484"/>
+        <location filename="../Main/MainWindow.ui" line="12532"/>
         <source>Edit simulation time limits</source>
         <translation>編輯模擬時間限制</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12487"/>
+        <location filename="../Main/MainWindow.ui" line="12535"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time series&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Edit simulation time limits&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;時間序列&lt;/span&gt;&lt;/p&gt;&lt;p&gt;編輯模擬時間限制&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12502"/>
+        <location filename="../Main/MainWindow.ui" line="12550"/>
         <source>activate time series</source>
         <translation>激活時間序列</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12505"/>
+        <location filename="../Main/MainWindow.ui" line="12553"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Time series mode&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When activated, the simulations run their time series version&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;時間序列模式&lt;/span&gt;&lt;/p&gt;&lt;p&gt;激活後，模擬運行其時間序列版本&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12511"/>
+        <location filename="../Main/MainWindow.ui" line="12559"/>
         <source>Ctrl+T</source>
         <translation>Ctrl+T</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12520"/>
+        <location filename="../Main/MainWindow.ui" line="12568"/>
         <source>Clean database</source>
         <translation>清理數據庫</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12526"/>
+        <location filename="../Main/MainWindow.ui" line="12574"/>
         <source>Ctrl+C, Ctrl+D</source>
         <translation>Ctrl+C、Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12535"/>
+        <location filename="../Main/MainWindow.ui" line="12583"/>
         <source>Scale</source>
         <translation>規模</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12538"/>
+        <location filename="../Main/MainWindow.ui" line="12586"/>
         <source>Scale the system load and or generation</source>
         <translation>擴展系統負載和/或發電量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12550"/>
+        <location filename="../Main/MainWindow.ui" line="12598"/>
         <source>Disable all results tags</source>
         <translation>禁用所有結果標籤</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12562"/>
+        <location filename="../Main/MainWindow.ui" line="12610"/>
         <source>Enable all results tags</source>
         <translation>啓用所有結果標籤</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12574"/>
+        <location filename="../Main/MainWindow.ui" line="12622"/>
         <source>Detect substations</source>
         <translation>檢測變電站</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12586"/>
+        <location filename="../Main/MainWindow.ui" line="12634"/>
         <source>Optimal hosting capacity</source>
         <translation>最佳託管容量</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12589"/>
+        <location filename="../Main/MainWindow.ui" line="12637"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Nodal hosting capacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the nodal hosting capacity calculation using the selected optimization method&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;節點承載能力&lt;/span&gt;&lt;/p&gt;&lt;p&gt;使用所選的優化方法運行節點託管容量計算&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12604"/>
+        <location filename="../Main/MainWindow.ui" line="12652"/>
         <source>Enable server mode</source>
         <translation>啓用服務器模式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12616"/>
+        <location filename="../Main/MainWindow.ui" line="12664"/>
         <source>Record video</source>
         <translation>錄製視頻</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12619"/>
+        <location filename="../Main/MainWindow.ui" line="12667"/>
         <source>Record video of the schematic</source>
         <translation>錄製原理圖視頻</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12631"/>
+        <location filename="../Main/MainWindow.ui" line="12679"/>
         <source>Save  differential</source>
         <translation>儲存差異</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12643"/>
+        <location filename="../Main/MainWindow.ui" line="12691"/>
         <source>Consolidate coordinates</source>
         <translation>合併座標</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12655"/>
+        <location filename="../Main/MainWindow.ui" line="12703"/>
         <source>Add selected as new remedial action</source>
         <translation>添加所選內容作為新的補救措施</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12658"/>
+        <location filename="../Main/MainWindow.ui" line="12706"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Add remedial action&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Create a new remedial action from the schematic selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加補救措施&lt;/span&gt;&lt;/p&gt;&lt;p&gt;從原理圖選擇中創建新的補救措施&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12664"/>
+        <location filename="../Main/MainWindow.ui" line="12712"/>
         <source>Ctrl+A, Ctrl+R</source>
         <translation>Ctrl+A、Ctrl+R</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12673"/>
+        <location filename="../Main/MainWindow.ui" line="12721"/>
         <source>Detect facilities</source>
         <translation>檢測設施</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12682"/>
+        <location filename="../Main/MainWindow.ui" line="12730"/>
         <source>Rotate</source>
         <translation>旋轉</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12694"/>
+        <location filename="../Main/MainWindow.ui" line="12742"/>
         <source>Reset diagram coordinates to database values</source>
         <translation>將圖表座標重置為數據庫值</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12706"/>
+        <location filename="../Main/MainWindow.ui" line="12754"/>
         <source>Reliability analysis</source>
         <translation>可靠性分析</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12709"/>
+        <location filename="../Main/MainWindow.ui" line="12757"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Reliability study&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run the reliability calculation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;可靠性研究&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行可靠性計算&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12724"/>
+        <location filename="../Main/MainWindow.ui" line="12772"/>
         <source>Color buses by...</source>
         <translation>為巴士塗色...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12736"/>
+        <location filename="../Main/MainWindow.ui" line="12784"/>
         <source>Color substations by...</source>
         <translation>給變電站上色...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12751"/>
+        <location filename="../Main/MainWindow.ui" line="12799"/>
         <source>Select buses by...</source>
         <translation>選擇巴士...</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12778"/>
+        <location filename="../Main/MainWindow.ui" line="12826"/>
         <source>Substation wizard</source>
         <translation>變電站嚮導</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12781"/>
+        <location filename="../Main/MainWindow.ui" line="12829"/>
         <source>Add substation with a wizard form</source>
         <translation>使用嚮導形式添加變電站</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12784"/>
+        <location filename="../Main/MainWindow.ui" line="12832"/>
         <source>Ctrl+A, Ctrl+S</source>
         <translation>Ctrl+A、Ctrl+S</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12796"/>
+        <location filename="../Main/MainWindow.ui" line="12844"/>
         <source>Dynamic RMS Simulation</source>
         <translation>動態RMS模擬</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12799"/>
+        <location filename="../Main/MainWindow.ui" line="12847"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RMS Simulation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a dynamic RMS simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RMS 模擬&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行動態 RMS 模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -16217,13 +17232,13 @@ You need to load or create a grid!</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;準備 RMS 動態圖&lt;/span&gt;&lt;/p&gt;&lt;p&gt;在運行仿真之前開啟 RMS 動態繪圖編輯器&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12811"/>
-        <location filename="../Main/MainWindow.ui" line="12814"/>
+        <location filename="../Main/MainWindow.ui" line="12859"/>
+        <location filename="../Main/MainWindow.ui" line="12862"/>
         <source>Small-Signal RMS Simulation</source>
         <translation>小信號 RMS 仿真</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12817"/>
+        <location filename="../Main/MainWindow.ui" line="12865"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Small Signal Simulation (RMS)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an RMS Small Signal stability analysis simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;小信號仿真（RMS）&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行 RMS 小信號穩定性分析模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -16236,113 +17251,113 @@ You need to load or create a grid!</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加RMS事件&lt;/span&gt;&lt;/p&gt;&lt;p&gt;創建一個新的 RMS 事件到原理圖選擇&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12847"/>
+        <location filename="../Main/MainWindow.ui" line="12895"/>
         <source>Clear highlights</source>
         <translation>清晰的亮點</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12862"/>
+        <location filename="../Main/MainWindow.ui" line="12910"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;State estimation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a state estimation analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;狀態估計&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行狀態估計分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12874"/>
+        <location filename="../Main/MainWindow.ui" line="12922"/>
         <source>Add short circuit events</source>
         <translation>添加短路事件</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12886"/>
+        <location filename="../Main/MainWindow.ui" line="12934"/>
         <source>PSS/e Raw / Rawx</source>
         <translation>PSS/e 原始 / 原始</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12895"/>
+        <location filename="../Main/MainWindow.ui" line="12943"/>
         <source>Power Factory DGS</source>
         <translation>動力廠DGS</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12904"/>
+        <location filename="../Main/MainWindow.ui" line="12952"/>
         <source>Matpower</source>
         <translation>瑪特動力</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12913"/>
+        <location filename="../Main/MainWindow.ui" line="12961"/>
         <source>UCTE</source>
         <translation>UCTE</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12922"/>
+        <location filename="../Main/MainWindow.ui" line="12970"/>
         <source>CGMES</source>
         <translation>CGMES</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12931"/>
+        <location filename="../Main/MainWindow.ui" line="12979"/>
         <source>Power Grid Models</source>
         <translation>電網模型</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12940"/>
+        <location filename="../Main/MainWindow.ui" line="12988"/>
         <source>CIM</source>
         <translation>CIM</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12949"/>
+        <location filename="../Main/MainWindow.ui" line="12997"/>
         <source>H5</source>
         <translation>H5</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12958"/>
+        <location filename="../Main/MainWindow.ui" line="13006"/>
         <source>JSON</source>
         <translation>JSON</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12967"/>
+        <location filename="../Main/MainWindow.ui" line="13015"/>
         <source>Microsoft Excel</source>
         <translation>微軟Excel</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12976"/>
+        <location filename="../Main/MainWindow.ui" line="13024"/>
         <source>SQLite</source>
         <translation>SQLite</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="12985"/>
+        <location filename="../Main/MainWindow.ui" line="13033"/>
         <source>Profiles</source>
         <translation>型材</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13012"/>
-        <location filename="../Main/MainWindow.ui" line="13030"/>
+        <location filename="../Main/MainWindow.ui" line="13060"/>
+        <location filename="../Main/MainWindow.ui" line="13078"/>
         <source>Catalogue</source>
         <translation>目錄</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13039"/>
+        <location filename="../Main/MainWindow.ui" line="13087"/>
         <source>Clean Room</source>
         <translation>無塵室</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13042"/>
+        <location filename="../Main/MainWindow.ui" line="13090"/>
         <source>Cleam room utility to produce an machine learning statistical representation of the static time series</source>
         <translation>用於生成靜態時間序列的機器學習統計表示的 Clean Room 實用程式</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13066"/>
+        <location filename="../Main/MainWindow.ui" line="13114"/>
         <source>Procedural grid expansion</source>
         <translation>程式網格擴展</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13075"/>
+        <location filename="../Main/MainWindow.ui" line="13123"/>
         <source>Catalogue element optimization</source>
         <translation>目錄元素優化</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13084"/>
+        <location filename="../Main/MainWindow.ui" line="13132"/>
         <source>Dynamic EMT Simulation</source>
         <translation>動態EMT模擬</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13087"/>
+        <location filename="../Main/MainWindow.ui" line="13135"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;EMT Simulation&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run a dynamic EMT simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;EMT 模擬&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行動態 EMT 模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -16355,43 +17370,43 @@ You need to load or create a grid!</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;準備 EMT 動態圖&lt;/span&gt;&lt;/p&gt;&lt;p&gt;在運行仿真之前開啟 EMT 動態繪圖編輯器&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13099"/>
-        <location filename="../Main/MainWindow.ui" line="13102"/>
+        <location filename="../Main/MainWindow.ui" line="13147"/>
+        <location filename="../Main/MainWindow.ui" line="13150"/>
         <source>Small-Signal EMT Simulation</source>
         <translation>小信號 EMT 仿真</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13105"/>
+        <location filename="../Main/MainWindow.ui" line="13153"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Small Signal Simulation (EMT)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an EMT Small Signal stability analysis simulation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;小信號仿真（EMT）&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行 EMT 小信號穩定性分析模擬&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13113"/>
+        <location filename="../Main/MainWindow.ui" line="13161"/>
         <source>Reticular</source>
         <translation>網狀</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13118"/>
+        <location filename="../Main/MainWindow.ui" line="13166"/>
         <source>Straight</source>
         <translation>直</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13127"/>
+        <location filename="../Main/MainWindow.ui" line="13175"/>
         <source>ai_chat</source>
         <translation>艾聊天</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13130"/>
+        <location filename="../Main/MainWindow.ui" line="13178"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;VeraGrid AI &lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show the VeraGrid AI chat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;VeraGrid AI &lt;/span&gt;&lt;/p&gt;&lt;p&gt;顯示 VeraGrid AI 聊天記錄&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13142"/>
+        <location filename="../Main/MainWindow.ui" line="13190"/>
         <source>Power Flow 3-phase</source>
         <translation>潮流三相</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13145"/>
+        <location filename="../Main/MainWindow.ui" line="13193"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Power Flow 3-phase&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Run an unbalanced 3-phase power flow analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;潮流三相&lt;/span&gt;&lt;/p&gt;&lt;p&gt;運行不平衡三相潮流分析&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -16404,32 +17419,32 @@ You need to load or create a grid!</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;添加EMT事件&lt;/span&gt;&lt;/p&gt;&lt;p&gt;創建一個新的 EMT 事件到原理圖選擇&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13172"/>
+        <location filename="../Main/MainWindow.ui" line="13220"/>
         <source>Set model (x,y) based on (lat, lon)</source>
         <translation>根據（緯度，經度）設定模型（x，y）</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13181"/>
+        <location filename="../Main/MainWindow.ui" line="13229"/>
         <source>Restore investments</source>
         <translation>恢復投資</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13193"/>
+        <location filename="../Main/MainWindow.ui" line="13241"/>
         <source>Veragrid Scenario</source>
         <translation>Veragrid場景</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13202"/>
+        <location filename="../Main/MainWindow.ui" line="13250"/>
         <source>Show dynamic models editor</source>
         <translation>顯示動態模型編輯器</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13214"/>
+        <location filename="../Main/MainWindow.ui" line="13262"/>
         <source>Repair diagram</source>
         <translation>維修圖</translation>
     </message>
     <message>
-        <location filename="../Main/MainWindow.ui" line="13226"/>
+        <location filename="../Main/MainWindow.ui" line="13274"/>
         <source>Clear cache</source>
         <translation>清除快取</translation>
     </message>
@@ -16454,135 +17469,30 @@ You need to load or create a grid!</source>
     </message>
 </context>
 <context>
-    <name>DynamicEventParametersTreeModel</name>
+    <name>SpecialConfigTabs</name>
     <message>
-        <source>Parameters</source>
-        <translation>參數</translation>
-    </message>
-</context>
-<context>
-    <name>GraphsWidget</name>
-    <message>
-        <source>Center data</source>
-        <translation>置中數據</translation>
+        <source>Core saturation</source>
+        <translation>磁芯飽和</translation>
     </message>
     <message>
-        <source>Edit X maximum…</source>
-        <translation>編輯 X 最大值…</translation>
+        <source>JMarti line configuration</source>
+        <translation>JMarti 線路配置</translation>
     </message>
     <message>
-        <source>Edit X minimum…</source>
-        <translation>編輯 X 最小值…</translation>
+        <source>Special configuration</source>
+        <translation>特殊配置</translation>
     </message>
     <message>
-        <source>Edit Y maximum…</source>
-        <translation>編輯 Y 最大值…</translation>
+        <source>Table configuration</source>
+        <translation>表格配置</translation>
     </message>
     <message>
-        <source>Edit Y minimum…</source>
-        <translation>編輯 Y 最小值…</translation>
+        <source>V-I curve</source>
+        <translation>V-I 曲線</translation>
     </message>
     <message>
-        <source>Enter a finite axis limit and press Enter</source>
-        <translation>輸入有限軸限並按 Enter</translation>
-    </message>
-    <message>
-        <source>Mouse wheel: zoom
-Left drag: select zoom area
-Ctrl + left drag: pan
-Right-click: chart options
-Double-click: reset view</source>
-        <translation>滑鼠滾輪：縮放
-左拖：選取縮放區域
-Ctrl + 左拖：平移
-右鍵：圖表選項
-雙擊：重設視圖</translation>
-    </message>
-    <message>
-        <source>Negative</source>
-        <translation>負數</translation>
-    </message>
-    <message>
-        <source>PNG image (*.png)</source>
-        <translation>PNG 圖像 (*.png)</translation>
-    </message>
-    <message>
-        <source>Positive</source>
-        <translation>正數</translation>
-    </message>
-    <message>
-        <source>SVG image (*.svg)</source>
-        <translation>SVG 圖像 (*.svg)</translation>
-    </message>
-    <message>
-        <source>Save chart</source>
-        <translation>儲存圖表</translation>
-    </message>
-    <message>
-        <source>Save image…</source>
-        <translation>儲存圖片…</translation>
-    </message>
-</context>
-<context>
-    <name>PythonConsole</name>
-    <message>
-        <source>Copy</source>
-        <translation>複製</translation>
-    </message>
-</context>
-<context>
-    <name>UndergroundCableBuilderGUI</name>
-    <message>
-        <source>Cable calculation</source>
-        <translation>電纜計算</translation>
-    </message>
-    <message>
-        <source>Cable positions</source>
-        <translation>電纜位置</translation>
-    </message>
-    <message>
-        <source>Depth (m)</source>
-        <translation>深度 (m)</translation>
-    </message>
-    <message>
-        <source>Horizontal position (m)</source>
-        <translation>水平位置 (m)</translation>
-    </message>
-    <message>
-        <source>Primitive series impedance [Ω/km]</source>
-        <translation>基本串聯阻抗 [Ω/km]</translation>
-    </message>
-    <message>
-        <source>Primitive shunt admittance [μS/km]</source>
-        <translation>基本並聯導納 [μS/km]</translation>
-    </message>
-    <message>
-        <source>Reduced series impedance [Ω/km]</source>
-        <translation>減小串聯阻抗 [Ω/km]</translation>
-    </message>
-    <message>
-        <source>Reduced shunt admittance [μS/km]</source>
-        <translation>減小並聯導納 [μS/km]</translation>
-    </message>
-    <message>
-        <source>Select a cable construction from the catalogue.</source>
-        <translation>從目錄中選擇電纜結構。</translation>
-    </message>
-    <message>
-        <source>Select a cable from the system composition.</source>
-        <translation>從系統組件中選擇電纜。</translation>
-    </message>
-    <message>
-        <source>Sequence series impedance [Ω/km]</source>
-        <translation>相序串聯阻抗 [Ω/km]</translation>
-    </message>
-    <message>
-        <source>Sequence shunt admittance [μS/km]</source>
-        <translation>相序並聯導納 [μS/km]</translation>
-    </message>
-    <message>
-        <source>Underground cable position</source>
-        <translation>地下電纜位置</translation>
+        <source>Waveform configuration</source>
+        <translation>波形配置</translation>
     </message>
 </context>
 </TS>

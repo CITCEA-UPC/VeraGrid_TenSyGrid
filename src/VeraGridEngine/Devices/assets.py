@@ -4,10 +4,12 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 
+import hashlib
+import json
 import warnings
 import numpy as np
 import pandas as pd
-from typing import List, Dict, Tuple, Union, Any, Set, Generator, Sequence
+from typing import List, Dict, Tuple, Union, Any, Set, Generator, Sequence, Optional
 import datetime as dateslib
 
 from VeraGridEngine.basic_structures import IntVec, StrVec, Vec, Mat, ObjVec, BoolVec
@@ -15,6 +17,16 @@ import VeraGridEngine.Devices as dev
 import VeraGridEngine.Templates as tem
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES, BRANCH_TYPES, INJECTION_DEVICE_TYPES, FLUID_TYPES
 from VeraGridEngine.Devices.Parents.editable_device import GCPROP_TYPES
+from VeraGridEngine.Devices.Parents.pointer_device_parent import PointerDeviceParent
+from VeraGridEngine.Utils.procedural_logic import (
+    IeeeCigreDllParameterOverride,
+    IeeeCigreDllSignalBinding,
+    ManufacturerNativeControllerLogic,
+    ManufacturerNativeRebindPlan,
+    ProceduralLogicBase,
+)
+from VeraGridEngine.Utils.Symbolic.block import Block
+from VeraGridEngine.Utils.Symbolic.symbolic import Var
 from VeraGridEngine.Devices.Dynamic.template_classification import (
     classify_dynamic_template_block,
 )
@@ -23,6 +35,7 @@ from VeraGridEngine.enumerations import (
     DeviceType,
     DynamicTemplateCategory,
     FmuTemplateDomain,
+    IeeeCigreDllModelMode,
     ParamPowerFlowReferenceType,
 )
 from VeraGridEngine.basic_structures import Logger, ListSet
@@ -120,7 +133,6 @@ class Assets:
         '_wire_types',
         '_underground_cable_constructions',
         '_underground_cable_types',
-        '_dc_cable_types',
         '_sequence_line_types',
         '_transformer_types',
         '_branch_groups',
@@ -152,6 +164,7 @@ class Assets:
         '_pumps',
         '_p2xs',
         '_diagrams',
+        '_manufacturer_native_models',
         '_rms_models',
         '_emt_models',
         '_fmu_templates',
@@ -276,9 +289,6 @@ class Assets:
         # underground cable lines
         self._underground_cable_types: List[dev.UndergroundLineType] = list()
 
-        # DC cable physical catalogue types
-        self._dc_cable_types: List[dev.DcCableType] = list()
-
         # sequence modelled lines
         self._sequence_line_types: List[dev.SequenceLineType] = list()
 
@@ -365,6 +375,9 @@ class Assets:
 
         # list of power to gas devices
         self._p2xs: List[dev.FluidP2x] = list()
+
+        # Manufacturer native providers precede every Block consumer.
+        self._manufacturer_native_models: List[dev.ManufacturerNativeModel] = list()
 
         # list of RMS models
         self._rms_models: List[dev.RmsModelTemplate] = list()
@@ -466,6 +479,7 @@ class Assets:
                 # dev.DynamicPlot(),
             ],
             "Templates": [
+                dev.ManufacturerNativeModel(),
                 dev.RmsModelTemplate(),
                 dev.EmtModelTemplate(),
                 dev.FmuTemplate(),
@@ -475,7 +489,6 @@ class Assets:
                 dev.OverheadLineType(),
                 dev.UndergroundCableType(),
                 dev.UndergroundLineType(),
-                dev.DcCableType(),
                 dev.SequenceLineType(),
                 dev.TransformerType(),
             ],
@@ -3823,49 +3836,21 @@ class Assets:
     # ------------------------------------------------------------------------------------------------------------------
 
     @property
-    def dc_cable_types(self) -> List[dev.DcCableType]:
-        """
-        Get the DC cable catalogue.
-
-        :return: Canonical DC cable type list.
-        """
-        return self._dc_cable_types
+    def dc_cable_types(self) -> List[dev.UndergroundLineType]:
+        """Deprecated alias of the common Cable System catalogue (AC and DC)."""
+        return self.underground_cable_types
 
     @dc_cable_types.setter
-    def dc_cable_types(self, value: List[dev.DcCableType]) -> None:
-        """
-        Replace the DC cable catalogue.
+    def dc_cable_types(self, value: List[dev.UndergroundLineType]) -> None:
+        self.underground_cable_types = value
 
-        :param value: Canonical DC cable type list.
-        :return: None.
-        """
-        self._dc_cable_types = value
+    def add_dc_cable_type(self, obj: dev.UndergroundLineType) -> None:
+        """Compatibility alias; register the object in Cable System."""
+        self.add_underground_line(obj)
 
-    def add_dc_cable_type(self, obj: dev.DcCableType) -> None:
-        """
-        Add one DC cable type to the catalogue.
-
-        :param obj: DC cable type to register.
-        :return: None.
-        """
-        if isinstance(obj, dev.DcCableType):
-            obj.set_var_factory(self._var_factory)
-            self._dc_cable_types.append(obj)
-        else:
-            print('The template is not a DC cable type!')
-
-    def delete_dc_cable_type(self, obj: dev.DcCableType) -> None:
-        """
-        Delete one DC cable type and clear dependent line references.
-
-        :param obj: DC cable type to remove.
-        :return: None.
-        """
-        self.delete_line_template_dependency(obj=obj)
-        try:
-            self._dc_cable_types.remove(obj)
-        except ValueError:
-            pass
+    def delete_dc_cable_type(self, obj: dev.UndergroundLineType) -> None:
+        """Compatibility alias; clear AC/DC references and remove the system."""
+        self.delete_underground_line(obj)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Sequence line type
@@ -6682,6 +6667,289 @@ class Assets:
             print(e)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Manufacturer native model providers
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def manufacturer_native_models(self) -> List[dev.ManufacturerNativeModel]:
+        """Return providers before their RMS/EMT Block consumers.
+
+        :return: Ordered manufacturer native provider catalogue.
+        """
+        return self._manufacturer_native_models
+
+    @manufacturer_native_models.setter
+    def manufacturer_native_models(self, value: List[dev.ManufacturerNativeModel]) -> None:
+        """Replace the provider catalogue.
+
+        :param value: Complete ordered provider list.
+        :return: None.
+        """
+        self._manufacturer_native_models = value
+
+    def add_manufacturer_native_model(self, obj: dev.ManufacturerNativeModel) -> None:
+        """Add one canonical manufacturer native provider.
+
+        :param obj: Provider to register.
+        :return: None.
+        """
+        if not isinstance(obj, dev.ManufacturerNativeModel):
+            raise TypeError("The provider is not a ManufacturerNativeModel")
+        else:
+            pass
+        if self.get_manufacturer_native_model_by_idtag(obj.idtag) is not None:
+            raise ValueError(f"Manufacturer native provider idtag already exists: {obj.idtag}")
+        else:
+            self._manufacturer_native_models.append(obj)
+
+    def get_manufacturer_native_model_by_idtag(self,
+                                                idtag: str) -> dev.ManufacturerNativeModel | None:
+        """Find one provider by stable identity.
+
+        :param idtag: Provider identifier.
+        :return: Matching provider or ``None``.
+        """
+        provider: dev.ManufacturerNativeModel
+        for provider in self._manufacturer_native_models:
+            if provider.idtag == idtag:
+                return provider
+            else:
+                pass
+        return None
+
+    def get_manufacturer_native_consumers(self,
+                                          provider: dev.ManufacturerNativeModel) -> List[dev.RmsModelTemplate | dev.EmtModelTemplate]:
+        """Return every template whose Block hierarchy references a provider.
+
+        :param provider: Provider whose consumers are requested.
+        :return: Ordered RMS/EMT template consumers.
+        """
+        consumers: List[dev.RmsModelTemplate | dev.EmtModelTemplate] = list()
+        template_lists: Tuple[List[dev.RmsModelTemplate] | List[dev.EmtModelTemplate], ...] = (
+            self._rms_models,
+            self._emt_models,
+        )
+        template_list: List[dev.RmsModelTemplate] | List[dev.EmtModelTemplate]
+        template: dev.RmsModelTemplate | dev.EmtModelTemplate
+        for template_list in template_lists:
+            for template in template_list:
+                found: bool = False
+                for block in template.block.get_all_blocks():
+                    for logic in block.procedural_logic:
+                        if isinstance(logic, ManufacturerNativeControllerLogic):
+                            if logic.provider_idtag == provider.idtag:
+                                found = True
+                            else:
+                                pass
+                        else:
+                            pass
+                if found:
+                    consumers.append(template)
+                else:
+                    pass
+        return consumers
+
+    def get_element_deletion_blockers(self, obj: ALL_DEV_TYPES) -> List[ALL_DEV_TYPES]:
+        """Return objects that prevent safe deletion of one database element.
+
+        This general Assets query keeps reference knowledge beside the model
+        ownership rules and lets database views remain independent of device
+        implementations.
+
+        :param obj: Candidate database element.
+        :return: Ordered objects that still reference the candidate.
+        """
+        blockers: List[ALL_DEV_TYPES] = list()
+        if isinstance(obj, dev.ManufacturerNativeModel):
+            consumer: dev.RmsModelTemplate | dev.EmtModelTemplate
+            for consumer in self.get_manufacturer_native_consumers(obj):
+                blockers.append(consumer)
+        else:
+            pass
+        return blockers
+
+    def delete_manufacturer_native_model(self, obj: dev.ManufacturerNativeModel) -> None:
+        """Delete a provider only when no template still references it.
+
+        :param obj: Provider to remove.
+        :return: None.
+        """
+        consumers: List[dev.RmsModelTemplate | dev.EmtModelTemplate] = (
+            self.get_manufacturer_native_consumers(obj)
+        )
+        if len(consumers) == 0:
+            if obj in self._manufacturer_native_models:
+                self._manufacturer_native_models.remove(obj)
+            else:
+                pass
+        else:
+            pass
+
+
+    def rebind_manufacturer_native_consumer(
+            self,
+            consumer: dev.RmsModelTemplate | dev.EmtModelTemplate,
+            source: dev.ManufacturerNativeModel,
+            destination: dev.ManufacturerNativeModel,
+            plan: ManufacturerNativeRebindPlan | None = None,
+    ) -> None:
+        """Atomically rebind one consumer after complete compatibility proof.
+
+        Byte-identical metadata needs no mapping. A different digest requires
+        the transient plan built by the IEEE/CIGRE IO layer.
+
+        :param consumer: RMS/EMT template to update.
+        :param source: Current provider.
+        :param destination: Replacement provider.
+        :param plan: Complete different-digest replacement plan.
+        :return: None.
+        """
+        if source.model_info_sha256 == destination.model_info_sha256:
+            rebound: bool = False
+            block: Block
+            for block in consumer.block.get_all_blocks():
+                logic: ProceduralLogicBase
+                for logic in block.procedural_logic:
+                    if isinstance(logic, ManufacturerNativeControllerLogic):
+                        if logic.provider_idtag == source.idtag:
+                            logic.provider_idtag = destination.idtag
+                            logic.model_info_sha256 = destination.model_info_sha256
+                            rebound = True
+                        else:
+                            pass
+                    else:
+                        pass
+            if not rebound:
+                raise ValueError("The selected template does not consume the source provider")
+            else:
+                return
+        else:
+            pass
+
+        if plan is None:
+            raise ValueError("Different ModelInfo digests require a complete rebind plan")
+        else:
+            pass
+        if (
+                plan.consumer_idtag != consumer.idtag
+                or plan.source_provider_idtag != source.idtag
+                or plan.destination_provider_idtag != destination.idtag
+                or plan.source_model_info_sha256 != source.model_info_sha256
+                or plan.destination_model_info_sha256 != destination.model_info_sha256
+        ):
+            raise ValueError("Manufacturer native rebind plan identities are stale")
+        else:
+            pass
+
+        if isinstance(consumer, dev.RmsModelTemplate):
+            occurrence_mode: IeeeCigreDllModelMode = IeeeCigreDllModelMode.RMS
+        else:
+            if isinstance(consumer, dev.EmtModelTemplate):
+                occurrence_mode = IeeeCigreDllModelMode.EMT
+            else:
+                raise TypeError("Manufacturer native consumer must be an RMS or EMT template")
+
+        occurrences: list[ManufacturerNativeControllerLogic] = list()
+        source_fingerprints: list[str] = list()
+        block: Block
+        for block in consumer.block.get_all_blocks():
+            logic: ProceduralLogicBase
+            for logic in block.procedural_logic:
+                if isinstance(logic, ManufacturerNativeControllerLogic):
+                    if logic.provider_idtag == source.idtag:
+                        fingerprint_payload: tuple[object, ...] = (
+                            int(occurrence_mode.value),
+                            logic.provider_idtag,
+                            logic.model_info_sha256,
+                            tuple(
+                                (
+                                    binding.is_input,
+                                    binding.port_ordinal,
+                                    binding.element_ordinal,
+                                    binding.get_variable().name,
+                                    binding.get_variable().non_mutable_uid,
+                                )
+                                for binding in logic.signal_bindings
+                            ),
+                            tuple(
+                                (
+                                    override.parameter_ordinal,
+                                    override.data_type,
+                                    override.fixed_value,
+                                    override.value,
+                                )
+                                for override in logic.parameter_overrides
+                            ),
+                        )
+                        fingerprint_bytes: bytes = json.dumps(
+                            fingerprint_payload,
+                            ensure_ascii=True,
+                            allow_nan=False,
+                            separators=(",", ":"),
+                        ).encode("utf-8")
+                        occurrences.append(logic)
+                        source_fingerprints.append(
+                            hashlib.sha256(fingerprint_bytes).hexdigest()
+                        )
+                    else:
+                        pass
+                else:
+                    pass
+        if tuple(source_fingerprints) != plan.source_occurrence_fingerprints:
+            raise ValueError("Manufacturer native consumer changed after plan construction")
+        else:
+            pass
+
+        replacement_bindings: list[Tuple[IeeeCigreDllSignalBinding, ...]] = list()
+        replacement_overrides: list[Tuple[IeeeCigreDllParameterOverride, ...]] = list()
+        occurrence_index: int
+        for occurrence_index in range(len(occurrences)):
+            signal_records: Tuple[Tuple[bool, int, int, str, int], ...] = (
+                plan.replacement_signal_records[occurrence_index]
+            )
+            override_records: Tuple[Tuple[int, int, bool, int | float | str], ...] = (
+                plan.replacement_override_records[occurrence_index]
+            )
+            binding_list: list[IeeeCigreDllSignalBinding] = list()
+            signal_record: Tuple[bool, int, int, str, int]
+            signal_record_index: int = 0
+            for signal_record in signal_records:
+                source_binding: IeeeCigreDllSignalBinding = (
+                    occurrences[occurrence_index].signal_bindings[signal_record_index]
+                )
+                binding_variable: Var = source_binding.get_variable()
+                if binding_variable.non_mutable_uid == signal_record[4]:
+                    pass
+                else:
+                    raise ValueError("Manufacturer native rebind variable identity is stale")
+                binding_list.append(IeeeCigreDllSignalBinding(
+                    is_input=signal_record[0],
+                    port_ordinal=signal_record[1],
+                    element_ordinal=signal_record[2],
+                    variable=binding_variable,
+                ))
+                signal_record_index += 1
+            override_list: list[IeeeCigreDllParameterOverride] = list()
+            override_record: Tuple[int, int, bool, int | float | str]
+            for override_record in override_records:
+                override_list.append(IeeeCigreDllParameterOverride(
+                    parameter_ordinal=override_record[0],
+                    data_type=override_record[1],
+                    fixed_value=override_record[2],
+                    value=override_record[3],
+                ))
+            replacement_bindings.append(tuple(binding_list))
+            replacement_overrides.append(tuple(override_list))
+
+        # No validation remains below this point; every occurrence changes as
+        # one in-memory transaction after the complete replacement is ready.
+        for occurrence_index in range(len(occurrences)):
+            occurrence: ManufacturerNativeControllerLogic = occurrences[occurrence_index]
+            occurrence.provider_idtag = destination.idtag
+            occurrence.model_info_sha256 = destination.model_info_sha256
+            occurrence.signal_bindings = replacement_bindings[occurrence_index]
+            occurrence.parameter_overrides = replacement_overrides[occurrence_index]
+
     # DynamicModel
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -6824,26 +7092,37 @@ class Assets:
             else:
                 print('The template is not a EmtModelTemplate!')
 
-    def delete_emt_model(self, obj: dev.EmtModelTemplate):
+    def delete_emt_model(self, obj: dev.EmtModelTemplate) -> None:
+        """Remove a library template and clear matching device references.
+
+        Injections and branches own template references through ``emt_template``.
+        Buses own independently constructed Blocks and have no such reference.
+        Existing setters retain materialized Blocks when the reference is cleared,
+        matching RMS deletion and explicit custom-model ownership.
+
+        :param obj: Library template whose matching references must be cleared.
+        :return: None; an absent library entry is handled without an exception.
         """
-        Delete EMT model from the collection
-        :param obj: DynamicModel object
-        """
-        for elm in self.buses:
-            if elm.emt_model.template == obj:
-                elm.emt_model.template = None
+        # Use the canonical reference setter rather than undeclared Block state.
+        injection: INJECTION_DEVICE_TYPES
+        for injection in self.get_injection_devices_iter():
+            if injection.emt_template == obj:
+                injection.emt_template = None
+            else:
+                pass
 
-        for elm in self.get_injection_devices_iter():
-            if elm.emt_model.template == obj:
-                elm.emt_model.template = None
+        # Apply the same ownership rule to every existing branch collection.
+        branch: BRANCH_TYPES
+        for branch in self.get_branches_iter(add_vsc=True, add_hvdc=True, add_switch=True):
+            if branch.emt_template == obj:
+                branch.emt_template = None
+            else:
+                pass
 
-        for elm in self.get_branches_iter(add_vsc=True, add_hvdc=True, add_switch=True):
-            if elm.emt_model.template == obj:
-                elm.emt_model.template = None
-
-        try:
+        # Idempotent removal preserves the established missing-entry behavior.
+        if obj in self._emt_models:
             self._emt_models.remove(obj)
-        except ValueError:
+        else:
             pass
 
     def get_emt_models_by_device_type(self, tpe: DeviceType) -> List[dev.EmtModelTemplate]:
@@ -7808,7 +8087,7 @@ class Assets:
             return self._underground_cable_constructions
 
         elif device_type == DeviceType.DcCableTypeDevice:
-            return self._dc_cable_types
+            return self._underground_cable_types
 
         elif device_type == DeviceType.SequenceLineDevice:
             return self._sequence_line_types
@@ -7965,6 +8244,9 @@ class Assets:
 
         elif device_type == DeviceType.LambdaDevice:
             return list()
+
+        elif device_type == DeviceType.ManufacturerNativeModelDevice:
+            return self.manufacturer_native_models
 
         elif device_type == DeviceType.RmsModelTemplateDevice:
             return self.rms_models
@@ -8128,7 +8410,7 @@ class Assets:
         elif device_type == DeviceType.DcCableTypeDevice:
             for d in devices:
                 d.set_var_factory(self._var_factory)
-            self._dc_cable_types = devices
+            self._underground_cable_types = devices
 
         elif device_type == DeviceType.SequenceLineDevice:
             for d in devices:
@@ -8274,6 +8556,9 @@ class Assets:
 
         elif device_type == DeviceType.MarketUnitDevice:
             self._market_units = devices
+
+        elif device_type == DeviceType.ManufacturerNativeModelDevice:
+            self._manufacturer_native_models = devices
 
         elif device_type == DeviceType.RmsModelTemplateDevice:
             self._rms_models = devices
@@ -8516,6 +8801,9 @@ class Assets:
         elif obj.device_type == DeviceType.MarketUnitDevice:
             self.add_market_unit(obj=obj)
 
+        elif obj.device_type == DeviceType.ManufacturerNativeModelDevice:
+            self.add_manufacturer_native_model(obj=obj)
+
         elif obj.device_type == DeviceType.RmsModelTemplateDevice:
             self.add_rms_model(obj=obj)
 
@@ -8548,6 +8836,9 @@ class Assets:
 
         elif obj.device_type == DeviceType.SwitchDevice:
             self.add_switch(obj=obj)
+
+        elif obj.device_type == DeviceType.ShortCircuitEvent:
+            self.add_short_circuit_event(obj=obj)
         else:
             raise Exception('Element type not understood ' + str(obj.device_type))
 
@@ -8557,6 +8848,14 @@ class Assets:
         :param obj: device object to delete_with_dialogue
         :return: Nothing
         """
+
+        # Every deletion route observes the same Assets-owned reference policy,
+        # including callers that bypass the database view.
+        deletion_blockers: List[ALL_DEV_TYPES] = self.get_element_deletion_blockers(obj)
+        if len(deletion_blockers) > 0:
+            return
+        else:
+            pass
 
         if obj.device_type == DeviceType.LoadDevice:
             self.delete_load(obj)
@@ -8767,6 +9066,9 @@ class Assets:
 
         elif obj.device_type == DeviceType.LineLocation:
             pass
+
+        elif obj.device_type == DeviceType.ManufacturerNativeModelDevice:
+            self.delete_manufacturer_native_model(obj=obj)
 
         elif obj.device_type == DeviceType.RmsModelTemplateDevice:
             self.delete_rms_model(obj=obj)
@@ -9308,6 +9610,9 @@ class Assets:
         elif elm_type == DeviceType.ShortCircuitEvent:
             elm = dev.ShortCircuitEvent()
 
+        elif elm_type == DeviceType.ManufacturerNativeModelDevice:
+            elm = dev.ManufacturerNativeModel()
+
         elif elm_type == DeviceType.RemedialActionDevice:
             elm = dev.RemedialAction()
             dictionary_of_lists = {DeviceType.RemedialActionGroupDevice: self.remedial_action_groups, }
@@ -9364,12 +9669,16 @@ class Assets:
             elm = dev.UndergroundLineType()
             dictionary_of_lists = {
                 DeviceType.ModellingAuthority: self.modelling_authorities,
-                DeviceType.RmsModelTemplateDevice: self.get_rms_models_by_device_type(DeviceType.LineDevice),
-                DeviceType.EmtModelTemplateDevice: self.get_emt_models_by_device_type(DeviceType.LineDevice),
+                DeviceType.RmsModelTemplateDevice: (
+                    self.get_rms_models_by_device_type(DeviceType.LineDevice)
+                    + self.get_rms_models_by_device_type(DeviceType.DCLineDevice)),
+                DeviceType.EmtModelTemplateDevice: (
+                    self.get_emt_models_by_device_type(DeviceType.LineDevice)
+                    + self.get_emt_models_by_device_type(DeviceType.DCLineDevice)),
             }
 
         elif elm_type == DeviceType.DcCableTypeDevice:
-            elm = dev.DcCableType()
+            elm = dev.UndergroundLineType()
             dictionary_of_lists = {
                 DeviceType.RmsModelTemplateDevice: self.get_rms_models_by_device_type(DeviceType.DCLineDevice),
                 DeviceType.EmtModelTemplateDevice: self.get_emt_models_by_device_type(DeviceType.DCLineDevice),
@@ -9546,6 +9855,64 @@ class Assets:
 
         else:
             raise Exception(f'elm_type not understood: {elm_type.value}')
+
+        # Collect dependency types from the property declarations and explicit
+        # pointer targets so new device relationships need no branch here.
+        dependency_types: List[DeviceType] = list()
+        for property_definition in elm.registered_properties.values():
+            if isinstance(property_definition.tpe, DeviceType):
+                dependency_types.append(property_definition.tpe)
+            else:
+                pass
+
+        if isinstance(elm, PointerDeviceParent):
+            for pointer_device_type in elm.pointer_dev_tpes:
+                dependency_types.append(pointer_device_type)
+        else:
+            pass
+
+        # Resolve every dependency to the corresponding circuit list while
+        # retaining specialized lists assembled above for aggregate types.
+        for dependency_type in dependency_types:
+            if dependency_type == DeviceType.PhysicalDeviceType:
+                # A generic pointer targets network objects, not catalogue,
+                # event, grouping, or other metadata objects.
+                if DeviceType.BusDevice not in dictionary_of_lists:
+                    dictionary_of_lists[DeviceType.BusDevice] = self.buses
+                else:
+                    pass
+
+                for injection_device_type in self.get_injections_device_types():
+                    if injection_device_type not in dictionary_of_lists:
+                        dictionary_of_lists[injection_device_type] = self.get_elements_by_type(
+                            injection_device_type)
+                    else:
+                        pass
+
+                branch_device_types: List[DeviceType] = [
+                    DeviceType.LineDevice,
+                    DeviceType.DCLineDevice,
+                    DeviceType.Transformer2WDevice,
+                    DeviceType.Transformer3WDevice,
+                    DeviceType.TransformerNwDevice,
+                    DeviceType.WindingDevice,
+                    DeviceType.HVDCLineDevice,
+                    DeviceType.VscDevice,
+                    DeviceType.UpfcDevice,
+                    DeviceType.SeriesReactanceDevice,
+                    DeviceType.SwitchDevice,
+                ]
+                for branch_device_type in branch_device_types:
+                    if branch_device_type not in dictionary_of_lists:
+                        dictionary_of_lists[branch_device_type] = self.get_elements_by_type(
+                            branch_device_type)
+                    else:
+                        pass
+            else:
+                if dependency_type not in dictionary_of_lists:
+                    dictionary_of_lists[dependency_type] = self.get_elements_by_type(dependency_type)
+                else:
+                    pass
 
         if (DeviceType.RmsModelTemplateDevice in dictionary_of_lists) or (
                 DeviceType.EmtModelTemplateDevice in dictionary_of_lists):

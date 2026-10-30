@@ -6,7 +6,8 @@
 import math
 from typing import Tuple, List
 
-from VeraGridEngine.enumerations import DynamicIntegrationMethod, RmsInitializationMethod, SubObjectType, RmsProblemTypes
+from VeraGridEngine.enumerations import (DynamicIntegrationMethod, RmsInitializationMethod, SubObjectType, RmsProblemTypes,
+                                         SparseSolver)
 from VeraGridEngine.Simulations.options_template import OptionsTemplate
 from VeraGridEngine.Devices.Parents.editable_device import GCProp
 from VeraGridEngine.Utils.Symbolic.symbolic import Var
@@ -22,11 +23,13 @@ class RmsOptions(OptionsTemplate):
         "integration_method",
         "initialization_method",
         "problem_type",
+        "sparse_solver",
         "time_step",
         "simulation_time",
         "tolerance",
         "use_init_values",
         "max_iter",
+        "init_fix_pf_bus_voltages",
         "fmi_state_event_time_tolerance",
         "fmi_state_event_max_iterations",
         "fmi_me_newton_absolute_tolerance",
@@ -42,11 +45,13 @@ class RmsOptions(OptionsTemplate):
         GCProp(key="integration_method", tpe=DynamicIntegrationMethod),
         GCProp(key="initialization_method", tpe=RmsInitializationMethod),
         GCProp(key="problem_type", tpe=RmsProblemTypes),
+        GCProp(key="sparse_solver", tpe=SparseSolver),
         GCProp(key="time_step", tpe=float),
         GCProp(key="simulation_time", tpe=float),
         GCProp(key="tolerance", tpe=float),
         GCProp(key="use_init_values", tpe=bool),
         GCProp(key="max_iter", tpe=int),
+        GCProp(key="init_fix_pf_bus_voltages", tpe=bool),
         GCProp(key="fmi_state_event_time_tolerance", tpe=float),
         GCProp(key="fmi_state_event_max_iterations", tpe=int),
         GCProp(key="fmi_me_newton_absolute_tolerance", tpe=float),
@@ -66,6 +71,7 @@ class RmsOptions(OptionsTemplate):
                  problem_type: RmsProblemTypes = RmsProblemTypes.PowerBalance,
                  use_init_values: bool = False,
                  max_iter: int = 1000,
+                 init_fix_pf_bus_voltages: bool = False,
                  verbose: int = 0,
                  fmi_state_event_time_tolerance: float = 1e-9,
                  fmi_state_event_max_iterations: int = 32,
@@ -73,12 +79,14 @@ class RmsOptions(OptionsTemplate):
                  fmi_me_newton_relative_tolerance: float = 1e-8,
                  fmi_me_newton_max_iterations: int = 20,
                  fmi_me_max_continuous_states: int = 128,
-                 fmi_me_max_runtime_evaluations_per_step: int = 100000) -> None:
+                 fmi_me_max_runtime_evaluations_per_step: int = 100000,
+                 sparse_solver: SparseSolver = SparseSolver.SuperLU) -> None:
         """
         RmsOptions
         :param time_step: time step of the simulations (s)
         :param simulation_time: simulation time (s)
         :param max_iter: max number of iterations
+        :param init_fix_pf_bus_voltages: Keep RMS bus voltages fixed at their power-flow seeds during consistent initialization.
         :param tolerance: Integration tolerance
         :param integration_method: Integration method (default Backward Euler)
         :param fmi_state_event_time_tolerance: Absolute FMI ME event-time tolerance in seconds.
@@ -88,6 +96,8 @@ class RmsOptions(OptionsTemplate):
         :param fmi_me_newton_max_iterations: Maximum FMI ME Backward Euler Newton updates.
         :param fmi_me_max_continuous_states: Maximum dense FMI ME state dimension.
         :param fmi_me_max_runtime_evaluations_per_step: Shared runtime-call limit for one FMI ME step.
+        :param sparse_solver: Sparse LU used by the Backward Euler Newton corrections; an unavailable
+            selection is reported and SciPy SuperLU is used.
         :return: None.
         """
 
@@ -96,11 +106,13 @@ class RmsOptions(OptionsTemplate):
         self.integration_method: DynamicIntegrationMethod = integration_method
         self.initialization_method: RmsInitializationMethod = initialization_method
         self.problem_type: RmsProblemTypes = problem_type
+        self.sparse_solver: SparseSolver = sparse_solver
         self.time_step: float = time_step
         self.simulation_time: float = simulation_time
         self.tolerance: float = tolerance
         self.use_init_values: bool = use_init_values
         self.max_iter: int = max_iter
+        self.init_fix_pf_bus_voltages: bool = init_fix_pf_bus_voltages
         if (
             math.isfinite(fmi_state_event_time_tolerance)
             and fmi_state_event_time_tolerance > 0.0

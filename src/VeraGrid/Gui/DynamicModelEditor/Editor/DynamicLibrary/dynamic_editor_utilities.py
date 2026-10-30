@@ -17,6 +17,7 @@ from VeraGridEngine.enumerations import (
     FaultType,
     JMartiDataSourceMode,
     ShuntConnectionType,
+    TheveninSourceVoltageMode,
     VarPowerFlowReferenceType,
     WindingType,
 )
@@ -185,7 +186,14 @@ def get_blocktype2template_builder_dict() -> Dict[BlockType, type[TemplateDefini
 
     :return: Builder class lookup used by drop and properties workflows.
     """
-    return dict(((BlockType.FAULT_EMT, emt_templates.FaultEmtTemplate),
+    return dict(((BlockType.MIN, basic_block_templates.MinimumTemplate),
+                 (BlockType.MAX, basic_block_templates.MaximumTemplate),
+                 (BlockType.INTEGRATOR, basic_block_templates.IntegratorTemplate),
+                 (BlockType.STARTUP_FREEZE_INTEGRATOR,
+                  basic_block_templates.StartupFreezeIntegratorTemplate),
+                 (BlockType.DERIVATIVE, basic_block_templates.DerivativeTemplate),
+                 (BlockType.FAULT_EMT, emt_templates.FaultEmtTemplate),
+                 (BlockType.EMT_THEVENIN, emt_templates.TheveninSourceEmtTemplate),
                  (BlockType.SWITCH_EMT, emt_templates.SwitchEmtTemplate),
                  (BlockType.GROUNDING_LINK_EMT, emt_templates.GroundingLinkEmtTemplate),
                  (BlockType.INDUCTION_MOTOR_EMT, emt_templates.InductionMotorEmtTemplate),
@@ -215,6 +223,7 @@ def get_blocktype2template_builder_dict() -> Dict[BlockType, type[TemplateDefini
                  (BlockType.EMT_JMARTI_LINE, JMartiBlockTemplateDefinition),
                  (BlockType.INVERSE_LOOKUP_ARRAY, emt_templates.InverseLookupArrayLinearRuntimeTemplate),
                  (BlockType.LOOKUP_ARRAY_LINEAR, emt_templates.LookupArrayLinearRuntimeTemplate),
+                 (BlockType.LOOKUP_ARRAY_LINEAR_VARIABLE, emt_templates.LookupArrayLinearVariableRuntimeTemplate),
                  (BlockType.LOOKUP_ARRAY_SPLINE, emt_templates.LookupArraySplineRuntimeTemplate),
                  (BlockType.LOOKUP_MATRIX_LINEAR, emt_templates.LookupMatrixLinearRuntimeTemplate),
                  (BlockType.LOOKUP_MATRIX_SPLINE, emt_templates.LookupMatrixSplineRuntimeTemplate),
@@ -326,6 +335,7 @@ def create_default_template_builder(var_factory: VarFactory,
             pass
     else:
         pass
+
     return builder
 
 
@@ -376,6 +386,168 @@ def copy_template_builder_values(source: TemplateDefinition,
             pass
 
 
+def _get_fault_type_from_block_structure(block: Block) -> FaultType | None:
+    """Infer one persisted fault topology from its distinctive algebraic variables.
+
+    The symbolic variable names are part of the saved model, unlike arbitrary
+    Python attributes. They therefore provide a backwards-compatible recovery
+    path for files saved before explicit modal metadata existed.
+
+    :param block: Existing EMT fault block.
+    :return: Inferred fault topology, or ``None`` for an unknown structure.
+    """
+    algebraic_names: set[str] = set(variable.name for variable in block.algebraic_vars)
+    active_phase_count: int = 0
+    phase_name: str
+    for phase_name in ("A", "B", "C"):
+        if block_has_phase_port(block=block, phase_name=phase_name):
+            active_phase_count += 1
+        else:
+            pass
+
+    has_ground_branch_current: bool = False
+    has_common_node_current: bool = False
+    has_phase_pair_current: bool = False
+    algebraic_name: str
+    for algebraic_name in algebraic_names:
+        if re.search(r"^i_fault_[ABC]G(?:_|$)", algebraic_name) is not None:
+            has_ground_branch_current = True
+        elif re.search(r"^i_fault_[ABC]N(?:_|$)", algebraic_name) is not None:
+            has_common_node_current = True
+        elif re.search(r"^i_fault_[ABC][ABC](?:_|$)", algebraic_name) is not None:
+            has_phase_pair_current = True
+        else:
+            pass
+
+    if has_ground_branch_current and active_phase_count == 1:
+        return FaultType.LG
+    elif has_ground_branch_current and active_phase_count == 3:
+        return FaultType.LLLG
+    elif has_common_node_current and active_phase_count == 2:
+        return FaultType.LLG
+    elif has_common_node_current and active_phase_count == 3:
+        return FaultType.LLL
+    elif has_phase_pair_current and active_phase_count == 2:
+        return FaultType.LL
+    else:
+        return None
+
+
+def _get_fault_placement_from_block_structure(block: Block) -> EmtFaultPlacementSide | None:
+    """Recover the semantic branch side encoded in persisted phase-node names.
+
+    :param block: Existing EMT fault block.
+    :return: Recovered placement side, or ``None`` when no marker remains.
+    """
+    child_block: Block
+    for child_block in block.children:
+        if child_block.name.startswith("From Phase "):
+            return EmtFaultPlacementSide.FromSide
+        elif child_block.name.startswith("To Phase "):
+            return EmtFaultPlacementSide.ToSide
+        else:
+            pass
+    return None
+
+
+def _get_fault_constant(block: Block,
+                        variable_name: str,
+                        is_mode: bool) -> float | None:
+    """Read one numeric fault constant from a persisted symbolic assignment.
+
+    :param block: Existing EMT fault block.
+    :param variable_name: Exact symbolic parameter name.
+    :param is_mode: Whether to inspect the mode dictionary instead of events.
+    :return: Numeric value, or ``None`` when the assignment is absent or invalid.
+    """
+    assignments: Dict[Var, Expr]
+    if is_mode:
+        assignments = block.mode_dict
+    else:
+        assignments = block.event_dict
+
+    variable: Var
+    expression: Expr
+    for variable, expression in assignments.items():
+        if variable.name == variable_name and isinstance(expression, Const):
+            if isinstance(expression.value, (int, float)) and not isinstance(expression.value, bool):
+                return float(expression.value)
+            else:
+                return None
+        else:
+            pass
+    return None
+
+
+def _recover_fault_builder_values(builder: TemplateDefinition, block: Block) -> None:
+    """Recover every fault setting represented by the saved symbolic structure.
+
+    :param builder: Fault template builder receiving persisted values.
+    :param block: Existing EMT fault block.
+    :return: None.
+    """
+    inferred_fault_type: FaultType | None = _get_fault_type_from_block_structure(block=block)
+    fault_type_property: TemplateProp | None = builder.params_dict.get("fault_type", None)
+    if fault_type_property is not None and inferred_fault_type is not None:
+        fault_type_property.value = inferred_fault_type
+    else:
+        pass
+
+    inferred_placement: EmtFaultPlacementSide | None = _get_fault_placement_from_block_structure(block=block)
+    placement_property: TemplateProp | None = builder.params_dict.get("placement_side", None)
+    if placement_property is not None and inferred_placement is not None:
+        placement_property.value = inferred_placement
+    else:
+        pass
+
+    # Procedural logic remains present even after connecting ``fault_cmd``
+    # substitutes that input with a differently named upstream variable.
+    signal_controlled: bool = len(block.procedural_logic) > 0
+    input_variable: Var
+    for input_variable in block.in_vars:
+        if input_variable.name == "fault_cmd":
+            signal_controlled = True
+        else:
+            pass
+    signal_property: TemplateProp | None = builder.params_dict.get("signal_controlled", None)
+    if signal_property is not None:
+        signal_property.value = signal_controlled
+    else:
+        pass
+
+    initial_closed_value: float | None = _get_fault_constant(
+        block=block,
+        variable_name="fault_closed_mode",
+        is_mode=True,
+    )
+    initial_closed_property: TemplateProp | None = builder.params_dict.get("initial_closed", None)
+    if initial_closed_property is not None and initial_closed_value is not None:
+        initial_closed_property.value = initial_closed_value >= 0.5
+    else:
+        pass
+
+    event_property_names: tuple[tuple[str, str], ...] = (
+        ("fault_resistance", "fault_r"),
+        ("ground_resistance", "fault_rg"),
+        ("open_conductance", "fault_open_g"),
+        ("fault_time_constant", "fault_tau"),
+        ("command_threshold", "fault_cmd_threshold"),
+    )
+    property_name: str
+    event_variable_name: str
+    for property_name, event_variable_name in event_property_names:
+        property_value: float | None = _get_fault_constant(
+            block=block,
+            variable_name=event_variable_name,
+            is_mode=False,
+        )
+        target_property: TemplateProp | None = builder.params_dict.get(property_name, None)
+        if target_property is not None and property_value is not None:
+            target_property.value = property_value
+        else:
+            pass
+
+
 def initialize_template_builder_from_block(builder: TemplateDefinition,
                                            block: Block,
                                            block_type: BlockType) -> None:
@@ -400,7 +572,13 @@ def initialize_template_builder_from_block(builder: TemplateDefinition,
         else:
             pass
 
-    if block_type in (BlockType.EMT_JMARTI_LINE, BlockType.GFL_VSC_HVDC_RMS):
+    if block_type in (
+        BlockType.EMT_JMARTI_LINE,
+        BlockType.GFL_VSC_HVDC_RMS,
+        BlockType.INTEGRATOR,
+        BlockType.STARTUP_FREEZE_INTEGRATOR,
+        BlockType.DERIVATIVE,
+    ):
         stored_configuration: object = block.modal_template_config
         if isinstance(stored_configuration, dict):
             configuration_name: str
@@ -424,15 +602,88 @@ def initialize_template_builder_from_block(builder: TemplateDefinition,
     else:
         pass
 
+    if block_type == BlockType.EMT_THEVENIN:
+        # The canonical immutable marker survives save/load and instance copies.
+        # Legacy Blocks without a marker retain the balanced builder default.
+        mode_property: TemplateProp | None = builder.params_dict.get("source_voltage_mode", None)
+        source_block: Block
+        for source_block in block.get_all_blocks():
+            mode_variable: Var
+            mode_expression: Expr
+            for mode_variable, mode_expression in source_block.parameters.items():
+                if (mode_property is not None and mode_variable.name == "source_voltage_mode"
+                        and isinstance(mode_expression, Const)):
+                    if mode_expression.value == 0.0:
+                        mode_property.value = TheveninSourceVoltageMode.Balanced
+                    elif mode_expression.value == 1.0:
+                        mode_property.value = TheveninSourceVoltageMode.Phase
+                    else:
+                        raise ValueError("Invalid Thevenin source voltage mode marker")
+                else:
+                    pass
+    else:
+        pass
+
+    if block_type == BlockType.FAULT_EMT:
+        # The persisted symbolic equations and diagram are authoritative, so
+        # recovery behaves identically before and after save/close/reopen.
+        _recover_fault_builder_values(builder=builder, block=block)
+    else:
+        pass
+
+    if block_type == BlockType.MIN or block_type == BlockType.MAX:
+        input_count_property: TemplateProp | None = builder.params_dict.get("input_count", None)
+        if input_count_property is not None:
+            input_count_property.value = len(block.in_vars)
+        else:
+            pass
+    else:
+        pass
+
+    if block_type == BlockType.LOOKUP_ARRAY_LINEAR_VARIABLE:
+        # The dynamic lookup exposes one coordinate, N x-breakpoints and N
+        # y-samples. Recover N from that stable port layout.
+        lookup_input_count: int = len(block.in_vars)
+        point_count_property: TemplateProp | None = builder.params_dict.get("point_count", None)
+        has_valid_dynamic_layout: bool = (
+            lookup_input_count >= 5
+            and (lookup_input_count - 1) % 2 == 0
+        )
+        if point_count_property is not None and has_valid_dynamic_layout:
+            point_count_property.value = (lookup_input_count - 1) // 2
+        else:
+            pass
+    else:
+        pass
+
+    if block_type in (BlockType.LOOKUP_ARRAY_LINEAR, BlockType.LOOKUP_ARRAY_LINEAR_VARIABLE):
+        # Linear lookup blocks retain the clipping choice as a mode parameter,
+        # which survives serialization and remains independent of block names.
+        clip_property: TemplateProp | None = builder.params_dict.get("clip", None)
+        mode_variable: Var
+        mode_expression: Expr
+        for mode_variable, mode_expression in block.mode_dict.items():
+            if (
+                clip_property is not None
+                and mode_variable.name.startswith("lookup_clip_")
+                and isinstance(mode_expression, Const)
+                and isinstance(mode_expression.value, (int, float))
+                and not isinstance(mode_expression.value, bool)
+            ):
+                clip_property.value = float(mode_expression.value) >= 0.5
+            else:
+                pass
+    else:
+        pass
+
     if block_type in (
         BlockType.GFL_VSC_HVDC_RMS,
         BlockType.VSC_ACTIVE_CONTROL_RMS,
         BlockType.VSC_REACTIVE_CONTROL_RMS,
     ):
-        # Block metadata accelerates an in-memory reopen, but the serialized
-        # symbolic format does not retain arbitrary Python attributes. Recover
-        # the two structural controller selections from the generated child
-        # names so save/close/reopen remains deterministic as well.
+        # Current files persist the template settings, but older files do not.
+        # Recover controller modes from the generated child names on every open:
+        # the symbolic structure is authoritative if metadata is missing or stale.
         child_names: set[str] = set()
         candidate_block: Block
         for candidate_block in block.get_all_blocks():

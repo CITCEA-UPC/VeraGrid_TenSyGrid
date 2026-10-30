@@ -6,7 +6,25 @@ from dataclasses import dataclass
 from typing import Callable, Tuple
 import numpy as np
 import numba as nb
-from VeraGridEngine.basic_structures import Vec, CscMat, IntVec, CxVec
+from VeraGridEngine.basic_structures import Vec, CscMat, IntVec, CxVec, CxMat
+
+
+def fortescue_012_to_abc(z0: complex, z1: complex, z2: complex) -> CxMat:
+    """
+    Convert a diagonal sequence operator to phase coordinates.
+
+    :param z0: Zero-sequence coefficient
+    :param z1: Positive-sequence coefficient
+    :param z2: Negative-sequence coefficient
+    :return: ABC matrix
+    """
+    a: complex = np.exp(1j * 2 * np.pi / 3)
+    Zabc: CxMat = 1 / 3 * np.array([
+        [z0 + z1 + z2, z0 + a * z1 + a ** 2 * z2, z0 + a ** 2 * z1 + a * z2],
+        [z0 + a ** 2 * z1 + a * z2, z0 + z1 + z2, z0 + a * z1 + a ** 2 * z2],
+        [z0 + a * z1 + a ** 2 * z2, z0 + a ** 2 * z1 + a * z2, z0 + z1 + z2]
+    ])
+    return Zabc
 
 
 def check_function_and_args(func: Callable, args: Tuple, n_used_for_solver: int) -> bool:
@@ -22,7 +40,7 @@ def check_function_and_args(func: Callable, args: Tuple, n_used_for_solver: int)
     return n_args == n_used_for_solver + len(args)
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def max_abs(x: Vec) -> float:
     """
     Compute max abs efficiently
@@ -38,7 +56,7 @@ def max_abs(x: Vec) -> float:
     return max_val
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def norm(x: Vec) -> float:
     """
     Compute max abs efficiently
@@ -105,7 +123,7 @@ class ConvexMethodResult:
         print("Elapsed:\t", self.elapsed, 's')
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def find_closest_number(arr: Vec, target: float) -> Tuple[int, float]:
     """
     Find the closest number that exists in array
@@ -153,7 +171,7 @@ def find_closest_number(arr: Vec, target: float) -> Tuple[int, float]:
     return 0, arr[0]
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def make_lookup(size: int, indices: IntVec) -> IntVec:
     """
     Create a lookup array
@@ -166,7 +184,7 @@ def make_lookup(size: int, indices: IntVec) -> IntVec:
     return lookup
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def make_complex(r: Vec, i: Vec) -> CxVec:
     """
     Fastest way to create complex arrays

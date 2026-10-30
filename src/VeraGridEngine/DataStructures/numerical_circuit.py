@@ -52,7 +52,7 @@ ALL_STRUCTS = Union[
 ]
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def build_q_limits(nbus: int, Sbase: float,
                    gen_idx, q_min_gen, q_max_gen, active_gen, control_mode_int_gen,
                    batt_idx, q_min_batt, q_max_batt, active_batt, control_mode_int_batt,
@@ -218,7 +218,7 @@ def check_arr(arr: Vec | IntVec | BoolVec | CxVec,
         return 1
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def correct_bus_types(gen_idx: IntVec,
                       control_mode_int: IntVec,
                       gen_controllable_bus_idx: IntVec,
@@ -1129,7 +1129,22 @@ class NumericalCircuit:
 
         C = sp.coo_matrix((data, (i, j)), shape=(n_elm, self.bus_data.nbus), dtype=int)
 
-        return (C.T @ C).tocsc()
+        adjacency: sp.csc_matrix = (C.T @ C).tocsc()
+        mutual: sp.coo_matrix = self.passive_branch_data.Ycoupling3.tocoo()
+        if mutual.nnz > 0:
+            # Coupled circuits must be solved together even without a galvanic path.
+            nbranch: int = self.passive_branch_data.nelm
+            rows: IntVec = (mutual.row % (4 * nbranch)) // 4
+            columns: IntVec = (mutual.col % (4 * nbranch)) // 4
+            active: BoolVec = self.passive_branch_data.active[rows] & self.passive_branch_data.active[columns]
+            links: sp.csc_matrix = sp.csc_matrix(
+                (np.ones(np.count_nonzero(active), dtype=int),
+                 (self.passive_branch_data.F[rows[active]], self.passive_branch_data.F[columns[active]])),
+                shape=adjacency.shape)
+            adjacency += links + links.T
+        else:
+            pass
+        return adjacency.tocsc()
 
     def process_reducible_branches(self) -> int:
         """

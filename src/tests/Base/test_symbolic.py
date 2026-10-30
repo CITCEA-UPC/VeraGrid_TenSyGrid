@@ -7,27 +7,102 @@ import math
 import numpy as np
 from typing import Any, Callable, Dict
 import VeraGridEngine.Utils.Symbolic.symbolic as sym
-from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian
+from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian, SymbolicVector
 from VeraGridEngine.Utils.Symbolic.jit_compiler import SubexpressionAnalyzer
+from VeraGridEngine.Utils.Symbolic.compare_expressions_structure import DAGNode, structural_hash, to_dag
 from VeraGridEngine.Utils.Symbolic.block import (
     Block,
+    DynamicModelContract,
     RmsPhysicalMeasurementPoint,
     RmsPhysicalMeterKind,
     RmsTerminalPowerContribution,
     RmsTerminalSide,
     collect_rms_physical_measurement_points,
 )
-from VeraGridEngine.Utils.Symbolic.symbolic_io import (duplicate_block, expr_to_dict, parse_expr,
-                                                       BlockSaver, BlockParser)
+from VeraGridEngine.Utils.Symbolic.symbolic_io import (
+    duplicate_block,
+    duplicate_block_across_factories,
+    duplicate_block_vars_uid,
+    expr_to_dict,
+    parse_expr,
+    BlockSaver,
+    BlockParser,
+)
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Devices.Diagrams.block_diagram import BlockDiagram
-from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
+from VeraGridEngine.Devices.Dynamic.var_factory import Connection, VarFactory
 from VeraGridEngine.enumerations import ParamPowerFlowReferenceType, VarPowerFlowReferenceType
 from VeraGridEngine.Utils.procedural_logic import AnalogFlipFlopLogic, ProceduralLogicCodec, aflipflop
 
 # -----------------------------------------------------------------------------
 # Atomic & basic operations
 # -----------------------------------------------------------------------------
+
+@pytest.mark.parametrize("use_jit", (False, True))
+def test_complex_projection_derivatives_match_real_coordinate_finite_difference(use_jit: bool) -> None:
+    """Compare native projected Jacobians with an independent AC current oracle.
+
+    :param use_jit: Whether to compile the symbolic derivative with numba.
+    :return: None; verify three operating points and every real coordinate.
+    """
+    variables: list[sym.Var] = list(sym.Var(name) for name in ("P", "Q", "Vm", "angle", "P"))
+    current: sym.Expr = sym.conj(variables[0] + 1j * variables[1]) / sym.conj(
+        variables[2] * sym.exp(1j * variables[3]))
+    names: dict[int, str] = dict((var.uid, f"x[{i}]") for i, var in enumerate(variables))
+    aliases: dict[int, str] = dict((var.uid, f"coordinate_{i}") for i, var in enumerate(variables))
+    jacobian: SymbolicJacobian = SymbolicJacobian(
+        eqs=list((sym.real(current), sym.imag(current))), variables=variables,
+        compiler_names_dict=names, alias_names_dict=aliases, VARS_NAME="x",
+        DIFF_NAME="dx", EVENT_PARAMS_NAME="events", PARAMS_NAME="parameters", use_jit=use_jit)
+    empty: np.ndarray = np.zeros(0, dtype=np.float64)
+    # The final coordinate shares a display name with P but has a different UID;
+    # it must contribute neither numerical values nor sparse Jacobian storage.
+    assert jacobian.J.indptr[-1] == jacobian.J.indptr[-2]
+    sample: tuple[float, float, float, float, float]
+    for sample in ((0.8, 0.2, 1.0, 0.0, 0.7), (-0.4, 0.3, 0.73, -0.6, -1.4), (1.2, -0.5, 1.3, 1.1, 3.0)):
+        values: np.ndarray = np.asarray(sample, dtype=np.float64)
+        expected: np.ndarray = np.empty((2, 5), dtype=np.float64)
+        index: int
+        for index in range(5):
+            plus: np.ndarray = values.copy()
+            minus: np.ndarray = values.copy()
+            plus[index] += 1e-6
+            minus[index] -= 1e-6
+            # The oracle uses NumPy directly and never symbolic differentiation.
+            plus_current: complex = np.conj(plus[0] + 1j * plus[1]) / np.conj(plus[2] * np.exp(1j * plus[3]))
+            minus_current: complex = np.conj(minus[0] + 1j * minus[1]) / np.conj(minus[2] * np.exp(1j * minus[3]))
+            difference: complex = (plus_current - minus_current) / 2e-6
+            expected[:, index] = (difference.real, difference.imag)
+        observed: np.ndarray = jacobian(values, empty, empty, empty, h=1.0).toarray()
+        np.testing.assert_allclose(observed, expected, atol=1e-8, rtol=1e-7)
+
+
+def test_complex_projection_derivatives_preserve_uid_and_dt() -> None:
+    """Preserve UID identity, nested conjugation and derivative scaling.
+
+    :return: None; distinguish equal display names and propagate the dt chain.
+    """
+    variable: sym.Var = sym.Var("same name")
+    unrelated: sym.Var = sym.Var("same name")
+    expression: sym.Expr = sym.real(sym.conj(sym.conj(variable * variable)))
+    assert expression.diff(unrelated).eval_uid(dict(((variable.uid, 3.0),))) == 0.0
+    assert expression.diff(variable).eval_uid(dict(((variable.uid, 3.0),))) == 6.0
+    derivative: sym.Var = sym.Var("derivative", base_var=variable)
+    projected: sym.Expr = sym.real(sym.conj(derivative * (1.0 + 2.0j)))
+    scaled: sym.Expr = projected.diff(variable, dt=sym.Const(0.25))
+    assert scaled.eval_uid(dict(((derivative.uid, 2.0),))) == 4.0
+    # Dependency selection must retain the base coordinate of a derivative
+    # occurrence, so the existing timestep scaling survives sparse compilation.
+    names: dict[int, str] = dict(((variable.uid, "x[0]"), (unrelated.uid, "x[1]"), (derivative.uid, "dx[0]")))
+    aliases: dict[int, str] = dict(((variable.uid, "coordinate_0"), (unrelated.uid, "coordinate_1"), (derivative.uid, "derivative_0")))
+    jacobian: SymbolicJacobian = SymbolicJacobian(
+        eqs=list((projected,)), variables=list((variable, unrelated)),
+        compiler_names_dict=names, alias_names_dict=aliases, VARS_NAME="x",
+        DIFF_NAME="dx", EVENT_PARAMS_NAME="events", PARAMS_NAME="parameters", use_jit=False)
+    empty: np.ndarray = np.zeros(0, dtype=np.float64)
+    observed: np.ndarray = jacobian(np.asarray((3.0, 7.0)), np.asarray((2.0,)), empty, empty, h=0.25).toarray()
+    np.testing.assert_array_equal(observed, np.asarray(((4.0, 0.0),)))
+    assert jacobian.J.nnz == 1
 
 def test_const_eval() -> None:
     assert sym.Const(42).eval() == 42
@@ -256,6 +331,21 @@ def test_eval_uid_duplicate_names() -> None:
     # uid‑based → independent values
     vals = {x1.uid: 2, x2.uid: 5}
     assert sym.eval_uid(expr, vals) == 12
+
+
+@pytest.mark.parametrize('exponent',(1.0,2.0,3.5))
+def test_parameter_exponent_derivative_at_zero(exponent: float) -> None:
+    """A constant-with-respect-to-state exponent must not create removable singularities.
+
+    :param exponent: Fixed positive exponent supplied through a parameter symbol.
+    """
+    state: sym.Var = sym.Var('flux')
+    parameter: sym.Var = sym.Var('exponent')
+    unrelated: sym.Var = sym.Var('other')
+    expression: sym.Expr = state**parameter
+    bindings: dict[int,float] = dict([(state.uid,0.0),(parameter.uid,exponent)])
+    assert expression.diff(state).simplify().eval_uid(bindings) == (1.0 if exponent == 1 else 0.0)
+    assert expression.diff(unrelated).simplify().eval_uid(bindings) == 0
 
 # -----------------------------------------------------------------------------
 # 3. Elementary functions – value & derivative
@@ -534,6 +624,130 @@ def test_block_deepcopy_preserves_editor_structure_metadata() -> None:
     assert copied_block.tpe_uid == 73
 
 
+def test_duplicate_block_vars_uid_creates_isolated_factory_graph() -> None:
+    """Verify editor cloning preserves identities without sharing symbolic state.
+
+    :return: None.
+    """
+    source_vf: VarFactory = VarFactory()
+    source_var: sym.Var = source_vf.add_var(name="source")
+    target_var: sym.Var = source_vf.add_var(name="target", shared_reference="shared_signal")
+    parameter_var: sym.Var = source_vf.add_var(name="gain")
+    parameter_const: sym.Const = source_vf.add_const(value=2.0, name="gain_value")
+    source_vf.add_connection(var_to_subs=target_var, incoming_var=source_var)
+    owner: object = object()
+    source_vf.register_var(dev=owner, var=target_var)
+    source_block: Block = Block(
+        algebraic_vars=list((source_var, target_var)),
+        algebraic_eqs=list((source_var, target_var)),
+        parameters=dict(((parameter_var, parameter_const),)),
+        in_vars=list((target_var,)),
+        out_vars=list((source_var,)),
+        name="source_block",
+    )
+    target_vf: VarFactory = VarFactory()
+
+    duplicated_block: Block = duplicate_block_vars_uid(
+        block=source_block,
+        source_var_factory=source_vf,
+        target_var_factory=target_vf,
+    )
+    duplicated_source: sym.Var = duplicated_block.out_vars[0]
+    duplicated_target: sym.Var = duplicated_block.in_vars[0]
+
+    assert duplicated_block is not source_block
+    assert duplicated_block.uid == source_block.uid
+    assert duplicated_source is not source_var
+    assert duplicated_target is not target_var
+    assert duplicated_source.uid == source_var.uid
+    assert duplicated_source.non_mutable_uid == source_var.non_mutable_uid
+    assert duplicated_target.uid == target_var.uid
+    assert duplicated_target.non_mutable_uid == target_var.non_mutable_uid
+    assert duplicated_block.algebraic_eqs[0] is duplicated_source
+    assert duplicated_block.algebraic_eqs[1] is duplicated_target
+    duplicated_parameter_var: sym.Var = next(iter(duplicated_block.parameters.keys()))
+    duplicated_parameter_const: sym.Const = duplicated_block.parameters[duplicated_parameter_var]
+    assert duplicated_parameter_var.uid == parameter_var.uid
+    assert duplicated_parameter_const.uid == parameter_const.uid
+    assert duplicated_parameter_const is not parameter_const
+    assert target_vf.get_var(duplicated_source.non_mutable_uid) is duplicated_source
+    assert target_vf.get_var(duplicated_target.non_mutable_uid) is duplicated_target
+    assert target_vf.get_connections_dict() is not source_vf.get_connections_dict()
+    assert len(target_vf.get_connections_dict()[duplicated_source.non_mutable_uid]) == 1
+
+    target_vf.remove_connection(
+        var_to_disconnect=duplicated_target,
+        outgoing_var=duplicated_source,
+    )
+
+    assert duplicated_source.non_mutable_uid not in target_vf.get_connections_dict()
+    assert source_var.non_mutable_uid in source_vf.get_connections_dict()
+
+    source_vf.merge_editor_var_factory(working_var_factory=target_vf)
+
+    assert source_vf.get_var(duplicated_source.non_mutable_uid) is duplicated_source
+    assert source_vf.get_var(duplicated_target.non_mutable_uid) is duplicated_target
+    assert source_vf.get_const(parameter_const.uid) is duplicated_parameter_const
+    assert source_vf.vars_info[owner][0] is duplicated_target
+    assert duplicated_target.shared_ref is source_vf.get_references_dict()["shared_signal"]
+    assert duplicated_source.non_mutable_uid not in source_vf.get_connections_dict()
+
+
+def test_duplicate_block_across_factories_copies_only_internal_graph() -> None:
+    """Clone internal aliases without sharing source variables or references.
+
+    :return: None.
+    """
+    source_vf: VarFactory = VarFactory()
+    source_var: sym.Var = source_vf.add_var(name="source")
+    target_var: sym.Var = source_vf.add_var(
+        name="target",
+        shared_reference="shared_signal",
+    )
+    external_var: sym.Var = source_vf.add_var(name="external")
+    source_vf.add_connection(
+        var_to_subs=target_var,
+        incoming_var=source_var,
+    )
+    source_vf.add_connection(
+        var_to_subs=external_var,
+        incoming_var=source_var,
+    )
+    source_block: Block = Block(
+        algebraic_vars=list((source_var, target_var)),
+        in_vars=list((target_var,)),
+        out_vars=list((source_var,)),
+    )
+    target_vf: VarFactory = VarFactory()
+
+    duplicated_block: Block = duplicate_block_across_factories(
+        block=source_block,
+        source_var_factory=source_vf,
+        target_var_factory=target_vf,
+    )
+    duplicated_source: sym.Var = duplicated_block.out_vars[0]
+    duplicated_target: sym.Var = duplicated_block.in_vars[0]
+    duplicated_connections: list[Connection] = target_vf.get_connections_dict()[
+        duplicated_source.non_mutable_uid
+    ]
+
+    assert duplicated_source is not source_var
+    assert duplicated_target is not target_var
+    assert duplicated_source.non_mutable_uid != source_var.non_mutable_uid
+    assert duplicated_target.non_mutable_uid != target_var.non_mutable_uid
+    assert duplicated_target.uid == duplicated_source.uid
+    assert duplicated_target.name == duplicated_source.name
+    assert target_var.shared_ref is not None
+    assert duplicated_target.shared_ref is not None
+    assert duplicated_target.shared_ref is not target_var.shared_ref
+    assert duplicated_target.shared_ref is target_vf.get_references_dict()["shared_signal"]
+    assert duplicated_target.shared_ref.uid == target_var.shared_ref.uid
+    assert len(duplicated_connections) == 1
+    assert duplicated_connections[0].non_mutable_uid == duplicated_target.non_mutable_uid
+    assert external_var.non_mutable_uid not in target_vf.get_vars_dict()
+    assert len(source_vf.get_connections_dict()[source_var.non_mutable_uid]) == 2
+
+
 def test_duplicate_block_preserves_parent_child_variable_links_with_new_uids() -> None:
     """
     Check that block duplication keeps parent and child references coherent.
@@ -622,6 +836,30 @@ def test_duplicate_block_preserves_expression_only_external_variables() -> None:
     assert copied_value is not measured_value
     assert copied_block.algebraic_eqs[0].left is copied_value
     assert copied_block.algebraic_eqs[0].right is external_bus_voltage
+
+
+def test_runtime_duplication_retains_only_explicit_external_network_edges() -> None:
+    """Runtime copies may keep remote measurements while editor copies stay isolated.
+
+    :return: None.
+    """
+    factory: VarFactory = VarFactory()
+    remote: sym.Var = factory.add_var('remote_bus_voltage')
+    ordinary: sym.Var = factory.add_var('unrelated_controller_signal')
+    measured: sym.Var = factory.add_var('measurement_input')
+    unshared: sym.Var = factory.add_var('ordinary_input')
+    output: sym.Var = factory.add_var('measured_output')
+    source: Block = Block(in_vars=list((measured,unshared)),algebraic_vars=list((output,)),
+        algebraic_eqs=list((output-measured-unshared,)),out_vars=list((output,)))
+    factory.add_network_connection(measured,remote)
+    factory.add_connection(unshared,ordinary)
+    isolated: Block = duplicate_block(source,factory)
+    runtime: Block = duplicate_block(source,factory,preserve_external_network_connections=True)
+    assert isolated.in_vars[0].uid != remote.uid
+    assert runtime.in_vars[0].uid == remote.uid
+    assert runtime.in_vars[1].uid != ordinary.uid
+    assert runtime.algebraic_vars[0].uid != output.uid
+    assert measured.uid == remote.uid
 
 
 def test_block_diagram_parse_accepts_empty_legacy_payload() -> None:
@@ -790,7 +1028,7 @@ def test_block_saver_parser_roundtrip_preserves_declarative_procedural_logic() -
 
 
 def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
-    """Persist typed terminal references without copying symbolic variables.
+    """Discard obsolete RMS terminal metadata while validating old payloads.
 
     :return: None.
     """
@@ -807,7 +1045,7 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
             (VarPowerFlowReferenceType.Qt, ac_reactive_power),
         )),
     )
-    block.dynamic_model_contract.rms_terminal_power_contributions = list((
+    legacy_contributions = list((
         RmsTerminalPowerContribution(
             terminal_side=RmsTerminalSide.FROM,
             active_power_reference=VarPowerFlowReferenceType.Pf,
@@ -819,12 +1057,19 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
             reactive_power_reference=VarPowerFlowReferenceType.Qt,
         ),
     ))
+    block.modal_template_kind = "configurable_integrator"
+    block.modal_template_config = dict((
+        ("scaling", "GAIN"),
+        ("scale_bounds_by_gain", True),
+    ))
 
     persisted_data: dict[str, object] = block.to_dict()
+    contract_data = persisted_data["dynamic_model_contract"]
+    assert isinstance(contract_data, dict)
+    assert contract_data["version"] == 8
+    assert contract_data["emt_finite_reciprocal_source_mode_var_uid"] is None
+    assert "rms_terminal_power_contributions" not in contract_data
     restored: Block = Block.parse(data=persisted_data)
-    restored_contributions: list[RmsTerminalPowerContribution] = (
-        restored.dynamic_model_contract.rms_terminal_power_contributions
-    )
     copied: Block = copy.deepcopy(block)
     saver: BlockSaver = BlockSaver(var_factory)
     saver.save_block(block, main=True)
@@ -836,43 +1081,65 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
         blocks_data=saver.get_blocks(),
         main_block_uid=block.uid,
     )
+    assert restored.modal_template_kind == "configurable_integrator"
+    assert restored.modal_template_config == block.modal_template_config
+    assert copied.modal_template_kind == "configurable_integrator"
+    assert copied.modal_template_config == block.modal_template_config
+    assert symbolic_io_restored.modal_template_kind == "configurable_integrator"
+    assert symbolic_io_restored.modal_template_config == block.modal_template_config
 
-    assert len(restored_contributions) == 2
-    assert restored_contributions[0].get_terminal_side() is RmsTerminalSide.FROM
-    assert (
-        restored_contributions[0].get_active_power_reference()
-        is VarPowerFlowReferenceType.Pf
-    )
-    assert restored_contributions[0].get_reactive_power_reference() is None
-    assert restored_contributions[1].get_terminal_side() is RmsTerminalSide.TO
-    assert (
-        restored_contributions[1].get_reactive_power_reference()
-        is VarPowerFlowReferenceType.Qt
-    )
-    assert (
-        copied.dynamic_model_contract.rms_terminal_power_contributions[0]
-        is not block.dynamic_model_contract.rms_terminal_power_contributions[0]
-    )
-    assert (
-        symbolic_io_restored.dynamic_model_contract
-        .rms_terminal_power_contributions[1].get_active_power_reference()
-        is VarPowerFlowReferenceType.Pt
-    )
+    # Both branches used version seven. Exercise both parsers so absent branch
+    # declarations stay at their typed defaults despite stale top-level metadata.
+    has_modal_fields: bool
+    for has_modal_fields in (False, True):
+        version_seven_data: dict[str, object] = block.to_dict()
+        version_seven_contract: object = version_seven_data["dynamic_model_contract"]
+        assert isinstance(version_seven_contract, dict)
+        version_seven_contract["version"] = 7
+        if has_modal_fields:
+            version_seven_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+        else:
+            version_seven_contract.pop("modal_template_kind")
+            version_seven_contract.pop("modal_template_config")
+        version_seven_restored: Block = Block.parse(data=version_seven_data)
+        assert version_seven_restored.dynamic_model_contract.emt_finite_reciprocal_source_mode_var_uid is None
+        assert version_seven_restored.to_dict()["dynamic_model_contract"]["version"] == 8
+        if has_modal_fields:
+            assert version_seven_restored.modal_template_kind == block.modal_template_kind
+            assert version_seven_restored.modal_template_config == block.modal_template_config
+        else:
+            assert version_seven_restored.modal_template_kind is None
+            assert version_seven_restored.modal_template_config is None
+
+        version_seven_blocks: dict[int, dict[str, object]] = copy.deepcopy(saver.get_blocks())
+        version_seven_blocks[block.uid]["dynamic_model_contract"] = version_seven_contract
+        version_seven_parser: BlockParser = BlockParser(var_factory=VarFactory())
+        version_seven_parser.parse_consts(saver.get_const_to_save())
+        version_seven_parser.parse_vars(saver.get_vars_to_save())
+        version_seven_parser.parse_diff_vars(saver.get_diff_vars_to_save())
+        version_seven_io_restored: Block = version_seven_parser.parse_block(
+            blocks_data=version_seven_blocks,
+            main_block_uid=block.uid,
+        )
+        assert version_seven_io_restored.modal_template_kind == version_seven_restored.modal_template_kind
+        assert version_seven_io_restored.modal_template_config == version_seven_restored.modal_template_config
+    else:
+        pass
+
+    assert "rms_terminal_power_contributions" not in DynamicModelContract.__slots__
 
     # Version 1 predates both formulation-specific terminal contracts.
     legacy_data: dict[str, object] = block.to_dict()
     legacy_contract: object = legacy_data["dynamic_model_contract"]
     assert isinstance(legacy_contract, dict)
     legacy_contract["version"] = 1
-    legacy_contract.pop("rms_terminal_power_contributions")
+    legacy_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
     legacy_contract.pop("emt_terminal_current_contributions")
     legacy_contract.pop("emt_internal_grounding_link")
     legacy_contract.pop("rms_physical_measurement_point")
+    legacy_contract.pop("modal_template_kind")
+    legacy_contract.pop("modal_template_config")
     legacy_restored: Block = Block.parse(data=legacy_data)
-    assert (
-        legacy_restored.dynamic_model_contract.rms_terminal_power_contributions
-        == list()
-    )
     assert (
         legacy_restored.dynamic_model_contract.emt_terminal_current_contributions
         == list()
@@ -883,13 +1150,16 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
     version_two_contract: object = version_two_data["dynamic_model_contract"]
     assert isinstance(version_two_contract, dict)
     version_two_contract["version"] = 2
+    version_two_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+    version_two_contract["rms_terminal_power_contributions"] = [
+        contribution.to_data() for contribution in legacy_contributions
+    ]
     version_two_contract.pop("emt_terminal_current_contributions")
     version_two_contract.pop("emt_internal_grounding_link")
     version_two_contract.pop("rms_physical_measurement_point")
+    version_two_contract.pop("modal_template_kind")
+    version_two_contract.pop("modal_template_config")
     version_two_restored: Block = Block.parse(data=version_two_data)
-    assert len(
-        version_two_restored.dynamic_model_contract.rms_terminal_power_contributions
-    ) == 2
     assert (
         version_two_restored.dynamic_model_contract.emt_terminal_current_contributions
         == list()
@@ -900,8 +1170,14 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
     version_three_contract: object = version_three_data["dynamic_model_contract"]
     assert isinstance(version_three_contract, dict)
     version_three_contract["version"] = 3
+    version_three_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+    version_three_contract["rms_terminal_power_contributions"] = [
+        contribution.to_data() for contribution in legacy_contributions
+    ]
     version_three_contract.pop("emt_internal_grounding_link")
     version_three_contract.pop("rms_physical_measurement_point")
+    version_three_contract.pop("modal_template_kind")
+    version_three_contract.pop("modal_template_config")
     version_three_restored: Block = Block.parse(data=version_three_data)
     assert not version_three_restored.dynamic_model_contract.emt_internal_grounding_link
 
@@ -910,13 +1186,38 @@ def test_rms_terminal_power_contract_roundtrips_and_fails_closed() -> None:
     version_four_contract: object = version_four_data["dynamic_model_contract"]
     assert isinstance(version_four_contract, dict)
     version_four_contract["version"] = 4
+    version_four_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+    version_four_contract["rms_terminal_power_contributions"] = [
+        contribution.to_data() for contribution in legacy_contributions
+    ]
     version_four_contract.pop("rms_physical_measurement_point")
+    version_four_contract.pop("modal_template_kind")
+    version_four_contract.pop("modal_template_config")
     version_four_restored: Block = Block.parse(data=version_four_data)
     assert version_four_restored.dynamic_model_contract.rms_physical_measurement_point is None
+
+    # Version 6 predates both branches' version-seven declarations.
+    version_six_data: dict[str, object] = block.to_dict()
+    version_six_contract: object = version_six_data["dynamic_model_contract"]
+    assert isinstance(version_six_contract, dict)
+    version_six_contract["version"] = 6
+    version_six_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+    version_six_contract.pop("modal_template_kind")
+    version_six_contract.pop("modal_template_config")
+    version_six_restored: Block = Block.parse(data=version_six_data)
+    assert version_six_restored.modal_template_kind is None
+    assert version_six_restored.modal_template_config is None
 
     malformed_data: dict[str, object] = block.to_dict()
     malformed_contract: object = malformed_data["dynamic_model_contract"]
     assert isinstance(malformed_contract, dict)
+    malformed_contract["version"] = 5
+    malformed_contract.pop("emt_finite_reciprocal_source_mode_var_uid")
+    malformed_contract["rms_terminal_power_contributions"] = [
+        contribution.to_data() for contribution in legacy_contributions
+    ]
+    malformed_contract.pop("modal_template_kind")
+    malformed_contract.pop("modal_template_config")
     malformed_contributions: object = malformed_contract[
         "rms_terminal_power_contributions"
     ]
@@ -1186,6 +1487,56 @@ def test_block_parse_rejects_malformed_structural_fields() -> None:
         Block.parse(data=malformed_name_data)
 
 
+def test_block_parsers_migrate_legacy_frequency_mapping() -> None:
+    """Migrate persisted ``fn`` API mappings to the canonical ``freq`` key.
+
+    :return: Nothing.
+    """
+    source_factory: VarFactory = VarFactory()
+    frequency: sym.Var = source_factory.add_var("frequency")
+    source_block: Block = Block(
+        algebraic_vars=list([frequency]),
+        api_obj_mapping=dict({ParamPowerFlowReferenceType.freq: frequency}),
+        name="legacy_frequency_mapping",
+    )
+
+    # Exercise the declarative Block parser after replacing the current key
+    # with the spelling emitted by older saved dynamic-model files.
+    declarative_data: Dict[str, Any] = source_block.to_dict()
+    declarative_mapping: Dict[str, Any] = declarative_data["api_obj_mapping"]
+    declarative_mapping["fn"] = declarative_mapping.pop(ParamPowerFlowReferenceType.freq.value)
+    declarative_restored: Block = Block.parse(data=declarative_data)
+    declarative_frequency: sym.Var | None = declarative_restored.api_obj_mapping.get(
+        ParamPowerFlowReferenceType.freq,
+        None,
+    )
+
+    assert declarative_frequency is not None
+    assert declarative_frequency.uid == frequency.uid
+
+    # Exercise the legacy UID-based parser because historical project files
+    # use this second persistence representation as well.
+    saver: BlockSaver = BlockSaver(source_factory)
+    saver.save_block(source_block, main=True)
+    legacy_blocks: Dict[int, Dict[str, Any]] = copy.deepcopy(saver.get_blocks())
+    legacy_block_data: Dict[str, Any] = legacy_blocks[source_block.uid]
+    legacy_mapping: Dict[str, int | None] = legacy_block_data["api_obj_mapping"]
+    legacy_mapping["fn"] = legacy_mapping.pop(ParamPowerFlowReferenceType.freq.value)
+
+    legacy_parser: BlockParser = BlockParser(VarFactory(), logger=Logger())
+    legacy_parser.parse_consts(saver.get_const_to_save())
+    legacy_parser.parse_vars(saver.get_vars_to_save())
+    legacy_parser.parse_diff_vars(saver.get_diff_vars_to_save())
+    legacy_restored: Block = legacy_parser.parse_block(legacy_blocks, source_block.uid)
+    legacy_frequency: sym.Var | None = legacy_restored.api_obj_mapping.get(
+        ParamPowerFlowReferenceType.freq,
+        None,
+    )
+
+    assert legacy_frequency is not None
+    assert legacy_frequency.uid == frequency.uid
+
+
 def test_block_parser_only_warns_for_broken_optional_mapping_references() -> None:
     """
     Check that optional null mappings are silent while broken UIDs warn.
@@ -1241,6 +1592,40 @@ def test_block_parser_only_warns_for_broken_optional_mapping_references() -> Non
     }
 
 
+def test_block_update_model_replaces_complete_symbolic_interface() -> None:
+    """Replace one variable consistently across ports, owners and mappings.
+
+    :return: None.
+    """
+    original_var: sym.Var = sym.Var(name="signal")
+    replacement_var: sym.Var = sym.Var(name="measured_signal")
+    child_block: Block = Block(
+        name="consumer",
+        in_vars=list((original_var,)),
+        out_vars=list((original_var,)),
+        algebraic_vars=list((original_var,)),
+        algebraic_eqs=list((original_var - sym.Const(1.0),)),
+    )
+    child_block.var_mapping["signal"] = original_var
+    root_block: Block = Block(
+        name="root",
+        children=list((child_block,)),
+        in_vars=list((original_var,)),
+        out_vars=list((original_var,)),
+    )
+
+    root_block.update_model(old=original_var, new=replacement_var)
+
+    assert root_block.in_vars[0] is replacement_var
+    assert root_block.out_vars[0] is replacement_var
+    assert child_block.in_vars[0] is replacement_var
+    assert child_block.out_vars[0] is replacement_var
+    assert child_block.algebraic_vars[0] is replacement_var
+    assert child_block.var_mapping["signal"] is replacement_var
+    assert original_var not in child_block.algebraic_eqs[0].get_vars()
+    assert replacement_var in child_block.algebraic_eqs[0].get_vars()
+
+
 # -----------------------------------------------------------------------------
 # 9. Immutability checks
 # -----------------------------------------------------------------------------
@@ -1255,3 +1640,135 @@ def test_block_parser_only_warns_for_broken_optional_mapping_references() -> Non
 #     c = sym.Const(1)
 #     with pytest.raises(AttributeError):
 #         c.value = 2  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("use_jit", [False, True])
+@pytest.mark.parametrize("point", [(0.7, 1.2), (-0.7, 1.2), (0.7, -1.2), (-0.7, -1.2)])
+def test_generated_values_and_jacobian_preserve_ordered_operations(use_jit: bool,
+                                                                  point: tuple[float, float]) -> None:
+    """Check emitted angle, powers and negation against independent formulas.
+
+    :param use_jit: Whether the same expression is executed through Numba.
+    :param point: Nonsymmetric point away from the atan2 singularity/branch cut.
+    :return: None; value, analytic slope and finite-difference evidence must agree.
+    """
+    x: sym.Var = sym.Var("x")
+    y: sym.Var = sym.Var("y")
+    expressions: list[sym.Expr] = list((sym.atan2(x, y), (x ** 2) ** 3,
+                                        x ** (sym.Const(2) ** 3), (-x) ** 2,
+                                        -(x ** 2), (-x) * y, x - (y - x)))
+    names: Dict[int, str] = dict(((x.uid, "values[0]"), (y.uid, "values[1]")))
+    aliases: Dict[int, str] = dict(((x.uid, "x0"), (y.uid, "y0")))
+    values: np.ndarray = np.array(point, dtype=float)
+    empty: np.ndarray = np.zeros(0, dtype=float)
+    vector: SymbolicVector = SymbolicVector(expressions, names, aliases,
+                                           "values", "diff", "events", "params", use_jit=use_jit)
+    jacobian: SymbolicJacobian = SymbolicJacobian(expressions, list((x, y)), names, aliases,
+                                                 "values", "diff", "events", "params", use_jit=use_jit)
+    xv: float = point[0]
+    yv: float = point[1]
+    expected: np.ndarray = np.array((np.arctan2(xv, yv), xv ** 6, xv ** 8,
+                                      xv ** 2, -xv ** 2, -xv * yv, 2 * xv - yv))
+    expected_jacobian: np.ndarray = np.array(((yv / (xv*xv + yv*yv), -xv / (xv*xv + yv*yv)),
+                                               (6*xv**5, 0), (8*xv**7, 0), (2*xv, 0),
+                                               (-2*xv, 0), (-yv, -xv), (2, -1)))
+    np.testing.assert_allclose(vector(values, empty, empty, empty), expected, rtol=2e-12, atol=2e-12)
+    np.testing.assert_allclose(jacobian(values, empty, empty, empty, 0.01).toarray(),
+                               expected_jacobian, rtol=2e-12, atol=2e-12)
+    numerical: np.ndarray = np.zeros((len(expressions), 2))
+    index: int
+    for index in range(2):
+        upper: np.ndarray = values.copy()
+        lower: np.ndarray = values.copy()
+        upper[index] += 1e-6
+        lower[index] -= 1e-6
+        upper_result: np.ndarray = vector(upper, empty, empty, empty).copy()
+        lower_result: np.ndarray = vector(lower, empty, empty, empty).copy()
+        numerical[:, index] = (upper_result - lower_result) / 2e-6
+    np.testing.assert_allclose(numerical, expected_jacobian, rtol=2e-7, atol=2e-7)
+    # A negative constant base with a variable exponent must keep its grouping;
+    # integer-valued runtime exponents provide an independent real-valued oracle.
+    negative_base: SymbolicVector = SymbolicVector(list((sym.Const(-2.0) ** x,)),
+        names, aliases, "values", "diff", "events", "params", use_jit=use_jit)
+    assert negative_base(np.array((2.0, 0.0)), empty, empty, empty)[0] == 4.0
+    assert negative_base(np.array((4.0, 0.0)), empty, empty, empty)[0] == 16.0
+
+    # Native initialization binds finite boundary values with repr(value).
+    # A compound binding exercises the same inline fallback without alias reuse.
+    binding: str
+    binding_value: float
+    expression: sym.Expr
+    target: float
+    for binding, binding_value in (("-2.0", -2.0), ("values[0] - values[1]", xv - yv)):
+        boundary_names: Dict[int, str] = dict(((x.uid, binding), (y.uid, "values[1]")))
+        for expression, target in ((x ** 2, binding_value * binding_value), (-x, -binding_value), (x * 3, binding_value * 3)):
+            boundary_vector: SymbolicVector = SymbolicVector(list((expression,)), boundary_names, aliases,
+                "values", "diff", "events", "params", use_jit=use_jit)
+            assert boundary_vector(values, empty, empty, empty)[0] == pytest.approx(target, rel=2e-12, abs=2e-12)
+
+
+def test_binary_structural_identity_keeps_atan2_order() -> None:
+    """Retain ordered angle operands without losing minimum/maximum symmetry.
+
+    :return: None; swapped angles must have distinct structural/DAG identity.
+    """
+    x: sym.Var = sym.Var("x")
+    y: sym.Var = sym.Var("y")
+    memo: Dict[str, DAGNode] = dict()
+    assert structural_hash(sym.atan2(x, y)) != structural_hash(sym.atan2(y, x))
+    assert to_dag(sym.atan2(x, y), memo) is not to_dag(sym.atan2(y, x), memo)
+    assert structural_hash(sym.Func2("min", x, y)) == structural_hash(sym.Func2("min", y, x))
+    assert structural_hash(sym.Func2("max", x, y)) == structural_hash(sym.Func2("max", y, x))
+
+
+@pytest.mark.parametrize("use_jit", [False, True])
+def test_ordered_emission_preserves_uid_randomness_and_output_aliasing(use_jit: bool) -> None:
+    """Exercise compiler boundaries that algebraic or global CSE can violate.
+
+    :param use_jit: Execute the alias-collision controls through Python or Numba.
+    :return: None; distinct UIDs, stochastic calls and output ordering survive.
+    """
+    x: sym.Var = sym.Var("same")
+    y: sym.Var = sym.Var("same")
+    analyzer: SubexpressionAnalyzer = SubexpressionAnalyzer()
+    names: Dict[int, str] = dict(((x.uid, "values[0]"), (y.uid, "values[1]")))
+    aliases: Dict[int, str] = dict(((x.uid, "a0"), (y.uid, "a1")))
+    empty: np.ndarray = np.zeros(0)
+    vector: SymbolicVector = SymbolicVector(list(((x + 1) * (y + 1),)), names, aliases,
+                                           "values", "diff", "events", "params", use_jit=False)
+    assert vector(np.array((2.0, 4.0)), empty, empty, empty)[0] == 15.0
+    # The alias is used only by later roots, but is assigned before the entire
+    # batch. A first-root temporary must reserve it even when that root reads x.
+    late_aliases: Dict[int, str] = dict(((x.uid, "a0"), (y.uid, "_vg_shared_0")))
+    late_alias_vector: SymbolicVector = SymbolicVector(list((x + 1, y + 1, 2 * y)), names,
+        late_aliases, "values", "diff", "events", "params", use_jit=use_jit)
+    np.testing.assert_array_equal(late_alias_vector(np.array((2.0, 4.0)), empty, empty, empty),
+                                   np.array((3.0, 5.0, 8.0)))
+    late_alias_jacobian: SymbolicJacobian = SymbolicJacobian(list((x*x, y*y, y*y*y)),
+        list((x, y)), names, late_aliases, "values", "diff", "events", "params", use_jit=use_jit)
+    np.testing.assert_array_equal(late_alias_jacobian(np.array((2.0, 4.0)), empty, empty,
+        empty, 0.01).toarray(), np.array(((4.0, 0.0), (0.0, 8.0), (0.0, 48.0))))
+    stochastic: sym.Expr = sym.Func(sym.Const(0), "rand")
+    assignments: list[str]
+    replacements: Dict[int, str]
+    assignments, replacements = analyzer.emit_ordered_assignments(stochastic + stochastic, names)
+    assert assignments == list() and replacements == dict()
+    stochastic_source: str = sym.expression2numba(stochastic + stochastic, names, 0, replacements)
+    assert stochastic_source.count("np.random.rand()") == 2
+    assignments, replacements = analyzer.emit_ordered_assignments(x * x, dict(((x.uid, "np.random.rand()"),)))
+    assert assignments == list() and replacements == dict()
+    # Two different UIDs can intentionally read the same slot. A first output
+    # write must be visible to the next equation when the original inline path
+    # would read that slot again. Sharing must stop at the output boundary.
+    shared_slot_names: Dict[int, str] = dict(((x.uid, "values[0]"), (y.uid, "values[0]")))
+    aliased: SymbolicVector = SymbolicVector(list((x + 1, 2 * y)), shared_slot_names, aliases,
+                                            "values", "diff", "events", "params", use_jit=False)
+    values: np.ndarray = np.array((2.0, 0.0))
+    assert aliased.func is not None
+    aliased.func(values, empty, empty, empty, values)
+    np.testing.assert_array_equal(values, np.array((3.0, 6.0)))
+    # Exact singular-domain behavior remains owned by the original emitter and
+    # simplification path; a zero-slope floor derivative stays canonical zero.
+    singular: sym.Expr = sym.Func(sym.BinOp(sym.Const(0), "**", sym.Const(0)), "floor")
+    derivative: sym.Expr = singular.diff(x)
+    assert isinstance(derivative, sym.Const) and derivative.value == 0

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 import numpy as np
-from typing import List, Union, TYPE_CHECKING
+from typing import List, Tuple, Union, TYPE_CHECKING
 
 from VeraGridEngine.Simulations.results_template import ResultsTemplate, ResultsProperty
 from VeraGridEngine.enumerations import ResultTypes, StudyResultsType, SolutionState
@@ -56,6 +56,7 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
         ResultsProperty(name='inter_space_vsc', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='converged', tpe=BoolVec, old_names=list(), expandable=True),
         ResultsProperty(name='inter_area_flows', tpe=Vec, old_names=list(), expandable=True),
+        ResultsProperty(name='transmission_reliability_margin', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='contingency_flows_list', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='strict_formulation', tpe=bool, old_names=list(), expandable=False),
         ResultsProperty(name='contingency_group_device_names', tpe=ObjVec, old_names=list(), expandable=False),
@@ -63,6 +64,7 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
         ResultsProperty(name='worst_contingency_flow', tpe=Mat, old_names=list(), expandable=True),
         ResultsProperty(name='worst_contingency_loading', tpe=Mat, old_names=list(), expandable=True),
         ResultsProperty(name='alpha_n1_worst', tpe=Mat, old_names=list(), expandable=True),
+        ResultsProperty(name='worst_contingency_ties', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='loading_threshold_to_report', tpe=float, old_names=list(), expandable=False),
     )
 
@@ -105,11 +107,13 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
         "strict_formulation",
         "converged",
         "inter_area_flows",
+        "transmission_reliability_margin",
         "contingency_group_device_names",
         "worst_contingency_idx",
         "worst_contingency_flow",
         "worst_contingency_loading",
         "alpha_n1_worst",
+        "worst_contingency_ties",
         "loading_threshold_to_report",
     )
 
@@ -121,7 +125,8 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
                  contingency_group_names: StrVec,
                  time_array: DateVec,
                  time_indices: IntVec,
-                 clustering_results: Union[ClusteringResults, None] = None):
+                 clustering_results: Union[ClusteringResults, None] = None,
+                 transmission_reliability_margin: float = 0.0):
 
         """
 
@@ -133,6 +138,7 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
         :param time_array:
         :param time_indices:
         :param clustering_results:
+        :param transmission_reliability_margin: Study TRM in MW; zero when absent from older saved results.
         """
         ResultsTemplate.__init__(
             self,
@@ -157,7 +163,6 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
                 ],
                 ResultTypes.VscResults: [
                     ResultTypes.VscPowerFromPositive,
-                    ResultTypes.VscPowerFromNegative,
                 ],
                 ResultTypes.FlowReports: [
                     ResultTypes.NetTransferCapacity,
@@ -240,6 +245,8 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
 
         self.converged = np.zeros(nt, dtype=bool)
         self.inter_area_flows = np.zeros(nt, dtype=float)
+        # A scalar study margin is shared by original and representative hours.
+        self.transmission_reliability_margin: float = transmission_reliability_margin
 
         n_g: int = len(contingency_group_names)
         self.contingency_group_device_names = np.empty(n_g, dtype=object)
@@ -250,6 +257,8 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
         self.loading_threshold_to_report: float = 98.0
         self.worst_contingency_loading = np.zeros((nt, m), dtype=float)
         self.alpha_n1_worst = np.zeros((nt, m), dtype=float)
+        # simulated time index, branch, group, N-1 flow (MW), N-1 loading (p.u.), alpha N-1 of the tied groups
+        self.worst_contingency_ties: List[Tuple[int, int, int, float, float, float]] = list()
 
     def get_total_slack_mw(self) -> Vec:
         """
@@ -546,10 +555,12 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
             )
 
         elif result_type == ResultTypes.NetTransferCapacity:
+            # The optimizer returns TTC; subtract TRM only in the capacity report.
             return ResultsTable(
-                data=self.inter_area_flows.reshape(-1, 1),
+                data=np.column_stack((self.inter_area_flows,
+                                      self.inter_area_flows - self.transmission_reliability_margin)),
                 index=self.time_array,
-                columns=np.array(['NTC (MW)']),
+                columns=np.array(('TTC (MW)', 'NTC (MW)')),
                 title=str(result_type.value),
                 ylabel='(MW)',
                 cols_device_type=DeviceType.NoDevice,
@@ -587,6 +598,12 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
             )
 
         elif result_type == ResultTypes.ContingencyFlowsReport:
+            # ties are keyed by simulated step, while expanded clustered rows are calendar hours
+            if (self.clustering_results is not None
+                    and len(self.inter_area_flows) != len(self.clustering_results.time_indices)):
+                tie_time_keys: IntVec | None = self.original_sample_idx
+            else:
+                tie_time_keys = None
             return worst_contingency_report_table(
                 time_array=self.time_array,
                 branch_names=self.branch_names,
@@ -599,15 +616,20 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
                 alpha_n1=self.alpha_n1_worst,
                 monitor_logic=self.monitor_logic,
                 flow_n=np.real(self.Sf),
-                ntc=self.inter_area_flows,
+                loading_n=self.loading,
+                ttc=self.inter_area_flows,
+                transmission_reliability_margin=self.transmission_reliability_margin,
                 contingency_rates=self.contingency_rates,
                 loading_threshold_pct=self.loading_threshold_to_report,
+                total_slack_mw=self.get_total_slack_mw(),
                 vsc_names=self.vsc_names,
                 vsc_power=self.vsc_Pf,
                 hvdc_names=self.hvdc_names,
                 hvdc_power=self.hvdc_Pf,
                 phase_shifter_indices=self.phase_shifter_indices,
-                phase_shift=self.phase_shift
+                phase_shift=self.phase_shift,
+                tied_groups=self.worst_contingency_ties,
+                tie_time_keys=tie_time_keys
             )
 
         elif (result_type == ResultTypes.ContingencyFlowsRepresentativeReport
@@ -632,7 +654,9 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
                 alpha_n1=self.alpha_n1_worst[selected_rows],
                 monitor_logic=self.monitor_logic[selected_rows],
                 flow_n=np.real(self.Sf[selected_rows]),
-                ntc=self.inter_area_flows[selected_rows],
+                loading_n=self.loading[selected_rows],
+                ttc=self.inter_area_flows[selected_rows],
+                transmission_reliability_margin=self.transmission_reliability_margin,
                 contingency_rates=self.contingency_rates,
                 loading_threshold_pct=self.loading_threshold_to_report,
                 total_slack_mw=total_slack[selected_rows],
@@ -644,7 +668,8 @@ class OptimalNetTransferCapacityTimeSeriesResults(ResultsTemplate):
                 hvdc_names=self.hvdc_names,
                 hvdc_power=self.hvdc_Pf[selected_rows],
                 phase_shifter_indices=self.phase_shifter_indices,
-                phase_shift=self.phase_shift[selected_rows]
+                phase_shift=self.phase_shift[selected_rows],
+                tied_groups=self.worst_contingency_ties
             )
 
         else:

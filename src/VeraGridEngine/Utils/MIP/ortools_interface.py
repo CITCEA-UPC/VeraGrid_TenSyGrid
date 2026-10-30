@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import List, Union, Tuple, Iterable, Callable
 from ortools.linear_solver.python import model_builder
+# Check required constructors during import so selected_interface can disable an incompatible backend.
+from ortools.linear_solver.python.model_builder import Model, Solver
 from ortools.linear_solver.python.model_builder import BoundedLinearExpression as LpCstBounded
 from ortools.linear_solver.python.model_builder import LinearConstraint as LpCst
 from ortools.linear_solver.python.model_builder import LinearExpr as LpExp
@@ -163,6 +165,8 @@ class OrToolsLpModel(AbstractLpModel):
     )
 
     OPTIMAL = SolveStatus.OPTIMAL
+    INFEASIBLE: SolveStatus = SolveStatus.INFEASIBLE
+    NOT_SOLVED: SolveStatus = SolveStatus.NOT_SOLVED
     INFINITY = 1e20
 
     def __init__(self, solver_type: MIPSolvers):

@@ -8,11 +8,16 @@ import numpy as np
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 from VeraGridEngine.Utils.Symbolic.block import Block
+from VeraGridEngine.Utils.Symbolic.jit_compiler import ProceduralExpressionCompiler, RuntimeParameterCompiler
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var, hard_sat, heaviside, piecewise, get_expression_vars
 from VeraGridEngine.basic_structures import Vec
 from VeraGridEngine.Simulations.driver_template import DummySignal
 from VeraGridEngine.Devices.Events.emt_events_group import EmtEventsGroup
 from VeraGridEngine.Devices import MultiCircuit
+from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified import (
+    build_api_parameter_initial_values_by_uid,
+    resolve_parameter_initial_expression,
+)
 from VeraGridEngine.enumerations import DynamicEventTransitionType, VarPowerFlowReferenceType
 
 
@@ -39,96 +44,6 @@ def _get_external_mapping(mdl: Block) -> Optional[Dict[Any, Var]]:
         return None
     else:
         return external_mapping
-
-
-def _register_referenced_static_parameter_vars(state_eqs: List[Any],
-                                               algebraic_eqs: List[Any],
-                                               diff_init_eqs: Dict[Var, Any],
-                                               init_eqs: Dict[Var, Any],
-                                               static_parameter_values: Dict[Var, Const],
-                                               known_state_vars: List[Var],
-                                               known_algebraic_vars: List[Var],
-                                               known_diff_vars: List[Var],
-                                               runtime_parameter_vars: List[Var]) -> None:
-    """
-    Register referenced static parameter vars that are not explicit block members.
-
-    Some EMT templates keep static quantities such as ``omega_base`` outside the
-    block ``parameters`` dictionary while still referencing them from state or
-    initialization equations. The EMT compiler-name tables are built only from the
-    collected states, algebraics, runtime parameters, diff vars, and static
-    parameters. This helper therefore scans the device equations and promotes any
-    already-known static parameter var into ``static_parameter_values`` when it is
-    referenced symbolically but absent from the explicit block collections.
-
-    :param state_eqs: State equations collected from the system block tree.
-    :type state_eqs: List[Any]
-    :param algebraic_eqs: Algebraic equations collected from the system block tree.
-    :type algebraic_eqs: List[Any]
-    :param diff_init_eqs: Differential initialization equations.
-    :type diff_init_eqs: Dict[Var, Any]
-    :param init_eqs: Initialization equations.
-    :type init_eqs: Dict[Var, Any]
-    :param static_parameter_values: Static parameter mapping being assembled.
-    :type static_parameter_values: Dict[Var, Const]
-    :param known_state_vars: Collected state variables.
-    :type known_state_vars: List[Var]
-    :param known_algebraic_vars: Collected algebraic variables.
-    :type known_algebraic_vars: List[Var]
-    :param known_diff_vars: Collected differential variables.
-    :type known_diff_vars: List[Var]
-    :param runtime_parameter_vars: Collected runtime parameter variables.
-    :type runtime_parameter_vars: List[Var]
-    :return: None.
-    :rtype: None
-    """
-    known_uids: set[int] = set()
-    static_parameter_value_by_uid: Dict[int, Const] = dict()
-    expression_collections: List[List[Any]] = list()
-    expression_list: List[Any] = list()
-    expression_item: Any
-    referenced_var: Var
-
-    for referenced_var in known_state_vars:
-        known_uids.add(referenced_var.uid)
-
-    for referenced_var in known_algebraic_vars:
-        known_uids.add(referenced_var.uid)
-
-    for referenced_var in known_diff_vars:
-        known_uids.add(referenced_var.uid)
-
-    for referenced_var in runtime_parameter_vars:
-        known_uids.add(referenced_var.uid)
-
-    for referenced_var in static_parameter_values.keys():
-        known_uids.add(referenced_var.uid)
-        static_parameter_value_by_uid[referenced_var.uid] = static_parameter_values[referenced_var]
-
-    expression_collections.append(state_eqs)
-    expression_collections.append(algebraic_eqs)
-    expression_collections.append(list(diff_init_eqs.values()))
-    expression_collections.append(list(init_eqs.values()))
-
-    for expression_list in expression_collections:
-        for expression_item in expression_list:
-            for referenced_var in get_expression_vars(expression_item):
-                if referenced_var.uid in known_uids:
-                    if referenced_var in static_parameter_values:
-                        pass
-                    else:
-                        static_parameter_value: Const | None = static_parameter_value_by_uid.get(referenced_var.uid, None)
-                        if static_parameter_value is None:
-                            pass
-                        else:
-                            static_parameter_values[referenced_var] = static_parameter_value
-                else:
-                    static_parameter_value = static_parameter_value_by_uid.get(referenced_var.uid, None)
-                    if static_parameter_value is None:
-                        pass
-                    else:
-                        static_parameter_values[referenced_var] = static_parameter_value
-                        known_uids.add(referenced_var.uid)
 
 
 def _register_equation_variable_aliases(state_eqs: List[Any],
@@ -279,6 +194,16 @@ class EmtBoundaryUpdateProtocol(Protocol):
         """
         ...
 
+    def commit_boundary(self, t: float, x: Vec, params: Vec) -> None:
+        """Advance post-accepted external sample-and-hold runtimes.
+
+        :param t: Accepted solver boundary.
+        :param x: Accepted state vector.
+        :param params: Mutable runtime parameter vector.
+        :return: None.
+        """
+        ...
+
 
 def _implements_forced_event_time_api(boundary_updater: Any) -> bool:
     """
@@ -299,6 +224,22 @@ def _implements_step_resolution_api(boundary_updater: Any) -> bool:
 
     return "resolve_step" in dir(boundary_updater)
 
+
+
+def _implements_commit_boundary_api(boundary_updater: Any) -> bool:
+    """Return whether an updater implements a boundary commit callback.
+
+    :param boundary_updater: Boundary updater instance.
+    :return: ``True`` when boundary commit is implemented.
+    """
+    updater_type: type = type(boundary_updater)
+    base_type: type
+    for base_type in updater_type.__mro__:
+        if "commit_boundary" in base_type.__dict__:
+            return True
+        else:
+            pass
+    return False
 
 def _emt_event_spec_time_sort_key(event_spec: Dict[str, float | str | None]) -> float:
     """
@@ -361,6 +302,8 @@ def resolve_solver_boundary_step(
         boundary_updater: EmtBoundaryUpdateProtocol | None,
         accepted: bool,
         params: Vec,
+        committed_time: float | None = None,
+        committed_state: Vec | None = None,
 ) -> float | None:
     """Resolve a prepared external boundary step when the updater supports it.
 
@@ -370,6 +313,8 @@ def resolve_solver_boundary_step(
     :param boundary_updater: Effective boundary updater used by the solver.
     :param accepted: Whether the EMT Newton step converged.
     :param params: Full runtime-parameter vector receiving resolved outputs.
+    :param committed_time: Accepted boundary time for sample-and-hold runtimes.
+    :param committed_state: Accepted state for sample-and-hold inputs.
     :return: Earlier state-event retry time, or ``None``.
     """
 
@@ -383,6 +328,12 @@ def resolve_solver_boundary_step(
             )
         else:
             retry_time = None
+    if (accepted and retry_time is None and boundary_updater is not None
+            and committed_time is not None and committed_state is not None
+            and _implements_commit_boundary_api(boundary_updater)):
+        boundary_updater.commit_boundary(float(committed_time), committed_state, params)
+    else:
+        pass
     return retry_time
 
 
@@ -478,6 +429,7 @@ class EmtProblemTemplate(ABC):
         "_algebraic_eqs",
         "_diff_vars",
         "_static_parameter_values",
+        "_api_parameter_initial_values_by_uid",
         "_variable_parameters",
         "_event_parameters_eqs",
         "_runtime_mode_uids",
@@ -491,6 +443,11 @@ class EmtProblemTemplate(ABC):
         "_runtime_mode_eqs",
         "_runtime_continuous_slice",
         "_runtime_mode_slice",
+        "_runtime_parameter_kernel",
+        "_runtime_parameter_kernel_enabled",
+        "_runtime_fixed_uid2idx",
+        "_runtime_fixed_values",
+        "_procedural_expression_compiler",
         "_vars_glob_name2uid",
         "init_guess",
         "event_params_init_dict",
@@ -529,6 +486,8 @@ class EmtProblemTemplate(ABC):
         Initialize the EMT problem template.
 
         :param sys_block: Root symbolic block that defines the EMT problem.
+        :param static_parameter_values_mapping: Problem-local initial values
+            resolved from owner-local API-object mappings.
         :param glob_time: Global time variable used by runtime expressions.
         :param init_eqs_flat: Optional pre-collected initialization equations.
         :param diff_init_eqs_flat: Optional pre-collected differential initialization equations.
@@ -572,15 +531,17 @@ class EmtProblemTemplate(ABC):
         self._diff_vars: List[Var] = list()
 
         self._static_parameter_values: Dict[Var, Const] = dict()
-        static_parameter_values_by_uid: Dict[int, Const] = dict()
+        self._api_parameter_initial_values_by_uid: Dict[int, Const] = build_api_parameter_initial_values_by_uid(
+            problem_mapping=static_parameter_values_mapping,
+        )
+        registered_parameter_uids: set[int] = set()
         self._variable_parameters: List[Var] = list()
         self._event_parameters_eqs: List[Any] = list()
         self._runtime_mode_uids: set[int] = set()
 
-        for const_var, const_expr in static_parameter_values_mapping.items():
-            self._static_parameter_values[const_var] = const_expr
-            static_parameter_values_by_uid[const_var.uid] = const_expr
-
+        # The API-object mapping provides initial values only. Block.parameters,
+        # Block.event_dict and Block.mode_dict remain authoritative for immutable,
+        # continuous-runtime and discrete-runtime roles, matching RMS.
         for block_item in block_sequence:
             self._state_vars.extend(block_item.state_vars)
             self._algebraic_vars.extend(block_item.algebraic_vars)
@@ -589,38 +550,47 @@ class EmtProblemTemplate(ABC):
             self._diff_vars.extend(block_item.diff_vars)
 
             for const_var, const_expr in block_item.parameters.items():
-                if const_var.uid in static_parameter_values_by_uid:
-                    canonical_const_expr: Const = static_parameter_values_by_uid[const_var.uid]
-                    self._static_parameter_values[const_var] = canonical_const_expr
+                if const_var.uid in registered_parameter_uids:
+                    raise ValueError(
+                        f"EMT constant parameter '{const_var.name}' (uid={const_var.uid}) "
+                        + "is declared more than once in the block hierarchy."
+                    )
                 else:
-                    self._static_parameter_values[const_var] = const_expr
-                    static_parameter_values_by_uid[const_var.uid] = const_expr
+                    registered_parameter_uids.add(const_var.uid)
+
+                    resolved_const_expression: Expr | Const = resolve_parameter_initial_expression(
+                        parameter=const_var,
+                        declared_expression=const_expr,
+                        problem_mapping=static_parameter_values_mapping,
+                    )
+                    if isinstance(resolved_const_expression, Const):
+                        self._static_parameter_values[const_var] = resolved_const_expression
+                    else:
+                        raise TypeError(
+                            f"EMT immutable parameter '{const_var.name}' (uid={const_var.uid}) "
+                            + f"in block '{block_item.name}' must resolve to Const."
+                        )
 
             for runtime_var, runtime_expr in block_item.event_dict.items():
                 self._variable_parameters.append(runtime_var)
-                self._event_parameters_eqs.append(runtime_expr)
+                resolved_runtime_expression: Expr | Const = resolve_parameter_initial_expression(
+                    parameter=runtime_var,
+                    declared_expression=runtime_expr,
+                    problem_mapping=static_parameter_values_mapping,
+                )
+                # The block keeps its runtime declaration while the problem
+                # stores the authoritative mapped value as the initial baseline.
+                self._event_parameters_eqs.append(resolved_runtime_expression)
 
             for runtime_var, runtime_expr in block_item.mode_dict.items():
                 self._variable_parameters.append(runtime_var)
-                self._event_parameters_eqs.append(runtime_expr)
+                resolved_mode_expression: Expr | Const = resolve_parameter_initial_expression(
+                    parameter=runtime_var,
+                    declared_expression=runtime_expr,
+                    problem_mapping=static_parameter_values_mapping,
+                )
+                self._event_parameters_eqs.append(resolved_mode_expression)
                 self._runtime_mode_uids.add(runtime_var.uid)
-
-        # Some EMT templates expose static symbolic quantities through the shared
-        # API-object mapping but keep them outside ``block.parameters``. They can
-        # still appear inside the final state and initialization equations, so the
-        # problem must keep those vars in the constant-parameter set before it
-        # builds compiler-name tables.
-        _register_referenced_static_parameter_vars(
-            state_eqs=self._state_eqs,
-            algebraic_eqs=self._algebraic_eqs,
-            diff_init_eqs=self._diff_init_eqs_flat,
-            init_eqs=self._init_eqs_flat,
-            static_parameter_values=self._static_parameter_values,
-            known_state_vars=self._state_vars,
-            known_algebraic_vars=self._algebraic_vars,
-            known_diff_vars=self._diff_vars,
-            runtime_parameter_vars=self._variable_parameters,
-        )
 
         self._constant_parameters: List[Var] = list(self._static_parameter_values.keys())
         self._parameters_values: List[Const] = list(self._static_parameter_values.values())
@@ -636,6 +606,10 @@ class EmtProblemTemplate(ABC):
 
         self._runtime_continuous_slice: slice = slice(0, 0)
         self._runtime_mode_slice: slice = slice(0, 0)
+        self._runtime_parameter_kernel: Callable[[Vec, Vec, float], None] | None = None
+        self._runtime_parameter_kernel_enabled: bool = False
+        self._runtime_fixed_uid2idx: Dict[int, int] = dict()
+        self._runtime_fixed_values: Vec = np.zeros(0, dtype=np.float64)
 
         if vars_glob_name2uid is None:
             self._vars_glob_name2uid: Dict[str, int] = dict()
@@ -646,10 +620,23 @@ class EmtProblemTemplate(ABC):
 
         self.init_guess: Dict[int, float] = dict()
         self.event_params_init_dict: Dict[int, float | int | complex | None] = dict()
+        for runtime_var in self._variable_parameters:
+            mapped_runtime_expr = self._api_parameter_initial_values_by_uid.get(runtime_var.uid, None)
+            if mapped_runtime_expr is None or mapped_runtime_expr.value is None:
+                pass
+            else:
+                self.event_params_init_dict[runtime_var.uid] = mapped_runtime_expr.value
         self.diff_init_guess: Dict[int, float] = dict()
         # self._vars_info: Dict[Any, List[Var]] = dict()
 
         self._finalize_order_and_maps()
+        self._procedural_expression_compiler: ProceduralExpressionCompiler = ProceduralExpressionCompiler(
+            state_map=self._uid2idx_vars,
+            runtime_map=self._uid2idx_event_params,
+            constant_map=self._uid2idx_params,
+            constant_values=self._parameters_values,
+            global_time_uid=self._glob_time.uid,
+        )
         self._event_params_values: Vec = np.zeros(0, dtype=np.float64)
         self._constant_params_values: Vec = np.zeros(0, dtype=np.float64)
         self._build_runtime_param_vectors()
@@ -665,6 +652,26 @@ class EmtProblemTemplate(ABC):
         :return: Global time symbolic variable.
         """
         return self._glob_time
+
+    def get_procedural_expression_compiler(self) -> ProceduralExpressionCompiler:
+        """Return the problem-local eager procedural expression compiler.
+
+        :return: Compiler shared by all bound procedural logic entries.
+        """
+        return self._procedural_expression_compiler
+
+    def _rebuild_procedural_expression_compiler(self) -> None:
+        """Rebuild the compiler after canonical parameter indexes change.
+
+        :return: None.
+        """
+        self._procedural_expression_compiler = ProceduralExpressionCompiler(
+            state_map=self._uid2idx_vars,
+            runtime_map=self._uid2idx_event_params,
+            constant_map=self._uid2idx_params,
+            constant_values=self._parameters_values,
+            global_time_uid=self._glob_time.uid,
+        )
 
     @property
     def boundary_update(self) -> EmtBoundaryUpdateProtocol | None:
@@ -712,23 +719,6 @@ class EmtProblemTemplate(ABC):
 
         :return: None
         """
-
-        parameter_var: Var
-        parameter_value: Const
-
-        # The unified EMT builder may assemble wrapped models where the final
-        # flattened ``sys_block`` owns static parameter vars that were not present
-        # in the earlier pre-flattened mapping snapshot. Reconcile against the
-        # definitive unified parameter dictionary here so every referenced static
-        # var receives one constant-array slot before symbolic compilation.
-        for parameter_var, parameter_value in self.sys_block.parameters.items():
-            if parameter_var in self._static_parameter_values:
-                pass
-            else:
-                self._static_parameter_values[parameter_var] = parameter_value
-
-        self._constant_parameters = list(self._static_parameter_values.keys())
-        self._parameters_values = list(self._static_parameter_values.values())
 
         self._diff_vars = sorted(self._diff_vars, key=_get_diff_var_sort_key)
 
@@ -835,6 +825,10 @@ class EmtProblemTemplate(ABC):
             [parameter.value for parameter in self._parameters_values],
             dtype=np.float64
         )
+
+        # Runtime equations are structurally final for this rebuild. Compile
+        # them now so the first simulation step performs numerical work only.
+        self._build_runtime_parameter_kernel()
 
     def rebuild_runtime_param_vectors(self) -> None:
         """
@@ -1020,6 +1014,134 @@ class EmtProblemTemplate(ABC):
         self._runtime_continuous_slice = slice(0, n_continuous)
         self._runtime_mode_slice = slice(n_continuous, n_continuous + n_mode)
 
+        # A changed partition or expression list changes generated source, so
+        # the old kernel must never survive this structural rebuild.
+        self._runtime_parameter_kernel = None
+        self._runtime_parameter_kernel_enabled = False
+
+    def _build_runtime_parameter_kernel(self) -> None:
+        """Eagerly compile the ordered continuous runtime equations.
+
+        Constant parameters and initialized state, algebraic, and differential
+        values are stored in one compact frozen array. Runtime parameters remain
+        in their own mutable array so generated assignments preserve the exact
+        sequential semantics of the interpreted implementation.
+
+        :return: None.
+        """
+        fixed_uid2idx: Dict[int, int] = dict()
+        fixed_value_count: int = 0
+        uid: int
+        time_uids: set[int] = set([self._glob_time.uid])
+        expression: Any
+        expression_var: Var
+        compiler: RuntimeParameterCompiler
+
+        # Constants take precedence over initialization guesses, matching the
+        # interpreted evaluator's UID lookup order.
+        for uid in self._uid2idx_params.keys():
+            fixed_uid2idx[uid] = fixed_value_count
+            fixed_value_count += 1
+
+        for uid in self._uid2idx_vars.keys():
+            if uid in fixed_uid2idx:
+                pass
+            else:
+                fixed_uid2idx[uid] = fixed_value_count
+                fixed_value_count += 1
+
+        for uid in self._uid2idx_diff.keys():
+            if uid in fixed_uid2idx:
+                pass
+            else:
+                fixed_uid2idx[uid] = fixed_value_count
+                fixed_value_count += 1
+
+        # Saved symbolic trees may carry cloned time variables with different
+        # UIDs. Their semantic name identifies the same scalar simulation time.
+        for expression in self._runtime_continuous_eqs:
+            if isinstance(expression, Expr):
+                for expression_var in expression.get_vars():
+                    if expression_var.name in {"time", self.TIME_NAME}:
+                        time_uids.add(expression_var.uid)
+                    else:
+                        pass
+            else:
+                pass
+
+        self._runtime_fixed_uid2idx = fixed_uid2idx
+        self._runtime_fixed_values = np.zeros(fixed_value_count, dtype=np.float64)
+        self._refresh_runtime_fixed_values()
+
+        compiler = RuntimeParameterCompiler(
+            runtime_map=self._uid2idx_event_params,
+            fixed_map=self._runtime_fixed_uid2idx,
+            time_uids=time_uids,
+        )
+        self._runtime_parameter_kernel = compiler.compile(
+            equations=self._runtime_continuous_eqs,
+            output_offset=self._runtime_continuous_slice.start,
+        )
+
+    def _refresh_runtime_fixed_values(self) -> None:
+        """Refresh frozen bindings consumed by the compiled runtime kernel.
+
+        :return: None.
+        """
+        uid: int
+        source_idx: int
+        target_idx: int | None
+        init_value: float | int | complex | None
+
+        self._runtime_fixed_values.fill(0.0)
+
+        for uid, source_idx in self._uid2idx_params.items():
+            target_idx = self._runtime_fixed_uid2idx.get(uid, None)
+            if target_idx is None:
+                pass
+            else:
+                self._runtime_fixed_values[target_idx] = float(self._parameters_values[source_idx].value)
+
+        for uid in self._uid2idx_vars.keys():
+            target_idx = self._runtime_fixed_uid2idx.get(uid, None)
+            init_value = self.init_guess.get(uid, None)
+            if uid in self._uid2idx_params or target_idx is None or init_value is None:
+                pass
+            else:
+                self._runtime_fixed_values[target_idx] = float(init_value)
+
+        for uid in self._uid2idx_diff.keys():
+            target_idx = self._runtime_fixed_uid2idx.get(uid, None)
+            init_value = self.diff_init_guess.get(uid, None)
+            if (
+                uid in self._uid2idx_params
+                or uid in self._uid2idx_vars
+                or target_idx is None
+                or init_value is None
+            ):
+                pass
+            else:
+                self._runtime_fixed_values[target_idx] = float(init_value)
+
+    def enable_compiled_runtime_parameter_evaluator(self) -> None:
+        """Enable compiled runtime updates after problem initialization.
+
+        Explicit and native initialization modify the initial-value dictionaries
+        directly while resolving their dependency graphs. Keeping runtime
+        evaluation interpreted during that phase guarantees every expression
+        observes the latest initialization values. The simulation calls this
+        method once initialization is complete, refreshing the compact frozen
+        bindings before activating the compiled hot path.
+
+        :return: None.
+        """
+        if self._runtime_parameter_kernel is None:
+            self._build_runtime_parameter_kernel()
+        else:
+            self._refresh_runtime_fixed_values()
+
+        self._runtime_parameter_kernel_enabled = True
+
     def refresh_runtime_equations_from_hierarchy(self) -> None:
         """
         Refresh canonical runtime equations from the current block hierarchy.
@@ -1031,7 +1153,15 @@ class EmtProblemTemplate(ABC):
         runtime_parameter: Var
 
         for runtime_parameter in self._runtime_all_parameters_source:
-            if runtime_parameter.uid in runtime_equation_lookup:
+            mapped_runtime_expression: Const | None = self._api_parameter_initial_values_by_uid.get(
+                runtime_parameter.uid,
+                None,
+            )
+            if mapped_runtime_expression is not None:
+                # API-object initialization has precedence over the template
+                # fallback and must remain the baseline used to build events.
+                refreshed_equations.append(mapped_runtime_expression)
+            elif runtime_parameter.uid in runtime_equation_lookup:
                 refreshed_equations.append(runtime_equation_lookup[runtime_parameter.uid])
             else:
                 runtime_idx: int | None = self.uid2idx_event_params.get(runtime_parameter.uid, None)
@@ -1071,6 +1201,7 @@ class EmtProblemTemplate(ABC):
         self._runtime_mode_uids = selected_mode_uids
         self._rebuild_runtime_parameter_partition()
         self._finalize_order_and_maps()
+        self._rebuild_procedural_expression_compiler()
         self._build_runtime_param_vectors()
 
     def _initialize_runtime_parameter_values(self, tm: float, seed_values: Optional[Vec] = None) -> Vec:
@@ -1412,6 +1543,8 @@ class EmtProblemTemplate(ABC):
             else:
                 pass
 
+        self._refresh_runtime_fixed_values()
+
     def set_dx0(self, dx0: Vec) -> None:
         """
         Set the initial differential vector guess from an array.
@@ -1425,6 +1558,8 @@ class EmtProblemTemplate(ABC):
                 self.diff_init_guess[uid] = float(dx0[idx])
             else:
                 pass
+
+        self._refresh_runtime_fixed_values()
 
     def def_event_params_fn(
             self,
@@ -1452,20 +1587,34 @@ class EmtProblemTemplate(ABC):
         else:
             out: Vec = ev_param.copy()
 
-            i: int = 0
-            while i < n_continuous:
-                global_idx: int = self._runtime_continuous_slice.start + i
-                expression: Any = self._runtime_continuous_eqs[i]
+            if defer_unavailable_dependencies or not self._runtime_parameter_kernel_enabled:
+                # Construction-time evaluation must retain its dependency
+                # availability checks because explicit initialization has not
+                # necessarily populated every frozen binding yet.
+                i: int = 0
+                while i < n_continuous:
+                    global_idx: int = self._runtime_continuous_slice.start + i
+                    expression: Any = self._runtime_continuous_eqs[i]
 
-                if (
-                    defer_unavailable_dependencies
-                    and isinstance(expression, Expr)
-                    and not self._runtime_expression_dependencies_available(expression)
-                ):
+                    if defer_unavailable_dependencies and isinstance(expression, Expr):
+                        if self._runtime_expression_dependencies_available(expression):
+                            out[global_idx] = self._evaluate_runtime_expression(expression, out, tm)
+                        else:
+                            pass
+                    else:
+                        out[global_idx] = self._evaluate_runtime_expression(expression, out, tm)
+                    i += 1
+            else:
+                if self._runtime_parameter_kernel is None:
+                    self._build_runtime_parameter_kernel()
+                else:
+                    pass
+
+                runtime_parameter_kernel: Callable[[Vec, Vec, float], None] | None = self._runtime_parameter_kernel
+                if runtime_parameter_kernel is None:
                     pass
                 else:
-                    out[global_idx] = self._evaluate_runtime_expression(expression, out, tm)
-                i += 1
+                    runtime_parameter_kernel(out, self._runtime_fixed_values, float(tm))
 
             return out
 

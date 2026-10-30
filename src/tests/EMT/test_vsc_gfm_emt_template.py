@@ -6,6 +6,7 @@
 from typing import Dict, List
 
 import numpy as np
+import pytest
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
@@ -23,7 +24,7 @@ class GenericEmtProblem(EmtProblemTemplate):
     __slots__ = []
 
 
-def _build_pf_consistent_bindings(name: str) -> Dict[str, float]:
+def _build_pf_consistent_bindings(name: str, phi: float = 0.0) -> Dict[str, float]:
     """
     Build a self-consistent steady-state operating point at ``t = 0``.
 
@@ -48,7 +49,6 @@ def _build_pf_consistent_bindings(name: str) -> Dict[str, float]:
     Vpk: float = np.sqrt(2.0) * 1.0
     Ipk: float = np.sqrt(2.0) * 0.4
     phi_v: float = 0.0
-    phi: float = 0.0
     v_dc: float = 2.0
 
     two_pi_over_3: float = 2.0 * np.pi / 3.0
@@ -81,9 +81,7 @@ def _build_pf_consistent_bindings(name: str) -> Dict[str, float]:
     e_B: float = Epk_init * np.sin(theta - two_pi_over_3)
     e_C: float = Epk_init * np.sin(theta + two_pi_over_3)
 
-    # Average 3-ph active / reactive power for balanced sinusoidal steady
-    # state. The runtime equations divide abc instantaneous sums by 3, so
-    # ``Pe = -(1/2)·Vpk·Ipk·cos(phi)`` and ``Qe = +(1/2)·Vpk·Ipk·sin(phi)``.
+    # Total three-phase active/reactive power on the system base.
     Pe: float = -0.5 * Vpk * Ipk * np.cos(phi)
     Qe: float = 0.5 * Vpk * Ipk * np.sin(phi)
 
@@ -101,7 +99,7 @@ def _build_pf_consistent_bindings(name: str) -> Dict[str, float]:
         "e_C": e_C,
         "Pe": Pe,
         "Qe": Qe,
-        "i_dc": -Pe / v_dc,
+        "i_dc": Pe / v_dc,
         "omega": 1.0,
         "Epk": Epk_init,
         "omega_base": omega_base,
@@ -166,7 +164,7 @@ def test_vsc_gfm_emt_template_exposes_expected_structure() -> None:
 def test_vsc_gfm_emt_template_can_be_loaded_into_generic_problem() -> None:
     """
     Verify the template plugs into the generic EMT problem template
-    without errors and exposes the expected runtime parameters.
+    and keeps static API values separate from runtime parameters.
 
     :return: None.
     """
@@ -181,11 +179,15 @@ def test_vsc_gfm_emt_template_can_be_loaded_into_generic_problem() -> None:
     )
     runtime_parameter_names = [var.name for var in problem.get_variable_parameters()]
 
-    for expected in ["omega_base", "R_s", "X_s", "Kdp", "Kdq"]:
+    for expected in ["Kdp", "Kdq"]:
         assert expected in runtime_parameter_names
+    for expected in ["omega_base", "R_s", "X_s"]:
+        assert expected in [var.name for var in model.parameters]
+        assert expected not in runtime_parameter_names
 
 
-def test_vsc_gfm_emt_template_init_residual_is_small() -> None:
+@pytest.mark.parametrize("current_angle", [-0.4, 0.0, 0.4])
+def test_vsc_gfm_emt_template_init_residual_is_small(current_angle) -> None:
     """
     Substitute a PF-consistent steady-state operating point into every
     variable of the template and check that the residual of every
@@ -196,7 +198,7 @@ def test_vsc_gfm_emt_template_init_residual_is_small() -> None:
     vf: VarFactory = VarFactory()
     templ = get_gfm_emt_template(vf=vf, name="G1")
     model = templ.block.children[0]
-    bindings: Dict[str, float] = _build_pf_consistent_bindings(name="G1")
+    bindings: Dict[str, float] = _build_pf_consistent_bindings(name="G1", phi=current_angle)
 
     for idx, eq in enumerate(model.algebraic_eqs):
         residual: float = float(eq.eval(**bindings))
@@ -214,3 +216,15 @@ def test_vsc_gfm_emt_template_init_residual_is_small() -> None:
     d_theta_var = next(v for v in model.diff_vars if v.name == "d_theta")
     omega_base_val: float = bindings["omega_base"]
     assert abs(float(model.diff_init_eqs[d_theta_var].eval(**bindings)) - omega_base_val) < 1.0e-9
+
+
+    # Evaluate the model-owned runtime reference, then use it in the actual
+    # voltage-controller equation. No problem-level V_ref seed is needed.
+    voltage_ref = next(var for var in model.event_dict if var.name == "V_ref")
+    voltage_reference = float(model.event_dict[voltage_ref].eval(**bindings))
+    np.testing.assert_allclose(voltage_reference, bindings["Epk"], rtol=0.0, atol=1e-12)
+    assert abs(voltage_reference - bindings["Vpk_ref"]) > 1e-5
+    bindings["V_ref"] = voltage_reference
+    voltage_state_index = next(index for index, var in enumerate(model.state_vars) if var.name == "Epk")
+    actual_derivative = float(model.state_eqs[voltage_state_index].eval(**bindings))
+    np.testing.assert_allclose(actual_derivative, 0.0, rtol=0.0, atol=1e-12)

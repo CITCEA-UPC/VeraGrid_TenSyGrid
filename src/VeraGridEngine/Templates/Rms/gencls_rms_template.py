@@ -11,7 +11,7 @@ from enum import Enum
 
 from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
-from VeraGridEngine.enumerations import DeviceType
+from VeraGridEngine.enumerations import ParamPowerFlowReferenceType, DeviceType
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 from VeraGridEngine.Templates.Rms.genrou_exc_gov_rms_template import configure_tgov1_block
 from VeraGridEngine.Templates.Rms.genrou_exc_gov_rms_template import get_tgov1_rms_template
@@ -107,7 +107,9 @@ def get_gencls_rms_template(
     te_var: Var = vfactory.add_var("Te", shared_reference="te_reference")
     vf_var: Var = vfactory.add_var("Vf")
     block: Block = Block(name=name)
-    fn_var: Var = _add_parameter(block, vfactory, "fn", 60.0)
+    fn_var: Var = vfactory.add_var("fn")
+    block.parameters[fn_var] = vfactory.add_const(60.0)
+    block.api_obj_mapping[ParamPowerFlowReferenceType.freq] = fn_var
     d_var: Var = _add_parameter(block, vfactory, "D", 0.0)
     m_var: Var = _add_parameter(block, vfactory, "M", 6.0)
     ra_var: Var = _add_parameter(block, vfactory, "Ra", 0.0)
@@ -197,13 +199,30 @@ def configure_gencls_block(
     parameters: GenclsRmsParameters,
     vfactory: VarFactory,
 ) -> None:
-    """Apply one GENCLS parameter record to a machine block.
+    """Configure a classical machine with a dynamic or fixed rotor.
+
+    Positive acceleration time enables the swing equation and electrical-angle
+    integration. Exactly zero acceleration time selects a prescribed internal
+    voltage source: rotor angle and speed retain their initialized values with
+    identically zero derivatives. This is a structural choice, not division by
+    a small substitute inertia. The stator equations still calculate changing
+    electrical power and current during network disturbances.
+
+    Reconfiguration reconstructs both rotor equations, so switching back from
+    fixed-rotor to positive-inertia behavior restores the original dynamics.
 
     :param block: GENCLS machine block.
     :param parameters: Numerical parameter record.
     :param vfactory: Shared variable factory.
     :return: None.
+    :raises ValueError: Nonfinite settings, negative inertia or invalid machine base dynamics.
     """
+    if not all(math.isfinite(value) for value in (parameters.fn,parameters.d,parameters.m,parameters.ra,parameters.xd1)):
+        raise ValueError('Classical machine settings must be finite')
+    elif parameters.fn <= 0 or parameters.m < 0 or parameters.xd1 <= 0:
+        raise ValueError('Classical machine frequency/reactance must be positive and inertia nonnegative')
+    else:
+        pass
     names: tuple[str, ...] = ("fn", "D", "M", "Ra", "Xd_prime")
     values: tuple[float, ...] = (
         parameters.fn, parameters.d, parameters.m, parameters.ra, parameters.xd1,
@@ -211,11 +230,12 @@ def configure_gencls_block(
     parameter_name: str
     parameter_value: float
     for parameter_name, parameter_value in zip(names, values):
+        destination = block.parameters if parameter_name == "fn" else block.event_dict
         matches: list[Var] = list(
-            variable for variable in block.event_dict if variable.name == parameter_name
+            variable for variable in destination if variable.name == parameter_name
         )
         if len(matches) == 1:
-            block.event_dict[matches[0]] = vfactory.add_const(
+            destination[matches[0]] = vfactory.add_const(
                 value=parameter_value,
                 name=parameter_name,
             )
@@ -223,6 +243,17 @@ def configure_gencls_block(
             raise ValueError(
                 f"Expected one GENCLS parameter {parameter_name!r}; found {len(matches)}."
             )
+    # Rebuild the structural choice explicitly; numerical parameter updates
+    # alone cannot represent a prescribed rotor at exactly zero inertia.
+    if parameters.m == 0:
+        block.state_eqs = list((sym.Const(0.0),sym.Const(0.0)))
+    else:
+        symbols: dict[str,Var] = dict()
+        for registry in (block.init_eqs,block.parameters,block.event_dict):
+            for variable in registry:
+                symbols[variable.name] = variable
+        block.state_eqs = list((sym.Const(2*math.pi)*symbols['fn']*(symbols['omega']-sym.Const(1.0)),
+            (symbols['Tm']-symbols['Te']-symbols['D']*(symbols['omega']-sym.Const(1.0)))/symbols['M']))
 
 
 def get_complete_gencls_rms_template(

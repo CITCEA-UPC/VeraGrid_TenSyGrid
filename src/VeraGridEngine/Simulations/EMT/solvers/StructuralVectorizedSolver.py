@@ -22,7 +22,6 @@ from VeraGridEngine.Utils.Symbolic.diagnostic import (
     dense_lstsq_fallback,
     maybe_apply_backtracking,
     maybe_check_index1,
-    sparse_lsqr_fallback,
     with_newton_diagnostics,
 )
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
@@ -33,8 +32,14 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
     resolve_solver_boundary_updater,
 )
 from VeraGridEngine.Utils.emt_boundary_update_wrapper import BoundaryUpdateWrapper
-from VeraGridEngine.Utils.Symbolic.jit_compiler import EagerEquationCompiler, EquationCompiler, MatrixVectorizedCompiler, _compile_to_file
-from VeraGridEngine.Simulations.EMT.solvers.structural_compiled_solver import StructuralCompiledSparseFactorizationManager
+from VeraGridEngine.Utils.Symbolic.jit_compiler import (
+    EagerEquationCompiler, EquationCompiler, MatrixVectorizedCompiler,
+    _compile_to_file, _fingerprint_codegen_expr, _StructuralExpressionContext,
+)
+from VeraGridEngine.Simulations.EMT.solvers.structural_compiled_solver import (
+    StructuralCompiledSparseFactorizationManager,
+    _sparse_factor_manager_fallback,
+)
 from VeraGridEngine.Simulations.driver_template import DummySignal
 from VeraGridEngine.Utils.NumericalMethods.external_sparse_solver_interface import SparseLinearSolverBackendProvider
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
@@ -174,17 +179,6 @@ def _sparse_factor_manager_solve(manager: StructuralCompiledSparseFactorizationM
     return manager.solve(rhs)
 
 
-def _sparse_factor_manager_fallback(manager: StructuralCompiledSparseFactorizationManager, rhs: Vec) -> Vec:
-    """
-    Solve one sparse fallback least-squares system.
-
-    :param manager: Sparse factorization manager.
-    :param rhs: Right-hand side vector.
-    :return: Fallback solution vector.
-    """
-    return sparse_lsqr_fallback(manager.get_active_matrix(), rhs)
-
-
 def _sparse_factor_manager_matrix(manager: StructuralCompiledSparseFactorizationManager) -> csc_matrix:
     """
     Return the active sparse Jacobian matrix held by one factor manager.
@@ -297,117 +291,30 @@ Callable[..., Any]:
     :rtype: Callable[..., Any]
     """
     if signature is not None:
-        return nb.njit(signature, fastmath=fastmath, cache=cache)(py_func)
+        return nb.jit(signature, fastmath=fastmath, cache=cache)(py_func)
     else:
-        return nb.njit(fastmath=fastmath, cache=cache)(py_func)
-
-
-def _canonicalize_node(
-        node: Expr,
-        runtime_uids: Set[int],
-        param_uids: Set[int],
-        runtime_slots: Dict[int, str],
-        param_slots: Dict[int, str],
-        found_runtime_vars_ordered: List[Var],
-        seen_runtime_uids: Set[int]
-) -> str:
-    """
-    Canonicalizes an expression while distinguishing runtime variables from parameters.
-
-    Runtime variables get placeholders __RVAR_k__ and are also collected in order.
-    Parameters get placeholders __PARAM_k__ but are NOT collected into template vars.
-    """
-
-    if isinstance(node, Var):
-        target_uid: int = node.uid if node.base_var is None else node.base_var.uid
-
-        if target_uid in runtime_uids:
-            if target_uid not in runtime_slots:
-                runtime_slots[target_uid] = f"__RVAR_{len(runtime_slots)}__"
-
-            if target_uid not in seen_runtime_uids:
-                seen_runtime_uids.add(target_uid)
-                found_runtime_vars_ordered.append(node)
-
-            return runtime_slots[target_uid]
-
-        elif target_uid in param_uids:
-            if target_uid not in param_slots:
-                param_name: str = node.name
-                param_slots[target_uid] = f"__PARAM_{param_name}_{target_uid}__"
-
-            return param_slots[target_uid]
-
-        else:
-            raise RuntimeError(
-                f"Canonicalization found Var not classified as runtime or parameter: "
-                f"name={node.name}, target_uid={target_uid}"
-            )
-
-    elif isinstance(node, Const):
-        return f"{float(node.value):.6g}"
-
-    elif isinstance(node, BinOp):
-        left_str: str = _canonicalize_node(
-            node.left, runtime_uids, param_uids,
-            runtime_slots, param_slots,
-            found_runtime_vars_ordered, seen_runtime_uids
-        )
-        right_str: str = _canonicalize_node(
-            node.right, runtime_uids, param_uids,
-            runtime_slots, param_slots,
-            found_runtime_vars_ordered, seen_runtime_uids
-        )
-
-        if node.op in ['+', '*'] and left_str > right_str:
-            left_str, right_str = right_str, left_str
-
-        return f"({left_str}{node.op}{right_str})"
-
-    elif isinstance(node, UnOp):
-        op_str: str = _canonicalize_node(
-            node.operand, runtime_uids, param_uids,
-            runtime_slots, param_slots,
-            found_runtime_vars_ordered, seen_runtime_uids
-        )
-        return f"{node.op}({op_str})"
-
-    elif isinstance(node, Func):
-        arg_str: str = _canonicalize_node(
-            node.arg, runtime_uids, param_uids,
-            runtime_slots, param_slots,
-            found_runtime_vars_ordered, seen_runtime_uids
-        )
-        return f"{node.op}({arg_str})"
-
-    else:
-        return str(node)
+        return nb.jit(fastmath=fastmath, cache=cache)(py_func)
 
 
 def canonicalize_expression(
         expr: Expr,
         runtime_uids: Set[int],
-        param_uids: Set[int]
+        param_uids: Set[int],
 ) -> Tuple[str, List[Var]]:
     """
-    Returns a canonical structural signature and the ordered runtime variables only.
+    Return the shared structural signature and first-occurrence runtime gathers.
+
+    :param expr: Symbolic expression whose literal values must remain exact.
+    :param runtime_uids: UIDs belonging to the runtime state/algebraic vector.
+    :param param_uids: UIDs belonging to the shared parameter vector.
+    :return: Structural fingerprint and one gathered variable per runtime UID.
+    :raises RuntimeError: If a supported variable has no runtime/parameter classification.
     """
-
-    runtime_slots: Dict[int, str] = dict()
-    param_slots: Dict[int, str] = dict()
-    found_runtime_vars_ordered: List[Var] = list()
-    seen_runtime_uids: Set[int] = set()
-
-    canonical_str: str = _canonicalize_node(
-        node=expr,
-        runtime_uids=runtime_uids,
-        param_uids=param_uids,
-        runtime_slots=runtime_slots,
-        param_slots=param_slots,
-        found_runtime_vars_ordered=found_runtime_vars_ordered,
-        seen_runtime_uids=seen_runtime_uids
-    )
-    return canonical_str, found_runtime_vars_ordered
+    # Bind structural roles only for this expression. The existing compiler walk
+    # preserves exact constants; its code-generation maps are unused in this context.
+    context: _StructuralExpressionContext = _StructuralExpressionContext(runtime_uids, param_uids)
+    signature: str = _fingerprint_codegen_expr(expr, dict(), dict(), "", None, None, context)
+    return signature, context.runtime_variables
 
 
 class VectorizedKernelSpec:
@@ -758,7 +665,7 @@ class DirectResidualDispatcher:
 
         self.evaluate(states, params, history, d_history, h, history2, out)
 
-@nb.njit(cache=True, fastmath=True)
+@nb.jit(cache=True, fastmath=True)
 def _scatter_color_jvp_to_csc_data(
         jvp: np.ndarray, data: np.ndarray, color_ptr: np.ndarray,col_ptr: np.ndarray,
         row_idx: np.ndarray, data_idx: np.ndarray, color_id: int) -> None:
@@ -1188,7 +1095,7 @@ class SparseADJacobian:
 class StructuralVectorizedSolver:
     __slots__ = [
         'problem', 't0', 't_end', 'h', 'method', 'pred_method', 'dense_threshold', 'verbose', 'newton_max_iter',
-        'newton_tolerance',
+        '_newton_tolerance',
         'vec_jacobian', 'vec_flat_args', 'fused_residual', 'vec_kernels',
         '_state_vars', '_algebraic_vars', '_diff_vars', '_state_eqs', '_algebraic_eqs',
         'sorted_vars', '_n_state', '_n_vars', '_n_diff', 'uid2idx_vars',
@@ -1197,7 +1104,7 @@ class StructuralVectorizedSolver:
         '_predictor', '_runtime_param_count', '_static_parameter_buffer', '_full_parameter_buffer', '_residual_buffer',
         '_trial_state_buffer', '_trial_residual_buffer', '_trial_residual_evaluator',
         '_backend_build_stats', '_last_runtime_stats', '_sparse_solver_backend_provider', '_sparse_factorization_manager', '_cancel_checker', '_progress_signal',
-        '_diff_base_var_indices'
+        '_diff_base_var_indices', '_use_compiled_runtime_parameters'
     ]
 
     def __init__(self,
@@ -1215,7 +1122,8 @@ class StructuralVectorizedSolver:
                  newton_diag_config: NewtonDiagnosticsConfig | None = None,
                  progress_signal: DummySignal | None = None,
                  cancel_checker: Callable[[], bool] | None = None,
-                 newton_tolerance: float = 1e-6)-> None:
+                 newton_tolerance: float = 1.0e-6,
+                 use_compiled_runtime_parameters: bool = True)-> None:
         """
         :param problem: The DAE problem definition.
         :param t0: Initial time.
@@ -1225,14 +1133,18 @@ class StructuralVectorizedSolver:
         :param pred_method: DynamicIntegrationMethod used in the predictor step if method is explicit.
         :param dense_threshold: Threshold to switch between dense and sparse linear solvers.
         :param verbose: Print compilation and simulation timings.
-        :param newton_max_iter: Maximum Newton iterations per local EMT substep.
-        :param newton_tolerance: Infinity-norm residual threshold for Newton convergence.
+        :param newton_max_iter: Maximum Newton corrections per local EMT substep.
+            The final corrected candidate is checked without another correction.
+        :param newton_tolerance: Absolute infinity-norm tolerance for Newton residual convergence.
         :param sparse_solver_backend_provider: Sparse linear solver backend provider.
         :type sparse_solver_backend_provider: SparseLinearSolverBackendProvider | None
         :param progress_signal: Optional progress signal updated during the simulation loop.
         :type progress_signal: DummySignal | None
+        :param use_compiled_runtime_parameters: Activate the compiled runtime-parameter evaluator at
+            the start of simulate; False keeps the interpreted evaluator on a problem not enabled before.
         """
         self.problem = problem
+        self._use_compiled_runtime_parameters: bool = bool(use_compiled_runtime_parameters)
         self.t0 = t0
         self.t_end = t_end
         self.h = h
@@ -1241,9 +1153,9 @@ class StructuralVectorizedSolver:
         self.dense_threshold = dense_threshold
         self.verbose = verbose
         self.newton_max_iter: int = int(newton_max_iter)
-        if not np.isfinite(newton_tolerance) or newton_tolerance <= 0:
-            raise ValueError("newton_tolerance must be positive and finite")
-        self.newton_tolerance = float(newton_tolerance)
+        self._newton_tolerance: float = float(newton_tolerance)
+        if not np.isfinite(self._newton_tolerance) or self._newton_tolerance <= 0.0:
+            raise ValueError("newton_tolerance must be finite and greater than zero.")
         self._newton_diag_config = newton_diag_config or NewtonDiagnosticsConfig(
             compute_dense_cond=False,
             enable_fallback=False,
@@ -1273,7 +1185,7 @@ class StructuralVectorizedSolver:
         self.uid2idx_vars = {v.uid: i for i, v in enumerate(self.sorted_vars)}
         self._diff_base_var_indices = np.full(self._n_diff, -1, dtype=np.int64)
         for diff_idx, diff_var in enumerate(self._diff_vars):
-            base_var = getattr(diff_var, "base_var", None)
+            base_var = diff_var.base_var
             if base_var is not None:
                 self._diff_base_var_indices[diff_idx] = self.uid2idx_vars.get(base_var.uid, -1)
 
@@ -1285,7 +1197,7 @@ class StructuralVectorizedSolver:
         self.vectorized_ready = False
         self._last_sim_loop_time = 0.0
         self._vectorized_warmup_done = False
-        algebraic_predictor_derivatives = getattr(problem, "algebraic_predictor_derivatives", {})
+        algebraic_predictor_derivatives = problem.algebraic_predictor_derivatives if hasattr(problem, "algebraic_predictor_derivatives") else {}
         algebraic_derivative_by_index: Dict[int, float] = {}
         for var_uid, derivative in algebraic_predictor_derivatives.items():
             var_idx = self.uid2idx_vars.get(var_uid, None)
@@ -1529,8 +1441,17 @@ class StructuralVectorizedSolver:
         :param dx0: Initial derivative vector.
         :param params0: Initial event parameters.
         :param boundary_updater: Optional override for the problem boundary updater.
-        :return: Time vector and state trajectory matrix.
+        :return: Matching completed macro prefixes for time, state and derivative,
+                 followed by initialization and convergence flags.
         """
+
+        # Problem construction, initialization and event-group selection are complete
+        # here. Activate the compiled runtime-parameter evaluator before the boundary
+        # updater reset evaluates the runtime parameters, as StructuralCompiledSolver does.
+        if self._use_compiled_runtime_parameters:
+            self.problem.enable_compiled_runtime_parameter_evaluator()
+        else:
+            pass
 
         if x0 is None:
             x0 = self.problem.get_x0()
@@ -1561,8 +1482,31 @@ class StructuralVectorizedSolver:
                              boundary_updater: EmtBoundaryUpdateProtocol | None,
                              verbose: bool,
                              dense_threshold: int)-> Tuple[Vec, Mat, Mat, bool, bool]:
-        if not self.vectorized_ready:
-            self.auto_detect_vectorization(method)
+        """Integrate accepted local steps and publish completed macro samples.
+
+        :param t0: Initial simulation time.
+        :param t_end: Requested simulation horizon.
+        :param h: Requested macro time step.
+        :param x0: Initial state and algebraic vector.
+        :param dx0: Initial differential vector.
+        :param params0: Initial runtime parameters.
+        :param method: Implicit integration scheme.
+        :param boundary_updater: Optional transactional boundary provider.
+        :param verbose: Whether to print integration progress.
+        :param dense_threshold: Largest system using dense factorization.
+        :return: Completed time/state/derivative prefixes and solver status flags.
+        """
+        bdf2_startup_pending: bool = method == DynamicIntegrationMethod.DaeBDF2
+        prepared_method: DynamicIntegrationMethod = (
+            DynamicIntegrationMethod.DaeBackEuler if bdf2_startup_pending else method
+        )
+        method_transition_s: float = 0.0
+        # Rebuild the complete startup backend on every fresh BDF2 call, so no
+        # accepted history or factorization leaks from an earlier simulation.
+        if bdf2_startup_pending or not self.vectorized_ready:
+            self.auto_detect_vectorization(prepared_method)
+        else:
+            pass
 
         steps: int = int(np.ceil((t_end - t0) / h))
         t: Vec = t0 + h * np.arange(steps + 1, dtype=np.float64)
@@ -1577,6 +1521,7 @@ class StructuralVectorizedSolver:
         x_prev: Vec = x0.copy()
         dx_prev: Vec = dx0.copy()
         x_prev2: Vec = x0.copy()
+        base_slopes: Vec = np.zeros(x_prev.size if bdf2_startup_pending else 0, dtype=np.float64)
         x_iter: Vec = x0.copy()
         res_global: Vec = self._residual_buffer
         trial_state: Vec = self._trial_state_buffer
@@ -1658,7 +1603,9 @@ class StructuralVectorizedSolver:
             history2=x_prev2
         )
 
-        t_start_loop = time.perf_counter()
+        # Only completed macro rows are published after a local rejection.
+        completed_samples: int = 1
+        t_start_loop: float = time.perf_counter()
         total_newton_iterations: int = 0
         jacobian_evaluation_count: int = 0
         aligned_substep_count: int = 0
@@ -1719,6 +1666,21 @@ class StructuralVectorizedSolver:
 
                 h_eff: float = float(t_curr - t_local_prev)
 
+                effective_method: DynamicIntegrationMethod = (
+                    DynamicIntegrationMethod.DaeBackEuler if bdf2_startup_pending else method
+                )
+                if prepared_method != effective_method:
+                    # Switch all residual/Jacobian/layout/factor owners together;
+                    # a BE factorization cannot solve the BDF2 Jacobian.
+                    transition_start: float = time.perf_counter()
+                    self.auto_detect_vectorization(effective_method)
+                    residual_evaluator = build_residual_evaluator(self.fused_residual, self.vec_flat_args)
+                    sparse_factor_manager = self._sparse_factorization_manager
+                    prepared_method = effective_method
+                    method_transition_s += time.perf_counter() - transition_start
+                else:
+                    pass
+
                 # Update params in-place for the local substep end
                 runtime_params = self.problem.def_event_params_fn(ev_params, float(t_curr))
                 fill_full_parameter_buffer(runtime_params, static_params, full_params)
@@ -1765,10 +1727,15 @@ class StructuralVectorizedSolver:
                 substep_converged: bool = state_event_retry_time is not None
                 newton_iteration_count: int
                 if state_event_retry_time is None:
-                    newton_iteration_count = self.newton_max_iter
+                    newton_iteration_count = self.newton_max_iter + 1
                 else:
                     newton_iteration_count = 0
                 for k in range(newton_iteration_count):
+                    # Check in Python, outside fastmath, before assembling a candidate.
+                    if not np.all(np.isfinite(x_iter)):
+                        break
+                    else:
+                        pass
                     total_newton_iterations += 1
                     ctx: NewtonSolveContext | None = None
                     res_norm: float = evaluate_vectorized_residual(
@@ -1782,8 +1749,20 @@ class StructuralVectorizedSolver:
                         residual_out=res_global,
                     )
 
-                    if res_norm < self.newton_tolerance:
+                    # The compiled norm may hide NaN entries; inspect the full buffer.
+                    if not np.all(np.isfinite(res_global)):
+                        break
+                    else:
+                        pass
+
+                    if res_norm < self._newton_tolerance:
                         substep_converged = True
+                        break
+                    else:
+                        pass
+
+                    # Validate the last iterate even when the correction budget is exhausted.
+                    if k >= self.newton_max_iter:
                         break
                     else:
                         pass
@@ -1794,7 +1773,7 @@ class StructuralVectorizedSolver:
                             step_idx=int(i),
                             newton_iter=int(k),
                             phase="jit_vec",
-                            method=str(method),
+                            method=str(effective_method),
                         )
                         ctx.res_norm_inf = res_norm
                     else:
@@ -1854,7 +1833,7 @@ class StructuralVectorizedSolver:
                             assert sparse_factor_manager is not None
                             delta = sparse_factor_manager.solve(-res_global)
 
-                    max_step_inf = getattr(diag_cfg, "max_newton_step_inf", None)
+                    max_step_inf = diag_cfg.max_newton_step_inf
                     if max_step_inf is not None and max_step_inf > 0.0:
                         step_inf = float(np.max(np.abs(delta))) if delta.size > 0 else 0.0
                         if step_inf > max_step_inf:
@@ -1888,20 +1867,54 @@ class StructuralVectorizedSolver:
                     converged = False
                     if i == 0 and is_first_local_step:
                         well_initialized = False
+                    else:
+                        pass
+                else:
+                    pass
 
                 if state_event_retry_time is None:
                     state_event_retry_time = resolve_solver_boundary_step(
                         boundary_updater=boundary_updater,
                         accepted=substep_converged,
                         params=full_params,
+                        committed_time=float(t_curr),
+                        committed_state=x_iter,
                     )
+                else:
+                    pass
+
+                # Resolve rejection once, then stop before any accepted history changes.
+                if not substep_converged:
+                    break
+                else:
+                    pass
+
+                if substep_converged and state_event_retry_time is None:
+                    # A post-acceptance native sample may publish new held
+                    # outputs. Retain them for the next aligned sub-step.
+                    ev_params[:] = full_params[:len(ev_params)]
                 else:
                     pass
 
                 if state_event_retry_time is not None:
                     x_iter[:] = x_prev
                 else:
-                    if method == DynamicIntegrationMethod.DaeTrapezoidal:
+                    if method == DynamicIntegrationMethod.DaeBDF2:
+                        # Keep runtime slopes separate from canonical derivative
+                        # slots, and calculate them before rotating state history.
+                        if bdf2_startup_pending:
+                            base_slopes[:] = (x_iter - x_prev) / h_eff
+                        else:
+                            base_slopes[:] = (1.5 * x_iter - 2.0 * x_prev + 0.5 * x_prev2) / h_eff
+                        diff_idx: int
+                        base_idx: int
+                        for diff_idx, base_idx in enumerate(self._diff_base_var_indices):
+                            if base_idx >= 0:
+                                dx_prev[diff_idx] = base_slopes[base_idx]
+                            else:
+                                pass
+                        bdf2_startup_pending = False
+                    elif method == DynamicIntegrationMethod.DaeTrapezoidal:
                         if self._n_diff == 0:
                             dx_prev[:self._n_state] = (
                                     (2.0 / h_eff) * (x_iter[:self._n_state] - x_prev[:self._n_state])
@@ -1913,22 +1926,12 @@ class StructuralVectorizedSolver:
                                     dx_prev[diff_idx] = (2.0 / h_eff) * (x_iter[base_idx] - x_prev[base_idx]) - dx_prev[diff_idx]
                                 else:
                                     pass
-                    elif method == DynamicIntegrationMethod.DaeBDF2:
-                        x_prev2[:] = x_prev
-                        dx_prev[:self._n_state] = (
-                                                          1.5 * x_iter[:self._n_state]
-                                                          - 2.0 * x_prev[:self._n_state]
-                                                          + 0.5 * x_prev2[:self._n_state]
-                                                  ) / h_eff
                     else:
                         dx_prev[:self._n_state] = (
                                                           x_iter[:self._n_state] - x_prev[:self._n_state]
                                                   ) / h_eff
 
-                    if method != DynamicIntegrationMethod.DaeBDF2:
-                        x_prev2[:] = x_prev
-                    else:
-                        pass
+                    x_prev2[:] = x_prev
 
                     x_prev[:] = x_iter
                     t_local_prev = t_curr
@@ -1936,16 +1939,24 @@ class StructuralVectorizedSolver:
 
 
 
+            # A partially accepted macro interval is not an output sample.
+            if not converged:
+                break
+            else:
+                pass
+
             y[i + 1] = x_prev
             dy[i + 1] = dx_prev
+            completed_samples += 1
 
-        self._last_sim_loop_time = time.perf_counter() - t_start_loop
+        self._last_sim_loop_time = time.perf_counter() - t_start_loop - method_transition_s
         self._last_runtime_stats = dict(
             sim_loop_s=self._last_sim_loop_time,
+            method_transition_s=method_transition_s,
             total_newton_iterations=float(total_newton_iterations),
             jacobian_evaluations=float(jacobian_evaluation_count),
             aligned_substeps=float(aligned_substep_count),
-            macro_steps=float(steps),
+            macro_steps=float(completed_samples - 1),
         )
 
         if verbose:
@@ -1953,7 +1964,7 @@ class StructuralVectorizedSolver:
         else:
             pass
 
-        return t, y, dy, well_initialized, converged
+        return t[:completed_samples].copy(), y[:completed_samples, :].copy(), dy[:completed_samples, :].copy(), well_initialized, converged
 
     def get_backend_build_stats(self) -> Dict[str, float]:
         """

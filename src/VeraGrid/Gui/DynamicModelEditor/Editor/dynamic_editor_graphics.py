@@ -7,15 +7,15 @@ from __future__ import annotations
 
 import math
 import uuid
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, TypeAlias
 
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QBrush, QPainter, QPainterPath, QPen, QAction, QPolygonF
 from PySide6.QtWidgets import QAbstractGraphicsShapeItem, QApplication, QColorDialog, QGraphicsEllipseItem, \
     QGraphicsItem, \
-    QGraphicsPathItem, QGraphicsPolygonItem, QGraphicsRectItem, QGraphicsScene, QGraphicsTextItem, \
-    QGraphicsView, QMenu, QWidget
+    QGraphicsPathItem, QGraphicsPolygonItem, QGraphicsRectItem, QGraphicsScene, \
+    QGraphicsTextItem, QGraphicsView, QMenu, QWidget
 
 from PySide6.QtCore import Signal
 
@@ -23,7 +23,17 @@ import VeraGrid.Gui.gui_functions as gf
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Devices.Diagrams.block_diagram import BlockDiagram, BlockDiagramNode
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
-from VeraGridEngine.enumerations import BlockType
+from VeraGridEngine.enumerations import (
+    BlockType,
+    DerivativeInactiveBehavior,
+    DerivativeOrder,
+    DerivativeScalingMode,
+    IntegratorBoundSource,
+    IntegratorHoldMode,
+    IntegratorResetMode,
+    IntegratorSaturationMode,
+    IntegratorScalingMode,
+)
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Var, Expr, BinOp, UnOp
 from VeraGridEngine.enumerations import DynamicSimulationMode
@@ -31,6 +41,7 @@ if TYPE_CHECKING:
     from VeraGrid.Gui.DynamicModelEditor.Editor.dynamic_block_editor import DynamicBlockEditorGUI
 else:
     pass
+
 
 
 def _build_port_tooltip(direction: str, index: int, variable_name: str) -> str:
@@ -169,13 +180,40 @@ def duplicate_paired_item(original: PairedItem) -> PairedItem | None:
 
     # The editor normalizes the symbolic variable object and migrates any
     # VarFactory propagation edges owned by a legacy output identity.
-    editor._bind_signal_pair_items(
-        signal_input_item=signal_input_item,
-        signal_output_items=list((new_item,)),
-    )
+
+    # Not necessary at all
+    ################################################################################3
+    # editor._bind_signal_pair_items(
+    #     signal_input_item=signal_input_item,
+    #     signal_output_items=list((new_item,)),
+    # )
+
+    #####################################################################################
+    # we only need this:
+
+    signal_input_item.set_paired_item(new_item)
+    new_item.set_paired_item(signal_input_item)
+
+
 
     editor.mark_unapplied_changes()
     return new_item
+
+def bind_signal_pair_items(
+        signal_input_item: PairedItem,
+        signal_output_items: List[PairedItem],
+) -> None:
+    """
+    Bind one From tag and its To tags to one authoritative signal variable.
+
+    :param signal_input_item: From/input tag that owns the canonical variable.
+    :param signal_output_items: To/output tags exposing the same signal.
+    :return: None.
+    """
+
+    for signal_output_item in signal_output_items:
+        signal_input_item.set_paired_item(signal_output_item)
+        signal_output_item.set_paired_item(signal_input_item)
 
 
 def truncate_port_label(text: str, max_chars: int) -> str:
@@ -665,8 +703,6 @@ class EditorGraphicsCommonFeatures:
     PARAMETER_EDITABLE_ROLE: int = int(QtCore.Qt.ItemDataRole.UserRole) + 501
     LIBRARY_SEARCH_TEXT_ROLE: int = int(QtCore.Qt.ItemDataRole.UserRole) + 502
     BLOCK_SEARCH_ROLE: int = int(QtCore.Qt.ItemDataRole.UserRole) + 503
-    MODAL_TEMPLATE_KIND_ATTR: str = "_modal_template_kind"
-    MODAL_TEMPLATE_CONFIG_ATTR: str = "_modal_template_config"
 
 
 class BlockPositionChangedCallback:
@@ -854,7 +890,6 @@ class PortItem(QAbstractGraphicsShapeItem):
         "index",
         "total",
         "base_var",
-        "_validation_highlighted",
     )
 
     _CORNER_RADIUS: float = 2.0
@@ -890,7 +925,6 @@ class PortItem(QAbstractGraphicsShapeItem):
         self.index: int = index
         self.total: int = total
         self.base_var: Var | None = None
-        self._validation_highlighted: bool = False
 
         self.setPos(0, 0)
 
@@ -1008,21 +1042,6 @@ class PortItem(QAbstractGraphicsShapeItem):
             self.setVisible(False)
         else:
             self.setVisible(True)
-
-    def set_validation_highlighted(self, val: bool) -> None:
-        """
-        Toggle the validation overlay state for this port.
-
-        :param val: Whether the port should be shown as a validation issue.
-        :return: None.
-        """
-        self._validation_highlighted = val
-
-        if self._validation_highlighted:
-            self.setBrush(QBrush(EditorGraphicsCommonFeatures.VALIDATION_HICHLIGHTED_BORDER))
-        else:
-            self.setBrush(self.brush())
-
 
 class BranchingItem(QGraphicsEllipseItem):
     """Movable junction used to branch one visible dynamic connection."""
@@ -3480,6 +3499,614 @@ class ProtectedConnectionBlockItem(BlockItem):
             return None
 
 
+class IntegratorItem(BlockItem):
+    """Dynamic graphics item for every configurable integrator structure."""
+
+    __slots__ = (
+        "_block_type",
+        "_scaling_mode",
+        "_hold_mode",
+        "_reset_mode",
+        "_saturation_mode",
+        "_bound_source",
+        "_scale_bounds_by_gain",
+    )
+
+    WIDTH: float = 62.0
+    MINIMUM_HEIGHT: float = 46.0
+    PORT_ROW_HEIGHT: float = 14.0
+    RADIUS: float = 4.0
+
+    def __init__(
+            self,
+            editor: DynamicBlockEditorGUI,
+            var_factory: VarFactory,
+            subsys: Block,
+            api_object: ALL_DEV_TYPES,
+            mode: DynamicSimulationMode,
+            block_type: BlockType,
+            name: str,
+            position_changed_callback: BlockPositionChangedCallback | None = None,
+    ) -> None:
+        """Create one integrator whose drawing follows its symbolic structure.
+
+        :param editor: Owning dynamic editor.
+        :param var_factory: Factory that owns symbolic variables.
+        :param subsys: Configurable integrator block represented by the item.
+        :param api_object: Static network device associated with the model.
+        :param mode: Dynamic simulation mode.
+        :param block_type: Integrator builder type, including startup freeze.
+        :param name: Persistent block name.
+        :param position_changed_callback: Callback used to persist movement.
+        :return: None.
+        """
+        super().__init__(
+            var_factory=var_factory,
+            name=name,
+            editor=editor,
+            mode=mode,
+            api_object=api_object,
+            position_changed_callback=position_changed_callback,
+        )
+        self._block_type: BlockType = block_type
+        self._scaling_mode: IntegratorScalingMode = IntegratorScalingMode.UNIT
+        self._hold_mode: IntegratorHoldMode = IntegratorHoldMode.NONE
+        self._reset_mode: IntegratorResetMode = IntegratorResetMode.NONE
+        self._saturation_mode: IntegratorSaturationMode = IntegratorSaturationMode.NONE
+        self._bound_source: IntegratorBoundSource = IntegratorBoundSource.PARAMETER
+        self._scale_bounds_by_gain: bool = False
+        self.subsys = subsys
+        self.name_item.setVisible(False)
+        self.refresh_integrator_structure()
+        self.build_item()
+
+    def refresh_integrator_structure(self) -> None:
+        """Recover visual modes exclusively from persisted template metadata.
+
+        :return: None.
+        """
+        if self.subsys is None:
+            return
+        else:
+            block_model: Block = self.subsys
+
+        # Defaults make missing metadata fail predictably without inspecting
+        # any mutable symbolic variable names.
+        self._scaling_mode = IntegratorScalingMode.UNIT
+        self._hold_mode = IntegratorHoldMode.NONE
+        self._reset_mode = IntegratorResetMode.NONE
+        self._saturation_mode = IntegratorSaturationMode.NONE
+        self._bound_source = IntegratorBoundSource.PARAMETER
+        self._scale_bounds_by_gain = False
+
+        # The persisted modal configuration is the only source of truth for
+        # the selections made in General Structure.
+        stored_configuration: object = block_model.modal_template_config
+        if isinstance(stored_configuration, dict):
+            stored_scaling: object = stored_configuration.get("scaling", None)
+            stored_hold: object = stored_configuration.get("hold_input", None)
+            stored_reset: object = stored_configuration.get("reset", None)
+            stored_saturation: object = stored_configuration.get("output_saturation", None)
+            stored_bound_source: object = stored_configuration.get("bound_source", None)
+            stored_bound_gain: object = stored_configuration.get("scale_bounds_by_gain", None)
+
+            if isinstance(stored_scaling, str) and stored_scaling in IntegratorScalingMode.__members__:
+                self._scaling_mode = IntegratorScalingMode[stored_scaling]
+            else:
+                pass
+            if isinstance(stored_hold, str) and stored_hold in IntegratorHoldMode.__members__:
+                self._hold_mode = IntegratorHoldMode[stored_hold]
+            else:
+                pass
+            if isinstance(stored_reset, str) and stored_reset in IntegratorResetMode.__members__:
+                self._reset_mode = IntegratorResetMode[stored_reset]
+            else:
+                pass
+            if (
+                    isinstance(stored_saturation, str)
+                    and stored_saturation in IntegratorSaturationMode.__members__
+            ):
+                self._saturation_mode = IntegratorSaturationMode[stored_saturation]
+            else:
+                pass
+            if (
+                    isinstance(stored_bound_source, str)
+                    and stored_bound_source in IntegratorBoundSource.__members__
+            ):
+                self._bound_source = IntegratorBoundSource[stored_bound_source]
+            else:
+                pass
+            if isinstance(stored_bound_gain, bool):
+                self._scale_bounds_by_gain = stored_bound_gain
+            else:
+                pass
+        else:
+            pass
+
+    def get_scaling_mode(self) -> IntegratorScalingMode:
+        """Return the scaling mode currently represented by the drawing.
+
+        :return: Recovered integrator scaling mode.
+        """
+        return self._scaling_mode
+
+    def get_hold_mode(self) -> IntegratorHoldMode:
+        """Return the hold mode currently represented by the drawing.
+
+        :return: Recovered integrator hold mode.
+        """
+        return self._hold_mode
+
+    def get_reset_mode(self) -> IntegratorResetMode:
+        """Return the reset mode currently represented by the drawing.
+
+        :return: Recovered integrator reset mode.
+        """
+        return self._reset_mode
+
+    def get_saturation_mode(self) -> IntegratorSaturationMode:
+        """Return the saturation mode currently represented by the drawing.
+
+        :return: Recovered integrator saturation mode.
+        """
+        return self._saturation_mode
+
+    def get_minimum_block_size(self) -> tuple[float, float]:
+        """Compute compact dimensions while keeping every input port distinct.
+
+        :return: Width and height required by the current structure.
+        """
+        input_count: int = max(len(self.inputs), 1)
+        height: float = max(
+            self.MINIMUM_HEIGHT,
+            18.0 + float(input_count) * self.PORT_ROW_HEIGHT,
+        )
+        return self.WIDTH, height
+
+    def _draw_input_annotations(self, painter: QPainter) -> None:
+        """Label optional control and bound ports inside the block body.
+
+        :param painter: Painter supplied by Qt.
+        :return: None.
+        """
+        font: QtGui.QFont = painter.font()
+        font.setPointSizeF(6.4)
+        painter.setFont(font)
+        painter.setPen(QPen(self.editor.colors_palet.BLOCK_TITLE, 1.0))
+        input_index: int = 1
+
+        # Port order is part of the builder contract. Deriving annotations from
+        # the modes keeps them stable even after a connection substitutes the
+        # original symbolic variable name with an upstream signal name.
+        if self._hold_mode == IntegratorHoldMode.SIGNAL:
+            self._draw_port_annotation(painter=painter, input_index=input_index, text="H")
+            input_index += 1
+        else:
+            pass
+
+        if self._reset_mode == IntegratorResetMode.INITIAL_STATE:
+            self._draw_port_annotation(painter=painter, input_index=input_index, text="R")
+            input_index += 1
+        elif self._reset_mode == IntegratorResetMode.SIGNAL:
+            self._draw_port_annotation(painter=painter, input_index=input_index, text="xR")
+            input_index += 1
+            self._draw_port_annotation(painter=painter, input_index=input_index, text="R")
+            input_index += 1
+        else:
+            pass
+
+        if self._bound_source == IntegratorBoundSource.SIGNAL:
+            if self._saturation_mode == IntegratorSaturationMode.LOWER:
+                self._draw_port_annotation(painter=painter, input_index=input_index, text="L")
+            elif self._saturation_mode == IntegratorSaturationMode.UPPER:
+                self._draw_port_annotation(painter=painter, input_index=input_index, text="U")
+            elif self._saturation_mode == IntegratorSaturationMode.BOTH:
+                self._draw_port_annotation(painter=painter, input_index=input_index, text="L")
+                input_index += 1
+                self._draw_port_annotation(painter=painter, input_index=input_index, text="U")
+            elif self._saturation_mode == IntegratorSaturationMode.SYMMETRIC:
+                self._draw_port_annotation(painter=painter, input_index=input_index, text="+/-L")
+            else:
+                pass
+        else:
+            pass
+
+    def _draw_port_annotation(self, painter: QPainter, input_index: int, text: str) -> None:
+        """Draw one semantic annotation beside an existing input port.
+
+        :param painter: Painter supplied by Qt.
+        :param input_index: Zero-based input-port position.
+        :param text: Compact semantic label rendered inside the body.
+        :return: None.
+        """
+        if input_index < len(self.inputs):
+            port_y: float = self.inputs[input_index].pos().y()
+            painter.drawText(QtCore.QPointF(7.0, port_y + 2.5), text)
+        else:
+            pass
+
+    def _draw_integrator_symbol(self, painter: QPainter, body_rect: QtCore.QRectF) -> None:
+        """Draw the transfer function and active structural modifiers.
+
+        :param painter: Painter supplied by Qt.
+        :param body_rect: Interior body rectangle.
+        :return: None.
+        """
+        symbol_color: QColor = self.editor.colors_palet.BLOCK_TITLE
+        painter.setPen(QPen(symbol_color, 1.2))
+
+        # Express the complete continuous-time operator as a fraction. This is
+        # immediately readable as a transfer function and avoids displaying
+        # ``1/T`` as though it were an annotation unrelated to integration.
+        has_saturation: bool = self._saturation_mode != IntegratorSaturationMode.NONE
+        if has_saturation:
+            fraction_center_x: float = body_rect.center().x() - 8.0
+        else:
+            fraction_center_x = body_rect.center().x()
+
+        transfer_font: QtGui.QFont = painter.font()
+        transfer_font.setPointSizeF(10.0)
+        painter.setFont(transfer_font)
+        numerator: str
+        denominator: str
+        if self._scaling_mode == IntegratorScalingMode.GAIN:
+            numerator = "K"
+            denominator = "s"
+        elif self._scaling_mode == IntegratorScalingMode.TIME_CONSTANT:
+            numerator = "1"
+            denominator = "Ts"
+        else:
+            numerator = "1"
+            denominator = "s"
+
+        fraction_width: float = 20.0
+        fraction_left: float = fraction_center_x - fraction_width / 2.0
+        fraction_top: float = body_rect.center().y() - 16.0
+        numerator_rect: QtCore.QRectF = QtCore.QRectF(
+            fraction_left,
+            fraction_top,
+            fraction_width,
+            14.0,
+        )
+        denominator_rect: QtCore.QRectF = QtCore.QRectF(
+            fraction_left,
+            fraction_top + 16.0,
+            fraction_width,
+            14.0,
+        )
+        painter.drawText(numerator_rect, Qt.AlignmentFlag.AlignCenter, numerator)
+        painter.drawLine(
+            QtCore.QPointF(fraction_left + 2.0, fraction_top + 15.0),
+            QtCore.QPointF(fraction_left + fraction_width - 2.0, fraction_top + 15.0),
+        )
+        painter.drawText(denominator_rect, Qt.AlignmentFlag.AlignCenter, denominator)
+
+        modifier_font: QtGui.QFont = painter.font()
+        modifier_font.setPointSizeF(6.5)
+        painter.setFont(modifier_font)
+
+        if self._block_type == BlockType.STARTUP_FREEZE_INTEGRATOR:
+            painter.drawText(QtCore.QPointF(body_rect.right() - 15.0, body_rect.bottom() - 6.0), "t0")
+        else:
+            pass
+
+        # Draw saturation as one continuous characteristic beside the transfer
+        # function. Upper and lower modes flatten only the configured end,
+        # while two-sided modes flatten both ends.
+        curve_left: float = body_rect.right() - 22.0
+        curve_right: float = body_rect.right() - 5.0
+        curve_middle: float = (curve_left + curve_right) / 2.0
+        upper_y: float = body_rect.center().y() - 10.0
+        lower_y: float = body_rect.center().y() + 10.0
+        if self._saturation_mode == IntegratorSaturationMode.UPPER:
+            painter.drawLine(
+                QtCore.QPointF(curve_left, lower_y),
+                QtCore.QPointF(curve_middle, upper_y),
+            )
+            painter.drawLine(
+                QtCore.QPointF(curve_middle, upper_y),
+                QtCore.QPointF(curve_right, upper_y),
+            )
+        elif self._saturation_mode == IntegratorSaturationMode.LOWER:
+            painter.drawLine(
+                QtCore.QPointF(curve_left, lower_y),
+                QtCore.QPointF(curve_middle, lower_y),
+            )
+            painter.drawLine(
+                QtCore.QPointF(curve_middle, lower_y),
+                QtCore.QPointF(curve_right, upper_y),
+            )
+        elif self._saturation_mode in (
+                IntegratorSaturationMode.BOTH,
+                IntegratorSaturationMode.SYMMETRIC,
+        ):
+            painter.drawLine(
+                QtCore.QPointF(curve_left, lower_y),
+                QtCore.QPointF(curve_middle - 3.0, lower_y),
+            )
+            painter.drawLine(
+                QtCore.QPointF(curve_middle - 3.0, lower_y),
+                QtCore.QPointF(curve_middle + 3.0, upper_y),
+            )
+            painter.drawLine(
+                QtCore.QPointF(curve_middle + 3.0, upper_y),
+                QtCore.QPointF(curve_right, upper_y),
+            )
+        else:
+            pass
+        if self._saturation_mode == IntegratorSaturationMode.SYMMETRIC:
+            painter.drawText(QtCore.QPointF(curve_left - 1.0, body_rect.top() + 7.0), "+/-")
+        else:
+            pass
+        if self._scale_bounds_by_gain and self._saturation_mode != IntegratorSaturationMode.NONE:
+            painter.drawText(QtCore.QPointF(curve_left, body_rect.bottom() - 2.0), "K")
+        else:
+            pass
+
+    def paint(
+            self,
+            painter: QPainter,
+            option: QtWidgets.QStyleOptionGraphicsItem,
+            widget: Optional[QWidget] = None,
+    ) -> None:
+        """Paint the dynamic integrator body and its active modifiers.
+
+        :param painter: Painter supplied by Qt.
+        :param option: Qt style options for the item.
+        :param widget: Optional target widget.
+        :return: None.
+        """
+        rect: QtCore.QRectF = self.rect()
+        body_rect: QtCore.QRectF = rect.adjusted(2.0, 2.0, -2.0, -2.0)
+        if self._validation_highlighted:
+            border_color: QColor = EditorGraphicsCommonFeatures.VALIDATION_HICHLIGHTED_BORDER
+        else:
+            border_color = (
+                EditorGraphicsCommonFeatures.BLOCK_BORDER_SELECTED
+                if self.isSelected()
+                else self.pen().color()
+            )
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        painter.setBrush(self.brush())
+        painter.setPen(QPen(border_color, 1.6))
+        painter.drawRoundedRect(body_rect, self.RADIUS, self.RADIUS)
+        self._draw_integrator_symbol(painter=painter, body_rect=body_rect)
+        self._draw_input_annotations(painter=painter)
+
+
+class DerivativeItem(BlockItem):
+    """Dynamic graphics item for every configurable filtered derivative."""
+
+    __slots__ = (
+        "_derivative_order",
+        "_scaling_mode",
+        "_inactive_behavior",
+    )
+
+    WIDTH: float = 82.0
+    HEIGHT: float = 48.0
+    RADIUS: float = 4.0
+
+    def __init__(
+            self,
+            editor: DynamicBlockEditorGUI,
+            var_factory: VarFactory,
+            subsys: Block,
+            api_object: ALL_DEV_TYPES,
+            mode: DynamicSimulationMode,
+            name: str,
+            position_changed_callback: BlockPositionChangedCallback | None = None,
+    ) -> None:
+        """Create one derivative whose drawing follows its symbolic structure.
+
+        :param editor: Owning dynamic editor.
+        :param var_factory: Factory that owns symbolic variables.
+        :param subsys: Configurable derivative block represented by the item.
+        :param api_object: Static network device associated with the model.
+        :param mode: Dynamic simulation mode.
+        :param name: Persistent block name.
+        :param position_changed_callback: Callback used to persist movement.
+        :return: None.
+        """
+        BlockItem.__init__(
+            self,
+            var_factory=var_factory,
+            name=name,
+            editor=editor,
+            mode=mode,
+            api_object=api_object,
+            position_changed_callback=position_changed_callback,
+        )
+        self._derivative_order: DerivativeOrder = DerivativeOrder.FIRST
+        self._scaling_mode: DerivativeScalingMode = DerivativeScalingMode.UNIT
+        self._inactive_behavior: DerivativeInactiveBehavior = DerivativeInactiveBehavior.STRICT
+        self.subsys = subsys
+        self.name_item.setVisible(False)
+        self.refresh_derivative_structure()
+        self.build_item()
+
+    def refresh_derivative_structure(self) -> None:
+        """Recover visual selections exclusively from persisted metadata.
+
+        :return: None.
+        """
+        if self.subsys is None:
+            return
+        else:
+            block_model: Block = self.subsys
+
+        # Defaults make missing metadata explicit without deriving choices
+        # from state counts, mode markers or symbolic variable names.
+        self._derivative_order = DerivativeOrder.FIRST
+        self._scaling_mode = DerivativeScalingMode.UNIT
+        self._inactive_behavior = DerivativeInactiveBehavior.STRICT
+
+        # The persisted modal configuration is the only source of truth for
+        # the selections made in General Structure.
+        stored_configuration: object = block_model.modal_template_config
+        if isinstance(stored_configuration, dict):
+            stored_order: object = stored_configuration.get("order", None)
+            stored_scaling: object = stored_configuration.get("scaling", None)
+            stored_inactive_behavior: object = stored_configuration.get("non_positive_time", None)
+            if isinstance(stored_order, str) and stored_order in DerivativeOrder.__members__:
+                self._derivative_order = DerivativeOrder[stored_order]
+            else:
+                pass
+            if isinstance(stored_scaling, str) and stored_scaling in DerivativeScalingMode.__members__:
+                self._scaling_mode = DerivativeScalingMode[stored_scaling]
+            else:
+                pass
+            if (
+                    isinstance(stored_inactive_behavior, str)
+                    and stored_inactive_behavior in DerivativeInactiveBehavior.__members__
+            ):
+                self._inactive_behavior = DerivativeInactiveBehavior[stored_inactive_behavior]
+            else:
+                pass
+        else:
+            pass
+
+    def get_derivative_order(self) -> DerivativeOrder:
+        """Return the derivative order represented by the drawing.
+
+        :return: First- or second-order derivative selection.
+        """
+        return self._derivative_order
+
+    def get_scaling_mode(self) -> DerivativeScalingMode:
+        """Return the numerator scaling represented by the drawing.
+
+        :return: Current derivative scaling mode.
+        """
+        return self._scaling_mode
+
+    def get_inactive_behavior(self) -> DerivativeInactiveBehavior:
+        """Return the non-positive-time behavior represented by the drawing.
+
+        :return: Current derivative inactive behavior.
+        """
+        return self._inactive_behavior
+
+    def get_minimum_block_size(self) -> tuple[float, float]:
+        """Return the compact fixed dimensions of the derivative symbol.
+
+        :return: Width and height of the derivative block.
+        """
+        return self.WIDTH, self.HEIGHT
+
+    def _get_transfer_function_text(self) -> tuple[str, str]:
+        """Build the numerator and denominator displayed on the canvas.
+
+        :return: Numerator and denominator text for the selected structure.
+        """
+        if self._derivative_order == DerivativeOrder.SECOND:
+            derivative_term: str = "s²"
+            denominator: str = "(1+Ts)²"
+        else:
+            derivative_term = "s"
+            denominator = "1+Ts"
+
+        if self._scaling_mode == DerivativeScalingMode.GAIN:
+            numerator: str = f"K{derivative_term}"
+        elif self._scaling_mode == DerivativeScalingMode.TIME_CONSTANT:
+            numerator = f"T{derivative_term}"
+        elif self._scaling_mode == DerivativeScalingMode.GAIN_TIME_CONSTANT:
+            numerator = f"KT{derivative_term}"
+        elif self._scaling_mode == DerivativeScalingMode.GAIN_DERIVATIVE_TIME:
+            numerator = f"KTd{derivative_term}"
+        else:
+            numerator = derivative_term
+        return numerator, denominator
+
+    def _draw_derivative_symbol(self, painter: QPainter, body_rect: QtCore.QRectF) -> None:
+        """Draw the selected transfer function and inactive-mode marker.
+
+        :param painter: Painter supplied by Qt.
+        :param body_rect: Interior body rectangle.
+        :return: None.
+        """
+        numerator: str
+        denominator: str
+        numerator, denominator = self._get_transfer_function_text()
+        painter.setPen(QPen(self.editor.colors_palet.BLOCK_TITLE, 1.2))
+        transfer_font: QtGui.QFont = painter.font()
+        transfer_font.setPointSizeF(8.5)
+        painter.setFont(transfer_font)
+
+        fraction_width: float = 52.0
+        fraction_left: float = body_rect.center().x() - fraction_width / 2.0
+        fraction_top: float = body_rect.center().y() - 16.0
+        numerator_rect: QtCore.QRectF = QtCore.QRectF(
+            fraction_left,
+            fraction_top,
+            fraction_width,
+            14.0,
+        )
+        denominator_rect: QtCore.QRectF = QtCore.QRectF(
+            fraction_left,
+            fraction_top + 16.0,
+            fraction_width,
+            14.0,
+        )
+        painter.drawText(numerator_rect, Qt.AlignmentFlag.AlignCenter, numerator)
+        painter.drawLine(
+            QtCore.QPointF(fraction_left + 2.0, fraction_top + 15.0),
+            QtCore.QPointF(fraction_left + fraction_width - 2.0, fraction_top + 15.0),
+        )
+        painter.drawText(denominator_rect, Qt.AlignmentFlag.AlignCenter, denominator)
+
+        marker_text: str
+        if self._inactive_behavior == DerivativeInactiveBehavior.ZERO_OUTPUT:
+            marker_text = "0"
+        elif self._inactive_behavior == DerivativeInactiveBehavior.BYPASS_INPUT:
+            marker_text = "B"
+        elif self._inactive_behavior == DerivativeInactiveBehavior.FALLBACK_TIME:
+            marker_text = "Tf"
+        else:
+            marker_text = ""
+        if len(marker_text) > 0:
+            marker_font: QtGui.QFont = painter.font()
+            marker_font.setPointSizeF(6.5)
+            painter.setFont(marker_font)
+            painter.drawText(
+                QtCore.QPointF(body_rect.right() - 15.0, body_rect.bottom() - 4.0),
+                marker_text,
+            )
+        else:
+            pass
+
+    def paint(
+            self,
+            painter: QPainter,
+            option: QtWidgets.QStyleOptionGraphicsItem,
+            widget: Optional[QWidget] = None,
+    ) -> None:
+        """Paint the dynamic derivative body and selected transfer function.
+
+        :param painter: Painter supplied by Qt.
+        :param option: Qt style options for the item.
+        :param widget: Optional target widget.
+        :return: None.
+        """
+        rect: QtCore.QRectF = self.rect()
+        body_rect: QtCore.QRectF = rect.adjusted(2.0, 2.0, -2.0, -2.0)
+        if self._validation_highlighted:
+            border_color: QColor = EditorGraphicsCommonFeatures.VALIDATION_HICHLIGHTED_BORDER
+        else:
+            border_color = (
+                EditorGraphicsCommonFeatures.BLOCK_BORDER_SELECTED
+                if self.isSelected()
+                else self.pen().color()
+            )
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        painter.setBrush(self.brush())
+        painter.setPen(QPen(border_color, 1.6))
+        painter.drawRoundedRect(body_rect, self.RADIUS, self.RADIUS)
+        self._draw_derivative_symbol(painter=painter, body_rect=body_rect)
+
+
 class UnOpItem(BlockItem):
     """Compact graphics item for one unary symbolic operation."""
 
@@ -3488,7 +4115,7 @@ class UnOpItem(BlockItem):
     SIZE: float = 38.0
     RADIUS: float = 4.0
 
-    _SYMBOL_TEXT: Dict[BlockType, str] = dict(((BlockType.CONST, "k"), (BlockType.ABS, "|x|"), (BlockType.INTEGRATOR, "∫"), (BlockType.POWER, "x^y"), (BlockType.SIN, "sin"), (BlockType.COS, "cos"), (BlockType.TAN, "tan"), (BlockType.EXP, "exp"), (BlockType.LOG, "ln"), (BlockType.LOG10, "log"), (BlockType.SQRT, "√"), (BlockType.ASIN, "asin"), (BlockType.ACOS, "acos"), (BlockType.ATAN, "atan"), (BlockType.SINH, "sinh"), (BlockType.COSH, "cosh"), (BlockType.TANH, "tanh"), (BlockType.REAL, "Re"), (BlockType.IMAG, "Im"), (BlockType.CONJ, "z*"), (BlockType.ANGLE, "∠"),))
+    _SYMBOL_TEXT: Dict[BlockType, str] = dict(((BlockType.CONST, "k"), (BlockType.ABS, "|x|"), (BlockType.POWER, "x^y"), (BlockType.SIN, "sin"), (BlockType.COS, "cos"), (BlockType.TAN, "tan"), (BlockType.EXP, "exp"), (BlockType.LOG, "ln"), (BlockType.LOG10, "log"), (BlockType.SQRT, "√"), (BlockType.ASIN, "asin"), (BlockType.ACOS, "acos"), (BlockType.ATAN, "atan"), (BlockType.SINH, "sinh"), (BlockType.COSH, "cosh"), (BlockType.TANH, "tanh"), (BlockType.REAL, "Re"), (BlockType.IMAG, "Im"), (BlockType.CONJ, "z*"), (BlockType.ANGLE, "∠"),))
 
     def __init__(self,
                  editor: DynamicBlockEditorGUI,
@@ -3933,10 +4560,18 @@ class RoundBaseArithmeticOpItem(QGraphicsEllipseItem):
         :param widget: Optional target widget.
         :return: None.
         """
-        rect = self.rect()
+        rect: QtCore.QRectF = self.rect()
+        border_color: QColor = (
+            EditorGraphicsCommonFeatures.BLOCK_BORDER_SELECTED
+            if self.isSelected()
+            else self.pen().color()
+        )
+
+        # Arithmetic blocks use a custom painter, so their selection outline
+        # must be resolved explicitly just like the other block item classes.
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         painter.setBrush(self.brush())
-        painter.setPen(self.pen())
+        painter.setPen(QPen(border_color, 1.6))
         painter.drawEllipse(rect)
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
@@ -4231,10 +4866,18 @@ class RectBaseArithmeticOpItem(QGraphicsRectItem):
         :param widget: Optional target widget.
         :return: None.
         """
-        rect = self.rect()
+        rect: QtCore.QRectF = self.rect()
+        border_color: QColor = (
+            EditorGraphicsCommonFeatures.BLOCK_BORDER_SELECTED
+            if self.isSelected()
+            else self.pen().color()
+        )
+
+        # Keep the large-input arithmetic representation visually consistent
+        # with both the round arithmetic item and the regular block items.
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         painter.setBrush(self.brush())
-        painter.setPen(self.pen())
+        painter.setPen(QPen(border_color, 1.6))
         painter.drawRoundedRect(rect, 6.0, 6.0)
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
@@ -5102,11 +5745,11 @@ class DiagramScene(QGraphicsScene):
             pass
 
         source_block: BlockItem | GenericBlockItem | PairedItem | \
-            RoundBaseArithmeticOpItem | RectBaseArithmeticOpItem = source_port.subsystem
+            RoundBaseArithmeticOpItem | RectBaseArithmeticOpItem | MeasurementsItem = source_port.subsystem
         target_block: BlockItem | GenericBlockItem | PairedItem | \
-            RoundBaseArithmeticOpItem | RectBaseArithmeticOpItem = target_port.subsystem
+            RoundBaseArithmeticOpItem | RectBaseArithmeticOpItem | MeasurementsItem = target_port.subsystem
 
-        if source_block.subsys is not None and target_block.subsys is not None:
+        if source_block.subsys is not None and target_block.subsys is not None and self.editor is not None:
             connection: ConnectionItem = ConnectionItem(
                 source_port=source_port,
                 target_port=target_port,
@@ -5119,3 +5762,20 @@ class DiagramScene(QGraphicsScene):
             self.editor.attach_new_connection_item(item=connection)
         else:
             pass
+
+
+DynamicBlockGraphicsItem: TypeAlias = (
+        BlockItem
+        | GenericBlockItem
+        | RoundBaseArithmeticOpItem
+        | RectBaseArithmeticOpItem
+        | IntegratorItem
+        | DerivativeItem
+        | UnOpItem
+        | PairedItem
+        | MeasurementsItem
+)
+DynamicColorableBlockGraphicsItem: TypeAlias = (
+        DynamicBlockGraphicsItem
+        | MeasurementsItem
+)

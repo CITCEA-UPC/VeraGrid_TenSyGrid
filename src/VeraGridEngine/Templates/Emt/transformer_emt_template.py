@@ -127,18 +127,19 @@ def get_transformer_emt_template(
     Build a linear two-winding transformer EMT template using coupled winding currents
     as state variables.
 
-    This simplified version keeps only the series coupled-winding model and omits the
-    primary shunt branch from the EMT equations. The total voltage ratio is exposed
-    through api_obj_mapping and is used to initialize the primary winding current from
-    the secondary-side port current in a way that is consistent with the external port
-    convention.
+    The winding model retains its mutual inductance. Core-loss conductance is
+    split equally on a common primary-referred basis between the two terminals;
+    the secondary conductance is scaled by the square of the voltage ratio.
+    Winding-current initialization subtracts the respective loss currents from
+    the PF terminal currents.
 
     Assumptions:
-    - `l1`, `l2`, and `m12` already represent the physical transformer model in the
+
+    - ``l1``, ``l2``, and ``m12`` already represent the physical transformer model in the
       chosen winding coordinates.
     - branch currents are positive when leaving the connected bus.
-    - `if_act` and `it_act` are externally initialized by the EMT framework from the
-      power-flow solution through `external_mapping`.
+    - ``if_act`` and ``it_act`` are externally initialized by the EMT framework from the
+      power-flow solution through ``external_mapping``.
 
     :param vf: EMT variable factory.
     :param conn_f: Optional from-side winding connection.
@@ -174,7 +175,7 @@ def get_transformer_emt_template(
     l1: Var = vf.add_var(name=f"trafo_l1")
     l2: Var = vf.add_var(name=f"trafo_l2")
     m12: Var = vf.add_var(name=f"trafo_m")
-    gm: Var = vf.add_var(name=f"trafo_gm")  # kept for compatibility, unused here
+    gm: Var = vf.add_var(name=f"trafo_gm")
     total_voltage_ratio: Var = vf.add_var(name=f"trafo_tap_ratio")
 
     block = Block()
@@ -187,6 +188,15 @@ def get_transformer_emt_template(
     block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_mutual_inductance_pu_s] = m12
     block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_magnetizing_conductance_pu] = gm
     block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_total_voltage_ratio] = total_voltage_ratio
+    block.parameters.update({
+        r1: vf.add_const(None),
+        r2: vf.add_const(None),
+        l1: vf.add_const(None),
+        l2: vf.add_const(None),
+        m12: vf.add_const(None),
+        gm: vf.add_const(None),
+        total_voltage_ratio: vf.add_const(None),
+    })
 
     # ------------------------------------------------------------------
     # Terminal voltages
@@ -349,27 +359,46 @@ def get_transformer_emt_template(
     # ------------------------------------------------------------------
     state_eqs_f: list[Expr] = []
     state_eqs_t: list[Expr] = []
-    det_l: Expr = l1 * l2 - m12 * m12
+    # Evaluate the nearly singular coupled matrix through its leakage terms.
+    # Directly forming l1*l2-m12**2 loses precision when the static model has
+    # no magnetizing shunt and the mapper consequently uses a very large Lm.
+    leakage_l1: Expr = l1 - m12 * total_voltage_ratio
+    leakage_l2: Expr = l2 - m12 / total_voltage_ratio
+    det_l: Expr = (
+        leakage_l1 * leakage_l2
+        + leakage_l1 * m12 / total_voltage_ratio
+        + leakage_l2 * m12 * total_voltage_ratio
+    )
 
     for idx in range(3):
         primary_rhs: Expr = v_f_term[idx] - r1 * i_f[idx]
         secondary_rhs: Expr = v_t_term[idx] - r2 * i_t[idx]
 
-        state_eqs_f.append((l2 * primary_rhs - m12 * secondary_rhs) / (det_l + c_eps))
-        state_eqs_t.append((l1 * secondary_rhs - m12 * primary_rhs) / (det_l + c_eps))
+        numerator_f: Expr = (
+            leakage_l2 * primary_rhs
+            + m12 * (primary_rhs / total_voltage_ratio - secondary_rhs)
+        )
+        numerator_t: Expr = (
+            leakage_l1 * secondary_rhs
+            + m12 * (total_voltage_ratio * secondary_rhs - primary_rhs)
+        )
+        state_eqs_f.append(numerator_f / (det_l + c_eps))
+        state_eqs_t.append(numerator_t / (det_l + c_eps))
 
     block.state_eqs = state_eqs_f + state_eqs_t
 
     # ------------------------------------------------------------------
     # Port-current algebraic equations
     #
-    # In this simplified EMT model, the port currents are exactly the series
-    # winding currents. The primary-side shunt branch is intentionally omitted.
+    # Split the primary-referred core-loss conductance equally. Referring the
+    # secondary half through n=Vf/Vt multiplies its conductance by n**2.
     # ------------------------------------------------------------------
+    g_from: Expr = gm * vf.add_const(0.5)
+    g_to: Expr = g_from * total_voltage_ratio * total_voltage_ratio
     alg_eqs: list[Expr] = []
     for idx in range(3):
-        alg_eqs.append(if_act[idx] - (i_f[idx] + gm * v_f_term[idx]))
-        alg_eqs.append(it_act[idx] - i_t[idx])
+        alg_eqs.append(if_act[idx] - (i_f[idx] + g_from * v_f_term[idx]))
+        alg_eqs.append(it_act[idx] - (i_t[idx] + g_to * v_t_term[idx]))
 
     if if_n_act is not None:
         neutral_from_kcl: Expr = if_n_act + if_act[0] + if_act[1] + if_act[2]
@@ -437,18 +466,13 @@ def get_transformer_emt_template(
     # ------------------------------------------------------------------
     # State initialization
     #
-    # Since the EMT model omits the shunt branch, initialize the secondary
-    # winding current directly from the secondary port current and initialize
-    # the primary winding current from the secondary current referred through
-    # the total voltage ratio.
-    #
-    # With branch currents positive when leaving the bus:
-    #   primary series current ~= -(secondary port current) / total_voltage_ratio
+    # Remove each terminal's core-loss current before seeding the winding
+    # states. This keeps initialization consistent with the port equations.
     # ------------------------------------------------------------------
     init_eqs: Dict[Var, Expr] = dict()
     for idx in range(3):
-        init_eqs[i_f[idx]] = if_act[idx] - gm * v_f_term[idx]
-        init_eqs[i_t[idx]] = it_act[idx]
+        init_eqs[i_f[idx]] = if_act[idx] - g_from * v_f_term[idx]
+        init_eqs[i_t[idx]] = it_act[idx] - g_to * v_t_term[idx]
 
     block.init_eqs = init_eqs
 
@@ -460,8 +484,16 @@ def get_transformer_emt_template(
         primary_rhs: Expr = v_f_term[idx] - r1 * i_f[idx]
         secondary_rhs: Expr = v_t_term[idx] - r2 * i_t[idx]
 
-        diff_init_eqs[di_f[idx]] = (l2 * primary_rhs - m12 * secondary_rhs) / (det_l + c_eps)
-        diff_init_eqs[di_t[idx]] = (l1 * secondary_rhs - m12 * primary_rhs) / (det_l + c_eps)
+        numerator_f: Expr = (
+            leakage_l2 * primary_rhs
+            + m12 * (primary_rhs / total_voltage_ratio - secondary_rhs)
+        )
+        numerator_t: Expr = (
+            leakage_l1 * secondary_rhs
+            + m12 * (total_voltage_ratio * secondary_rhs - primary_rhs)
+        )
+        diff_init_eqs[di_f[idx]] = numerator_f / (det_l + c_eps)
+        diff_init_eqs[di_t[idx]] = numerator_t / (det_l + c_eps)
 
     block.diff_init_eqs = diff_init_eqs
 
@@ -485,8 +517,6 @@ def get_transformer_emt_template(
 
     templ.block.children.append(block)
     templ.block.external_mapping = block.external_mapping
-    templ.block.api_obj_mapping = block.api_obj_mapping
-    templ.block.parameters = block.parameters
     templ.block.in_vars = block.in_vars
     templ.block.out_vars = block.out_vars
 
@@ -504,8 +534,16 @@ def get_series_transformer_emt_template(
 
     This model is intended for transformers, such as those in the balanced
     Kundur case, whose static representation contains only series R/X and a
-    fixed tap.  Currents use the conventional three-phase current base and the
-    standard equation ``dV = Zpu * Ipu``; R and X are not rescaled.
+    fixed tap. Currents use the conventional three-phase current base. The
+    state is the from-terminal current, so the static R/X impedance is referred
+    to that current by the squared tap in the equations. Stored R/X stay unchanged.
+
+    :param vf: Factory owning the symbolic variables and constants.
+    :param name: Model and block name.
+    :param r: Static series resistance in p.u.; None uses device mapping.
+    :param x: Static series reactance in p.u.; None uses device mapping.
+    :param tap_module: Fixed magnitude tap; None uses device mapping.
+    :return: Three-wire series transformer with from-terminal current states.
     """
     templ = EmtModelTemplate()
     templ.tpe = DeviceType.Transformer2WDevice
@@ -539,9 +577,12 @@ def get_series_transformer_emt_template(
         "ABC", (VarPowerFlowReferenceType.if_A, VarPowerFlowReferenceType.if_B, VarPowerFlowReferenceType.if_C))]
     it_vars = [vf.add_var(f"it_{phase}", reference=reference) for phase, reference in zip(
         "ABC", (VarPowerFlowReferenceType.it_A, VarPowerFlowReferenceType.it_B, VarPowerFlowReferenceType.it_C))]
-    inductance = x_ser / (omega_base + eps)
+    # The static equivalent uses If=(Vf-tap*Vt)/(tap²*Z) and It=-tap*If.
+    tap_ratio_squared: Expr = tap_ratio * tap_ratio
+    series_resistance: Expr = tap_ratio_squared * r_ser
+    inductance: Expr = tap_ratio_squared * x_ser / (omega_base + eps)
     state_eqs = [
-        (vf_vars[idx] - tap_ratio * vt_vars[idx] - r_ser * currents[idx]) / (inductance + eps)
+        (vf_vars[idx] - tap_ratio * vt_vars[idx] - series_resistance * currents[idx]) / (inductance + eps)
         for idx in range(3)
     ]
     templ.block.in_vars = vf_vars + vt_vars

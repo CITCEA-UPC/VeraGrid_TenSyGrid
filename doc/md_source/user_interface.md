@@ -44,6 +44,18 @@ In the left panel, you can find the library of elements to drag and drop into yo
 
 In the main panel, you can find the schematics and map diagrams that represent the system currently under study. You can create as many maps and schematics, either of the whole system or of specific portions, as you want. Creating these smaller schematics will allow you to focus on results for specific areas, while still simulating the full system. 
 
+Map backgrounds offer OpenFreeMap Colour, Light and Dark palettes without API keys,
+plus the standard OpenStreetMap raster map. Older diagrams using CARTO Voyager,
+Positron or Dark Matter open with the corresponding OpenFreeMap palette.
+Light and Dark use neutral backgrounds, faint major roads and national land
+borders, and sparse place labels. Buildings, land-use detail and local roads are
+omitted to keep the electrical grid prominent; Colour retains the detailed map.
+OpenFreeMap vector data is decoded by a bundled Python decoder and
+painted with Qt, keeping selection, editing and image export in the existing Qt
+map widget. Downloaded vectors and rendered tiles are cached locally. These are
+VeraGrid's Qt palettes rather than exact MapLibre styles: terrain effects and
+sprite icons are not rendered, and text placement is limited to individual tiles.
+
 ![](figures/VeraGrid_Map_Light_500bus.png)    
     Sample map diagram of ~500 node grid.
 

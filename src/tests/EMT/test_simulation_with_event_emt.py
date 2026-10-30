@@ -10,6 +10,7 @@ from pandas.testing import assert_frame_equal
 import os
 
 from VeraGridEngine.Utils.Symbolic.block import Block
+from VeraGridEngine.Utils.Symbolic.symbolic import Var
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDae
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
@@ -37,11 +38,15 @@ def find_name_in_block(name: str, block: Block):
         if res is not None:
             return res
 
-def test_simulation_with_event_emt():
+def test_simulation_with_event_emt() -> None:
     """
-    This test creates a grid, adds rms models and events and rens simulation. Then it compares results with reference.
-    :return:
-    :rtype:
+    Compare the complete historical EMT resistance-event trajectory.
+
+    The reference starts with automatically sized phase resistances, followed
+    by events setting them to 3 pu and then 6 pu. Preserve the initial power
+    flow sizing so the complete trajectory remains comparable to the CSV.
+
+    :return: None; compare every state and derivative with the historical CSV.
     """
 
     #########
@@ -174,6 +179,9 @@ def test_simulation_with_event_emt():
     power_flow.run()
     res = power_flow.results
 
+    # A reference trajectory is only valid when its steady-state seed converged.
+    assert bool(res.converged)
+
     print(f"Converged: {res.converged}")
     print(res.get_bus_df())
     print(res.get_branch_df())
@@ -202,32 +210,33 @@ def test_simulation_with_event_emt():
                                  verbose = True)
 
     boundary_updater = cast(Any, problem)
-    t, y, dy, _, _ = solver.simulate(boundary_updater=boundary_updater)
+    t, y, dy, well_initialized, converged = solver.simulate(boundary_updater=boundary_updater)
+
+    # Never accept a golden trajectory from an invalid EMT initialization or run.
+    assert well_initialized
+    assert converged
 
     res = np.concatenate((y, dy), axis=1)
 
     cols_y = [f"y{i}" for i in range(y.shape[1])]
     cols_dy = [f"dy{i}" for i in range(dy.shape[1])]
     cols = cols_y + cols_dy
+
     results_df = pd.DataFrame(res, index=t, columns=cols)
     results_df.index.name = "time_s"
 
-    results_df = results_df[reference_df.columns]
-    runtime_df = results_df.iloc[1:].reset_index(drop=True)
-    reference_runtime_df = reference_df.iloc[1:].reset_index(drop=True)
-    y_columns = [col for col in runtime_df.columns if col.startswith("y")]
-    dy_columns = [col for col in runtime_df.columns if col.startswith("dy")]
-
-    # The non-flattened EMT build now follows the RMS-like canonical workflow,
-    # so the legacy CSV snapshot is no longer treated as a strict trajectory
-    # contract. The runtime result must still remain finite and eventful.
-    assert np.all(np.isfinite(runtime_df[y_columns].to_numpy(dtype=float)))
-    assert np.max(np.abs(runtime_df[y_columns].to_numpy(dtype=float))) > 1.0e-6
-
-    # The derivative traces are not treated as a strict snapshot contract here.
-    # They are still checked for numerical sanity so event handling cannot hide
-    # NaNs or infinities behind a passing state-trajectory comparison.
-    assert np.all(np.isfinite(runtime_df[dy_columns].to_numpy(dtype=float)))
+    # The EMT reference is a complete trajectory contract. Compare every state
+    # and derivative at every simulated instant, including the initialized point
+    # at t=0 and both event boundaries.
+    assert list(results_df.columns) == list(reference_df.columns)
+    assert_frame_equal(
+        results_df.reset_index(drop=True),
+        reference_df.reset_index(drop=True),
+        check_dtype=False,
+        check_index_type=False,
+        atol=1.0e-6,
+        rtol=1.0e-6,
+    )
 
 
 if __name__ == "__main__":

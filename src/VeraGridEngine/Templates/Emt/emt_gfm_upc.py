@@ -430,6 +430,13 @@ def build_emt_gfm_aggregated_model(
             p_pf: vf.add_const(None), q_pf: vf.add_const(None),
             p_ref: vf.add_const(None), q_ref: vf.add_const(None), v_ref: vf.add_const(None),
         },
+        parameters={
+            fn: vf.add_const(50.0),
+            omega_base: vf.add_const(2.0 * math.pi * 50.0),
+            a0: vf.add_const(0.0),
+            a1: vf.add_const(0.0),
+            a2: vf.add_const(0.0),
+        },
         init_eqs={
             theta: theta0, omega: vf.add_const(1.0),
             p: p0, q: q0, p_ref: p0, q_ref: q0,
@@ -505,6 +512,7 @@ def build_emt_gfm_aggregated_model(
             VarPowerFlowReferenceType.Q: q_pf,
         },
         api_obj_mapping={
+            ParamPowerFlowReferenceType.freq: fn,
             ParamPowerFlowReferenceType.omega_base: omega_base,
             ParamPowerFlowReferenceType.alpha1: a0,
             ParamPowerFlowReferenceType.alpha2: a1,

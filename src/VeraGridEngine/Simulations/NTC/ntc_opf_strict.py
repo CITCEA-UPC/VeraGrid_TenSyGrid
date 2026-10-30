@@ -38,7 +38,11 @@ from VeraGridEngine.Simulations.NTC.ntc_opf import (add_corrective_contingency_f
                                                     fill_worst_contingency_per_branch,
                                                     evaluate_corrective_flow_addons,
                                                     has_pmode3_control,
-                                                    pmode3_formulation)
+                                                    pmode3_formulation,
+                                                    add_base_control_effort,
+                                                    add_corrective_control_effort,
+                                                    solve_least_control_effort,
+                                                    get_exchange_proportions)
 from VeraGridEngine.IO.file_system import opf_file_path
 from VeraGridEngine.Simulations.NTC.ntc_compact import SolverProgress, CompactContingencies
 
@@ -149,8 +153,9 @@ def get_transfer_power_scaling_per_bus(bus_data_t: BusData,
     """
 
     # get values per bus
-    gen_per_bus = gen_data_t.get_injections_per_bus() / Sbase
-    load_per_bus = load_data_t.get_injections_per_bus() / Sbase
+    # active power only
+    gen_per_bus: Vec = gen_data_t.get_injections_per_bus().real / Sbase
+    load_per_bus: Vec = load_data_t.get_injections_per_bus().real / Sbase
     pinst_per_bus = gen_data_t.get_installed_power_per_bus() / Sbase
 
     # Evaluate transfer method
@@ -208,86 +213,6 @@ def get_transfer_power_scaling_per_bus(bus_data_t: BusData,
         raise Exception('Undefined available transfer mode')
 
     return p_ref * dispatchable_bus, p_max, p_min
-
-
-def get_sensed_proportions(power: Vec,
-                           idx: IntVec,
-                           logger: Logger) -> Vec:
-    """
-
-    :param power:
-    :param idx:
-    :param logger:
-    :return:
-    """
-    nelem = len(power)
-
-    # bus area mask
-    isin_ = np.isin(range(nelem), idx, assume_unique=True)
-
-    p_ref = power * isin_
-
-    # get proportions of contribution by sense (gen or pump) and area
-    # the idea is both techs contributes to achieve the power shift goal in the same proportion
-    # that in base situation
-
-    # Filter positive and negative generators. Same vectors lenght, set not matched values to zero.
-    gen_pos = np.where(p_ref < 0, 0, p_ref)
-    gen_neg = np.where(p_ref > 0, 0, p_ref)
-
-    denom = np.sum(np.abs(p_ref))
-    if denom != 0.0:
-        prop_up = np.sum(gen_pos) / denom
-        prop_dw = np.sum(gen_neg) / denom
-    else:
-        prop_up = np.zeros(len(gen_pos))
-        prop_dw = np.zeros(len(gen_neg))
-
-    # get proportion by production (ammount of power contributed by generator to his sensed area).
-    if np.sum(np.abs(gen_pos)) != 0:
-        prop_up_gen = gen_pos / np.sum(np.abs(gen_pos))
-    else:
-        prop_up_gen = np.zeros_like(gen_pos)
-
-    if np.sum(np.abs(gen_neg)) != 0:
-        prop_dw_gen = gen_neg / np.sum(np.abs(gen_neg))
-    else:
-        prop_dw_gen = np.zeros_like(gen_neg)
-
-    # delta proportion by generator (considering both proportions: sense and production)
-    prop_gen_delta_up = prop_up_gen * prop_up
-    prop_gen_delta_dw = prop_dw_gen * prop_dw
-
-    # Join generator proportions into one vector
-    # Notice this is not a summatory, it's just joining like 'or' logical operation
-    proportions = prop_gen_delta_up + prop_gen_delta_dw
-
-    # some checks
-    if not np.isclose(np.sum(proportions), 1, rtol=1e-6):
-        logger.add_warning('Issue computing proportions to scale delta generation in area 1.')
-
-    return proportions
-
-
-def get_exchange_proportions(power: Vec,
-                             bus_a1_idx: IntVec,
-                             bus_a2_idx: IntVec,
-                             logger: Logger,
-                             decimals: int):
-    """
-    Get generation proportions by transfer method with sign consideration.
-    :param power: Vec. Power reference
-    :param bus_a1_idx: bus indices within area 1
-    :param bus_a2_idx: bus indices within area 2
-    :param logger: logger instance
-    :param decimals: Number of decimals to round to
-    :return: proportions (rounded)
-    """
-    proportions_a1 = get_sensed_proportions(power=power, idx=bus_a1_idx, logger=logger)
-    proportions_a2 = get_sensed_proportions(power=power, idx=bus_a2_idx, logger=logger)
-    proportions = proportions_a1 - proportions_a2
-
-    return np.round(proportions, decimals)
 
 
 class BusNtcVars:
@@ -385,6 +310,7 @@ class BranchNtcVars:
         "worst_contingency_flow",
         "worst_contingency_loading",
         "alpha_n1_worst",
+        "worst_contingency_ties",
     )
 
     def __init__(self, nt: int, n_elm: int):
@@ -417,6 +343,9 @@ class BranchNtcVars:
         self.worst_contingency_loading = np.zeros((nt, n_elm), dtype=float)
         self.alpha_n1_worst = np.zeros((nt, n_elm), dtype=float)
 
+        # branch, group, N-1 flow (MW), N-1 loading (p.u.), alpha N-1 of the groups tied with the worst
+        self.worst_contingency_ties: List[Tuple[int, int, float, float, float]] = list()
+
     def get_values(self, Sbase: float, model: OrToolsLpModel) -> "BranchNtcVars":
         """
         Return an instance of this class where the arrays content are not LP vars but their value
@@ -436,6 +365,7 @@ class BranchNtcVars:
         data.worst_contingency_flow = self.worst_contingency_flow
         data.worst_contingency_loading = self.worst_contingency_loading
         data.alpha_n1_worst = self.alpha_n1_worst
+        data.worst_contingency_ties = self.worst_contingency_ties
 
         for t in range(nt):
             for i in range(n_elm):
@@ -922,15 +852,10 @@ def add_linear_branches_formulation(t_idx: int,
                     name=join("dc_flow_", [t_idx, m], "_")
                 )
 
-                # DC Branch
-                # compute the branch susceptance
-                if branch_data_t.R[m] == 0.0:
-                    bk = 1e-6  # setting a value too low will "break" the linear solver
-                else:
-                    bk = 1.0 / branch_data_t.R[m]
-
+                # DC Branch: R x P = ΔV. Dividing by R instead puts 1/R in the matrix, and HiGHS
+                # rejects entries above 1e15 (this fixes an ideal cable as it has an R of 1e-20) 
                 prob.add_cst(
-                    cst=branch_vars.flows[t_idx, m] == bk * (bus_vars.Vm[t_idx, fr] - bus_vars.Vm[t_idx, to]),
+                    cst=branch_data_t.R[m] * branch_vars.flows[t_idx, m] == bus_vars.Vm[t_idx, fr] - bus_vars.Vm[t_idx, to],
                     name=join("dc_flows_", [t_idx, m], "_")
                 )
 
@@ -943,11 +868,13 @@ def add_linear_branches_formulation(t_idx: int,
                     name=join("ac_flow_", [t_idx, m], "_")
                 )
 
-                # compute the branch susceptance
-                if branch_data_t.X[m] == 0.0:
-                    bk = 1e-6  # setting a value too low will "break" the linear solver
+                # compute the branch susceptance as the linear model (PTDF, linear power flow) does,
+                # with the tap module, so the NTC flows equal those of a linear power flow
+                x_eff: float = branch_data_t.X[m] * active_branch_data_t.tap_module[m]
+                if x_eff == 0.0:
+                    bk: float = 1e-6  # setting a value too low will "break" the linear solver
                 else:
-                    bk = 1.0 / branch_data_t.X[m]
+                    bk = 1.0 / x_eff
 
                 # compute the flow
                 if (active_branch_data_t.tap_phase_control_mode[m] == TapPhaseControl.Pf.idx() or
@@ -1162,10 +1089,6 @@ def add_linear_branches_contingencies_formulation(t_idx: int,
     """
     f_obj = 0.0
 
-    # con_loading is used by the corrective path to skip already-overloaded branches; the strict
-    # formulation does not pre-compute it, so use zeros (no pre-skip; slacks still capture overloads).
-    con_loading_zeros = np.zeros(branch_data_t.nelm)
-
     # Branches that could possibly receive a post-contingency limit
     monitorable: BoolVec = get_contingency_monitorable_branches(
         branch_data_t=branch_data_t,
@@ -1209,8 +1132,8 @@ def add_linear_branches_contingencies_formulation(t_idx: int,
                 t_idx=t_idx, c=c, Sbase=Sbase, contingency=contingency,
                 contingency_flows=contingency_flows, changed_idx=changed_idx,
                 branch_data_t=branch_data_t, branch_vars=branch_vars,
-                vsc_vars=vsc_vars, hvdc_vars=hvdc_vars, con_loading=con_loading_zeros,
-                prob=prob, logger=Logger(), corrective_rows=corrective_rows,
+                vsc_vars=vsc_vars, hvdc_vars=hvdc_vars,
+                prob=prob, corrective_rows=corrective_rows,
                 vsc_active=vsc_active, hvdc_active=hvdc_active,
                 vsc_delta_vars=vsc_deltas_c, hvdc_delta_vars=hvdc_deltas_c)
         else:
@@ -1223,9 +1146,6 @@ def add_linear_branches_contingencies_formulation(t_idx: int,
                 monitor_only_sensitive_branches=monitor_only_sensitive_branches,
                 structural_ntc=structural_ntc, ntc_load_rule=ntc_load_rule,
                 alpha_threshold=alpha_threshold, alpha_n1_abs=alpha_n1_abs, prob=prob)
-
-    # copy the contingency rates
-    branch_vars.contingency_rates[t_idx, :] = branch_data_t.contingency_rates
 
     return f_obj
 
@@ -1664,6 +1584,10 @@ def run_linear_ntc_opf_strict(grid: MultiCircuit,
                                                         areas_dict=areas_dict,
                                                         logger=logger)
 
+    # The N-1 report divides by these ratings even when no contingency row enters the LP
+    # so copy them unconditionally
+    mip_vars.branch_vars.contingency_rates[t_idx, :] = nc.passive_branch_data.contingency_rates
+
     # branch index, branch object, flow sense w.r.t the area exchange
     bus_a1_idx_set = set(bus_a1_idx)
     bus_a2_idx_set = set(bus_a2_idx)
@@ -1881,14 +1805,36 @@ def run_linear_ntc_opf_strict(grid: MultiCircuit,
     # solve the model
     status = lp_model.solve(robust=robust, show_logs=verbose > 0, progress_text=progress_text)
     if controlled_states is not None:
+        # The shared screening loop certifies the strict physical states. Its
+        # strict=True formulation admits hard limits and never adds thermal slacks.
         status = controlled_states.solve(f_obj, status, robust=robust, show_logs=verbose > 0,
                                          progress=SolverProgress(progress_text))
+    else:
+        # Other control modes already have their contingency constraints. Among the optima,
+        # pick the least control effort so the operating point and its limiting pairs are reproducible.
+        effort: List[LpExp] = list()
+        add_base_control_effort(prob=lp_model, t_idx=t_idx,
+                                branch_data_t=nc.passive_branch_data,
+                                active_branch_data_t=nc.active_branch_data,
+                                branch_vars=mip_vars.branch_vars,
+                                vsc_vars=mip_vars.vsc_vars,
+                                hvdc_vars=mip_vars.hvdc_vars,
+                                effort=effort)
+        add_corrective_control_effort(prob=lp_model, vsc_delta_store=vsc_delta_store,
+                                      hvdc_delta_store=hvdc_delta_store, counted=set(), effort=effort)
+        if status == lp_model.OPTIMAL and len(effort) > 0:
+            status = solve_least_control_effort(prob=lp_model, objective=f_obj, transfer=mip_vars.delta_1[t_idx],
+                                                effort=effort, logger=logger, robust=robust,
+                                                show_logs=verbose > 0, progress_text=progress_text)
+        else:
+            pass  # nothing to choose among the optima, or the first stage failed
 
     # gather the results
     logger.add_info(msg="Status", value=lp_model.status2string(status))
 
     if status == lp_model.OPTIMAL:
-        logger.add_info("Objective function", value=lp_model.fobj_value())
+        # the transfer objective, not the second stage effort the model last minimised
+        logger.add_info("Objective function", value=lp_model.get_value(f_obj))
         mip_vars.acceptable_solution[t_idx] = True
     else:
         logger.add_error('The problem does not have an optimal solution.')
@@ -1945,27 +1891,41 @@ def run_linear_ntc_opf_strict(grid: MultiCircuit,
         worst_flow=vars_v.branch_vars.worst_contingency_flow[t_idx, :],
         worst_loading=vars_v.branch_vars.worst_contingency_loading[t_idx, :],
         alpha_n1_worst=vars_v.branch_vars.alpha_n1_worst[t_idx, :],
+        tied_groups=vars_v.branch_vars.worst_contingency_ties,
+        branch_data=nc.passive_branch_data,
         solved_flows=solved_flows,
         corrective_addons_mw=corrective_addons_mw,
     )
 
+    # The compact states and their coordinator reference each other through a numpy object
+    # array, which the garbage collector cannot traverse
+    if controlled_states is not None:
+        controlled_states.states.fill(None)
+    else:
+        pass  # no compact contingency states to release
+
     # fill the power shift
     vars_v.power_shift = vars_v.bus_vars.delta_p[:, bus_a1_idx]
 
-    # register the slacks
-    if vars_v.delta_sl_1[t_idx] > 1e-6:
-        logger.add_warning(msg="Inter area equality not fulfilled for area 1",
-                           value=vars_v.delta_sl_1[t_idx])
+    # The area 1 increase must equal the area 2 decrease. The balance slacks are interchangeable, so
+    # only their difference (= delta_1 - delta_2) is a mismatch
+    area_mismatch_mw: float = abs(vars_v.delta_1[t_idx] - vars_v.delta_2[t_idx]) * grid.Sbase
+    if area_mismatch_mw > 1e-3:
+        logger.add_warning(msg="Area 1 increase and area 2 decrease differ (MW)",
+                           value=area_mismatch_mw, expected_value=0.0)
+    else:
+        pass  # both areas moved the same power
 
-    if vars_v.delta_sl_2[t_idx] > 1e-6:
-        logger.add_warning(msg="Inter area equality not fulfilled for area 2",
-                           value=vars_v.delta_sl_2[t_idx])
-
-    for i in range(nb):
-        if abs(vars_v.bus_vars.Pbalance[t_idx, i]) > 1e-8:
-            logger.add_warning(msg="Inter area equality not fulfilled for area 2",
-                               device=f"Bus {i}",
-                               value=vars_v.bus_vars.Pbalance[t_idx, i])
+    # Kirchhoff balance of every networked bus (MW). Isolated buses were reported when formulated
+    bus_k: int
+    for bus_k in range(nc.bus_data.nbus):
+        if isinstance(mip_vars.bus_vars.Pbalance[t_idx, bus_k], (int, float)):
+            pass  # isolated bus, no balance equation
+        elif abs(vars_v.bus_vars.Pbalance[t_idx, bus_k]) > 1e-3:
+            logger.add_warning(msg="Nodal balance not fulfilled (MW)", device=nc.bus_data.names[bus_k],
+                               value=vars_v.bus_vars.Pbalance[t_idx, bus_k], expected_value=0.0)
+        else:
+            pass  # balanced within tolerance
 
     # add the model logger to the main logger
     logger += lp_model.logger
@@ -1983,8 +1943,8 @@ def run_linear_ntc_opf_strict(grid: MultiCircuit,
     inter_area_hvdc_sense = [x[1] for x in inter_info_hvdc]
 
     inter_info_vsc = nc.vsc_data.get_inter_areas(bus_idx_from=bus_a1_idx, bus_idx_to=bus_a2_idx)
-    inter_area_vsc_idx = [x[0] for x in inter_info_vsc]
-    inter_area_vsc_sense = [x[2] for x in inter_info_vsc]
+    inter_area_vsc_idx: List[int] = [x[0] for x in inter_info_vsc]
+    inter_area_vsc_sense: List[float] = [x[1] for x in inter_info_vsc]
 
     for k in inter_area_branch_idx:
         logger.add_info("Inter area branch", device=f"({k}) - {nc.passive_branch_data.names[k]}",

@@ -9,7 +9,12 @@ import pandas as pd
 import scipy.sparse as sp
 
 
-from VeraGridEngine.enumerations import ParamPowerFlowReferenceType, DeviceType, DynamicEventTransitionType
+from VeraGridEngine.enumerations import (
+    DeviceType,
+    DynamicEventTransitionType,
+    DynamicSimulationMode,
+    ParamPowerFlowReferenceType,
+)
 from VeraGridEngine.Devices import MultiCircuit
 from VeraGridEngine.Simulations.driver_template import DummySignal
 from VeraGridEngine.Utils.Symbolic.symbolic import (Var, Const, Expr, piecewise, get_expression_vars, hard_sat)
@@ -19,30 +24,38 @@ from VeraGridEngine.enumerations import VarPowerFlowReferenceType, RmsInitializa
 from VeraGridEngine.basic_structures import Vec, ObjVec, BoolVec, Logger
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowResults
 from VeraGridEngine.Simulations.Rms.rms_options import RmsOptions
-from VeraGridEngine.Utils.Symbolic.explicit_initialization_symbolic import (init_explicit_common,
-                                                                            build_rms_single_equation_compiler)
-from VeraGridEngine.Simulations.Rms.initialization import init_pseudo_transient
+from VeraGridEngine.Utils.Symbolic.explicit_initialization_symbolic import (
+    ExplicitInitializationResult,
+    build_rms_single_equation_compiler,
+    init_explicit_common,
+)
+from VeraGridEngine.Simulations.Rms.initialization import init_pseudo_transient, _select_rms_initialization_method
+from VeraGridEngine.Simulations.Rms.initialization_rms import run_rms_consistent_initialization
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProblemTemplate
-from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import (
-    _resolve_rms_constant_parameter_value,
-    _resolve_rms_runtime_parameter_expression,
+from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified import (
+    StaticParameterMappingDiagnostics,
+    assign_static_api_object_mapping_for_device,
+    get_api_parameter_initial_value_by_uid,
+    resolve_constant_parameter_initial_value,
+    resolve_runtime_parameter_initial_expression,
 )
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
 from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
 from VeraGridEngine.Devices.Events.rms_event import RmsEvent
 from VeraGridEngine.Devices.Branches.transformer import Transformer2W
-from VeraGridEngine.Utils.Symbolic.jit_compiler import RMSCompiler, RMSCompilerVec
+from VeraGridEngine.Utils.Symbolic.jit_compiler import RMSCompiler, ProceduralExpressionCompiler, RMSCompilerVec
 from VeraGridEngine.Utils.Symbolic.bus_rms_template import get_bus_rms_algebraic_vars
-from VeraGridEngine.Utils.procedural_logic import build_boundary_updater_from_block
-from VeraGridEngine.IO.fmu.importer.co_simulation import (
+from VeraGridEngine.Utils.procedural_logic import build_boundary_updater_from_block, ProceduralExpressionMode
+from VeraGridEngine.Utils.procedural_logic_contract import ManufacturerNativeRuntimeSessionProtocol
+from VeraGridEngine.IO.fmu.co_simulation import (
     advance_rms_fmu_cs_devices,
     align_rms_fmu_cs_device_output_parameters,
     close_rms_fmu_cs_devices,
     initialize_rms_fmu_cs_devices,
     register_rms_fmu_cs_device,
 )
-from VeraGridEngine.IO.fmu.importer.model_exchange import (
+from VeraGridEngine.IO.fmu.model_exchange import (
     advance_rms_fmu_me_devices,
     close_rms_fmu_me_devices,
     get_next_rms_fmu_me_event_time,
@@ -51,15 +64,7 @@ from VeraGridEngine.IO.fmu.importer.model_exchange import (
     register_rms_fmu_me_device,
     resolve_rms_fmu_me_devices,
 )
-from VeraGridEngine.IO.fmu.importer.runtime_profile import FmuMeEvaluationBudget
-
-# Previous mapper:
-# from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_rms import (
-#     assign_static_api_object_mapping_for_device,
-# )
-from VeraGridEngine.Devices.Dynamic.static_parameter_mapping_unified import (
-    assign_static_api_object_mapping_for_device,
-)
+from VeraGridEngine.IO.fmu.profile import FmuMeEvaluationBudget
 
 from VeraGridEngine.Utils.procedural_logic import BlockProceduralLogicUpdater
 from VeraGridEngine.Utils.rms_models_types import build_equivalence_classes_dict
@@ -346,6 +351,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         "_constant_parameters_equiv_class_dict",
         "_parameters_values",
         "_static_parameters_values_mapping",
+        "_static_parameter_mapping_diagnostics",
         "_runtime_all_parameters_source",
         "_runtime_all_eqs_source",
         "_runtime_continuous_parameters",
@@ -365,6 +371,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         "_mode_runtime_expression_by_uid",
         "_mode_runtime_initialized_uids",
         "_procedural_logic_updater",
+        "_procedural_expression_compiler",
+        "_manufacturer_native_runtime_session",
         "_derivative_fn",
         "_event_params_fn",
         "_rhs_algeb_fn_by_types",
@@ -386,6 +394,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         "_fmu_me_adapters",
         "_fmu_me_initialized",
         "_fmu_me_evaluation_budget",
+        "_manufacturer_native_runtime_session",
         "_n_vars",
         "_n_state",
         "_n_alg",
@@ -413,8 +422,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         "_alias_names_dict_vect",
         "_vars_info",
         "_glob_time",
-        "_delta",
-        "_dt",
         "_state_algeb_vars",
         "_x_gather_idx",
         "_dx_gather_idx",
@@ -431,6 +438,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         "equivalence_dict",
         "reference_class_for_all_blocks_dict",
         "variables_equivalence_dict",
+        "_manufacturer_native_runtime_session",
     )
 
     def __init__(self,
@@ -452,7 +460,15 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         super().__init__(progress_signal=progress_signal,
                          progress_text=progress_text)
 
-        self.logger = logger
+        # The driver owns the logger. Direct problem construction may remain
+        # silent without changing any numerical mapping behavior.
+        self.logger: Logger | None = logger
+        self._static_parameter_mapping_diagnostics: StaticParameterMappingDiagnostics = (
+            StaticParameterMappingDiagnostics(
+                logger=self.logger,
+                simulation_mode=DynamicSimulationMode.RMS,
+            )
+        )
         self.grid: MultiCircuit = grid
         self.power_flow_results: PowerFlowResults = pf_results
         self.Sf = self.power_flow_results.Sf / self.grid.Sbase
@@ -498,7 +514,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         # scatter_map[model_type] -> array (nnz_type, n_inst) of global data indices
         self._jac_global_data: Dict[str, Tuple[sp.csc_matrix, Dict[int, np.ndarray]]] = dict()
 
-        # mapping from model uid → global start index of its state equations
+        # mapping from model uid â†’ global start index of its state equations
         self._model_state_eq_start_idx: Dict[int, int] = dict()
         self._model_algebraic_eq_start_idx: Dict[int, int] = dict()
 
@@ -532,7 +548,9 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._active_events_group: RmsEventsGroup | None = None
         self._mode_runtime_expression_by_uid: Dict[int, Expr | Const] = dict()
         self._mode_runtime_initialized_uids: Set[int] = set()
+        self._procedural_expression_compiler: ProceduralExpressionCompiler | None = None
         self._procedural_logic_updater: BlockProceduralLogicUpdater | None = None
+        self._manufacturer_native_runtime_session: ManufacturerNativeRuntimeSessionProtocol | None = None
 
         self._rhs_state_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec], Vec]] = dict()
         self._rhs_algeb_fn_by_types: Dict[int, Callable[[Vec, Vec, Vec, Vec], Vec]] = dict()
@@ -680,7 +698,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                                                             device=elm,
                                                             mdl=elm.rms_model,
                                                             problem_mapping=self._static_parameters_values_mapping,
-                                                            logger=None)
+                                                            logger=self._static_parameter_mapping_diagnostics)
 
                 self.add_variables_to_compilation_dicts(elm, elm.rms_model)
                 register_rms_fmu_cs_device(self, elm, elm.rms_model)
@@ -723,20 +741,22 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 # Run explicit initialization for branches to solve algebraic equations
                 if isinstance(elm, Transformer2W):
 
-                    if self.options.initialization_method == RmsInitializationMethod.Explicit:
+                    initialization_method: RmsInitializationMethod = _select_rms_initialization_method(
+                        configured_method=self.options.initialization_method, mdl=elm.rms_model,
+                        init_guess=self.init_guess, uid2idx_vars=self._uid2idx_vars)
+                    if initialization_method in (RmsInitializationMethod.Explicit, RmsInitializationMethod.ConsistentNewton):
                         diff_sys_vars: Dict[int, Var] = {diff_var.uid: diff_var for diff_var in self._diff_vars}
                         rms_compiler_init = RMSCompiler(
                             variables=list(self.sys_vars.values()),
                             diff_vars=list(diff_sys_vars.values()),
                             v_params=self._variable_parameters,
                             c_params=self._constant_parameters,
-                            dt_var=Var("dt"),
                             compiler_names_dict=self._compiler_names_dict,
                         )
                         compile_single_equation = build_rms_single_equation_compiler(rms_compiler_init)
 
                         # New init_explicit_common path
-                        self.init_guess, diff_init_guess_common = init_explicit_common(
+                        explicit_initialization_result: ExplicitInitializationResult = init_explicit_common(
                             mdl=elm.rms_model,
                             sys_vars=self.sys_vars,
                             sys_diff_vars=diff_sys_vars,
@@ -754,7 +774,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                             compile_single_equation=compile_single_equation,
                             verbose=bool(self.options.verbose > 0),
                         )
-                    elif self.options.initialization_method == RmsInitializationMethod.PseudoTransient:
+                        if explicit_initialization_result.converged:
+                            self.init_guess = explicit_initialization_result.init_guess
+                            diff_init_guess_common = explicit_initialization_result.diff_init_guess
+                        else:
+                            raise RuntimeError(explicit_initialization_result.message)
+                    elif initialization_method == RmsInitializationMethod.PseudoTransient:
                         self.init_guess = init_pseudo_transient(
                             mdl=elm.rms_model,
                             sys_vars=self.sys_vars,
@@ -774,7 +799,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                             CONSTANT_PARAMS_NAME=self.CONSTANT_PARAMS_NAME,
                             dtau0=1.0,
                             max_iter=max(500, int(self.options.max_iter)),
-                            tol=1e-8,
+                            tol=min(1e-8, self.options.tolerance),
                             verbose=bool(self.options.verbose > 0),
                         )
 
@@ -811,7 +836,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                                                             device=elm,
                                                             mdl=mdl,
                                                             problem_mapping=self._static_parameters_values_mapping,
-                                                            logger=self.logger )
+                                                            logger=self._static_parameter_mapping_diagnostics)
 
 
                 St_vsc = self.power_flow_results.St_vsc / self.grid.Sbase
@@ -852,6 +877,9 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
                 setP(P, P_used, f, -mdl.E(VarPowerFlowReferenceType.Pf))
                 setP(P, P_used, t, -mdl.E(VarPowerFlowReferenceType.Pt))
+                if elm.bus_from.is_dc and VarPowerFlowReferenceType.Qf in mdl.external_mapping:
+                    if self.logger is not None:
+                        self.logger.add_warning("Ignoring VSC reactive power on DC from terminal", device=elm.name)
                 if VarPowerFlowReferenceType.Qt in mdl.external_mapping and not elm.bus_to.is_dc:
                     setQ(Q, Q_used, t, -mdl.E(VarPowerFlowReferenceType.Qt))
                 else:
@@ -900,7 +928,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             else:
 
                 # find init values for the variables of this model
-                if self.options.initialization_method == RmsInitializationMethod.Explicit:
+                initialization_method: RmsInitializationMethod = _select_rms_initialization_method(
+                    configured_method=self.options.initialization_method, mdl=elm.rms_model,
+                    init_guess=self.init_guess, uid2idx_vars=self._uid2idx_vars)
+                if initialization_method in (RmsInitializationMethod.Explicit, RmsInitializationMethod.ConsistentNewton):
                     # common initialization to integrate
 
                     # create constant parameters array
@@ -916,14 +947,13 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         diff_vars=list(diff_sys_vars.values()),
                         v_params=self._variable_parameters,
                         c_params=self._constant_parameters,
-                        dt_var=Var("dt"),
                         compiler_names_dict=self._compiler_names_dict,
                     )
                     compile_single_equation = build_rms_single_equation_compiler(
                         rms_compiler_init)  # function to compile one equation
 
                     # New init_explicit_common path
-                    self.init_guess, diff_init_guess_common = init_explicit_common(
+                    explicit_initialization_result: ExplicitInitializationResult = init_explicit_common(
                         mdl=elm.rms_model,
                         sys_vars=self.sys_vars,
                         sys_diff_vars=diff_sys_vars,
@@ -941,8 +971,13 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         compile_single_equation=compile_single_equation,
                         verbose=bool(self.options.verbose > 0),
                     )
+                    if explicit_initialization_result.converged:
+                        self.init_guess = explicit_initialization_result.init_guess
+                        diff_init_guess_common = explicit_initialization_result.diff_init_guess
+                    else:
+                        raise RuntimeError(explicit_initialization_result.message)
 
-                elif self.options.initialization_method == RmsInitializationMethod.PseudoTransient:
+                elif initialization_method == RmsInitializationMethod.PseudoTransient:
                     self.init_guess = init_pseudo_transient(
                         mdl=elm.rms_model,
                         sys_vars=self.sys_vars,
@@ -962,18 +997,19 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         CONSTANT_PARAMS_NAME=self.CONSTANT_PARAMS_NAME,
                         dtau0=1e-4,
                         max_iter=max(500, int(self.options.max_iter)),
-                        tol=1e-8,
+                        tol=min(1e-8, self.options.tolerance),
                         verbose=bool(self.options.verbose > 0),
                     )
 
                 else:
                     raise ValueError("Not implemented initialization method")
-                # add model to system block
-                self.sys_block.add(elm.rms_model)
+                # PF seeding already registered this canonical VSC model.
+                # Initialization must not add a second procedural owner.
 
         injection_init_data = self.get_injection_init_data(bus_dict=bus_dict)
 
         for elm in grid.get_injection_devices_iter():
+            Sdev: complex = injection_init_data[elm.idtag]
 
             if elm.rms_model.empty():
                 if self.logger is not None:
@@ -993,21 +1029,22 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                     device=elm,
                     mdl=elm.rms_model,
                     problem_mapping=self._static_parameters_values_mapping,
-                    logger=self.logger,
+                    logger=self._static_parameter_mapping_diagnostics,
                 )
 
                 self.add_variables_to_compilation_dicts(elm, elm.rms_model)
                 register_rms_fmu_cs_device(self, elm, elm.rms_model)
                 register_rms_fmu_me_device(self, elm, elm.rms_model)
 
-                if elm.bus.is_dc:
-                    self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.P,
-                                        np.real(self.power_flow_results.Sbus[bus_index] / grid.Sbase))
-                else:
-                    Sdev = injection_init_data[elm.idtag]
+                # Keep the per-device PF dispatch for AC and DC injections. The
+                # bus aggregate cannot identify the share owned by this model.
+                self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.P,
+                                    Sdev.real)
 
-                    self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.P,
-                                        Sdev.real)
+                if elm.bus.is_dc:
+                    # Reactive power is not part of the DC model contract.
+                    pass
+                else:
                     self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Q,
                                         Sdev.imag)
 
@@ -1017,7 +1054,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                 if VarPowerFlowReferenceType.Q in elm.rms_model.external_mapping:
                     setQ(Q, Q_used, k, elm.rms_model.E(VarPowerFlowReferenceType.Q))
 
-                if self.options.initialization_method == RmsInitializationMethod.Explicit:
+                initialization_method: RmsInitializationMethod = _select_rms_initialization_method(
+                    configured_method=self.options.initialization_method, mdl=elm.rms_model,
+                    init_guess=self.init_guess, uid2idx_vars=self._uid2idx_vars)
+                if initialization_method in (RmsInitializationMethod.Explicit, RmsInitializationMethod.ConsistentNewton):
 
                     # else:
                     # for common init explicit to integrate
@@ -1027,13 +1067,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         diff_vars=list(diff_sys_vars.values()),
                         v_params=self._variable_parameters,
                         c_params=self._constant_parameters,
-                        dt_var=Var("dt"),
                         compiler_names_dict=self._compiler_names_dict,
                     )
                     compile_single_equation = build_rms_single_equation_compiler(rms_compiler_init)
 
                     # New init_explicit_common path
-                    self.init_guess, diff_init_guess_common = init_explicit_common(
+                    explicit_initialization_result: ExplicitInitializationResult = init_explicit_common(
                         mdl=elm.rms_model,
                         sys_vars=self.sys_vars,
                         sys_diff_vars=diff_sys_vars,
@@ -1051,10 +1090,15 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         compile_single_equation=compile_single_equation,
                         verbose=bool(self.options.verbose > 0),
                     )
+                    if explicit_initialization_result.converged:
+                        self.init_guess = explicit_initialization_result.init_guess
+                        diff_init_guess_common = explicit_initialization_result.diff_init_guess
+                    else:
+                        raise RuntimeError(explicit_initialization_result.message)
                     # initialize variables with no init equation assigned
-                    # run_rms_native_initialization(self, self.options)
+                    # run_rms_consistent_initialization(self, self.options)
 
-                elif self.options.initialization_method == RmsInitializationMethod.PseudoTransient:
+                elif initialization_method == RmsInitializationMethod.PseudoTransient:
                     self.init_guess = init_pseudo_transient(
                         mdl=elm.rms_model,
                         sys_vars=self.sys_vars,
@@ -1073,33 +1117,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                         DIFF_NAME=self.DIFF_NAME,
                         CONSTANT_PARAMS_NAME=self.CONSTANT_PARAMS_NAME,
                         max_iter=100,
-                        tol=1e-5,
+                        tol=min(1e-5, self.options.tolerance),
                         verbose=bool(self.options.verbose > 0),
                     )
 
-                # not implemented yet
-                # elif self.options.initialization_method == RmsInitializationMethod.PseudoTransient:
-                #     init_pseudo_transient(
-                #         mdl=elm.rms_model,
-                #         sys_vars=self.sys_vars,
-                #         variable_parameters=self._variable_parameters,
-                #         event_parameters_eqs=self._event_parameters_eqs0,
-                #         constant_parameters=self._constant_parameters,
-                #         init_guess=self.init_guess,
-                #         uid2idx_vars=self._uid2idx_vars,
-                #         uid2idx_params=self._uid2idx_params,
-                #         uid2idx_event_params=self._uid2idx_event_params,
-                #         compiler_names_dict=self._compiler_names_dict,
-                #         alias_names_dict=self._alias_names_dict,
-                #         VARIABLE_PARAMS_NAME=self.VARIABLE_PARAMS_NAME,
-                #         TIME_NAME=self.TIME_NAME,
-                #         VARS_NAME=self.VARS_NAME,
-                #         DIFF_NAME=self.DIFF_NAME,
-                #         CONSTANT_PARAMS_NAME=self.CONSTANT_PARAMS_NAME,
-                #         dtau0=1e0,
-                #         max_iter=1000,
-                #         tol=1e-6
-                #     )
                 else:
                     raise ValueError("Not implemented initialization method")
 
@@ -1162,32 +1183,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                     self._balance_equations.append(Q[i])
                     self._balance_equations.append(P[i])
 
-        # We define the parameter dt and delta
-        self._dt = Var(name='dt')
-        self._delta = Var(name='delta')
-        self._variable_parameters.append(self._dt)
-        self._variable_parameters.append(self._delta)
-        self._event_parameters_eqs0.append(Const(1e-3))
-        self._event_parameters_eqs0.append(Const(1))
-
-        self._runtime_all_parameters_source.append(self._dt)
-        self._runtime_all_parameters_source.append(self._delta)
-        self._runtime_all_eqs_source.append(Const(1e-3))
-        self._runtime_all_eqs_source.append(Const(1))
-
-        # add these parameters, m is for variable parameters
-        self._compiler_names_dict[self._dt.uid] = f"{self.VARIABLE_PARAMS_NAME}[{self._n_event_params}]"
-        self._alias_names_dict[self._dt.uid] = f"{self.VARIABLE_PARAMS_NAME}_{self._n_event_params}"
-        self._uid2idx_event_params[self._dt.uid] = self._n_event_params
-        self._n_event_params += 1
-
-        self._compiler_names_dict[self._delta.uid] = f"{self.VARIABLE_PARAMS_NAME}[{self._n_event_params}]"
-        self._alias_names_dict[self._delta.uid] = f"{self.VARIABLE_PARAMS_NAME}_{self._n_event_params}"
-        self._uid2idx_event_params[self._delta.uid] = self._n_event_params
-        self._n_event_params += 1
-
-
-
         self._runtime_all_eqs_source0 = list(self._runtime_all_eqs_source)
 
         ##################### To be removed when order is preserved in the first part #############################
@@ -1229,6 +1224,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             if isinstance(eq, Const) and eq.value is None:
                 raise Exception(f' Event parameter {self._variable_parameters[it]} has None Value')
 
+        # Complete assembly includes the original nodal balance rows.
+
     def set_events_group(self, rms_events_group: RmsEventsGroup):
         """
         add events modifying values of event_parameters equations
@@ -1244,8 +1241,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         else:
             same_group_requested = self._active_events_group.idtag == rms_events_group.idtag
 
-        if same_group_requested:
+        if same_group_requested and self.is_initialized():
             return
+        else:
+            pass
+        # Preparing another group invalidates the previous runtime certificate.
+        self._is_initialized: bool = False
 
         active_runtime_eqs: List[Expr | Const] = list(self._runtime_all_eqs_source0)
 
@@ -1396,7 +1397,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
         self._runtime_all_eqs_source = active_runtime_eqs
         self._scheduled_mode_events = scheduled_mode_events
-        self._active_events_group = rms_events_group
 
         # The active runtime equations must replace the current event-parameter
         # equations before recompilation. Otherwise the JIT event-parameter
@@ -1407,6 +1407,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._rebuild_runtime_parameter_partition()
         self._initialize_mode_event_state()
         self._initialize_procedural_logic_updater()
+        self._validate_deferred_mode_parameter_sources()
 
         if self.get_variable_parameter_number() > 0:
             self._variable_parameters_values = np.ones(self.get_variable_parameter_number(), dtype=np.float64)
@@ -1424,7 +1425,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             diff_vars=self._diff_vars,
             v_params=self._variable_parameters,
             c_params=self._constant_parameters,
-            dt_var=self._dt,
             compiler_names_dict=self._compiler_names_dict
         )
         timings["Compiler Setup"] = _toc(t0)
@@ -1452,7 +1452,6 @@ class RmsProblemDaeVec(RmsProblemTemplate):
                     diff_vars=self._diff_vars_equiv_class_dict[model_type],
                     v_params=self._variable_parameters_equiv_class_dict[model_type],
                     c_params=self._constant_parameters_equiv_class_dict[model_type],
-                    dt_var=self._dt,
                     compiler_names_dict=self._compiler_names_dict_vect[model_type]
                 )
 
@@ -1525,7 +1524,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
         self._constant_params = np.array([const.value for const in self._parameters_values])
 
-        self._block_boundary_updater = build_boundary_updater_from_block(self)
+        # Initialization, reset and runtime updates must operate on the same
+        # cloned procedural state. A second updater would split latch and timer
+        # history between two independent instances.
+        self._block_boundary_updater = self._procedural_logic_updater
 
         if self.options.verbose > 0:
             print(f"\nTotal compile time: {sum(timings.values()):.4f} s")
@@ -1534,6 +1536,23 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._build_global_jacobian_templates()
 
         # we mark the problem as ready for simulation
+        if self.options.initialization_method in (
+                RmsInitializationMethod.ConsistentNewton, RmsInitializationMethod.Auto,
+                RmsInitializationMethod.PseudoTransient):
+            # Record the completed replay/latch snapshot in its existing UID owner.
+            initial_parameter: Var
+            for initial_parameter in self._variable_parameters:
+                self.event_params_init_dict[initial_parameter.uid] = float(
+                    self._variable_parameters_values[self._uid2idx_event_params[initial_parameter.uid]])
+            consistency_converged: bool = run_rms_consistent_initialization(problem=self, options=self.options, logger=self.logger)
+            if consistency_converged:
+                pass
+            else:
+                raise RuntimeError("RMS Auto consistent initialization did not converge")
+        else:
+            pass
+        # A failed new group must remain retryable instead of looking accepted.
+        self._active_events_group = rms_events_group
         self.set_initialize_flag()
 
     def _build_global_jacobian_templates(self):
@@ -1640,6 +1659,43 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
             self._jac_global_data[block_name] = (csc, scatter_map)
 
+    def _set_manufacturer_native_runtime_session(
+            self,
+            runtime_session: ManufacturerNativeRuntimeSessionProtocol | None,
+    ) -> None:
+        """Install the driver-owned RMS native session in the procedural updater.
+
+        :param runtime_session: Event-group session, or ``None`` to detach it.
+        :return: None.
+        """
+        self._manufacturer_native_runtime_session = runtime_session
+        # Finalize compiler snapshots before binding kernels to runtime indexes.
+        self._rebuild_procedural_expression_compiler()
+        self._procedural_logic_updater = build_boundary_updater_from_block(
+            problem=self,
+            expression_mode=ProceduralExpressionMode.Compiled,
+            runtime_session=runtime_session,
+            model_mode=2 if runtime_session is not None else None,
+        )
+        self._block_boundary_updater = self._procedural_logic_updater
+    def resolve_manufacturer_native_boundary(self, t: float, x: Vec) -> None:
+        """Advance due manufacturer controllers after an accepted RMS step.
+
+        :param t: Accepted RMS boundary time.
+        :param x: Accepted state and algebraic vector.
+        :return: None.
+        """
+        updater: BlockProceduralLogicUpdater | None = self._block_boundary_updater
+        if updater is not None and self._manufacturer_native_runtime_session is not None:
+            if self._constant_params is None:
+                constant_params: Vec = np.zeros(0, dtype=float)
+            else:
+                constant_params = self._constant_params
+            full_params: Vec = np.concatenate((self._variable_parameters_values.copy(), constant_params))
+            updater.commit_boundary(float(t), x, full_params)
+            self._variable_parameters_values[:] = full_params[:self.get_variable_parameter_number()]
+        else:
+            pass
     def get_next_forced_event_time(self, t_prev: float, t_target: float) -> Optional[float]:
         t_mode = _get_next_forced_mode_event_time(self._scheduled_mode_events, t_prev, t_target)
 
@@ -1668,16 +1724,73 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             else:
                 return min(native_event_time, t_fmu)
 
-    def _initialize_procedural_logic_updater(self) -> None:
-        entries: List = list()
-        for blk in self.sys_block.get_all_blocks():
-            if blk.procedural_logic:
-                entries.extend(blk.procedural_logic)
-        if len(entries) == 0:
-            self._procedural_logic_updater = None
-            return
+    def _rebuild_procedural_expression_compiler(self) -> None:
+        """Snapshot finalized RMS indexes and constants before procedural binding.
 
-        self._procedural_logic_updater = BlockProceduralLogicUpdater(self, entries)
+        :return: None.
+        """
+        # Event groups can reorder runtime parameters, so kernels must use a fresh snapshot.
+        self._procedural_expression_compiler = ProceduralExpressionCompiler(
+            state_map=self._uid2idx_vars,
+            runtime_map=self._uid2idx_event_params,
+            constant_map=self._uid2idx_params,
+            constant_values=self._parameters_values,
+            global_time_uid=self._glob_time.uid,
+        )
+
+    def get_procedural_expression_compiler(self) -> ProceduralExpressionCompiler:
+        """Return the RMS compiler shared by fused and standalone evaluators.
+
+        :return: Compiler bound to the current RMS parameter layout.
+        """
+        # Direct bindings also need a compiler when no event group has been installed.
+        if self._procedural_expression_compiler is None:
+            self._rebuild_procedural_expression_compiler()
+        else:
+            pass
+        assert self._procedural_expression_compiler is not None
+        return self._procedural_expression_compiler
+
+    def _initialize_procedural_logic_updater(self) -> None:
+        """Build solver-owned procedural state without binding model entries.
+
+        :return: None.
+        """
+        # Finalize compiler snapshots before binding kernels to runtime indexes.
+        self._rebuild_procedural_expression_compiler()
+        self._procedural_logic_updater = build_boundary_updater_from_block(
+            problem=self,
+            expression_mode=ProceduralExpressionMode.Compiled,
+        )
+
+    def _validate_deferred_mode_parameter_sources(self) -> None:
+        """Reject null vectorized RMS modes without an initialization owner.
+
+        :return: None.
+        """
+        parameter_uid: int
+        expression: Expr | Const
+        for parameter_uid, expression in self._mode_runtime_expression_by_uid.items():
+            if isinstance(expression, Const) and expression.value is None:
+                parameter_index: int | None = self._uid2idx_event_params.get(parameter_uid, None)
+                seeded_value: float | int | complex | None = self.event_params_init_dict.get(
+                    parameter_uid,
+                    None,
+                )
+                has_procedural_owner: bool = (
+                    parameter_index is not None
+                    and self._procedural_logic_updater is not None
+                    and parameter_index in self._procedural_logic_updater.get_output_parameter_indices()
+                )
+                if seeded_value is not None or has_procedural_owner:
+                    pass
+                else:
+                    raise ValueError(
+                        "Unresolved RMS mode parameter "
+                        + f"uid={parameter_uid}: Const(None) has no API, explicit or procedural source."
+                    )
+            else:
+                pass
 
     def _register_runtime_event_parameters(self, dev: ALL_DEV_TYPES, mdl: Block) -> None:
         """
@@ -1686,19 +1799,12 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         if not mdl.event_dict and not mdl.mode_dict:
             return
 
-        for parameter, expression in mdl.event_dict.items():
-            init_eq_for_parameter: Expr | Const | None = None
-            for init_var, init_eq in mdl.init_eqs.items():
-                if init_var.uid == parameter.uid:
-                    init_eq_for_parameter = init_eq
-                    break
+        mode_parameter_uids: set[int] = set()
+        mode_parameter: Var
+        for mode_parameter in mdl.mode_dict:
+            mode_parameter_uids.add(mode_parameter.uid)
 
-            expression_for_classification: Expr | Const = expression
-            if isinstance(expression, Const) and expression.value is None and init_eq_for_parameter is not None:
-                expression_for_classification = init_eq_for_parameter
-            else:
-                pass
-
+        for parameter in mdl.event_dict.keys():
             self._event_parameter_device_idtags[parameter.uid] = dev.idtag
 
             # ``Block.event_dict`` declares parameters that the user expects to be
@@ -1711,7 +1817,7 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             # transition into a latched step. The runtime partition therefore uses
             # the initialization expression only as the starting value, while the
             # event_dict parameter itself remains a continuous event target.
-            if parameter.uid in mdl.mode_dict:
+            if parameter.uid in mode_parameter_uids:
                 self._discrete_event_parameter_uids.add(parameter.uid)
             else:
                 self._continuous_event_parameter_uids.add(parameter.uid)
@@ -1919,7 +2025,10 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             if var_idx is not None:
                 return float(x[var_idx])
 
-            return 0.0
+            raise KeyError(
+                f"RMS runtime expression variable '{expression.name}' "
+                + f"(uid={expression.uid}) is not registered."
+            )
 
         uid_bindings: Dict[int, float] = dict()
 
@@ -1935,9 +2044,13 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         uid_bindings[self._glob_time.uid] = float(t)
 
         try:
-            return float(expression.eval_uid(uid_bindings))
-        except Exception:
-            return 0.0
+            result: float = float(expression.eval_uid(uid_bindings))
+        except (KeyError, TypeError, ValueError) as evaluation_error:
+            raise ValueError(
+                "RMS mode initialization expression could not be evaluated "
+                + f"at t={float(t):g}: {expression}"
+            ) from evaluation_error
+        return result
 
     def _update_dynamic_mode_defaults(self, t: float, x: Vec, params: Vec) -> None:
         for uid, expression in self._mode_runtime_expression_by_uid.items():
@@ -1954,6 +2067,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
 
                     if runtime_idx is None:
                         pass
+                    elif isinstance(expression, Const) and expression.value is None:
+                        self._mode_runtime_initialized_uids.add(uid)
                     else:
                         params[runtime_idx] = self._evaluate_runtime_expression_with_state(expression, params, x, t)
                         self._mode_runtime_initialized_uids.add(uid)
@@ -1981,11 +2096,29 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._mode_runtime_initialized_uids = set()
 
         if self._procedural_logic_updater is not None:
-            for logic in self._procedural_logic_updater.logic_entries:
-                logic.bind(self)
+            self._procedural_logic_updater.reset()
+        else:
+            pass
 
         if self.get_all_vars_number() > 0 and self.get_variable_parameter_number() > 0:
             self._initialize_latched_mode_defaults(t=float(t0), x=self.get_x0())
+        else:
+            pass
+
+        if self._procedural_logic_updater is not None:
+            if self._constant_params is None:
+                constant_params: Vec = np.zeros(0, dtype=float)
+            else:
+                constant_params = self._constant_params
+            full_params: Vec = np.concatenate((self._variable_parameters_values.copy(), constant_params))
+            self._procedural_logic_updater.initialize_modes(
+                t=float(t0),
+                x=self.get_x0(),
+                params=full_params,
+            )
+            self._variable_parameters_values[:] = full_params[:self.get_variable_parameter_number()]
+        else:
+            pass
 
     def def_event_params_fn(self, ev_param: Vec, t: float) -> Vec:
         """
@@ -2056,29 +2189,137 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         self._variable_parameters_values = self.def_event_params_fn(self._variable_parameters_values, t)
         self._apply_scheduled_mode_events(scheduled_time, self._variable_parameters_values)
 
+        # Match the scalar RMS contract. Each procedural entry owns its retained
+        # state, while memoryless entries consume every supplied state snapshot.
         if self._block_boundary_updater is not None and x_snapshot is not None:
             if self._constant_params is None:
-                constant_params = np.zeros(0, dtype=float)
+                constant_params: Vec = np.zeros(0, dtype=float)
             else:
                 constant_params = self._constant_params
 
-            full_params = np.concatenate((self._variable_parameters_values.copy(), constant_params))
+            full_params: Vec = np.concatenate((self._variable_parameters_values.copy(), constant_params))
             self._block_boundary_updater.update(float(t), x_snapshot, full_params)
             self._variable_parameters_values[:] = full_params[:self.get_variable_parameter_number()]
+        else:
+            pass
 
     def update(self, t: float, x: Vec, params: Vec) -> None:
+        """Apply one RMS target-boundary update to retained runtime modes.
+
+        :param t: Target solver-boundary time.
+        :param x: Accepted state and algebraic snapshot.
+        :param params: Mutable full parameter vector.
+        :return: None.
+        """
         self._update_dynamic_mode_defaults(t=t, x=x, params=params)
-        if self._procedural_logic_updater is not None:
-            self._procedural_logic_updater.update(t=t, x=x, params=params)
+        if self._block_boundary_updater is not None:
+            self._block_boundary_updater.update(t=t, x=x, params=params)
+        else:
+            pass
         self._variable_parameters_values[:] = params[: len(self._variable_parameters)]
 
-    def add_variables_to_compilation_dicts(self, elm: ALL_DEV_TYPES, mdl: Block):
+    def _register_event_parameter_for_block(
+            self,
+            elm: ALL_DEV_TYPES,
+            mdl: Block,
+            parameter: Var,
+            declared_expression: Expr | Const,
+            equivalence_class_uid: int | None,
+            runtime_expression: Expr | Const | None = None,
+    ) -> None:
+        """Register one vectorized RMS runtime parameter through the shared contract.
+
+        The initial value source is resolved independently of the runtime role.
+        Global and equivalence-class layouts are then populated in the same
+        order so both compiler views refer to one physical parameter slot.
+
+        :param elm: Static device which owns the complete RMS model.
+        :param mdl: Block which declares the runtime parameter.
+        :param parameter: Runtime parameter to register.
+        :param declared_expression: Fallback declared by the block.
+        :param equivalence_class_uid: Vectorized model-class UID, if available.
+        :param runtime_expression: Optional expression retained for runtime use.
+        :return: None.
+        """
+        if parameter.uid in self._uid2idx_event_params:
+            raise ValueError(
+                f"Event parameter '{parameter.name}' (uid={parameter.uid}) is already registered in the system. "
+                + "Previous device may have created a duplicate event parameter."
+            )
+        else:
+            pass
+
+        mapped_initial_value: Const | None = get_api_parameter_initial_value_by_uid(
+            parameter=parameter,
+            problem_mapping=self._static_parameters_values_mapping,
+        )
+        effective_expression: Expr | Const = resolve_runtime_parameter_initial_expression(
+            device=elm,
+            simulation_mode=DynamicSimulationMode.RMS,
+            root_block=elm.rms_model,
+            owner_block=mdl,
+            parameter=parameter,
+            declared_expression=declared_expression,
+            problem_mapping=self._static_parameters_values_mapping,
+            allow_deferred_initialization=parameter.uid in self._discrete_event_parameter_uids,
+        )
+        if mapped_initial_value is None or mapped_initial_value.value is None:
+            pass
+        else:
+            self.event_params_init_dict[parameter.uid] = mapped_initial_value.value
+
+        if equivalence_class_uid is None:
+            pass
+        else:
+            class_index: int = self._class_n_event_params.get(equivalence_class_uid, 0)
+            self._compiler_names_dict_vect[equivalence_class_uid][parameter.uid] = (
+                f"{self.VARIABLE_PARAMS_NAME}[{class_index}]"
+            )
+            self._alias_names_dict_vect[equivalence_class_uid][parameter.uid] = (
+                f"{self.VARIABLE_PARAMS_NAME}_{class_index}"
+            )
+            self._uid2idx_event_params_vec[equivalence_class_uid][parameter.uid] = class_index
+            self._variable_parameters_equiv_class_dict[equivalence_class_uid].append(parameter)
+            self._class_n_event_params[equivalence_class_uid] = class_index + 1
+
+        self._compiler_names_dict[parameter.uid] = f"{self.VARIABLE_PARAMS_NAME}[{self._n_event_params}]"
+        self._alias_names_dict[parameter.uid] = f"{self.VARIABLE_PARAMS_NAME}_{self._n_event_params}"
+        self._uid2idx_event_params[parameter.uid] = self._n_event_params
+        self._variable_parameters.append(parameter)
+        self._event_parameters_eqs0.append(effective_expression)
+        self._runtime_all_parameters_source.append(parameter)
+
+        if runtime_expression is None:
+            resolved_runtime_expression: Expr | Const = effective_expression
+        else:
+            resolved_runtime_expression = runtime_expression
+
+        if runtime_expression is None and parameter.uid in self._discrete_event_parameter_uids:
+            if isinstance(effective_expression, Const) and effective_expression.value is not None:
+                resolved_runtime_expression = Const(float(effective_expression.value))
+            else:
+                resolved_runtime_expression = Const(0.0)
+                self._mode_runtime_expression_by_uid[parameter.uid] = effective_expression
+        else:
+            pass
+
+        self._runtime_all_eqs_source.append(resolved_runtime_expression)
+        self._runtime_all_eqs_source0.append(resolved_runtime_expression)
+        self._n_event_params += 1
+
+    def add_variables_to_compilation_dicts(self, elm: ALL_DEV_TYPES, mdl: Block) -> None:
+        """Register a complete RMS block hierarchy in vectorized storage.
+
+        :param elm: Static device which owns the complete RMS model.
+        :param mdl: Current block in the recursive hierarchy traversal.
+        :return: None.
+        """
 
         self.add_block_variables_to_compilation_dicts(elm, mdl)
         for child in mdl.children:
             self.add_variables_to_compilation_dicts(elm, child)
 
-    def add_block_variables_to_compilation_dicts(self, elm: ALL_DEV_TYPES, mdl: Block):
+    def add_block_variables_to_compilation_dicts(self, elm: ALL_DEV_TYPES, mdl: Block) -> None:
         """
         add variables and parameters info to the system block
 
@@ -2218,13 +2459,14 @@ class RmsProblemDaeVec(RmsProblemTemplate):
             self._n_vars += 1
 
         for ep, const in mdl.parameters.items():
-            resolved_parameter_value: Const = _resolve_rms_constant_parameter_value(
+            resolved_parameter_value: Const = resolve_constant_parameter_initial_value(
                 device=elm,
+                simulation_mode=DynamicSimulationMode.RMS,
                 root_block=elm.rms_model,
                 owner_block=mdl,
                 parameter=ep,
                 declared_value=const,
-                static_parameter_values=self._static_parameters_values_mapping,
+                problem_mapping=self._static_parameters_values_mapping,
             )
 
             # if ep.name == "g":
@@ -2256,62 +2498,23 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         # m is for variable parameters
         self._register_runtime_event_parameters(dev=elm, mdl=mdl)
 
-        # Todo: function inside a function, refactor this!
-        def _register_event_parameter(ep: Var, eq: Expr | Const, runtime_eq: Expr | Const | None = None) -> None:
-            declared_eq: Expr | Const = self._static_parameters_values_mapping.get(ep, eq)
-            if ep in self._static_parameters_values_mapping:
-                mapped_value = self._static_parameters_values_mapping[ep].value
-                if mapped_value is not None:
-                    self.event_params_init_dict[ep.uid] = float(mapped_value)
-
-            effective_eq: Expr | Const = _resolve_rms_runtime_parameter_expression(
-                device=elm,
-                owner_block=mdl,
+        for ep, eq in mdl.event_dict.items():
+            self._register_event_parameter_for_block(
+                elm=elm,
+                mdl=mdl,
                 parameter=ep,
-                declared_expression=declared_eq,
-                is_discrete_parameter=ep.uid in self._discrete_event_parameter_uids,
+                declared_expression=eq,
+                equivalence_class_uid=equiv_class_uid,
             )
 
-            if ep.uid in self._uid2idx_event_params:
-                raise ValueError(f"Event parameter '{ep.name}' (uid={ep.uid}) is already registered in the system. "
-                                 f"Previous device may have created a duplicate event parameter.")
-            if equiv_class_uid:
-
-                class_idx = self._class_n_event_params.get(equiv_class_uid, 0)
-                self._compiler_names_dict_vect[equiv_class_uid][ep.uid] = f"{self.VARIABLE_PARAMS_NAME}[{class_idx}]"
-                self._alias_names_dict_vect[equiv_class_uid][ep.uid] = f"{self.VARIABLE_PARAMS_NAME}_{class_idx}"
-                self._uid2idx_event_params_vec[equiv_class_uid][ep.uid] = class_idx
-                self._variable_parameters_equiv_class_dict[equiv_class_uid].append(ep)
-                self._class_n_event_params[equiv_class_uid] = class_idx + 1
-
-            self._compiler_names_dict[ep.uid] = f"{self.VARIABLE_PARAMS_NAME}[{self._n_event_params}]"
-            self._alias_names_dict[ep.uid] = f"{self.VARIABLE_PARAMS_NAME}_{self._n_event_params}"
-            self._uid2idx_event_params[ep.uid] = self._n_event_params
-
-            self._variable_parameters.append(ep)
-            self._event_parameters_eqs0.append(effective_eq)
-            self._runtime_all_parameters_source.append(ep)
-
-
-            runtime_expression: Expr | Const = effective_eq if runtime_eq is None else runtime_eq
-
-            if runtime_eq is None and ep.uid in self._discrete_event_parameter_uids:
-                if isinstance(effective_eq, Const) and effective_eq.value is not None:
-                    runtime_expression = Const(float(effective_eq.value))
-                else:
-                    runtime_expression = Const(0.0)
-                    self._mode_runtime_expression_by_uid[ep.uid] = effective_eq
-
-            self._runtime_all_eqs_source.append(runtime_expression)
-            self._runtime_all_eqs_source0.append(runtime_expression)
-
-            self._n_event_params += 1
-
-        for ep, eq in mdl.event_dict.items():
-            _register_event_parameter(ep, eq)
-
         for ep, eq in mdl.mode_dict.items():
-            _register_event_parameter(ep, eq)
+            self._register_event_parameter_for_block(
+                elm=elm,
+                mdl=mdl,
+                parameter=ep,
+                declared_expression=eq,
+                equivalence_class_uid=equiv_class_uid,
+            )
 
         # l is for differential vars
         for v in mdl.diff_vars:
@@ -2593,6 +2796,17 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         :return: array matching with the mapping, matching the solver ordering
         """
         x = np.zeros(len(self._variable_parameters))
+
+        # Registered baseline constants, including the branch activity u=1,
+        # are known startup data even when explicit initialization did not
+        # add them to its sparse seed map. Never substitute structural zero.
+        parameter_index: int
+        parameter_expression: Expr | Const
+        for parameter_index, parameter_expression in enumerate(self._event_parameters_eqs0):
+            if isinstance(parameter_expression, Const) and parameter_expression.value is not None:
+                x[parameter_index] = float(parameter_expression.value)
+            else:
+                pass
 
         for uid, val in self.event_params_init_dict.items():
             i = self._uid2idx_event_params[uid]
@@ -2955,12 +3169,8 @@ class RmsProblemDaeVec(RmsProblemTemplate):
         # Preserve the existing per-model and network-balance Jacobian assembly.
         return self.get_j22_vec(x=x, dx=dx, h=h)
 
-    def get_dt(self):
-        return self._dt
-
     def get_dt_value(self):
-        dt_value = self._variable_parameters_values[-2]
-        return dt_value
+        return self.options.time_step
 
     def get_compiler_names_dict(self):
         return self._compiler_names_dict

@@ -4,21 +4,89 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from typing import Union
+from typing import Union, List
 
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
+from VeraGridEngine.Devices.Events.contingency_group import ContingencyGroup
 from VeraGridEngine.Simulations.NTC.ntc_opf import run_linear_ntc_opf, NtcVars
 from VeraGridEngine.Simulations.NTC.ntc_opf_strict import run_linear_ntc_opf_strict
 from VeraGridEngine.Simulations.NTC.ntc_driver import (
     OptimalNetTransferCapacityOptions,
     collect_contingency_group_device_names,
     collect_phase_shifter_indices,
+    select_ntc_contingency_groups,
+    get_ntc_operating_point_as_opf_results,
 )
+from VeraGridEngine.Simulations.OPF.opf_results import OptimalPowerFlowResults
 from VeraGridEngine.Simulations.NTC.ntc_ts_results import OptimalNetTransferCapacityTimeSeriesResults
 from VeraGridEngine.Simulations.driver_template import TimeSeriesDriverTemplate
 from VeraGridEngine.Simulations.Clustering.clustering_results import ClusteringResults
 from VeraGridEngine.basic_structures import Logger, IntVec
-from VeraGridEngine.enumerations import SimulationTypes
+from VeraGridEngine.enumerations import SimulationTypes, AvailableTransferMode
+
+
+class NtcOperatingPoints:
+    """
+    The operating points of an NTC time series, served one time step at a time as OPF results,
+    so a power flow time series reproduces the NTC flows of every time step the NTC solved.
+    """
+    __slots__ = (
+        "grid",
+        "results",
+        "transfer_method",
+        "rows",
+    )
+
+    def __init__(self,
+                 grid: MultiCircuit,
+                 results: OptimalNetTransferCapacityTimeSeriesResults,
+                 transfer_method: AvailableTransferMode) -> None:
+        """
+        Locate the results row of every time step the NTC solved.
+
+        :param grid: circuit the NTC was solved on
+        :param results: NTC time series results, with or without the clusters expanded
+        :param transfer_method: transfer method of that NTC run
+        """
+        self.grid: MultiCircuit = grid
+        self.results: OptimalNetTransferCapacityTimeSeriesResults = results
+        self.transfer_method: AvailableTransferMode = transfer_method
+
+        # Only the solved steps hold an NTC solution
+        solved: IntVec
+        solved_rows: IntVec
+        if results.clustering_results is not None:
+            solved = np.asarray(results.clustering_results.time_indices, dtype=int)
+            if len(results.inter_area_flows) == len(results.clustering_results.time_array):
+                solved_rows = solved
+            else:
+                solved_rows = np.arange(len(solved), dtype=int)
+        else:
+            solved = np.asarray(results.time_indices, dtype=int)
+            solved_rows = np.arange(len(solved), dtype=int)
+
+        # row of the results for every time step, -1 where the NTC did not solve it
+        self.rows: IntVec = np.full(grid.get_time_number(), -1, dtype=int)
+        self.rows[solved] = solved_rows
+
+    def get_at(self, t: int) -> OptimalPowerFlowResults | None:
+        """
+        NTC operating point of a time step.
+
+        :param t: time step
+        :return: OPF results holding the NTC operating point, or None where the NTC did not solve it
+        """
+        row: int = int(self.rows[t])
+        if row < 0:
+            return None
+        else:
+            return get_ntc_operating_point_as_opf_results(grid=self.grid,
+                                                          t_idx=t,
+                                                          bus_change=self.results.dSbus[row, :],
+                                                          phase_shift=self.results.phase_shift[row, :],
+                                                          hvdc_flow=self.results.hvdc_Pf[row, :],
+                                                          vsc_flow=self.results.vsc_Pf[row, :],
+                                                          transfer_method=self.transfer_method)
 
 
 class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
@@ -76,10 +144,14 @@ class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
             time_array=self.grid.time_profile[self.time_indices],
             time_indices=self.time_indices,
             clustering_results=self.clustering_results,
+            transmission_reliability_margin=self.options.transmission_reliability_margin,
         )
         self.results.phase_shifter_indices = collect_phase_shifter_indices(self.grid, self.time_indices)
         self.results.strict_formulation = self.options.strict_formulation
         self.results.loading_threshold_to_report = self.options.loading_threshold_to_report
+
+        contingency_groups_used: List[ContingencyGroup] = select_ntc_contingency_groups(
+            self.grid, self.options.opf_options.contingency_groups_used)
 
         for t_idx, t in enumerate(self.time_indices):
 
@@ -93,7 +165,7 @@ class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
                     skip_generation_limits=self.options.skip_generation_limits,
                     consider_contingencies=self.options.consider_contingencies,
                     corrective_contingencies=self.options.corrective_contingencies,
-                    contingency_groups_used=self.options.opf_options.contingency_groups_used,
+                    contingency_groups_used=contingency_groups_used,
                     alpha_threshold=self.options.branch_exchange_sensitivity,
                     lodf_threshold=self.options.lin_options.lodf_threshold,
                     bus_a1_idx=self.options.sending_bus_idx,
@@ -118,7 +190,7 @@ class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
                     skip_generation_limits=self.options.skip_generation_limits,
                     consider_contingencies=self.options.consider_contingencies,
                     corrective_contingencies=self.options.corrective_contingencies,
-                    contingency_groups_used=self.options.opf_options.contingency_groups_used,
+                    contingency_groups_used=contingency_groups_used,
                     alpha_threshold=self.options.branch_exchange_sensitivity,
                     lodf_threshold=self.options.lin_options.lodf_threshold,
                     bus_a1_idx=self.options.sending_bus_idx,
@@ -170,11 +242,28 @@ class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
             self.results.worst_contingency_flow[t_idx, :] = opf_vars.branch_vars.worst_contingency_flow[0, :]
             self.results.worst_contingency_loading[t_idx, :] = opf_vars.branch_vars.worst_contingency_loading[0, :]
             self.results.alpha_n1_worst[t_idx, :] = opf_vars.branch_vars.alpha_n1_worst[0, :]
+            # keep only the ties of rows the report can show
+            for tie in opf_vars.branch_vars.worst_contingency_ties:
+                tie_branch: int = tie[0]
+                row_loading_pct: float = 100.0 * max(
+                    float(opf_vars.branch_vars.worst_contingency_loading[0, tie_branch]),
+                    abs(float(opf_vars.branch_vars.loading[0, tie_branch])))
+                if (opf_vars.branch_vars.monitor_logic[0, tie_branch]
+                        and row_loading_pct >= self.options.loading_threshold_to_report):
+                    self.results.worst_contingency_ties.append((t_idx,) + tie)
+                else:
+                    pass  # the report never displays this branch
 
-            # the snapshot LP always runs at its internal t = 0, so re-stamp every report
-            # entry with the time series step index before accumulating
-            for report_entry in opf_vars.branch_vars.contingency_flow_data:
-                self.results.contingency_flows_list.append((t_idx,) + tuple(report_entry[1:]))
+            # The time series only reads the relaxed rows back (total slack per step). Keeping every
+            # admitted N-1 row instead grows the memory.
+            if not self.options.strict_formulation:
+                for report_entry in opf_vars.branch_vars.contingency_flow_data:
+                    if abs(report_entry[4]) + abs(report_entry[5]) > 0.0:
+                        self.results.contingency_flows_list.append((t_idx,) + tuple(report_entry[1:]))
+                    else:
+                        pass  # the limit held without relaxation
+            else:
+                pass  # the strict formulation has no contingency slacks to accumulate
 
             self.results.hvdc_Pf[t_idx, :] = opf_vars.hvdc_vars.flows[0, :]
             self.results.hvdc_loading[t_idx, :] = opf_vars.hvdc_vars.loading[0, :]
@@ -184,6 +273,10 @@ class OptimalNetTransferCapacityTimeSeriesDriver(TimeSeriesDriverTemplate):
 
             self.results.converged[t_idx] = opf_vars.acceptable_solution
             self.results.inter_area_flows[t_idx] = opf_vars.inter_area_flows[0]
+
+            # The step results are copied, so release this step LP (several GB on national grids
+            # with N-1) now; otherwise it stays alive while the next step builds its own
+            del opf_vars, model
 
             # update progress bar
             self.report_progress2(t_idx, len(self.time_indices))

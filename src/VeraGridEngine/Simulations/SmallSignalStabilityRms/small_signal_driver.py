@@ -25,6 +25,8 @@ from VeraGridEngine.basic_structures import Vec, Mat
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import RmsProblemDae, RmsProblemTemplate
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 from VeraGridEngine.Simulations.Rms.numerical.back_euler_fx import BackEulerImplicitIntegration
+from VeraGridEngine.Utils.NumericalMethods.external_sparse_solver_interface import SparseLinearSolverBackendProvider
+from VeraGridEngine.Utils.NumericalMethods.sparse_lu_selection import resolve_sparse_lu_provider
 
 
 def compute_state_matrix(problem: RmsProblemTemplate, x: Vec, dx: Vec) -> tuple[Mat, Mat]:
@@ -110,7 +112,7 @@ def compute_state_matrix(problem: RmsProblemTemplate, x: Vec, dx: Vec) -> tuple[
     return A_bal, A
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def compute_participation_factors(v: np.ndarray,
                                   w: np.ndarray) -> np.ndarray:
     """
@@ -168,9 +170,7 @@ def compute_participation_factors_generalized(v: np.ndarray,
 
         w_i^T E v_i = 1
 
-    and computes:
-
-        p_ki = |v_ki (w_i^T E)_k|
+    and computes ``p_ki = |v_ki (w_i^T E)_k|``.
 
     The returned participation factors are column-normalized.
     """
@@ -232,7 +232,7 @@ def select_eigs_without_conjugates(eigenvalues: Vec) -> Vec:
     return np.array(eig_list)
 
 
-@nb.njit(cache=True)
+@nb.jit(cache=True)
 def compute_damping_ratios_and_frequencies(eigenvalues: Vec,
                                            eig_no_conjugates: Vec) -> tuple[Vec, Vec]:
     """
@@ -717,7 +717,8 @@ class SmallSignalStabilityRmsDriver(DriverTemplate):
 
         self.problem = RmsProblemDae(grid=grid,
                                      options=self.rms_options,
-                                     pf_results=pf_results)
+                                     pf_results=pf_results,
+                                     logger=self.logger)
 
         self.problem.set_events_group(events_group)
 
@@ -773,12 +774,17 @@ class SmallSignalStabilityRmsDriver(DriverTemplate):
                 f"Simulating the RMS model up to the assessment time ({self.assessment_time:g} s)..."
             )
 
+            sparse_solver_backend_provider: SparseLinearSolverBackendProvider = resolve_sparse_lu_provider(
+                self.rms_options.sparse_solver,
+                self.logger,
+            )
             solver = self.integration_methods_dict[self.rms_options.integration_method](
                 problem=self.problem,
                 t0=0,
                 t_end=self.assessment_time,
                 h=self.rms_options.time_step,
-                max_iter=self.rms_options.max_iter
+                max_iter=self.rms_options.max_iter,
+                sparse_solver_backend_provider=sparse_solver_backend_provider,
             )
 
             t, y, well_initialized, converged = solver.simulate()

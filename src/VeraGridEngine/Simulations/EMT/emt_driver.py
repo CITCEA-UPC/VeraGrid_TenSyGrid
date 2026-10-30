@@ -5,7 +5,7 @@
 
 import numpy as np
 import pandas as pd
-from typing import Dict
+from typing import Dict, List
 
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Simulations.driver_template import DriverTemplate
@@ -18,10 +18,77 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDa
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
 from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowResults
 from VeraGridEngine.Utils.Symbolic.diagnostic import NewtonDiagnosticsConfig
-from VeraGridEngine.IO.fmu.importer.emt_boundary import CompositeEmtBoundaryUpdater, build_emt_boundary_updater
+from VeraGridEngine.IO.fmu.fmu_device_integration import CompositeEmtBoundaryUpdater, build_emt_boundary_updater
 from VeraGridEngine.basic_structures import Vec, StrVec
+from VeraGridEngine.IO.manufacturer_native.runtime_session import ManufacturerNativeRuntimeSession
+from VeraGridEngine.IO.native_runtime import NativeWorkerLimits
+from VeraGridEngine.Utils.Symbolic.symbolic import Var
 
 from VeraGridEngine.enumerations import EngineType, PlotSimulationType, SimulationTypes
+
+
+def _compare_first_step_non_angle_states(
+        values: np.ndarray,
+        state_vars: List[Var],
+        tolerance: float = 1.0e-4,
+) -> bool | None:
+    """Compare non-angle model states across the first integration step.
+
+    This is a local sample-to-sample diagnostic. It does not establish an EMT
+    equilibrium or periodic steady state because sinusoidal physical states are
+    expected to evolve even when their phasors are stationary.
+
+    :param values: Simulated variable samples with time along the first axis.
+    :param state_vars: State variables corresponding to the leading columns.
+    :param tolerance: Relative change accepted as unchanged.
+    :return: ``True`` when every compared state remains within tolerance,
+        ``False`` when at least one changes, or ``None`` when comparison is not
+        possible.
+    """
+    values_array: np.ndarray = np.asarray(values, dtype=float)
+    inputs_are_valid: bool = bool(
+        np.isfinite(tolerance)
+        and tolerance >= 0.0
+        and values_array.ndim == 2
+        and values_array.shape[0] >= 2
+        and values_array.shape[1] >= len(state_vars)
+    )
+    if inputs_are_valid:
+        pass
+    else:
+        return None
+
+    indices: List[int] = list()
+    state_index: int
+    state_var: Var
+    for state_index, state_var in enumerate(state_vars):
+        is_angle_state: bool = state_var.name.lower().startswith(("theta", "angle", "phi"))
+        if is_angle_state:
+            pass
+        else:
+            indices.append(state_index)
+
+    if len(indices) == 0:
+        return None
+    else:
+        pass
+
+    first_values: np.ndarray = values_array[0, indices]
+    second_values: np.ndarray = values_array[1, indices]
+    samples_are_finite: bool = bool(
+        np.all(np.isfinite(first_values)) and np.all(np.isfinite(second_values))
+    )
+    if samples_are_finite:
+        pass
+    else:
+        return None
+
+    scale: np.ndarray = np.maximum(
+        1.0,
+        np.maximum(np.abs(first_values), np.abs(second_values)),
+    )
+    relative_change: np.ndarray = np.abs(second_values - first_values) / scale
+    return bool(np.all(relative_change <= tolerance))
 
 
 def _collect_emt_group_parameter_values(problem: EmtProblemDae,
@@ -36,7 +103,9 @@ def _collect_emt_group_parameter_values(problem: EmtProblemDae,
     parameter_values: Dict[str, float] = collect_declared_dynamic_parameter_values(
         grid=grid,
         simulation_type=PlotSimulationType.EMT,
-        logger=problem.logger,
+        # The problem builder already reported mapping diagnostics. Rebuilding
+        # result metadata must not emit them again for every saved snapshot.
+        logger=None,
     )
     event_parameter_count: int = len(problem.get_variable_parameters())
     parameter_index: int
@@ -117,9 +186,6 @@ class EmtSimulationDriver(DriverTemplate):
         Performs the EMTP loop using the chosen method.
         :return:
         """
-        # TODO: into the loop add " self.report_text('Time series at ' + str(self.grid.time_profile[t]) + '...')
-        #                     self.report_progress2(it, len(time_indices)) "
-
         self.progress_signal.emit(0)
 
         # set emt events groups
@@ -231,7 +297,24 @@ class EmtSimulationDriver(DriverTemplate):
                     newton_diag_config=newton_diag_config,
                     progress_signal=self.progress_signal,
                     cancel_checker=self.is_cancel,
+                    logger=self.logger,
                 )
+
+                native_session: ManufacturerNativeRuntimeSession | None = None
+                if len(self.grid.manufacturer_native_models) > 0:
+                    native_session = ManufacturerNativeRuntimeSession(
+                        providers=self.grid.manufacturer_native_models,
+                        platform=None,
+                        limits=NativeWorkerLimits(),
+                        logger=self.logger,
+                    )
+                    try:
+                        problem.resolve_manufacturer_native_boundary(native_session)
+                    except BaseException:
+                        native_session.close()
+                        raise
+                else:
+                    pass
 
                 # EMT runtime parameters are initialized by problem/solver
                 # construction. Snapshot them now, before any event evolution.
@@ -239,7 +322,6 @@ class EmtSimulationDriver(DriverTemplate):
                     problem=problem,
                     grid=self.grid,
                 )
-
                 boundary_updater: EmtProblemDae | CompositeEmtBoundaryUpdater = build_emt_boundary_updater(problem)
                 try:
                     # The solver uses the FMU-aware wrapper when native adapters
@@ -250,6 +332,11 @@ class EmtSimulationDriver(DriverTemplate):
                     # every native runtime on success, failure, or cancellation.
                     if isinstance(boundary_updater, CompositeEmtBoundaryUpdater):
                         boundary_updater.close()
+                    else:
+                        pass
+                    problem.resolve_manufacturer_native_boundary(None)
+                    if native_session is not None:
+                        native_session.close()
                     else:
                         pass
 
@@ -283,14 +370,54 @@ class EmtSimulationDriver(DriverTemplate):
 
                 print(f"converged ={converged}")
                 print(f"well_initialized ={well_initialized}")
+                # Qualification belongs to the existing initialization report.
+                if problem.initialization_report is None:
+                    pass
+                else:
+                    initialization_summary: str = (
+                        f"Initialization status={problem.initialization_report.status.name}: "
+                        f"{problem.initialization_report.message}"
+                    )
+                    print(initialization_summary)
+                    self.report_text(initialization_summary)
+                first_step_states_unchanged: bool | None
+                if well_initialized:
+                    first_step_states_unchanged = _compare_first_step_non_angle_states(
+                        values=y,
+                        state_vars=problem.get_state_vars(),
+                    )
+                else:
+                    first_step_states_unchanged = None
+
+                if first_step_states_unchanged is None:
+                    self.report_text(
+                        "First-step non-angle EMT state comparison is unavailable because "
+                        "initialization failed or comparable finite samples were not produced."
+                    )
+                else:
+                    if first_step_states_unchanged:
+                        self.report_text(
+                            "Non-angle EMT states remained unchanged between the initial sample "
+                            "and the first integration sample."
+                        )
+                    else:
+                        self.report_text(
+                            "Non-angle EMT states changed between the initial sample and the first "
+                            "integration sample. This sample comparison does not by itself indicate "
+                            "failed initialization; periodic AC states normally evolve in time."
+                        )
 
                 # Persist the solver status in the shared results object so the
                 # GUI post-processing stage reports the actual simulation
                 # outcome instead of the default False placeholders.
                 self.results.converged[group_idx] = converged
                 self.results.well_initialized[group_idx] = well_initialized
-                self.results.values[:, :, group_idx] = y
-                self.results.diff_values[:, :, group_idx] = dy
+                # Keep the declared group/time layout while marking uncomputed rows.
+                completed_samples: int = y.shape[0]
+                self.results.values[:completed_samples, :, group_idx] = y
+                self.results.diff_values[:completed_samples, :, group_idx] = dy
+                self.results.values[completed_samples:, :, group_idx] = np.nan
+                self.results.diff_values[completed_samples:, :, group_idx] = np.nan
                 self.results.parameter_value_maps[group_idx] = _collect_emt_group_parameter_values(
                     problem=problem,
                     grid=self.grid,

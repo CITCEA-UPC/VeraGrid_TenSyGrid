@@ -8,14 +8,22 @@ import json
 import math
 import os
 from pathlib import Path
-from typing import Dict, Union, List, Tuple, Any, Callable
+from typing import Dict, Union, List, Tuple, Any, Callable, Set, Optional
 import pandas as pd
 import numpy as np
 from enum import EnumMeta as EnumType
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
-import VeraGridEngine.Devices as devices
+from VeraGridEngine.Devices.Dynamic.manufacturer_native_model import (
+    ManufacturerNativeBinaryVariant,
+    ManufacturerNativeModel,
+)
+from VeraGridEngine.IO.manufacturer_native.model_info import ManufacturerNativeModelInfo
+from VeraGridEngine.IO.manufacturer_native.model_info_codec import decode_manufacturer_native_model_info
+from VeraGridEngine.enumerations import IeeeCigreDllPlatform, IeeeCigreDllVerificationStatus
+import VeraGridEngine.Devices as dev
 from VeraGridEngine.Devices.Parents.editable_device import GCProp, EditableDevice
+from VeraGridEngine.Devices.Parents.pointer_device_parent import PointerDeviceParent
 from VeraGridEngine.Devices.Profiles import AnyProfile
 from VeraGridEngine.Utils.Symbolic.symbolic_io import (BlockSaver, BlockParser, Block,
                                                        normalize_persisted_block_uid,
@@ -41,123 +49,123 @@ def get_objects_dictionary() -> Dict[str, ALL_DEV_TYPES]:
     # loading algorithm is able to find the object substitutions
 
     return {
-        'modelling_authority': devices.ModellingAuthority(),
+        'modelling_authority': dev.ModellingAuthority(),
 
-        'area': devices.Area(),
-        'zone': devices.Zone(),
+        'area': dev.Area(),
+        'zone': dev.Zone(),
 
-        'country': devices.Country(),
-        'community': devices.Community(),
-        'region': devices.Region(),
-        'municipality': devices.Municipality(),
+        'country': dev.Country(),
+        'community': dev.Community(),
+        'region': dev.Region(),
+        'municipality': dev.Municipality(),
 
-        'owner': devices.Owner(),
+        'owner': dev.Owner(),
 
-        'substation': devices.Substation(),
-        'voltage_level': devices.VoltageLevel(),
+        'substation': dev.Substation(),
+        'voltage_level': dev.VoltageLevel(),
 
-        'technology': devices.Technology(),
+        'technology': dev.Technology(),
 
-        'fuel': devices.Fuel(),
+        'fuel': dev.Fuel(),
 
-        'emission': devices.EmissionGas(),
+        'emission': dev.EmissionGas(),
 
-        'facility': devices.Facility(),
+        'facility': dev.Facility(),
 
-        'market_unit': devices.MarketUnit(),
+        'market_unit': dev.MarketUnit(),
 
-        'rms_model_template': devices.RmsModelTemplate(),
-        'emt_model_template': devices.EmtModelTemplate(),
-        'fmu_template': devices.FmuTemplate(),
+        'manufacturer_native_model': dev.ManufacturerNativeModel(),
+        'rms_model_template': dev.RmsModelTemplate(),
+        'emt_model_template': dev.EmtModelTemplate(),
+        'fmu_template': dev.FmuTemplate(),
 
-        'bus': devices.Bus(),
+        'bus': dev.Bus(),
 
-        'bus_bar': devices.BusBar(),
+        'bus_bar': dev.BusBar(),
 
-        'load': devices.Load(),
+        'load': dev.Load(),
 
-        'static_generator': devices.StaticGenerator(),
+        'static_generator': dev.StaticGenerator(),
 
-        'battery': devices.Battery(),
+        'battery': dev.Battery(),
 
-        'generator': devices.Generator(),
+        'generator': dev.Generator(),
 
-        'shunt': devices.Shunt(),
+        'shunt': dev.Shunt(),
 
-        'linear_shunt': devices.ControllableShunt(),
+        'linear_shunt': dev.ControllableShunt(),
 
-        'external_grid': devices.ExternalGrid(),
+        'external_grid': dev.ExternalGrid(),
 
-        'current_injection': devices.CurrentInjection(),
+        'current_injection': dev.CurrentInjection(),
 
-        'wires': devices.Wire(),
-        'overhead_line_types': devices.OverheadLineType(),
-        'underground_cable_constructions': devices.UndergroundCableType(),
-        'underground_cable_types': devices.UndergroundLineType(),
-        'sequence_line_types': devices.SequenceLineType(),
-        'dc_cable_types': devices.DcCableType(),
-        'transformer_types': devices.TransformerType(),
+        'wires': dev.Wire(),
+        'overhead_line_types': dev.OverheadLineType(),
+        'underground_cable_constructions': dev.UndergroundCableType(),
+        'underground_cable_types': dev.UndergroundLineType(),
+        'sequence_line_types': dev.SequenceLineType(),
+        'transformer_types': dev.TransformerType(),
 
-        'branch_group': devices.BranchGroup(),
+        'branch_group': dev.BranchGroup(),
 
-        'branch': devices.Branch(),
-        'transformer2w': devices.Transformer2W(),
+        'branch': dev.Branch(),
+        'transformer2w': dev.Transformer2W(),
 
-        'windings': devices.Winding(),
-        'transformer3w': devices.Transformer3W(),
-        'transformernw': devices.TransformerNW(),
+        'windings': dev.Winding(),
+        'transformer3w': dev.Transformer3W(),
+        'transformernw': dev.TransformerNW(),
 
-        'line': devices.Line(),
-        'dc_line': devices.DcLine(),
+        'line': dev.Line(),
+        'dc_line': dev.DcLine(),
 
-        'hvdc': devices.HvdcLine(),
+        'hvdc': dev.HvdcLine(),
 
-        'vsc': devices.VSC(),
-        'upfc': devices.UPFC(),
+        'vsc': dev.VSC(),
+        'upfc': dev.UPFC(),
 
-        'series_reactance': devices.SeriesReactance(),
+        'series_reactance': dev.SeriesReactance(),
 
-        'switch': devices.Switch(),
+        'switch': dev.Switch(),
 
-        'contingency_group': devices.ContingencyGroup(),
-        'contingency': devices.Contingency(),
-        'short_circuit_definition': devices.ShortCircuitEvent(),
+        'contingency_group': dev.ContingencyGroup(),
+        'contingency': dev.Contingency(),
+        'short_circuit_definition': dev.ShortCircuitEvent(),
 
-        'remedial_action_group': devices.RemedialActionGroup(),
-        'remedial_action': devices.RemedialAction(),
+        'remedial_action_group': dev.RemedialActionGroup(),
+        'remedial_action': dev.RemedialAction(),
 
-        'investments_group': devices.InvestmentsGroup(),
-        'investment': devices.Investment(),
+        'investments_group': dev.InvestmentsGroup(),
+        'investment': dev.Investment(),
 
-        'rms_event_group': devices.RmsEventsGroup(),
-        'rms_event': devices.RmsEvent(),
+        'rms_event_group': dev.RmsEventsGroup(),
+        'rms_event': dev.RmsEvent(),
 
-        'emt_event_group': devices.EmtEventsGroup(),
-        'emt_event': devices.EmtEvent(),
+        'emt_event_group': dev.EmtEventsGroup(),
+        'emt_event': dev.EmtEvent(),
 
-        'dynamic_plot': devices.DynamicPlot(),
-        'dynamic_plot_entry': devices.DynamicPlotEntry(),
+        'dynamic_plot': dev.DynamicPlot(),
+        'dynamic_plot_entry': dev.DynamicPlotEntry(),
 
-        'fluid_node': devices.FluidNode(),
-        'fluid_path': devices.FluidPath(),
-        'fluid_turbine': devices.FluidTurbine(),
-        'fluid_pump': devices.FluidPump(),
-        'fluid_p2x': devices.FluidP2x(),
+        'fluid_node': dev.FluidNode(),
+        'fluid_path': dev.FluidPath(),
+        'fluid_turbine': dev.FluidTurbine(),
+        'fluid_pump': dev.FluidPump(),
+        'fluid_p2x': dev.FluidP2x(),
 
-        'pi_measurement': devices.PiMeasurement(),
-        'qi_measurement': devices.QiMeasurement(),
-        'pf_measurement': devices.PfMeasurement(),
-        'qf_measurement': devices.QfMeasurement(),
-        'if_measurement': devices.IfMeasurement(),
-        'pt_measurement': devices.PtMeasurement(),
-        'qt_measurement': devices.QtMeasurement(),
-        'it_measurement': devices.ItMeasurement(),
-        'vm_measurement': devices.VmMeasurement(),
-        'va_measurement': devices.VaMeasurement(),
-        'pg_measurement': devices.PgMeasurement(),
-        'qg_measurement': devices.QgMeasurement(),
+        'pi_measurement': dev.PiMeasurement(),
+        'qi_measurement': dev.QiMeasurement(),
+        'pf_measurement': dev.PfMeasurement(),
+        'qf_measurement': dev.QfMeasurement(),
+        'if_measurement': dev.IfMeasurement(),
+        'pt_measurement': dev.PtMeasurement(),
+        'qt_measurement': dev.QtMeasurement(),
+        'it_measurement': dev.ItMeasurement(),
+        'vm_measurement': dev.VmMeasurement(),
+        'va_measurement': dev.VaMeasurement(),
+        'pg_measurement': dev.PgMeasurement(),
+        'qg_measurement': dev.QgMeasurement(),
 
-        'control_pc': devices.ControlPc(),
+        'control_pc': dev.ControlPc(),
     }
 
 
@@ -692,6 +700,18 @@ def veragrid_object_to_json(elm: ALL_DEV_TYPES,
             if prop.has_profile():
                 data[name + '_prof'] = profile_todict(elm.get_profile_by_prop(prop=prop))
 
+        elif prop.tpe == SubObjectType.ManufacturerNativeModelInfo:
+            # Decode before serialization so malformed metadata can never enter
+            # a VeraGrid archive through this generic property path.
+            decoded_model_info: ManufacturerNativeModelInfo = decode_manufacturer_native_model_info(obj)
+            if obj.startswith(b"veragrid-manufacturer-native-model-info-v2\n"):
+                canonical_schema_version: int = 2
+            else:
+                canonical_schema_version = 1
+            data[name] = {
+                "schema_version": canonical_schema_version,
+                "canonical_hex": obj.hex(),
+            }
         elif prop.tpe == SubObjectType.MergeInformation:
             data[name] = obj.to_dict()
 
@@ -767,6 +787,29 @@ def veragrid_object_to_json(elm: ALL_DEV_TYPES,
                     else:
                         pass
 
+    if isinstance(elm, ManufacturerNativeModel):
+        variant_records: List[Dict[str, object]] = list()
+        platform: IeeeCigreDllPlatform
+        for platform in (
+                IeeeCigreDllPlatform.WINDOWS_X86,
+                IeeeCigreDllPlatform.WINDOWS_X64,
+                IeeeCigreDllPlatform.LINUX_X64,
+        ):
+            variant: ManufacturerNativeBinaryVariant | None = elm.get_platform_variant(platform)
+            if variant is not None:
+                variant_records.append({
+                    "platform": variant.platform.value,
+                    "extension": variant.extension,
+                    "content_sha256": variant.content_sha256,
+                    "byte_size": variant.byte_size,
+                    "zip_member": variant.zip_member,
+                    "verification_status": variant.verification_status.value,
+                })
+            else:
+                pass
+        data["binary_variants"] = variant_records
+    else:
+        pass
     return data
 
 
@@ -950,14 +993,14 @@ class CreatedOnTheFly:
         """
         # legacy operations: this is from when area, zone and substation were strings,
         # now we create those objects on the fly
-        self.legacy_area_dict: Dict[str, devices.Area] = dict()
-        self.legacy_zone_dict: Dict[str, devices.Zone] = dict()
-        self.legacy_substation_dict: Dict[str, devices.Substation] = dict()
+        self.legacy_area_dict: Dict[str, dev.Area] = dict()
+        self.legacy_zone_dict: Dict[str, dev.Zone] = dict()
+        self.legacy_substation_dict: Dict[str, dev.Substation] = dict()
 
-        self.contingency_groups: List[devices.ContingencyGroup] = list()
-        self.contingencies: List[devices.Contingency] = list()
+        self.contingency_groups: List[dev.ContingencyGroup] = list()
+        self.contingencies: List[dev.Contingency] = list()
 
-        self.technologies: Dict[str, devices.Technology] = dict()
+        self.technologies: Dict[str, dev.Technology] = dict()
 
     def get_create_area(self, property_value):
         """
@@ -967,7 +1010,7 @@ class CreatedOnTheFly:
         """
         area = self.legacy_area_dict.get(property_value, None)
         if area is None:
-            area = devices.Area(name=str(property_value))
+            area = dev.Area(name=str(property_value))
             self.legacy_area_dict[property_value] = area
         return area
 
@@ -979,7 +1022,7 @@ class CreatedOnTheFly:
         """
         zone = self.legacy_zone_dict.get(property_value, None)
         if zone is None:
-            zone = devices.Zone(name=str(property_value))
+            zone = dev.Zone(name=str(property_value))
             self.legacy_zone_dict[property_value] = zone
         return zone
 
@@ -991,7 +1034,7 @@ class CreatedOnTheFly:
         """
         substation = self.legacy_substation_dict.get(property_value, None)
         if substation is None:
-            substation = devices.Substation(name=str(property_value))
+            substation = dev.Substation(name=str(property_value))
             self.legacy_substation_dict[property_value] = substation
         return substation
 
@@ -1001,13 +1044,13 @@ class CreatedOnTheFly:
         :param elm:
         :return:
         """
-        con_group = devices.ContingencyGroup(name=elm.name)
-        conn = devices.Contingency(device=elm, prop=ContingencyOperationTypes.Active, group=con_group)
+        con_group = dev.ContingencyGroup(name=elm.name)
+        conn = dev.Contingency(device=elm, prop=ContingencyOperationTypes.Active, group=con_group)
 
         self.contingency_groups.append(con_group)
         self.contingencies.append(conn)
 
-    def create_technology(self, elm: devices.Generator, tech_name: str) -> None:
+    def create_technology(self, elm: dev.Generator, tech_name: str) -> None:
         """
 
         :param elm:
@@ -1018,7 +1061,7 @@ class CreatedOnTheFly:
         tech = self.technologies.get(tech_name, None)
 
         if tech is None:
-            tech = devices.Technology(name=tech_name)
+            tech = dev.Technology(name=tech_name)
             self.technologies[tech_name] = tech
 
         elm.technologies.add_object(api_object=tech, val=1.0)
@@ -1031,7 +1074,10 @@ def parse_object_type_from_dataframe(
         time_profile: pd.DatetimeIndex,
         object_type_key: str,
         data: Dict[str, Union[float, str, pd.DataFrame]],
-        logger: Logger) -> Tuple[List[ALL_DEV_TYPES], Dict[str, ALL_DEV_TYPES], CreatedOnTheFly]:
+        logger: Logger,
+        reflexive_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]],
+        physical_device_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]]) -> Tuple[
+            List[ALL_DEV_TYPES], Dict[str, ALL_DEV_TYPES], CreatedOnTheFly]:
     """
     Convert a DataFrame to a list of VeraGrid devices
     :param main_df: DataFrame to convert
@@ -1042,6 +1088,8 @@ def parse_object_type_from_dataframe(
     :param object_type_key: Object type naming to find the profile
     :param data: Complete data collection to find the profiles
     :param logger: Logger instance
+    :param reflexive_references: References to resolve after all device types are loaded
+    :param physical_device_references: References to resolve against all physical devices
     :return: devices, devices_dict
     """
     # dictionary to be filled with this type of objects
@@ -1088,7 +1136,6 @@ def parse_object_type_from_dataframe(
 
                         # the property of the file exists, parse it
                         if isinstance(gc_prop.tpe, DeviceType):
-
                             # we must look for the reference in elements_dict
                             collection = elements_dict_by_type.get(gc_prop.tpe, None)
 
@@ -1097,11 +1144,15 @@ def parse_object_type_from_dataframe(
                                 ref_elm = collection.get(ref_idtag, None)
 
                                 if ref_elm is not None:
-                                    elm.set_snapshot_value(gc_prop.name, ref_elm)
+                                    if gc_prop.reflexive:
+                                        reflexive_references.append((elm, gc_prop, ref_idtag))
+                                    else:
+                                        elm.set_snapshot_value(gc_prop.name, ref_elm)
 
-                                    if gc_prop.has_profile():
-                                        prof.fill(ref_elm)
-
+                                        if gc_prop.has_profile():
+                                            prof.fill(ref_elm)
+                                elif gc_prop.reflexive:
+                                    reflexive_references.append((elm, gc_prop, ref_idtag))
                                 else:
 
                                     # legacy operations: this is from when grids referenced buses by name
@@ -1125,6 +1176,14 @@ def parse_object_type_from_dataframe(
                                                          device_class=template_elm.device_type.value,
                                                          device_property=gc_prop.name,
                                                          value=ref_idtag)
+                            elif gc_prop.reflexive:
+                                reflexive_references.append((elm, gc_prop, str(property_value)))
+                            elif gc_prop.tpe == DeviceType.PhysicalDeviceType:
+                                if isinstance(elm, PointerDeviceParent):
+                                    # PointerDeviceParent resolves this after parsing its concrete tpe.
+                                    pass
+                                else:
+                                    physical_device_references.append((elm, gc_prop, str(property_value)))
                             else:
 
                                 # legacy operations: this is from when area, zone and substation were strings
@@ -1390,7 +1449,9 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                 time_profile: pd.DatetimeIndex,
                                 block_parser: BlockParser,
                                 logger: Logger,
-                                text_func: Union[Callable, None] = None ):
+                                text_func: Union[Callable, None] = None,
+                                reflexive_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]] | None = None,
+                                physical_device_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]] | None = None):
     """
 
     :param template_elm:
@@ -1400,6 +1461,8 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
     :param block_parser:
     :param logger:
     :param text_func:
+    :param reflexive_references:
+    :param physical_device_references:
     :return:
     """
     # dictionary to be filled with this type of objects
@@ -1461,8 +1524,11 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                     # we must look for the reference in elements_dict
                                     collection = elements_dict_by_type.get(gc_prop.tpe, None)
 
-                                if collection is not None:
-                                    ref_idtag = str(property_value)
+                                ref_idtag = str(property_value)
+                                if gc_prop.reflexive and reflexive_references is not None:
+                                    reflexive_references.append((elm, gc_prop, ref_idtag))
+
+                                elif collection is not None:
                                     ref_elm = collection.get(ref_idtag, None)
 
                                     if ref_elm is not None:
@@ -1479,6 +1545,18 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                                          device_class=template_elm.device_type.value,
                                                          device_property=gc_prop.name,
                                                          value=ref_idtag)
+                                elif gc_prop.tpe == DeviceType.PhysicalDeviceType:
+                                    if isinstance(elm, PointerDeviceParent):
+                                        # PointerDeviceParent resolves this after parsing its concrete tpe.
+                                        pass
+                                    elif physical_device_references is not None:
+                                        physical_device_references.append((elm, gc_prop, ref_idtag))
+                                    else:
+                                        logger.add_error("No device of the referenced type",
+                                                         device=elm.idtag,
+                                                         device_class=template_elm.device_type.value,
+                                                         device_property=gc_prop.name,
+                                                         value=property_value)
                                 else:
                                     logger.add_error("No device of the referenced type",
                                                      device=elm.idtag,
@@ -1488,10 +1566,52 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
 
                             elif isinstance(gc_prop.tpe, SubObjectType):  # this is a hyperlink to another object
 
-                                if gc_prop.tpe == SubObjectType.GeneratorQCurve:
+                                if gc_prop.tpe == SubObjectType.ManufacturerNativeModelInfo:
+                                    if not isinstance(property_value, dict):
+                                        raise TypeError("ModelInfo must use a declarative canonical_hex envelope")
+                                    else:
+                                        pass
+                                    if set(property_value.keys()) != {"schema_version", "canonical_hex"}:
+                                        raise ValueError("ModelInfo envelope must contain exactly schema_version and canonical_hex")
+                                    else:
+                                        pass
+                                    schema_version: object = property_value["schema_version"]
+                                    if (
+                                            not isinstance(schema_version, int)
+                                            or isinstance(schema_version, bool)
+                                            or schema_version not in (1, 2)
+                                    ):
+                                        raise ValueError("Unsupported canonical ModelInfo schema version")
+                                    else:
+                                        pass
+                                    canonical_hex: object = property_value["canonical_hex"]
+                                    if not isinstance(canonical_hex, str) or len(canonical_hex) % 2 != 0:
+                                        raise TypeError("Canonical ModelInfo hexadecimal bytes are invalid")
+                                    else:
+                                        canonical_bytes: bytes = bytes.fromhex(canonical_hex)
+                                    if canonical_bytes.hex() != canonical_hex:
+                                        raise ValueError("Canonical ModelInfo hex must be lowercase")
+                                    else:
+                                        pass
+                                    if schema_version == 1:
+                                        if not canonical_bytes.startswith(b"veragrid-ieee-cigre-model-info-v1\n"):
+                                            raise ValueError("Canonical ModelInfo envelope schema does not match its bytes")
+                                        else:
+                                            pass
+                                    else:
+                                        if not canonical_bytes.startswith(
+                                                b"veragrid-manufacturer-native-model-info-v2\n"
+                                        ):
+                                            raise ValueError("Canonical ModelInfo envelope schema does not match its bytes")
+                                        else:
+                                            pass
+                                    decode_manufacturer_native_model_info(canonical_bytes)
+                                    elm.set_snapshot_value(gc_prop.name, canonical_bytes)
+
+                                elif gc_prop.tpe == SubObjectType.GeneratorQCurve:
 
                                     # Fill the curve object from its JSON declaration.
-                                    q_curve: devices.GeneratorQCurve = elm.get_snapshot_value(prop=gc_prop)
+                                    q_curve: dev.GeneratorQCurve = elm.get_snapshot_value(prop=gc_prop)
                                     if isinstance(property_value, str):
                                         q_curve.parse(json.loads(property_value))
                                     else:
@@ -1500,20 +1620,20 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                 elif gc_prop.tpe == SubObjectType.LineLocations:
 
                                     # Fill the line locations from their JSON declaration.
-                                    locations_obj: devices.LineLocations = elm.get_snapshot_value(prop=gc_prop)
+                                    locations_obj: dev.LineLocations = elm.get_snapshot_value(prop=gc_prop)
                                     locations_obj.parse(property_value)
 
                                 elif gc_prop.tpe == SubObjectType.ListOfWires:
 
                                     # Fill the wire collection from its JSON declaration.
-                                    list_of_wires: devices.ListOfWires = elm.get_snapshot_value(prop=gc_prop)
+                                    list_of_wires: dev.ListOfWires = elm.get_snapshot_value(prop=gc_prop)
                                     list_of_wires.parse(data=property_value,
                                                         wire_dict=elements_dict_by_type[DeviceType.WireDevice])
 
                                 elif gc_prop.tpe == SubObjectType.ListOfCables:
 
                                     # Fill cable systems after their physical cable catalogue is available.
-                                    list_of_cables: devices.ListOfCables = elm.get_snapshot_value(prop=gc_prop)
+                                    list_of_cables: dev.ListOfCables = elm.get_snapshot_value(prop=gc_prop)
                                     list_of_cables.parse(
                                         data=property_value,
                                         cable_dict=elements_dict_by_type[DeviceType.UndergroundCableTypeDevice],
@@ -1523,14 +1643,14 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                 elif gc_prop.tpe == SubObjectType.ImpedanceTripletList:
 
                                     # Fill the impedance triplets from their JSON declaration.
-                                    impedance_triplet_list: devices.ImpedanceTripletList = elm.get_snapshot_value(
+                                    impedance_triplet_list: dev.ImpedanceTripletList = elm.get_snapshot_value(
                                         prop=gc_prop)
                                     impedance_triplet_list.parse(data=property_value)
 
                                 elif gc_prop.tpe == SubObjectType.TapChanger:
 
                                     # Fill the tap changer from its JSON declaration.
-                                    tc_obj: devices.TapChanger = elm.get_snapshot_value(prop=gc_prop)
+                                    tc_obj: dev.TapChanger = elm.get_snapshot_value(prop=gc_prop)
                                     tc_obj.parse(property_value, logger=logger)
 
                                 elif gc_prop.tpe == SubObjectType.Array:
@@ -1541,7 +1661,7 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                                 elif gc_prop.tpe == SubObjectType.AdmittanceMatrix:
 
                                     # Fill the admittance matrix from its JSON declaration.
-                                    adm_mat: devices.AdmittanceMatrix = elm.get_snapshot_value(prop=gc_prop)
+                                    adm_mat: dev.AdmittanceMatrix = elm.get_snapshot_value(prop=gc_prop)
                                     adm_mat.parse(property_value)
 
                                 elif gc_prop.tpe == SubObjectType.DaeBlockType:
@@ -1683,6 +1803,71 @@ def parse_object_type_from_json(template_elm: ALL_DEV_TYPES,
                 if property_value is not None and float(property_value) == 0.0:
                     elm._length = 0.0
 
+        if isinstance(elm, ManufacturerNativeModel):
+            raw_variants: object = json_entry.get("binary_variants", None)
+            if not isinstance(raw_variants, list):
+                raise TypeError("Manufacturer native provider requires a binary_variants list")
+            else:
+                pass
+            if len(raw_variants) > 3:
+                raise ValueError("Manufacturer native provider has too many platform variants")
+            else:
+                pass
+            raw_variant: object
+            for raw_variant in raw_variants:
+                if not isinstance(raw_variant, dict):
+                    raise TypeError("Manufacturer native binary variant must be a record")
+                else:
+                    pass
+                expected_fields: Set[str] = {
+                    "platform", "extension", "content_sha256", "byte_size",
+                    "zip_member", "verification_status",
+                }
+                if set(raw_variant.keys()) != expected_fields:
+                    raise ValueError("Manufacturer native binary variant has missing or extra fields")
+                else:
+                    pass
+                platform: IeeeCigreDllPlatform = IeeeCigreDllPlatform(raw_variant["platform"])
+                if elm.get_platform_variant(platform) is not None:
+                    raise ValueError("Manufacturer native platform variant is duplicated")
+                else:
+                    pass
+                byte_size: object = raw_variant["byte_size"]
+                if not isinstance(byte_size, int) or isinstance(byte_size, bool):
+                    raise TypeError("Manufacturer native binary byte_size must be an integer")
+                else:
+                    pass
+                variant: ManufacturerNativeBinaryVariant = ManufacturerNativeBinaryVariant(
+                    platform=platform,
+                    extension=str(raw_variant["extension"]),
+                    content_sha256=str(raw_variant["content_sha256"]),
+                    byte_size=byte_size,
+                    zip_member=str(raw_variant["zip_member"]),
+                    verification_status=IeeeCigreDllVerificationStatus(raw_variant["verification_status"]),
+                )
+                elm.set_platform_variant(variant)
+            if len(elm.model_info) == 0:
+                raise ValueError("Manufacturer native provider is missing canonical ModelInfo")
+            else:
+                persisted_model_info: ManufacturerNativeModelInfo = (
+                    decode_manufacturer_native_model_info(elm.model_info)
+                )
+            if persisted_model_info.native_interface != elm.native_interface:
+                raise ValueError(
+                    "Manufacturer native interface does not match canonical ModelInfo"
+                )
+            else:
+                pass
+            if elm.model_info.startswith(b"veragrid-manufacturer-native-model-info-v2\n"):
+                persisted_schema_version: int = 2
+            else:
+                persisted_schema_version = 1
+            if persisted_schema_version != elm.model_info_schema_version:
+                raise ValueError(
+                    "Manufacturer native schema version does not match canonical ModelInfo"
+                )
+            else:
+                pass
         # save the element in the dictionary for later
         devices_dict[elm.idtag] = elm
         parsed_devices.append(elm)
@@ -1699,6 +1884,17 @@ def handle_legacy_jsons(model_data: Dict[str, List],
     :param logger:
     :return:
     """
+    # The first resistance selector only controlled the core. Recover the
+    # former sheath material definition before the shared selector is used.
+    cable_types = elements_dict_by_type.get(DeviceType.UndergroundCableTypeDevice, {})
+    for entry in model_data.get('underground_cable_constructions', []):
+        if ('core_resistance_input' in entry and 'resistance_input' not in entry
+                and 'sheath_dc_resistance' not in entry):
+            cable = cable_types.get(entry.get('idtag'))
+            if cable is not None:
+                cable.sheath_dc_resistance = cable.get_sheath_dc_resistance_from_material()
+                logger.add_info('Recovered sheath resistance for legacy core-only input selector', device=cable.name)
+
     gt_data_list = model_data.get("generator_technology", None)
     if gt_data_list is not None:
         for entry in gt_data_list:
@@ -1965,6 +2161,96 @@ def normalize_dynamic_legacy(data: VERAGRID_FILE_TYPE,
     return symbolic_data
 
 
+def migrate_dc_cable_types(data: VERAGRID_FILE_TYPE, logger: Logger) -> None:
+    """Move legacy DC providers into Cable System before resolving references.
+
+    Preserve identifiers and dynamic associations. The former C field is in
+    F/km; Cable System stores microfarad/km. A 50 Hz representation preserves
+    the original frequency-neutral L/C exactly up to floating-point rounding.
+    Both native JSON and legacy DataFrame tables are accepted.
+    """
+    omega = 2.0 * np.pi * 50.0
+
+    def convert(record: dict) -> dict:
+        result = dict(record)
+        result['freq'] = 50.0
+        result['X'] = float(result.pop('L', 0.0)) * omega
+        result['C'] = float(result.get('C', 0.0)) * 1.0e6
+        result['B'] = result['C'] * omega
+        return result
+
+    model_data = data.get('model_data')
+    if model_data is not None and 'dc_cable_types' in model_data:
+        legacy = model_data.pop('dc_cable_types')
+        existing = model_data.setdefault('underground_cable_types', [])
+        existing_ids = {item.get('idtag') for item in existing}
+        for record in legacy:
+            if record.get('idtag') in existing_ids:
+                logger.add_warning('Duplicate legacy DC cable identifier; keeping Cable System',
+                                   device=record.get('idtag'))
+            else:
+                existing.append(convert(record))
+                existing_ids.add(record.get('idtag'))
+        if legacy:
+            logger.add_info('Migrated DC cable types to Cable System', value=len(legacy))
+
+    legacy_df = data.pop('dc_cable_types', None)
+    if legacy_df is not None and not legacy_df.empty:
+        converted = pd.DataFrame([convert(row) for row in legacy_df.to_dict('records')])
+        existing_df = data.get('underground_cable_types')
+        if existing_df is not None and not existing_df.empty:
+            converted = pd.concat([existing_df, converted], ignore_index=True)
+        data['underground_cable_types'] = converted
+        logger.add_info('Migrated DC cable table to Cable System', value=len(legacy_df))
+
+
+def resolve_reflexive_references(device_type: DeviceType,
+                                elements_dict_by_type: Dict[DeviceType, Dict[str, ALL_DEV_TYPES]],
+                                reflexive_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]],
+                                logger: Logger) -> None:
+    """Resolve deferred references once their target device type is fully loaded.
+
+    :param device_type: Type whose objects have just been registered.
+    :param elements_dict_by_type: Loaded objects indexed by type and idtag.
+    :param reflexive_references: Deferred source-property-idtag triples; resolved entries are removed.
+    :param logger: Logger for missing targets or rejected assignments.
+    :return: None.
+    """
+    collection = elements_dict_by_type.get(device_type, None)
+    remaining_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]] = list()
+
+    for source_elm, gc_prop, ref_idtag in reflexive_references:
+        if gc_prop.tpe == device_type:
+            if collection is not None:
+                ref_elm = collection.get(ref_idtag, None)
+                if ref_elm is not None:
+                    try:
+                        source_elm.set_snapshot_value(gc_prop.name, ref_elm)
+                    except (TypeError, ValueError) as error:
+                        logger.add_error("Could not set reference",
+                                         device=source_elm.idtag,
+                                         device_class=source_elm.device_type.value,
+                                         device_property=gc_prop.name,
+                                         value=ref_idtag,
+                                         comment=str(error))
+                else:
+                    logger.add_error("Could not locate reference",
+                                     device=source_elm.idtag,
+                                     device_class=source_elm.device_type.value,
+                                     device_property=gc_prop.name,
+                                     value=ref_idtag)
+            else:
+                logger.add_error("No device of the referenced type",
+                                 device=source_elm.idtag,
+                                 device_class=source_elm.device_type.value,
+                                 device_property=gc_prop.name,
+                                 value=ref_idtag)
+        else:
+            remaining_references.append((source_elm, gc_prop, ref_idtag))
+
+    reflexive_references[:] = remaining_references
+
+
 def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                         previous_circuit: Union[MultiCircuit, None] = None,
                         project_directory: str | Path | None = None,
@@ -1983,6 +2269,8 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
     :param logger: Logger to register events
     :return: MultiCircuit instance
     """
+    migrate_dc_cable_types(data=data, logger=logger)
+
     # create circuit
     circuit = MultiCircuit()
 
@@ -2036,6 +2324,10 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
     else:
         elements_dict_by_type = previous_circuit.get_all_elements_dict_by_type(add_locations=True, string_keys=False)
 
+    # Reflexive references need all objects registered before resolving their IDs.
+    reflexive_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]] = list()
+    physical_device_references: List[Tuple[ALL_DEV_TYPES, GCProp, str]] = list()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Legacy DataFrame processing
     # for each element type...
@@ -2062,7 +2354,9 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                     time_profile=circuit.time_profile,
                     object_type_key=object_type_key,
                     data=data,
-                    logger=logger
+                    logger=logger,
+                    reflexive_references=reflexive_references,
+                    physical_device_references=physical_device_references
                 )
 
                 # add the elements that were created on the fly...
@@ -2082,6 +2376,11 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                 # set/augment the dictionary per type for later
                 prev_dict = elements_dict_by_type.get(template_elm.device_type, dict())
                 elements_dict_by_type[template_elm.device_type] = dict(prev_dict, **devices_dict)
+
+                resolve_reflexive_references(device_type=template_elm.device_type,
+                                             elements_dict_by_type=elements_dict_by_type,
+                                             reflexive_references=reflexive_references,
+                                             logger=logger)
 
                 # add the devices to the circuit
                 circuit.set_elements_list_by_type(device_type=template_elm.device_type,
@@ -2184,13 +2483,20 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                         time_profile=circuit.time_profile,
                         block_parser=block_parser,
                         logger=logger,
-                        text_func=text_func
+                        text_func=text_func,
+                        reflexive_references=reflexive_references,
+                        physical_device_references=physical_device_references
                     )
 
                     # set/augment the dictionary per type for later
                     prev_dict = elements_dict_by_type.get(template_elm.device_type, dict())
                     prev_dict.update(devices_dict)  # augment prev_dict with devices_dict
                     elements_dict_by_type[template_elm.device_type] = prev_dict
+
+                    resolve_reflexive_references(device_type=template_elm.device_type,
+                                                 elements_dict_by_type=elements_dict_by_type,
+                                                 reflexive_references=reflexive_references,
+                                                 logger=logger)
 
                     # add the devices to the circuit
                     circuit.set_elements_list_by_type(device_type=template_elm.device_type,
@@ -2212,10 +2518,33 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
                                 elements_dict_by_type=elements_dict_by_type,
                                 logger=logger)
 
+    all_elements_dict: Dict[str, ALL_DEV_TYPES] = dict()
+    if len(physical_device_references) > 0:
+        all_elements_dict, _ = circuit.get_all_elements_dict()
+        for source_elm, gc_prop, ref_idtag in physical_device_references:
+            ref_elm = all_elements_dict.get(ref_idtag, None)
+            if ref_elm is not None:
+                try:
+                    source_elm.set_snapshot_value(gc_prop.name, ref_elm)
+                except (TypeError, ValueError) as error:
+                    logger.add_error("Could not set reference",
+                                     device=source_elm.idtag,
+                                     device_class=source_elm.device_type.value,
+                                     device_property=gc_prop.name,
+                                     value=ref_idtag,
+                                     comment=str(error))
+            else:
+                logger.add_error("Could not locate reference",
+                                 device=source_elm.idtag,
+                                 device_class=source_elm.device_type.value,
+                                 device_property=gc_prop.name,
+                                 value=ref_idtag)
+    else:
+        pass
+
     # fill in device into pointer devices ------------------------------------------------------------------------------
 
     to_delete: List[ALL_DEV_TYPES] = list()
-    all_elements_dict: Dict[str, ALL_DEV_TYPES] = dict()
     for dtype in [
         DeviceType.PiMeasurementDevice,
         DeviceType.QiMeasurementDevice,
@@ -2274,8 +2603,8 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
 
             if ((tower_name in elements_dict_by_type[DeviceType.OverheadLineTypeDevice].keys()) and
                     (wire_name in elements_dict_by_type[DeviceType.WireDevice].keys())):
-                tower: devices.OverheadLineType = elements_dict_by_type[DeviceType.OverheadLineTypeDevice][tower_name]
-                wire: devices.Wire = elements_dict_by_type[DeviceType.WireDevice][wire_name]
+                tower: dev.OverheadLineType = elements_dict_by_type[DeviceType.OverheadLineTypeDevice][tower_name]
+                wire: dev.Wire = elements_dict_by_type[DeviceType.WireDevice][wire_name]
                 xpos = df['xpos'].values[i]
                 ypos = df['ypos'].values[i]
                 phase = df['phase'].values[i]
@@ -2294,18 +2623,18 @@ def parse_veragrid_data(data: VERAGRID_FILE_TYPE,
 
         if len(list_of_diagrams):
             obj_dict = circuit.get_all_elements_dict_by_type(add_locations=True)
-            diagrams_by_id: Dict[str, devices.BaseDiagram] = dict()
+            diagrams_by_id: Dict[str, dev.BaseDiagram] = dict()
 
             for diagram_dict in list_of_diagrams:
 
                 if diagram_dict['type'] in [DiagramType.Schematic.value, "bus-branch"]:
-                    diagram = devices.SchematicDiagram()
+                    diagram = dev.SchematicDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     circuit.add_diagram(diagram)
                     diagrams_by_id[diagram.idtag] = diagram
 
                 elif diagram_dict['type'] == DiagramType.SubstationLineMap.value:
-                    diagram = devices.MapDiagram()
+                    diagram = dev.MapDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     circuit.add_diagram(diagram)
                     diagrams_by_id[diagram.idtag] = diagram
@@ -2345,7 +2674,7 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
                           metadata: Dict[str, Dict[str, int | float] | int | None],
                           text_func: Union[Callable, None] = None,
                           progress_func: Union[Callable, None] = None,
-                          logger: Logger = Logger()) -> devices.MultiVerse:
+                          logger: Logger = Logger()) -> dev.MultiVerse:
     """
 
     :param data:
@@ -2355,7 +2684,7 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
     :param logger:
     :return:
     """
-    mv = devices.MultiVerse(current_model=None)
+    mv = dev.MultiVerse(current_model=None)
 
     diffs_dict: Dict[str, MultiCircuit] = dict()
     diagrams_dict: Dict[str, List[Dict[str, Any]]] = dict()
@@ -2456,18 +2785,18 @@ def parse_multiverse_data(data: Dict[str, VERAGRID_FILE_TYPE],
             node = mv.get_node(node_id)
             full_circuit = mv.checkout(node)
             obj_dict = full_circuit.get_all_elements_dict_by_type(add_locations=True)
-            parsed_diagrams: devices.DiagramTree = devices.DiagramTree()
-            diagrams_by_id: Dict[str, devices.BaseDiagram] = dict()
+            parsed_diagrams: dev.DiagramTree = dev.DiagramTree()
+            diagrams_by_id: Dict[str, dev.BaseDiagram] = dict()
 
             for diagram_dict in diagrams_dict.get(circuit_idtag, list()):
                 if diagram_dict['type'] in [DiagramType.Schematic.value, "bus-branch"]:
-                    diagram = devices.SchematicDiagram()
+                    diagram = dev.SchematicDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     parsed_diagrams.append(diagram)
                     diagrams_by_id[diagram.idtag] = diagram
 
                 elif diagram_dict['type'] == DiagramType.SubstationLineMap.value:
-                    diagram = devices.MapDiagram()
+                    diagram = dev.MapDiagram()
                     diagram.parse_data(data=diagram_dict, obj_dict=obj_dict, logger=logger)
                     parsed_diagrams.append(diagram)
                     diagrams_by_id[diagram.idtag] = diagram

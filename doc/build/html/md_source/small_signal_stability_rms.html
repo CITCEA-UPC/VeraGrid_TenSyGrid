@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔍 Small-Signal Stability Analysis &mdash; VeraGrid 6.7.0 documentation</title>
+  <title>🔍 Small-Signal Stability Analysis &mdash; VeraGrid 6.7.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,14 +15,14 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
+      <script src="../_static/documentation_options.js?v=16fbabd8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="🔬 EMT simulations" href="emt_simulations.html" />
-    <link rel="prev" title="⏱️ RMS simulations" href="rms_simulations.html" /> 
+    <link rel="next" title="🧬 EMT Small-Signal stability: Floquet analysis" href="small_signal_stability_emt.html" />
+    <link rel="prev" title="EMT practical session: building and simulating a phase-domain model" href="EMT_practical_session.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -73,53 +73,25 @@
 <li class="toctree-l1"><a class="reference internal" href="reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="state_estimation.html">🌀 State estimation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dynamic_simulations.html">🧲 Dynamic simulations</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="rms_simulations.html">⏱️ RMS simulations</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">🔍 Small-Signal Stability Analysis</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#rms-workflow">RMS Workflow</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#settings">Settings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#numerical-formulation">Numerical Formulation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dense-vs-sparse-calculation">Dense vs Sparse Calculation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#results">Results</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#registered-result-properties">Registered Result Properties</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api">API</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#benchmark">Benchmark</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dynamic_simulations.html#dynamic-simulation-theory">1. Dynamic simulation theory</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dynamic_theory.html">Dynamic simulation theory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html">⏱️ RMS simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="emt_simulations.html">🔬 EMT simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="dynamic_simulations.html#small-signal-stability">Small-signal stability</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">🔍 Small-Signal Stability Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="small_signal_stability_emt.html">🧬 EMT Small-Signal stability: Floquet analysis</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#when-to-use-rms-simulation">When to use RMS simulation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#rms-workflow-in-veragrid">RMS workflow in VeraGrid</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#rms-settings">RMS settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#rms-events">RMS events</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#gui-example">GUI example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#rms-results">RMS results</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#api">API</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rms_simulations.html#practical-notes">Practical notes</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="emt_simulations.html">🔬 EMT simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_model_library_index.html">📚 Dynamic model library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#why-dynamic-simulations-are-different-from-static-simulations">Why dynamic simulations are different from static simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#rms-and-emt">RMS and EMT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dae-formulation">DAE formulation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#from-blocks-to-equations-in-veragrid">From blocks to equations in VeraGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#symbolic-numeric-approach">Symbolic-numeric approach</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-blocks-in-veragrid">Dynamic blocks in VeraGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#initialization">Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#initialization-references">Initialization references</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#solvers-and-integration-methods">Solvers and integration methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#events-and-simulation-scenarios">Events and simulation scenarios</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#settings">Settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#results">Results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#api-workflow-overview">API workflow overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#rms-example-from-scripting">RMS example from scripting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#emt-example-from-scripting">EMT example from scripting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#working-with-templates-and-model-editors">Working with templates and model editors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#importing-dynamic-models-from-external-tools">Importing dynamic models from external tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#benchmarks-and-validation">Benchmarks and validation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#best-practices">Best practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#common-pitfalls">Common pitfalls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#benchmarking-against-other-software">2. Benchmarking against other software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-editor-and-model-construction">3. Dynamic editor and model construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-model-library">4. Dynamic model library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#recommended-reading-paths">Recommended reading paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#end-to-end-workflow">End-to-end workflow</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="fmu.html">🔌 Functional Mock-up Units (FMUs)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">📜 License</a></li>
@@ -142,7 +114,6 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="dynamic_simulations.html">🧲 Dynamic simulations</a></li>
-          <li class="breadcrumb-item"><a href="rms_simulations.html">⏱️ RMS simulations</a></li>
       <li class="breadcrumb-item active">🔍 Small-Signal Stability Analysis</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/md_source/small_signal_stability_rms.md.txt" rel="nofollow"> View page source</a>
@@ -1043,94 +1014,16 @@
 <p>In that case, the driver first runs the RMS simulation to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">5.0</span> <span class="pre">s</span></code> and then computes the modal analysis there.</p>
 </section>
 </section>
-<section id="benchmark">
-<h2>Benchmark<a class="headerlink" href="#benchmark" title="Link to this heading"></a></h2>
-<section id="running-andes">
-<h3>Running ANDES<a class="headerlink" href="#running-andes" title="Link to this heading"></a></h3>
-<p>Thanks to its symbolic precision and reliable numerical performance, ANDES provides a great baseline for stability analysis in contemporary power system studies. That’s why VeraGrid uses ANDES as its benchmark for Small-Signal analysis. Of course, VeraGrid successfully reproduces all eigenvalue placements from ANDES.</p>
-<p>VeraGrid loads ANDES models by opening json files. Naturally, VeraGrid replicates all eigenvalue results from ANDES across standard benchmarks like the Kundur two area system with consistent accuracy and sub-second performance.</p>
-<p>This is the code to get ANDES results:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">To run this script andes must be installed (pip install andes)</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">andes</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">stability_andes</span><span class="p">():</span>
-
-   <span class="n">ss</span> <span class="o">=</span> <span class="n">andes</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;Gen_Load/kundur_ieee_no_shunt.json&#39;</span><span class="p">,</span> <span class="n">default_config</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-   <span class="n">n_xy</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">dae</span><span class="o">.</span><span class="n">xy_name</span><span class="p">)</span>
-   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Andes variables = </span><span class="si">{</span><span class="n">n_xy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">no_output</span> <span class="o">=</span> <span class="kc">True</span>
-
-   <span class="c1"># fix P &amp; Q load ANDES</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">p2p</span> <span class="o">=</span> <span class="mf">1.0</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">p2i</span> <span class="o">=</span> <span class="mi">0</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">p2z</span> <span class="o">=</span> <span class="mi">0</span>
-
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">q2q</span> <span class="o">=</span> <span class="mf">1.0</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">q2i</span> <span class="o">=</span> <span class="mi">0</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PQ</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">q2z</span> <span class="o">=</span> <span class="mi">0</span>
-
-   <span class="n">dae</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">dae</span>
-
-   <span class="c1"># Run PF</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PFlow</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-8</span>
-   <span class="n">ss</span><span class="o">.</span><span class="n">PFlow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
-   <span class="c1">#Run Small-Signal Stability analysis</span>
-   <span class="n">eig</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">EIG</span>
-   <span class="n">eig</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
-   <span class="n">df_Eig</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">eig</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
-   <span class="n">df_Eig</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;Eigenvalues_results_Andes.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-   <span class="n">df_pfactors</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">eig</span><span class="o">.</span><span class="n">pfactors</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-   <span class="n">df_pfactors</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;pfactors_results_Andes.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.10f</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">eig</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">eig</span><span class="o">.</span><span class="n">pfactors</span>
-</pre></div>
-</div>
-<p>Comparing the case of Kundur two-area system VeraGrid gets exactly the same results.</p>
-<p><img alt="" src="../_images/andes_vs_veragrid_kundur.png" /></p>
-<p>The following plot template is used to compare results.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="n">x1</span> <span class="o">=</span> <span class="n">VeraGrid_Eig</span><span class="o">.</span><span class="n">real</span>
-<span class="n">y1</span> <span class="o">=</span> <span class="n">VeraGrid_Eig</span><span class="o">.</span><span class="n">imag</span>
-<span class="n">x2</span><span class="o">=</span> <span class="n">Andes_Eig</span><span class="o">.</span><span class="n">real</span>
-<span class="n">y2</span> <span class="o">=</span> <span class="n">Andes_Eig</span><span class="o">.</span><span class="n">imag</span>
-<span class="n">slope</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">0.05</span>
-<span class="n">x_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-<span class="n">y_z</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x_z</span>
-<span class="c1"># Plot the two lines (positive and negative imaginary axis)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_z</span><span class="p">,</span> <span class="n">y_z</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\lambda$ = 5%&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_z</span><span class="p">,</span> <span class="o">-</span><span class="n">y_z</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Andes&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;VeraGrid&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Re [s -1]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Im [s -1]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Stability plot&quot;</span><span class="p">)</span>
-<span class="n">margin_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x1</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.1</span>
-<span class="n">margin_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">y1</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.1</span>
-<span class="n">x_min</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">margin_x</span>
-<span class="n">x_max</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin_x</span>
-<span class="n">y_min</span> <span class="o">=</span> <span class="n">y1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">margin_y</span>
-<span class="n">y_max</span> <span class="o">=</span> <span class="n">y1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin_y</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">VeraGrid_Eig</span></code> and <code class="docutils literal notranslate"><span class="pre">Andes_Eig</span></code> are numpy arrays with the eigenvalues results from the VeraGrid and Andes stability assessments respectively.</p>
-</section>
+<section id="benchmarking">
+<h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
+<p>The complete RMS validation against ANDES is documented in
+<a class="reference internal" href="dynamic_benchmarks.html#1-andes-comparison"><span class="std std-ref">Dynamic simulation benchmarks</span></a>. It
+covers Kundur, IEEE14, IEEE39, NPCC140, and WECC179 and reports operating-point,
+state-matrix, eigenvalue, participation-factor, time-domain, and timing results.</p>
+<p>The benchmark page also explains state-name alignment, repeated-mode handling,
+and the difference between local linear agreement and nonlinear equivalence
+after a limiter changes branch. Use those criteria instead of relying only on
+an overlaid eigenvalue plot.</p>
 </section>
 </section>
 
@@ -1138,8 +1031,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="rms_simulations.html" class="btn btn-neutral float-left" title="⏱️ RMS simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="emt_simulations.html" class="btn btn-neutral float-right" title="🔬 EMT simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="EMT_practical_session.html" class="btn btn-neutral float-left" title="EMT practical session: building and simulating a phase-domain model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="small_signal_stability_emt.html" class="btn btn-neutral float-right" title="🧬 EMT Small-Signal stability: Floquet analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

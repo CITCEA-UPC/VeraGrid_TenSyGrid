@@ -26,7 +26,8 @@ from VeraGridEngine.enumerations import (DeviceType, PrpCat, TimeFrame, BuildSta
                                          EraSvdSolverType, ShuntControlMode, RmsProblemTypes, FmuTemplateDomain,
                                          FmuTemplateMode, RmsInitializationMethod, EmtSolverTypes, PlotSimulationType,
                                          DynamicEventTransitionType, DynamicPlotEntryKind, DynamicPlotEntryRole,
-                                         ParamPowerFlowReferenceType)
+                                         ParamPowerFlowReferenceType, GeneratorControlMode,
+                                         RemedialActionPropertyEnum, BatteryDispatchMode)
 # types that can be assigned to a VeraGrid property
 GCPROP_TYPES = Union[
     Type[int],
@@ -49,6 +50,7 @@ GCPROP_TYPES = Union[
     Type[InvestmentsEvaluationObjectives],
     Type[NodalCapacityMethod],
     Type[ShuntControlMode],
+    Type[GeneratorControlMode],
     Type[SolverType],
     Type[TimeGrouping],
     Type[ZonalGrouping],
@@ -59,6 +61,7 @@ GCPROP_TYPES = Union[
     Type[TapChangerTypes],
     Type[VoltageLevelTypes],
     Type[ContingencyOperationTypes],
+    Type[RemedialActionPropertyEnum],
     Type[BranchGroupTypes],
     Type[ConverterControlType],
     Type[WindingType],
@@ -70,6 +73,7 @@ GCPROP_TYPES = Union[
     Type[SwitchGraphicType],
     Type[DynamicIntegrationMethod],
     Type[RmsInitializationMethod],
+    Type[BatteryDispatchMode],
     Type[OpfDispatchMode],
     Type[EmtLineTypes],
     Type[EmtSolverTypes],
@@ -152,7 +156,8 @@ class GCProp:
         "_is_color",
         "_is_date",
         "_category",
-        "dyn_ref"
+        "_dyn_ref",
+        "_reflexive"
     )
 
     def __init__(self,
@@ -168,7 +173,8 @@ class GCProp:
                  is_date: bool = False,
                  key: Union[str, None] = None,
                  cat: List[PrpCat] | None = None,
-                 dyn_ref: ParamPowerFlowReferenceType | None = None,):
+                 dyn_ref: ParamPowerFlowReferenceType | None = None,
+                 reflexive: bool = False):
         """
         VeraGrid property
         :param prop_name:
@@ -204,11 +210,11 @@ class GCProp:
         self._editable: bool = editable
         self._is_color: bool = is_color
         self._is_date: bool = is_date
-        self.dyn_ref = dyn_ref
-        if old_names is None:
-            self._old_names: Tuple[str, ...] = tuple()
-        else:
-            self._old_names = tuple(old_names)
+        self._dyn_ref = dyn_ref
+        self._reflexive = reflexive
+
+        self._old_names: Tuple[str, ...] = tuple() if old_names is None else tuple(old_names)
+
         self._category: List[PrpCat] = [PrpCat.All] if cat is None else cat
 
     @property
@@ -299,6 +305,22 @@ class GCProp:
         """
         return self._category
 
+    @property
+    def reflexive(self) -> bool:
+        """
+        Is reflexive?
+        :return: Boolean
+        """
+        return self._reflexive
+
+    @property
+    def dyn_ref(self) -> ParamPowerFlowReferenceType | None :
+        """
+        dyn_ref
+        :return: Boolean
+        """
+        return self._dyn_ref
+
     def has_profile(self) -> bool:
         """
         Check if this property has an associated profile
@@ -314,16 +336,18 @@ class GCProp:
         tpe_name = str(self.tpe)
         if '.' in tpe_name:
             chunks = tpe_name.split('.')
-            return chunks[-1].replace("'", "") \
-                .replace("<", "") \
-                .replace(">", "").strip()
+            return (chunks[-1]
+                    .replace("'", "")
+                    .replace("<", "")
+                    .replace(">", "").strip())
         else:
-            return tpe_name.replace('class', '') \
-                .replace("'", "") \
-                .replace("<", "") \
-                .replace(">", "").strip()
+            return (tpe_name
+                    .replace('class', '')
+                    .replace("'", "")
+                    .replace("<", "")
+                    .replace(">", "").strip())
 
-    def get_dict(self) -> Dict[str, str]:
+    def get_dict(self) -> Dict[str, str | bool]:
         """
         Get the values of this property as a dictionary
         :return: Dict[name, value]
@@ -1089,6 +1113,10 @@ class EditableDevice(metaclass=EditableDeviceMeta):
             else:
                 # return the normal property
                 return getattr(self, prop.name)
+
+    def is_property_editable(self, prop: GCProp) -> bool:
+        """Return instance-specific GUI editability without mutating shared metadata."""
+        return prop.editable
 
     def set_value(self, prop: GCProp, t_idx: Union[None, int], value: Any) -> None:
         """

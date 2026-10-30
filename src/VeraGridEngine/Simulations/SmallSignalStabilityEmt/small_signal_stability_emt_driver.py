@@ -26,8 +26,7 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
     SmallSignalStabilityEmtOptions
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_results import \
     SmallSignalStabilityEmtResults
-from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import NUMBA_AVAILABLE, \
-    bmgs_twice_numba
+from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import bmgs_twice_numba
 from VeraGridEngine.basic_structures import Vec, CxVec, Mat, CxMat
 from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes, DynamicIntegrationMethod
 
@@ -131,7 +130,7 @@ class RobustBlockArnoldiEngine:
             return W, np.zeros((0, self.p_active), dtype=np.float64)
 
         # Numba path (real-valued, cache-friendly)
-        if NUMBA_AVAILABLE and bmgs_twice_numba is not None:
+        if bmgs_twice_numba is not None:
             starts = np.asarray(self.block_indices[:j + 1], dtype=np.int64)
             ends = np.asarray(self.block_indices[1:j + 2], dtype=np.int64)
             V_prev = np.ascontiguousarray(self.V[:, :end_j], dtype=np.float64)
@@ -341,7 +340,8 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         :param h: Integration time step.
         :param verbose: Verbosity level flag.
-        :return: Tuple containing (y_trajectory, t_trajectory, jacobian_evaluator, static_parameters, n_event_params).
+        :return: Period trajectory, times, evaluator, static parameters and event count.
+                 Invalid captures return zero-row views and None evaluator.
         """
 
         if verbose > 0:
@@ -360,29 +360,35 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             verbose=self.sss_options.verbose > 0
         )
         sim_result = solver.simulate()
-        t_full = sim_result[0]
-        y_full = sim_result[1]
-        d_full = sim_result[2]
-
-        steps_per_period = int(self.sss_options.target_period / h)
-        # N integration intervals require N+1 samples, including both period
-        # endpoints. Keeping only N samples made the monodromy operator apply
-        # one Jacobian step too few.
-        samples_per_period = steps_per_period + 1
+        t_full: Vec = sim_result[0]
+        y_full: Mat = sim_result[1]
+        d_full: Mat = sim_result[2]
+        steps_per_period: int = int(self.sss_options.target_period / h)
+        samples_per_period: int = steps_per_period + 1
+        expected_samples: int = int(np.ceil(self.sss_options.ss_assessment_time / h)) + 1
+        static_params: Vec = np.array([c.value for c in params_values], dtype=np.float64)
+        if (not sim_result[4] or steps_per_period <= 0
+                or t_full.shape[0] != expected_samples or y_full.shape[0] != expected_samples
+                or d_full.shape[0] != expected_samples or t_full.shape[0] < samples_per_period
+                or not np.all(np.isfinite(t_full)) or not np.all(np.isfinite(y_full))
+                or not np.all(np.isfinite(d_full))):
+            self.logger.add_error("EMT limit-cycle capture is unavailable: failed, nonfinite or incomplete history.")
+            self.results = None
+            return y_full[:0, :], d_full[:0, :], t_full[:0], None, static_params, n_event_params
         y_limit = y_full[-samples_per_period:]
         d_limit = d_full[-samples_per_period:]
         t_limit = t_full[-samples_per_period:]
-
-        static_params = np.array([c.value for c in params_values], dtype=np.float64)
 
         jacobian_evaluator = self.problem.get_floquet_jacobian_evaluator(solver.vec_jacobian)
 
         return y_limit, d_limit, t_limit, jacobian_evaluator, static_params, n_event_params
 
-    def run_arnoldi(self):
+    def run_arnoldi(self) -> None:
         """
         Executes the Standard Arnoldi Floquet analysis using SciPy ARPACK.
         Suited for small-to-medium systems.
+
+        :return: None; an unavailable capture leaves results unset.
         """
         self.tic()
 
@@ -394,6 +400,12 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         self.last_period_trajectory = y_traj
         self.last_period_derivative_trajectory = d_traj
         self.last_monodromy_matrix = None
+
+        # Capture owns the diagnostic; stop before constructing any Floquet operator.
+        if t_traj.shape[0] == 0:
+            self.toc()
+            return
+
         tangent = self._build_consistent_tangent(y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params)
 
         # 2. Operator initialized with HPC LU Caching
@@ -486,17 +498,21 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         self._consistent_basis = tangent.basis
         return tangent
 
-    def _make_monodromy_operator(self, h: float, n_states: int):
+    def _make_monodromy_operator(self, h: float, n_states: int) -> BlockEmtFloquetOperator | AkStackBlockEmtFloquetOperator | None:
         """
         Creates the Monodromy Operator. Uses the HPC Ak-Stack if available,
         otherwise falls back to the LU-cached Jacobian operator.
 
         :param h: Integration time step.
         :param n_states: Number of differential states.
-        :return: An initialized LinearOperator instance (Block or Stack-based).
+        :return: Initialized Block or Stack operator, or None for unavailable capture.
         """
 
         y_traj, d_traj, t_traj, jac_eval, stat_params, n_ev_params = self._capture_limit_cycle_and_evaluator(h)
+        # Reject an unavailable capture before either operator implementation runs.
+        if t_traj.shape[0] == 0:
+            return None
+
         tangent = self._build_consistent_tangent(y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params)
         initial_tangent_derivative = tangent.initial_derivative_map if tangent is not None else None
 
@@ -600,11 +616,13 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         return mu_sel, U_sel, rel
 
-    def run_arnoldi_hybrid(self):
+    def run_arnoldi_hybrid(self) -> None:
         """
         Executes the Hybrid Block-Arnoldi (BIRAM) Floquet analysis.
         Suited for extremely large sparse DAE systems utilizing BLAS-3 acceleration
         and robust block projection to handle invariant subspace degeneracy.
+
+        :return: None; an unavailable capture leaves results unset.
         """
         self.tic()
 
@@ -613,6 +631,9 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
 
         # Operator (A_k stack if the EMT backend exposes it, else LU-cached DAE operator)
         monodromy_op = self._make_monodromy_operator(h, physical_states)
+        if monodromy_op is None:
+            self.toc()
+            return
         n_states = monodromy_op.shape[0]
 
         # Hyperparameters (Clean Code: Native types passed directly from Options)
@@ -642,8 +663,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             # self.report_progress2()
             print(
                 f'Executing Hybrid Block-Arnoldi (Block Size: {p_seed}, Iters: {m_iters}, Restarts: {max_restarts})...')
-            if NUMBA_AVAILABLE and bmgs_twice_numba is not None:
-                print('   [BIRAM] Numba BMGS kernel: ON')
+            print('   [BIRAM] Numba BMGS kernel: ON')
 
         rng = np.random.default_rng(42)
         raw_seed = np.zeros((n_states, p_seed), dtype=np.float64)

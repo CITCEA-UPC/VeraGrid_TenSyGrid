@@ -27,7 +27,7 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProb
 from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian, SymbolicVector
 from VeraGridEngine.Utils.Symbolic.symbolic import expression2numba, get_expression_vars, heaviside_num
 from VeraGridEngine.Utils.Symbolic.block import Block
-from VeraGridEngine.Utils.Symbolic.symbolic import Var, Const, Expr, find_vars_order
+from VeraGridEngine.Utils.Symbolic.symbolic import Var, Const, Expr
 
 
 InitializationStatus = EmtInitializationStatus
@@ -342,7 +342,7 @@ class InitializationStateRhsVector:
         exec(source_code, namespace)
 
         if use_jit:
-            compiled_func = nb.njit(
+            compiled_func = nb.jit(
                 nb.void(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:]),
                 fastmath=True,
                 cache=False,
@@ -484,53 +484,6 @@ def _build_event_equation_lookup_from_problem_order(
         parameter_index += 1
 
     return equation_lookup
-
-
-def _seed_runtime_event_parameter_array(
-        variable_parameters: List[Var],
-        event_parameters_eqs: List[Union[Expr, Const]],
-        uid2idx_event_params: Dict[int, int],
-        event_params_array: np.ndarray,
-) -> None:
-    """
-    Seed the flat runtime-parameter array from concrete event equations.
-
-    EMT wrapper models can enter explicit initialization with runtime parameter
-    slots that already carry concrete ``Const`` equations after PF seeding. The
-    explicit initializer must mirror those values into ``event_params_array``
-    before it starts dependency evaluation, or downstream expressions can still
-    observe stale placeholder zeros and propagate ``nan`` into the first DAE step.
-
-    :param variable_parameters: Canonical runtime parameter order.
-    :type variable_parameters: List[Var]
-    :param event_parameters_eqs: Runtime parameter equations aligned with the canonical order.
-    :type event_parameters_eqs: List[Union[Expr, Const]]
-    :param uid2idx_event_params: Runtime-parameter uid-to-index lookup.
-    :type uid2idx_event_params: Dict[int, int]
-    :param event_params_array: Runtime parameter storage updated in place.
-    :type event_params_array: np.ndarray
-    :return: None.
-    :rtype: None
-    """
-    parameter_index: int = 0
-    runtime_parameter: Var
-    runtime_equation: Union[Expr, Const]
-    runtime_idx: int | None
-
-    while parameter_index < len(variable_parameters):
-        runtime_parameter = variable_parameters[parameter_index]
-        runtime_equation = event_parameters_eqs[parameter_index]
-        runtime_idx = uid2idx_event_params.get(runtime_parameter.uid, None)
-
-        if runtime_idx is None:
-            pass
-        else:
-            if isinstance(runtime_equation, Const) and runtime_equation.value is not None:
-                event_params_array[runtime_idx] = float(runtime_equation.value)
-            else:
-                pass
-
-        parameter_index += 1
 
 
 def _get_state_rhs_persistent_cache_directory() -> Path:
@@ -933,6 +886,7 @@ def _build_persistent_initialization_cache_key(
         f"{float(options.init_ptc_dtau_min):.12g}",
         f"{float(options.init_ptc_dtau_max):.12g}",
         str(int(options.init_ptc_max_iter)),
+        str(bool(options.init_ptc_backward_euler_residual)),
     ])
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -1163,421 +1117,6 @@ def _collect_missing_dx_problem(problem: EmtProblemTemplate,
     return missing_diff_vars, missing_state_eqs
 
 
-def build_uid_bindings(
-        eq: Union[Expr, Const],
-        event_params_array: np.ndarray,
-        x: np.ndarray,
-        params_array: np.ndarray,
-        dx: np.ndarray,
-        uid2idx_event_params: Dict[int, int],
-        uid2idx_vars: Dict[int, int],
-        uid2idx_params: Dict[int, int],
-        uid2idx_diff: Dict[int, int]
-) -> Dict[int, float]:
-    """
-    Builds a mapping of Unique Identifiers (UIDs) to their current numeric values.
-
-    :param eq: The symbolic expression to analyze.
-    :param event_params_array: Array containing resolved event parameters.
-    :param x: Array containing state and algebraic variables.
-    :param params_array: Array containing constant model parameters.
-    :param dx: Array containing derivative values.
-    :param uid2idx_event_params: Mapping of UID to index for event parameters.
-    :param uid2idx_vars: Mapping of UID to index for variables.
-    :param uid2idx_params: Mapping of UID to index for constants.
-    :param uid2idx_diff: Mapping of UID to index for derivatives.
-    :return: A dictionary mapping UIDs to their float values.
-    """
-    uid_bindings: Dict[int, float] = dict()
-    vars_list: List[Var] = find_vars_order(eq)
-
-    for vr in vars_list:
-        resolved_value: Optional[float] = None
-        event_idx: Optional[int] = uid2idx_event_params.get(vr.uid, None)
-        state_idx: Optional[int] = uid2idx_vars.get(vr.uid, None)
-        param_idx: Optional[int] = uid2idx_params.get(vr.uid, None)
-        diff_idx: Optional[int] = uid2idx_diff.get(vr.uid, None)
-
-        if event_idx is None:
-            if state_idx is None:
-                if param_idx is None:
-                    if diff_idx is None:
-                        resolved_value = None
-                    else:
-                        resolved_value = float(dx[diff_idx])
-                else:
-                    resolved_value = float(params_array[param_idx])
-            else:
-                resolved_value = float(x[state_idx])
-        else:
-            resolved_value = float(event_params_array[event_idx])
-
-        if resolved_value is None:
-            uid_bindings = uid_bindings
-        else:
-            uid_bindings[vr.uid] = resolved_value
-
-    return uid_bindings
-
-
-def event_param_is_resolved(v: Var,
-                            mdl: Block,
-                            event_parameters_eqs: List[Union[Expr, Const]] | None = None,
-                            uid2idx_event_params: Dict[int, int] | None = None) -> bool:
-    """
-    Checks if an event parameter has been assigned a concrete value.
-
-    :param v: The variable representing the event parameter.
-    :param mdl: The symbolic model block.
-    :return: True if resolved, False otherwise.
-    """
-    eqv: Union[Expr, Const] | None = None
-    runtime_idx: int | None = None
-
-    if uid2idx_event_params is None:
-        runtime_idx = None
-    else:
-        runtime_idx = uid2idx_event_params.get(v.uid, None)
-
-    if event_parameters_eqs is not None and runtime_idx is not None:
-        eqv = event_parameters_eqs[runtime_idx]
-    else:
-        if v in mdl.event_dict:
-            eqv = mdl.event_dict[v]
-        else:
-            eqv = None
-
-    if eqv is None:
-        return True
-    else:
-        pass
-
-    if v in mdl.event_dict or runtime_idx is not None:
-        if isinstance(eqv, Const):
-            if eqv.value is None:
-                return False
-            else:
-                return True
-        else:
-            return True
-    else:
-        return True
-
-
-def can_compute_init(
-        var: Var,
-        eq: Union[Expr, Const],
-        mdl: Block,
-        event_parameters_eqs: List[Union[Expr, Const]],
-        init_guess: Dict[int, float],
-        diff_init_guess: Dict[int, float],
-        uid2idx_event_params: Dict[int, int],
-        uid2idx_diff: Dict[int, int],
-        uid2idx_vars: Dict[int, int]
-) -> bool:
-    """
-    Determines if an initialization equation is computable based on current knowns.
-
-    :param var: Target variable.
-    :param eq: The expression to evaluate.
-    :param mdl: The model block.
-    :param init_guess: Current variable guesses.
-    :param diff_init_guess: Current derivative guesses.
-    :param uid2idx_diff: UID map for derivatives.
-    :param uid2idx_vars: UID map for variables.
-    :return: Boolean indicating if all dependencies are met.
-    """
-    vars_needed: List[Var] = get_expression_vars(eq)
-    for v_dep in vars_needed:
-        if v_dep.uid == var.uid:
-            dependency_ready: bool = True
-        elif v_dep.uid in uid2idx_event_params:
-            dependency_ready = event_param_is_resolved(v_dep, mdl, event_parameters_eqs, uid2idx_event_params)
-        elif v_dep.uid in uid2idx_diff:
-            dependency_ready = v_dep.uid in diff_init_guess
-        elif v_dep.uid in uid2idx_vars:
-            dependency_ready = v_dep.uid in init_guess
-        else:
-            dependency_ready = True
-
-        if dependency_ready:
-            dependency_ready = dependency_ready
-        else:
-            return False
-    return True
-
-
-def init_explicit_emt(
-        mdl: Block,
-        sys_vars: Dict[int, Var],
-        sys_diff_vars: Dict[int, Var],
-        variable_parameters: List[Var],
-        event_parameters_eqs: List[Union[Expr, Const]],
-        constant_parameters: List[Var],
-        constant_parameter_values: List[Const],
-        init_guess: Dict[int, float],
-        diff_init_guess: Dict[int, float],
-        uid2idx_vars: Dict[int, int],
-        uid2idx_diff: Dict[int, int],
-        uid2idx_params: Dict[int, int],
-        uid2idx_event_params: Dict[int, int],
-        compiler_names_dict: Dict[int, str],
-        alias_names_dict: Dict[int, str],
-        VARIABLE_PARAMS_NAME: str,
-        VARS_NAME: str,
-        DIFF_NAME: str,
-        CONSTANT_PARAMS_NAME: str,
-        verbose: bool = False) -> Optional[Tuple[Dict[int, float], Dict[int, float]]]:
-    """
-    Initializes the EMT model by solving initialization and differential equations.
-
-    This function performs a topological-like resolution of model variables.
-    It uses fixed-point iteration for self-referencing equations and handles
-    dependencies between algebraic and differential states.
-
-    :param mdl: Symbolic model block.
-    :param sys_vars: Registry of system variables.
-    :param sys_diff_vars: Registry of system differential variables.
-    :param variable_parameters: List of parameters that change on events.
-    :param event_parameters_eqs: Initial equations for event parameters.
-    :param constant_parameters: List of constant parameters.
-    :param constant_parameter_values: Values associated with ``constant_parameters``.
-    :param init_guess: Initial guesses for variables.
-    :param diff_init_guess: Initial guesses for derivatives.
-    :param uid2idx_vars: Index map for variables.
-    :param uid2idx_diff: Index map for derivatives.
-    :param uid2idx_params: Index map for parameters.
-    :param uid2idx_event_params: Index map for event parameters.
-    :param compiler_names_dict: Map for variable naming in compilation.
-    :param alias_names_dict: Map for variable aliases.
-    :param VARIABLE_PARAMS_NAME: Name for variable parameter array.
-    :param VARS_NAME: Name for state variable array.
-    :param DIFF_NAME: Name for derivative array.
-    :param CONSTANT_PARAMS_NAME: Name for constant parameter array.
-    :param verbose: Whether to print explicit initialization diagnostics.
-    :return: Updated initial guesses and modified model block.
-    """
-
-    # Initialize memory buffers for numerical evaluation
-    # EMT solvers require flat arrays for efficient computation
-    x: np.ndarray = np.ones(len(sys_vars))
-    dx: np.ndarray = np.zeros(len(sys_diff_vars))
-
-    # Hydrate buffers with existing user-provided guesses
-    for uid, val in init_guess.items():
-        if verbose:
-            print(f"Var {sys_vars[uid].name} with uid= {uid} initialized with val: {val} ")
-        x[uid2idx_vars[uid]] = val
-
-    for uid, val in diff_init_guess.items():
-        if verbose:
-            print(f"Diff var {sys_diff_vars[uid].name} with uid= {uid} initialized with val: {val} ")
-        dx[uid2idx_diff[uid]] = val
-
-    # Static EMT constants now live in the problem-owned mapping. Build the
-    # dense array from that canonical source instead of the block-local cache.
-    _ = mdl
-    _ = constant_parameters
-    params_array: np.ndarray = np.asarray(
-        [float(const.value) for const in constant_parameter_values],
-        dtype=np.float64,
-    )
-
-    # Primary pass: resolve basic event parameters that are constant or immediate
-    event_params_array: np.ndarray = np.ones(len(variable_parameters))
-    block_sequence: List[Block] = _collect_block_sequence(mdl)
-    event_equation_lookup: Dict[int, Union[Expr, Const]] = _build_hierarchical_event_equation_lookup(mdl)
-    event_block: Block
-    event_param: Var
-
-    _seed_runtime_event_parameter_array(
-        variable_parameters=variable_parameters,
-        event_parameters_eqs=event_parameters_eqs,
-        uid2idx_event_params=uid2idx_event_params,
-        event_params_array=event_params_array,
-    )
-
-    for event_block in block_sequence:
-        for event_param in event_block.event_dict.keys():
-            event_runtime_idx: int | None = uid2idx_event_params.get(event_param.uid, None)
-            eq: Union[Expr, Const]
-
-            if event_runtime_idx is None:
-                eq = event_block.event_dict[event_param]
-            else:
-                eq = event_equation_lookup.get(event_param.uid, event_parameters_eqs[event_runtime_idx])
-
-            # GUI and wrapper-loaded EMT models can expose one runtime parameter
-            # on the root while the concrete ``event_dict`` definition still lives
-            # inside a child block. The explicit initializer must therefore scan
-            # the full hierarchy instead of only ``mdl.event_dict``.
-            is_concrete_const: bool = isinstance(eq, Const) and eq.value is not None
-            is_expression: bool = not isinstance(eq, Const)
-
-            if is_concrete_const or is_expression:
-                vars_list: List[Var] = find_vars_order(eq)
-                uid_bindings: Dict[int, float] = dict()
-                for var in vars_list:
-                    dep_runtime_idx: int | None = uid2idx_event_params.get(var.uid, None)
-                    if dep_runtime_idx is None:
-                        pass
-                    else:
-                        uid_bindings[var.uid] = float(event_params_array[dep_runtime_idx])
-
-                result: float = eq.eval_uid(uid_bindings)
-                if event_runtime_idx is None:
-                    pass
-                else:
-                    event_params_array[event_runtime_idx] = result
-                if verbose:
-                    print(f"event_param:{event_param.name} initialized from events_dict with: {result}")
-            else:
-                event_param = event_param
-
-    # Track pending equations that require dependency resolution
-    init_pending: Dict[int, Tuple[Var, Union[Expr, Const]]] = dict()
-    for v, e in mdl.init_eqs.items():
-        init_pending[v.uid] = (v, e)
-
-    diff_pending: Dict[int, Tuple[Var, Union[Expr, Const]]] = dict()
-    for v, e in mdl.diff_init_eqs.items():
-        diff_pending[v.uid] = (v, e)
-
-    # Iterative solver loop
-    while len(init_pending) > 0 or len(diff_pending) > 0:
-        progress_made: bool = False
-
-        # Solve for Algebraic/State variables
-        for uid in list(init_pending.keys()):
-            var, eq = init_pending[uid]
-            if can_compute_init(var, eq, mdl, event_parameters_eqs, init_guess, diff_init_guess, uid2idx_event_params, uid2idx_diff, uid2idx_vars):
-
-                # Logic for variables that are registered as event parameters
-                if var in mdl.event_dict:
-                    var_runtime_idx: int | None = uid2idx_event_params.get(var.uid, None)
-                    if isinstance(eq, Const) and eq.value is not None:
-                        if var_runtime_idx is None:
-                            pass
-                        else:
-                            event_params_array[var_runtime_idx] = float(eq.value)
-                    else:
-                        bindings: Dict[int, float] = build_uid_bindings(
-                            eq, event_params_array, x, params_array, dx,
-                            uid2idx_event_params, uid2idx_vars, uid2idx_params, uid2idx_diff
-                        )
-                        res: float = eq.eval_uid(bindings)
-                        if var_runtime_idx is None:
-                            pass
-                        else:
-                            event_parameters_eqs[var_runtime_idx] = Const(res)
-                            event_params_array[var_runtime_idx] = res
-                        if verbose:
-                            print(f"event_param:{var.name} initialized from init_eqs with: {res}")
-                        else:
-                            pass
-
-                # Logic for standard algebraic variables
-                else:
-                    vars_in_eqs: List[Var] = get_expression_vars(eq)
-                    if var not in vars_in_eqs:
-                        # Direct assignment
-                        bindings = build_uid_bindings(
-                            eq, event_params_array, x, params_array, dx,
-                            uid2idx_event_params, uid2idx_vars, uid2idx_params, uid2idx_diff
-                        )
-                        res = eq.eval_uid(bindings)
-                        init_guess[var.uid] = res
-                        x[uid2idx_vars[var.uid]] = res
-                    else:
-                        # Implicit resolution using a damped fixed-point iteration
-                        eq_fn: SymbolicVector = SymbolicVector(
-                            [eq], compiler_names_dict, alias_names_dict,
-                            VARS_NAME, DIFF_NAME, VARIABLE_PARAMS_NAME, CONSTANT_PARAMS_NAME
-                        )
-
-                        # Fixed-point parameters
-                        tol: float = 1e-8
-                        error: float = 1.0
-                        alpha: float = 1.3
-                        curr_x: float = 1.2
-
-                        x[uid2idx_vars[var.uid]] = curr_x
-                        while error > tol:
-                            try:
-                                # Evaluate expression with current state
-                                eval_res: float = float(eq_fn(x, dx, event_params_array, params_array)[0])
-                            except Exception:
-                                # Fallback/Reset on numerical instability
-                                x[uid2idx_vars[var.uid]] = -0.1
-                                eval_res = float(eq_fn(x, dx, event_params_array, params_array)[0])
-
-                            # Update with damping (Successive Over-Relaxation style)
-                            x[uid2idx_vars[var.uid]] = (1 - alpha) * curr_x + alpha * eval_res
-                            error = float(abs(eval_res - curr_x))
-                            curr_x = float(x[uid2idx_vars[var.uid]])
-
-                        init_guess[var.uid] = curr_x
-
-                del init_pending[uid]
-                progress_made = True
-            else:
-                uid = uid
-
-        # Solve for Differential variables
-        for uid in list(diff_pending.keys()):
-            d_var, eq = diff_pending[uid]
-            # Use separate check for diff equations to ensure variables are ready
-            if can_compute_init(d_var, eq, mdl, event_parameters_eqs, init_guess, diff_init_guess, uid2idx_event_params, uid2idx_diff, uid2idx_vars):
-                vars_in_eqs = get_expression_vars(eq)
-
-                if d_var not in vars_in_eqs:
-                    bindings = build_uid_bindings(
-                        eq, event_params_array, x, params_array, dx,
-                        uid2idx_event_params, uid2idx_vars, uid2idx_params, uid2idx_diff
-                    )
-                    res = eq.eval_uid(bindings)
-                    diff_init_guess[d_var.uid] = res
-                    dx[uid2idx_diff[d_var.uid]] = res
-                else:
-                    # Fixed-point iteration for derivatives
-                    eq_fn = SymbolicVector(
-                        [eq], compiler_names_dict, alias_names_dict,
-                        VARS_NAME, DIFF_NAME, VARIABLE_PARAMS_NAME, CONSTANT_PARAMS_NAME
-                    )
-                    tol = 1e-8
-                    error = 1.0
-                    alpha = 1.3
-                    curr_dx: float = 1.2
-
-                    dx[uid2idx_diff[d_var.uid]] = curr_dx
-                    while error > tol:
-                        try:
-                            eval_res = float(eq_fn(x, dx, event_params_array, params_array)[0])
-                        except Exception:
-                            dx[uid2idx_diff[d_var.uid]] = -0.1
-                            eval_res = float(eq_fn(x, dx, event_params_array, params_array)[0])
-
-                        dx[uid2idx_diff[d_var.uid]] = (1 - alpha) * curr_dx + alpha * eval_res
-                        error = float(abs(eval_res - curr_dx))
-                        curr_dx = float(dx[uid2idx_diff[d_var.uid]])
-
-                    diff_init_guess[d_var.uid] = curr_dx
-
-                del diff_pending[uid]
-                progress_made = True
-            else:
-                uid = uid
-
-        # If no variables were resolved in this pass, the system is unsolvable
-        if not progress_made:
-            # We return None to signify failure rather than raising, per directive
-            return None
-        else:
-            progress_made = progress_made
-
-    return init_guess, diff_init_guess
-
-
 def init_pseudo_transient(problem: EmtProblemTemplate, options: EmtOptions) -> EmtInitializationReport:
     """
     Run the EMT-native initialization workflow forcing the pure pseudo-transient path.
@@ -1592,42 +1131,6 @@ def init_pseudo_transient(problem: EmtProblemTemplate, options: EmtOptions) -> E
     """
     options.initialization_method = EmtInitializationMethod.PseudoTransient
     return run_emt_native_initialization(problem, options)
-
-
-def run_emt_explicit_initialization(problem: EmtProblemTemplate, verbose: bool = False) -> None:
-    """
-    Run the explicit EMT initialization stage on a full problem object.
-
-    :param problem: EMT problem being initialized.
-    :param verbose: Print explicit initialization details.
-    :return: None
-    """
-    sys_vars: Dict[int, Var] = {v.uid: v for v in (problem.get_state_vars() + problem.get_algebraic_vars())}
-    sys_diff_vars: Dict[int, Var] = {dv.uid: dv for dv in problem.get_diff_vars()}
-
-    init_explicit_emt(
-        mdl=problem.sys_block,
-        sys_vars=sys_vars,
-        sys_diff_vars=sys_diff_vars,
-        variable_parameters=problem.get_variable_parameters(),
-        event_parameters_eqs=problem.get_event_parameter_equations(),
-        constant_parameters=problem.get_constant_parameters(),
-        constant_parameter_values=problem.get_parameters_values(),
-        init_guess=problem.init_guess,
-        diff_init_guess=problem.diff_init_guess,
-        uid2idx_vars=problem.uid2idx_vars,
-        uid2idx_diff=problem.uid2idx_diff,
-        uid2idx_params=problem.uid2idx_params,
-        uid2idx_event_params=problem.uid2idx_event_params,
-        compiler_names_dict=problem.get_compiler_names_dict(),
-        alias_names_dict=problem.get_alias_names_dict(),
-        VARIABLE_PARAMS_NAME=problem.VARIABLE_PARAMS_NAME,
-        VARS_NAME=problem.VARS_NAME,
-        DIFF_NAME=problem.DIFF_NAME,
-        CONSTANT_PARAMS_NAME=problem.CONSTANT_PARAMS_NAME,
-        verbose=verbose,
-    )
-    problem.rebuild_runtime_param_vectors()
 
 
 class ReducedInitializationSystem:
@@ -1710,6 +1213,402 @@ def _build_constant_param_array(problem: EmtProblemTemplate) -> np.ndarray:
     return np.asarray([float(item.value) for item in const_values], dtype=np.float64)
 
 
+def _emt_phase_groups(variables: List[Var]) -> List[Tuple[Var, Var, Var]]:
+    """Find the template convention ``<quantity>_A/B/C`` within one block.
+
+    These groups represent balanced fundamental quantities. Their rotating-frame
+    derivative is omega/sqrt(3) * (x_C-x_B, x_A-x_C, x_B-x_A).
+    """
+    families: Dict[str, Dict[str, Var]] = {}
+    for var in variables:
+        if var.name.endswith(("_A", "_B", "_C")):
+            families.setdefault(var.name[:-1], {})[var.name[-1]] = var
+    return [(phases["A"], phases["B"], phases["C"])
+            for phases in families.values() if all(phase in phases for phase in "ABC")]
+
+
+def _emt_is_absolute_angle(var: Var) -> bool:
+    """Identify absolute machine/PLL phase states in the EMT templates."""
+    return var.name.rstrip("_") in ("theta_abs", "theta", "theta_pll")
+
+
+def _emt_periodic_derivatives(
+        states: List[Var], groups: List[Tuple[Var, Var, Var]], omega: float,
+) -> Dict[int, Expr]:
+    """Build periodic derivatives from state roles, without initialization equations."""
+    derivatives: Dict[int, Expr] = {var.uid: Const(0.0) for var in states}
+    for var in states:
+        # Absolute electrical rotor angles advance once per fundamental cycle;
+        # rotor-relative angles and dq/controller quantities remain constant.
+        if _emt_is_absolute_angle(var):
+            derivatives[var.uid] = Const(omega)
+    for a, b, c in groups:
+        if a.uid in derivatives and b.uid in derivatives and c.uid in derivatives:
+            derivatives[a.uid] = omega / np.sqrt(3.0) * (c - b)
+            derivatives[b.uid] = omega / np.sqrt(3.0) * (a - c)
+            derivatives[c.uid] = omega / np.sqrt(3.0) * (b - a)
+    return derivatives
+
+
+def _emt_initialization_bindings(problem: EmtProblemTemplate) -> Dict[int, float]:
+    x, dx = problem.get_x0(), problem.get_dx0()
+    constants = _build_constant_param_array(problem)
+    bindings = {uid: float(x[index]) for uid, index in problem.uid2idx_vars.items()}
+    bindings.update({uid: float(dx[index]) for uid, index in problem.uid2idx_diff.items()})
+    bindings.update({uid: float(problem.event_params_values[index])
+                     for uid, index in problem.uid2idx_event_params.items()})
+    bindings.update({uid: float(constants[index]) for uid, index in problem.uid2idx_params.items()})
+    bindings[problem.glob_time.uid] = 0.0
+    return bindings
+
+
+def run_emt_device_pseudo_transient_initialization(
+        problem: EmtProblemTemplate,
+        blocks: List[Block],
+        options: EmtOptions,
+        check_kcl: bool = True,
+        require_full_coverage: bool = True,
+) -> EmtInitializationReport:
+    """Solve each complete device at a balanced periodic PF operating point.
+
+    Device registration and residuals use only dynamic equations. Machine and
+    controller children share one solve. PF terminal voltages remain fixed and
+    mapped terminal currents anchor the operating point. Unseeded Const(None)
+    event parameters become unknown references; symbolic references also carry
+    their defining residual. Neither init_eqs nor diff_init_eqs is evaluated.
+
+    Pseudo time relaxes f(x)-D_periodic(x)=0. ABC state triples use their
+    fundamental sinusoidal derivatives; dq/controller states use zero and
+    absolute rotor angles advance at grid frequency. This balanced fundamental
+    approximation is checked against the assembled DAE at four cycle phases.
+    """
+    from VeraGridEngine.enumerations import VarPowerFlowReferenceType
+    from VeraGridEngine.Simulations.Rms.initialization import _build_reference_update_from_residual
+
+    report = EmtInitializationReport(method_requested=EmtInitializationMethod.PseudoTransient)
+    report.method_used = EmtInitializationMethod.PseudoTransient
+    start_time = time.perf_counter()
+    omega = 2.0 * np.pi * float(problem.grid.fBase)
+    if not np.isfinite(omega) or omega <= 0.0:
+        report.status = InitializationStatus.FAILED
+        report.message = "Periodic initialization requires a positive grid frequency."
+        return report
+    for index, bus in enumerate(problem.grid.buses):
+        if not bus.is_dc:
+            bus_vars = [var for block in bus.emt_model.get_all_blocks() for var in block.algebraic_vars]
+            if not _emt_phase_groups(bus_vars):
+                report.status = InitializationStatus.FAILED
+                report.message = f"Periodic initialization requires an ABC voltage group at bus {bus.name!r}."
+                return report
+            if problem.power_flow_results_3ph is not None:
+                voltages = problem._get_bus_voltage_vector_3ph(index)
+                rotation = np.exp(-2j * np.pi / 3.0)
+                balanced = voltages[1] * np.asarray([1.0, rotation, rotation ** 2])
+                if not np.allclose(voltages[1:], balanced, rtol=0.0, atol=float(options.tolerance)):
+                    report.status = InitializationStatus.FAILED
+                    report.message = "Device-local periodic PTC currently requires a balanced power-flow operating point."
+                    return report
+    bindings = _emt_initialization_bindings(problem)
+    original_bindings = dict(bindings)
+    # Auto may call device PTC after explicit initialization. Terminal anchors
+    # must still come from the preserved power-flow snapshot, not from values
+    # that explicit model equations may have subsequently rewritten.
+    for uid, value in problem._temp_init_guess.items():
+        if uid in original_bindings and value is not None and np.isfinite(float(value)):
+            original_bindings[uid] = float(value)
+            bindings[uid] = float(value)
+    solved_values: Dict[int, float] = {}
+    solved_derivatives: Dict[int, float] = {}
+    solved_references: Dict[int, float] = {}
+    tolerance = float(options.init_newton_tol)
+    current_refs = {
+        VarPowerFlowReferenceType.i_A, VarPowerFlowReferenceType.i_B, VarPowerFlowReferenceType.i_C,
+        VarPowerFlowReferenceType.if_A, VarPowerFlowReferenceType.if_B, VarPowerFlowReferenceType.if_C,
+        VarPowerFlowReferenceType.it_A, VarPowerFlowReferenceType.it_B, VarPowerFlowReferenceType.it_C,
+    }
+    voltage_refs = {
+        VarPowerFlowReferenceType.v_N, VarPowerFlowReferenceType.v_A,
+        VarPowerFlowReferenceType.v_B, VarPowerFlowReferenceType.v_C,
+        VarPowerFlowReferenceType.vf_N, VarPowerFlowReferenceType.vf_A,
+        VarPowerFlowReferenceType.vf_B, VarPowerFlowReferenceType.vf_C,
+        VarPowerFlowReferenceType.vt_N, VarPowerFlowReferenceType.vt_A,
+        VarPowerFlowReferenceType.vt_B, VarPowerFlowReferenceType.vt_C,
+        VarPowerFlowReferenceType.Vdc, VarPowerFlowReferenceType.Vf_dc,
+        VarPowerFlowReferenceType.Vt_dc,
+    }
+    covered_uids: Set[int] = set()
+    seen_roots: Set[int] = set()
+
+    device_roots = []
+    for root in blocks:
+        if root.uid not in seen_roots:
+            seen_roots.add(root.uid)
+            if any(block.state_vars or block.algebraic_vars for block in root.get_all_blocks()):
+                device_roots.append(root)
+
+    for root in device_roots:
+        children = root.get_all_blocks()
+        states = [var for block in children for var in block.state_vars]
+        algebraics = [var for block in children for var in block.algebraic_vars]
+        state_eqs = [eq for block in children for eq in block.state_eqs]
+        algebraic_eqs = [eq for block in children for eq in block.algebraic_eqs]
+        owner = problem._vars2device.get((states + algebraics)[0].uid)
+        label = f"{owner.name} / {root.name}" if owner is not None else root.name
+        if len(states) != len(state_eqs) or len(algebraics) != len(algebraic_eqs):
+            report.status = InitializationStatus.FAILED
+            report.message = f"Device {label!r} has mismatched dynamic equations."
+            break
+        owned_uids = {var.uid for var in states + algebraics}
+        if covered_uids & owned_uids:
+            report.status = InitializationStatus.FAILED
+            report.message = "Pseudo-transient device roots overlap."
+            break
+        covered_uids.update(owned_uids)
+        groups = [group for block in children for group in _emt_phase_groups(block.state_vars)]
+        derivatives = _emt_periodic_derivatives(states, groups, omega)
+        # Positive mass on target-rhs gives the usual pseudo-time equation
+        # M dx/dtau = rhs - target. Algebraic and PF rows have zero mass.
+        residual_eqs = [derivatives[var.uid] - eq for var, eq in zip(states, state_eqs)]
+        residual_eqs.extend(algebraic_eqs)
+        references: List[Var] = []
+        inferred_references: Dict[int, Expr] = {}
+        event_sources = {var: expression for block in children for var, expression in block.event_dict.items()}
+        for var, expression in event_sources.items():
+            if var.uid in problem.uid2idx_event_params and var.uid not in problem.event_params_init_dict:
+                if isinstance(expression, Const):
+                    if expression.value is None:
+                        # Null references are solved from the dynamic/PF equations.
+                        if not any(var.uid in {v.uid for v in eq.get_vars()} for eq in residual_eqs):
+                            report.status = InitializationStatus.FAILED
+                            report.message = f"Reference {var.name!r} has no dynamic equation in {label!r}."
+                            break
+                        inferred = next((update for eq in residual_eqs
+                                         if (update := _build_reference_update_from_residual(eq, var)) is not None), None)
+                        if inferred is not None:
+                            inferred_references[var.uid] = inferred
+                        else:
+                            references.append(var)
+                elif any(v.uid in problem.uid2idx_vars for v in expression.get_vars()):
+                    residual_eqs.append(var - expression)
+                    references.append(var)
+                # Expressions using only PF values/constants are already resolved.
+        if report.status == InitializationStatus.FAILED:
+            break
+
+        mapping = {key: var for block in children for key, var in block.external_mapping.items()}
+        anchor_uids = {
+            var.uid for key, var in mapping.items()
+            if key in current_refs and isinstance(var, Var)
+            and var.uid in owned_uids and var.uid in problem.init_guess
+        }
+        local_vars = states + algebraics + references
+        local_uids = [var.uid for var in local_vars]
+        # PF terminal data has the network tolerance; dynamic residuals keep
+        # the tighter initialization tolerance (e.g. tiny winding regularizers).
+        branch_anchor_weight = tolerance / max(tolerance, float(options.tolerance))
+        injection_uids = {var.uid for key, var in mapping.items()
+                          if key in {VarPowerFlowReferenceType.i_A, VarPowerFlowReferenceType.i_B,
+                                     VarPowerFlowReferenceType.i_C} and isinstance(var, Var)}
+        residual_eqs.extend((1.0 if var.uid in injection_uids else branch_anchor_weight)
+                            * (var - original_bindings[var.uid])
+                            for var in local_vars if var.uid in anchor_uids)
+        current = np.asarray([bindings[uid] for uid in local_uids], dtype=np.float64)
+        for index, var in enumerate(states):
+            if var.name in ("omega", "omega_") and var.uid not in problem.init_guess:
+                current[index] = 1.0
+        report.unknown_var_count += len(local_vars)
+        report.unresolved_state_count += len(states)
+
+        def evaluate(values: np.ndarray) -> np.ndarray:
+            bindings.update(zip(local_uids, map(float, values)))
+            for uid, expression in inferred_references.items():
+                bindings[uid] = float(expression.eval_uid(bindings))
+            # Residuals that explicitly contain dx see the same periodic target.
+            for block in children:
+                for derivative in block.diff_vars:
+                    if derivative.base_var is not None and derivative.base_var.uid in derivatives:
+                        bindings[derivative.uid] = float(derivatives[derivative.base_var.uid].eval_uid(bindings))
+            return np.asarray([float(eq.eval_uid(bindings)) for eq in residual_eqs], dtype=np.float64)
+
+        try:
+            residual = evaluate(current)
+            initial_norm = _max_abs_value(residual)
+            if not np.isfinite(initial_norm):
+                raise ValueError("non-finite initial residual")
+            report.initial_residual_inf = max(report.initial_residual_inf, initial_norm)
+            dtau = float(options.init_ptc_dtau0)
+            stalled = 0
+            for _ in range(int(options.init_ptc_max_iter)):
+                if _max_abs_value(residual) <= tolerance:
+                    break
+                jacobian = np.empty((len(residual), len(current)))
+                for column in range(len(current)):
+                    epsilon = 1e-6 * max(1.0, abs(current[column]))
+                    trial = current.copy()
+                    trial[column] += epsilon
+                    positive = evaluate(trial)
+                    trial[column] -= 2.0 * epsilon
+                    jacobian[:, column] = (positive - evaluate(trial)) / (2.0 * epsilon)
+                if references or inferred_references or any(_emt_is_absolute_angle(var) for var in states):
+                    # Reference inference can eliminate a state residual and PF
+                    # anchors make the system rectangular. Relax J.T F with a
+                    # positive artificial mass in scaled local coordinates.
+                    # The mass decreases with the residual; every correction
+                    # remains a pseudo-time step, with no Newton-only fallback.
+                    row_scale = np.maximum(np.linalg.norm(jacobian, axis=1), 1e-8)
+                    row_jacobian = jacobian / row_scale[:, None]
+                    column_scale = np.maximum(np.linalg.norm(row_jacobian, axis=0), 1e-8)
+                    scaled_jacobian = row_jacobian / column_scale
+                    pseudo_mass = max(1e-14, min(1.0, np.linalg.norm(residual / row_scale)) ** 2)
+                    relaxation = np.sqrt(pseudo_mass / max(dtau, 1e-30))
+                    augmented = np.vstack((scaled_jacobian, relaxation * np.eye(len(current))))
+                    rhs = np.r_[-residual / row_scale, np.zeros(len(current))]
+                    correction = np.linalg.lstsq(augmented, rhs, rcond=None)[0] / column_scale
+                else:
+                    row_scale = np.ones(len(residual))
+                    for index in range(len(states)):
+                        jacobian[index, index] += 1.0 / max(dtau, 1e-30)
+                    correction = np.linalg.lstsq(jacobian, -residual, rcond=None)[0]
+                accepted = False
+                alpha = 1.0
+                for _ in range(12):
+                    candidate = current + alpha * correction
+                    candidate_residual = evaluate(candidate)
+                    if np.all(np.isfinite(candidate_residual)) and np.linalg.norm(candidate_residual / row_scale) < np.linalg.norm(residual / row_scale):
+                        current, residual = candidate, candidate_residual
+                        accepted = True
+                        break
+                    alpha *= 0.5
+                report.pseudo_transient_steps += 1
+                if accepted:
+                    dtau = min(float(options.init_ptc_dtau_max), 2.0 * dtau)
+                    stalled = 0
+                else:
+                    dtau = max(float(options.init_ptc_dtau_min), 0.5 * dtau)
+                    stalled += 1
+                    if stalled >= 3:
+                        break
+            if options.verbose:
+                print(f"[EMT PTC] {label}: residual={_max_abs_value(residual):.3g}")
+            final_norm = _max_abs_value(residual)
+            report.final_residual_inf = max(report.final_residual_inf, final_norm)
+            if not np.isfinite(final_norm) or final_norm > tolerance:
+                raise ValueError(f"periodic residual {final_norm:.3g} exceeds {tolerance:.3g}")
+            evaluate(current)
+            pf_value_tolerance = max(tolerance, float(options.tolerance))
+            for pf_ref, pf_var in mapping.items():
+                if (pf_ref in voltage_refs | current_refs
+                        and isinstance(pf_var, Var)
+                        and pf_var.uid in original_bindings):
+                    pf_error = abs(float(bindings[pf_var.uid]) - float(original_bindings[pf_var.uid]))
+                    if pf_error > pf_value_tolerance:
+                        raise ValueError(
+                            f"PF terminal value {pf_ref.value!r} changed by {pf_error:.3g} "
+                            f"in {label!r}"
+                        )
+            solved_references.update({uid: bindings[uid] for uid in inferred_references})
+            for var, value in zip(local_vars, current):
+                if var.uid in problem.uid2idx_event_params:
+                    solved_references[var.uid] = float(value)
+                else:
+                    solved_values[var.uid] = float(value)
+            for block in children:
+                for derivative in block.diff_vars:
+                    if derivative.base_var is not None and derivative.base_var.uid in derivatives:
+                        solved_derivatives[derivative.uid] = float(derivatives[derivative.base_var.uid].eval_uid(bindings))
+        except (FloatingPointError, ZeroDivisionError, ValueError, RuntimeError, OverflowError, KeyError, TypeError, np.linalg.LinAlgError) as exc:
+            report.status = InitializationStatus.FAILED
+            report.message = f"Device {label!r} failed: {exc}"
+            break
+
+    if report.status != InitializationStatus.FAILED:
+        bus_uids = {var.uid for bus in problem.grid.buses
+                    for block in bus.emt_model.get_all_blocks() for var in block.algebraic_vars}
+        missing = set(problem.uid2idx_vars) - covered_uids - bus_uids
+        if missing and require_full_coverage:
+            report.status = InitializationStatus.FAILED
+            report.message = f"Device-local initialization does not cover {len(missing)} variables."
+        elif check_kcl:
+            kcl = [float(eq.eval_uid(bindings))
+                   for var, eq in zip(problem.get_algebraic_vars(), problem.get_algebraic_eqs())
+                   if var.uid in bus_uids]
+            kcl_norm = _max_abs_value(np.asarray(kcl))
+            report.final_residual_inf = max(report.final_residual_inf, kcl_norm)
+            if not np.isfinite(kcl_norm) or kcl_norm > max(tolerance, float(options.tolerance)):
+                report.status = InitializationStatus.FAILED
+                report.message = f"Assembled device initialization violates bus KCL ({kcl_norm:.3g})."
+
+    # Apply atomically: a failed local solve must not leave a partially modified
+    # runtime reference graph or preserved post-init snapshot.
+    if report.status != InitializationStatus.FAILED:
+        problem.init_guess.update(solved_values)
+        problem.diff_init_guess.update(solved_derivatives)
+        if hasattr(problem, "_temp_post_init_guess"):
+            problem._temp_post_init_guess.update(solved_values)
+            problem._temp_post_diff_init_guess.update(solved_derivatives)
+        for uid, value in solved_references.items():
+            problem.event_params_init_dict[uid] = value
+            problem._set_runtime_parameter_value_by_uid(uid=uid, value=value)
+        report.status = InitializationStatus.RESOLVED
+        report.message = "Device-local periodic pseudo-transient initialization converged."
+    report.pseudo_transient_elapsed_s = time.perf_counter() - start_time
+    report.elapsed_s = report.pseudo_transient_elapsed_s
+    return report
+
+
+def validate_emt_periodic_initialization(
+        problem: EmtProblemTemplate, blocks: List[Block], options: EmtOptions,
+        report: EmtInitializationReport,
+) -> EmtInitializationReport:
+    """Check the assembled periodic DAE at four phases without time integration."""
+    if report.status != InitializationStatus.RESOLVED:
+        return report
+    omega = 2.0 * np.pi * float(problem.grid.fBase)
+    children = [block for root in blocks for block in root.get_all_blocks()]
+    children.extend(block for bus in problem.grid.buses for block in bus.emt_model.get_all_blocks())
+    # Static phase powers such as P_A/Q_A are ABC-labelled but do not rotate
+    # with the fundamental waveform. Restrict the phase transform to the
+    # lower-case waveform families used by EMT voltages, currents and states.
+    groups = [group for block in children
+              for group in _emt_phase_groups(block.state_vars + block.algebraic_vars)
+              if group[0].name[0].islower()]
+    states = problem.get_state_vars()
+    derivatives = _emt_periodic_derivatives(states, groups, omega)
+    baseline = _emt_initialization_bindings(problem)
+    worst = 0.0
+    try:
+        for phase in (0.0, np.pi / 2.0, np.pi, 3.0 * np.pi / 2.0):
+            bindings = dict(baseline)
+            for a, b, c in groups:
+                for var, plus, minus in ((a, c, b), (b, a, c), (c, b, a)):
+                    bindings[var.uid] = (
+                        baseline[var.uid] * np.cos(phase)
+                        + (baseline[plus.uid] - baseline[minus.uid]) / np.sqrt(3.0) * np.sin(phase)
+                    )
+            for var in states:
+                if _emt_is_absolute_angle(var):
+                    bindings[var.uid] = baseline[var.uid] + phase
+            bindings[problem.glob_time.uid] = phase / omega
+            for derivative in problem.get_diff_vars():
+                if derivative.base_var is not None and derivative.base_var.uid in derivatives:
+                    bindings[derivative.uid] = float(derivatives[derivative.base_var.uid].eval_uid(bindings))
+            residual = [float(eq.eval_uid(bindings) - derivatives[var.uid].eval_uid(bindings))
+                        for var, eq in zip(states, problem.get_state_eqs())]
+            residual.extend(float(eq.eval_uid(bindings)) for eq in problem.get_algebraic_eqs())
+            norm = _max_abs_value(np.asarray(residual))
+            if not np.isfinite(norm):
+                raise ValueError("non-finite assembled periodic residual")
+            worst = max(worst, norm)
+        report.final_residual_inf = max(report.final_residual_inf, worst)
+        if worst > max(float(options.init_newton_tol), float(options.tolerance)):
+            raise ValueError(f"assembled periodic DAE residual is {worst:.3g}")
+        report.message = "Periodic steady state verified at four phases without EMT time integration."
+    except (FloatingPointError, ZeroDivisionError, ValueError, RuntimeError, OverflowError, KeyError, TypeError) as exc:
+        report.status = InitializationStatus.FAILED
+        report.message = str(exc)
+    return report
+
+
 def _build_runtime_param_array(problem: EmtProblemTemplate) -> np.ndarray:
     """
     Build the runtime-parameter snapshot at the initialization time.
@@ -1782,19 +1681,23 @@ def _scatter_unknown_vector(problem: EmtProblemTemplate, unknown_vars: List[Var]
 def _build_reduced_initialization_system(
         problem: EmtProblemTemplate,
         allow_state_equilibrium: bool,
+        fix_seeded_states: bool = True,
 ) -> ReducedInitializationSystem | None:
     """
     Build the reduced initialization system for unresolved EMT variables.
 
     The reduced system always enforces all algebraic equations. In addition, any
-    state variable still missing after the explicit stage receives one extra
-    consistency equation, either from `init_eqs` or from a steady-state residual.
+    unresolved or released state variable receives one extra consistency equation,
+    either from `init_eqs` or from a steady-state residual.
 
     :param problem: EMT problem being initialized.
     :param allow_state_equilibrium: Whether unresolved states may use f(x,z,p)=0.
+    :param fix_seeded_states: Whether seeded differential states remain fixed.
     :return: Reduced initialization system or None if nothing remains to solve.
     """
-    reduced_problem = _collect_reduced_initialization_problem(problem, allow_state_equilibrium)
+    reduced_problem = _collect_reduced_initialization_problem(
+        problem, allow_state_equilibrium, fix_seeded_states=fix_seeded_states,
+    )
 
     if reduced_problem is None:
         return None
@@ -2199,6 +2102,7 @@ def _collect_reduced_initialization_problem(
         problem: EmtProblemTemplate,
         allow_state_equilibrium: bool,
         fixed_algebraic_uids: Optional[Set[int]] = None,
+        fix_seeded_states: bool = True,
 ) -> Tuple[List[Var], List[Expr], np.ndarray] | None:
     """
     Collect the reduced initialization unknowns and residual equations without compiling them.
@@ -2207,11 +2111,13 @@ def _collect_reduced_initialization_problem(
     :type problem: EmtProblemTemplate
     :param allow_state_equilibrium: Whether unresolved states may use ``f(x,z,p)=0``.
     :type allow_state_equilibrium: bool
+    :param fix_seeded_states: Whether seeded differential states remain fixed.
     :return: Tuple ``(unknown_vars, residual_eqs, state_unknown_mask)`` or ``None``.
     :rtype: Tuple[List[Var], List[Expr], np.ndarray] | None
     """
     state_unknown_vars: List[Var] = list()
     state_residual_eqs: List[Expr] = list()
+    state_equilibrium_flags: List[float] = list()
     algebraic_unknown_vars: List[Var] = list()
     algebraic_residual_eqs: List[Expr] = list()
     state_eq_lookup: Dict[int, Expr] = _build_state_equation_lookup(problem)
@@ -2229,21 +2135,22 @@ def _collect_reduced_initialization_problem(
         alg_idx += 1
 
     for state_var in problem.get_state_vars():
-        if state_var.uid in problem.init_guess:
-            state_var = state_var
-        else:
+        if not fix_seeded_states or state_var.uid not in problem.init_guess:
             state_unknown_vars.append(state_var)
 
             if state_var in init_eq_lookup:
                 state_residual_eqs.append(state_var - init_eq_lookup[state_var])
+                state_equilibrium_flags.append(0.0)
             elif allow_state_equilibrium and state_var.uid in state_eq_lookup:
                 state_residual_eqs.append(state_eq_lookup[state_var.uid])
+                state_equilibrium_flags.append(1.0)
             else:
                 state_residual_eqs.append(state_var)
+                state_equilibrium_flags.append(0.0)
 
     unknown_vars: List[Var] = state_unknown_vars + algebraic_unknown_vars
     residual_eqs: List[Expr] = state_residual_eqs + algebraic_residual_eqs
-    state_unknown_flags: List[float] = [1.0] * len(state_unknown_vars) + [0.0] * len(algebraic_unknown_vars)
+    state_unknown_flags: List[float] = state_equilibrium_flags + [0.0] * len(algebraic_unknown_vars)
 
     if len(unknown_vars) == 0:
         return None
@@ -2306,12 +2213,13 @@ def _evaluate_reduced_pseudo_transient_residual(
         runtime_params: np.ndarray,
         constant_params: np.ndarray,
         dtau: float,
+        use_backward_euler_residual: bool = False,
 ) -> np.ndarray:
     """
     Evaluate the reduced EMT pseudo-transient residual.
 
-    State rows use a backward-Euler pseudo-time term while algebraic rows keep the
-    original reduced steady-state residual.
+    State equilibrium rows use the PTC sign convention ``-f`` while algebraic
+    rows keep the original steady-state residual ``g``.
 
     :param reduced_system: Reduced initialization system.
     :param problem: EMT problem being initialized.
@@ -2333,16 +2241,13 @@ def _evaluate_reduced_pseudo_transient_residual(
         runtime_params=runtime_params,
         constant_params=constant_params,
     )
-    # Recover the current reduced iterate so the state rows can add the
-    # backward-Euler pseudo-time difference against the previous iterate.
-    reduced_x: np.ndarray = _extract_unknown_vector(problem, reduced_system.unknown_vars, x)
     state_mask: np.ndarray = np.asarray(reduced_system.state_unknown_mask, dtype=np.float64)
-    dtau_eff: float = float(max(dtau, 1.0e-30))
-    residual = residual.copy()
-    # Only unresolved state rows receive the pseudo-time term. Algebraic rows stay
-    # unchanged so they continue to enforce the original consistency equations.
-    residual += state_mask * ((reduced_x - x_prev_reduced) / dtau_eff)
-    return residual
+    if use_backward_euler_residual:
+        reduced_x = _extract_unknown_vector(problem, reduced_system.unknown_vars, x)
+        return residual + state_mask * (
+            (reduced_x - x_prev_reduced) / max(dtau, 1.0e-30)
+        )
+    return (1.0 - 2.0 * state_mask) * residual
 
 
 def _evaluate_reduced_pseudo_transient_jacobian(
@@ -2353,6 +2258,8 @@ def _evaluate_reduced_pseudo_transient_jacobian(
         runtime_params: np.ndarray,
         constant_params: np.ndarray,
         dtau: float,
+        ptc_residual: np.ndarray,
+        use_backward_euler_residual: bool = False,
 ) -> sp.csc_matrix:
     """
     Evaluate the Jacobian of the reduced EMT pseudo-transient residual.
@@ -2378,9 +2285,16 @@ def _evaluate_reduced_pseudo_transient_jacobian(
     )
     state_mask: np.ndarray = np.asarray(reduced_system.state_unknown_mask, dtype=np.float64)
     dtau_eff: float = float(max(dtau, 1.0e-30))
-    # The backward-Euler pseudo-time term contributes only on state rows, so the
-    # Jacobian adds a diagonal 1/dtau term only for reduced state unknowns.
-    return (jacobian + sp.diags(state_mask / dtau_eff, format="csc")).tocsc(copy=True)
+    if use_backward_euler_residual:
+        return (
+            jacobian + sp.diags(state_mask / dtau_eff, format="csc")
+        ).tocsc(copy=True)
+    row_sign: np.ndarray = 1.0 - 2.0 * state_mask
+    signed_jacobian = (sp.diags(row_sign, format="csc") @ jacobian).tocsc()
+    mass_diagonal = state_mask * (0.01 + np.abs(ptc_residual)) / dtau_eff
+    return (
+        signed_jacobian + sp.diags(mass_diagonal, format="csc")
+    ).tocsc(copy=True)
 
 
 def _max_abs_value(values: np.ndarray) -> float:
@@ -2432,6 +2346,33 @@ def _solve_reduced_linear_system(
             return np.asarray(lsqr_solution[0], dtype=np.float64)
 
 
+def _solve_equilibrated_reduced_linear_system(
+        matrix: sp.csc_matrix,
+        rhs: np.ndarray,
+        dense_threshold: int,
+) -> np.ndarray:
+    """Solve after row and column equilibration."""
+    squared = matrix.multiply(matrix)
+    row_scale = np.maximum(
+        np.sqrt(np.asarray(squared.sum(axis=1)).ravel()),
+        1.0e-12,
+    )
+    row_scaled = (sp.diags(1.0 / row_scale, format="csc") @ matrix).tocsc()
+    column_scale = np.maximum(
+        np.sqrt(np.asarray(row_scaled.multiply(row_scaled).sum(axis=0)).ravel()),
+        1.0e-12,
+    )
+    equilibrated = (
+        row_scaled @ sp.diags(1.0 / column_scale, format="csc")
+    ).tocsc()
+    scaled_step = _solve_reduced_linear_system(
+        equilibrated,
+        rhs / row_scale,
+        dense_threshold,
+    )
+    return scaled_step / column_scale
+
+
 def _run_reduced_newton_initialization(
         reduced_system: ReducedInitializationSystem,
         problem: EmtProblemTemplate,
@@ -2458,7 +2399,6 @@ def _run_reduced_newton_initialization(
     reduced_x: np.ndarray = _extract_unknown_vector(problem, reduced_system.unknown_vars, x)
     max_iter: int = int(options.init_newton_max_iter)
     tol: float = float(options.init_newton_tol)
-
     iter_idx: int = 0
     while iter_idx < max_iter:
         _scatter_unknown_vector(problem, reduced_system.unknown_vars, x, reduced_x)
@@ -2544,7 +2484,8 @@ def _run_reduced_pseudo_transient_initialization(
     dtau_max: float = float(options.init_ptc_dtau_max)
     max_iter: int = int(options.init_ptc_max_iter)
     tol: float = float(options.init_newton_tol)
-    # The previous reduced iterate supplies the pseudo-time reference for state rows.
+    use_backward_euler_residual: bool = bool(options.init_ptc_backward_euler_residual)
+    # Retained for API compatibility; direct PTC does not add it to the residual.
     x_prev_reduced: np.ndarray = reduced_x.copy()
 
     iter_idx: int = 0
@@ -2561,6 +2502,7 @@ def _run_reduced_pseudo_transient_initialization(
             runtime_params=runtime_params,
             constant_params=constant_params,
             dtau=dtau,
+            use_backward_euler_residual=use_backward_euler_residual,
         )
         res_norm: float = _max_abs_value(residual)
         report.final_residual_inf = res_norm
@@ -2581,37 +2523,66 @@ def _run_reduced_pseudo_transient_initialization(
             runtime_params=runtime_params,
             constant_params=constant_params,
             dtau=max(dtau, dtau_min),
+            ptc_residual=residual,
+            use_backward_euler_residual=use_backward_euler_residual,
         )
 
-        delta: np.ndarray = _solve_reduced_linear_system(linear_matrix, -residual, int(options.init_dense_threshold))
+        if use_backward_euler_residual:
+            delta = _solve_reduced_linear_system(
+                linear_matrix,
+                -residual,
+                int(options.init_dense_threshold),
+            )
+        else:
+            delta = _solve_equilibrated_reduced_linear_system(
+                linear_matrix,
+                -residual,
+                int(options.init_dense_threshold),
+            )
 
         if np.all(np.isfinite(delta)):
             # Form one trial iterate and accept it only when the pseudo-transient
             # residual decreases. This keeps the continuation monotone enough for
             # the small initialization problems solved here.
-            trial_reduced_x: np.ndarray = reduced_x + delta
-            _scatter_unknown_vector(problem, reduced_system.unknown_vars, x, trial_reduced_x)
-            trial_residual: np.ndarray = _evaluate_reduced_pseudo_transient_residual(
-                reduced_system=reduced_system,
-                problem=problem,
-                x=x,
-                x_prev_reduced=x_prev_reduced,
-                dx=dx,
-                runtime_params=runtime_params,
-                constant_params=constant_params,
-                dtau=max(dtau, dtau_min),
-            )
-            trial_norm: float = _max_abs_value(trial_residual)
+            best_x: np.ndarray | None = None
+            best_norm: float = np.inf
+            trial_scales = (1.0,) if use_backward_euler_residual else (1.0, 0.5, 0.25, 0.125)
+            for scale in trial_scales:
+                trial_reduced_x = reduced_x + scale * delta
+                _scatter_unknown_vector(problem, reduced_system.unknown_vars, x, trial_reduced_x)
+                trial_residual = _evaluate_reduced_pseudo_transient_residual(
+                    reduced_system=reduced_system,
+                    problem=problem,
+                    x=x,
+                    x_prev_reduced=x_prev_reduced,
+                    dx=dx,
+                    runtime_params=runtime_params,
+                    constant_params=constant_params,
+                    dtau=max(dtau, dtau_min),
+                    use_backward_euler_residual=use_backward_euler_residual,
+                )
+                trial_norm = _max_abs_value(trial_residual)
+                if np.isfinite(trial_norm) and trial_norm < best_norm:
+                    best_x = trial_reduced_x
+                    best_norm = trial_norm
 
-            if trial_norm < res_norm:
-                # Once a step is accepted, the old iterate becomes the new pseudo-time
-                # reference and dtau is expanded to accelerate convergence.
-                x_prev_reduced = reduced_x.copy()
-                reduced_x = trial_reduced_x
-                dtau = min(dtau_max, dtau * 2.0)
+            if use_backward_euler_residual and best_norm >= res_norm:
+                best_x = None
+
+            if best_x is not None:
+                if use_backward_euler_residual:
+                    beta = 2.0 if best_norm < res_norm else 0.5
+                else:
+                    beta = float(np.clip(
+                        max(res_norm, 1.0e-30) / max(best_norm, 1.0e-30),
+                        0.5,
+                        5.0,
+                    ))
+                if use_backward_euler_residual:
+                    x_prev_reduced = reduced_x.copy()
+                reduced_x = best_x
+                dtau = float(np.clip(dtau * beta, dtau_min, dtau_max))
             else:
-                # Rejected steps shrink dtau so the next pseudo-time correction is
-                # more damped and therefore more likely to be accepted.
                 dtau = max(dtau_min, dtau * 0.5)
         else:
             # Non-finite linear corrections indicate an unusable local model, so the
@@ -2828,6 +2799,7 @@ def _build_initialization_system_if_needed(
     reduced_system: ReducedInitializationSystem | None = _build_reduced_initialization_system(
         problem=problem,
         allow_state_equilibrium=bool(options.init_allow_state_equilibrium),
+        fix_seeded_states=bool(options.init_fix_seeded_states),
     )
     if reduced_system is None:
         report.unknown_var_count = 0
@@ -2842,11 +2814,17 @@ def run_emt_native_initialization(problem: EmtProblemTemplate, options: EmtOptio
     """
     Run the EMT-native initialization stages after power-flow variable projection.
 
-    The workflow keeps the current seed intact, then solves only the unresolved
-    subset with the native initialization algorithm requested by
-    ``options.initialization_method``. In the main EMT build workflow, the seed
-    comes either from power-flow projection alone for pure ``PseudoTransient`` or
-    from power-flow projection plus explicit initialization for the other modes.
+    The workflow uses the current seed as its initial guess and holds seeded
+    states fixed unless ``options.init_fix_seeded_states`` is false. It solves
+    the selected unknowns with the native initialization algorithm requested by
+    ``options.initialization_method``. The concrete EMT build uses device-local
+    periodic pseudo-transient initialization directly from PF seeds for
+    ``PseudoTransient``; this native dispatcher remains available for direct
+    helper calls and the other initialization methods.
+    With ``init_periodic_samples > 0``, solve the original assembled DAE over a
+    cycle instead. All states become unknown waveforms; seed assignments are
+    not reused as residual equations. This mode currently targets smooth,
+    autonomous models and uses the seeded rotor angles as phase references.
     Missing differential initial values are computed automatically from the state
     equations.
 
@@ -2856,6 +2834,32 @@ def run_emt_native_initialization(problem: EmtProblemTemplate, options: EmtOptio
     """
     report = EmtInitializationReport(method_requested=options.initialization_method)
     start_time: float = time.perf_counter()
+    if options.init_periodic_samples:
+        if options.initialization_method == EmtInitializationMethod.Explicit:
+            raise ValueError("Periodic constraints require ConsistentNewton, PseudoTransient or Auto")
+        from VeraGridEngine.Simulations.EMT.periodic_initialization_emt import solve_periodic_initialization
+
+        # Seed assignments are not equations in this formulation. The original
+        # DAE and cycle differentiation supply independent state constraints.
+        try:
+            result = solve_periodic_initialization(problem, options)
+            report.status = InitializationStatus.RESOLVED
+            report.method_used = (EmtInitializationMethod.PseudoTransient
+                                  if options.initialization_method == EmtInitializationMethod.PseudoTransient
+                                  else EmtInitializationMethod.ConsistentNewton)
+            report.initial_residual_inf = result["initial_residual"]
+            report.final_residual_inf = result["final_residual"]
+            report.unknown_var_count = result["unknowns"]
+            if report.method_used == EmtInitializationMethod.PseudoTransient:
+                report.pseudo_transient_steps = result["iterations"]
+            else:
+                report.newton_iterations = result["iterations"]
+            report.message = "Native periodic initialization verified the original DAE at and between cycle samples."
+        except (ValueError, RuntimeError, FloatingPointError, spla.MatrixRankWarning) as exc:
+            report.status = InitializationStatus.FAILED
+            report.message = str(exc)
+        report.elapsed_s = time.perf_counter() - start_time
+        return report
     x: np.ndarray = problem.get_x0()
     x_seed: np.ndarray = x.copy()
     dx: np.ndarray = problem.get_dx0()
@@ -2877,16 +2881,17 @@ def run_emt_native_initialization(problem: EmtProblemTemplate, options: EmtOptio
             phase_t0: float = time.perf_counter()
             fixed_algebraic_uids: Set[int] = set()
             if options.init_fix_pf_bus_voltages:
-                grid = getattr(problem, "grid", None)
-                for bus in getattr(grid, "buses", []):
-                    bus_model = getattr(bus, "emt_model", None)
-                    for bus_var in getattr(bus_model, "algebraic_vars", []):
-                        if isinstance(bus_var, Var):
-                            fixed_algebraic_uids.add(bus_var.uid)
+                if problem.grid is not None:
+                    for bus in problem.grid.buses:
+                        if bus.emt_model is not None:
+                            for bus_var in bus.emt_model.algebraic_vars:
+                                if isinstance(bus_var, Var):
+                                    fixed_algebraic_uids.add(bus_var.uid)
             reduced_problem_payload = _collect_reduced_initialization_problem(
                 problem=problem,
                 allow_state_equilibrium=bool(options.init_allow_state_equilibrium),
                 fixed_algebraic_uids=fixed_algebraic_uids,
+                fix_seeded_states=bool(options.init_fix_seeded_states),
             )
 
             if reduced_problem_payload is None:
@@ -3025,49 +3030,10 @@ def run_emt_native_initialization(problem: EmtProblemTemplate, options: EmtOptio
                     options=options,
                     report=report,
                 )
-                # converged = _run_pseudo_transient_initialization(
-                #     reduced_system=reduced_system,
-                #     problem=problem,
-                #     x=x,
-                #     dx=dx,
-                #     runtime_params=runtime_params,
-                #     constant_params=constant_params,
-                #     options=options,
-                #     report=report,
-                # )
                 report.pseudo_transient_elapsed_s += float(time.perf_counter() - phase_t0)
                 if converged:
-                    converged = converged
-                else:
-                    # Pure PseudoTransient mode must remain pseudo-transient only.
-                    # The broader initialization policy requested by the user is
-                    # interpreted here, not in the reduced solver itself. When the
-                    # method is explicitly PseudoTransient, failing the PTC loop must
-                    # keep the explicit seed instead of retrying with Newton. Auto
-                    # and ConsistentNewton continue to own the Newton-capable paths.
-                    if method_requested == EmtInitializationMethod.PseudoTransient:
-                        converged = False
-                    else:
-                        phase_t0 = time.perf_counter()
-                        converged = _run_reduced_newton_initialization(
-                            reduced_system=reduced_system,
-                            problem=problem,
-                            x=x,
-                            dx=dx,
-                            runtime_params=runtime_params,
-                            constant_params=constant_params,
-                            options=options,
-                            report=report,
-                        )
-                        report.newton_elapsed_s += float(time.perf_counter() - phase_t0)
-                if converged:
                     report.status = InitializationStatus.RESOLVED
-                    if method_requested == EmtInitializationMethod.PseudoTransient:
-                        report.method_used = EmtInitializationMethod.PseudoTransient
-                    elif method_requested == EmtInitializationMethod.Auto:
-                        report.method_used = EmtInitializationMethod.PseudoTransient
-                    else:
-                        report.method_used = EmtInitializationMethod.ConsistentNewton
+                    report.method_used = EmtInitializationMethod.PseudoTransient
                 else:
                     x[:] = x_seed
                     report.status = InitializationStatus.FAILED
@@ -3076,7 +3042,7 @@ def run_emt_native_initialization(problem: EmtProblemTemplate, options: EmtOptio
                         report.message = "Pseudo-transient initialization failed."
                     else:
                         report.method_used = EmtInitializationMethod.Explicit
-                        report.message = "Consistent initialization failed after pseudo-transient fallback; keeping explicit initialization."
+                        report.message = "Newton and pseudo-transient initialization failed; keeping explicit initialization."
             else:
                 x[:] = x_seed
                 report.status = InitializationStatus.FAILED

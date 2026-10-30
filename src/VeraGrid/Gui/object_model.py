@@ -8,7 +8,7 @@ import datetime
 import math
 
 import numpy as np
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Tuple
 from PySide6 import QtCore, QtWidgets, QtGui
 from typing import Callable
 from enum import EnumMeta
@@ -17,11 +17,13 @@ from VeraGrid.Gui.gui_functions import (BoolCheckboxDelegate, IntDelegate, Combo
                                         ComplexDelegate, LineLocationsDelegate, DateTimeDelegate)
 from VeraGrid.Gui.Icons.icon_associations import device_type_icons
 from VeraGrid.Gui.wrappable_table_model import WrappableTableModel
-from VeraGridEngine.Devices import Bus, ContingencyGroup
+from VeraGridEngine.Devices import Bus, ContingencyGroup, RemedialActionGroup
 from VeraGridEngine.Devices.Parents.editable_device import EditableDevice, GCProp, GCPROP_TYPES
+from VeraGridEngine.Devices.Parents.physical_device import PhysicalDevice
+from VeraGridEngine.Devices.Parents.pointer_device_parent import PointerDeviceParent
 from VeraGridEngine.Devices.Branches.line_locations import LineLocations
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
-from VeraGridEngine.enumerations import DeviceType, PrpCat, SubObjectType
+from VeraGridEngine.enumerations import DeviceType, PrpCat, RemedialActionPropertyEnum, SubObjectType
 
 
 class DeviceSelectorDelegate(QtWidgets.QItemDelegate):
@@ -198,6 +200,136 @@ class DeviceSelectorDelegate(QtWidgets.QItemDelegate):
                 editor.setGeometry(QtCore.QRect(cell_bottom_left, size))
 
 
+class RemedialActionPropertyDelegate(QtWidgets.QItemDelegate):
+    """
+    Edit remedial-action limits using the monitored device in the same row.
+    """
+
+    def __init__(self,
+                 parent: QtWidgets.QTableView,
+                 monitored_attribute_index: int,
+                 transposed: bool) -> None:
+        """
+        Create a device-aware remedial-action property delegate.
+
+        :param parent: Parent table view.
+        :param monitored_attribute_index: Position of ``monitored_device`` in the model.
+        :param transposed: Whether properties are represented as rows.
+        """
+        QtWidgets.QItemDelegate.__init__(self, parent)
+        self.monitored_attribute_index: int = monitored_attribute_index
+        self.transposed: bool = transposed
+
+    @QtCore.Slot()
+    def current_index_changed(self) -> None:
+        """
+        Commit a newly selected property.
+
+        :return: None.
+        """
+        editor: QtCore.QObject | None = self.sender()
+        if isinstance(editor, QtWidgets.QWidget):
+            self.commitData.emit(editor)
+        else:
+            pass
+
+    def get_monitored_device(self, index: QtCore.QModelIndex) -> PhysicalDevice | None:
+        """
+        Return the monitored device associated with the edited property cell.
+
+        :param index: Edited property cell.
+        :return: Selected physical device, or None.
+        """
+        model: QtCore.QAbstractItemModel = index.model()
+        if self.transposed:
+            monitored_index: QtCore.QModelIndex = model.index(
+                self.monitored_attribute_index,
+                index.column(),
+            )
+        else:
+            monitored_index = model.index(
+                index.row(),
+                self.monitored_attribute_index,
+            )
+
+        monitored_value: object = model.data(
+            monitored_index,
+            role=QtCore.Qt.ItemDataRole.EditRole,
+        )
+        if isinstance(monitored_value, PhysicalDevice):
+            return monitored_value
+        else:
+            return None
+
+    def createEditor(self,
+                     parent: QtWidgets.QWidget,
+                     option: QtWidgets.QStyleOptionViewItem,
+                     index: QtCore.QModelIndex) -> QtWidgets.QComboBox:
+        """
+        Create a combo containing only limits applicable to the selected device.
+
+        :param parent: Parent widget.
+        :param option: Editor style option.
+        :param index: Edited property cell.
+        :return: Device-specific property combo.
+        """
+        del option
+        monitored_device: PhysicalDevice | None = self.get_monitored_device(index=index)
+        property_types: List[RemedialActionPropertyEnum] = (
+            RemedialActionGroup.get_allowed_property_types_for_device(
+                monitored_device=monitored_device,
+            )
+        )
+        editor: QtWidgets.QComboBox = QtWidgets.QComboBox(parent)
+        property_type: RemedialActionPropertyEnum
+        for property_type in property_types:
+            editor.addItem(property_type.value, property_type)
+        editor.currentIndexChanged.connect(self.current_index_changed)
+        return editor
+
+    def setEditorData(self,
+                      editor: QtWidgets.QComboBox,
+                      index: QtCore.QModelIndex) -> None:
+        """
+        Select the property's current value in the editor.
+
+        :param editor: Property combo.
+        :param index: Edited property cell.
+        :return: None.
+        """
+        current_value: object = index.model().data(
+            index,
+            role=QtCore.Qt.ItemDataRole.EditRole,
+        )
+        editor.blockSignals(True)
+        item_index: int
+        for item_index in range(editor.count()):
+            if editor.itemData(item_index) == current_value:
+                editor.setCurrentIndex(item_index)
+                break
+            else:
+                pass
+        editor.blockSignals(False)
+
+    def setModelData(self,
+                     editor: QtWidgets.QComboBox,
+                     model: QtCore.QAbstractItemModel,
+                     index: QtCore.QModelIndex) -> None:
+        """
+        Store the selected limit enum in the model.
+
+        :param editor: Property combo.
+        :param model: Edited model.
+        :param index: Edited property cell.
+        :return: None.
+        """
+        selected_property: object = editor.currentData()
+        if isinstance(selected_property, RemedialActionPropertyEnum):
+            model.setData(index, selected_property)
+        else:
+            pass
+
+
 class ObjectsModel(WrappableTableModel):
     """
     Class to populate a Qt table view with the properties of objects
@@ -211,7 +343,7 @@ class ObjectsModel(WrappableTableModel):
                  editable=False,
                  transposed=False,
                  check_unique: Union[None, List[str]] = None,
-                 dictionary_of_lists: Union[None, Dict[Any, List[ALL_DEV_TYPES]]] = None,
+                 dictionary_of_lists: Dict[DeviceType, List[ALL_DEV_TYPES]] | None = None,
                  properties_filter: PrpCat = PrpCat.All,
                  error_msg_ptr: Callable[[str], None] = None):
         """
@@ -277,6 +409,11 @@ class ObjectsModel(WrappableTableModel):
 
         self.error_msg_ptr: Callable[[str], None] | None = error_msg_ptr
 
+        self.is_pointer_object = False
+        if len(self.objects) > 0:
+            if isinstance(self.objects[0], PointerDeviceParent):
+                self.is_pointer_object = True
+
         self.set_delegates()
 
     def report_error(self, msg: str):
@@ -338,7 +475,7 @@ class ObjectsModel(WrappableTableModel):
                     delegate = BoolCheckboxDelegate(self.parent)
                     F(i, delegate)
 
-                elif tpe is str:
+                elif tpe is str and not (self.is_pointer_object and self.attributes[i] == "device"):
                     delegate = TextDelegate(self.parent)
                     F(i, delegate)
 
@@ -363,6 +500,17 @@ class ObjectsModel(WrappableTableModel):
                     if len(self.non_editable_attributes) == 0:
                         self.non_editable_attributes.append(self.attributes[i])
 
+                elif (tpe is RemedialActionPropertyEnum
+                      and self.attributes[i] == 'property_type'
+                      and 'monitored_device' in self.attributes):
+                    monitored_attribute_index: int = self.attributes.index('monitored_device')
+                    delegate = RemedialActionPropertyDelegate(
+                        parent=self.parent,
+                        monitored_attribute_index=monitored_attribute_index,
+                        transposed=self.transposed,
+                    )
+                    F(i, delegate)
+
                 elif isinstance(tpe, EnumMeta):
                     objects = list(tpe)
                     values = [x.value for x in objects]
@@ -372,7 +520,7 @@ class ObjectsModel(WrappableTableModel):
                 elif tpe == SubObjectType.VarType:
                     # Symbolic event parameters are supplied by the owning dynamic model because
                     # they are not circuit devices and therefore cannot use DeviceSelectorDelegate.
-                    parameter_objects: List[Any] | None = self._get_delegate_objects(i)
+                    parameter_objects: List[Any] | None = self._get_delegate_objects_single_type(i)
                     if parameter_objects is not None:
                         parameter_names: List[str] = [parameter.name for parameter in parameter_objects]
                         delegate = ComboDelegate(self.parent, parameter_objects, parameter_names)
@@ -380,25 +528,27 @@ class ObjectsModel(WrappableTableModel):
                     else:
                         F(i, None)
 
-                elif self._get_delegate_objects(i) is not None:
-                    # Foreign key object references use the searchable device selector.
-                    objs = self._get_delegate_objects(i)
-                    if isinstance(tpe, DeviceType):
-                        device_type: DeviceType = tpe
-                    else:
-                        if len(objs) > 0:
-                            device_type: DeviceType = objs[0].device_type
-                        else:
-                            device_type: DeviceType = DeviceType.NoDevice
-
-                    delegate = DeviceSelectorDelegate(
-                        parent=self.parent,
-                        devices_by_type={device_type: objs},
-                    )
-                    F(i, delegate)
-
                 else:
-                    F(i, None)
+
+                    # Foreign key object references use the searchable device selector.
+                    empty, objs = self._get_delegate_objects_dict(i)
+
+                    if not empty:
+                        # if isinstance(tpe, DeviceType):
+                        #     device_type: DeviceType = tpe
+                        # else:
+                        #     if len(objs) > 0:
+                        #         device_type: DeviceType = objs[0].device_type
+                        #     else:
+                        #         device_type: DeviceType = DeviceType.NoDevice
+
+                        delegate = DeviceSelectorDelegate(
+                            parent=self.parent,
+                            devices_by_type=objs,
+                        )
+                        F(i, delegate)
+                    else:
+                        F(i, None)
 
     @staticmethod
     def _is_bus_property_type(tpe: GCPROP_TYPES) -> bool:
@@ -416,7 +566,7 @@ class ObjectsModel(WrappableTableModel):
             else:
                 return False
 
-    def _get_delegate_objects(self, attr_idx: int) -> List[ALL_DEV_TYPES] | None:
+    def _get_delegate_objects_single_type(self, attr_idx: int) -> List[ALL_DEV_TYPES] | None:
         """
         Return the object list used by one foreign-key delegate.
 
@@ -424,7 +574,7 @@ class ObjectsModel(WrappableTableModel):
         generic list keyed by the registered property type.
 
         :param attr_idx: Property index inside the visible table model.
-        :return: Delegate object list when available.
+        :return: empty, dictionary of lists of objects
         """
 
         prop_name = self.attributes[attr_idx]
@@ -445,6 +595,98 @@ class ObjectsModel(WrappableTableModel):
                     else:
                         return None
 
+    def _get_delegate_objects_dict(self, attr_idx: int) -> Tuple[bool, Dict[DeviceType, List[ALL_DEV_TYPES]]]:
+        """
+        Return the object list used by one foreign-key delegate.
+
+        The GUI first looks for a property-specific list and then falls back to the
+        generic list keyed by the registered property type.
+
+        :param attr_idx: Property index inside the visible table model.
+        :return: empty, dictionary of lists of objects
+        """
+
+        prop_name = self.attributes[attr_idx]
+        tpe = self.attribute_types[attr_idx]
+        specific_key = (prop_name, tpe)
+
+        if self.is_pointer_object and prop_name == "device":
+            tpes = self.objects[0].pointer_dev_tpes
+            devices_by_type: Dict[DeviceType, List[ALL_DEV_TYPES]] = dict()
+            for device_type in tpes:
+                if device_type == DeviceType.PhysicalDeviceType:
+                    # PhysicalDeviceType is the broad-pointer sentinel, so expose
+                    # only physical network lists and not unrelated dependencies.
+                    physical_device_types: List[DeviceType] = [
+                        DeviceType.BusDevice,
+                        DeviceType.LineDevice,
+                        DeviceType.DCLineDevice,
+                        DeviceType.Transformer2WDevice,
+                        DeviceType.Transformer3WDevice,
+                        DeviceType.TransformerNwDevice,
+                        DeviceType.WindingDevice,
+                        DeviceType.HVDCLineDevice,
+                        DeviceType.VscDevice,
+                        DeviceType.UpfcDevice,
+                        DeviceType.SeriesReactanceDevice,
+                        DeviceType.SwitchDevice,
+                    ]
+                    physical_device_types.extend([
+                        DeviceType.GeneratorDevice,
+                        DeviceType.BatteryDevice,
+                        DeviceType.LoadDevice,
+                        DeviceType.ExternalGridDevice,
+                        DeviceType.StaticGeneratorDevice,
+                        DeviceType.ShuntDevice,
+                        DeviceType.ControllableShuntDevice,
+                        DeviceType.CurrentInjectionDevice,
+                    ])
+
+                    for available_type, devices in self.dictionary_of_lists.items():
+                        if available_type in physical_device_types:
+                            devices_by_type[available_type] = devices
+                        else:
+                            pass
+                else:
+                    devices: List[ALL_DEV_TYPES] | None = self.dictionary_of_lists.get(device_type, None)
+                    if devices is not None:
+                        devices_by_type[device_type] = devices
+                    else:
+                        pass
+
+            return False, devices_by_type
+
+        elif prop_name == 'monitored_device' and tpe == DeviceType.PhysicalDeviceType:
+            allowed_device_types: Tuple[DeviceType, ...] = (
+                DeviceType.BusDevice,
+                DeviceType.LineDevice,
+                DeviceType.Transformer2WDevice,
+            )
+            devices_by_type = dict()
+            for device_type in allowed_device_types:
+                devices: List[ALL_DEV_TYPES] | None = self.dictionary_of_lists.get(device_type, None)
+                if devices is not None:
+                    devices_by_type[device_type] = devices
+                else:
+                    pass
+            return len(devices_by_type) == 0, devices_by_type
+
+        else:
+
+            if specific_key in self.dictionary_of_lists:
+                return False, {specific_key: self.dictionary_of_lists[specific_key]}
+            else:
+                if prop_name in self.dictionary_of_lists:
+                    return False, {prop_name: self.dictionary_of_lists[prop_name]}
+                else:
+                    if tpe in self.dictionary_of_lists:
+                        return False, {tpe: self.dictionary_of_lists[tpe]}
+                    else:
+                        if self._is_bus_property_type(tpe=tpe) and DeviceType.BusDevice in self.dictionary_of_lists:
+                            return False, {DeviceType.BusDevice: self.dictionary_of_lists[DeviceType.BusDevice]}
+                        else:
+                            return True, dict()
+
     def update(self):
         """
         update table
@@ -458,27 +700,45 @@ class ObjectsModel(WrappableTableModel):
         self.layoutAboutToBeChanged.emit()
         self.layoutChanged.emit()
 
+    def _is_property_editable(self, obj_idx: int, prop: GCProp) -> bool:
+        """Use instance rules when available, otherwise the property's metadata.
+
+        Auxiliary table objects such as BusConnectionObject do not inherit
+        EditableDevice and need not provide an instance editability hook.
+        """
+        is_property_editable = getattr(self.objects[obj_idx], "is_property_editable", None)
+        if is_property_editable is None:
+            return prop.editable
+        return is_property_editable(prop)
+
     def flags(self, index: QtCore.QModelIndex) -> QtCore.Qt.ItemFlag:
         """
         Get the display mode
         :param index:
         :return:
         """
+        if not index.isValid():
+            return QtCore.Qt.ItemFlag.NoItemFlags
+
         if self.transposed:
             attr_idx = index.row()
+            obj_idx = index.column()
         else:
             attr_idx = index.column()
+            obj_idx = index.row()
 
         value: Any = self.data_with_type(index=index)
         is_empty_bus_reference: bool = self._is_bus_property_type(
             tpe=self.attribute_types[attr_idx],
         ) and value is None
 
-        if self.editable and (self.attributes[attr_idx] not in self.non_editable_attributes or is_empty_bus_reference):
+        instance_editable = self._is_property_editable(obj_idx, self.property_list[attr_idx])
+        if self.editable and ((self.attributes[attr_idx] not in self.non_editable_attributes
+                               and instance_editable) or is_empty_bus_reference):
             flags: QtCore.Qt.ItemFlag = (
-                QtCore.Qt.ItemFlag.ItemIsEditable
-                | QtCore.Qt.ItemFlag.ItemIsEnabled
-                | QtCore.Qt.ItemFlag.ItemIsSelectable
+                    QtCore.Qt.ItemFlag.ItemIsEditable
+                    | QtCore.Qt.ItemFlag.ItemIsEnabled
+                    | QtCore.Qt.ItemFlag.ItemIsSelectable
             )
 
             if self.attribute_types[attr_idx] is bool:
@@ -685,9 +945,15 @@ class ObjectsModel(WrappableTableModel):
                 else:
                     pass
 
+            elif role == QtCore.Qt.ItemDataRole.ForegroundRole:
+                obj_idx = index.column() if self.transposed else index.row()
+                prop = self.property_list[attr_idx]
+                if prop.editable and not self._is_property_editable(obj_idx, prop):
+                    return QtGui.QColor('gray')
+
             elif role == QtCore.Qt.ItemDataRole.DecorationRole:
 
-                delegate_objects: List[ALL_DEV_TYPES] | None = self._get_delegate_objects(attr_idx)
+                delegate_objects: List[ALL_DEV_TYPES] | None = self._get_delegate_objects_single_type(attr_idx)
                 has_selector_data: bool = delegate_objects is not None
                 is_editable_cell: bool = bool(self.flags(index) & QtCore.Qt.ItemFlag.ItemIsEditable)
 
@@ -727,6 +993,9 @@ class ObjectsModel(WrappableTableModel):
         if len(self.objects) == 0:
             return True
 
+        if not index.isValid():
+            return False
+
         if self.transposed:
             obj_idx = index.column()
             attr_idx = index.row()
@@ -752,27 +1021,33 @@ class ObjectsModel(WrappableTableModel):
                 current_value: Any = self.objects[obj_idx].get_value(prop=prop, t_idx=self.time_index_)
                 is_empty_bus_reference: bool = self._is_bus_property_type(tpe=prop.tpe) and current_value is None
 
+                if not self._is_property_editable(obj_idx, prop) and not is_empty_bus_reference:
+                    return False
+
                 if self.attributes[attr_idx] not in self.non_editable_attributes or is_empty_bus_reference:
 
-                    if isinstance(value, str) and value != "":
-                        # try casting to the type
-                        value2 = prop.tpe(value)
-                    else:
-                        value2 = value
-
                     try:
+                        if isinstance(value, str) and value != "":
+                            value2 = prop.tpe(value)
+                        else:
+                            value2 = value
                         self.objects[obj_idx].set_value(prop=prop, t_idx=self.time_index_, value=value2)
+                        first = self.index(0, obj_idx) if self.transposed else self.index(obj_idx, 0)
+                        last = (self.index(self.rowCount() - 1, obj_idx) if self.transposed
+                                else self.index(obj_idx, self.columnCount() - 1))
                         self.dataChanged.emit(
-                            index,
-                            index,
+                            first,
+                            last,
                             [
                                 QtCore.Qt.ItemDataRole.DisplayRole,
                                 QtCore.Qt.ItemDataRole.EditRole,
                                 QtCore.Qt.ItemDataRole.CheckStateRole,
+                                QtCore.Qt.ItemDataRole.ForegroundRole,
                             ],
                         )
-                    except ValueError as e:
+                    except (TypeError, ValueError) as e:
                         self.report_error(str(e))
+                        return False
                 else:
                     pass  # the column cannot be edited
             else:
@@ -869,8 +1144,10 @@ class ObjectsModel(WrappableTableModel):
                 obj_idx = row
                 attr_idx = col
 
-            if self.attributes[attr_idx] not in self.non_editable_attributes:
-                setattr(self.objects[obj_idx], self.attributes[attr_idx], value)
+            prop = self.property_list[attr_idx]
+            if (self.attributes[attr_idx] not in self.non_editable_attributes
+                    and self._is_property_editable(obj_idx, prop)):
+                self.setData(self.index(row, col), value, QtCore.Qt.ItemDataRole.EditRole)
             else:
                 pass  # the column cannot be edited
 

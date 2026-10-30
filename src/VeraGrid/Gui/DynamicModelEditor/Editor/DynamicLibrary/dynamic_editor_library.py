@@ -18,9 +18,12 @@ from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Devices.Dynamic.fmu_template import FmuTemplate
 from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
-from VeraGridEngine.Templates.BasicBlockCatalog import BasicBlockTemplateDescriptor, \
-    get_editor_ready_basic_block_catalog_descriptors
-from VeraGridEngine.Templates.BasicBlockCatalog.catalog import build_basic_block_catalog_branch_skeleton
+from VeraGridEngine.Templates.BasicBlockCatalog import (
+    BasicBlockTemplateDescriptor,
+    ExactMathematicalBlockDescriptor,
+    build_exact_mathematical_block_descriptors,
+    get_editor_ready_basic_block_catalog_descriptors,
+)
 from VeraGridEngine.Templates.ProceduralLogicCatalog import (
     ProceduralBlockParameterSpec,
     ProceduralBlockTemplateDescriptor,
@@ -31,7 +34,16 @@ from VeraGridEngine.Templates.InternationalStandardsCatalog import (
 )
 from VeraGridEngine.enumerations import (
     BlockType,
+    DerivativeInactiveBehavior,
+    DerivativeOrder,
+    DerivativeScalingMode,
     DynamicDeviceTemplateType,
+    ExactMathematicalBlockOperation,
+    IntegratorBoundSource,
+    IntegratorHoldMode,
+    IntegratorResetMode,
+    IntegratorSaturationMode,
+    IntegratorScalingMode,
     InternationalStandardModel,
     ProceduralLogicType,
 )
@@ -69,6 +81,362 @@ class LibraryLeafSpec:
         self.label: str = label
         self.payload: object = payload
         self.search_text: str = search_text
+
+
+class IntegratorPresetDescriptor:
+    """Describe one preconfigured view of the canonical integrator builder."""
+
+    __slots__ = (
+        "_block_type",
+        "_scaling_mode",
+        "_hold_mode",
+        "_reset_mode",
+        "_saturation_mode",
+        "_bound_source",
+        "_scale_bounds_by_gain",
+        "_description",
+    )
+
+    def __init__(
+            self,
+            block_type: BlockType,
+            scaling_mode: IntegratorScalingMode,
+            hold_mode: IntegratorHoldMode,
+            reset_mode: IntegratorResetMode,
+            saturation_mode: IntegratorSaturationMode,
+            bound_source: IntegratorBoundSource,
+            scale_bounds_by_gain: bool,
+            description: str,
+    ) -> None:
+        """Store the structural defaults represented by one Library leaf.
+
+        Every preset materializes the same normal configurable integrator. The
+        descriptor only avoids repetitive clicks for common initial layouts.
+
+        :param block_type: Canonical integrator builder type.
+        :param scaling_mode: Input scaling selected by the preset.
+        :param hold_mode: External hold structure selected by the preset.
+        :param reset_mode: Reset structure selected by the preset.
+        :param saturation_mode: Output saturation selected by the preset.
+        :param bound_source: Source of enabled saturation bounds.
+        :param scale_bounds_by_gain: Whether one parameter scales the bounds.
+        :param description: Human-facing explanation shown in the Library.
+        :return: None.
+        """
+        self._block_type: BlockType = block_type
+        self._scaling_mode: IntegratorScalingMode = scaling_mode
+        self._hold_mode: IntegratorHoldMode = hold_mode
+        self._reset_mode: IntegratorResetMode = reset_mode
+        self._saturation_mode: IntegratorSaturationMode = saturation_mode
+        self._bound_source: IntegratorBoundSource = bound_source
+        self._scale_bounds_by_gain: bool = scale_bounds_by_gain
+        self._description: str = description
+
+    def get_block_type(self) -> BlockType:
+        """Return the canonical builder type.
+
+        :return: Integrator block type used to materialize the preset.
+        """
+        return self._block_type
+
+    def get_scaling_mode(self) -> IntegratorScalingMode:
+        """Return the preset input-scaling mode.
+
+        :return: Configured integrator scaling mode.
+        """
+        return self._scaling_mode
+
+    def get_hold_mode(self) -> IntegratorHoldMode:
+        """Return the preset hold mode.
+
+        :return: Configured integrator hold mode.
+        """
+        return self._hold_mode
+
+    def get_reset_mode(self) -> IntegratorResetMode:
+        """Return the preset reset mode.
+
+        :return: Configured integrator reset mode.
+        """
+        return self._reset_mode
+
+    def get_saturation_mode(self) -> IntegratorSaturationMode:
+        """Return the preset output-saturation mode.
+
+        :return: Configured integrator saturation mode.
+        """
+        return self._saturation_mode
+
+    def get_bound_source(self) -> IntegratorBoundSource:
+        """Return the source of enabled saturation bounds.
+
+        :return: Configured bound source.
+        """
+        return self._bound_source
+
+    def get_scale_bounds_by_gain(self) -> bool:
+        """Return whether the preset scales its bounds by a gain.
+
+        :return: ``True`` when enabled bounds share an extra gain parameter.
+        """
+        return self._scale_bounds_by_gain
+
+    def get_description(self) -> str:
+        """Return the Library explanation of the preset.
+
+        :return: Human-facing preset description.
+        """
+        return self._description
+
+    def apply_to_template_builder(self, builder: TemplateDefinition) -> None:
+        """Apply this preset to a canonical integrator template builder.
+
+        :param builder: Integrator builder whose initial structural values are
+            replaced by this preset.
+        :return: None.
+        """
+        builder.params_dict["scaling"].value = self._scaling_mode
+        builder.params_dict["hold_input"].value = self._hold_mode
+        builder.params_dict["reset"].value = self._reset_mode
+        builder.params_dict["output_saturation"].value = self._saturation_mode
+        builder.params_dict["bound_source"].value = self._bound_source
+        builder.params_dict["scale_bounds_by_gain"].value = self._scale_bounds_by_gain
+
+
+class DerivativePresetDescriptor:
+    """Describe one preconfigured view of the canonical derivative builder."""
+
+    __slots__ = (
+        "_derivative_order",
+        "_scaling_mode",
+        "_inactive_behavior",
+        "_description",
+    )
+
+    def __init__(
+            self,
+            derivative_order: DerivativeOrder,
+            scaling_mode: DerivativeScalingMode,
+            inactive_behavior: DerivativeInactiveBehavior,
+            description: str,
+    ) -> None:
+        """Store the structural defaults represented by one Library leaf.
+
+        :param derivative_order: First- or second-order filtered derivative.
+        :param scaling_mode: Numerator scaling selected by the preset.
+        :param inactive_behavior: Response to a non-positive denominator time.
+        :param description: Human-facing explanation shown in the Library.
+        :return: None.
+        """
+        self._derivative_order: DerivativeOrder = derivative_order
+        self._scaling_mode: DerivativeScalingMode = scaling_mode
+        self._inactive_behavior: DerivativeInactiveBehavior = inactive_behavior
+        self._description: str = description
+
+    def get_block_type(self) -> BlockType:
+        """Return the canonical builder type.
+
+        :return: Derivative block type used to materialize the preset.
+        """
+        return BlockType.DERIVATIVE
+
+    def get_derivative_order(self) -> DerivativeOrder:
+        """Return the preset derivative order.
+
+        :return: Configured first- or second-order selection.
+        """
+        return self._derivative_order
+
+    def get_scaling_mode(self) -> DerivativeScalingMode:
+        """Return the preset numerator-scaling mode.
+
+        :return: Configured derivative scaling mode.
+        """
+        return self._scaling_mode
+
+    def get_inactive_behavior(self) -> DerivativeInactiveBehavior:
+        """Return the preset non-positive-time behavior.
+
+        :return: Configured derivative inactive behavior.
+        """
+        return self._inactive_behavior
+
+    def get_description(self) -> str:
+        """Return the Library explanation of the preset.
+
+        :return: Human-facing preset description.
+        """
+        return self._description
+
+    def apply_to_template_builder(self, builder: TemplateDefinition) -> None:
+        """Apply this preset to a canonical derivative template builder.
+
+        :param builder: Derivative builder receiving the initial selections.
+        :return: None.
+        """
+        builder.params_dict["order"].value = self._derivative_order
+        builder.params_dict["scaling"].value = self._scaling_mode
+        builder.params_dict["non_positive_time"].value = self._inactive_behavior
+
+
+def build_integrator_preset_descriptors() -> tuple[tuple[str, IntegratorPresetDescriptor], ...]:
+    """Build the curated Library views of the configurable integrator.
+
+    The set intentionally covers independent common structures instead of the
+    full Cartesian product. Users can combine every option later in General
+    Structure without multiplying Library entries indefinitely.
+
+    :return: Ordered label and preset-descriptor pairs.
+    """
+    default_bound_source: IntegratorBoundSource = IntegratorBoundSource.PARAMETER
+    presets: tuple[tuple[str, IntegratorPresetDescriptor], ...] = (
+        ("Integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input as y = integral(u dt).",
+        )),
+        ("Gain integrator (K/s)", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.GAIN,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input with a configurable gain K: dy/dt = K u.",
+        )),
+        ("Time-constant integrator (1/(sT))", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.TIME_CONSTANT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input through a configurable time constant T: dy/dt = u/T.",
+        )),
+        ("Upper-limited integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.UPPER,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input and clamps the exposed output at a configurable upper limit.",
+        )),
+        ("Lower-limited integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.LOWER,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input and clamps the exposed output at a configurable lower limit.",
+        )),
+        ("Limited integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.BOTH,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description=(
+                "Integrates the input and clamps the exposed output between configurable lower and upper limits."
+            ),
+        )),
+        ("Holdable integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.SIGNAL,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input and freezes its state while the external hold signal is active.",
+        )),
+        ("Resettable integrator", IntegratorPresetDescriptor(
+            block_type=BlockType.INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.INITIAL_STATE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description="Integrates the input and resets the state to its initialized value on a rising reset edge.",
+        )),
+        ("Integrator with startup freeze", IntegratorPresetDescriptor(
+            block_type=BlockType.STARTUP_FREEZE_INTEGRATOR,
+            scaling_mode=IntegratorScalingMode.UNIT,
+            hold_mode=IntegratorHoldMode.NONE,
+            reset_mode=IntegratorResetMode.NONE,
+            saturation_mode=IntegratorSaturationMode.NONE,
+            bound_source=default_bound_source,
+            scale_bounds_by_gain=False,
+            description=(
+                "Keeps the state frozen for a configurable interval after startup and then integrates normally."
+            ),
+        )),
+    )
+    return presets
+
+
+def build_derivative_preset_descriptors() -> tuple[tuple[str, DerivativePresetDescriptor], ...]:
+    """Build the curated Library views of the configurable derivative.
+
+    The presets cover common transfer functions without exposing the full
+    Cartesian product. Every created block remains completely configurable in
+    General Structure.
+
+    :return: Ordered label and preset-descriptor pairs.
+    """
+    strict_behavior: DerivativeInactiveBehavior = DerivativeInactiveBehavior.STRICT
+    presets: tuple[tuple[str, DerivativePresetDescriptor], ...] = (
+        ("Filtered derivative s/(1+Ts)", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.FIRST,
+            scaling_mode=DerivativeScalingMode.UNIT,
+            inactive_behavior=strict_behavior,
+            description="Applies the first-order filtered derivative s/(1 + T s).",
+        )),
+        ("Gain filtered derivative", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.FIRST,
+            scaling_mode=DerivativeScalingMode.GAIN,
+            inactive_behavior=strict_behavior,
+            description="Applies the gain-scaled filtered derivative K s/(1 + T s).",
+        )),
+        ("Washout", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.FIRST,
+            scaling_mode=DerivativeScalingMode.TIME_CONSTANT,
+            inactive_behavior=strict_behavior,
+            description="Applies the washout transfer function T s/(1 + T s).",
+        )),
+        ("Gain washout", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.FIRST,
+            scaling_mode=DerivativeScalingMode.GAIN_TIME_CONSTANT,
+            inactive_behavior=strict_behavior,
+            description="Applies the gain-scaled washout K T s/(1 + T s).",
+        )),
+        ("Bypassable washout", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.FIRST,
+            scaling_mode=DerivativeScalingMode.TIME_CONSTANT,
+            inactive_behavior=DerivativeInactiveBehavior.BYPASS_INPUT,
+            description="Applies T s/(1 + T s), or passes the input through when T is non-positive.",
+        )),
+        ("Second-order filtered derivative", DerivativePresetDescriptor(
+            derivative_order=DerivativeOrder.SECOND,
+            scaling_mode=DerivativeScalingMode.GAIN,
+            inactive_behavior=strict_behavior,
+            description="Applies the second-order filtered derivative K s²/(1 + T s)².",
+        )),
+    )
+    return presets
 
 
 class LibraryDeviceTemplateSpec:
@@ -328,9 +696,9 @@ class DynamicEditorLibrary:
         )
 
         self.tree_structure["Tools"] = list((
-            LibraryLeafSpec("Signal Pair", BlockType.FROM_GOTO),
+            LibraryLeafSpec("Signal pair", BlockType.FROM_GOTO),
             LibraryLeafSpec("Measurements", BlockType.INPUT_CONN),
-            LibraryLeafSpec("Generic Device", BlockType.GENERIC),
+            LibraryLeafSpec("Generic device", BlockType.GENERIC),
         ))
 
         if self.templates_list:
@@ -447,6 +815,8 @@ def build_native_device_description(
         description: str = (
             "Complete synchronous-generator RMS model with GENQEC machine, exciter, governor, and stabilizer"
         )
+    elif source == DynamicDeviceTemplateType.RMS_GENCLS:
+        description = "Classical two-state synchronous-generator GENCLS RMS model"
     elif source == BlockType.GENQEC:
         description = "Synchronous-generator GENQEC RMS model with quadratic magnetic saturation"
     elif source == BlockType.GENRAW:
@@ -482,7 +852,7 @@ def build_native_device_description(
     elif source == DynamicDeviceTemplateType.EMT_COMPLETE_GENERATOR:
         description = "Complete three-phase synchronous-generator EMT model with machine and controls"
     elif source == BlockType.EMT_THEVENIN:
-        description = "Three-phase Thevenin generator EMT model behind a series resistance-inductance impedance"
+        description = "Grounded passive ABC source with coupled R/L impedance and balanced or per-phase internal voltage"
     elif source == DynamicDeviceTemplateType.EMT_IDEAL_CONVERTER:
         description = "Averaged ideal voltage-source converter EMT model without semiconductor switching"
     elif source == BlockType.COMPLETE_PSEUDO_VSC_EMT:
@@ -628,6 +998,9 @@ def build_rms_native_device_specs() -> List[LibraryDeviceTemplateSpec]:
         _build_native_device_spec("Complete generator", DynamicDeviceTemplateType.RMS_COMPLETE_GENERATOR,
                                   DynamicSimulationMode.RMS, DeviceType.GeneratorDevice,
                                   "Generators and sources", DynamicDeviceTemplateType.RMS_COMPLETE_GENERATOR.value),
+        _build_native_device_spec("Generator GENCLS", DynamicDeviceTemplateType.RMS_GENCLS,
+                                  DynamicSimulationMode.RMS, DeviceType.GeneratorDevice,
+                                  "Generators and sources", DynamicDeviceTemplateType.RMS_GENCLS.value),
         _build_native_device_spec("Generator QEC", BlockType.GENQEC,
                                   DynamicSimulationMode.RMS, DeviceType.GeneratorDevice,
                                   "Generators and sources", DynamicDeviceTemplateType.RMS_GENQEC.value),
@@ -888,34 +1261,79 @@ def build_international_standard_description(model: InternationalStandardModel) 
         description: str = "GENSAL salient-pole synchronous-machine RMS model"
     elif model == InternationalStandardModel.GENROU:
         description = "GENROU round-rotor synchronous-machine RMS model"
+    elif model == InternationalStandardModel.GENTRA:
+        description = "Field-transient salient-pole synchronous machine without damper windings"
+    elif model == InternationalStandardModel.GENSAE:
+        description = "Salient-pole synchronous machine with five states and two-axis power-law saturation"
+    elif model == InternationalStandardModel.GENROE:
+        description = "Round-rotor synchronous machine with power-law magnetic saturation"
     elif model == InternationalStandardModel.CIMTR1:
         description = "CIMTR1 induction-generator RMS model"
     elif model == InternationalStandardModel.CIMW:
         description = "CIMW induction-motor RMS model for a dynamic load"
+    elif model == InternationalStandardModel.GGOV1D:
+        description = "Tracked fuel-valve governor with asymmetric speed deadband and turbine dynamics"
+    elif model == InternationalStandardModel.GASTD:
+        description = "GASTD turbine-governor with asymmetric speed pickup and explicit turbine dynamics"
+    elif model == InternationalStandardModel.IEESGOD:
+        description = "IEESGOD turbine-governor with asymmetric speed pickup and explicit turbine dynamics"
+    elif model == InternationalStandardModel.HYGOV2:
+        description = 'Cascaded PI hydraulic governor with gate motion limits and inverse-response water dynamics.'
+    elif model == InternationalStandardModel.PIDGOV:
+        description = 'Hydraulic PID regulation with selectable droop feedback and calibrated gate/power characteristic.'
+    elif model == InternationalStandardModel.PIDGOVD:
+        description = 'Deadbanded hydraulic PID regulation with raw-speed mechanical damping.'
+    elif model == InternationalStandardModel.HYGOV2D:
+        description = 'Cascaded PI hydraulic governor with asymmetric excess-speed deadband.'
+    elif model == InternationalStandardModel.HYGOVD:
+        description = "HYGOVD turbine-governor with asymmetric speed pickup and explicit turbine dynamics"
+    elif model == InternationalStandardModel.TGOV1D:
+        description = "TGOV1D turbine-governor with asymmetric speed pickup and explicit turbine dynamics"
     elif model == InternationalStandardModel.GGOV1:
         description = "GGOV1 general-purpose turbine-governor model for synchronous generation"
+    elif model == InternationalStandardModel.IEEEG3:
+        description = "Hydraulic governor with pilot-valve dynamics, transient droop and inverse water-column response"
+    elif model == InternationalStandardModel.IEEEG3D:
+        description = "Hydraulic governor with asymmetric speed deadband, pilot-valve dynamics and inverse water-column response"
+    elif model == InternationalStandardModel.GAST:
+        description = "Gas-turbine speed governor with fuel-valve dynamics and exhaust-temperature limiting"
+    elif model == InternationalStandardModel.IEESGO:
+        description = "Steam-turbine speed governor with chest, reheat and crossover power stages"
     elif model in tuple((InternationalStandardModel.GOVHYDRO4, InternationalStandardModel.HYGOV)):
         description = f"{label} hydro-turbine governor model for synchronous generation"
     elif model in tuple((InternationalStandardModel.GOVSTEAM1, InternationalStandardModel.GOVSTEAMEU)):
         description = f"{label} steam-turbine governor model for synchronous generation"
+    elif model in (InternationalStandardModel.DEGOV, InternationalStandardModel.DEGOV1, InternationalStandardModel.DEGOV1D):
+        description = 'Electronic engine-speed governor with bounded fuel throttle and combustion transport delay'
+    elif model == InternationalStandardModel.IVOGO:
+        description = 'Three-stage rational speed governor with balanced integral load memories and separate power/torque outputs.'
+    elif model == InternationalStandardModel.LCFB1:
+        description = "Outer measured-power control with frequency bias and bounded governor-reference correction"
+    elif model == InternationalStandardModel.IEEEG1D:
+        description = "Steam governor with asymmetric deadband, valve travel limits and four turbine stages"
     elif model in tuple((InternationalStandardModel.IEEEG1, InternationalStandardModel.IEEEG2)):
         description = f"{label} IEEE turbine-governor model for synchronous generation"
     elif model in tuple((InternationalStandardModel.TGOV1, InternationalStandardModel.TGOV3)):
         description = f"{label} turbine-governor model for synchronous generation"
     elif model == InternationalStandardModel.IEEEVC_1981:
         description = "IEEEVC 1981 terminal-voltage compensation model for a synchronous generator"
+    elif model == InternationalStandardModel.COMP:
+        description = "Voltage sensing behind a signed reactive impedance using rectangular terminal phasors"
+    elif model == InternationalStandardModel.COMPCC:
+        description = "Cross-compound voltage sensing with shared and individual two-machine current corrections"
+    elif model == InternationalStandardModel.CCOMP4A:
+        description = "Four-unit reactive-current sharing with a bounded correction to terminal voltage"
+    elif model == InternationalStandardModel.REMCMP:
+        description = "Remote bus voltage sensing without an artificial measurement delay"
     elif model == InternationalStandardModel.VRKUNDUR:
         description = "Kundur automatic voltage regulator model for a synchronous generator"
     elif model in tuple((
             InternationalStandardModel.AC1A,
-            InternationalStandardModel.AC1C,
             InternationalStandardModel.AC6A,
             InternationalStandardModel.AC6C,
             InternationalStandardModel.AC7B,
             InternationalStandardModel.AC7C,
-            InternationalStandardModel.AC8B,
             InternationalStandardModel.AC8C,
-            InternationalStandardModel.BBSEX1,
             InternationalStandardModel.DC1A,
             InternationalStandardModel.DC1C,
             InternationalStandardModel.ESDC2A,
@@ -926,15 +1344,9 @@ def build_international_standard_description(model: InternationalStandardModel) 
             InternationalStandardModel.SCRX,
             InternationalStandardModel.SEXS,
             InternationalStandardModel.ST1A,
-            InternationalStandardModel.ST1C,
-            InternationalStandardModel.ST4B,
-            InternationalStandardModel.ST4C,
-            InternationalStandardModel.ST5B,
             InternationalStandardModel.ST5C,
             InternationalStandardModel.ST6B,
             InternationalStandardModel.ST6C,
-            InternationalStandardModel.ST7B,
-            InternationalStandardModel.ST7C,
             InternationalStandardModel.ST9C,
     )):
         description = f"{label} automatic voltage regulator and excitation-system model for a synchronous generator"
@@ -953,6 +1365,10 @@ def build_international_standard_description(model: InternationalStandardModel) 
         description = "PSS1A power-system stabilizer using rotor-speed deviation as its input"
     elif model == InternationalStandardModel.PSS1APGEN:
         description = "PSS1A power-system stabilizer using generator active power as its input"
+    elif model == InternationalStandardModel.PSS2C:
+        description = 'Continuously enabled four-phase dual-input ramp tracking with limited measurements.'
+    elif model == InternationalStandardModel.PSS3B:
+        description = 'Dual-input damping with optional washouts and two quadratic phase compensators.'
     elif model in tuple((InternationalStandardModel.PSS2A, InternationalStandardModel.PSS2B,
                          InternationalStandardModel.PSS2C)):
         description = f"{label} dual-input power-system stabilizer for damping electromechanical oscillations"
@@ -961,6 +1377,114 @@ def build_international_standard_description(model: InternationalStandardModel) 
         description = f"{label} power-system stabilizer for damping generator electromechanical oscillations"
     elif model == InternationalStandardModel.PSSKUNDUR:
         description = "Kundur power-system stabilizer for damping generator electromechanical oscillations"
+    elif model == InternationalStandardModel.STAB1:
+        description = "Speed-sensitive stabilizer with washout and two phase-compensation stages"
+    elif model == InternationalStandardModel.STAB2A:
+        description = "Electrical-power stabilizer with triple washout and parallel-path filtering"
+    elif model == InternationalStandardModel.STAB3:
+        description = "Reference-subtracted power stabilizer with filtered derivative feedback"
+    elif model == InternationalStandardModel.STAB4:
+        description = "Power stabilizer with derivative reset, phase compensation and asymmetric voltage limits"
+    elif model == InternationalStandardModel.IVOST:
+        description = 'Electrical-power damping through three rational filters with distinct tracking and external output limits.'
+    elif model == InternationalStandardModel.STABNI:
+        description = "Power stabilizer with double reset and fourth-order shaping"
+    elif model == InternationalStandardModel.IEEEST:
+        description = "Single-input stabilizer with polynomial filtering and terminal-voltage supervision"
+    elif model == InternationalStandardModel.IEE2ST:
+        description = "Dual-input stabilizer with independent transducers and three phase-compensation stages"
+    elif model == InternationalStandardModel.BBSEX1:
+        description = 'Static excitation with bounded regulator feedback and voltage-dependent field capability.'
+    elif model == InternationalStandardModel.BUDCZT:
+        description = 'Parallel PI excitation with bounded integral memory and separate actuator/exciter dynamics.'
+    elif model == InternationalStandardModel.EXPIC1:
+        description = 'PI excitation with separate regulator/field limits, shaped rate feedback and compound supply.'
+    elif model == InternationalStandardModel.EXNI:
+        description = 'Bidirectional controlled-bridge excitation with external clipping and two-stage rate feedback.'
+    elif model == InternationalStandardModel.IEET1B:
+        description = 'Biased rotating excitation with clipped voltage error, two regulator stages and selectable rate feedback.'
+    elif model == InternationalStandardModel.ST4B:
+        description = 'Cascaded bounded voltage/field PI regulators with loaded compound-transformer supply.'
+    elif model == InternationalStandardModel.AC8B:
+        description = 'Bounded PID excitation with a saturated rotating winding, current-dependent ceiling and loaded diode bridge.'
+    elif model == InternationalStandardModel.ST4C:
+        description = 'Cascaded bounded PI excitation with selectable take-over gates, firing lag and filtered bridge feedback.'
+    elif model == InternationalStandardModel.ST5B:
+        description = 'Three live bounded lead-lag channels with take-over selection and terminal-dependent field capability.'
+    elif model in (InternationalStandardModel.ST7B,InternationalStandardModel.ST7C):
+        description = 'Static excitation with reference takeover, independent capability feedback and optional firing lag.'
+    elif model == InternationalStandardModel.ST1C:
+        description = 'Terminal-fed static excitation with three minimum/maximum limiter locations and two stabilizer summations.'
+    elif model == InternationalStandardModel.ESST1A:
+        description = 'Terminal-fed static excitation with selectable limiter/stabilizer routing and field-current limiting.'
+    elif model == InternationalStandardModel.IEEET3:
+        description = 'Compound-transformer excitation with capability on total field forcing.'
+    elif model == InternationalStandardModel.IEEEX3:
+        description = 'Compound-transformer excitation with capability on rectified transformer supply.'
+    elif model == InternationalStandardModel.AC7C:
+        description = 'Cascaded PID/PI excitation with explicit takeover gates and compound or self-derived field power.'
+    elif model == InternationalStandardModel.AC7B:
+        description = 'Cascaded voltage PID and field PI with mixed field feedback, terminal supply and negative forcing capability.'
+    elif model == InternationalStandardModel.ST6C:
+        description = 'Current-limited PID field regulation with inner feedforward, bridge-command feedback and compound supply.'
+    elif model == InternationalStandardModel.DC4C:
+        description = 'Compound-fed bounded PID regulation of a commutator exciter with loaded supply and field-rate feedback.'
+    elif model == InternationalStandardModel.DC4B:
+        description = 'Terminal-fed bounded PID excitation with selectable limiter routing and field-rate feedback.'
+    elif model == InternationalStandardModel.DC3A:
+        description = 'Rheostat excitation with range-normalized motor travel, fast contacts and lower field stop.'
+    elif model == InternationalStandardModel.DC2C:
+        description = 'Bounded rotating excitation with terminal-fed regulation and selectable limiter takeover.'
+    elif model == InternationalStandardModel.ESAC8B:
+        description = 'PID voltage regulator with saturated rotating excitation and nonnegative field output.'
+    elif model == InternationalStandardModel.ESAC5A:
+        description = "Brushless exciter with independent regulator supply and shaped exciter-field feedback"
+    elif model == InternationalStandardModel.EXAC4:
+        description = "Alternator-fed controlled bridge with external current-dependent output clipping"
+    elif model == InternationalStandardModel.AC5C:
+        description = 'Brushless excitation with shaped field-loss feedback and selectable excitation limiters.'
+    elif model in (InternationalStandardModel.AC1C,InternationalStandardModel.AC2C):
+        description = 'Brushless rotating excitation with selectable limiter insertion and a field-current ceiling.'
+    elif model == InternationalStandardModel.AC4C:
+        description = 'Controlled bridge with selectable excitation gates and current-dependent capability'
+    elif model == InternationalStandardModel.ESAC4A:
+        description = "Alternator-fed controlled bridge with non-windup regulation and a minimum-excitation gate"
+    elif model == InternationalStandardModel.EXAC1A:
+        description = "Brushless exciter with rate feedback from rectified field voltage"
+    elif model == InternationalStandardModel.ESAC1A:
+        description = "Brushless exciter with separate amplifier/forcing limits and cascaded capability gates"
+    elif model == InternationalStandardModel.EXAC2:
+        description = "High-response brushless exciter with inner field-current feedback and a finite-gain current override"
+    elif model == InternationalStandardModel.EXAC3:
+        description = "Self-excited brushless exciter with nonlinear field-voltage rate feedback and minimum-voltage protection"
+    elif model == InternationalStandardModel.EXBAS:
+        description = "PI brushless excitation with shaped exciter-current rate feedback"
+    elif model == InternationalStandardModel.IEET1A:
+        description = "Field-controlled excitation with external output-voltage clipping and internal-memory rate feedback"
+    elif model == InternationalStandardModel.IEEET4:
+        description = "Deadband relay reset with parallel rapid forcing"
+    elif model == InternationalStandardModel.IEEET5:
+        description = "Continuous error reset with parallel rapid forcing"
+    elif model == InternationalStandardModel.IEEEX4:
+        description = "Range-normalized reset with parallel rapid forcing"
+    elif model == InternationalStandardModel.IEET5A:
+        description = "Lag or integral regulation with rapid forcing and an external field clip"
+    elif model == InternationalStandardModel.ESAC2A:
+        description = "High-response brushless excitation with takeover gates and an internal field-current stop"
+    elif model == InternationalStandardModel.ESAC3A:
+        description = "Self-excited brushless excitation with minimum-excitation takeover and internal field stops"
+    elif model == InternationalStandardModel.MNLEX1:
+        description = "Minimum-excitation limiter using active-current and field-current balance"
+    elif model == InternationalStandardModel.MNLEX2:
+        description = "Circular power-capability limiter with voltage scaling and internal rate feedback"
+    elif model == InternationalStandardModel.MNLEX3:
+        description = "Linear reactive-current capability limiter with field-voltage feedback"
+    elif model == InternationalStandardModel.EXST2A:
+        description = 'Multiplicative compound-source static exciter with field-voltage feedback.'
+    elif model == InternationalStandardModel.ESST2A:
+        description = 'Multiplicative compound-source static exciter with a minimum-excitation gate.'
+    elif model == InternationalStandardModel.EXST2:
+        description = "Static exciter with compound rectifier supply, commutation loading and bounded field voltage"
     elif model == InternationalStandardModel.REECB:
         description = "WECC REECB renewable-energy electrical control model"
     elif model == InternationalStandardModel.REECC:
@@ -1037,7 +1561,9 @@ def get_dynamic_library_international_standard_descriptors() -> Sequence[Interna
     """
     descriptors: List[InternationalStandardTemplateDescriptor] = list()
     _append_international_standard_group(
-        descriptors, (InternationalStandardModel.GENSAL, InternationalStandardModel.GENROU),
+        descriptors, (InternationalStandardModel.GENSAL, InternationalStandardModel.GENROU,
+                      InternationalStandardModel.GENTRA, InternationalStandardModel.GENROE,
+                      InternationalStandardModel.GENSAE),
         "Synchronous machines", "synchronous_machines", DeviceType.GeneratorDevice)
 
     # Induction models have different physical hosts and are registered
@@ -1051,12 +1577,22 @@ def get_dynamic_library_international_standard_descriptors() -> Sequence[Interna
 
     _append_international_standard_group(
         descriptors,
-        (InternationalStandardModel.GGOV1, InternationalStandardModel.GOVHYDRO4,
+        (InternationalStandardModel.GASTD, InternationalStandardModel.IEESGOD, InternationalStandardModel.HYGOVD,
+         InternationalStandardModel.HYGOV2, InternationalStandardModel.HYGOV2D,
+         InternationalStandardModel.PIDGOV, InternationalStandardModel.PIDGOVD,
+         InternationalStandardModel.TGOV1D, InternationalStandardModel.GGOV1, InternationalStandardModel.GGOV1D, InternationalStandardModel.GOVHYDRO4,
          InternationalStandardModel.GOVSTEAM1, InternationalStandardModel.GOVSTEAMEU,
-         InternationalStandardModel.HYGOV, InternationalStandardModel.IEEEG1,
+         InternationalStandardModel.IVOGO, InternationalStandardModel.DEGOV, InternationalStandardModel.DEGOV1, InternationalStandardModel.DEGOV1D,
+         InternationalStandardModel.HYGOV, InternationalStandardModel.IEEEG1, InternationalStandardModel.IEEEG1D, InternationalStandardModel.LCFB1,
          InternationalStandardModel.IEEEG2, InternationalStandardModel.TGOV1,
-         InternationalStandardModel.TGOV3),
+         InternationalStandardModel.TGOV3, InternationalStandardModel.GAST, InternationalStandardModel.IEEEG3, InternationalStandardModel.IEEEG3D,
+         InternationalStandardModel.IEESGO),
         "Governors", "governors", None)
+    _append_international_standard_group(
+        descriptors,
+        (InternationalStandardModel.COMP, InternationalStandardModel.COMPCC,
+         InternationalStandardModel.CCOMP4A, InternationalStandardModel.REMCMP),
+        "Voltage compensators", "voltage_compensators", None)
     _append_international_standard_group(
         descriptors,
         (InternationalStandardModel.AC1A, InternationalStandardModel.AC1C,
@@ -1065,7 +1601,30 @@ def get_dynamic_library_international_standard_descriptors() -> Sequence[Interna
          InternationalStandardModel.AC8B, InternationalStandardModel.AC8C,
          InternationalStandardModel.BBSEX1, InternationalStandardModel.DC1A,
          InternationalStandardModel.DC1C, InternationalStandardModel.ESDC2A,
-         InternationalStandardModel.EXAC1, InternationalStandardModel.IEEET1,
+         InternationalStandardModel.EXAC1, InternationalStandardModel.EXST2,
+         InternationalStandardModel.EXST2A, InternationalStandardModel.ESST2A, InternationalStandardModel.IEEET1,
+         InternationalStandardModel.IEEEX1, InternationalStandardModel.ESDC1A, InternationalStandardModel.EXDC2,
+         InternationalStandardModel.ESAC5A,
+         InternationalStandardModel.ESAC8B,
+         InternationalStandardModel.DC2C, InternationalStandardModel.DC3A, InternationalStandardModel.DC4B, InternationalStandardModel.DC4C,
+         InternationalStandardModel.IEEET3, InternationalStandardModel.IEEEX3,
+         InternationalStandardModel.ESST1A,
+         InternationalStandardModel.BUDCZT,
+         InternationalStandardModel.EXAC4, InternationalStandardModel.ESAC4A, InternationalStandardModel.AC4C,
+         InternationalStandardModel.AC2C, InternationalStandardModel.AC5C,
+         InternationalStandardModel.EXAC1A,
+         InternationalStandardModel.ESAC1A,
+         InternationalStandardModel.EXAC2,
+         InternationalStandardModel.EXAC3,
+         InternationalStandardModel.EXBAS,
+         InternationalStandardModel.IEET1A, InternationalStandardModel.IEET1B, InternationalStandardModel.EXNI, InternationalStandardModel.EXPIC1,
+         InternationalStandardModel.IEEET4,
+         InternationalStandardModel.IEEET5,
+         InternationalStandardModel.IEEEX4,
+         InternationalStandardModel.IEET5A,
+         InternationalStandardModel.ESAC2A,
+         InternationalStandardModel.ESAC3A,
+         InternationalStandardModel.IEEET2,
          InternationalStandardModel.IEEEX2, InternationalStandardModel.IEEX2A,
          InternationalStandardModel.SCRX, InternationalStandardModel.SEXS,
          InternationalStandardModel.ST1A, InternationalStandardModel.ST1C,
@@ -1079,6 +1638,7 @@ def get_dynamic_library_international_standard_descriptors() -> Sequence[Interna
     _append_international_standard_group(
         descriptors,
         (InternationalStandardModel.IEEL, InternationalStandardModel.MAXEX2,
+         InternationalStandardModel.MNLEX1, InternationalStandardModel.MNLEX2, InternationalStandardModel.MNLEX3,
          InternationalStandardModel.OEL2C, InternationalStandardModel.OEL3C,
          InternationalStandardModel.OEL4C, InternationalStandardModel.OEL5C,
          InternationalStandardModel.SCL1C, InternationalStandardModel.SCL2C,
@@ -1090,7 +1650,10 @@ def get_dynamic_library_international_standard_descriptors() -> Sequence[Interna
          InternationalStandardModel.PSS2A, InternationalStandardModel.PSS2B,
          InternationalStandardModel.PSS2C, InternationalStandardModel.PSS3B,
          InternationalStandardModel.PSS3C, InternationalStandardModel.PSS6C,
-         InternationalStandardModel.PSSKUNDUR),
+         InternationalStandardModel.PSSKUNDUR, InternationalStandardModel.STAB1,
+         InternationalStandardModel.STAB2A, InternationalStandardModel.STAB3,
+         InternationalStandardModel.STAB4, InternationalStandardModel.STABNI, InternationalStandardModel.IVOST,
+         InternationalStandardModel.IEEEST, InternationalStandardModel.IEE2ST),
         "Power system stabilizers", "power_system_stabilizers", None)
     _append_international_standard_group(
         descriptors,
@@ -1222,6 +1785,7 @@ def build_rms_control_library_branch() -> Dict[str, object]:
 
     standard_category_map: tuple[tuple[str, str], ...] = (
         ("Governors", "Governors"),
+        ("Voltage compensators", "Reactive power and voltage"),
         ("Excitation systems", "Exciters"),
         ("Excitation limiters", "Limiters"),
         ("Power system stabilizers", "Stabilizers"),
@@ -1327,12 +1891,22 @@ def build_dynamic_library_structure(
     """
     structure: Dict[str, object] = dict()
     structure["Basic"] = build_basic_library_branch()
+    if mode == DynamicSimulationMode.EMT:
+        # Fault insertion is a mode-wide composition tool rather than a full
+        # network-device drawing. Keep it near the top of the visible Library
+        # so the large device and control trees cannot obscure its presence.
+        structure["Faults"] = list((LibraryLeafSpec(
+            label="Fault EMT",
+            payload=BlockType.FAULT_EMT,
+            search_text="EMT fault short circuit LG LL LLG LLL LLLG ground",
+        ),))
+    else:
+        pass
     structure["Devices"] = build_device_library_branch(mode=mode, device_type=device_type)
     if mode == DynamicSimulationMode.RMS:
         structure["Controls"] = build_rms_control_library_branch()
     elif mode == DynamicSimulationMode.EMT:
         structure["Controls"] = build_emt_control_library_branch()
-        structure["Faults"] = list((LibraryLeafSpec("Fault EMT", BlockType.FAULT_EMT),))
     else:
         pass
     structure["Procedural logic"] = build_procedural_library_branch()
@@ -1374,6 +1948,20 @@ def get_dynamic_library_device_specs(mode: DynamicSimulationMode) -> List[Librar
     specs: List[LibraryDeviceTemplateSpec] = list()
     _collect_device_specs_from_branch(device_branch, specs)
     return specs
+
+
+def get_catalogue_template_block_type(
+        template: RmsModelTemplate | EmtModelTemplate | FmuTemplate,
+        mode: DynamicSimulationMode,
+) -> BlockType | None:
+    """Resolve a saved catalogue template's native type from its stable code."""
+    if not template.code:
+        return None
+    spec: LibraryDeviceTemplateSpec
+    for spec in get_dynamic_library_device_specs(mode):
+        if spec.unique_key == template.code and isinstance(spec.source, BlockType):
+            return spec.source
+    return None
 
 
 def build_dynamic_library_device_template(
@@ -1430,6 +2018,8 @@ def build_dynamic_library_device_template(
             template = None
     elif source == DynamicDeviceTemplateType.RMS_COMPLETE_GENERATOR:
         template = tem.get_complete_generator_template_rms(var_factory)
+    elif source == DynamicDeviceTemplateType.RMS_GENCLS:
+        template = tem.get_gencls_rms_template(var_factory)
     elif source == DynamicDeviceTemplateType.RMS_GENQEC:
         template = tem.get_genqec_rms(var_factory)
     elif source == DynamicDeviceTemplateType.RMS_GENROW:
@@ -1510,6 +2100,9 @@ def build_dynamic_library_device_template(
     if template is not None:
         # A device registration is authoritative for host compatibility even
         # when the underlying block builder is also usable as a control block.
+        # The same registration also owns the user-facing catalogue label. A
+        # builder's internal symbolic name must not leak into device selectors.
+        template.name = spec.label
         template.tpe = spec.device_type
         template.code = spec.unique_key
     else:
@@ -1517,58 +2110,925 @@ def build_dynamic_library_device_template(
     return template
 
 
-def build_basic_library_branch() -> Dict[str, object]:
+def build_basic_branch_skeleton() -> Dict[str, object]:
+    """Build the canonical empty hierarchy below ``Basic``.
+
+    The hierarchy lives beside the ``Devices`` and ``Controls`` registrations
+    so the complete dynamic-editor library can be inspected and maintained in
+    one module. Empty leaf collections reserve the requested semantic location
+    while the tree is populated; they are removed before it becomes visible.
+
+    :return: Ordered category tree whose leaf nodes are empty lists.
     """
-    Build the nested Basic branch used by both RMS and EMT editors.
+    # Mathematical operations are separated by behavior rather than by the
+    # implementation family from which a block happened to originate.
+    mathematical_functions: Dict[str, object] = dict((
+        ("Sum", list()),
+        ("Product", list()),
+        ("Gain", list()),
+        ("Affine", list()),
+        ("Polynomials", list()),
+        ("Minimum/Maximum", list()),
+        ("Absolute value", list()),
+        ("Sign", list()),
+        ("Square root", list()),
+        ("Power", list()),
+        ("Exponential and logarithms", list()),
+        ("Rounding and modulo", list()),
+        ("Trigonometric functions", list()),
+        ("Constants", list()),
+    ))
+
+    # State-bearing continuous blocks are kept apart from discrete memory so
+    # their numerical meaning is evident from the library path.
+    continuous_dynamics: Dict[str, object] = dict((
+        ("Integrators", list()),
+        ("Derivatives", list()),
+        ("Transfer functions", list()),
+        ("Filters", list()),
+        ("Delay approximations", list()),
+    ))
+    memory_and_discrete_time: Dict[str, object] = dict((
+        ("Sample and hold", list()),
+        ("Previous value", list()),
+        ("Exact time delay", list()),
+        ("Moving average", list()),
+    ))
+
+    # Event-generating comparators are distinguished from ordinary algebraic
+    # comparisons and from the switches that consume their results.
+    logic_and_events: Dict[str, object] = dict((
+        ("Logic gate", list()),
+        ("Comparator", list()),
+        ("Timed comparator", list()),
+        ("Selector / Switch", list()),
+        ("Edge detector", list()),
+        ("Latches and flip-flops", list()),
+        ("Timers", list()),
+    ))
+    limits_and_nonlinearities: Dict[str, object] = dict((
+        ("Saturation", list()),
+        ("Deadband", list()),
+        ("Rate limiter", list()),
+        ("Hysteresis", list()),
+    ))
+
+    # Sources are classified by the waveform users look for. Scalar constants
+    # belong with the other mathematical constants, while clocks have their
+    # own category instead of being presented incorrectly as steps.
+    sources: Dict[str, object] = dict((
+        ("Initial conditions", list()),
+        ("Simulation time", list()),
+        ("Periodic clocks", list()),
+        ("Pulse", list()),
+        ("Sine", list()),
+        ("Square", list()),
+        ("Triangle", list()),
+        ("Sawtooth", list()),
+    ))
+    lookup_tables: Dict[str, object] = dict((
+        ("1D lookup table", list()),
+        ("Inverse 1D lookup table", list()),
+        ("2D lookup table", list()),
+    ))
+    transforms: Dict[str, object] = dict((
+        ("Clarke", list()),
+        ("Park / dq0", list()),
+        ("Sequence components", list()),
+        ("RMS conversions", list()),
+    ))
+    complex_numbers: Dict[str, object] = dict((
+        ("Cartesian / polar conversion", list()),
+        ("Magnitude and angle", list()),
+        ("Conjugate", list()),
+        ("Arithmetic", list()),
+    ))
+    measurements: Dict[str, object] = dict((
+        ("Electrical measurements", list()),
+        ("Per-unit conversions", list()),
+        ("Unit conversions", list()),
+    ))
+    mechanical: Dict[str, object] = dict((("Drive train", list()),))
+
+    return dict((
+        ("Mathematical functions", mathematical_functions),
+        ("Continuous dynamics", continuous_dynamics),
+        ("Memory and discrete-time", memory_and_discrete_time),
+        ("Logic and events", logic_and_events),
+        ("Limits and nonlinearities", limits_and_nonlinearities),
+        ("Sources", sources),
+        ("Lookup tables", lookup_tables),
+        ("Transforms", transforms),
+        ("Complex numbers", complex_numbers),
+        ("Measurements and conversions", measurements),
+        ("Mechanical", mechanical),
+    ))
+
+
+def get_basic_lookup_table_category_path(descriptor: BasicBlockTemplateDescriptor) -> tuple[str, ...]:
+    """Return the dimensional lookup-table category for one descriptor.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :return: Path below ``Basic`` for the lookup implementation.
+    """
+    template_key: str = descriptor.template_key
+    inverse_keys: tuple[str, ...] = (
+        "inverse_lookup_array_object_linear",
+        "invlapprox",
+    )
+    matrix_keys: tuple[str, ...] = (
+        "lookup_matrix_linear",
+        "lookup_matrix_spline",
+        "lookup_matrix_object_linear",
+        "lookup_matrix_object_spline",
+        "lapprox2",
+        "sapprox2",
+    )
+    array_keys: tuple[str, ...] = (
+        "lookup_array_linear_noclipping",
+        "lookup_array_1x3_linear_fixed",
+        "lookup_array_1x3_linear_variable",
+        "lookup_array_1x4_linear_fixed",
+        "lookup_array_1x4_linear_variable",
+        "lookup_array_object_linear",
+        "lookup_array_object_linear_noclipping",
+        "lookup_array_object_spline",
+        "lapprox",
+        "lapproxext",
+        "sapprox",
+    )
+
+    # Every shipped lookup implementation is named explicitly. This prevents a
+    # future matrix or inverse implementation from silently landing in 1D.
+    if template_key in inverse_keys:
+        category_path: tuple[str, ...] = ("Lookup tables", "Inverse 1D lookup table")
+    elif template_key in matrix_keys:
+        category_path = ("Lookup tables", "2D lookup table")
+    elif template_key in array_keys:
+        category_path = ("Lookup tables", "1D lookup table")
+    else:
+        raise ValueError(f"Unclassified lookup-table template '{template_key}'")
+    return category_path
+
+
+def get_basic_mathematical_category_path(descriptor: BasicBlockTemplateDescriptor,
+                                         source_category: str) -> tuple[str, ...]:
+    """Classify a descriptor from the legacy mathematical families.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :param source_category: Legacy second-level mathematical category.
+    :return: Path below ``Basic`` for the mathematical behavior.
+    """
+    template_key: str = descriptor.template_key
+    scaling_gain_keys: tuple[str, ...] = (
+        "multiply_1_form_a", "multiply_k_form_a", "multiply_1_k_form_a",
+        "multiply_1_k1_k2", "multiply_1_form_b",
+        "multiply_1_k_form_b",
+        "multiply_k_form_b", "multiply_k1_k2_k3_form_a",
+        "multiply_k1_k2_k3_form_b", "multiply_k1_k2_form_a",
+        "multiply_k1_k2_form_b", "multiply_sqrt2", "multiply_sqrt3",
+    )
+    saturated_gain_keys: tuple[str, ...] = (
+        "multiply_1_k_p", "multiply_1_k1k2_p", "multiply_k_p",
+    )
+    trigonometric_keys: tuple[str, ...] = (
+        "acos", "asin", "atan", "atan2", "atan2d", "atand",
+        "cos", "cosd", "cosh", "coshd", "sin", "sind",
+        "sinh", "sinhd", "tan", "tand", "tanh", "tanhd",
+    )
+    polynomial_keys: tuple[str, ...] = (
+        "a_x_c1_x_c2", "ax_2_bx_c",
+    )
+    power_keys: tuple[str, ...] = (
+        "reciprocal", "reciprocal_fb", "x_2", "x_p",
+    )
+
+    if source_category == "Constants and Scaling":
+        category_path: tuple[str, ...] = ("Mathematical functions", "Constants")
+    elif source_category == "Scaling and Products":
+        if template_key == "bias":
+            category_path = ("Sources", "Initial conditions")
+        elif template_key == "mx_n":
+            category_path = ("Mathematical functions", "Affine")
+        elif template_key in polynomial_keys:
+            category_path = ("Mathematical functions", "Polynomials")
+        elif template_key in power_keys:
+            category_path = ("Mathematical functions", "Power")
+        elif template_key in saturated_gain_keys:
+            category_path = ("Limits and nonlinearities", "Saturation")
+        elif template_key in scaling_gain_keys:
+            category_path = ("Mathematical functions", "Gain")
+        else:
+            raise ValueError(f"Unclassified scaling template '{template_key}'")
+    elif template_key == "equal":
+        category_path = ("Logic and events", "Comparator")
+    elif template_key == "abs":
+        category_path = ("Mathematical functions", "Absolute value")
+    elif template_key == "sign":
+        category_path = ("Mathematical functions", "Sign")
+    elif template_key == "sqrt":
+        category_path = ("Mathematical functions", "Square root")
+    elif template_key in ("exp", "ln", "log"):
+        category_path = ("Mathematical functions", "Exponential and logarithms")
+    elif template_key in ("ceil", "floor", "frac", "modulo", "round"):
+        category_path = ("Mathematical functions", "Rounding and modulo")
+    elif template_key in trigonometric_keys:
+        category_path = ("Mathematical functions", "Trigonometric functions")
+    elif template_key in power_keys:
+        category_path = ("Mathematical functions", "Power")
+    else:
+        raise ValueError(f"Unclassified elementary-function template '{template_key}'")
+    return category_path
+
+
+def get_basic_waveform_category_path(descriptor: BasicBlockTemplateDescriptor,
+                                     source_category: str) -> tuple[str, ...]:
+    """Classify waveform, clock, and event-pulse descriptors.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :param source_category: Legacy waveform category.
+    :return: Path below ``Basic`` for the source or event behavior.
+    """
+    template_key: str = descriptor.template_key
+    timed_comparator_keys: tuple[str, ...] = (
+        "abs_in_greater_than_c_ip", "abs_in_less_than_c_ip",
+        "yi_equals_c_ip", "yi_greater_than_c_ip",
+        "yi_greater_than_or_equal_c_ip", "yi_less_than_c_ip",
+        "yi_less_than_or_equal_c_ip", "yi1_equals_yi2_ip",
+        "yi1_greater_than_or_equal_yi2_ip", "yi1_greater_than_yi2_ip",
+        "yi1_less_than_or_equal_yi2_ip", "yi1_less_than_yi2_ip",
+    )
+    pulse_logic_keys: tuple[str, ...] = (
+        "2_out_of_3_ip", "and2_ip", "and3_ip", "invert_logic_ip",
+        "not_ip", "or2_ip", "or3_ip",
+    )
+    clock_keys: tuple[str, ...] = (
+        "clock_t_0_par", "clock_t_0_sig", "clock_t_t0_par",
+        "clock_t_t0_sig", "clock_par", "clock_sig",
+    )
+
+    if template_key in ("sawtooth_wave_generator_ip", "sawtooth_wave_generator"):
+        category_path: tuple[str, ...] = ("Sources", "Sawtooth")
+    elif template_key in ("triangle_wave_generator", "triangle_wave_generator_ip"):
+        category_path = ("Sources", "Triangle")
+    elif template_key in ("square_wave_generator", "square_wave_generator_ip"):
+        category_path = ("Sources", "Square")
+    elif template_key in ("sine_wave_generator_t_t0", "sine_wave_generator"):
+        category_path = ("Sources", "Sine")
+    elif template_key == "pulse":
+        category_path = ("Sources", "Pulse")
+    elif template_key in ("time_form_a", "time_form_b"):
+        category_path = ("Sources", "Simulation time")
+    elif template_key in clock_keys:
+        category_path = ("Sources", "Periodic clocks")
+    elif template_key in ("timer_reset", "timer_reset_hold_reset_t0_reset_incfw"):
+        category_path = ("Logic and events", "Timers")
+    elif template_key in timed_comparator_keys:
+        category_path = ("Logic and events", "Timed comparator")
+    elif template_key in pulse_logic_keys:
+        category_path = ("Logic and events", "Logic gate")
+    else:
+        raise ValueError(
+            f"Unclassified waveform template '{template_key}' from '{source_category}'"
+        )
+    return category_path
+
+
+def get_basic_continuous_category_path(descriptor: BasicBlockTemplateDescriptor,
+                                       source_category: str) -> tuple[str, ...]:
+    """Classify legacy continuous-time descriptors by numerical behavior.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :param source_category: Legacy continuous-time category.
+    :return: Path below ``Basic`` for the continuous behavior.
+    """
+    template_key: str = descriptor.template_key
+    previous_value_keys: tuple[str, ...] = (
+        "lastvalue_form_a", "lastvalue_incbackward",
+        "lastvalue_incforward", "lastvalue_form_b",
+    )
+    delay_approximation_keys: tuple[str, ...] = (
+        "ke_st_bypass_incforward", "ke_st_incforward",
+        "pade_approximant_r12_incbackward", "pade_approximant_r12_incforward",
+        "e_s0_01_incforward", "e_st_bypass", "e_st_bypass_incbackward",
+        "e_st_bypass_incforward", "e_st_incbackward", "e_st_incforward",
+    )
+    derivative_keys: tuple[str, ...] = (
+        "s_1_st", "st_1_st_bypass_form_a", "st_1_st",
+        "st_1_st_bypass_form_b", "skt_1_st", "sktd_1_st",
+        "stb_1_sta_fb", "stld_1_stlg_fb", "sk_1_0_01s",
+        "sk_1_st_fb", "sk_1_st", "s_2k_1_st_2",
+    )
+    filter_keys: tuple[str, ...] = (
+        "s_w0_2_s_2",
+        "h0w0_q_s_w0_2_sw0_q_s_2", "butterworth_2nd_order",
+        "butterworth_3rd_order", "butterworth_2nd_order_rst_hold",
+        "butterworth_3rd_order_rst_hold",
+    )
+    integrator_keys_from_controllers: tuple[str, ...] = (
+        "k_s_p", "k_s_s", "k_s",
+    )
+    mathematical_gain_keys: tuple[str, ...] = (
+        "multiply_1_sqrt2", "multiply_1_sqrt3", "multiply_pi",
+        "multiply_sqrt_2_3", "multiply_sqrt_3_2", "multiply_sqrt_k1_k2",
+    )
+    minimum_maximum_keys: tuple[str, ...] = (
+        "max2", "max3", "max4", "min2", "min3", "min4",
+    )
+
+    if source_category == "Delays and Memory":
+        if template_key == "movingavg":
+            category_path: tuple[str, ...] = ("Memory and discrete-time", "Moving average")
+        elif template_key in previous_value_keys:
+            category_path = ("Memory and discrete-time", "Previous value")
+        elif template_key in delay_approximation_keys:
+            category_path = ("Continuous dynamics", "Delay approximations")
+        elif template_key == "delay":
+            category_path = ("Memory and discrete-time", "Exact time delay")
+        else:
+            raise ValueError(f"Unclassified delay or memory template '{template_key}'")
+    elif source_category == "Integrators and Derivatives":
+        if template_key in filter_keys:
+            # The legacy catalogue stored the undamped resonator beside
+            # integrators and derivatives, but its transfer function is a
+            # resonant filter and must be classified by behavior.
+            category_path = ("Continuous dynamics", "Filters")
+        elif template_key in derivative_keys:
+            category_path = ("Continuous dynamics", "Derivatives")
+        else:
+            # The remaining audited source records implement 1/s or 1/(sT)
+            # variants with reset, hold, freeze, and limit options.
+            category_path = ("Continuous dynamics", "Integrators")
+    elif template_key in minimum_maximum_keys:
+        category_path = ("Mathematical functions", "Minimum/Maximum")
+    elif template_key in ("picdro", "picdro_const"):
+        category_path = ("Logic and events", "Timed comparator")
+    elif template_key in mathematical_gain_keys:
+        category_path = ("Mathematical functions", "Gain")
+    elif template_key in filter_keys:
+        category_path = ("Continuous dynamics", "Filters")
+    elif template_key in derivative_keys:
+        category_path = ("Continuous dynamics", "Derivatives")
+    elif template_key in integrator_keys_from_controllers:
+        category_path = ("Continuous dynamics", "Integrators")
+    elif template_key == "1_2hs":
+        category_path = ("Mechanical", "Drive train")
+    elif source_category in ("Transfer Functions and Filters", "Controllers"):
+        # All non-exception records in these two audited legacy families are
+        # rational transfer functions or complete continuous controllers.
+        category_path = ("Continuous dynamics", "Transfer functions")
+    else:
+        raise ValueError(
+            f"Unclassified continuous template '{template_key}' from '{source_category}'"
+        )
+    return category_path
+
+
+def get_basic_logic_category_path(descriptor: BasicBlockTemplateDescriptor,
+                                  source_category: str) -> tuple[str, ...]:
+    """Classify legacy logical and event descriptors.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :param source_category: Legacy logical category.
+    :return: Path below ``Basic`` for the logical behavior.
+    """
+    template_key: str = descriptor.template_key
+    latch_keys: tuple[str, ...] = ("aflipflop", "flipflop", "bistable")
+    gate_keys: tuple[str, ...] = (
+        "and2", "and3", "and4", "eor", "nor", "not", "or2", "or3", "or4",
+    )
+    gate_memory_switch_keys: tuple[str, ...] = (
+        "switch_sig_2_1_not_eq_k_by_s_p", "switch_sw_not_equal_c_2s_1s",
+    )
+    enabled_integrator_keys: tuple[str, ...] = (
+        "1_s_enable", "1_s_enable_reset", "1_s_enable_reset_sig",
+    )
+    enabled_derivative_keys: tuple[str, ...] = ("st_1_st_enable",)
+    enabled_transfer_function_keys: tuple[str, ...] = ("1_1_st_enable",)
+    signal_enable_keys: tuple[str, ...] = (
+        "enable_1_sig_hold", "enable_1_sig",
+        "enable_2_sig_hold", "enable_2_sig",
+        "enable_3_sig_hold", "enable_3_sig",
+        "enable_4_sig_hold", "enable_4_sig",
+        "enable_5_sig_hold", "enable_5_sig",
+        "enable_6_sig_hold", "enable_7_sig_hold", "enable_8_sig_hold",
+        "enable_signal_fixed", "enable_signal",
+    )
+    if source_category == "Comparators":
+        category_path: tuple[str, ...] = ("Logic and events", "Comparator")
+    elif source_category == "Switching and Selection" or template_key in gate_memory_switch_keys:
+        category_path = ("Logic and events", "Selector / Switch")
+    elif template_key in enabled_integrator_keys:
+        category_path = ("Continuous dynamics", "Integrators")
+    elif template_key in enabled_derivative_keys:
+        category_path = ("Continuous dynamics", "Derivatives")
+    elif template_key in enabled_transfer_function_keys:
+        category_path = ("Continuous dynamics", "Transfer functions")
+    elif template_key in signal_enable_keys:
+        category_path = ("Logic and events", "Selector / Switch")
+    elif template_key == "edge_detector":
+        category_path = ("Logic and events", "Edge detector")
+    elif template_key == "monostable":
+        category_path = ("Logic and events", "Timers")
+    elif template_key in latch_keys:
+        category_path = ("Logic and events", "Latches and flip-flops")
+    elif template_key in gate_keys:
+        category_path = ("Logic and events", "Logic gate")
+    else:
+        raise ValueError(
+            f"Unclassified logic template '{template_key}' from '{source_category}'"
+        )
+    return category_path
+
+
+def get_basic_measurement_category_path(descriptor: BasicBlockTemplateDescriptor) -> tuple[str, ...]:
+    """Classify measurements separately from unit and per-unit conversions.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :return: Path below ``Basic`` for the measurement or conversion behavior.
+    """
+    template_key: str = descriptor.template_key
+    electrical_measurement_keys: tuple[str, ...] = (
+        "el_power", "pq_calculator", "accelerating_power_simple", "accelerating_power_ipb",
+    )
+    per_unit_conversion_keys: tuple[str, ...] = (
+        "power_base", "hz_p_u", "nm_p_u", "abs_p_u_par", "abs_p_u_sig",
+        "p_u_hz", "p_u_abs_par", "p_u_abs_sig", "p_u_rpm", "rpm_p_u",
+    )
+    unit_conversion_keys: tuple[str, ...] = (
+        "deg_rad", "rad_deg", "rad_s_rpm", "rpm_rad_s",
+    )
+
+    if template_key in electrical_measurement_keys:
+        category_path: tuple[str, ...] = ("Measurements and conversions", "Electrical measurements")
+    elif template_key in per_unit_conversion_keys:
+        category_path = ("Measurements and conversions", "Per-unit conversions")
+    elif template_key in unit_conversion_keys:
+        category_path = ("Measurements and conversions", "Unit conversions")
+    else:
+        raise ValueError(f"Unclassified measurement or conversion template '{template_key}'")
+    return category_path
+
+
+def get_basic_limit_category_path(descriptor: BasicBlockTemplateDescriptor,
+                                  source_category: str) -> tuple[str, ...]:
+    """Classify limiter and nonlinearity descriptors.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :param source_category: Legacy limit category.
+    :return: Path below ``Basic`` for the nonlinear behavior.
+    """
+    template_key: str = descriptor.template_key
+    deadband_keys: tuple[str, ...] = (
+        "deadband_p", "deadband_bypass", "deadband_discontinuous",
+        "deadband_offset_p", "deadband_offset_bypass", "deadband_stepped_p",
+        "deadband_stepped_bypass", "deadband",
+    )
+    rate_limiter_keys: tuple[str, ...] = (
+        "gradlim_const", "rate_limiter", "rate_limiter_base",
+        "rate_limiter_base_p_form_a", "rate_limiter_base_p_form_b",
+        "rate_limiter_base_p_form_c", "rate_limiter_p_form_a",
+        "rate_limiter_p_form_b", "rate_limiter_p_form_c", "rate_limiter_s",
+    )
+    if template_key in deadband_keys:
+        category_path: tuple[str, ...] = ("Limits and nonlinearities", "Deadband")
+    elif template_key == "backlash":
+        category_path = ("Limits and nonlinearities", "Hysteresis")
+    elif template_key in rate_limiter_keys:
+        category_path = ("Limits and nonlinearities", "Rate limiter")
+    elif source_category == "Limiters":
+        category_path = ("Limits and nonlinearities", "Saturation")
+    else:
+        raise ValueError(
+            f"Unclassified limit template '{template_key}' from '{source_category}'"
+        )
+    return category_path
+
+
+def get_basic_transform_category_path(descriptor: BasicBlockTemplateDescriptor) -> tuple[str, ...]:
+    """Classify coordinate, sequence, and RMS transform descriptors.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :return: Path below ``Basic`` for the transform behavior.
+    """
+    template_key: str = descriptor.template_key
+    clarke_keys: tuple[str, ...] = (
+        "clarke_transform_power_invariant", "clarke_transform",
+        "inverse_clarke_transform_pow_invariant", "inverse_clarke_transform",
+    )
+    park_keys: tuple[str, ...] = (
+        "inverse_park_transform_dq", "inverse_park_transform_dq0",
+        "park_transform_dq", "park_transform_dq0",
+        "abc_dq0_power_invariant_align_a_d", "abc_dq0_power_invariant_align_a_q",
+        "abc_dq0_power_variant_align_a_d", "abc_dq0_power_variant_align_a_q",
+        "dq0_abc_power_invariant_align_a_d", "dq0_abc_power_invariant_align_a_q",
+        "dq0_abc_power_variant_align_a_d", "dq0_abc_power_variant_align_a_q",
+    )
+    rms_keys: tuple[str, ...] = ("rms", "rms_value_p_u", "rms_value")
+    sequence_keys: tuple[str, ...] = ("balanced", "u_seq_ab0_u_abc")
+    if template_key in clarke_keys:
+        category_path: tuple[str, ...] = ("Transforms", "Clarke")
+    elif template_key in park_keys:
+        category_path = ("Transforms", "Park / dq0")
+    elif template_key in rms_keys:
+        category_path = ("Transforms", "RMS conversions")
+    elif template_key in sequence_keys:
+        category_path = ("Transforms", "Sequence components")
+    else:
+        raise ValueError(f"Unclassified transform template '{template_key}'")
+    return category_path
+
+
+def get_basic_complex_category_path(descriptor: BasicBlockTemplateDescriptor) -> tuple[str, ...]:
+    """Classify complex-number descriptors by their visible operation.
+
+    :param descriptor: Basic-block descriptor being classified.
+    :return: Path below ``Basic`` for the complex operation.
+    """
+    template_key: str = descriptor.template_key
+    if template_key in ("to_polar_complex", "to_rectangular_complex"):
+        category_path: tuple[str, ...] = ("Complex numbers", "Cartesian / polar conversion")
+    elif template_key == "mag_complex":
+        category_path = ("Complex numbers", "Magnitude and angle")
+    elif template_key == "conj_complex":
+        category_path = ("Complex numbers", "Conjugate")
+    elif template_key in ("add_complex", "div_complex", "mul_complex", "sub_complex"):
+        category_path = ("Complex numbers", "Arithmetic")
+    elif template_key in ("limit_p_complex", "limit_ppp_complex_with_prio"):
+        category_path = ("Limits and nonlinearities", "Saturation")
+    else:
+        raise ValueError(f"Unclassified complex template '{template_key}'")
+    return category_path
+
+
+def get_basic_library_category_path(descriptor: BasicBlockTemplateDescriptor) -> tuple[str, ...]:
+    """Translate catalog metadata into the canonical ``Basic`` tree.
+
+    The catalog retains its stable import metadata while this GUI-owned mapping
+    controls only where a draggable leaf is presented. This keeps persistence
+    and template materialization independent from library organization.
+
+    :param descriptor: Editor-ready catalog descriptor to place in the tree.
+    :return: Canonical path below ``Basic``.
+    """
+    source_path: tuple[str, ...] = tuple(descriptor.category_path)
+    if len(source_path) > 0 and source_path[0] == "Native":
+        source_path = source_path[1:]
+    else:
+        pass
+
+    if len(source_path) > 0:
+        primary_category: str = source_path[0]
+    else:
+        primary_category = ""
+    if len(source_path) > 1:
+        secondary_category: str = source_path[1]
+    else:
+        secondary_category = ""
+
+    if primary_category in ("Arrays and Matrices", "Lookup and Tables"):
+        category_path: tuple[str, ...] = get_basic_lookup_table_category_path(descriptor=descriptor)
+    elif primary_category == "Math and Functions":
+        category_path = get_basic_mathematical_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Waveforms and Time":
+        category_path = get_basic_waveform_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Continuous":
+        category_path = get_basic_continuous_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Logic and Events":
+        category_path = get_basic_logic_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Limits and Nonlinearities":
+        category_path = get_basic_limit_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Transforms":
+        category_path = get_basic_transform_category_path(descriptor=descriptor)
+    elif primary_category == "Complex":
+        category_path = get_basic_complex_category_path(descriptor=descriptor)
+    elif primary_category == "Mechanical":
+        category_path = ("Mechanical", "Drive train")
+    elif primary_category == "Control and Measurement" and secondary_category == "Controllers":
+        category_path = get_basic_continuous_category_path(
+            descriptor=descriptor,
+            source_category=secondary_category,
+        )
+    elif primary_category == "Control and Measurement" and secondary_category == "Measurements and Units":
+        category_path = get_basic_measurement_category_path(descriptor=descriptor)
+    else:
+        raise ValueError(
+            f"Unclassified basic-catalog path {source_path!r} for '{descriptor.template_key}'"
+        )
+    return category_path
+
+
+def get_basic_procedural_category_path(
+        descriptor: ProceduralBlockTemplateDescriptor,
+) -> tuple[str, ...] | None:
+    """Return the Basic path for a reusable procedural primitive.
+
+    Common sampling, memory, limit, latch, edge, and timer behaviors belong in
+    the semantic Basic taxonomy. Device-oriented switching and diagnostic
+    behaviors remain under the dedicated ``Procedural logic`` branch.
+
+    :param descriptor: Procedural descriptor being projected into the Library.
+    :return: Basic category path, or ``None`` for an advanced procedural block.
+    """
+    logic_tpe: ProceduralLogicType = descriptor.logic_tpe
+    if logic_tpe == ProceduralLogicType.FixedSample:
+        category_path: tuple[str, ...] | None = ("Memory and discrete-time", "Sample and hold")
+    elif logic_tpe == ProceduralLogicType.SampledValue:
+        category_path = ("Memory and discrete-time", "Previous value")
+    elif logic_tpe == ProceduralLogicType.TimeDelay:
+        category_path = ("Memory and discrete-time", "Exact time delay")
+    elif logic_tpe == ProceduralLogicType.MovingAverage:
+        category_path = ("Memory and discrete-time", "Moving average")
+    elif logic_tpe == ProceduralLogicType.HardSaturation:
+        category_path = ("Limits and nonlinearities", "Saturation")
+    elif logic_tpe == ProceduralLogicType.GradientLimiter:
+        category_path = ("Limits and nonlinearities", "Rate limiter")
+    elif logic_tpe in (ProceduralLogicType.FlipFlop, ProceduralLogicType.AnalogFlipFlop):
+        category_path = ("Logic and events", "Latches and flip-flops")
+    elif logic_tpe in (ProceduralLogicType.PickupDropoff, ProceduralLogicType.DelayedThresholdLatch):
+        category_path = ("Logic and events", "Timed comparator")
+    elif logic_tpe == ProceduralLogicType.ResetOnRisingEdge:
+        category_path = ("Logic and events", "Edge detector")
+    elif logic_tpe == ProceduralLogicType.StartupHandover:
+        category_path = ("Logic and events", "Timers")
+    elif logic_tpe in (
+            ProceduralLogicType.ConditionalDiagnostic,
+            ProceduralLogicType.DelayedSwitchEvent,
+            ProceduralLogicType.ValveState,
+            ProceduralLogicType.ThreePhaseCarrierPwm,
+            ProceduralLogicType.ThreePhaseCarrierSampledModulation,
+    ):
+        category_path = None
+    else:
+        raise ValueError(f"Unclassified procedural Library type '{logic_tpe.name}'")
+    return category_path
+
+
+def is_replaced_legacy_basic_descriptor(descriptor: BasicBlockTemplateDescriptor) -> bool:
+    """Return whether the Basic library omits one redundant legacy leaf.
+
+    The generated templates remain importable for saved-model compatibility.
+    Their draggable entries are suppressed when a canonical structural,
+    mathematical, or procedural block provides the same behavior, or when the
+    template is a no-op identity block.
+
+    :param descriptor: Basic catalog descriptor being considered for display.
+    :return: ``True`` when the legacy descriptor must stay out of the library.
+    """
+    replaced_template_keys: tuple[str, ...] = (
+        "1_sqrt2",
+        "2pi_form_a",
+        "2pi_form_b",
+        "2pi_form_c",
+        "2pi_form_d",
+        "2pi_form_e",
+        "abs",
+        "aflipflop",
+        "c_form_b",
+        "c_form_c",
+        "c_form_d",
+        "c_form_e",
+        "c_form_f",
+        "delay",
+        "e",
+        "flipflop",
+        "gradlim_const",
+        "inverse_lookup_array_object_linear",
+        "lastvalue_form_a",
+        "lastvalue_form_b",
+        "lookup_array_1x3_linear_fixed",
+        "lookup_array_1x3_linear_variable",
+        "lookup_array_1x4_linear_fixed",
+        "lookup_array_1x4_linear_variable",
+        "lookup_array_linear_noclipping",
+        "lookup_array_object_linear",
+        "lookup_array_object_linear_noclipping",
+        "lookup_array_object_spline",
+        "lookup_matrix_linear",
+        "lookup_matrix_object_linear",
+        "lookup_matrix_object_spline",
+        "lookup_matrix_spline",
+        "movingavg",
+        "max2",
+        "max3",
+        "max4",
+        "min2",
+        "min3",
+        "min4",
+        "multiply_1_form_b",
+        "multiply_1_sqrt2",
+        "multiply_1_sqrt3",
+        "multiply_k_form_a",
+        "multiply_k_form_b",
+        "multiply_pi",
+        "multiply_sqrt2",
+        "multiply_sqrt3",
+        "multiply_sqrt_2_3",
+        "multiply_sqrt_3_2",
+        "pi",
+        "pi_2",
+        "picdro_const",
+        "sqrt2",
+        "sqrt3",
+        "sqrt_2_3",
+        "sqrt_3_2",
+        "s_1_st",
+        "s_2k_1_st_2",
+        "sk_1_0_01s",
+        "sk_1_st",
+        "sk_1_st_fb",
+        "skt_1_st",
+        "sktd_1_st",
+        "st_1_st",
+        "st_1_st_bypass_form_a",
+        "st_1_st_bypass_form_b",
+        "st_1_st_enable",
+        "stb_1_sta_fb",
+        "stld_1_stlg_fb",
+        "time_form_a",
+    )
+    descriptor_type_id: int = int(descriptor.typ_id)
+    is_legacy_integrator: bool = 206 <= descriptor_type_id <= 292
+    return is_legacy_integrator or descriptor.template_key in replaced_template_keys
+
+
+def build_non_empty_library_branch(branch: Dict[str, object]) -> Dict[str, object]:
+    """Copy a Library branch while removing empty categories recursively.
+
+    :param branch: Fully populated branch built from the canonical skeleton.
+    :return: Branch containing only categories with at least one visible leaf.
+    """
+    result: Dict[str, object] = dict()
+    label: str
+    child_data: object
+    for label, child_data in branch.items():
+        if isinstance(child_data, dict):
+            filtered_child: Dict[str, object] = build_non_empty_library_branch(branch=child_data)
+            if len(filtered_child) > 0:
+                result[label] = filtered_child
+            else:
+                pass
+        elif isinstance(child_data, list):
+            if len(child_data) > 0:
+                result[label] = child_data
+            else:
+                pass
+        else:
+            raise TypeError(f"Unsupported Library branch data type {type(child_data)!r}")
+    return result
+
+
+def build_basic_library_branch() -> Dict[str, object]:
+    """Build the complete categorized ``Basic`` library branch.
+
+    Structural blocks, canonical procedural primitives, and non-duplicate
+    catalog descriptors are inserted into one semantic hierarchy. Legacy
+    wrapper templates remain loadable even when their duplicate leaf is hidden.
 
     :return: Nested branch data consumed by :class:`DynamicEditorLibrary`.
     """
-    # build native branch
-    native_branch: Dict[str, object] = dict((("Arithmetic", list((LibraryLeafSpec("Const", BlockType.CONST),
-                                                                  LibraryLeafSpec("Gain", BlockType.GAIN),
-                                                                  LibraryLeafSpec("Sum", BlockType.SUM),
-                                                                  LibraryLeafSpec("Product", BlockType.PRODUCT),
-                                                                  LibraryLeafSpec("Abs", BlockType.ABS),))),
-                                             ("Arrays and matrices", list((LibraryLeafSpec("Inverse Lookup array (linear)", BlockType.INVERSE_LOOKUP_ARRAY),
-                                                                           LibraryLeafSpec("Lookup array (linear)", BlockType.LOOKUP_ARRAY_LINEAR),
-                                                                           LibraryLeafSpec("Lookup array (spline)", BlockType.LOOKUP_ARRAY_SPLINE),
-                                                                           LibraryLeafSpec("Lookup matrix (linear)", BlockType.LOOKUP_MATRIX_LINEAR),
-                                                                           LibraryLeafSpec("Lookup matrix (spline)", BlockType.LOOKUP_MATRIX_SPLINE),))),))
-
-    # build catalogue branch
-    branch: Dict[str, object] = build_basic_block_catalog_branch_skeleton()
-
-    descriptor: BasicBlockTemplateDescriptor
-    for descriptor in get_editor_ready_basic_block_catalog_descriptors():
-        category_path: tuple[str, ...] = descriptor.category_path[1:] if descriptor.category_path and \
-                                                                         descriptor.category_path[
-                                                                             0] == "Native" else descriptor.category_path
-        if len(category_path) == 0:
-            category_path = ("Miscellaneous", "Other")
-        else:
-            pass
-
+    basic_branch: Dict[str, object] = build_basic_branch_skeleton()
+    structural_blocks: tuple[tuple[tuple[str, ...], LibraryLeafSpec], ...] = (
+        (("Mathematical functions", "Constants"), LibraryLeafSpec("Configurable constant", BlockType.CONST)),
+        (("Mathematical functions", "Gain"), LibraryLeafSpec("Gain", BlockType.GAIN)),
+        (("Mathematical functions", "Sum"), LibraryLeafSpec("Sum", BlockType.SUM)),
+        (("Mathematical functions", "Product"), LibraryLeafSpec("Product", BlockType.PRODUCT)),
+        (("Mathematical functions", "Minimum/Maximum"), LibraryLeafSpec("MIN", BlockType.MIN)),
+        (("Mathematical functions", "Minimum/Maximum"), LibraryLeafSpec("MAX", BlockType.MAX)),
+        (("Mathematical functions", "Absolute value"), LibraryLeafSpec("Absolute value", BlockType.ABS)),
+        (("Lookup tables", "Inverse 1D lookup table"),
+         LibraryLeafSpec("Inverse linear lookup table", BlockType.INVERSE_LOOKUP_ARRAY)),
+        (("Lookup tables", "1D lookup table"),
+         LibraryLeafSpec("Linear lookup table", BlockType.LOOKUP_ARRAY_LINEAR)),
+        (("Lookup tables", "1D lookup table"),
+         LibraryLeafSpec("Spline lookup table", BlockType.LOOKUP_ARRAY_SPLINE)),
+        (("Lookup tables", "1D lookup table"),
+         LibraryLeafSpec("Dynamic linear lookup table", BlockType.LOOKUP_ARRAY_LINEAR_VARIABLE)),
+        (("Lookup tables", "2D lookup table"),
+         LibraryLeafSpec("Bilinear lookup table", BlockType.LOOKUP_MATRIX_LINEAR)),
+        (("Lookup tables", "2D lookup table"),
+         LibraryLeafSpec("2D spline lookup table", BlockType.LOOKUP_MATRIX_SPLINE)),
+    )
+    structural_entry: tuple[tuple[str, ...], LibraryLeafSpec]
+    for structural_entry in structural_blocks:
         insert_library_leaf(
-            branch=branch,
-            category_path=category_path,
+            branch=basic_branch,
+            category_path=structural_entry[0],
+            leaf=structural_entry[1],
+        )
+
+    # Presets are convenient initial views of one canonical configurable
+    # integrator, not separate block implementations. General Structure can
+    # still transform any created instance into every supported combination.
+    integrator_preset_entry: tuple[str, IntegratorPresetDescriptor]
+    for integrator_preset_entry in build_integrator_preset_descriptors():
+        insert_library_leaf(
+            branch=basic_branch,
+            category_path=("Continuous dynamics", "Integrators"),
             leaf=LibraryLeafSpec(
-                label=descriptor.display_label,
-                payload=descriptor,
-                search_text=descriptor.search_text,
+                label=integrator_preset_entry[0],
+                payload=integrator_preset_entry[1],
             ),
         )
 
-    if len(branch["Miscellaneous"]["Other"]) == 0:
-        del branch["Miscellaneous"]
-    else:
-        pass
-    native_branch.update(branch)
+    # Derivative presets are common starting configurations of one canonical
+    # builder. Less common combinations remain available through General
+    # Structure without expanding the Library with legacy duplicates.
+    derivative_preset_entry: tuple[str, DerivativePresetDescriptor]
+    for derivative_preset_entry in build_derivative_preset_descriptors():
+        insert_library_leaf(
+            branch=basic_branch,
+            category_path=("Continuous dynamics", "Derivatives"),
+            leaf=LibraryLeafSpec(
+                label=derivative_preset_entry[0],
+                payload=derivative_preset_entry[1],
+            ),
+        )
 
-    return dict((("Native", native_branch),))
+    # Exact named values are registered as two parallel normal block families:
+    # sources under Constants and multipliers under Gain. Imported equivalents
+    # remain available for legacy files but their duplicate leaves are hidden.
+    exact_descriptor: ExactMathematicalBlockDescriptor
+    for exact_descriptor in build_exact_mathematical_block_descriptors():
+        if exact_descriptor.operation == ExactMathematicalBlockOperation.CONSTANT:
+            exact_category_path: tuple[str, ...] = ("Mathematical functions", "Constants")
+        else:
+            exact_category_path = ("Mathematical functions", "Gain")
+        insert_library_leaf(
+            branch=basic_branch,
+            category_path=exact_category_path,
+            leaf=LibraryLeafSpec(
+                label=exact_descriptor.display_label,
+                payload=exact_descriptor,
+                search_text=exact_descriptor.search_text,
+            ),
+        )
+
+    # Reusable procedural primitives are shown in their semantic Basic category
+    # instead of being duplicated under the top-level procedural branch.
+    procedural_descriptor: ProceduralBlockTemplateDescriptor
+    for procedural_descriptor in get_dynamic_library_procedural_descriptors():
+        procedural_category_path: tuple[str, ...] | None = get_basic_procedural_category_path(
+            descriptor=procedural_descriptor,
+        )
+        if procedural_category_path is not None:
+            insert_library_leaf(
+                branch=basic_branch,
+                category_path=procedural_category_path,
+                leaf=LibraryLeafSpec(
+                    label=procedural_descriptor.display_label,
+                    payload=procedural_descriptor,
+                    search_text=procedural_descriptor.search_text,
+                ),
+            )
+        else:
+            pass
+
+    # Catalog descriptors carry stable import identities. Only their visible
+    # paths are translated here, beside the rest of the Library registrations.
+    # Redundant wrappers stay loadable for legacy models but are not exposed as
+    # duplicate draggable entries.
+    descriptor: BasicBlockTemplateDescriptor
+    for descriptor in get_editor_ready_basic_block_catalog_descriptors():
+        if is_replaced_legacy_basic_descriptor(descriptor=descriptor):
+            pass
+        else:
+            if descriptor.template_key == "1_2hs":
+                descriptor_label: str = "Inertia integrator 1/(2Hs)"
+            else:
+                descriptor_label = descriptor.display_label
+            insert_library_leaf(
+                branch=basic_branch,
+                category_path=get_basic_library_category_path(descriptor=descriptor),
+                leaf=LibraryLeafSpec(
+                    label=descriptor_label,
+                    payload=descriptor,
+                    search_text=descriptor.search_text,
+                ),
+            )
+
+    # Planned categories without an implementation are intentionally omitted
+    # until a real block is available, avoiding dead ends in the visible tree.
+    return build_non_empty_library_branch(branch=basic_branch)
 
 
 def build_procedural_library_branch() -> Dict[str, object]:
-    """Build the complete native procedural-logic branch.
+    """Build the advanced procedural-logic branch.
 
     The descriptor inventory and its ordering are owned locally by this
     Library module. Engine code remains responsible only for materializing the
@@ -1579,15 +3039,18 @@ def build_procedural_library_branch() -> Dict[str, object]:
     branch: Dict[str, object] = dict()
     descriptor: ProceduralBlockTemplateDescriptor
     for descriptor in get_dynamic_library_procedural_descriptors():
-        insert_library_leaf(
-            branch=branch,
-            category_path=tuple(descriptor.category_path),
-            leaf=LibraryLeafSpec(
-                label=descriptor.display_label,
-                payload=descriptor,
-                search_text=descriptor.search_text,
-            ),
-        )
+        if get_basic_procedural_category_path(descriptor=descriptor) is None:
+            insert_library_leaf(
+                branch=branch,
+                category_path=tuple(descriptor.category_path),
+                leaf=LibraryLeafSpec(
+                    label=descriptor.display_label,
+                    payload=descriptor,
+                    search_text=descriptor.search_text,
+                ),
+            )
+        else:
+            pass
     return branch
 
 
@@ -1608,7 +3071,11 @@ def is_supported_library_payload(item_data: object) -> bool:
     :param item_data: Candidate payload object.
     :return: ``True`` when the payload can be materialized in the editor.
     """
-    if isinstance(item_data, BlockType):
+    if isinstance(item_data, (IntegratorPresetDescriptor, DerivativePresetDescriptor)):
+        return True
+    elif isinstance(item_data, BlockType):
+        return True
+    elif isinstance(item_data, ExactMathematicalBlockDescriptor):
         return True
     elif isinstance(item_data, BasicBlockTemplateDescriptor):
         return True
@@ -1655,22 +3122,34 @@ def build_library_item_description(payload: object) -> str:
     :param payload: Typed payload represented by one library leaf.
     :return: Human-readable description derived from existing block metadata.
     """
-    if isinstance(payload, BasicBlockTemplateDescriptor):
-        description: str = build_library_interface_description(
-            inputs=payload.inputs,
-            outputs=payload.outputs,
-            states=payload.states,
-            params=payload.params,
-        )
+    if isinstance(payload, IntegratorPresetDescriptor):
+        description: str = payload.get_description()
+    elif isinstance(payload, DerivativePresetDescriptor):
+        description = payload.get_description()
+    elif isinstance(payload, BasicBlockTemplateDescriptor):
+        if len(payload.description) > 0:
+            description: str = payload.description
+        else:
+            description = build_library_interface_description(
+                inputs=payload.inputs,
+                outputs=payload.outputs,
+                states=payload.states,
+                params=payload.params,
+            )
+    elif isinstance(payload, ExactMathematicalBlockDescriptor):
+        description = payload.description
     elif isinstance(payload, ProceduralBlockTemplateDescriptor):
-        description = build_library_interface_description(
-            inputs=payload.input_names,
-            outputs=payload.output_names,
-            states=tuple(),
-            params=tuple(parameter_spec.name for parameter_spec in payload.parameter_specs),
-        )
+        if len(payload.description) > 0:
+            description = payload.description
+        else:
+            description = build_library_interface_description(
+                inputs=payload.input_names,
+                outputs=payload.output_names,
+                states=tuple(),
+                params=tuple(parameter_spec.name for parameter_spec in payload.parameter_specs),
+            )
         if payload.requires_configuration:
-            description = f"{description}. Requires external configuration"
+            description = f"{description.rstrip('.')}. Requires external configuration"
         else:
             pass
     elif isinstance(payload, InternationalStandardTemplateDescriptor):
@@ -1828,6 +3307,10 @@ def build_block_type_description(block_type: BlockType) -> str:
         description = "Produces a configurable constant signal"
     elif block_type == BlockType.GAIN:
         description = "Multiplies an input signal by a configurable gain"
+    elif block_type == BlockType.MIN:
+        description = "Outputs the smallest input signal; the number of inputs is configurable"
+    elif block_type == BlockType.MAX:
+        description = "Outputs the largest input signal; the number of inputs is configurable"
     elif block_type == BlockType.SUM:
         description = "Adds or subtracts a configurable set of input signals"
     elif block_type == BlockType.DIVIDE:
@@ -1837,7 +3320,20 @@ def build_block_type_description(block_type: BlockType) -> str:
     elif block_type == BlockType.ABS:
         description = "Returns the absolute value or magnitude of the input signal"
     elif block_type == BlockType.INTEGRATOR:
-        description = "Integrates the input signal over simulation time"
+        description = (
+            "Integrates the input with configurable scaling, hold, reset, "
+            "and output-saturation structure"
+        )
+    elif block_type == BlockType.STARTUP_FREEZE_INTEGRATOR:
+        description = (
+            "Integrates the input after a configurable startup freeze interval, "
+            "with optional scaling, hold, reset, and output saturation"
+        )
+    elif block_type == BlockType.DERIVATIVE:
+        description = (
+            "Applies a configurable first- or second-order filtered derivative "
+            "with selectable numerator scaling and non-positive-time behavior"
+        )
     elif block_type == BlockType.POWER:
         description = "Raises the input signal to a configurable power"
     elif block_type in tuple((BlockType.SIN, BlockType.COS, BlockType.TAN)):
@@ -1865,13 +3361,18 @@ def build_block_type_description(block_type: BlockType) -> str:
     elif block_type == BlockType.INVERSE_LOOKUP_ARRAY:
         description = "Computes the input corresponding to a tabulated output using linear interpolation"
     elif block_type == BlockType.LOOKUP_ARRAY_LINEAR:
-        description = "Interpolates a one-dimensional lookup table linearly"
+        description = "Interpolates a configurable one-dimensional table linearly, with clipping or extrapolation"
+    elif block_type == BlockType.LOOKUP_ARRAY_LINEAR_VARIABLE:
+        description = (
+            "Linearly interpolates a table whose ordered x/y points are signal inputs; "
+            "the point count and clipping rule are configurable"
+        )
     elif block_type == BlockType.LOOKUP_ARRAY_SPLINE:
-        description = "Interpolates a one-dimensional lookup table with a spline"
+        description = "Interpolates a configurable one-dimensional table with a clipped natural cubic spline"
     elif block_type == BlockType.LOOKUP_MATRIX_LINEAR:
-        description = "Interpolates a two-dimensional lookup table linearly"
+        description = "Interpolates a configurable two-dimensional table bilinearly"
     elif block_type == BlockType.LOOKUP_MATRIX_SPLINE:
-        description = "Interpolates a two-dimensional lookup table with a spline"
+        description = "Interpolates a configurable two-dimensional table with a clipped natural cubic spline"
     elif block_type.name.endswith("_RMS"):
         description = f"RMS dynamic-model component implementing {block_type.value} behavior"
     elif block_type.name.endswith("_EMT"):
@@ -1923,7 +3424,25 @@ def set_library_item_icon(item: QtGui.QStandardItem, payload: object) -> None:
     :return: None.
     """
 
-    if isinstance(payload, FmuTemplate):
+    if isinstance(payload, IntegratorPresetDescriptor):
+        # Every configurable-integrator preset belongs to the same Library
+        # family, so all variants intentionally share the user-provided base
+        # integrator artwork.
+        integrator_icon: QtGui.QIcon = QtGui.QIcon(":/Icons/icons/integrator.svg")
+        if integrator_icon.isNull():
+            item.setIcon(QtGui.QIcon(":/Icons/icons/dyn_gray.png"))
+        else:
+            item.setIcon(integrator_icon)
+    elif isinstance(payload, DerivativePresetDescriptor):
+        # All derivative presets intentionally share one family icon, just as
+        # the integrator presets do. The generic dynamic-block icon remains a
+        # defensive fallback if the compiled Qt resource is unavailable.
+        derivative_icon: QtGui.QIcon = QtGui.QIcon(":/Icons/icons/derivative.svg")
+        if derivative_icon.isNull():
+            item.setIcon(QtGui.QIcon(":/Icons/icons/dyn_gray.png"))
+        else:
+            item.setIcon(derivative_icon)
+    elif isinstance(payload, FmuTemplate):
         item.setIcon(QtGui.QIcon(device_type_icons[DeviceType.FmuTemplateDevice.value]))
     elif isinstance(payload, RmsModelTemplate):
         item.setIcon(QtGui.QIcon(device_type_icons[DeviceType.RmsModelTemplateDevice.value]))
@@ -1937,7 +3456,15 @@ def set_library_item_icon(item: QtGui.QStandardItem, payload: object) -> None:
             item.setIcon(QtGui.QIcon(device_type_icons[DeviceType.RmsModelTemplateDevice.value]))
         else:
             item.setIcon(QtGui.QIcon(device_type_icons[DeviceType.EmtModelTemplateDevice.value]))
-    elif isinstance(payload, (EmtModelTemplate, BasicBlockTemplateDescriptor, ProceduralBlockTemplateDescriptor)):
+    elif isinstance(
+            payload,
+            (
+                EmtModelTemplate,
+                BasicBlockTemplateDescriptor,
+                ExactMathematicalBlockDescriptor,
+                ProceduralBlockTemplateDescriptor,
+            ),
+    ):
         item.setIcon(QtGui.QIcon(device_type_icons[DeviceType.EmtModelTemplateDevice.value]))
     elif isinstance(payload, BlockType):
         if payload == BlockType.FROM_GOTO:

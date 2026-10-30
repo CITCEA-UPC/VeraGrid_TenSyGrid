@@ -34,10 +34,11 @@ computation requirements of Electromagnetic Transient (EMT) simulations.
 """
 
 # Import libraries for utils
+import ast
 import numpy as np
 from abc import ABC, abstractmethod
 from enum import Enum
-from numba import types
+from numba import njit, types
 from typing import Dict, List, Callable, Tuple, Set, Any
 import os
 from pathlib import Path
@@ -50,7 +51,7 @@ from collections import defaultdict
 from VeraGridEngine.Utils.Symbolic.symbolic import expression2numba, get_expression_vars
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 #Totally integrated
-from VeraGridEngine.Utils.Symbolic.symbolic import Expr, BinOp, UnOp, Func, Var, Const
+from VeraGridEngine.Utils.Symbolic.symbolic import Expr, BinOp, UnOp, Func, Func2, Var, Const
 from VeraGridEngine.basic_structures import Vec
 
 
@@ -388,7 +389,8 @@ def _build_equation_compiler_residual_cache_key(equations: List[Expr],
                                                 method_name: str,
                                                 use_cse: bool,
                                                 offset: int,
-                                                inplace: bool) -> str:
+                                                inplace: bool,
+                                                diff_var_map: Dict[int, int] | None = None) -> str:
     """
     Return a deterministic cache key for one ``EquationCompiler`` residual kernel.
 
@@ -406,6 +408,8 @@ def _build_equation_compiler_residual_cache_key(equations: List[Expr],
     :type offset: int
     :param inplace: Whether the kernel writes in place.
     :type inplace: bool
+    :param diff_var_map: Base UID to derivative-history slot; missing entries use the state slot.
+    :type diff_var_map: Dict[int, int] | None
     :return: Deterministic cache key.
     :rtype: str
     """
@@ -420,6 +424,7 @@ def _build_equation_compiler_residual_cache_key(equations: List[Expr],
                 param_map,
                 method_name,
                 None,
+                diff_var_map,
             )
         )
         equation_index += 1
@@ -442,7 +447,8 @@ def _build_equation_compiler_ad_cache_key(equations: List[Expr],
                                           param_map: Dict[int, int],
                                           method_name: str,
                                           use_cse: bool,
-                                          active_indices: set | None) -> str:
+                                          active_indices: set | None,
+                                          diff_var_map: Dict[int, int] | None = None) -> str:
     """
     Return a deterministic cache key for one ``EquationCompiler`` AD kernel.
 
@@ -458,11 +464,14 @@ def _build_equation_compiler_ad_cache_key(equations: List[Expr],
     :type use_cse: bool
     :param active_indices: Optional active seed indices.
     :type active_indices: set | None
+    :param diff_var_map: Base UID to derivative-history slot; missing entries use the state slot.
+    :type diff_var_map: Dict[int, int] | None
     :return: Deterministic cache key.
     :rtype: str
     """
     expr_fingerprints: List[str] = list()
     active_index_tokens: List[str] = list()
+    dynamic_seeds: bool = active_indices is None
     equation_index: int = 0
 
     while equation_index < len(equations):
@@ -473,6 +482,7 @@ def _build_equation_compiler_ad_cache_key(equations: List[Expr],
                 param_map,
                 method_name,
                 None,
+                diff_var_map,
             )
         )
         equation_index += 1
@@ -488,6 +498,8 @@ def _build_equation_compiler_ad_cache_key(equations: List[Expr],
         str(use_cse),
         str(len(var_map)),
         str(len(param_map)),
+        # A runtime seed vector and an explicitly empty selection emit different code.
+        str(dynamic_seeds),
         ",".join(active_index_tokens),
         "::".join(expr_fingerprints),
     ])
@@ -498,7 +510,7 @@ def _build_equation_compiler_matrix_cache_key(template_eq: Expr,
                                               var_map: Dict[int, int],
                                               param_map: Dict[int, int],
                                               method_name: str,
-                                              col_map: Dict[str, int]) -> str:
+                                              col_map: Dict[int, int]) -> str:
     """
     Return a deterministic cache key for one ``MatrixVectorizedCompiler`` kernel.
 
@@ -510,19 +522,21 @@ def _build_equation_compiler_matrix_cache_key(template_eq: Expr,
     :type param_map: Dict[int, int]
     :param method_name: Discretization strategy name.
     :type method_name: str
-    :param col_map: Matrix-kernel column map.
-    :type col_map: Dict[str, int]
+    :param col_map: Runtime UID to canonical matrix gather column.
+    :type col_map: Dict[int, int]
     :return: Deterministic cache key.
     :rtype: str
     """
     sorted_col_items: List[str] = list()
-    col_name: str
+    col_index: int
 
-    for col_name in sorted(col_map.keys()):
-        sorted_col_items.append(f"{col_name}:{col_map[col_name]}")
+    # Generated code consumes column positions; recreated UIDs and display
+    # names must not create another kernel for the same binding topology.
+    for col_index in sorted(col_map.values()):
+        sorted_col_items.append(str(col_index))
 
     payload: str = "|".join([
-        "eq-compiler-matrix",
+        "eq-compiler-matrix-uid-v2",
         method_name,
         str(len(var_map)),
         str(len(param_map)),
@@ -666,7 +680,8 @@ def _build_codegen_cache_key(payload: str) -> str:
     :return: Cache key.
     :rtype: str
     """
-    cache_version: str = "jit-codegen-v1"
+    # Regenerate kernels whose old identity omitted history bindings or seed mode.
+    cache_version: str = "jit-codegen-v2"
     return _stable_digest(cache_version + "|" + payload)
 
 
@@ -674,7 +689,9 @@ def _fingerprint_codegen_var(node: Var,
                              var_map: Dict[int, int],
                              param_map: Dict[int, int],
                              method_name: str,
-                             col_map: Dict[str, int] | None = None) -> str:
+                             col_map: Dict[int, int] | None = None,
+                             diff_var_map: Dict[int, int] | None = None,
+                             force_derivative_discretization: bool = False) -> str:
     """
     Return a stable code-generation fingerprint for one variable node.
 
@@ -687,42 +704,124 @@ def _fingerprint_codegen_var(node: Var,
     :param method_name: Discretization strategy name.
     :type method_name: str
     :param col_map: Optional matrix-kernel column map.
-    :type col_map: Dict[str, int] | None
+    :type col_map: Dict[int, int] | None
+    :param diff_var_map: Base UID to scalar derivative-history slot, with state-slot fallback.
+    :type diff_var_map: Dict[int, int] | None
+    :param force_derivative_discretization: Follow nested derivative visitor recursion directly,
+        bypassing an intermediate derivative's own runtime or parameter mapping.
+    :type force_derivative_discretization: bool
     :return: Stable fingerprint string.
     :rtype: str
     """
-    if node.uid in param_map:
+    # Top-level variables keep their mapped meaning. Nested scalar visitors call
+    # visit_diffvar directly, so their intermediate derivatives must follow the base.
+    if not force_derivative_discretization and node.uid in param_map:
         return f"P{param_map[node.uid]}"
-    elif col_map is None and node.uid in var_map:
+    elif not force_derivative_discretization and col_map is None and node.uid in var_map:
         return f"S{var_map[node.uid]}"
-    elif col_map is not None and node.uid in var_map:
-        mapped_name: str = node.name
-
-        if mapped_name in col_map:
-            return f"M{col_map[mapped_name]}"
-        elif node.base_var is not None and node.origin_var.name in col_map:
-            return f"M{col_map[node.origin_var.name]}"
-        else:
-            return f"MN:{mapped_name}"
+    elif not force_derivative_discretization and col_map is not None and node.uid in var_map:
+        # Match the visitor's direct runtime lookup exactly: a missing UID is
+        # invalid even if another column happens to belong to its origin.
+        return f"M{col_map[node.uid]}"
     elif node.base_var is not None:
         if node.base_var.base_var is not None:
-            nested_fp: str = _fingerprint_codegen_var(node.base_var, var_map, param_map, method_name, col_map)
+            # Both visitors recurse directly through visit_diffvar. An
+            # intermediate runtime/parameter mapping cannot replace that
+            # derivative traversal or hide its actual origin gather column.
+            nested_fp: str = _fingerprint_codegen_var(
+                node.base_var, var_map, param_map, method_name, col_map,
+                diff_var_map, True)
             return f"DD[{method_name}|{nested_fp}]"
         elif col_map is None:
-            return f"D[{method_name}|S{var_map[node.base_var.uid]}]"
+            state_index: int = var_map[node.base_var.uid]
+            history_index: int
+            if diff_var_map is None:
+                history_index = state_index
+            else:
+                history_index = diff_var_map.get(node.base_var.uid, state_index)
+            # Encode only the binding consumed by this leaf. Unused mappings and
+            # renamed UIDs must not prevent equivalent kernels from being reused.
+            return f"D[{method_name}|S{state_index}|H{history_index}]"
         else:
-            return f"D[{method_name}|M{col_map[node.origin_var.name]}]"
+            return f"D[{method_name}|M{col_map[node.origin_var.uid]}]"
     elif node.name == 'h':
         return "H"
     else:
         return f"N:{node.name}"
 
 
+class _StructuralExpressionContext:
+    """
+    Bind structural variable occurrences during one expression fingerprint walk.
+
+    Runtime slots follow first occurrence, whereas parameter tokens retain
+    concrete identity because grouped kernels read a shared parameter vector.
+    This context is discarded after its ordered runtime variables are returned.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "runtime_uids", "parameter_uids", "runtime_slots", "parameter_slots", "runtime_variables",
+    )
+
+    def __init__(self, runtime_uids: Set[int], parameter_uids: Set[int]) -> None:
+        """
+        Initialize expression-local binding lookups without copying the model.
+
+        :param runtime_uids: UIDs belonging to the runtime state/algebraic vector.
+        :param parameter_uids: UIDs belonging to the shared parameter vector.
+        :return: None.
+        """
+        # Borrow the classification sets only for this traversal. The number of
+        # encountered variables is unknown until the expression has been walked.
+        self.runtime_uids: Set[int] = runtime_uids
+        self.parameter_uids: Set[int] = parameter_uids
+        self.runtime_slots: Dict[int, str] = dict()
+        self.parameter_slots: Dict[int, str] = dict()
+        self.runtime_variables: List[Var] = list()
+
+    def fingerprint_variable(self, node: Var) -> str:
+        """
+        Classify an occurrence and retain its role and first runtime gather slot.
+
+        :param node: Variable occurrence, including a derivative or same-UID alias.
+        :return: Structural token preserving the occurrence's binding semantics.
+        :raises RuntimeError: If the immediate-base UID has no classification.
+        """
+        # Group gather tables use the immediate base UID. Derivative order is
+        # separate metadata: a value and its derivative share a column, not code.
+        target_uid: int = node.uid if node.base_var is None else node.base_var.uid
+        if target_uid in self.runtime_uids:
+            runtime_slot: str | None = self.runtime_slots.get(target_uid, None)
+            if runtime_slot is None:
+                runtime_slot = f"__RVAR_{len(self.runtime_slots)}__"
+                self.runtime_slots[target_uid] = runtime_slot
+                self.runtime_variables.append(node)
+            else:
+                pass
+            return f"{runtime_slot}:D{node.diff_order}"
+        elif target_uid in self.parameter_uids:
+            parameter_slot: str | None = self.parameter_slots.get(target_uid, None)
+            if parameter_slot is None:
+                # Keep the original first-name-per-UID policy. Different global
+                # parameter entries must not normalize into a runtime placeholder.
+                parameter_slot = f"__PARAM_{node.name}_{target_uid}__"
+                self.parameter_slots[target_uid] = parameter_slot
+            else:
+                pass
+            return parameter_slot
+        else:
+            raise RuntimeError(
+                f"Unclassified symbolic variable name={node.name}, target_uid={target_uid}"
+            )
+
+
 def _fingerprint_codegen_expr(node: Expr,
                               var_map: Dict[int, int],
                               param_map: Dict[int, int],
                               method_name: str,
-                              col_map: Dict[str, int] | None = None) -> str:
+                              col_map: Dict[int, int] | None = None,
+                              diff_var_map: Dict[int, int] | None = None,
+                              structural_context: _StructuralExpressionContext | None = None) -> str:
     """
     Return a stable code-generation fingerprint for one symbolic expression.
 
@@ -735,17 +834,31 @@ def _fingerprint_codegen_expr(node: Expr,
     :param method_name: Discretization strategy name.
     :type method_name: str
     :param col_map: Optional matrix-kernel column map.
-    :type col_map: Dict[str, int] | None
+    :type col_map: Dict[int, int] | None
+    :param diff_var_map: Base UID to scalar derivative-history slot; propagated through all nodes.
+    :type diff_var_map: Dict[int, int] | None
+    :param structural_context: Optional expression-local structural variable bindings.
+        When present, code-generation maps and method are not consumed by variable nodes.
+    :type structural_context: _StructuralExpressionContext | None
     :return: Stable fingerprint string.
     :rtype: str
     """
     if isinstance(node, Const):
+        # Exact literal tokens are shared by grouping and cache identity; decimal
+        # rounding here would substitute a different constant in grouped kernels.
         return f"C[{repr(node.value)}]"
     elif isinstance(node, Var):
-        return _fingerprint_codegen_var(node, var_map, param_map, method_name, col_map)
+        if structural_context is None:
+            return _fingerprint_codegen_var(node, var_map, param_map, method_name, col_map, diff_var_map)
+        else:
+            return structural_context.fingerprint_variable(node)
     elif isinstance(node, BinOp):
-        left_fp: str = _fingerprint_codegen_expr(node.left, var_map, param_map, method_name, col_map)
-        right_fp: str = _fingerprint_codegen_expr(node.right, var_map, param_map, method_name, col_map)
+        # Visit operands before sorting their tokens: runtime gather columns must
+        # stay in source occurrence order for the corresponding compiled template.
+        left_fp: str = _fingerprint_codegen_expr(
+            node.left, var_map, param_map, method_name, col_map, diff_var_map, structural_context)
+        right_fp: str = _fingerprint_codegen_expr(
+            node.right, var_map, param_map, method_name, col_map, diff_var_map, structural_context)
 
         if node.op in ['+', '*'] and left_fp > right_fp:
             left_fp, right_fp = right_fp, left_fp
@@ -754,10 +867,12 @@ def _fingerprint_codegen_expr(node: Expr,
 
         return f"B[{node.op}|{left_fp}|{right_fp}]"
     elif isinstance(node, UnOp):
-        operand_fp: str = _fingerprint_codegen_expr(node.operand, var_map, param_map, method_name, col_map)
+        operand_fp: str = _fingerprint_codegen_expr(
+            node.operand, var_map, param_map, method_name, col_map, diff_var_map, structural_context)
         return f"U[{node.op}|{operand_fp}]"
     elif isinstance(node, Func):
-        arg_fp: str = _fingerprint_codegen_expr(node.arg, var_map, param_map, method_name, col_map)
+        arg_fp: str = _fingerprint_codegen_expr(
+            node.arg, var_map, param_map, method_name, col_map, diff_var_map, structural_context)
         return f"F[{node.op}|{arg_fp}]"
     else:
         return f"RAW[{type(node).__name__}|{str(node)}]"
@@ -770,7 +885,8 @@ def _build_residual_codegen_cache_key(equations: List[Expr],
                                       use_cse: bool,
                                       offset: int,
                                       n_variables: int,
-                                      n_parameters: int) -> str:
+                                      n_parameters: int,
+                                      diff_var_map: Dict[int, int] | None = None) -> str:
     """
     Return the cache key of one residual kernel.
 
@@ -790,6 +906,8 @@ def _build_residual_codegen_cache_key(equations: List[Expr],
     :type n_variables: int
     :param n_parameters: Number of parameters.
     :type n_parameters: int
+    :param diff_var_map: Base UID to derivative-history slot; missing entries use the state slot.
+    :type diff_var_map: Dict[int, int] | None
     :return: Deterministic cache key.
     :rtype: str
     """
@@ -797,7 +915,8 @@ def _build_residual_codegen_cache_key(equations: List[Expr],
     equation_index: int = 0
 
     while equation_index < len(equations):
-        expr_fingerprints.append(_fingerprint_codegen_expr(equations[equation_index], var_map, param_map, method_name, None))
+        expr_fingerprints.append(_fingerprint_codegen_expr(
+            equations[equation_index], var_map, param_map, method_name, None, diff_var_map))
         equation_index += 1
 
     payload: str = "|".join([
@@ -820,7 +939,8 @@ def _build_ad_codegen_cache_key(equations: List[Expr],
                                 use_cse: bool,
                                 active_indices: set | None,
                                 n_variables: int,
-                                n_parameters: int) -> str:
+                                n_parameters: int,
+                                diff_var_map: Dict[int, int] | None = None) -> str:
     """
     Return the cache key of one AD kernel.
 
@@ -840,15 +960,19 @@ def _build_ad_codegen_cache_key(equations: List[Expr],
     :type n_variables: int
     :param n_parameters: Number of parameters.
     :type n_parameters: int
+    :param diff_var_map: Base UID to derivative-history slot; missing entries use the state slot.
+    :type diff_var_map: Dict[int, int] | None
     :return: Deterministic cache key.
     :rtype: str
     """
     expr_fingerprints: List[str] = list()
     active_index_list: List[str] = list()
+    dynamic_seeds: bool = active_indices is None
     equation_index: int = 0
 
     while equation_index < len(equations):
-        expr_fingerprints.append(_fingerprint_codegen_expr(equations[equation_index], var_map, param_map, method_name, None))
+        expr_fingerprints.append(_fingerprint_codegen_expr(
+            equations[equation_index], var_map, param_map, method_name, None, diff_var_map))
         equation_index += 1
 
     if active_indices is None:
@@ -863,6 +987,8 @@ def _build_ad_codegen_cache_key(equations: List[Expr],
         str(n_variables),
         str(n_parameters),
         str(len(equations)),
+        # None consumes runtime seeds; an empty set emits a zero JVP.
+        str(dynamic_seeds),
         ",".join(active_index_list),
         "::".join(expr_fingerprints),
     ])
@@ -873,7 +999,7 @@ def _build_matrix_codegen_cache_key(template_eq: Expr,
                                     var_map: Dict[int, int],
                                     param_map: Dict[int, int],
                                     method_name: str,
-                                    col_map: Dict[str, int],
+                                    col_map: Dict[int, int],
                                     n_variables: int,
                                     n_parameters: int) -> str:
     """
@@ -887,8 +1013,8 @@ def _build_matrix_codegen_cache_key(template_eq: Expr,
     :type param_map: Dict[int, int]
     :param method_name: Discretization strategy name.
     :type method_name: str
-    :param col_map: Matrix-kernel column map.
-    :type col_map: Dict[str, int]
+    :param col_map: Runtime UID to canonical matrix gather column.
+    :type col_map: Dict[int, int]
     :param n_variables: Number of runtime variables.
     :type n_variables: int
     :param n_parameters: Number of parameters.
@@ -898,13 +1024,15 @@ def _build_matrix_codegen_cache_key(template_eq: Expr,
     """
     expr_fingerprint: str = _fingerprint_codegen_expr(template_eq, var_map, param_map, method_name, col_map)
     sorted_col_items: List[str] = list()
-    col_name: str
+    col_index: int
 
-    for col_name in sorted(col_map.keys()):
-        sorted_col_items.append(f"{col_name}:{col_map[col_name]}")
+    # Keep the cache independent of author labels and per-model UIDs. The
+    # expression fingerprint retains the actual ordered column references.
+    for col_index in sorted(col_map.values()):
+        sorted_col_items.append(str(col_index))
 
     payload: str = "|".join([
-        "matrix",
+        "matrix-uid-v2",
         method_name,
         str(n_variables),
         str(n_parameters),
@@ -1016,6 +1144,128 @@ class SubexpressionAnalyzer:
         for i, (_, expr_hash) in enumerate(candidates):
             temp_vars[expr_hash] = f"_t{i}"
         return temp_vars
+
+    def emit_ordered_assignments(self,
+                                 equation: Expr,
+                                 compiler_names_dict: Dict[int, str],
+                                 reserved_names: Tuple[str, ...] = ()) -> Tuple[List[str], Dict[int, str]]:
+        """Emit one pure scalar expression as ordered, reusable assignments.
+
+        This path follows node identity in postorder, then reuses only identical
+        emitted operations with already bound children. It neither hashes nor
+        sorts operands. Each caller resets the plan before the next output write.
+        Unsupported nodes, stochastic functions or effectful binding syntax keep
+        the original inline emission for the complete equation.
+
+        :param equation: Existing expression graph, including cloned subexpressions.
+        :param compiler_names_dict: Variable UID to slot or scalar alias binding.
+        :param reserved_names: All generated function arguments and other reserved locals.
+        :return: Indented assignments and node identity to scalar temporary lookup;
+            both are empty when the original inline path is required.
+        """
+        # Discovery is bounded by unique node identities; the cardinality is not
+        # known until this walk completes. A fresh plan cannot cross output writes.
+        self.visited_traversal.clear()
+        pending: List[Tuple[Expr, bool]] = list(((equation, False),))
+        ordered: List[Expr] = list()
+        binding_names: Set[str] = set(reserved_names)
+        node: Expr
+        ready: bool
+        binding: str | None
+        parsed_binding: ast.expr
+        binding_node: ast.AST
+        # Aliases are declared for the complete compiled batch before any root.
+        # A temporary must not overwrite a name read only by a later equation.
+        for binding in compiler_names_dict.values():
+            try:
+                parsed_binding = ast.parse(binding, mode="eval").body
+            except SyntaxError:
+                return list(), dict()
+            for binding_node in ast.walk(parsed_binding):
+                if isinstance(binding_node, ast.Name):
+                    binding_names.add(binding_node.id)
+                else:
+                    pass
+        while pending:
+            node, ready = pending.pop()
+            if ready:
+                ordered.append(node)
+            elif id(node) not in self.visited_traversal:
+                self.visited_traversal.add(id(node))
+                if isinstance(node, Var):
+                    binding = compiler_names_dict.get(node.uid, None)
+                    if binding is None:
+                        if node.name in {"time", "glob_time"}:
+                            binding = "glob_time"
+                        else:
+                            return list(), dict()
+                    else:
+                        pass
+                    # Runtime arrays are float vectors and aliases are scalars.
+                    # A caller-supplied call/expression must retain its original
+                    # evaluation multiplicity, even without a symbolic rand node.
+                    try:
+                        parsed_binding = ast.parse(binding, mode="eval").body
+                    except SyntaxError:
+                        return list(), dict()
+                    if isinstance(parsed_binding, ast.Name):
+                        binding_names.add(parsed_binding.id)
+                    elif (isinstance(parsed_binding, ast.Subscript)
+                          and isinstance(parsed_binding.value, ast.Name)
+                          and isinstance(parsed_binding.slice, ast.Constant)
+                          and isinstance(parsed_binding.slice.value, int)):
+                        binding_names.add(parsed_binding.value.id)
+                    else:
+                        return list(), dict()
+                elif isinstance(node, Const):
+                    pass
+                elif isinstance(node, BinOp) and node.op in {"+", "-", "*", "/", "**"}:
+                    pending.append((node, True))
+                    pending.append((node.right, False))
+                    pending.append((node.left, False))
+                elif isinstance(node, UnOp) and node.op == "-":
+                    pending.append((node, True))
+                    pending.append((node.operand, False))
+                elif (isinstance(node, Func) and node.op in {
+                        "sin", "cos", "tan", "exp", "log", "log10", "sqrt",
+                        "asin", "acos", "atan", "sinh", "cosh", "tanh",
+                        "floor", "ceil", "round", "real", "imag", "conj",
+                        "angle", "abs", "heaviside"}):
+                    pending.append((node, True))
+                    pending.append((node.arg, False))
+                elif isinstance(node, Func2) and node.name in {"atan2", "min", "max"}:
+                    pending.append((node, True))
+                    pending.append((node.arg2, False))
+                    pending.append((node.arg1, False))
+                else:
+                    return list(), dict()
+            else:
+                pass
+
+        # Retain exact emitted operation order and literal precision. The lookup
+        # key is the actual shallow source, never a display name or lossy hash.
+        prefix: str = "_vg_shared_"
+        name: str
+        while any(name.startswith(prefix) for name in binding_names):
+            prefix += "_"
+        assignments: List[str] = [""] * len(ordered)
+        expression_names: Dict[int, str] = dict()
+        source_names: Dict[str, str] = dict()
+        source: str
+        temporary: str | None
+        assignment_count: int = 0
+        for node in ordered:
+            source = expression2numba(node, compiler_names_dict, 0, expression_names)
+            temporary = source_names.get(source, None)
+            if temporary is None:
+                temporary = f"{prefix}{assignment_count}"
+                assignments[assignment_count] = f"    {temporary} = {source}"
+                assignment_count += 1
+                source_names[source] = temporary
+            else:
+                pass
+            expression_names[id(node)] = temporary
+        return assignments[:assignment_count], expression_names
 
     def _count_subexpressions(self, node: Expr)->None:
         if isinstance(node, (Const, Var)):
@@ -1307,6 +1557,289 @@ class SymbolicToPythonVisitor:
             return f"np.abs({arg})"
 
         return f"np.{op}({arg})"
+
+
+class RuntimeParameterToPythonVisitor(SymbolicToPythonVisitor):
+    """Emit expressions for an ordered runtime-parameter update kernel."""
+
+    __slots__ = ["runtime_map", "fixed_map", "time_uids"]
+
+    def __init__(
+            self,
+            runtime_map: Dict[int, int],
+            fixed_map: Dict[int, int],
+            time_uids: Set[int],
+    ) -> None:
+        """Initialize the runtime expression visitor.
+
+        :param runtime_map: Runtime-vector indices keyed by variable UID.
+        :param fixed_map: Frozen-binding indices keyed by variable UID.
+        :param time_uids: Variable UIDs that represent simulation time.
+        :return: None.
+        """
+        super().__init__(
+            var_map=dict(),
+            param_map=dict(),
+            method=ContinuousMethod(),
+            diff_var_map=dict(),
+        )
+        self.runtime_map: Dict[int, int] = runtime_map
+        self.fixed_map: Dict[int, int] = fixed_map
+        self.time_uids: Set[int] = time_uids
+
+    def visit_var(self, node: Var, prec: int) -> str:
+        """Return the direct array access for one runtime expression variable.
+
+        Unknown variables preserve the interpreted evaluator's zero fallback.
+
+        :param node: Symbolic variable to translate.
+        :param prec: Parent expression precedence.
+        :return: Python source fragment for the variable value.
+        """
+        runtime_idx: int | None
+        fixed_idx: int | None
+
+        if node.uid in self.time_uids or node.name in {"time", "glob_time"}:
+            return "tm"
+        else:
+            pass
+
+        runtime_idx = self.runtime_map.get(node.uid, None)
+        if runtime_idx is not None:
+            return f"runtime_values[{runtime_idx}]"
+        else:
+            pass
+
+        fixed_idx = self.fixed_map.get(node.uid, None)
+        if fixed_idx is not None:
+            return f"fixed_values[{fixed_idx}]"
+        else:
+            return "0.0"
+
+
+class RuntimeParameterCompiler:
+    """Compile sequential runtime-parameter expressions into one eager kernel."""
+
+    __slots__ = ["_visitor"]
+
+    def __init__(
+            self,
+            runtime_map: Dict[int, int],
+            fixed_map: Dict[int, int],
+            time_uids: Set[int],
+    ) -> None:
+        """Initialize the runtime parameter compiler.
+
+        :param runtime_map: Runtime-vector indices keyed by variable UID.
+        :param fixed_map: Frozen-binding indices keyed by variable UID.
+        :param time_uids: Variable UIDs that represent simulation time.
+        :return: None.
+        """
+        self._visitor: RuntimeParameterToPythonVisitor = RuntimeParameterToPythonVisitor(
+            runtime_map=runtime_map,
+            fixed_map=fixed_map,
+            time_uids=time_uids,
+        )
+
+    def compile(self, equations: List[Any], output_offset: int = 0) -> Callable:
+        """Compile ordered expressions into an eagerly specialized Numba kernel.
+
+        Each assignment is emitted in declaration order. Consequently, an
+        expression that reads an earlier runtime parameter observes its value
+        from the current update sweep, while later and self references retain
+        their incoming value.
+
+        :param equations: Ordered continuous runtime equations.
+        :param output_offset: First runtime-vector index written by the kernel.
+        :return: Eagerly compiled in-place runtime update function.
+        """
+        source_lines: List[str] = list()
+        equation_index: int
+        expression: Any
+        expression_code: str
+        full_source: str
+        python_function: Callable
+        signature_tpe: object
+
+        source_lines.append("def runtime_parameter_update(runtime_values, fixed_values, tm):")
+        for equation_index, expression in enumerate(equations):
+            # CSE is deliberately local to one expression so generated reads
+            # cannot move ahead of preceding runtime-vector writes.
+            self._visitor._str_cache = dict()
+            if isinstance(expression, Const) and expression.value is None:
+                expression_code = "0.0"
+            elif isinstance(expression, Expr):
+                expression_code = self._visitor.visit(expression)
+            else:
+                expression_code = repr(float(expression))
+            source_lines.append(
+                f"    runtime_values[{output_offset + equation_index}] = {expression_code}"
+            )
+
+        if len(equations) == 0:
+            source_lines.append("    pass")
+        else:
+            pass
+
+        full_source = "\n".join(source_lines)
+        python_function = _compile_to_file(full_source, "runtime_parameter_update")
+        signature_tpe = types.void(
+            types.float64[::1],
+            types.float64[::1],
+            types.float64,
+        )
+        return njit(signature_tpe, cache=True, fastmath=True)(python_function)
+
+
+class ProceduralExpressionCompiler:
+    """Compile and cache procedural expressions for one finalized problem."""
+
+    __slots__ = [
+        "_state_map",
+        "_runtime_map",
+        "_constant_map",
+        "_global_time_uid",
+        "_fixed_values",
+        "_kernel_cache",
+    ]
+
+    def __init__(
+            self,
+            state_map: Dict[int, int],
+            runtime_map: Dict[int, int],
+            constant_map: Dict[int, int],
+            constant_values: List[Const],
+            global_time_uid: int,
+    ) -> None:
+        """Initialize one problem-local procedural expression compiler.
+
+        :param state_map: State and algebraic indexes keyed by variable UID.
+        :param runtime_map: Mutable runtime-parameter indexes keyed by UID.
+        :param constant_map: Constant-parameter indexes keyed by UID.
+        :param constant_values: Constant values in problem order.
+        :param global_time_uid: Canonical target-boundary time UID.
+        :return: None.
+        """
+        self._state_map: Dict[int, int] = dict(state_map)
+        self._runtime_map: Dict[int, int] = dict(runtime_map)
+        self._constant_map: Dict[int, int] = dict(constant_map)
+        self._global_time_uid: int = int(global_time_uid)
+        self._fixed_values: np.ndarray = np.asarray(
+            [float(constant.value) for constant in constant_values],
+            dtype=np.float64,
+        )
+        self._kernel_cache: Dict[str, Callable[..., float]] = dict()
+
+    @property
+    def fixed_values(self) -> np.ndarray:
+        """Return the immutable constant vector used by compiled kernels.
+
+        :return: Problem-local constant values.
+        """
+        return self._fixed_values
+
+    def compile(self, expression: Expr) -> Callable[..., float]:
+        """Compile one expression with accepted-state boundary semantics.
+
+        Structurally identical generated expressions share one eager Numba
+        dispatcher inside the problem, including across different logic entries.
+
+        :param expression: Normalized procedural expression.
+        :return: Eagerly compiled scalar evaluator.
+        """
+        expression_code: str = self.render(expression)
+        cached_kernel: Callable[..., float] | None = self._kernel_cache.get(
+            expression_code,
+            None,
+        )
+        if cached_kernel is not None:
+            return cached_kernel
+        else:
+            pass
+
+        function_source: str = (
+            "def procedural_expression(states, runtime_values, fixed_values, sample_time, target_time):\n"
+            + f"    return float({expression_code})"
+        )
+        python_function: Callable[..., float] = _compile_to_file(
+            function_source,
+            "procedural_expression",
+        )
+        signature_tpe: object = types.float64(
+            types.float64[::1],
+            types.float64[::1],
+            types.float64[::1],
+            types.float64,
+            types.float64,
+        )
+        compiled_kernel: Callable[..., float] = njit(
+            signature_tpe,
+            cache=True,
+            fastmath=False,
+        )(python_function)
+        self._kernel_cache[expression_code] = compiled_kernel
+        return compiled_kernel
+
+    def render(self, expression: Expr) -> str:
+        """Render one expression for inclusion in a fused procedural kernel.
+
+        The generated source uses the same state, runtime, constant and time
+        mapping as the standalone procedural-expression kernels.  Keeping one
+        mapping implementation prevents the fused and fallback paths from
+        assigning different numerical meanings to the same symbolic variable.
+
+        :param expression: Normalized procedural expression.
+        :return: Numba-compatible scalar Python expression.
+        """
+        compiler_names: Dict[int, str] = dict()
+        expression_var: Var
+
+        # Resolve every symbolic leaf to the arrays owned by the runtime problem.
+        for expression_var in expression.get_vars():
+            if expression_var.name == "glob_time" or expression_var.uid == self._global_time_uid:
+                compiler_names[expression_var.uid] = "target_time"
+            elif expression_var.name == "time":
+                compiler_names[expression_var.uid] = "sample_time"
+            elif expression_var.uid in self._state_map:
+                compiler_names[expression_var.uid] = f"states[{self._state_map[expression_var.uid]}]"
+            elif expression_var.uid in self._runtime_map:
+                compiler_names[expression_var.uid] = f"runtime_values[{self._runtime_map[expression_var.uid]}]"
+            elif expression_var.uid in self._constant_map:
+                compiler_names[expression_var.uid] = f"fixed_values[{self._constant_map[expression_var.uid]}]"
+            else:
+                raise KeyError(
+                    f"Unknown procedural variable '{expression_var.name}' "
+                    + f"(uid={expression_var.uid})."
+                )
+
+        return expression2numba(
+            expr=expression,
+            compiler_names_dict=compiler_names,
+        )
+
+    def compile_boundary_kernel(self, function_source: str) -> Callable[..., int]:
+        """Compile one model-specific procedural boundary-update function eagerly.
+
+        :param function_source: Complete source defining ``procedural_boundary_update``.
+        :return: Eager Numba kernel returning zero or a one-based logic error index.
+        """
+        python_function: Callable[..., int] = _compile_to_file(
+            function_source,
+            "procedural_boundary_update",
+        )
+        signature_tpe: object = types.int64(
+            types.float64[::1],
+            types.float64[::1],
+            types.float64[::1],
+            types.float64,
+            types.float64,
+            types.float64[::1],
+        )
+        return njit(
+            signature_tpe,
+            cache=True,
+            fastmath=False,
+        )(python_function)
 
 # =============================================================================================
 # 4. Solution for large-scale algebraic frameworks, based on differential automatic composition
@@ -1623,6 +2156,7 @@ class EquationCompiler:
             use_cse,
             offset,
             inplace,
+            self.diff_var_map,
         )
         cache_entry: GeneratedKernelCacheEntry | None = GENERATED_KERNEL_CACHE.get_entry("residual", cache_key)
 
@@ -1699,6 +2233,7 @@ class EquationCompiler:
             type(self.strategy).__name__,
             use_cse,
             active_indices,
+            self.diff_var_map,
         )
         cache_entry: GeneratedKernelCacheEntry | None = GENERATED_KERNEL_CACHE.get_entry("ad", cache_key)
 
@@ -1777,18 +2312,34 @@ class MatrixVectorizedVisitor(SymbolicToPythonVisitor):
                  var_map: Dict[int, int],
                  param_map: Dict[int, int],
                  method: DiscretizationMethod,
-                 col_map: Dict[str, int]) -> None:
+                 col_map: Dict[int, int]) -> None:
+        """Bind matrix gathers to declared runtime identities.
+
+        :param var_map: Runtime UID to scalar-vector slot.
+        :param param_map: Parameter UID to shared parameter slot.
+        :param method: Existing derivative discretization strategy.
+        :param col_map: Runtime UID to grouped gather column.
+        :return: None.
+        """
         super().__init__(var_map, param_map, method)
-        self.col_map = col_map  # Maps variable_name -> column_index (int)
+        self.col_map: Dict[int, int] = col_map
 
     def visit_var(self, node: Var, _precedence: int) -> str:
+        """Emit a parameter or runtime gather before derivative fallback.
+
+        :param node: Variable occurrence whose UID defines its identity.
+        :param _precedence: Parent expression precedence.
+        :return: Generated vector expression for the declared binding.
+        """
         if node.uid in self.param_map:
             return f"params[{self.param_map[node.uid]}]"
         else:
             pass
 
         if node.uid in self.var_map:
-            col_idx = self.col_map[node.name]
+            # Independent devices may share names; only UID identifies the
+            # column retained by the structural grouping owner.
+            col_idx: int = self.col_map[node.uid]
             return f"states[indices[:, {col_idx}]]"
         else:
             pass
@@ -1802,15 +2353,24 @@ class MatrixVectorizedVisitor(SymbolicToPythonVisitor):
         raise ValueError(f"Var '{node.name}' (UID: {node.uid}) Not mapped in matrix visitor.")
 
     def visit_diffvar(self, node: Var, prec: int) -> str:
+        """Discretize a derivative with its existing origin/history semantics.
+
+        :param node: Derivative occurrence with an explicitly declared base.
+        :param prec: Parent precedence used to delimit the generated term.
+        :return: Vector derivative expression for the selected method.
+        """
+        col_idx: int
+        idx_access: str
+        term: str
         # If base_var is also a DiffVar, recursively discretize it
         if node.base_var.base_var is not None:
             # Use base_var's origin for history lookup since base_var is a DiffVar
-            base_origin_name = node.base_var.origin_var.name
-            col_idx = self.col_map[base_origin_name]
+            base_origin_uid: int = node.base_var.origin_var.uid
+            col_idx = self.col_map[base_origin_uid]
             idx_access = f"indices[:, {col_idx}]"
             
             # Recursively get discretized base
-            base_discretized = self.visit_diffvar(node.base_var, prec)
+            base_discretized: str = self.visit_diffvar(node.base_var, prec)
             # Apply discretization using d_history
             if isinstance(self.method, BackwardEulerMethod):
                 term = f"(({base_discretized} - d_history[{idx_access}]) / h)"
@@ -1820,9 +2380,9 @@ class MatrixVectorizedVisitor(SymbolicToPythonVisitor):
                 raise NotImplementedError(f"Nested DiffVar not supported with {type(self.method)}")
         else:
             # Base is a regular state variable - use standard discretization
-            # Get origin variable name for column mapping
-            origin_name = node.origin_var.name
-            col_idx = self.col_map[origin_name]
+            # History belongs to the declared origin, regardless of its label.
+            origin_uid: int = node.origin_var.uid
+            col_idx = self.col_map[origin_uid]
             idx_access = f"indices[:, {col_idx}]"
             
             if isinstance(self.method, TrapezoidalMethod):
@@ -1845,11 +2405,23 @@ class MatrixVectorizedCompiler(EquationCompiler):
     __slots__ = []
 
     def compile_matrix_kernel(self, template_eq: Expr, func_name: str, template_vars: List[Var]) -> Callable:
+        """Compile one grouped residual using the declared runtime UID slots.
+
+        :param template_eq: Equation shared by the grouped batch rows.
+        :param func_name: Requested name; canonical cache identity names the kernel.
+        :param template_vars: Ordered runtime gathers supplied by structural grouping.
+        :return: Python batch residual kernel, reused for equivalent bindings.
+        """
         # 1. Create a deterministic column map (Var index within the kernel)
-        col_map: Dict[str, int] = dict()
+        col_map: Dict[int, int] = dict()
+        i: int
+        v: Var
         for i, v in enumerate(template_vars):
-            name = v.base_var.name if v.base_var is not None else v.name
-            col_map[name] = i
+            target_uid: int = v.uid if v.uid in self.var_map or v.base_var is None else v.base_var.uid
+            if target_uid not in col_map:
+                col_map[target_uid] = i
+            else:
+                pass
 
         cache_key: str = _build_equation_compiler_matrix_cache_key(
             template_eq,
@@ -1868,8 +2440,8 @@ class MatrixVectorizedCompiler(EquationCompiler):
         canonical_func_name: str = f"eq_matrix_{cache_key[:16]}"
 
         # 2. Generate source code using the Matrix Visitor
-        visitor = MatrixVectorizedVisitor(self.var_map, self.param_map, self.strategy, col_map)
-        rhs_code = visitor.visit(template_eq)
+        visitor: MatrixVectorizedVisitor = MatrixVectorizedVisitor(self.var_map, self.param_map, self.strategy, col_map)
+        rhs_code: str = visitor.visit(template_eq)
 
         # 3. Package into a function (indices is now a 2D int32 array)
         lines: List[str] = list()
@@ -1877,7 +2449,7 @@ class MatrixVectorizedCompiler(EquationCompiler):
         lines.append(f"    # Vectorized Matrix Kernel (No Dicts)")
         lines.append(f"    residuals = {rhs_code}")
         lines.append(f"    return residuals")
-        full_source = "\n".join(lines)
+        full_source: str = "\n".join(lines)
 
         # 4. Compile to file (enabling Numba's persistent cache)
         py_func: Callable = _compile_to_file(full_source, canonical_func_name)
@@ -2082,6 +2654,7 @@ class EagerEquationCompiler(EquationCompiler):
             offset,
             len(self.variables_objs),
             len(self.parameters_objs),
+            self.diff_var_map,
         )
         cache_entry = GENERATED_KERNEL_CACHE.get_entry("residual", cache_key)
 
@@ -2182,6 +2755,7 @@ class EagerEquationCompiler(EquationCompiler):
             active_indices,
             len(self.variables_objs),
             len(self.parameters_objs),
+            self.diff_var_map,
         )
         cache_entry = GENERATED_KERNEL_CACHE.get_entry("ad", cache_key)
 
@@ -2268,7 +2842,7 @@ class EagerEquationCompiler(EquationCompiler):
         :return: Pair ``(python_function, eager_signature)``.
         :rtype: Tuple[Callable, object]
         """
-        col_map: Dict[str, int] = dict()
+        col_map: Dict[int, int] = dict()
         visitor: MatrixVectorizedVisitor
         rhs_code: str
         lines: List[str] = list()
@@ -2277,13 +2851,14 @@ class EagerEquationCompiler(EquationCompiler):
         full_source: str
 
         # The template variables define the deterministic position of each grouped runtime value.
+        i: int
+        v: Var
         for i, v in enumerate(template_vars):
-            mapped_name: str
-            if v.base_var is None:
-                mapped_name = v.name
+            target_uid: int = v.uid if v.uid in self.var_map or v.base_var is None else v.base_var.uid
+            if target_uid not in col_map:
+                col_map[target_uid] = i
             else:
-                mapped_name = v.base_var.name
-            col_map[mapped_name] = i
+                pass
 
         cache_key = _build_matrix_codegen_cache_key(
             template_eq,
@@ -2343,7 +2918,6 @@ class RMSCompiler(EquationCompiler):
                  diff_vars: List[Var],
                  v_params: List[Var],
                  c_params: List[Var],
-                 dt_var: Var,
                  compiler_names_dict: Dict[int, str]) -> None:
         """
         Initializes the RMS Compiler with the system's mathematical components.
@@ -2353,16 +2927,15 @@ class RMSCompiler(EquationCompiler):
             diff_vars (List[Var]): Differential variables (dx/dt).
             v_params (List[Var]): Variable (event-driven) parameters.
             c_params (List[Var]): Constant parameters.
-            dt_var (Var): The symbolic variable representing the integration time step.
             compiler_names_dict (Dict[int, str]): Dictionary mapping variable UIDs to
                                                   their executable string representations.
         """
         super().__init__(variables=variables, parameters=c_params, method=DynamicIntegrationMethod.DaeBackEuler)
-        self.dt_var = dt_var
+        self.dt_var = Var(name="dt")
         self.compiler_names_dict = compiler_names_dict
         self.diff_vars = diff_vars
         self.v_params = v_params
-        self.compiler_names_dict[dt_var.uid] = 'h'
+        self.compiler_names_dict[self.dt_var.uid] = 'h'
 
     def compile_rhs(self, equations: List[Expr], func_name: str) -> Callable[[Vec, Vec, Vec, Vec], Vec]:
         """
@@ -2493,6 +3066,8 @@ class RMSCompiler(EquationCompiler):
             expr_str = expression2numba(eq, final_names_dict)
             lines.append(f"    out[{i}] = {expr_str}")
 
+        lines.append("    return out")
+
         raw_fn = _compile_to_file("\n".join(lines), func_name)
         return EventParameterFunctionWrapper(raw_fn=raw_fn, equation_count=len(eqs))
 
@@ -2549,7 +3124,6 @@ class RMSCompilerVec(EquationCompiler):
                  diff_vars: List[Var],
                  v_params: List[Var],
                  c_params: List[Var],
-                 dt_var: Var,
                  compiler_names_dict: Dict[int, str]) -> None:
         """
         Initializes the RMS Compiler with the system's mathematical components.
@@ -2559,16 +3133,15 @@ class RMSCompilerVec(EquationCompiler):
             diff_vars (List[Var]): Differential variables (dx/dt).
             v_params (List[Var]): Variable (event-driven) parameters.
             c_params (List[Var]): Constant parameters.
-            dt_var (Var): The symbolic variable representing the integration time step.
             compiler_names_dict (Dict[int, str]): Dictionary mapping variable UIDs to
                                                   their executable string representations.
         """
         super().__init__(variables=variables, parameters=c_params, method=DynamicIntegrationMethod.DaeBackEuler)
-        self.dt_var = dt_var
+        self.dt_var = Var(name="dt")
         self.compiler_names_dict = compiler_names_dict
         self.diff_vars = diff_vars
         self.v_params = v_params
-        self.compiler_names_dict[dt_var.uid] = 'h'
+        self.compiler_names_dict[self.dt_var.uid] = 'h'
 
     def compile_rhs(self, equations: List[Expr], func_name: str) -> Callable[[Vec, Vec, Vec, Vec], Vec]:
         """
@@ -2702,6 +3275,8 @@ class RMSCompilerVec(EquationCompiler):
             # evaluate a simplified step-like path instead of the intended ramp.
             expr_str = expression2numba(eq, final_names_dict)
             lines.append(f"    out[{i}] = {expr_str}")
+
+        lines.append("    return out")
 
         raw_fn = _compile_to_file("\n".join(lines), func_name)
         return EventParameterFunctionWrapper(raw_fn=raw_fn, equation_count=len(eqs))

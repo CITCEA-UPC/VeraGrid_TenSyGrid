@@ -11,6 +11,7 @@ from PySide6 import QtCore, QtWidgets
 
 from VeraGrid.Gui.DynamicModelEditor.Events.dynamic_events_page import DynamicEventsPage
 from VeraGrid.Gui.DynamicModelEditor.Editor.dynamic_block_editor import DynamicBlockEditorGUI
+from VeraGrid.Gui.DynamicModelEditor.Editor.dynamic_editor_models import initialize_connected_bus_models_for_editor_assignment
 from VeraGrid.Gui.DynamicModelEditor.Plots.dynamic_plots_page import DynamicPlotsPage
 from VeraGrid.Gui.DynamicModelEditor.ModelComparison.dynamic_model_comparison_page import DynamicModelComparisonPage
 from VeraGrid.Gui.DynamicModelEditor.Workspace.Tabs.dynamic_editor_tab import DynamicEditorTab
@@ -120,6 +121,54 @@ class DynamicEditorWorkspaceSession(QtCore.QObject):
             for workspace in self._open_workspaces
             if workspace.is_available_for_pages()
         )
+
+    def refresh_dynamic_library_templates(self, circuit: MultiCircuit) -> None:
+        """
+        Refresh compatible template catalogues in every open editor for a circuit.
+
+        Detached workspace windows belong to the same session, so the refresh
+        traverses the complete stable workspace snapshot rather than only the
+        most recently active window.
+
+        :param circuit: Circuit whose template catalogue changed.
+        :return: None.
+        """
+        workspaces: List[DynamicEditorWorkspaceWindow] = self.get_open_workspaces()
+        workspace: DynamicEditorWorkspaceWindow
+        page: DynamicBlockEditorGUI | DynamicEditorTab | DynamicEventsPage
+
+        # Reuse the established entry and mode resolver for each page. This
+        # keeps device compatibility rules in one place and excludes catalogues
+        # owned by any other circuit open in the same GUI process.
+        for workspace in workspaces:
+            for page in workspace.pages_iter():
+                if isinstance(page, DynamicEventsPage):
+                    pass
+                else:
+                    entry: DynamicEditorEntry | None = _get_page_entry(page=page)
+                    mode: DynamicSimulationMode | None = get_page_mode(page=page)
+                    if entry is not None and entry.circuit is circuit and mode is not None:
+                        editor: DynamicBlockEditorGUI | None
+                        if isinstance(page, DynamicEditorTab):
+                            editor = page.editor
+                        else:
+                            if isinstance(page, DynamicBlockEditorGUI):
+                                editor = page
+                            else:
+                                editor = None
+
+                        if editor is not None:
+                            templates: List[ALL_DEV_TYPES] = get_templates_for_entry(
+                                entry=entry,
+                                mode=mode,
+                            )
+                            editor.refresh_dynamic_library_templates(
+                                templates_list=templates,
+                            )
+                        else:
+                            pass
+                    else:
+                        pass
 
     def get_last_active_workspace(self) -> "DynamicEditorWorkspaceWindow | None":
         """
@@ -392,6 +441,11 @@ class DynamicEditorWorkspaceSession(QtCore.QObject):
         :param mode: Dynamic mode to open.
         :return: Newly created editor tab.
         """
+        # Reconcile persistent interfaces before the tab clones the model and factory.
+        initialize_connected_bus_models_for_editor_assignment(
+            api_object=entry.api_object, circuit=entry.circuit,
+            var_factory=entry.circuit.var_factory, mode=mode,
+        )
         page = DynamicEditorTab(
             var_factory=entry.circuit.var_factory,
             block=get_block_for_entry(entry, mode),

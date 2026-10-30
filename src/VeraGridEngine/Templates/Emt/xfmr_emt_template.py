@@ -124,8 +124,13 @@ def get_xfmr_emt_template(
     * xfmr_outer_leg_length_rel
     * xfmr_c_term
     * xfmr_use_linear_core
+    * xfmr_use_piecewise_core
     * xfmr_core_knee_flux_mult
     * xfmr_core_knee_current_mult
+    * xfmr_piecewise_flux_1/2
+    * xfmr_piecewise_current_1/2
+    * xfmr_use_fixed_initial_flux
+    * xfmr_initial_flux_a/b/c
     * xfmr_sc_resistance_pct
     * xfmr_core_linear_l_pu
     * xfmr_core_a_prime
@@ -164,7 +169,6 @@ def get_xfmr_emt_template(
     :return: EMT transformer template.
     """
 
-    name = "xfmr_emt_template"
     templ = EmtModelTemplate()
     templ.tpe = DeviceType.Transformer2WDevice
     templ.name = name
@@ -172,12 +176,16 @@ def get_xfmr_emt_template(
     block = Block()
     block.name=name
 
-    if conn_f in {WindingType.GroundedStar, WindingType.NeutralStar}:
+    # ``NeutralStar`` exposes a fourth terminal conductor. ``GroundedStar``
+    # instead fixes the internal star point to ground and therefore keeps the
+    # external terminal contract three-phase unless the static branch itself
+    # explicitly models a neutral conductor.
+    if conn_f == WindingType.NeutralStar:
         from_has_neutral_port: bool = True
     else:
         from_has_neutral_port = False
 
-    if conn_t in {WindingType.GroundedStar, WindingType.NeutralStar}:
+    if conn_t == WindingType.NeutralStar:
         to_has_neutral_port: bool = True
     else:
         to_has_neutral_port = False
@@ -194,12 +202,28 @@ def get_xfmr_emt_template(
     # Static parameters mapped from the transformer API object.
     # ------------------------------------------------------------------
     omega_base: Var = vf.add_var(name=f"omega_base")
+    system_sbase: Var = vf.add_var(name="xfmr_system_sbase_mva")
     xfmr_s_rated_mva: Var = vf.add_var(name=f"xfmr_s_rated_mva")
     xfmr_oc_current_pct: Var = vf.add_var(name=f"xfmr_oc_current_pct")
     xfmr_oc_loss_kw: Var = vf.add_var(name=f"xfmr_oc_loss_kw")
     xfmr_sc_voltage_pct: Var = vf.add_var(name=f"xfmr_sc_voltage_pct")
     xfmr_sc_loss_kw: Var = vf.add_var(name=f"xfmr_sc_loss_kw")
     xfmr_tap_module: Var = vf.add_var(name=f"xfmr_tap_module")
+
+    block.api_obj_mapping[ParamPowerFlowReferenceType.Sbase] = system_sbase
+    # Static API-mapped values belong to the physical transformer. ``None`` is
+    # intentional: it keeps each UID visible to the initializer while forcing
+    # the EMT assembler to supply the real device value. A numerical fallback
+    # here would silently change leakage and magnetizing branches whenever the
+    # wrapper mapping was not propagated correctly.
+    block.parameters[omega_base] = vf.add_const(None)
+    block.parameters[system_sbase] = vf.add_const(None)
+    block.parameters[xfmr_s_rated_mva] = vf.add_const(None)
+    block.parameters[xfmr_oc_current_pct] = vf.add_const(None)
+    block.parameters[xfmr_oc_loss_kw] = vf.add_const(None)
+    block.parameters[xfmr_sc_voltage_pct] = vf.add_const(None)
+    block.parameters[xfmr_sc_loss_kw] = vf.add_const(None)
+    block.parameters[xfmr_tap_module] = vf.add_const(None)
 
     block.api_obj_mapping[ParamPowerFlowReferenceType.omega_base] = omega_base
     block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_rated_power_mva] = xfmr_s_rated_mva
@@ -261,6 +285,12 @@ def get_xfmr_emt_template(
             block.api_obj_mapping[cf_enums[i][j]] = c_f_var
             block.api_obj_mapping[ct_enums[i][j]] = c_t_var
 
+            # The connection and clock-number mapper is the sole source of
+            # these coefficients. Required placeholders prevent an identity
+            # fallback from hiding a missing or lost physical-device mapping.
+            block.parameters[c_f_var] = vf.add_const(None)
+            block.parameters[c_t_var] = vf.add_const(None)
+
             c_f_row.append(c_f_var)
             c_t_row.append(c_t_var)
 
@@ -277,8 +307,17 @@ def get_xfmr_emt_template(
     xfmr_outer_leg_length_rel: Var = vf.add_var(name=f"xfmr_outer_leg_length_rel")
     xfmr_c_term: Var = vf.add_var(name=f"xfmr_c_term")
     xfmr_use_linear_core: Var = vf.add_var(name=f"xfmr_use_linear_core")
+    xfmr_use_piecewise_core: Var = vf.add_var(name=f"xfmr_use_piecewise_core")
     xfmr_core_knee_flux_mult: Var = vf.add_var(name=f"xfmr_core_knee_flux_mult")
     xfmr_core_knee_current_mult: Var = vf.add_var(name=f"xfmr_core_knee_current_mult")
+    xfmr_piecewise_flux_1: Var = vf.add_var(name=f"xfmr_piecewise_flux_1")
+    xfmr_piecewise_current_1: Var = vf.add_var(name=f"xfmr_piecewise_current_1")
+    xfmr_piecewise_flux_2: Var = vf.add_var(name=f"xfmr_piecewise_flux_2")
+    xfmr_piecewise_current_2: Var = vf.add_var(name=f"xfmr_piecewise_current_2")
+    xfmr_use_fixed_initial_flux: Var = vf.add_var(name=f"xfmr_use_fixed_initial_flux")
+    xfmr_initial_flux_a: Var = vf.add_var(name=f"xfmr_initial_flux_a")
+    xfmr_initial_flux_b: Var = vf.add_var(name=f"xfmr_initial_flux_b")
+    xfmr_initial_flux_c: Var = vf.add_var(name=f"xfmr_initial_flux_c")
 
     xfmr_sc_resistance_pct: Var = vf.add_var(name=f"xfmr_sc_resistance_pct")
     xfmr_core_linear_l_pu: Var = vf.add_var(name=f"xfmr_core_linear_l_pu")
@@ -292,19 +331,44 @@ def get_xfmr_emt_template(
     block.event_dict[xfmr_outer_leg_length_rel] = vf.add_const(1.0)
     block.event_dict[xfmr_c_term] = vf.add_const(1e-6)
     block.event_dict[xfmr_use_linear_core] = vf.add_const(1.0)
+    block.event_dict[xfmr_use_piecewise_core] = vf.add_const(0.0)
     block.event_dict[xfmr_core_knee_flux_mult] = vf.add_const(1.50)
     block.event_dict[xfmr_core_knee_current_mult] = vf.add_const(8.0)
+    block.event_dict[xfmr_piecewise_flux_1] = vf.add_const(1.2)
+    block.event_dict[xfmr_piecewise_current_1] = vf.add_const(0.005)
+    block.event_dict[xfmr_piecewise_flux_2] = vf.add_const(1.9)
+    block.event_dict[xfmr_piecewise_current_2] = vf.add_const(0.1)
+    block.event_dict[xfmr_use_fixed_initial_flux] = vf.add_const(0.0)
+    block.event_dict[xfmr_initial_flux_a] = vf.add_const(0.0)
+    block.event_dict[xfmr_initial_flux_b] = vf.add_const(0.0)
+    block.event_dict[xfmr_initial_flux_c] = vf.add_const(0.0)
 
     # ------------------------------------------------------------------
     # Derived local parameters of the dynamic model.
     # ------------------------------------------------------------------
     block.event_dict[xfmr_sc_resistance_pct] = xfmr_sc_loss_kw / (vf.add_const(10.0) * xfmr_s_rated_mva + c_eps)
 
+    # Terminal currents use the network three-phase base. Nameplate test
+    # quantities are on the transformer rating; convert before injecting them.
+    impedance_base_ratio: Expr = system_sbase / (xfmr_s_rated_mva + c_eps)
+    admittance_base_ratio: Expr = xfmr_s_rated_mva / (system_sbase + c_eps)
     oc_loss_pu: Expr = (xfmr_oc_loss_kw / vf.add_const(1000.0)) / (xfmr_s_rated_mva + c_eps)
     oc_current_pu: Expr = xfmr_oc_current_pct / vf.add_const(100.0)
-    i_mag_pu: Expr = sym.sqrt(oc_current_pu * oc_current_pu - oc_loss_pu * oc_loss_pu + c_eps)
+    i_mag_pu: Expr = sym.sqrt(oc_current_pu * oc_current_pu - oc_loss_pu * oc_loss_pu + c_eps) * admittance_base_ratio
 
     block.event_dict[xfmr_core_linear_l_pu] = c1 / (i_mag_pu + c_eps)
+
+    # The terminal-capacitance current is a valid initialization degree of
+    # freedom only when the physical capacitance exists. Use a smooth runtime-
+    # parameter selector because introducing switching functions inside the
+    # explicit initialization would create a nested block whose derived event
+    # parameters are not available yet. At Cterm = 0 this expression is
+    # exactly zero; for every practical positive capacitance it is unity to
+    # numerical precision.
+    capacitance_enable_epsilon: Expr = vf.add_const(1e-15)
+    terminal_capacitance_enabled: Expr = (
+        xfmr_c_term / (xfmr_c_term + capacitance_enable_epsilon)
+    )
 
     lambda_nom_peak: Expr = c_sqrt2
     i_nom_peak_from_linear: Expr = lambda_nom_peak / (xfmr_core_linear_l_pu + c_eps)
@@ -320,8 +384,8 @@ def get_xfmr_emt_template(
     # ------------------------------------------------------------------
     # Leakage-branch parameters.
     # ------------------------------------------------------------------
-    z_sc_pu: Expr = xfmr_sc_voltage_pct / vf.add_const(100.0)
-    r_sc_pu: Expr = xfmr_sc_resistance_pct / vf.add_const(100.0)
+    z_sc_pu: Expr = xfmr_sc_voltage_pct / vf.add_const(100.0) * impedance_base_ratio
+    r_sc_pu: Expr = xfmr_sc_resistance_pct / vf.add_const(100.0) * impedance_base_ratio
     x_sc_pu: Expr = sym.sqrt(z_sc_pu * z_sc_pu - r_sc_pu * r_sc_pu + c_eps)
     l_sigma: Expr = x_sc_pu / (omega_base + c_eps)
     l_inv: Expr = c1 / (l_sigma + c_eps)
@@ -329,8 +393,10 @@ def get_xfmr_emt_template(
     # ------------------------------------------------------------------
     # Core-loss conductance from open-circuit losses.
     # ------------------------------------------------------------------
-    g_core_total: Expr = (xfmr_oc_loss_kw / vf.add_const(1000.0)) / (xfmr_s_rated_mva + c_eps)
-    g_core_leg: Expr = g_core_total / c3
+    g_core_total: Expr = (xfmr_oc_loss_kw / vf.add_const(1000.0)) / (system_sbase + c_eps)
+    # Phase voltage/current bases already use Sbase/3 per phase. At balanced
+    # nominal voltage, sum(v_phase*i_phase)/3 must equal total loss/Sbase.
+    g_core_leg: Expr = g_core_total
 
     # ------------------------------------------------------------------
     # Terminal electrical interface variables in abc frame.
@@ -559,12 +625,23 @@ def get_xfmr_emt_template(
     # Core topology selectors.
     #
     # Supported values:
+    #   1.0 -> three independent single-phase magnetic cores
     #   3.0 -> three-legged core
     #   5.0 -> five-legged core
     # ------------------------------------------------------------------
     lam_return_total: Expr = -(lam_leg[0] + lam_leg[1] + lam_leg[2])
-    five_leg_selector: Expr = (xfmr_core_topology_code - c3) / c2
-    three_leg_selector: Expr = c1 - five_leg_selector
+    independent_core_selector: Expr = (
+        (xfmr_core_topology_code - c3) * (xfmr_core_topology_code - vf.add_const(5.0))
+        / vf.add_const(8.0)
+    )
+    three_leg_selector: Expr = -(
+        (xfmr_core_topology_code - c1) * (xfmr_core_topology_code - vf.add_const(5.0))
+        / vf.add_const(4.0)
+    )
+    five_leg_selector: Expr = (
+        (xfmr_core_topology_code - c1) * (xfmr_core_topology_code - c3)
+        / vf.add_const(8.0)
+    )
 
     yoke_area_rel: Expr = xfmr_yoke_area_rel
     yoke_length_rel: Expr = xfmr_yoke_length_rel
@@ -611,9 +688,30 @@ def get_xfmr_emt_template(
             + xfmr_core_b_prime * sym.sqrt(i_leg_core[k] * i_leg_core[k] + c_smooth)
             + c_eps
         )
+        first_segment_slope: Expr = xfmr_piecewise_current_1 / xfmr_piecewise_flux_1
+        second_segment_slope: Expr = (
+            (xfmr_piecewise_current_2 - xfmr_piecewise_current_1)
+            / (xfmr_piecewise_flux_2 - xfmr_piecewise_flux_1)
+        )
+        clamped_flux: Expr = sym.max(
+            -xfmr_piecewise_flux_1,
+            sym.min(lam_leg[k], xfmr_piecewise_flux_1),
+        )
+        excess_flux: Expr = (
+            sym.max(lam_leg[k] - xfmr_piecewise_flux_1, c0)
+            + sym.min(lam_leg[k] + xfmr_piecewise_flux_1, c0)
+        )
+        piecewise_current: Expr = (
+            first_segment_slope * clamped_flux
+            + second_segment_slope * excess_flux
+        )
+        piecewise_leg_eq: Expr = i_leg_core[k] - piecewise_current
         alg_eqs.append(
             xfmr_use_linear_core * linear_leg_eq
-            + (c1 - xfmr_use_linear_core) * nonlinear_leg_eq
+            + (c1 - xfmr_use_linear_core) * (
+                xfmr_use_piecewise_core * piecewise_leg_eq
+                + (c1 - xfmr_use_piecewise_core) * nonlinear_leg_eq
+            )
         )
 
     # Return-path constitutive law.
@@ -629,7 +727,8 @@ def get_xfmr_emt_template(
     three_leg_eq_nonlinear: Expr = lam_return_total - c2 * yoke_frolich_lam
 
     alg_eqs.append(
-        five_leg_selector * (
+        independent_core_selector * i_return_path
+        + five_leg_selector * (
             xfmr_use_linear_core * five_leg_eq_linear
             + (c1 - xfmr_use_linear_core) * five_leg_eq_nonlinear
         )
@@ -804,10 +903,20 @@ def get_xfmr_emt_template(
     # ------------------------------------------------------------------
     c_inv_sqrt3: Expr = c1 / sym.sqrt(c3)
 
-    lam_leg_init: list[Expr] = [
+    voltage_derived_flux_init: list[Expr] = [
         -(v_f_w[2] - v_f_w[1]) * c_inv_sqrt3,
         -(v_f_w[0] - v_f_w[2]) * c_inv_sqrt3,
         -(v_f_w[1] - v_f_w[0]) * c_inv_sqrt3,
+    ]
+    fixed_flux_init: list[Expr] = [
+        xfmr_initial_flux_a,
+        xfmr_initial_flux_b,
+        xfmr_initial_flux_c,
+    ]
+    lam_leg_init: list[Expr] = [
+        xfmr_use_fixed_initial_flux * fixed_flux_init[k]
+        + (c1 - xfmr_use_fixed_initial_flux) * voltage_derived_flux_init[k]
+        for k in range(3)
     ]
 
     init_eqs: Dict[Var, Expr] = {}
@@ -833,15 +942,36 @@ def get_xfmr_emt_template(
                 xfmr_core_a_prime * lam_leg[k]
                 / (c1 - xfmr_core_b_prime * abs_lam_k + c_eps)
         )
+        first_segment_slope_init: Expr = xfmr_piecewise_current_1 / xfmr_piecewise_flux_1
+        second_segment_slope_init: Expr = (
+            (xfmr_piecewise_current_2 - xfmr_piecewise_current_1)
+            / (xfmr_piecewise_flux_2 - xfmr_piecewise_flux_1)
+        )
+        clamped_lam_init: Expr = sym.max(
+            -xfmr_piecewise_flux_1,
+            sym.min(lam_leg[k], xfmr_piecewise_flux_1),
+        )
+        excess_lam_init: Expr = (
+            sym.max(lam_leg[k] - xfmr_piecewise_flux_1, c0)
+            + sym.min(lam_leg[k] + xfmr_piecewise_flux_1, c0)
+        )
+        i_leg_core_piecewise_init: Expr = (
+            first_segment_slope_init * clamped_lam_init
+            + second_segment_slope_init * excess_lam_init
+        )
 
         init_eqs[i_leg_core[k]] = (
                 xfmr_use_linear_core * (lam_leg[k] / (xfmr_core_linear_l_pu + c_eps))
-                + (c1 - xfmr_use_linear_core) * i_leg_core_nl_init
+                + (c1 - xfmr_use_linear_core) * (
+                    xfmr_use_piecewise_core * i_leg_core_piecewise_init
+                    + (c1 - xfmr_use_piecewise_core) * i_leg_core_nl_init
+                )
         )
 
     # Return-path currents from initialized fluxes.
     init_eqs[i_return_path] = (
-        five_leg_selector * (lam_return_total / (c2 * yoke_linear_coeff + outer_linear_coeff + c_eps))
+        independent_core_selector * c0
+        + five_leg_selector * (lam_return_total / (c2 * yoke_linear_coeff + outer_linear_coeff + c_eps))
         + three_leg_selector * (lam_return_total / (c2 * yoke_linear_coeff + c_eps))
     )
     init_eqs[i_return_total] = (
@@ -857,14 +987,20 @@ def get_xfmr_emt_template(
     for k in range(3):
         init_eqs[i_loss_leg[k]] = g_core_leg * v_f_w[k]
 
-    # Leakage-current seed from PF-initialized from-side terminal current.
+    # Balanced fundamental seeds, consistent with the voltage-derived core
+    # flux above: capacitance current is C*dV/dt, not a KCL residual absorbing
+    # the core current. Project terminal current back to the winding frame
+    # and subtract the parallel core and capacitor currents from leakage.
     for k in range(3):
-        init_eqs[i_leak[k]] = if_act[k]
-
-    # Capacitor-current seeds from terminal current balance.
-    for k in range(3):
-        init_eqs[i_cap_f[k]] = if_act[k] - (i_series_from[k] + i_core_from_term[k])
-        init_eqs[i_cap_t[k]] = it_act[k] - (-n_tap * i_series_to[k])
+        next_phase = (k + 1) % 3
+        previous_phase = (k + 2) % 3
+        init_eqs[i_cap_f[k]] = xfmr_c_term * omega_base * (
+            v_f_term[previous_phase] - v_f_term[next_phase]) * c_inv_sqrt3
+        init_eqs[i_cap_t[k]] = xfmr_c_term * omega_base * (
+            v_t_term[previous_phase] - v_t_term[next_phase]) * c_inv_sqrt3
+        init_eqs[i_leak[k]] = sum(
+            (c_f_expr[j][k] * (if_act[j] - i_cap_f[j]) for j in range(3)), c0
+        ) - i_mag[k] - i_loss_leg[k]
 
     block.init_eqs = init_eqs
 
@@ -901,8 +1037,6 @@ def get_xfmr_emt_template(
 
     templ.block.children.append(block)
     templ.block.external_mapping = block.external_mapping
-    templ.block.api_obj_mapping = block.api_obj_mapping
-    templ.block.parameters = block.parameters
     templ.block.in_vars = block.in_vars
     templ.block.out_vars = block.out_vars
 

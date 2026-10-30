@@ -13,9 +13,11 @@ import pytest
 
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
+from VeraGridEngine.Simulations.EMT.solvers.solver_AD import JitAdSolver
 from VeraGridEngine.Simulations.EMT.solvers.jit_symbolic_solver import BoundaryUpdateWrapper, JitSymbolicSolver
 from VeraGridEngine.Utils.procedural_logic import (
     aflipflop,
+    BlockProceduralLogicUpdater,
     DelayedThresholdLatchLogic,
     bool_and,
     bool_or,
@@ -25,13 +27,15 @@ from VeraGridEngine.Utils.procedural_logic import (
     lastvalue,
     picdro,
     ProceduralLogicCodec,
+    ProceduralExpressionMode,
+    hard_saturation,
     reset,
     sampled_value,
     select,
 )
 from VeraGridEngine.Utils.Symbolic.diagnostic import NewtonTraceCollector
 from VeraGridEngine.Utils.Symbolic.block import Block
-from VeraGridEngine.Utils.Symbolic.symbolic import atan2, Comparison, Const, Expr, Var
+from VeraGridEngine.Utils.Symbolic.symbolic import atan2, Comparison, Const, Expr, sin, Var
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 
 
@@ -73,6 +77,114 @@ class GenericEmtProblem(EmtProblemTemplate):
     """Minimal generic EMT problem used for unit testing."""
 
     __slots__ = []
+
+
+def _simulate_runtime_parameter_evaluator(
+        use_compiled_runtime_parameters: bool,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Simulate one second through one selected runtime-parameter path.
+
+    The model contains coupled differential and algebraic equations, sequential
+    runtime-expression dependencies, and a delayed procedural protection trip.
+    A fresh problem is built for each path to keep their initial states and
+    mutable runtime vectors independent.
+
+    :param use_compiled_runtime_parameters: Select the compiled evaluator when
+        true, or the legacy interpreted evaluator when false.
+    :return: Time, state, and differential histories.
+    """
+    var_factory: VarFactory = VarFactory()
+    global_time: Var = var_factory.add_var("runtime_equivalence_time")
+    position: Var = var_factory.add_var("runtime_equivalence_position")
+    velocity: Var = var_factory.add_var("runtime_equivalence_velocity")
+    filtered_output: Var = var_factory.add_var("runtime_equivalence_filtered_output")
+    measured_output: Var = var_factory.add_var("runtime_equivalence_measured_output")
+    d_position: Var = var_factory.add_diff_var(
+        name="d_runtime_equivalence_position",
+        base_var=position,
+    )
+    d_velocity: Var = var_factory.add_diff_var(
+        name="d_runtime_equivalence_velocity",
+        base_var=velocity,
+    )
+    d_filtered_output: Var = var_factory.add_diff_var(
+        name="d_runtime_equivalence_filtered_output",
+        base_var=filtered_output,
+    )
+    runtime_mode: Var = var_factory.add_var("runtime_equivalence_mode")
+    runtime_drive: Var = var_factory.add_var("runtime_equivalence_drive")
+    runtime_gain: Var = var_factory.add_var("runtime_equivalence_gain")
+    runtime_bias: Var = var_factory.add_var("runtime_equivalence_bias")
+    drive_expression: Expr = Const(1.0) + Const(0.25) * sin(
+        Const(2.0 * math.pi) * global_time
+    )
+    gain_expression: Expr = runtime_drive * (
+        Const(1.0) + Const(0.1) * sin(Const(math.pi) * global_time)
+    )
+    bias_expression: Expr = Const(0.15) * runtime_gain + Const(0.05) * runtime_drive
+    block: Block = Block(
+        name="RuntimeParameterEvaluatorEquivalence",
+        state_vars=list((position, velocity, filtered_output)),
+        algebraic_vars=list((measured_output,)),
+        diff_vars=list((d_position, d_velocity, d_filtered_output)),
+        state_eqs=list((
+            velocity,
+            runtime_mode * (
+                runtime_gain
+                - Const(0.8) * velocity
+                - Const(1.7) * position
+                + runtime_bias
+            ),
+            Const(4.0) * (measured_output - filtered_output),
+        )),
+        algebraic_eqs=list((
+            measured_output
+            - (position + Const(0.3) * velocity + Const(0.2) * runtime_bias),
+        )),
+        event_dict=dict((
+            (runtime_drive, drive_expression),
+            (runtime_gain, gain_expression),
+            (runtime_bias, bias_expression),
+        )),
+        mode_dict=dict(((runtime_mode, Const(1.0)),)),
+    )
+    block.unify_blocks()
+
+    problem: GenericEmtProblem = GenericEmtProblem(
+        sys_block=block,
+        glob_time=global_time,
+        static_parameter_values_mapping=dict(),
+    )
+    solver: JitAdSolver = JitAdSolver(
+        problem=problem,
+        t0=0.0,
+        t_end=1.0,
+        h=1.0e-3,
+        method=DynamicIntegrationMethod.DaeTrapezoidal,
+        verbose=False,
+        use_compiled_runtime_parameters=use_compiled_runtime_parameters,
+    )
+    protection: ThresholdDelayTripWrapper = ThresholdDelayTripWrapper(
+        problem=problem,
+        monitored_var=position,
+        mode_var=runtime_mode,
+        threshold=0.2,
+        delay=2.5e-2,
+    )
+    time_values: np.ndarray
+    state_values: np.ndarray
+    derivative_values: np.ndarray
+    well_initialized: bool
+    converged: bool
+    time_values, state_values, derivative_values, well_initialized, converged = solver.simulate(
+        params0=problem.event_params_values.copy(),
+        boundary_updater=protection,
+    )
+
+    assert well_initialized
+    assert converged
+    assert protection.tripped
+    return time_values, state_values, derivative_values
 
 
 class ThresholdDelayTripWrapper(BoundaryUpdateWrapper):
@@ -603,7 +715,7 @@ def _run_benchmark_simulation(
         data=logic_snapshot,
         procedural_logic_codec=ProceduralLogicCodec(),
     )
-    updater = build_boundary_updater_from_block(problem)
+    updater: BlockProceduralLogicUpdater | None = build_boundary_updater_from_block(problem)
 
     collector = NewtonTraceCollector()
     problem.set_newton_trace_collector(collector)
@@ -747,9 +859,84 @@ def test_boundary_updater_builds_from_block_logic() -> None:
     assert pytest.approx(forced_time, abs=1e-7) == 1.5e-3
 
 
-def test_sampled_value_uses_declarative_atan2_argument_order() -> None:
-    """Evaluate procedural ``atan2(imaginary, real)`` without generated code.
+def test_boundary_updater_re_evaluates_memoryless_mode_at_same_timestamp() -> None:
+    """Refresh a memoryless mode when its state snapshot changes at one time.
 
+    :return: None.
+    """
+    vf: VarFactory = VarFactory()
+    source: Var = vf.add_var("sample_source")
+    sampled_mode: Var = vf.add_var("sample_mode")
+    block: Block = Block(
+        algebraic_vars=list((source,)),
+        algebraic_eqs=list((source - Const(1.0),)),
+        mode_dict=dict(((sampled_mode, Const(0.0)),)),
+        procedural_logic=list((sampled_value(output=sampled_mode, source=source),)),
+        name="Procedural startup reevaluation",
+    )
+    problem: GenericEmtProblem = GenericEmtProblem(
+        sys_block=block,
+        glob_time=vf.add_var("t_glob_startup"),
+        static_parameter_values_mapping=dict(),
+    )
+    updater = build_boundary_updater_from_block(problem)
+
+    assert updater is not None
+    state: np.ndarray = problem.get_x0().copy()
+    parameters: np.ndarray = problem.event_params_values.copy()
+    source_index: int = problem.get_var_idx(source)
+    mode_index: int = problem.uid2idx_event_params[sampled_mode.uid]
+    state[source_index] = 1.0
+
+    updater.initialize_modes(t=0.0, x=state, params=parameters)
+    assert parameters[mode_index] == 1.0
+
+    # Nonlinear initialization and equilibrium solves can improve the state
+    # without advancing time. The memoryless mode must follow that new state.
+    state[source_index] = 2.0
+    updater.update(t=0.0, x=state, params=parameters)
+    assert parameters[mode_index] == 2.0
+
+
+def test_boundary_updater_rejects_duplicate_procedural_mode_writers() -> None:
+    """Reject update order as an implicit owner for one retained mode.
+
+    :return: None.
+    """
+    vf: VarFactory = VarFactory()
+    source_a: Var = vf.add_var("source_a")
+    source_b: Var = vf.add_var("source_b")
+    sampled_mode: Var = vf.add_var("shared_mode")
+    block: Block = Block(
+        algebraic_vars=list((source_a, source_b)),
+        algebraic_eqs=list((source_a, source_b)),
+        mode_dict=dict(((sampled_mode, Const(0.0)),)),
+        procedural_logic=list((
+            sampled_value(output=sampled_mode, source=source_a),
+            sampled_value(output=sampled_mode, source=source_b),
+        )),
+        name="Duplicate procedural mode ownership",
+    )
+    problem: GenericEmtProblem = GenericEmtProblem(
+        sys_block=block,
+        glob_time=vf.add_var("t_glob_duplicate_owner"),
+        static_parameter_values_mapping=dict(),
+    )
+
+    with pytest.raises(ValueError, match="Multiple procedural logic entries write runtime parameter"):
+        _ = build_boundary_updater_from_block(problem)
+
+
+@pytest.mark.parametrize("expression_mode", tuple(ProceduralExpressionMode))
+@pytest.mark.parametrize("fused_support", (True, False))
+def test_sampled_value_uses_declarative_atan2_argument_order(
+        expression_mode: ProceduralExpressionMode,
+        fused_support: bool,
+) -> None:
+    """Preserve expression evaluation and reset across procedural execution paths.
+
+    :param expression_mode: Explicit compiled or interpreted expression execution.
+    :param fused_support: Select a fusible sample or a standalone saturation.
     :return: None.
     """
     vf: VarFactory = VarFactory()
@@ -769,6 +956,16 @@ def test_sampled_value_uses_declarative_atan2_argument_order() -> None:
             ),
         )),
     )
+    # Saturation excludes fusion, exercising individual compound evaluators.
+    if fused_support:
+        pass
+    else:
+        block.procedural_logic = list((hard_saturation(
+            output=angle,
+            u=atan2(imaginary, real),
+            u_min=Const(-math.pi),
+            u_max=Const(math.pi),
+        ),))
     block.unify_blocks()
     block = Block.parse(
         data=block.to_dict(),
@@ -779,7 +976,10 @@ def test_sampled_value_uses_declarative_atan2_argument_order() -> None:
         glob_time=vf.add_var("t_glob_atan2"),
         static_parameter_values_mapping=dict(),
     )
-    updater: BoundaryUpdateWrapper | None = build_boundary_updater_from_block(problem)
+    updater: BlockProceduralLogicUpdater | None = build_boundary_updater_from_block(
+        problem=problem,
+        expression_mode=expression_mode,
+    )
 
     assert updater is not None
 
@@ -791,6 +991,15 @@ def test_sampled_value_uses_declarative_atan2_argument_order() -> None:
 
     angle_idx: int = problem.uid2idx_event_params[angle.uid]
     assert parameters[angle_idx] == pytest.approx(math.pi / 2.0)
+    assert (updater._compiled_plan is not None) == (
+        fused_support and expression_mode == ProceduralExpressionMode.Compiled
+    )
+
+    # Reset must retain the selected mode when rebuilding expression evaluators.
+    updater.reset()
+    state[problem.get_var_idx(imaginary)] = -1.0
+    updater.update(t=0.0, x=state, params=parameters)
+    assert parameters[angle_idx] == pytest.approx(-math.pi / 2.0)
 
 
 def test_procedural_logic_demo_path_trips_mode_during_simulation() -> None:
@@ -827,6 +1036,48 @@ def test_procedural_logic_demo_path_trips_mode_during_simulation() -> None:
     assert logic.trip_applied_time > 0.0
     assert len(logic.trace_t) > 0
     assert np.max(y_hist[:, problem.get_var_idx(vars_map["y"])]) > 0.2
+
+
+def test_compiled_runtime_parameter_simulation_matches_interpreted_evaluator() -> None:
+    """Match one-second simulations using both runtime expression evaluators.
+
+    The first run preserves the legacy ``_evaluate_runtime_expression()`` path.
+    The second run uses the compiled runtime-parameter equations enabled by the
+    current AD solver. Their complete numerical histories must be equivalent.
+
+    :return: None.
+    """
+    interpreted_time: np.ndarray
+    interpreted_states: np.ndarray
+    interpreted_derivatives: np.ndarray
+    compiled_time: np.ndarray
+    compiled_states: np.ndarray
+    compiled_derivatives: np.ndarray
+
+    interpreted_time, interpreted_states, interpreted_derivatives = (
+        _simulate_runtime_parameter_evaluator(
+            use_compiled_runtime_parameters=False,
+        )
+    )
+    compiled_time, compiled_states, compiled_derivatives = (
+        _simulate_runtime_parameter_evaluator(
+            use_compiled_runtime_parameters=True,
+        )
+    )
+
+    np.testing.assert_array_equal(compiled_time, interpreted_time)
+    np.testing.assert_allclose(
+        compiled_states,
+        interpreted_states,
+        rtol=1.0e-12,
+        atol=1.0e-12,
+    )
+    np.testing.assert_allclose(
+        compiled_derivatives,
+        interpreted_derivatives,
+        rtol=1.0e-12,
+        atol=1.0e-12,
+    )
 
 
 def test_helper_based_logic_supports_and_or_picdro_flipflop_reset() -> None:

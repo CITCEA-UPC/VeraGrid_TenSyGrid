@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from typing import List, Union
+from typing import Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from VeraGridEngine.Simulations.results_table import ResultsTable
@@ -40,7 +40,8 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
                                    alpha_n1: np.ndarray,
                                    monitor_logic: np.ndarray,
                                    flow_n: np.ndarray,
-                                   ntc: np.ndarray,
+                                   loading_n: np.ndarray,
+                                   ttc: np.ndarray,
                                    contingency_rates: Vec,
                                    loading_threshold_pct: float,
                                    total_slack_mw: Vec | None = None,
@@ -52,12 +53,16 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
                                    hvdc_names: StrVec | None = None,
                                    hvdc_power: np.ndarray | None = None,
                                    phase_shifter_indices: IntVec | None = None,
-                                   phase_shift: np.ndarray | None = None) -> ResultsTable:
+                                   phase_shift: np.ndarray | None = None,
+                                   transmission_reliability_margin: float = 0.0,
+                                   tied_groups: List[Tuple[int, int, int, float, float, float]] | None = None,
+                                   tie_time_keys: IntVec | None = None) -> ResultsTable:
     """
     Build the long form worst-contingency table with one row per kept (time, branch).
 
-    A row is kept only when the branch is monitored and its N-1 loading is at
-    least ``loading_threshold_pct``.
+    A row is kept only when the branch is monitored and its N-1 loading or its
+    N-state loading is at least ``loading_threshold_pct``, so base-case limits show
+    up as rows without a contingency group. We also handle tied groups.
     That is the NTC "loading threshold to report" option. It avoids allocating
     an object cell for every branch of every hour.
 
@@ -72,9 +77,11 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
     :param alpha_n1: N-1 exchange sensitivity of the worst group
     :param monitor_logic: N-state monitor flag
     :param flow_n: N-state branch flow (MW)
-    :param ntc: NTC of each time index (MW)
+    :param loading_n: N-state branch loading over the normal rating (p.u.)
+    :param ttc: Optimized total transfer capacity of each time index (MW).
+    :param transmission_reliability_margin: Margin subtracted from TTC to report NTC (MW).
     :param contingency_rates: branch contingency ratings (MW)
-    :param loading_threshold_pct: keep rows whose N-1 loading is at least this percent
+    :param loading_threshold_pct: keep rows whose N-1 or N loading is at least this percent
     :param total_slack_mw: optional total thermal slack per displayed operating point
     :param time_percentage: optional cluster probabilities expressed as percentages
     :param original_time_indices: optional original-series indices for the displayed hours
@@ -85,10 +92,16 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
     :param phase_shifter_indices: indices of branches configured for phase-angle control
     :param phase_shift: base operating-point branch tap angles, radians (time, branch)
     :param result_type: report title to display
+    :param tied_groups: (time key, branch, group, N-1 flow MW, N-1 loading p.u., alpha N-1)
+                        of the groups tied with the worst group of that time and branch
+    :param tie_time_keys: per displayed time row, the time key used in ``tied_groups``
+                          (None when the keys are the displayed rows themselves)
     :return: results table
     """
     n_g: int = len(group_names)
     n_dev: int = len(group_device_names)
+    # The saved-results reader can restore scalar properties as one-element arrays.
+    margin_mw: float = float(np.asarray(transmission_reliability_margin).item())
 
     if time_array is None:
         include_time: bool = False
@@ -97,29 +110,81 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
 
     # worst_loading is already p.u. of the contingency rate, including the N-state
     loading_pct: np.ndarray = np.asarray(worst_loading, dtype=float) * 100.0
+    # the N-state uses the normal rating, which can bind while the N-1 contingency rating does not
+    loading_n_pct: np.ndarray = np.abs(np.real(np.asarray(loading_n))) * 100.0
     # Apply the same per hour monitoring flags displayed in the monitored column.
-    keep: np.ndarray = ((loading_pct >= float(loading_threshold_pct))
+    keep: np.ndarray = (((loading_pct >= float(loading_threshold_pct))
+                         | (loading_n_pct >= float(loading_threshold_pct)))
                         & np.asarray(monitor_logic, dtype=bool))
     kept: np.ndarray = np.argwhere(keep)
-    n_rows: int = int(kept.shape[0])
+    n_kept: int = int(kept.shape[0])
+
+    # Tied outages per (time key, branch), so every equally critical group gets its own row
+    ties_at: Dict[Tuple[int, int], List[Tuple[int, float, float, float]]] = dict()
+    if tied_groups is not None:
+        t_key: int
+        m_tie: int
+        c_tie: int
+        flow_tie: float
+        loading_tie: float
+        alpha_tie: float
+        for t_key, m_tie, c_tie, flow_tie, loading_tie, alpha_tie in tied_groups:
+            ties_at.setdefault((int(t_key), int(m_tie)), list()).append(
+                (int(c_tie), float(flow_tie), float(loading_tie) * 100.0, float(alpha_tie)))
+    else:
+        pass  # no tie information, one row per kept (time, branch)
+
+    # Expand the kept pairs into report rows, with the worst group first, then its tied groups.
+    # Each row is (time, branch, group, N-1 flow, N-1 loading %, alpha N-1)
+    report_rows: List[Tuple[int, int, int, float, float, float]] = list()
+    kept_i: int
+    for kept_i in range(n_kept):
+        h_k: int = int(kept[kept_i, 0])
+        m_k: int = int(kept[kept_i, 1])
+        c_k: int = int(worst_idx[h_k, m_k])
+        if 0 <= c_k < n_g:
+            report_rows.append((h_k, m_k, c_k, float(worst_flow[h_k, m_k]),
+                                float(loading_pct[h_k, m_k]), float(alpha_n1[h_k, m_k])))
+            if tie_time_keys is None:
+                key_h: int = h_k
+            else:
+                key_h = int(tie_time_keys[h_k])
+            ties_hm: Union[List[Tuple[int, float, float, float]], None] = ties_at.get((key_h, m_k), None)
+            if ties_hm is not None:
+                c_t: int
+                flow_t: float
+                loading_t: float
+                alpha_t: float
+                for c_t, flow_t, loading_t, alpha_t in ties_hm:
+                    if 0 <= c_t < n_g:
+                        report_rows.append((h_k, m_k, c_t, flow_t, loading_t, alpha_t))
+                    else:
+                        pass
+            else:
+                pass  # a single worst group for this branch
+        else:
+            # no outage makes N-1 worse so we report the N flow as the N-1 flow
+            report_rows.append((h_k, m_k, -1, float(np.real(flow_n[h_k, m_k])),
+                                float(loading_pct[h_k, m_k]), float(alpha_n1[h_k, m_k])))
+    n_rows: int = len(report_rows)
 
     if include_time:
-        n_cols: int = 12
-        columns = [
+        n_cols: int = 14
+        columns: List[str] = list((
             'Time index', 'Time',
             'Branch', 'Monitored',
             'Contingency group', 'Contingency devices',
-            'NTC (MW)', 'Alpha', 'Alpha N-1',
-            'Flow N (MW)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
-        ]
+            'TTC (MW)', 'NTC (MW)', 'Alpha', 'Alpha N-1',
+            'Flow N (MW)', 'Loading N (%)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
+        ))
     else:
-        n_cols = 10
-        columns = [
+        n_cols = 12
+        columns = list((
             'Branch', 'Monitored',
             'Contingency group', 'Contingency devices',
-            'NTC (MW)', 'Alpha', 'Alpha N-1',
-            'Flow N (MW)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
-        ]
+            'TTC (MW)', 'NTC (MW)', 'Alpha', 'Alpha N-1',
+            'Flow N (MW)', 'Loading N (%)', 'Flow N-1 (MW)', 'Loading N-1 (%)'
+        ))
 
     # Slack is useful for snapshots too. Probability exists only for clusters.
     detail_column: int = columns.index('NTC (MW)') + 1
@@ -157,31 +222,31 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
     index: np.ndarray = np.empty(n_rows, dtype=object)
 
     row_i: int
+    h: int
+    m: int
+    c_star: int
+    flow_n1_m: float
+    loading_n1_m: float
+    alpha_n1_m: float
     for row_i in range(n_rows):
-        h: int = int(kept[row_i, 0])
-        m: int = int(kept[row_i, 1])
+        h, m, c_star, flow_n1_m, loading_n1_m, alpha_n1_m = report_rows[row_i]
         if include_time:
             time_val: str = str(time_array[h])
         else:
             time_val = ""
-        ntc_h: float = float(ntc[h])
-        c_star: int = int(worst_idx[h, m])
+        ttc_h: float = float(ttc[h])
+        # Apply the study margin to capacity reporting, preserving the solved flows.
+        ntc_h: float = ttc_h - margin_mw
         flow_n_m: float = float(np.real(flow_n[h, m]))
-        if c_star >= 0 and c_star < n_g:
+        if c_star >= 0:
             c_name: str = str(group_names[c_star])
             if c_star < n_dev:
                 c_dev: str = str(group_device_names[c_star])
             else:
                 c_dev = ""
-            flow_n1_m: float = float(worst_flow[h, m])
-            loading_n1_m: float = float(loading_pct[h, m])
         else:
-            c_star = -1
             c_name = ""
             c_dev = ""
-            # no outage makes N-1 worse so we report the N flow as the N-1 flow
-            flow_n1_m = flow_n_m
-            loading_n1_m = float(loading_pct[h, m])
 
         mon_flag: bool = monitored_flag_from_logic(monitor_logic[h, m])
 
@@ -199,8 +264,9 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
         data[row_i, col0 + 1] = mon_flag
         data[row_i, col0 + 2] = c_name
         data[row_i, col0 + 3] = c_dev
-        data[row_i, col0 + 4] = np.round(ntc_h, 4)
-        next_col: int = col0 + 5
+        data[row_i, col0 + 4] = np.round(ttc_h, 4)
+        data[row_i, col0 + 5] = np.round(ntc_h, 4)
+        next_col: int = col0 + 6
         if total_slack_mw is not None:
             data[row_i, next_col] = np.round(float(total_slack_mw[h]), 4)
             next_col += 1
@@ -212,10 +278,11 @@ def worst_contingency_report_table(time_array: Union[DateVec, None],
         else:
             pass
         data[row_i, next_col] = np.round(float(alpha[h, m]), 6)
-        data[row_i, next_col + 1] = np.round(float(alpha_n1[h, m]), 6)
+        data[row_i, next_col + 1] = np.round(alpha_n1_m, 6)
         data[row_i, next_col + 2] = np.round(flow_n_m, 4)
-        data[row_i, next_col + 3] = np.round(flow_n1_m, 4)
-        data[row_i, next_col + 4] = np.round(loading_n1_m, 4)
+        data[row_i, next_col + 3] = np.round(float(loading_n_pct[h, m]), 4)
+        data[row_i, next_col + 4] = np.round(flow_n1_m, 4)
+        data[row_i, next_col + 5] = np.round(loading_n1_m, 4)
         control_col: int = control_start
         if vsc_names is not None and vsc_power is not None:
             data[row_i, control_col:control_col + len(vsc_names)] = np.round(vsc_power[h], 4)
@@ -295,6 +362,7 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         ResultsProperty(name='vsc_losses', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='converged', tpe=bool, old_names=list(), expandable=False),
         ResultsProperty(name='inter_area_flows', tpe=float, old_names=list(), expandable=False),
+        ResultsProperty(name='transmission_reliability_margin', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='structural_inter_area_flows', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='contingency_flows_list', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='strict_formulation', tpe=bool, old_names=list(), expandable=False),
@@ -303,6 +371,7 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         ResultsProperty(name='worst_contingency_flow', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='worst_contingency_loading', tpe=Vec, old_names=list(), expandable=False),
         ResultsProperty(name='alpha_n1_worst', tpe=Vec, old_names=list(), expandable=False),
+        ResultsProperty(name='worst_contingency_ties', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='loading_threshold_to_report', tpe=float, old_names=list(), expandable=False),
         ResultsProperty(name='sending_bus_idx', tpe=list, old_names=list(), expandable=False),
         ResultsProperty(name='receiving_bus_idx', tpe=list, old_names=list(), expandable=False),
@@ -350,12 +419,14 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         "strict_formulation",
         "converged",
         "inter_area_flows",
+        "transmission_reliability_margin",
         "structural_inter_area_flows",
         "contingency_group_device_names",
         "worst_contingency_idx",
         "worst_contingency_flow",
         "worst_contingency_loading",
         "alpha_n1_worst",
+        "worst_contingency_ties",
         "loading_threshold_to_report",
     )
 
@@ -364,12 +435,14 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                  branch_names: StrVec,
                  hvdc_names: StrVec,
                  vsc_names: StrVec,
-                 contingency_group_names: StrVec, ):
+                 contingency_group_names: StrVec,
+                 transmission_reliability_margin: float = 0.0):
         """
 
         :param bus_names:
         :param branch_names:
         :param hvdc_names:
+        :param transmission_reliability_margin: Study TRM in MW; zero when absent from older saved results.
         """
 
         ResultsTemplate.__init__(self,
@@ -463,6 +536,8 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         self.converged = False
 
         self.inter_area_flows = 0
+        # Store the study margin with the results so saved reports remain reproducible.
+        self.transmission_reliability_margin: float = transmission_reliability_margin
         self.structural_inter_area_flows = 0
 
         n_g: int = len(contingency_group_names)
@@ -474,23 +549,31 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
         self.worst_contingency_flow = np.zeros(m, dtype=float)
         self.worst_contingency_loading = np.zeros(m, dtype=float)
         self.alpha_n1_worst = np.zeros(m, dtype=float)
+        self.worst_contingency_ties: List[Tuple[int, int, int, float, float, float]] = list()
         self.loading_threshold_to_report: float = 98.0
 
 
-    def get_total_slack_mw(self) -> float:
+    def get_total_slack_mw(self: "OptimalNetTransferCapacityResults") -> float:
         """
         Total limit-relaxation slack of the solution in MW, with the base case overload
-        slacks plus the post-contingency relaxation slacks.
+        slacks plus the post-contingency relaxation slacks. Strict contingency
+        records contain no slack fields and do not contribute to the total.
 
         :return: total slack in MW
         """
         total: float = float(np.sum(np.abs(self.overloads)))
-        for item in self.contingency_flows_list:
-            t_i, m_i, c_i, flow_i, neg_i, pos_i = item
-            if isinstance(neg_i, float) and isinstance(pos_i, float):
-                total += abs(neg_i) + abs(pos_i)
-            else:
-                pass  # slack not evaluated to a number, nothing to add
+        if self.strict_formulation:
+            pass  # Strict limits have no slacks; their four-field rows contain only flows.
+        else:
+            # Only the regular formulation appends negative and positive slack values.
+            item: tuple[int, int, int, float, object, object]
+            for item in self.contingency_flows_list:
+                neg_i: object = item[4]
+                pos_i: object = item[5]
+                if isinstance(neg_i, float) and isinstance(pos_i, float):
+                    total += abs(neg_i) + abs(pos_i)
+                else:
+                    pass  # Slack not evaluated to a number, nothing to add.
         return total
 
     def get_solution_state(self, slack_tol_mw: float = 0.1) -> SolutionState:
@@ -784,7 +867,9 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                 alpha_n1=self.alpha_n1_worst.reshape(1, n_br),
                 monitor_logic=self.monitor_logic.reshape(1, n_br),
                 flow_n=flow_n,
-                ntc=np.array([self.inter_area_flows], dtype=float),
+                loading_n=self.loading.reshape(1, n_br),
+                ttc=np.array([self.inter_area_flows], dtype=float),
+                transmission_reliability_margin=self.transmission_reliability_margin,
                 contingency_rates=self.contingency_rates,
                 loading_threshold_pct=self.loading_threshold_to_report,
                 vsc_names=self.vsc_names,
@@ -792,7 +877,8 @@ class OptimalNetTransferCapacityResults(ResultsTemplate):
                 hvdc_names=self.hvdc_names,
                 hvdc_power=self.hvdc_Pf.reshape(1, -1),
                 phase_shifter_indices=self.phase_shifter_indices,
-                phase_shift=self.phase_shift.reshape(1, -1)
+                phase_shift=self.phase_shift.reshape(1, -1),
+                tied_groups=self.worst_contingency_ties
             )
 
         else:

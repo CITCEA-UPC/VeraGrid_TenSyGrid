@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💾 File loading and saving &mdash; VeraGrid 6.7.0 documentation</title>
+  <title>💾 File loading and saving &mdash; VeraGrid 6.7.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
+      <script src="../_static/documentation_options.js?v=16fbabd8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -65,29 +65,34 @@
 <li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#dgs">DGS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anarede-pwf">ANAREDE PWF</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">Import assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Export assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dgs">DGS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Import assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Export assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Example</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#ucte">UCTE</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id4">Import assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">Export assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Import assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Export assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Example</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#matpower">Matpower</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id7">Import assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">Export assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id9">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">Import assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">Export assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Example</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#cgmes">CGMES</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id10">Import assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id11">Export assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">Import assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">Export assumptions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#supported-profiles">Supported profiles</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id12">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">Example</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#export-the-results">Export the results</a></li>
@@ -116,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="state_estimation.html">🌀 State estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dynamic_simulations.html">🧲 Dynamic simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fmu.html">🔌 Functional Mock-up Units (FMUs)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">📜 License</a></li>
@@ -162,60 +168,139 @@ From there you may further edit or export in any of the supported formats.</p>
 <tr class="row-odd"><th class="head"><p></p></th>
 <th class="head"><p>read</p></th>
 <th class="head"><p>write</p></th>
+<th class="head"><p>Comments</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>VeraGrid</p></td>
 <td><p>✅</p></td>
 <td><p>✅</p></td>
+<td><p>Native <code class="docutils literal notranslate"><span class="pre">.veragrid</span></code> format.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Json</p></td>
+<tr class="row-odd"><td><p>VeraGrid scenario</p></td>
 <td><p>✅</p></td>
 <td><p>✅</p></td>
+<td><p>Scenario/profile data.</p></td>
 </tr>
-<tr class="row-even"><td><p>CIM 16</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-odd"><td><p>CGMES 2.4.15</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-even"><td><p>CGMES 3.0</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-odd"><td><p>raw/rawx (PSS/e)</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-even"><td><p>dgs (PowerFactory)</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-odd"><td><p>ucte (UCTE)</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-even"><td><p>m (Matpower)</p></td>
-<td><p>✅</p></td>
-<td><p>✅</p></td>
-</tr>
-<tr class="row-odd"><td><p>p (PandaPower)*</p></td>
+<tr class="row-even"><td><p>VeraGrid delta</p></td>
 <td><p>✅</p></td>
 <td><p></p></td>
+<td><p>Differential model format.</p></td>
 </tr>
-<tr class="row-even"><td><p>nc (PyPSA)*</p></td>
+<tr class="row-odd"><td><p>VeraGrid SQLite</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>Native SQLite storage.</p></td>
+</tr>
+<tr class="row-even"><td><p>VeraGrid HDF5</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>Native HDF5 storage.</p></td>
+</tr>
+<tr class="row-odd"><td><p>VeraGrid Excel</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>VeraGrid workbook variants.</p></td>
+</tr>
+<tr class="row-even"><td><p>Json</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>Native JSON model format.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CIM 16</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>CIM XML/ZIP exchange.</p></td>
+</tr>
+<tr class="row-even"><td><p>CGMES 2.4.15</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>CGMES version-specific exchange.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CGMES 3.0</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>CGMES version-specific exchange.</p></td>
+</tr>
+<tr class="row-even"><td><p>raw/rawx (PSS/e)</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>PSS/e versions 29–35.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dgs (PowerFactory)</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>PowerFactory exchange; not fully lossless.</p></td>
+</tr>
+<tr class="row-even"><td><p>ucte (UCTE)</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>UCTE network exchange.</p></td>
+</tr>
+<tr class="row-odd"><td><p>m (Matpower)</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>Matpower case files.</p></td>
+</tr>
+<tr class="row-even"><td><p>p (PandaPower)*</p></td>
 <td><p>✅</p></td>
 <td><p></p></td>
+<td><p>Requires optional <code class="docutils literal notranslate"><span class="pre">pandapower</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>nc (PyPSA)*</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>Requires optional <code class="docutils literal notranslate"><span class="pre">pypsa</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>hdf5 (PyPSA)*</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>PyPSA HDF5; requires optional <code class="docutils literal notranslate"><span class="pre">pypsa</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>epc (PSLF)</p></td>
 <td><p>✅</p></td>
 <td><p></p></td>
+<td><p>PSLF exchange; not fully lossless.</p></td>
 </tr>
-<tr class="row-even"><td><p>Power grid models</p></td>
+<tr class="row-even"><td><p>pwf (ANAREDE)</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>ANAREDE fixed-width import.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dpx</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>Read-only DPX import.</p></td>
+</tr>
+<tr class="row-even"><td><p>ech/dta (Eurostag)</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>Eurostag multi-file import.</p></td>
+</tr>
+<tr class="row-odd"><td><p>iidm</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>IIDM XML/compressed XML import.</p></td>
+</tr>
+<tr class="row-even"><td><p>RTE XML</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>RTE-specific XML import.</p></td>
+</tr>
+<tr class="row-odd"><td><p>IPA</p></td>
+<td><p>✅</p></td>
+<td><p></p></td>
+<td><p>Read-only IPA import.</p></td>
+</tr>
+<tr class="row-even"><td><p>Generic Excel</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>Generic workbook import/export.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Power grid models</p></td>
 <td><p></p></td>
 <td><p>✅</p></td>
+<td><p>VeraGrid power-grid model export.</p></td>
 </tr>
 </tbody>
 </table>
@@ -234,7 +319,7 @@ From there you may further edit or export in any of the supported formats.</p>
 <h3>Loading a grid<a class="headerlink" href="#loading-a-grid" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 
-<span class="c1"># load a grid (.veragrid, .m (Matpower), .raw (PSS/e) .rawx (PSS/e), .epc (PSLF), .dgs (PowerFactory)</span>
+<span class="c1"># load a grid (.veragrid, .m (Matpower), .raw (PSS/e), .rawx (PSS/e), .epc (PSLF), .dgs (PowerFactory), .pwf (ANAREDE))</span>
 <span class="n">my_grid</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="s2">&quot;my_file.veragrid&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -403,10 +488,40 @@ bus-branch steady-state case and you want to preserve most of the transmission-m
 </div>
 </section>
 </section>
-<section id="dgs">
-<h3>DGS<a class="headerlink" href="#dgs" title="Link to this heading"></a></h3>
+<section id="anarede-pwf">
+<h3>ANAREDE PWF<a class="headerlink" href="#anarede-pwf" title="Link to this heading"></a></h3>
 <section id="id1">
 <h4>Import assumptions<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>ANAREDE <code class="docutils literal notranslate"><span class="pre">.pwf</span></code> files are read-only imports. They are converted into the native
+<code class="docutils literal notranslate"><span class="pre">MultiCircuit</span></code> model; the original fixed-width PWF structure is not retained
+as the working grid format.</p>
+<p>The importer supports the main ANAREDE steady-state records, including:</p>
+<ul class="simple">
+<li><p>AC buses, loads, generators, lines, transformers and shunts;</p></li>
+<li><p>switched shunts, static var compensators and series compensation;</p></li>
+<li><p>areas, zones, voltage-limit groups and transformer tap settings;</p></li>
+<li><p>classical HVDC links assembled from <code class="docutils literal notranslate"><span class="pre">DELO</span></code>, <code class="docutils literal notranslate"><span class="pre">DCBA</span></code>, <code class="docutils literal notranslate"><span class="pre">DCLI</span></code>, <code class="docutils literal notranslate"><span class="pre">DCNV</span></code> and <code class="docutils literal notranslate"><span class="pre">DCCV</span></code>;</p></li>
+<li><p>VSC links from <code class="docutils literal notranslate"><span class="pre">DVSC</span></code>.</p></li>
+</ul>
+<p>ANAREDE study-control sections such as solver options, measurements and
+incremental-control records are preserved as parser study records when they do
+not correspond to native electrical devices. Latin-1 is the default text
+encoding, with detector-assisted recovery for files containing other encoding
+patterns.</p>
+</section>
+<section id="id2">
+<h4>Example<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">gce</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="s2">&quot;network.pwf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dgs">
+<h3>DGS<a class="headerlink" href="#dgs" title="Link to this heading"></a></h3>
+<section id="id3">
+<h4>Import assumptions<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <p>DGS import maps a PowerFactory-oriented database exchange into VeraGrid steady-state objects.
 This is useful, but it is not a lossless import of the full PowerFactory project semantics.</p>
 <p>Typical assumptions are:</p>
@@ -418,9 +533,185 @@ This is useful, but it is not a lossless import of the full PowerFactory project
 </ul>
 <p>So DGS import is best understood as “bring the electrical model into VeraGrid”, not “reproduce the full
 PowerFactory project database exactly”.</p>
+<p>Without explicit VSC import, voltage-droop <code class="docutils literal notranslate"><span class="pre">ElmSvs</span></code> elements (<code class="docutils literal notranslate"><span class="pre">i_ctrl=1</span></code>, <code class="docutils literal notranslate"><span class="pre">i_droop!=0</span></code>)
+become <span class="xref myst">StaticGenerator</span> devices in Q-V droop mode.
+<code class="docutils literal notranslate"><span class="pre">Srated</span></code>, <code class="docutils literal notranslate"><span class="pre">ddroop</span></code> and <code class="docutils literal notranslate"><span class="pre">usetp</span></code> retain the existing VSC curve’s rating, percentage
+and local voltage reference; P/Q references remain zero. Positive-sequence and
+ABC power flow evaluate this curve inside the nonlinear solve; ABC uses <code class="docutils literal notranslate"><span class="pre">abs(U1)</span></code>
+and positive-sequence current. Other SVC modes and the explicit VSC import route
+keep their existing mappings. The voltage clamps are 0.9 and 1.1 pu by default;
+the VSC curve currently does not clip reactive power. Native <code class="docutils literal notranslate"><span class="pre">.veragrid</span></code> files
+retain these settings; DGS export does not yet represent this static-generator control.</p>
+<p>Voltage-controlled <code class="docutils literal notranslate"><span class="pre">ElmSvs</span></code> without droop remains a
+<span class="xref myst">ControllableShunt</span>, with its physical AB/BC/CA connection.
+Continuous ABC shunts now regulate <code class="docutils literal notranslate"><span class="pre">abs(U1)</span></code> by adjusting a common susceptance, so phase
+voltage magnitudes can differ. The bank’s available capacitor/reactor data determine
+the nominal susceptance limits using the same range as the existing VSC import route;
+native <code class="docutils literal notranslate"><span class="pre">qmin</span></code> alone is a single capacitor step. Reimport the DGS to refresh those limits
+and the connection. The control uses existing solvers and Jacobian routines.</p>
+<p>Without explicit VSC import, <code class="docutils literal notranslate"><span class="pre">ElmGenstat</span></code> elements with <code class="docutils literal notranslate"><span class="pre">av_mode=constv</span></code>, including wind units,
+use the existing PV generator model and retain their active-power and voltage setpoints.
+All PV generators in three-phase power flow regulate <code class="docutils literal notranslate"><span class="pre">abs(U1)</span></code> to <code class="docutils literal notranslate"><span class="pre">Vset</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">U1</span> <span class="pre">=</span> <span class="pre">(Ua</span> <span class="pre">+</span> <span class="pre">a*Ub</span> <span class="pre">+</span> <span class="pre">a^2*Uc)/3</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">exp(j*2*pi/3)</span></code>.
+The three phase magnitudes may differ. Balanced power flow continues to use the existing PV model.</p>
+<p>This behaviour applies automatically to manually created and imported generators in
+voltage-control mode (<code class="docutils literal notranslate"><span class="pre">control_mode</span> <span class="pre">=</span> <span class="pre">V</span></code>) on non-slack buses. There is no option to fix
+the three phase magnitudes independently. Existing files use the same U1 regulation;
+an older phase/sequence selector has no effect. The ideal ABC slack retains its equations.</p>
+<p>The U1 model fixes total active power and solves for total reactive power. Its controlled
+positive-sequence current can coexist with passive negative- and zero-sequence responses.
+When reactive limits are enabled,
+the generator’s compiled <code class="docutils literal notranslate"><span class="pre">Qmin</span></code>/<code class="docutils literal notranslate"><span class="pre">Qmax</span></code> replace voltage regulation with fixed Q at a violated
+bound. Colocated U1 generators must have the same setpoint and share their aggregate Q
+capability. Remote U1 control and missing phases are rejected explicitly.</p>
+<p>U1 generators automatically use <code class="docutils literal notranslate"><span class="pre">R2</span> <span class="pre">+</span> <span class="pre">j*X2</span></code>. The existing <code class="docutils literal notranslate"><span class="pre">conn</span></code> property determines
+the homopolar response: <strong>Yg</strong> uses <code class="docutils literal notranslate"><span class="pre">R0</span> <span class="pre">+</span> <span class="pre">j*X0</span></code>, whereas <strong>Y</strong> and <strong>D</strong> block terminal
+zero-sequence current. There are no separate switches for using the impedances. All
+required impedances are in system-base pu and must be finite and nonzero; missing data
+and legacy near-zero short-circuit placeholders are rejected before the U1 calculation.
+Supply physical sequence data for three-phase voltage-controlled generators. The explicit
+neutral connection <strong>Yn</strong> is not supported by this U1 controller and is rejected rather
+than interpreted as a direct earth connection. Connection and impedance data persist
+in native VeraGrid files. Balanced positive-sequence power flow and the ideal ABC slack
+retain their existing equations.</p>
+<p>The ABC solver reuses the Fortescue transformation to form the passive admittance
+<code class="docutils literal notranslate"><span class="pre">Yabc</span> <span class="pre">=</span> <span class="pre">T</span> <span class="pre">*</span> <span class="pre">diag(Y0,</span> <span class="pre">0,</span> <span class="pre">Y2)</span> <span class="pre">*</span> <span class="pre">inverse(T)</span></code>, with <code class="docutils literal notranslate"><span class="pre">Y2</span> <span class="pre">=</span> <span class="pre">1/Z2</span></code> and <code class="docutils literal notranslate"><span class="pre">Y0</span> <span class="pre">=</span> <span class="pre">1/Z0</span></code> for Yg,
+or <code class="docutils literal notranslate"><span class="pre">Y0</span> <span class="pre">=</span> <span class="pre">0</span></code> for Y/D. It adds <code class="docutils literal notranslate"><span class="pre">-Yabc</span> <span class="pre">*</span> <span class="pre">Uabc</span></code> to the controlled positive-sequence
+current. The positive-sequence source compensates the powers absorbed by these passive
+responses so that the specified P and solved/limited Q remain <strong>total terminal powers</strong>.
+The positive-sequence PV source is not replaced by a passive <code class="docutils literal notranslate"><span class="pre">1/Z1</span></code> shunt. A blocked
+zero-sequence path means <code class="docutils literal notranslate"><span class="pre">Y0</span> <span class="pre">=</span> <span class="pre">0</span></code>, not <code class="docutils literal notranslate"><span class="pre">Z0</span> <span class="pre">=</span> <span class="pre">0</span></code>.</p>
+<p>Fixed-PQ <code class="docutils literal notranslate"><span class="pre">ElmGenstat</span></code> devices imported as <code class="docutils literal notranslate"><span class="pre">StaticGenerator</span></code> use the same connection
+and impedance conversion. Without explicit phase powers, ABC injects positive-sequence
+current from P1/Q1 and adds passive I2 and connection-dependent I0. This matches the
+native constq cases validated against PowerFactory; total terminal power includes
+passive sequence absorption, unlike the PV compensation described above. Existing
+explicit phase-power inputs keep their model. No additional earth connection or U0
+constraint is introduced. See <span class="xref myst">StaticGenerator</span> for
+units, legacy defaults and the distinction between PQ and Q-V droop.</p>
+<p>Storage <code class="docutils literal notranslate"><span class="pre">ElmGenstat</span></code> records with <code class="docutils literal notranslate"><span class="pre">av_mode=constq</span></code> remain <code class="docutils literal notranslate"><span class="pre">Battery</span></code> devices.
+Their connection and sequence impedances use the same conversion as other
+<code class="docutils literal notranslate"><span class="pre">ElmGenstat</span></code> injections. ABC includes their fixed positive-sequence P/Q and passive
+I0/I2 response, following the fixed-PQ convention above. Positive P discharges into
+the network; negative P charges. Manually created voltage-controlled batteries
+reuse the generator U1 controller and its total-terminal-power convention, including
+Q limits and colocated generators/shunts. Supply finite, nonzero Z2 and, for Yg, Z0
+for both battery modes. The storage identity, energy parameters and profiles remain
+available; this snapshot electrical model does not simulate state-of-charge evolution.</p>
+<p>Storage records with <code class="docutils literal notranslate"><span class="pre">av_mode=vdroop</span></code> instead become <code class="docutils literal notranslate"><span class="pre">StaticGenerator</span></code> devices with
+the existing Q-V droop control by default. They retain P/Q, <code class="docutils literal notranslate"><span class="pre">sgn</span></code>, <code class="docutils literal notranslate"><span class="pre">usetp</span></code>, <code class="docutils literal notranslate"><span class="pre">ddroop</span></code>,
+the <code class="docutils literal notranslate"><span class="pre">usp_min</span></code>/<code class="docutils literal notranslate"><span class="pre">usp_max</span></code> voltage clamps, connection and sequence impedances.
+ABC evaluates the droop using U1. With the explicit VSC import option enabled,
+these records keep the VSC representation and its auxiliary DC bus. Fixed-Q storage
+continues to use <code class="docutils literal notranslate"><span class="pre">Battery</span></code> under either option.</p>
+<p>For DGS <code class="docutils literal notranslate"><span class="pre">ElmGenstat</span></code> PV and PQ import, export <code class="docutils literal notranslate"><span class="pre">phtech</span></code>, <code class="docutils literal notranslate"><span class="pre">nneutral</span></code>, <code class="docutils literal notranslate"><span class="pre">r0</span></code>, <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">r2</span></code> and <code class="docutils literal notranslate"><span class="pre">x2</span></code>.
+Include these permanent variables in the <strong>Static Generator (ElmGenstat)</strong> variable set
+of the PowerFactory DGS export definition (for example, <strong>DGS Export Definitions 8 - VeraGrid</strong>).
+Their variable-set identifiers are <code class="docutils literal notranslate"><span class="pre">e:phtech</span></code>, <code class="docutils literal notranslate"><span class="pre">e:nneutral</span></code>, <code class="docutils literal notranslate"><span class="pre">e:r0</span></code>, <code class="docutils literal notranslate"><span class="pre">e:x0</span></code>, <code class="docutils literal notranslate"><span class="pre">e:r2</span></code> and <code class="docutils literal notranslate"><span class="pre">e:x2</span></code>.
+Updating this definition affects subsequent exports; an existing DGS must be exported again.
+The importer converts machine-base impedances using <code class="docutils literal notranslate"><span class="pre">Z_system</span> <span class="pre">=</span> <span class="pre">Z_machine</span> <span class="pre">*</span> <span class="pre">Sbase/sgn</span></code>
+for each parallel machine. <code class="docutils literal notranslate"><span class="pre">3PH</span></code> (<code class="docutils literal notranslate"><span class="pre">phtech=0</span></code>) maps to <strong>Y</strong>, an ungrounded three-wire
+equivalent, and retains <code class="docutils literal notranslate"><span class="pre">I0=0</span></code> even when Z0 data exist. <code class="docutils literal notranslate"><span class="pre">3PH-E</span></code> (<code class="docutils literal notranslate"><span class="pre">phtech=1</span></code>) with
+<code class="docutils literal notranslate"><span class="pre">nneutral=0</span></code> maps to <strong>Yg</strong>. Explicit terminal/separate neutral connections map to <strong>Yn</strong>
+with an import warning and are rejected by the U1 calculation. Missing connection data
+or missing/invalid impedance data also produce import warnings; required impedances
+must be completed before running U1 power flow. Other phase technologies and externally
+controlled negative-sequence currents are outside this passive three-phase model.</p>
+<p>An older DGS without these optional columns cannot reproduce the corresponding sequence
+response; re-export the required fields or supply verified data manually. Missing or
+invalid required impedances produce a diagnostic identifying
+<strong>Z0 or Z2</strong>, the affected generator and the resistance/reactance fields to check.
+The three-phase GUI displays the simulation error log instead of suggesting a missing
+slack when the engine has reported such an error. DGS reactive-limit import behaviour
+is unchanged; inspect the imported generator’s Q limits
+before enabling them. These additions do not establish complete PowerFactory equivalence
+for other equipment or control functions.</p>
+<p>Lines defined by <code class="docutils literal notranslate"><span class="pre">TypLne</span></code> sequence parameters use the line length, connected-bus voltage base
+and system power base for both scalar parameters and ABC matrices. Capacitance inputs use
+the network frequency. Geometrical tower and cable templates retain their physical matrix calculation.</p>
+<p>Series reactors (<code class="docutils literal notranslate"><span class="pre">ElmSind</span></code> / <code class="docutils literal notranslate"><span class="pre">SeriesReactance</span></code>) participate in ABC power flow using
+their existing <code class="docutils literal notranslate"><span class="pre">R/X</span></code>, <code class="docutils literal notranslate"><span class="pre">R0/X0</span></code> and <code class="docutils literal notranslate"><span class="pre">R2/X2</span></code> on the system base. The compiler transforms
+the three sequence admittances to ABC and stamps a series-only branch, without
+charging. Missing legacy Z0 or Z2 values inherit Z1, as in the line fallback.</p>
+<p>Common impedances (<code class="docutils literal notranslate"><span class="pre">ElmZpu</span></code>) reuse this <code class="docutils literal notranslate"><span class="pre">SeriesReactance</span></code> ABC model. Include
+<code class="docutils literal notranslate"><span class="pre">e:r0_pu</span></code>, <code class="docutils literal notranslate"><span class="pre">e:x0_pu</span></code>, <code class="docutils literal notranslate"><span class="pre">e:r2_pu</span></code>, <code class="docutils literal notranslate"><span class="pre">e:x2_pu</span></code>, <code class="docutils literal notranslate"><span class="pre">e:iz2eqz1</span></code> and <code class="docutils literal notranslate"><span class="pre">e:iequalz</span></code>
+in the Common Impedance variable set of <strong>DGS Export Definitions 8 - VeraGrid</strong>,
+alongside the existing <code class="docutils literal notranslate"><span class="pre">Sn</span></code>, <code class="docutils literal notranslate"><span class="pre">r_pu</span></code> and <code class="docutils literal notranslate"><span class="pre">x_pu</span></code>. The importer converts all exported
+sequence impedances using <code class="docutils literal notranslate"><span class="pre">Z_system</span> <span class="pre">=</span> <span class="pre">Z_PF</span> <span class="pre">*</span> <span class="pre">Sbase/Sn</span></code>. With <code class="docutils literal notranslate"><span class="pre">iz2eqz1=1</span></code>, Z2 uses
+Z1 even if separate negative-sequence fields contain older values. Old exports
+without the sequence fields retain the existing ABC Z1 fallback and report the
+missing fields. Re-export to obtain the physical sequence response.
+This equivalence covers reciprocal, series-only common impedances with unit ratio
+and no phase shift. Unequal forward/reverse impedances produce a warning and keep
+the existing forward-value approximation; general ElmZpu shunts and complex ratios
+are not added by this sequence extension.</p>
+<p>Series capacitors (<code class="docutils literal notranslate"><span class="pre">ElmScap</span></code>) already use the same <code class="docutils literal notranslate"><span class="pre">SeriesReactance</span></code> model with
+negative <code class="docutils literal notranslate"><span class="pre">X</span></code>, so this ABC calculation also applies to them. The current scalar
+import uses <code class="docutils literal notranslate"><span class="pre">xcap</span></code> and does not import separate capacitor sequence or phase data;
+the missing Z0/Z2 values therefore inherit the capacitive Z1. No separate ABC
+capacitor model is needed for this representation.</p>
+<p>Standard single-cage asynchronous generators (<code class="docutils literal notranslate"><span class="pre">ElmAsm</span></code>, <code class="docutils literal notranslate"><span class="pre">GeneratorType.Asynchronous</span></code>)
+also participate in ABC power flow. Use <code class="docutils literal notranslate"><span class="pre">Q</span></code> control mode: the machine model computes
+reactive power; the stored Q setpoint is not imposed. The existing <code class="docutils literal notranslate"><span class="pre">Rs/Xs/Xm/Rr/Xr</span></code>
+parameters use the machine <code class="docutils literal notranslate"><span class="pre">Snom</span></code> base. A common slip is solved from U1 and the
+positive-sequence electrical P setpoint, matching PF’s AS mode. Positive sequence
+uses slip <code class="docutils literal notranslate"><span class="pre">s</span></code>; negative sequence uses <code class="docutils literal notranslate"><span class="pre">2-s</span></code>. Passive negative- and zero-sequence
+losses reduce total terminal active injection under imbalance, without redispatching
+P1. The existing generating slip solver and interval are retained.
+No Jacobian selection or derivative formulas are changed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TypAsmo.nslty</span></code> maps <code class="docutils literal notranslate"><span class="pre">D</span></code> and isolated <code class="docutils literal notranslate"><span class="pre">Y</span></code> to connections that block zero-sequence
+current. A manually defined <code class="docutils literal notranslate"><span class="pre">Yg</span></code> machine uses effective <code class="docutils literal notranslate"><span class="pre">R0/X0</span></code> on the system base,
+including any neutral grounding contribution. Missing or invalid required Z0 produces
+an explicit error. DGS <code class="docutils literal notranslate"><span class="pre">YN</span></code> machines retain an explicit-neutral connection with an
+import warning: their neutral/grounding network is not represented by this extension.
+Double-cage, saturated, DFIG, motor and mechanical-power/torque modes are not added.
+Validate machine reactive power as well as bus voltages: a colocated voltage regulator
+can hide an incorrect machine Q. The general ABC device-Q result partition remains
+unimplemented; its zero-filled per-generator tables are not machine Q measurements.</p>
+<p>For three-phase two-winding transformers, <code class="docutils literal notranslate"><span class="pre">TypTr2.nt2ag</span></code> is imported as
+<code class="docutils literal notranslate"><span class="pre">vector_group_number</span></code> (0 to 11). In ABC power flow it specifies the <strong>total</strong>
+positive-sequence HV-to-LV lag in steps of 30 degrees, rather than an additional
+shift on top of the winding connection. Clock 0 therefore gives no structural
+shift, including for Y-D and D-Y connections; clock 1 gives a 30-degree lag and
+clock 11 a 30-degree lead. The negative sequence rotates in the opposite direction.
+The existing zero-sequence connection and neutral paths are preserved. The clock
+direction is reversed when LV is the from terminal, and the existing <code class="docutils literal notranslate"><span class="pre">tap_phase</span></code>
+remains separate. Applying a transformer catalogue template also copies its clock.
+This corrects the previous ABC behaviour, which ignored the clock and imposed an
+implicit winding shift. Single-phase transformer primitives and the balanced
+power-flow equations are unchanged.</p>
+<p>Three-winding transformers use their existing internal bus and three <code class="docutils literal notranslate"><span class="pre">Winding</span></code>
+branches in ABC power flow. Export <code class="docutils literal notranslate"><span class="pre">TypTr3.uk0hm</span></code>, <code class="docutils literal notranslate"><span class="pre">uk0ml</span></code>, <code class="docutils literal notranslate"><span class="pre">uk0hl</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ur0hm</span></code>, <code class="docutils literal notranslate"><span class="pre">ur0ml</span></code>, <code class="docutils literal notranslate"><span class="pre">ur0hl</span></code> to preserve the separate zero-sequence leakage data.
+The pairwise percentages are converted on the smaller rating of each pair before
+forming the star equivalent. Negative-sequence leakage uses <code class="docutils literal notranslate"><span class="pre">Z2</span> <span class="pre">=</span> <span class="pre">Z1</span></code> for this
+passive PF model. Each winding clock is its terminal lag relative to the common
+internal reference, so terminal-to-terminal shifts are clock differences.
+The existing winding fields retain these values when saving a native model;
+DGS export reconstructs the zero-sequence pairwise tests and connections.
+See <span class="xref myst">Transformer3W</span> for supported connections and limits.</p>
+<p>For coupled overhead lines (<code class="docutils literal notranslate"><span class="pre">ElmTow</span></code>), include <code class="docutils literal notranslate"><span class="pre">e:dphasing</span></code>, <code class="docutils literal notranslate"><span class="pre">e:dpolar</span></code> and
+<code class="docutils literal notranslate"><span class="pre">e:ctransp</span></code> in the PowerFactory export definition, together with <code class="docutils literal notranslate"><span class="pre">pGeo</span></code> and
+<code class="docutils literal notranslate"><span class="pre">plines</span></code>. Export the DGS again after updating the definition. <code class="docutils literal notranslate"><span class="pre">dphasing</span></code> maps
+the physical conductor positions to electrical ABC phases; the importer creates
+a separate geometric template variant when needed, preserving the shared catalogue.
+<code class="docutils literal notranslate"><span class="pre">dpolar</span></code> preserves circuit orientation.</p>
+<p>Each imported physical tower section has a common <code class="docutils literal notranslate"><span class="pre">Line.coupling_group</span></code> and
+per-line <code class="docutils literal notranslate"><span class="pre">coupling_reversed</span></code> flag. ABC compilation retains the complete series
+and shunt matrices between its circuits. Merely sharing a catalogue template
+does not couple unrelated lines. The existing tower calculation supplies the
+matrices, including its earth-wire reduction; a tower guard wire is not exposed
+as a load neutral. These associations survive native <code class="docutils literal notranslate"><span class="pre">.veragrid</span></code> save/load.</p>
+<p>This supports one untransposed geometry and distinct ABC circuits. Each self block
+uses its circuit’s own length; mutual blocks use the shorter of the two circuit
+lengths, preserving unequal lengths as in PowerFactory. Transposed or multi-section
+couplings retain the previous independent templates with an import warning.
+Older exports without <code class="docutils literal notranslate"><span class="pre">dphasing</span></code> are readable,
+but warn that ABC is assumed: their original phase arrangement cannot be recovered.
+DGS export from VeraGrid does not currently reconstruct these <code class="docutils literal notranslate"><span class="pre">ElmTow</span></code> associations.</p>
 </section>
-<section id="id2">
-<h4>Export assumptions<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<section id="id4">
+<h4>Export assumptions<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
 <p>The DGS exporter maps VeraGrid devices into a PowerFactory-oriented steady-state network:</p>
 <ul class="simple">
 <li><p>the export is static and evaluated at the selected <code class="docutils literal notranslate"><span class="pre">t_idx</span></code>;</p></li>
@@ -439,8 +730,8 @@ PowerFactory project database exactly”.</p>
 <li><p>technology-specific PowerFactory constructs that must be flattened into standard electrical elements.</p></li>
 </ul>
 </section>
-<section id="id3">
-<h4>Example<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<section id="id5">
+<h4>Example<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
 <p>Loading:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 
@@ -478,8 +769,8 @@ PowerFactory project database exactly”.</p>
 </section>
 <section id="ucte">
 <h3>UCTE<a class="headerlink" href="#ucte" title="Link to this heading"></a></h3>
-<section id="id4">
-<h4>Import assumptions<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<section id="id6">
+<h4>Import assumptions<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
 <p>UCTE import is more heuristic than RAW import because UCTE files are more aggregated and more tolerant of
 non-canonical real-world variants.</p>
 <p>The main import assumptions are:</p>
@@ -492,8 +783,8 @@ non-canonical real-world variants.</p>
 </ul>
 <p>This means that UCTE import aims to recover a working electrical model, not to preserve every textual oddity of the source file.</p>
 </section>
-<section id="id5">
-<h4>Export assumptions<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<section id="id7">
+<h4>Export assumptions<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
 <p>UCTE is more aggregated than VeraGrid, so the export makes stronger assumptions:</p>
 <ul class="simple">
 <li><p>the export is node-oriented rather than device-oriented at the injection level;</p></li>
@@ -517,8 +808,8 @@ non-canonical real-world variants.</p>
 <li><p>omission of unsupported device categories that have no UCTE counterpart.</p></li>
 </ul>
 </section>
-<section id="id6">
-<h4>Example<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<section id="id8">
+<h4>Example<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
 <p>Loading:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 
@@ -556,8 +847,8 @@ non-canonical real-world variants.</p>
 </section>
 <section id="matpower">
 <h3>Matpower<a class="headerlink" href="#matpower" title="Link to this heading"></a></h3>
-<section id="id7">
-<h4>Import assumptions<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<section id="id9">
+<h4>Import assumptions<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
 <p>MATPOWER import maps the classical MATPOWER case tables into VeraGrid devices:</p>
 <ul class="simple">
 <li><p>bus, generator and branch tables are converted into buses, controllable injections and branch elements;</p></li>
@@ -568,8 +859,8 @@ non-canonical real-world variants.</p>
 <p>So MATPOWER import is a very good fit for conventional AC transmission cases, but not for preserving every
 MATLAB-side modeling pattern surrounding them.</p>
 </section>
-<section id="id8">
-<h4>Export assumptions<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<section id="id10">
+<h4>Export assumptions<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
 <p>MATPOWER uses a bus/generator/branch table model, so VeraGrid has to collapse some device detail:</p>
 <ul class="simple">
 <li><p>the export is one steady-state MATPOWER case for the selected <code class="docutils literal notranslate"><span class="pre">t_idx</span></code>;</p></li>
@@ -589,8 +880,8 @@ MATLAB-side modeling pattern surrounding them.</p>
 <li><p>omission of unsupported non-AC or converter-specific devices from the standard AC case export path.</p></li>
 </ul>
 </section>
-<section id="id9">
-<h4>Example<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<section id="id11">
+<h4>Example<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
 <p>Loading:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 
@@ -628,8 +919,8 @@ MATLAB-side modeling pattern surrounding them.</p>
 </section>
 <section id="cgmes">
 <h3>CGMES<a class="headerlink" href="#cgmes" title="Link to this heading"></a></h3>
-<section id="id10">
-<h4>Import assumptions<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<section id="id12">
+<h4>Import assumptions<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
 <p>CGMES is the richest exchange format supported by VeraGrid, but it is also the most model-driven.
 Import therefore depends not only on the XML content, but also on the selected interpretation strategy.</p>
 <p>Important assumptions are:</p>
@@ -642,8 +933,8 @@ Import therefore depends not only on the XML content, but also on the selected i
 </ul>
 <p>When you need direct access to the raw CGMES asset model, use <code class="docutils literal notranslate"><span class="pre">CgmesDataParser</span></code> and <code class="docutils literal notranslate"><span class="pre">CgmesCircuit</span></code> explicitly before conversion.</p>
 </section>
-<section id="id11">
-<h4>Export assumptions<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<section id="id13">
+<h4>Export assumptions<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
 <p>CGMES export is the richest VeraGrid exporter, but it still requires explicit assumptions:</p>
 <ul class="simple">
 <li><p>export is built from the selected <code class="docutils literal notranslate"><span class="pre">t_idx</span></code>;</p></li>
@@ -782,8 +1073,8 @@ The exporter exposes the following profile registries today.</p>
 <li><p>and what schedule or NCP objects are actually available in the model at export time.</p></li>
 </ul>
 </section>
-<section id="id12">
-<h4>Example<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<section id="id14">
+<h4>Example<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
 <p>Loading a CGMES package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">VeraGridEngine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gce</span>
 

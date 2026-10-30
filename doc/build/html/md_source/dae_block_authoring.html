@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Writing DAE models in VeraGrid &mdash; VeraGrid 6.7.0 documentation</title>
+  <title>Writing DAE models in VeraGrid &mdash; VeraGrid 6.7.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=9cce70e7"></script>
+      <script src="../_static/documentation_options.js?v=16fbabd8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -73,41 +73,23 @@
 <li class="toctree-l1"><a class="reference internal" href="reliability.html">🚧 Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="state_estimation.html">🌀 State estimation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="dynamic_simulations.html">🧲 Dynamic simulations</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="rms_simulations.html">⏱️ RMS simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="emt_simulations.html">🔬 EMT simulations</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="dynamic_model_library_index.html">📚 Dynamic model library</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="dynamic_model_library_index.html#authoring-models">Authoring models</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Writing DAE models in VeraGrid</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamic_physical_network_contracts.html">Dynamic physical network contracts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-simulation-theory">1. Dynamic simulation theory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#benchmarking-against-other-software">2. Benchmarking against other software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-editor-and-model-construction">3. Dynamic editor and model construction</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dynamic_simulations.html#dynamic-model-library">4. Dynamic model library</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="dynamic_model_library_index.html">📚 Dynamic model library</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="dynamic_model_library_index.html#authoring-models">Authoring models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamic_model_library_index.html#device-templates">Device templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dynamic_model_library_index.html#reusable-blocks-and-logic">Reusable blocks and logic</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="dynamic_model_library_index.html#device-templates">Device templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dynamic_model_library_index.html#reusable-blocks-and-logic">Reusable blocks and logic</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#why-dynamic-simulations-are-different-from-static-simulations">Why dynamic simulations are different from static simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#rms-and-emt">RMS and EMT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dae-formulation">DAE formulation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#from-blocks-to-equations-in-veragrid">From blocks to equations in VeraGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#symbolic-numeric-approach">Symbolic-numeric approach</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#dynamic-blocks-in-veragrid">Dynamic blocks in VeraGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#initialization">Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#initialization-references">Initialization references</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#solvers-and-integration-methods">Solvers and integration methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#events-and-simulation-scenarios">Events and simulation scenarios</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#settings">Settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#results">Results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#api-workflow-overview">API workflow overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#rms-example-from-scripting">RMS example from scripting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#emt-example-from-scripting">EMT example from scripting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#working-with-templates-and-model-editors">Working with templates and model editors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#importing-dynamic-models-from-external-tools">Importing dynamic models from external tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#benchmarks-and-validation">Benchmarks and validation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#best-practices">Best practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#common-pitfalls">Common pitfalls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#recommended-reading-paths">Recommended reading paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dynamic_simulations.html#end-to-end-workflow">End-to-end workflow</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="fmu.html">🔌 Functional Mock-up Units (FMUs)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">💻 Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugins.html">🧩 Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">📜 License</a></li>
@@ -144,7 +126,7 @@
   <section class="tex2jax_ignore mathjax_ignore" id="writing-dae-models-in-veragrid">
 <h1>Writing DAE models in VeraGrid<a class="headerlink" href="#writing-dae-models-in-veragrid" title="Link to this heading"></a></h1>
 <p>This guide explains how to author dynamic models with VeraGrid’s symbolic <code class="docutils literal notranslate"><span class="pre">Block</span></code> system. It covers the mathematical contract, every user-facing part of a block, initialization, network and API mappings, hierarchical composition, retained runtime values, procedural logic, and the equivalent workflows in Python and the Dynamic Model Editor.</p>
-<p>Use this guide when you need to create a new RMS or EMT model. Use the <a class="reference internal" href="dynamic_model_library_index.html"><span class="std std-doc">Dynamic model library</span></a> when you need the reference page for an existing model or reusable block, and <a class="reference internal" href="dynamic_simulations.html"><span class="std std-doc">Dynamic simulations</span></a> for the theory and simulation workflow.</p>
+<p>Use this guide when you need to create a new RMS or EMT model. Use <a class="reference internal" href="dynamic_editor.html"><span class="std std-doc">Dynamic workspace and editors</span></a> for the complete GUI workflow, the <a class="reference internal" href="dynamic_model_library_index.html"><span class="std std-doc">Dynamic model library</span></a> for an existing model or reusable block, and <a class="reference internal" href="dynamic_theory.html"><span class="std std-doc">Dynamic simulation theory</span></a> for the mathematical context.</p>
 <section id="the-mental-model">
 <h2>The mental model<a class="headerlink" href="#the-mental-model" title="Link to this heading"></a></h2>
 <p>A VeraGrid dynamic model is a hierarchy of symbolic blocks. Each primitive block contributes variables and equations to a global differential-algebraic equation (DAE) problem:</p>
@@ -171,7 +153,7 @@
 <li><p>Primitive <code class="docutils literal notranslate"><span class="pre">Block</span></code> objects declare their variables, equations, parameters, initialization, and ports.</p></li>
 <li><p>A root <code class="docutils literal notranslate"><span class="pre">Block</span></code> groups the primitive blocks and exposes the device-level interface.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">external_mapping</span></code> connects that interface to grid and power-flow semantics.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> copies compatible static device data into model parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> copies compatible device data into a model parameter’s initial value.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">set_rms_model()</span></code> or <code class="docutils literal notranslate"><span class="pre">set_emt_model()</span></code> attaches the model and connects it to its bus or buses.</p></li>
 <li><p>The RMS or EMT problem builder flattens the hierarchy, initializes the model, and compiles the numerical evaluators.</p></li>
 <li><p>During the simulation, scheduled events update <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> parameters and procedural entries update retained values stored internally in <code class="docutils literal notranslate"><span class="pre">mode_dict</span></code> at accepted boundaries.</p></li>
@@ -249,8 +231,8 @@
 <td><p>Map a <code class="docutils literal notranslate"><span class="pre">VarPowerFlowReferenceType</span></code> to the exact model <code class="docutils literal notranslate"><span class="pre">Var</span></code> representing it. <code class="docutils literal notranslate"><span class="pre">None</span></code> is reserved for an optional or currently unconnected semantic slot managed by connection helpers.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code></p></td>
-<td><p>Static device-property references</p></td>
-<td><p>Map a <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code> to the exact parameter <code class="docutils literal notranslate"><span class="pre">Var</span></code> that receives the value.</p></td>
+<td><p>Device-property initialization references</p></td>
+<td><p>Map a <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code> to the exact immutable or event-capable parameter <code class="docutils literal notranslate"><span class="pre">Var</span></code> that receives the initial value.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">procedural_logic</span></code></p></td>
 <td><p>Ordered runtime logic entries</p></td>
@@ -264,29 +246,26 @@
 <td><p>Explicit derivative variables</p></td>
 <td><p>Use only when the chosen formulation requires explicit derivative symbols.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">differential_eqs</span></code></p></td>
-<td><p>Legacy differential residual representation</p></td>
-<td><p>Prefer <code class="docutils literal notranslate"><span class="pre">state_vars</span></code> plus <code class="docutils literal notranslate"><span class="pre">state_eqs</span></code> for new models.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discrete_eqs</span></code> and <code class="docutils literal notranslate"><span class="pre">boolean_guards</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">discrete_eqs</span></code> and <code class="docutils literal notranslate"><span class="pre">boolean_guards</span></code></p></td>
 <td><p>Advanced discrete/guard representation</p></td>
 <td><p>Prefer the public procedural-logic API for new stateful switching logic unless implementing a solver-specific formulation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reformulated_vars</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reformulated_vars</span></code></p></td>
 <td><p>Auxiliary variables introduced during reformulation</p></td>
 <td><p>Normally compiler-owned rather than manually authored.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">is_decomposable</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">is_decomposable</span></code></p></td>
 <td><p>Whether equations may be exposed as smaller graphical blocks</p></td>
 <td><p>Leave enabled unless the model must remain atomic.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">diagram</span></code> and <code class="docutils literal notranslate"><span class="pre">connection_intents</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">diagram</span></code> and <code class="docutils literal notranslate"><span class="pre">connection_intents</span></code></p></td>
 <td><p>Persisted editor layout and semantic connection state</p></td>
 <td><p>Let the Dynamic Model Editor manage these in normal authoring workflows.</p></td>
 </tr>
 </tbody>
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">uid</span></code> and each variable’s symbolic identities are infrastructure, not model parameters. Do not generate, copy, or rewrite them manually. Use <code class="docutils literal notranslate"><span class="pre">VarFactory</span></code> and the connection helpers so identity propagation remains consistent.</p>
+<p>The current authoring contract has no <code class="docutils literal notranslate"><span class="pre">differential_eqs</span></code> collection. Declare dynamic behaviour with <code class="docutils literal notranslate"><span class="pre">state_vars</span></code> and <code class="docutils literal notranslate"><span class="pre">state_eqs</span></code>, and use <code class="docutils literal notranslate"><span class="pre">diff_vars</span></code> plus <code class="docutils literal notranslate"><span class="pre">diff_init_eqs</span></code> only when explicit derivative symbols are required. Older saved models can contain compatibility data that the loader migrates internally; do not copy that representation into new models.</p>
 </section>
 <section id="variables-and-symbolic-expressions">
 <h2>Variables and symbolic expressions<a class="headerlink" href="#variables-and-symbolic-expressions" title="Link to this heading"></a></h2>
@@ -359,7 +338,7 @@
 </tr>
 </tbody>
 </table>
-<p>For each dictionary, the key is the symbolic variable and the value is its initial expression or constant. <code class="docutils literal notranslate"><span class="pre">Const(None)</span></code> is useful for a dynamic parameter whose initial value must be recovered through <code class="docutils literal notranslate"><span class="pre">init_eqs</span></code>, for example from a solved active-power value. An unchanged unresolved value remains unset in the GUI until initialization supplies it.</p>
+<p>For each dictionary, the key is the symbolic variable and the value is its initial expression or constant. Parameter initialization belongs in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> or <code class="docutils literal notranslate"><span class="pre">event_dict</span></code>, optionally with a device-backed source in <code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code>. Do not place parameter targets in <code class="docutils literal notranslate"><span class="pre">init_eqs</span></code>: that collection initializes solved state and algebraic variables, not parameters. <code class="docutils literal notranslate"><span class="pre">Const(None)</span></code> marks a parameter whose value must be supplied by its mapped device source; if that source cannot be resolved, model assembly must report the unresolved parameter.</p>
 <p>Do not put every tunable number in <code class="docutils literal notranslate"><span class="pre">event_dict</span></code>. Dynamic parameters occupy the runtime parameter vector and form part of the public event interface. A fixed machine reactance belongs in <code class="docutils literal notranslate"><span class="pre">parameters</span></code>; an active-power reference intended for a step or ramp belongs in <code class="docutils literal notranslate"><span class="pre">event_dict</span></code>. Do not describe or create a retained runtime value as a “mode parameter”: <code class="docutils literal notranslate"><span class="pre">mode_dict</span></code> is the persisted engine field, while <strong>Retained mode</strong> is the current authoring concept.</p>
 </section>
 </section>
@@ -382,7 +361,6 @@
 <li><p>use power-flow quantities through <code class="docutils literal notranslate"><span class="pre">external_mapping</span></code> where appropriate;</p></li>
 <li><p>reconstruct internal controller and electrical variables from that operating point;</p></li>
 <li><p>provide consistent initial values for continuous states;</p></li>
-<li><p>initialize unresolved <code class="docutils literal notranslate"><span class="pre">Const(None)</span></code> dynamic parameters;</p></li>
 <li><p>avoid contradictory assignments and circular dependencies;</p></li>
 <li><p>use the same sign and per-unit conventions as the time-domain equations.</p></li>
 </ul>
@@ -436,7 +414,7 @@
 </section>
 <section id="api-object-mappings">
 <h2>API object mappings<a class="headerlink" href="#api-object-mappings" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> maps static grid-device properties to dynamic model parameter variables:</p>
+<p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> maps grid-device properties to initial values of dynamic model parameters:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">root</span><span class="o">.</span><span class="n">api_obj_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">({</span>
     <span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">Pl0</span><span class="p">:</span> <span class="n">initial_active_power</span><span class="p">,</span>
     <span class="n">ParamPowerFlowReferenceType</span><span class="o">.</span><span class="n">Ql0</span><span class="p">:</span> <span class="n">initial_reactive_power</span><span class="p">,</span>
@@ -448,8 +426,40 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">external_mapping</span></code> identifies operating-point and network-interface variables;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> identifies configuration values copied from the associated API device.</p></li>
 </ul>
-<p>The public mapping contract is static-device data to a fixed model parameter. The mapped value must therefore be the same <code class="docutils literal notranslate"><span class="pre">Var</span></code> that appears in <code class="docutils literal notranslate"><span class="pre">parameters</span></code>, not in <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> or <code class="docutils literal notranslate"><span class="pre">mode_dict</span></code>. Use one semantic mapping key only once in the effective block hierarchy. The available keys and their intended units are defined by <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code>; use the GUI selector or inspect that enum rather than inventing a string key.</p>
-<p>Dynamic parameters do not expose an API mapping selector in the GUI. If a runtime reference must start from static device data, map that data to a fixed parameter and use the fixed parameter in the runtime reference’s initialization expression. Controller-specific gains with no corresponding static device property should retain their template value; place them in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> unless they are genuine event targets.</p>
+<p>The mapping selects the source of the initial value; it does not select the parameter’s runtime role. The mapped <code class="docutils literal notranslate"><span class="pre">Var</span></code> must be declared by the same block in exactly one collection: <code class="docutils literal notranslate"><span class="pre">parameters</span></code> for a value that remains fixed, or <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> for a value that scheduled events may change. A mapping-only variable is not registered by either RMS or EMT.</p>
+<p>Initial-value precedence is the same in RMS and EMT:</p>
+<ol class="arabic simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> is present and its device value is resolved, that device value is authoritative.</p></li>
+<li><p>Otherwise, the expression stored in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> or <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> is the authoritative local value.</p></li>
+<li><p>A scheduled event may subsequently replace an <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> value during the simulation; it does not participate in initial-value source selection.</p></li>
+</ol>
+<p>The supported authoring patterns are therefore:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Declaration</p></th>
+<th class="head"><p>Mapping</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Concrete <code class="docutils literal notranslate"><span class="pre">Const(value)</span></code> or expression</p></td>
+<td><p>absent</p></td>
+<td><p>The model template owns the value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Const(None)</span></code></p></td>
+<td><p>present</p></td>
+<td><p>The associated grid device must supply the value.</p></td>
+</tr>
+<tr class="row-even"><td><p>Concrete <code class="docutils literal notranslate"><span class="pre">Const(value)</span></code> or expression</p></td>
+<td><p>present</p></td>
+<td><p>The device value wins when it resolves; the declaration is a fallback and an information diagnostic records a different resolved value.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The Dynamic Model Editor deliberately keeps the numeric-value control and device-source selector mutually exclusive, so its normal device-backed pattern is <code class="docutils literal notranslate"><span class="pre">Const(None)</span></code> plus <code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code>. The concrete-fallback form exists for explicit scripted models and legacy compatibility; authors must not use it when the local value is intended to override the device. In that case, remove the mapping.</p>
+<p>Mappings follow block ownership recursively. When a child owns a parameter, declare both its storage entry and its <code class="docutils literal notranslate"><span class="pre">api_obj_mapping</span></code> entry on that child. Do not copy either entry to the root wrapper; the RMS and EMT problem builders traverse the hierarchy. A block flattened with <code class="docutils literal notranslate"><span class="pre">unify_blocks()</span></code> owns the merged declarations after its children have been consumed, so it also does not need a second wrapper copy.</p>
+<p>Use one semantic mapping key only once in the effective block hierarchy. The available keys and their intended units are defined by <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code>; use the GUI selector or inspect that enum rather than inventing a string key. Multiple sources may target one symbolic UID only when they resolve to the same value. VeraGrid keeps the first resolved value and reports a conflict instead of silently overwriting it when a later source differs. The file loader repairs historical mapping-only static targets with <code class="docutils literal notranslate"><span class="pre">Const(None)</span></code> so old <code class="docutils literal notranslate"><span class="pre">.veragrid</span></code> files remain readable, but new templates must always declare the parameter explicitly.</p>
+<p>Dynamic parameters may also expose a device initialization mapping in the GUI. The numeric-value control and device-source selector are mutually exclusive. Seeding a variable already owned by <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> does not make it static: RMS and EMT use the mapped value as the pre-event baseline and retain the variable in their runtime parameter vectors. The loader preserves the serialized storage role and never promotes an event target into <code class="docutils literal notranslate"><span class="pre">parameters</span></code> merely because of its mapping key. Controller-specific gains with no corresponding device property should retain their template value; place them in <code class="docutils literal notranslate"><span class="pre">parameters</span></code> unless they are genuine event targets.</p>
 </section>
 <section id="ports-children-and-connections">
 <h2>Ports, children, and connections<a class="headerlink" href="#ports-children-and-connections" title="Link to this heading"></a></h2>
@@ -595,8 +605,8 @@
     <span class="n">active_power_reference</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">var_factory</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Pl_ref&quot;</span><span class="p">)</span>
     <span class="n">reactive_power_reference</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">var_factory</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ql_ref&quot;</span><span class="p">)</span>
 
-    <span class="c1"># API mappings populate fixed parameters only. These seed parameters</span>
-    <span class="c1"># receive the associated static Load values and initialize the references.</span>
+    <span class="c1"># These particular API mappings populate fixed seed parameters. A mapped</span>
+    <span class="c1"># event_dict target would instead remain event-capable after initialization.</span>
     <span class="n">initial_active_power</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">var_factory</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Pl0_device&quot;</span><span class="p">)</span>
     <span class="n">initial_reactive_power</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">var_factory</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ql0_device&quot;</span><span class="p">)</span>
     <span class="n">time_constant</span><span class="p">:</span> <span class="n">Var</span> <span class="o">=</span> <span class="n">var_factory</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;T_p&quot;</span><span class="p">)</span>
@@ -674,7 +684,7 @@
 </section>
 <section id="authoring-in-the-dynamic-model-editor">
 <h2>Authoring in the Dynamic Model Editor<a class="headerlink" href="#authoring-in-the-dynamic-model-editor" title="Link to this heading"></a></h2>
-<p>The GUI edits the same <code class="docutils literal notranslate"><span class="pre">Block</span></code> objects used by scripting. There is no separate graphical model format.</p>
+<p>The GUI edits the same <code class="docutils literal notranslate"><span class="pre">Block</span></code> objects used by scripting. There is no separate graphical model format. This section focuses on equation authoring inside an RMS or EMT Editor tab; <a class="reference internal" href="dynamic_editor.html"><span class="std std-doc">Dynamic workspace and editors</span></a> documents the Events, Comparison, Plots, and Results pages.</p>
 <section id="open-and-compose-a-model">
 <h3>Open and compose a model<a class="headerlink" href="#open-and-compose-a-model" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
@@ -694,13 +704,7 @@
 <p>Double-click a block to open <strong>Block properties</strong>. The main pages are:</p>
 <ul class="simple">
 <li><p><strong>General options</strong>: block identity, generated structural settings, fixed parameters, and dynamic parameters. Retained runtime values are deliberately not edited here.</p></li>
-</ul>
-<p><img alt="General options" src="../_images/block_properties_general_options.png" /></p>
-<ul class="simple">
 <li><p><strong>DAE model</strong>: recursive Variables and Parameters tables, the equation owner selector, safe Python-like DAE code with mathematical algebraic equalities, copyable LaTeX source, and rendered PDF export.</p></li>
-</ul>
-<p><img alt="Block Properties" src="../_images/block_properties_DAE_model.png" /></p>
-<ul class="simple">
 <li><p><strong>Runtime logic</strong>: retained runtime values and ordered procedural entries. Its two subpages are <strong>Procedural entries</strong> and <strong>Retained modes</strong>.</p></li>
 <li><p><strong>Special settings</strong>: structured builder data for blocks that need it, such as lookup tables.</p></li>
 </ul>
@@ -714,7 +718,7 @@
 <li><p><strong>Parameters</strong> offers Parameter for fixed constants and Dynamic parameter for <code class="docutils literal notranslate"><span class="pre">event_dict</span></code> values.</p></li>
 <li><p><strong>Runtime logic → Retained modes</strong> is the only current GUI location for creating and editing <code class="docutils literal notranslate"><span class="pre">mode_dict</span></code> values. There is no Mode parameter choice in the add-symbol form or either visible symbol table.</p></li>
 </ul>
-<p>The mapping column assigns <code class="docutils literal notranslate"><span class="pre">VarPowerFlowReferenceType</span></code> to network-facing variables and <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code> to fixed parameters. Dynamic parameters do not accept a static API mapping in the GUI. Do not simulate a mapping by merely renaming a variable to <code class="docutils literal notranslate"><span class="pre">Vm</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, or <code class="docutils literal notranslate"><span class="pre">r</span></code>; the semantic enum selection is what creates the contract.</p>
+<p>The mapping column assigns <code class="docutils literal notranslate"><span class="pre">VarPowerFlowReferenceType</span></code> to network-facing variables and <code class="docutils literal notranslate"><span class="pre">ParamPowerFlowReferenceType</span></code> to fixed or dynamic parameters. For a dynamic parameter, the selected device value is only its initial baseline; the value remains available to scheduled events. Do not simulate a mapping by merely renaming a variable to <code class="docutils literal notranslate"><span class="pre">Vm</span></code>, <code class="docutils literal notranslate"><span class="pre">P</span></code>, or <code class="docutils literal notranslate"><span class="pre">r</span></code>; the semantic enum selection is what creates the contract.</p>
 <p>The Output checkbox exposes an existing variable as a port or result. It does not turn an input into an equation, and it does not remove a variable from its original role.</p>
 </section>
 <section id="dae-code-in-the-gui">

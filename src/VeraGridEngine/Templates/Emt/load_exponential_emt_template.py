@@ -189,6 +189,8 @@ def get_exponential_load_emt(
     # Shared constants stay scalar because every per-phase equation reuses the
     # same EMT formulation and only the active phase list changes the sizing.
     c2: Expr = vf.add_const(2.0)
+    # P0/Q0 are per-phase powers on the system three-phase Sbase.
+    c3: Expr = vf.add_const(3.0)
     c05: Expr = vf.add_const(0.5)
 
     # Runtime parameters remain global to the load object because they are fed by
@@ -205,7 +207,6 @@ def get_exponential_load_emt(
     templ.block.event_dict[alpha_q] = vf.add_const(2.0)
     templ.block.event_dict[k_sogi] = vf.add_const(float(np.sqrt(2.0)))
     templ.block.event_dict[eps] = vf.add_const(1e-12)
-    templ.block.event_dict[omega] = vf.add_const(2.0 * np.pi * 50.0)
 
     # All phase-indexed structures are built from the active phase list so the
     # block sizes, names and ordering match the electrical connection exactly.
@@ -246,8 +247,10 @@ def get_exponential_load_emt(
         q0_var: Var = vf.add_var(name=f"Q0_{phase_label}")
 
         templ.block.event_dict[voltage_derivative_var] = vf.add_const(None)
-        templ.block.event_dict[p0_var] = vf.add_const(0.1 / 3.0)
-        templ.block.event_dict[q0_var] = vf.add_const(0.01 / 3.0)
+        # Keep device-backed load powers event-capable. Const(None) records that
+        # api_obj_mapping is their exclusive initial source.
+        templ.block.event_dict[p0_var] = vf.add_const(None)
+        templ.block.event_dict[q0_var] = vf.add_const(None)
 
         voltage_vars[phase_label] = voltage_var
         voltage_derivative_vars[phase_label] = voltage_derivative_var
@@ -321,7 +324,7 @@ def get_exponential_load_emt(
         algebraic_eqs.append(ratio_sq_var - safe_ratio_sq_expr)
         algebraic_eqs.append(p_var + (p0_var * p_power_expr))
         algebraic_eqs.append(q_load_var + (q0_var * q_power_expr))
-        algebraic_eqs.append(current_var - (c2 * (u_var * p_var + q_var * q_load_var) / safe_v2_expr))
+        algebraic_eqs.append(current_var - (c3 * c2 * (u_var * p_var + q_var * q_load_var) / safe_v2_expr))
 
         # The explicit initializer consumes these seeds phase by phase using the
         # same formulas as before, now limited to the active subset.
@@ -333,7 +336,7 @@ def get_exponential_load_emt(
         init_eqs[ratio_sq_var] = safe_ratio_sq_expr
         init_eqs[p_var] = -(p0_var * p_power_expr)
         init_eqs[q_load_var] = -(q0_var * q_power_expr)
-        init_eqs[current_var] = c2 * (u_var * p_var + q_var * q_load_var) / safe_v2_expr
+        init_eqs[current_var] = c3 * c2 * (u_var * p_var + q_var * q_load_var) / safe_v2_expr
 
         diff_init_eqs[d_u_var] = voltage_derivative_var
         diff_init_eqs[d_q_var] = omega * u_var
@@ -357,7 +360,18 @@ def get_exponential_load_emt(
         diff_init_eqs=diff_init_eqs,
     )
     block_model.name = resolved_name
-    block_model.event_dict = templ.block.event_dict
+    block_model.event_dict = dict()
+    # Move only device-backed runtime parameters to the physical child that
+    # owns their API mappings. Model-wide controls and derivative inputs remain
+    # exposed by the root without being duplicated in the child.
+    for phase_label in active_phases:
+        p0_var = p0_vars[phase_label]
+        q0_var = q0_vars[phase_label]
+        block_model.event_dict[p0_var] = templ.block.event_dict.pop(p0_var)
+        block_model.event_dict[q0_var] = templ.block.event_dict.pop(q0_var)
+    block_model.parameters = templ.block.parameters
+    templ.block.parameters = dict()
+    block_model.parameters[omega] = vf.add_const(2.0 * np.pi * 50.0)
 
     # The external mapping keeps the fixed EMT enum contract, but only active
     # phases publish concrete variables. Inactive phases are explicit ``None``.
@@ -383,7 +397,7 @@ def get_exponential_load_emt(
 
     # The load initializer writes only the active per-phase parameters into the
     # block, which keeps template metadata aligned with the generated equations.
-    api_obj_mapping: Dict[ParamPowerFlowReferenceType, Var | None] = dict({
+    api_obj_mapping: Dict[ParamPowerFlowReferenceType, Var] = dict({
         ParamPowerFlowReferenceType.omega_base: omega,
     })
 
@@ -398,7 +412,6 @@ def get_exponential_load_emt(
 
     templ.block.children.append(block_model)
     templ.block.external_mapping = block_model.external_mapping
-    templ.block.api_obj_mapping = block_model.api_obj_mapping
     templ.block.in_vars = block_model.in_vars
     templ.block.out_vars = block_model.out_vars
 

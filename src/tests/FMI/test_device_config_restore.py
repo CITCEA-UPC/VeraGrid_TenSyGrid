@@ -1,18 +1,22 @@
 from __future__ import annotations
+from VeraGridEngine.enumerations import InterfaceType
 
 import json
+import ast
 from pathlib import Path
+import subprocess
+import sys
 from types import SimpleNamespace
 
 import pytest
 
-from VeraGridEngine.IO.fmu.exporter.api import export_fmu
-from VeraGridEngine.IO.fmu.exporter.build import host_build_capable
-from VeraGridEngine.IO.fmu.exporter.config import ExportConfig as CsExportConfig, detect_target_platform as detect_cs_target_platform
-from VeraGridEngine.IO.fmu.exporter.compat import Block, Const, Var
-from VeraGridEngine.IO.fmu.exporter_me.api import export_fmu_me
-from VeraGridEngine.IO.fmu.exporter_me.config import ExportConfig as MeExportConfig, detect_target_platform as detect_me_target_platform
-from VeraGridEngine.IO.fmu.importer.bindings import (
+from VeraGridEngine.IO.fmu.interface import export_model_as_fmu
+from VeraGridEngine.IO.fmu.CosimulationInterface.build import host_build_capable
+from VeraGridEngine.IO.fmu.config import ExportConfig as CsExportConfig, detect_target_platform as detect_cs_target_platform
+from VeraGridEngine.Utils.Symbolic.block import Block
+from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var
+from VeraGridEngine.IO.fmu.config import ExportConfig as MeExportConfig, detect_target_platform as detect_me_target_platform
+from VeraGridEngine.IO.fmu.Elements.bindings import (
     FmuBindingDirection,
     FmiThreeFloat64ConfigurationValue,
     FmiThreeUInt64ConfigurationValue,
@@ -20,13 +24,13 @@ from VeraGridEngine.IO.fmu.importer.bindings import (
     FmuRefBinding,
     FmuVariableBinding,
 )
-from VeraGridEngine.IO.fmu.importer.device_api import (
+from VeraGridEngine.IO.fmu.fmu_device_integration import (
     attach_emt_fmu_cs_device,
     attach_emt_fmu_me_device,
     attach_rms_fmu_cs_device,
     attach_rms_fmu_me_device,
 )
-from VeraGridEngine.IO.fmu.importer.device_config import (
+from VeraGridEngine.IO.fmu.fmu_device_integration import (
     FmuCsDeviceConfigRecord,
     FmuMeDeviceConfigRecord,
     dump_fmu_cs_device_config,
@@ -35,18 +39,18 @@ from VeraGridEngine.IO.fmu.importer.device_config import (
     load_fmu_me_device_config,
     restore_fmu_cs_spec_from_record,
 )
-from VeraGridEngine.IO.fmu.importer.co_simulation import (
+from VeraGridEngine.IO.fmu.co_simulation import (
     FmuCsDeviceSpec,
     FmuCsDomain,
     register_emt_fmu_cs_device,
     register_rms_fmu_cs_device,
 )
-from VeraGridEngine.IO.fmu.importer.model_exchange import (
+from VeraGridEngine.IO.fmu.model_exchange import (
     FmuMeDomain,
     register_emt_fmu_me_device,
     register_rms_fmu_me_device,
 )
-from VeraGridEngine.IO.fmu.importer.runtime_worker_host import (
+from VeraGridEngine.IO.fmu.worker_host import (
     FmiThreeWorkerHostLimits,
 )
 
@@ -57,6 +61,42 @@ from VeraGridEngine.enumerations import (
     FmuInterfaceMode,
     VarPowerFlowReferenceType,
 )
+
+
+def test_fmu_runtime_imports_are_acyclic() -> None:
+    """Check fresh import orders, legacy identity and resolved adapter annotations.
+
+    :return: None; any import cycle, deferred back edge or changed identity fails.
+    """
+    root: Path = Path(__file__).resolve().parents[3]
+    module: str
+    for module in ("co_simulation", "model_exchange", "fmu_device_integration"):
+        path: Path = root / "src" / "VeraGridEngine" / "IO" / "fmu" / (module + ".py")
+        tree: ast.Module = ast.parse(path.read_text(encoding="utf-8"))
+        node: ast.AST
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                assert node.col_offset == 0 or node.module is None or not node.module.startswith("VeraGridEngine.IO.fmu")
+                if module != "fmu_device_integration":
+                    assert node.module != "VeraGridEngine.IO.fmu.fmu_device_integration"
+                else:
+                    pass
+            else:
+                pass
+        script: str = (
+            "import sys; from typing import get_type_hints; "
+            "sys.path.insert(0, " + repr(str(root / "src")) + "); "
+            "import VeraGridEngine.IO.fmu." + module + "; "
+            "from VeraGridEngine.IO.fmu import fmu_device_integration as integration; "
+            "from VeraGridEngine.IO.fmu.Elements import device_configuration as config; "
+            "from VeraGridEngine.IO.fmu import co_simulation as cs, model_exchange as me; "
+            "assert integration.FmuCsDeviceConfigRecord is config.FmuCsDeviceConfigRecord; "
+            "assert integration.restore_fmu_cs_spec_from_record is cs.restore_fmu_cs_spec_from_record; "
+            "assert integration.restore_fmu_me_spec_from_record is me.restore_fmu_me_spec_from_record; "
+            "get_type_hints(integration.CompositeEmtBoundaryUpdater.__init__)"
+        )
+        result: subprocess.CompletedProcess[str] = subprocess.run([sys.executable, "-c", script], cwd=root, capture_output=True, text=True, check=False)
+        assert result.returncode == 0, result.stdout + result.stderr
 
 
 def build_simple_output_fmu_block() -> Block:
@@ -523,7 +563,7 @@ def test_rms_device_config_can_restore_runtime_spec(tmp_path: Path) -> None:
     output_root: Path = tmp_path
     fmu_path = output_root / "restore_rms.fmu"
     try:
-        exported_fmu = export_fmu(
+        exported_fmu = export_model_as_fmu(
             build_simple_output_fmu_block(),
             CsExportConfig(
                 model_name="RestoreRmsDevice",
@@ -831,7 +871,7 @@ def test_emt_device_config_can_restore_runtime_spec(tmp_path: Path) -> None:
     output_root: Path = tmp_path
     fmu_path = output_root / "restore_emt.fmu"
     try:
-        exported_fmu = export_fmu(
+        exported_fmu = export_model_as_fmu(
             build_simple_output_fmu_block(),
             CsExportConfig(
                 model_name="RestoreEmtDevice",
@@ -881,9 +921,9 @@ def test_rms_me_device_config_can_restore_runtime_spec(tmp_path: Path) -> None:
     output_root: Path = tmp_path
     fmu_path = output_root / "restore_rms_me.fmu"
     try:
-        exported_fmu = export_fmu_me(
+        exported_fmu = export_model_as_fmu(
             build_simple_me_output_fmu_block(),
-            MeExportConfig(
+            MeExportConfig(interface_type=InterfaceType.MODEL_EXCHANGE, 
                 model_name="RestoreRmsMeDevice",
                 output_path=fmu_path,
                 target_platform=detect_me_target_platform(),
@@ -931,9 +971,9 @@ def test_emt_me_device_config_can_restore_runtime_spec(tmp_path: Path) -> None:
     output_root: Path = tmp_path
     fmu_path = output_root / "restore_emt_me.fmu"
     try:
-        exported_fmu = export_fmu_me(
+        exported_fmu = export_model_as_fmu(
             build_simple_me_output_fmu_block(),
-            MeExportConfig(
+            MeExportConfig(interface_type=InterfaceType.MODEL_EXCHANGE, 
                 model_name="RestoreEmtMeDevice",
                 output_path=fmu_path,
                 target_platform=detect_me_target_platform(),

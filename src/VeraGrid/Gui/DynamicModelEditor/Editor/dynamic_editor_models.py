@@ -27,12 +27,10 @@ from VeraGridEngine.Devices.Substation.bus import Bus
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Devices.types import ALL_DEV_TYPES
 from VeraGridEngine.Utils.Symbolic.block import Block
-from VeraGridEngine.Utils.Symbolic.bus_emt_template import BusEmtTemplate, get_bus_emt_algebraic_vars
 from VeraGridEngine.Utils.Symbolic.bus_rms_template import initialize_bus_rms
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var
+from VeraGridEngine.Utils.Symbolic.symbolic_io import duplicate_block_vars_uid
 from VeraGridEngine.Utils.Symbolic.templates_common_functions import (
-    emt_bus_shell_matches_grid_topology,
-    reconcile_saved_emt_model_against_current_topology,
     synchronize_emt_bus_shell_with_grid,
 )
 from VeraGridEngine.enumerations import DynamicSimulationMode
@@ -161,52 +159,77 @@ def clone_block_for_editing(block: Block) -> Block:
     """
     return copy.deepcopy(block)
 
+def clone_block_and_create_vf_for_editor(
+        block: Block,
+        source_var_factory: VarFactory,
+) -> tuple[Block, VarFactory]:
+    """Create an isolated working block and private symbolic factory.
+
+    :param block: Source block owned by the device or template.
+    :param source_var_factory: Factory owning the persistent connection graph.
+    :return: Working block and private factory used by one editor document.
+    """
+    working_vf: VarFactory = VarFactory()
+    working_block: Block = duplicate_block_vars_uid(
+        block=block,
+        source_var_factory=source_var_factory,
+        target_var_factory=working_vf,
+    )
+    return working_block, working_vf
+
 
 def copy_block_state(source_block: Block, target_block: Block) -> None:
-    """Replace all persistent target-block state with an isolated source copy.
+    """Transfer the complete working state into the persistent block object.
+
+    Symbolic collections are assigned directly so the persistent block and the
+    merged circuit ``VarFactory`` own the exact same variable instances.
 
     :param source_block: Working block whose complete state must be committed.
     :param target_block: Existing owned block whose identity object is retained.
     :return: None.
     """
-    source_clone: Block = clone_block_for_editing(source_block)
+    # Transfer every persistent declaration without introducing a third set of
+    # Var objects between the accepted working tree and the circuit factory.
+    target_block.name = source_block.name
+    target_block.model_family_name = source_block.model_family_name
+    target_block.uid = source_block.uid
+    target_block.is_decomposable = source_block.is_decomposable
+    target_block.tpe_uid = source_block.tpe_uid
+    target_block.vars_glob_name2uid = source_block.vars_glob_name2uid
+    target_block.state_vars = source_block.state_vars
+    target_block.state_eqs = source_block.state_eqs
+    target_block.algebraic_vars = source_block.algebraic_vars
+    target_block.algebraic_eqs = source_block.algebraic_eqs
+    target_block.inequalities = source_block.inequalities
+    target_block.diff_vars = source_block.diff_vars
+    target_block.reformulated_vars = source_block.reformulated_vars
+    target_block.differential_eqs = source_block.differential_eqs
+    target_block.init_eqs = source_block.init_eqs
+    target_block.diff_init_eqs = source_block.diff_init_eqs
+    target_block.post_init_seed_eqs = source_block.post_init_seed_eqs
+    target_block.children = source_block.children
+    target_block.in_vars = source_block.in_vars
+    target_block.out_vars = source_block.out_vars
+    target_block.parameters = source_block.parameters
+    target_block.discrete_eqs = source_block.discrete_eqs
+    target_block.external_mapping = source_block.external_mapping
+    target_block.api_obj_mapping = source_block.api_obj_mapping
+    target_block.init_values = source_block.init_values
+    target_block.var_mapping = source_block.var_mapping
+    target_block.event_dict = source_block.event_dict
+    target_block.mode_dict = source_block.mode_dict
+    target_block.boolean_guards = source_block.boolean_guards
+    target_block.procedural_logic = source_block.procedural_logic
+    target_block.connection_intents = source_block.connection_intents
+    target_block.dynamic_model_contract = source_block.dynamic_model_contract
+    target_block._modal_template_kind = source_block._modal_template_kind
+    target_block._modal_template_config = source_block._modal_template_config
+    target_block._jmarti_fit_bundle = source_block._jmarti_fit_bundle
+    target_block._jmarti_runtime_data = source_block._jmarti_runtime_data
+    target_block.diagram = source_block.diagram
 
-    # Copy every persistent symbolic collection so Apply changes cannot retain
-    # stale equations, mappings, or procedural data from the previous model.
-    target_block.name = source_clone.name
-    target_block.model_family_name = source_clone.model_family_name
-    target_block.uid = source_clone.uid
-    target_block.is_decomposable = source_clone.is_decomposable
-    target_block.tpe_uid = source_clone.tpe_uid
-    target_block.vars_glob_name2uid = source_clone.vars_glob_name2uid
-    target_block.state_vars = source_clone.state_vars
-    target_block.state_eqs = source_clone.state_eqs
-    target_block.algebraic_vars = source_clone.algebraic_vars
-    target_block.algebraic_eqs = source_clone.algebraic_eqs
-    target_block.inequalities = source_clone.inequalities
-    target_block.diff_vars = source_clone.diff_vars
-    target_block.reformulated_vars = source_clone.reformulated_vars
-    target_block.differential_eqs = source_clone.differential_eqs
-    target_block.init_eqs = source_clone.init_eqs
-    target_block.diff_init_eqs = source_clone.diff_init_eqs
-    target_block.children = source_clone.children
-    target_block.in_vars = source_clone.in_vars
-    target_block.out_vars = source_clone.out_vars
-    target_block.parameters = source_clone.parameters
-    target_block.discrete_eqs = source_clone.discrete_eqs
-    target_block.external_mapping = source_clone.external_mapping
-    target_block.api_obj_mapping = source_clone.api_obj_mapping
-    target_block.init_values = source_clone.init_values
-    target_block.var_mapping = source_clone.var_mapping
-    target_block.event_dict = source_clone.event_dict
-    target_block.mode_dict = source_clone.mode_dict
-    target_block.boolean_guards = source_clone.boolean_guards
-    target_block.procedural_logic = source_clone.procedural_logic
-    target_block.connection_intents = source_clone.connection_intents
-    target_block.diagram = source_clone.diagram
 
-
-def _ensure_block_tree_names(block: Block, prefix: str = "block") -> None:
+def ensure_block_tree_names(block: Block, prefix: str = "block") -> None:
     """Assign deterministic display names to unnamed blocks recursively.
 
     :param block: Block subtree to normalize.
@@ -221,7 +244,7 @@ def _ensure_block_tree_names(block: Block, prefix: str = "block") -> None:
     child_index: int
     child_block: Block
     for child_index, child_block in enumerate(block.children, start=1):
-        _ensure_block_tree_names(child_block, prefix=f"{block.name}_{child_index}")
+        ensure_block_tree_names(child_block, prefix=f"{block.name}_{child_index}")
 
 
 def block_requires_editor_connection_bootstrap(block: Block) -> bool:
@@ -245,7 +268,7 @@ def block_requires_editor_connection_bootstrap(block: Block) -> bool:
         return False
 
 
-def _initialize_editor_assigned_rms_bus_model(bus: Bus, var_factory: VarFactory) -> None:
+def initialize_editor_assigned_rms_bus_model(bus: Bus, var_factory: VarFactory) -> None:
     """Create a missing RMS bus shell used by an editor-assigned model.
 
     :param bus: Connected network bus.
@@ -258,118 +281,40 @@ def _initialize_editor_assigned_rms_bus_model(bus: Bus, var_factory: VarFactory)
         pass
 
 
-def _initialize_editor_assigned_emt_bus_model(bus: Bus,
-                                              api_object: ALL_DEV_TYPES,
-                                              circuit: MultiCircuit | None,
-                                              var_factory: VarFactory) -> None:
-    """Create or reconcile one EMT bus shell before editor attachment.
-
-    :param bus: Connected network bus.
-    :param api_object: Device whose model is being assigned.
-    :param circuit: Optional grid used to infer the active topology.
-    :param var_factory: Shared symbolic variable factory.
-    :return: None.
-    """
-    if circuit is not None:
-        branch_shell_requires_check: bool = (
-            isinstance(api_object, BranchParent)
-            and not bus.emt_model.empty()
-            and not bus.is_emt_model_grid_synchronized()
-        )
-        if branch_shell_requires_check:
-            try:
-                get_bus_emt_algebraic_vars(bus.emt_model)
-            except (AttributeError, TypeError, ValueError):
-                synchronize_emt_bus_shell_with_grid(bus=bus,
-                                                    grid=circuit,
-                                                    var_factory=var_factory,
-                                                    device_to_skip=api_object)
-            else:
-                if emt_bus_shell_matches_grid_topology(bus=bus, grid=circuit):
-                    bus.mark_emt_model_grid_synchronized()
-                else:
-                    pass
-        else:
-            synchronize_emt_bus_shell_with_grid(bus=bus,
-                                                grid=circuit,
-                                                var_factory=var_factory,
-                                                device_to_skip=api_object)
-    else:
-        invalid_shell: bool = bus.emt_model.empty()
-        if not invalid_shell:
-            try:
-                get_bus_emt_algebraic_vars(bus.emt_model)
-            except (AttributeError, TypeError, ValueError):
-                invalid_shell = True
-            else:
-                pass
-        else:
-            pass
-
-        if invalid_shell:
-            phase_mask: list[bool]
-            if bus.is_dc:
-                phase_mask = list((False, False, False, False))
-            else:
-                phase_mask = list((False, True, True, True))
-            bus.emt_model = BusEmtTemplate(
-                vf=var_factory,
-                mask=phase_mask,
-                is_dc=bus.is_dc,
-                name=f"{bus.name}_emt_template",
-            ).block
-        else:
-            pass
-
-
 def initialize_connected_bus_models_for_editor_assignment(api_object: ALL_DEV_TYPES,
-                                                          circuit: MultiCircuit | None,
+                                                          circuit: MultiCircuit,
                                                           var_factory: VarFactory,
                                                           mode: DynamicSimulationMode) -> None:
-    """Initialize all bus-side shells needed by one editor-assigned model.
+    """Prepare persistent buses before constructing an editor working document.
 
-    :param api_object: Injection or branch device receiving the dynamic model.
-    :param circuit: Optional grid used for EMT topology reconciliation.
-    :param var_factory: Shared symbolic variable factory.
-    :param mode: Dynamic simulation domain being edited.
+    :param api_object: Device whose editor is requested.
+    :param circuit: Owning circuit used to derive phases.
+    :param var_factory: Persistent symbolic factory.
+    :param mode: Requested simulation domain.
     :return: None.
     """
+    buses: list[Bus] = list()
     if isinstance(api_object, InjectionParent):
-        bus: Bus | None = api_object.bus
-        if bus is None:
+        if api_object.bus is not None:
+            buses.append(api_object.bus)
+        else:
             pass
-        elif mode == DynamicSimulationMode.RMS:
-            _initialize_editor_assigned_rms_bus_model(bus=bus, var_factory=var_factory)
-        elif mode == DynamicSimulationMode.EMT:
-            _initialize_editor_assigned_emt_bus_model(bus=bus,
-                                                      api_object=api_object,
-                                                      circuit=circuit,
-                                                      var_factory=var_factory)
-        else:
-            raise ValueError(f"Unsupported dynamic editor mode {mode}")
     elif isinstance(api_object, BranchParent):
-        if mode == DynamicSimulationMode.RMS:
-            _initialize_editor_assigned_rms_bus_model(bus=api_object.bus_from, var_factory=var_factory)
-            _initialize_editor_assigned_rms_bus_model(bus=api_object.bus_to, var_factory=var_factory)
-        elif mode == DynamicSimulationMode.EMT:
-            _initialize_editor_assigned_emt_bus_model(bus=api_object.bus_from,
-                                                      api_object=api_object,
-                                                      circuit=circuit,
-                                                      var_factory=var_factory)
-            _initialize_editor_assigned_emt_bus_model(bus=api_object.bus_to,
-                                                      api_object=api_object,
-                                                      circuit=circuit,
-                                                      var_factory=var_factory)
-            if not api_object.emt_model.empty() and circuit is not None:
-                reconcile_saved_emt_model_against_current_topology(device=api_object,
-                                                                   grid=circuit,
-                                                                   var_factory=var_factory)
-            else:
-                pass
+        buses.append(api_object.bus_from)
+        if api_object.bus_to is not api_object.bus_from:
+            buses.append(api_object.bus_to)
         else:
-            raise ValueError(f"Unsupported dynamic editor mode {mode}")
+            pass
     else:
         pass
+    bus: Bus
+    for bus in buses:
+        if mode == DynamicSimulationMode.EMT:
+            synchronize_emt_bus_shell_with_grid(bus=bus, grid=circuit, var_factory=var_factory)
+        elif mode == DynamicSimulationMode.RMS:
+            initialize_editor_assigned_rms_bus_model(bus=bus, var_factory=var_factory)
+        else:
+            pass
 
 
 def is_valid_symbol_name(name: str) -> bool:

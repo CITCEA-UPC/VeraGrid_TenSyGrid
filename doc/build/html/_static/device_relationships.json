@@ -1166,6 +1166,14 @@
       ]
     },
     {
+      "source": "DcLine",
+      "target": "UndergroundLineType",
+      "kind": "references",
+      "properties": [
+        "template"
+      ]
+    },
+    {
       "source": "EmtEvent",
       "target": "EmtEventsGroup",
       "kind": "references",
@@ -1621,6 +1629,14 @@
       "kind": "references",
       "properties": [
         "conn_group"
+      ]
+    },
+    {
+      "source": "RemedialActionGroup",
+      "target": "RemedialActionGroup",
+      "kind": "references",
+      "properties": [
+        "prev_ra"
       ]
     },
     {

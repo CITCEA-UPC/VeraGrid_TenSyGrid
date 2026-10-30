@@ -5,6 +5,7 @@
 
 from typing import List
 import numpy as np
+from VeraGridEngine.enumerations import ParamPowerFlowReferenceType
 import math
 
 from VeraGridEngine.enumerations import DeviceType
@@ -323,10 +324,10 @@ def pll_transform(vfactory: VarFactory, v_abc, multilinear:bool = False, name:st
     )
 
     res_block.add(Block(event_dict={
-        omega_base: vfactory.add_const(2.0 * math.pi * 50.0),
         Kp_pll: vfactory.add_const(0.03),
         Ki_pll: vfactory.add_const(0.2),
-    }))
+    }, parameters={omega_base: vfactory.add_const(2.0 * math.pi * 50.0)},
+        api_obj_mapping={ParamPowerFlowReferenceType.omega_base: omega_base}))
     res_block.add(integrator)
     res_block.add(park_block)
     return res_block, v_dq, omega, theta, aux_vars
@@ -342,17 +343,13 @@ def build_gfl_converter_model_emt(vfactory: VarFactory, inputs,
     Build power control loop model for Grid Following Converter for EMT simulation.
     Supports multiple control modes via ConverterControlType.
 
-    Args:
-        inputs: [vc_A, vc_B, vc_C, vg_A, vg_B, vg_C, i_A, i_B, i_C, Vdc,
-                 Pt_vsc, Qt_vsc, Vpk_ref, phi_v_ref]
-        control1: First control mode (typically active power or DC voltage related)
-        control2: Second control mode (typically reactive power or AC voltage related)
-        multilinear: Use multilinearization for Park transforms
-
-    Returns:
-        gfl_block: The complete converter block
-        i_a_inj, i_b_inj, i_c_inj: Three-phase bus injection currents
-        P, Q: Active and reactive power measurements
+    :param vfactory: Variable factory used to construct the symbolic model.
+    :param inputs: Converter voltages, currents, references, and initial power values.
+    :param control1: First control mode, typically related to active power or DC voltage.
+    :param control2: Second control mode, typically related to reactive power or AC voltage.
+    :param multilinear: Whether to use multilinearized Park transforms.
+    :param frozen_voltage_source: Whether to keep the converter voltage source fixed.
+    :return: Converter block together with its active and reactive power measurements.
     """
     vc_a   = inputs[0]
     vc_b   = inputs[1]
@@ -819,13 +816,21 @@ def VscGflEmtBuild(vfactory: VarFactory, name: str = "",
         VarPowerFlowReferenceType.v_A: inputs[0],
         VarPowerFlowReferenceType.v_B: inputs[1],
         VarPowerFlowReferenceType.v_C: inputs[2],
+        VarPowerFlowReferenceType.vt_A: inputs[0],
+        VarPowerFlowReferenceType.vt_B: inputs[1],
+        VarPowerFlowReferenceType.vt_C: inputs[2],
         VarPowerFlowReferenceType.Vdc: inputs[9],
+        VarPowerFlowReferenceType.Vf_dc: inputs[9],
         VarPowerFlowReferenceType.Idc: i_dc,
+        VarPowerFlowReferenceType.If_dc: i_dc,
         VarPowerFlowReferenceType.Pt: Pt_vsc,
         VarPowerFlowReferenceType.Qt: Qt_vsc,
         VarPowerFlowReferenceType.i_A: i_a_t,
         VarPowerFlowReferenceType.i_B: i_b_t,
         VarPowerFlowReferenceType.i_C: i_c_t,
+        VarPowerFlowReferenceType.it_A: i_a_t,
+        VarPowerFlowReferenceType.it_B: i_b_t,
+        VarPowerFlowReferenceType.it_C: i_c_t,
         VarPowerFlowReferenceType.Vpk: Vpk_ref,
         VarPowerFlowReferenceType.phi_v: phi_v_ref,
     }

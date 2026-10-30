@@ -7,7 +7,10 @@
 Uncomment the appropriate interface imports to use: Pulp or OrTools
 """
 from typing import List, Union, Tuple, TypeAlias, TYPE_CHECKING
+from VeraGridEngine.Utils.optional_dependencies import optional_dependency_failure
 import numpy as np
+from highspy import Highs, HighsModelStatus
+from pulp import HiGHS
 from scipy.sparse import csc_matrix
 from VeraGridEngine.basic_structures import ObjVec, ObjMat, BoolVec
 from VeraGridEngine.enumerations import MIPFramework, MIPSolvers
@@ -27,6 +30,7 @@ if TYPE_CHECKING:
                                                             get_ortools_available_mip_solvers)
     ORTOOLS_AVAILABLE = True
 else:
+    # Older OR-Tools exports and incompatible native binaries must leave the PuLP path usable.
     try:
         from VeraGridEngine.Utils.MIP.ortools_interface import (LpExp as OrToolsLpExp,
                                                                 LpVar as OrToolsLpVar,
@@ -34,8 +38,10 @@ else:
                                                                 get_ortools_available_mip_solvers)
 
         ORTOOLS_AVAILABLE = True
-    except ImportError:
+        ORTOOLS_UNAVAILABLE_REASON: str = ""
+    except (ImportError, AttributeError, OSError, RuntimeError, ValueError, TypeError) as error:
         ORTOOLS_AVAILABLE = False
+        ORTOOLS_UNAVAILABLE_REASON = optional_dependency_failure("ortools", error)
         OrToolsLpModel = None
         OrToolsLpExp = None
         OrToolsLpVar = None
@@ -45,6 +51,26 @@ else:
 LpExp: TypeAlias = Union[PulpLpExp, OrToolsLpExp]
 LpVar: TypeAlias = Union[PulpLpVar, OrToolsLpVar]
 LpModel: TypeAlias = Union[PulpLpModel, OrToolsLpModel]
+
+
+def is_infeasible(model: LpModel, status: int) -> bool:
+    """Check whether a solve established infeasibility before relaxing limits.
+
+    :param model: Solver interface owning the solved model.
+    :param status: Status returned by the solver interface.
+    :return: True only when the available solver status confirms infeasibility.
+    """
+    infeasible: bool = status == model.INFEASIBLE
+    if (infeasible and isinstance(model, PulpLpModel)
+            and isinstance(model.model.solver, HiGHS)
+            and isinstance(model.model.solverModel, Highs)):
+        # PuLP maps both infeasible and unbounded-or-infeasible here. Only the
+        # first justifies rebuilding NTC with additional thermal slacks.
+        native_status: HighsModelStatus = model.model.solverModel.getModelStatus()
+        infeasible = native_status == HighsModelStatus.kInfeasible
+    else:
+        pass  # Other backends retain their own explicit infeasibility status.
+    return infeasible
 
 
 def get_available_mip_frameworks() -> List[MIPFramework]:

@@ -66,6 +66,8 @@ class Line(BranchParent):
         '_temp_oper_prof',
         'alpha',
         '_circuit_idx',
+        'coupling_group',
+        'coupling_reversed',
         'template',
         'possible_tower_types',
         'possible_underground_line_types',
@@ -210,6 +212,20 @@ class Line(BranchParent):
             definition='Length of the line (not used for calculation)',
             cat=[PrpCat.TP],
             dyn_ref=ParamPowerFlowReferenceType.line_length_km,
+        ),
+        GCProp(
+            prop_name='coupling_group',
+            units='',
+            tpe=str,
+            definition='Physical tower section shared by coupled circuits; empty for independent lines.',
+            cat=[PrpCat.PF3],
+        ),
+        GCProp(
+            prop_name='coupling_reversed',
+            units='',
+            tpe=bool,
+            definition='The line runs opposite to the reference direction of its coupling group.',
+            cat=[PrpCat.PF3],
         ),
         GCProp(
             prop_name='template',
@@ -386,6 +402,8 @@ class Line(BranchParent):
         self._ysh = AdmittanceMatrix()
 
         self._circuit_idx: int = int(circuit_idx)
+        self.coupling_group: str = ''
+        self.coupling_reversed: bool = False
 
         # type template
         self.template: OverheadLineType | SequenceLineType | UndergroundLineType | None = template
@@ -643,11 +661,15 @@ class Line(BranchParent):
     @property
     def ys(self) -> AdmittanceMatrix:
         """
+        Return series admittance, using current sequence data without a template.
 
-        :return:
+        :return: Series admittance in NABC coordinates.
         """
-        if self._ys.size <= 0 and self.auto_update_enabled:
+        # Stored matrices may predate sequence edits; only templates define independent phase data.
+        if self.auto_update_enabled and (self.template is None or self._ys.size <= 0):
             self.fill_3_phase_from_sequence()
+        else:
+            pass
 
         return self._ys
 
@@ -661,11 +683,15 @@ class Line(BranchParent):
     @property
     def ysh(self) -> AdmittanceMatrix:
         """
+        Return shunt admittance, using current sequence data without a template.
 
-        :return:
+        :return: Shunt admittance in NABC coordinates, scaled by 1e6 for compilation.
         """
-        if self._ysh.size <= 0 and self.auto_update_enabled:
+        # Respect disabled updates while loading, before all sequence values have been restored.
+        if self.auto_update_enabled and (self.template is None or self._ysh.size <= 0):
             self.fill_3_phase_from_sequence()
+        else:
+            pass
 
         return self._ysh
 
@@ -676,11 +702,20 @@ class Line(BranchParent):
         else:
             raise ValueError(f'{val} is not a AdmittanceMatrix')
 
-    def change_base(self, Sbase_old: float, Sbase_new: float) -> None:
-        """
-        Change the impedance base
-        :param Sbase_old: old base (MVA)
-        :param Sbase_new: new base (MVA)
+    def change_base(self, Sbase_old: float, Sbase_new: float,
+                    Vbase_old: float = 1.0, Vbase_new: float = 1.0) -> None:
+        """Refer the same physical line to another power and voltage base.
+
+        Sequence impedances scale with power base and the squared inverse
+        voltage ratio; shunts and stored phase admittances use the reciprocal.
+        Omitting voltage arguments retains the previous power-only conversion.
+        Invalid bases leave the line unchanged; ratios and transformed values
+        must remain within the representable floating-point range.
+
+        :param Sbase_old: Existing three-phase system power base in MVA.
+        :param Sbase_new: Requested three-phase system power base in MVA.
+        :param Vbase_old: Existing line-to-line voltage reference in kV.
+        :param Vbase_new: Requested line-to-line voltage reference in kV.
         :return: None.
         """
         has_valid_base_change: bool = (
@@ -688,15 +723,61 @@ class Line(BranchParent):
             and Sbase_old > 0.0
             and np.isfinite(Sbase_new)
             and Sbase_new > 0.0
+            and np.isfinite(Vbase_old)
+            and Vbase_old > 0.0
+            and np.isfinite(Vbase_new)
+            and Vbase_new > 0.0
         )
         if has_valid_base_change:
-            b: float = Sbase_new / Sbase_old
-            self.R *= b
-            self.X *= b
-            self.B *= b
-            self.G *= b
-            self.G0 *= b
-            self.G2 *= b
+            # Check every transformed value before changing any owned data.
+            # A partial conversion would mix electrical coordinate systems.
+            with np.errstate(over="ignore", under="ignore", invalid="ignore", divide="ignore"):
+                impedance_ratio: float = float(
+                    np.float64(Sbase_new) / Sbase_old * (np.float64(Vbase_old) / Vbase_new) ** 2
+                )
+                admittance_ratio: float = float(
+                    np.float64(Sbase_old) / Sbase_new * (np.float64(Vbase_new) / Vbase_old) ** 2
+                )
+                transformed_impedances: np.ndarray = np.array((
+                    self.R, self.X, self.R0, self.X0, self.R2, self.X2,
+                )) * impedance_ratio
+                transformed_shunts: np.ndarray = np.array((
+                    self.B, self.G, self.B0, self.G0, self.B2, self.G2,
+                )) * admittance_ratio
+                transformed_series: np.ndarray = self._ys.values * admittance_ratio
+                transformed_phase_shunts: np.ndarray = self._ysh.values * admittance_ratio
+            has_valid_base_change = (
+                np.isfinite(impedance_ratio) and impedance_ratio > 0.0
+                and np.isfinite(admittance_ratio) and admittance_ratio > 0.0
+                and np.all(np.isfinite(transformed_impedances))
+                and np.all(np.isfinite(transformed_shunts))
+                and np.all(np.isfinite(transformed_series))
+                and np.all(np.isfinite(transformed_phase_shunts))
+            )
+        else:
+            pass
+
+        if has_valid_base_change:
+
+            # Preserve ohmic impedances independently in all stored sequences.
+            self.R *= impedance_ratio
+            self.X *= impedance_ratio
+            self.R0 *= impedance_ratio
+            self.X0 *= impedance_ratio
+            self.R2 *= impedance_ratio
+            self.X2 *= impedance_ratio
+
+            # Physical shunts use the reciprocal ratio, without sequence fallbacks.
+            self.B *= admittance_ratio
+            self.G *= admittance_ratio
+            self.B0 *= admittance_ratio
+            self.G0 *= admittance_ratio
+            self.B2 *= admittance_ratio
+            self.G2 *= admittance_ratio
+
+            # Avoid lazy getters: rebuilding would discard custom phase coupling.
+            self._ys.values *= admittance_ratio
+            self._ysh.values *= admittance_ratio
         else:
             pass
 
@@ -711,8 +792,8 @@ class Line(BranchParent):
     def apply_template(self,
                        obj: Union[OverheadLineType, UndergroundLineType, SequenceLineType],
                        Sbase: float, freq: float,
-                       logger=Logger(),
-                       decimals_rounding: int = 6):
+                       logger: Logger = Logger(),
+                       decimals_rounding: int = 6) -> None:
         """
         Apply a line template to this object
         :param obj: OverheadLineType, UndergroundLineType, SequenceLineType
@@ -720,7 +801,20 @@ class Line(BranchParent):
         :param freq: Frequency in Hz
         :param logger: Logger
         :param decimals_rounding: Number of decimals to round to
+        :return: None; the supplied provider remains the line's template.
         """
+
+        # Electrical data use the retained Line's from reference. Keep the old
+        # maximum-voltage rating and Transformer conversion policy independent.
+        rating_voltage: float = self.get_max_bus_nominal_voltage()
+        electrical_voltage: float = rating_voltage
+        if (np.isfinite(self.bus_from.Vnom) and self.bus_from.Vnom > 0.0
+                and np.isfinite(self.bus_to.Vnom) and self.bus_to.Vnom > 0.0
+                and not self.bus_from.is_dc and not self.bus_to.is_dc
+                and not self.should_this_be_a_transformer(0.1, logger=None)):
+            electrical_voltage = self.bus_from.Vnom
+        else:
+            pass
 
         if isinstance(obj, OverheadLineType):
             if not obj.is_computed():
@@ -728,14 +822,18 @@ class Line(BranchParent):
                 if not obj.is_computed():
                     logger.add_error("No admittance data", device=obj.name)
                     return
+                else:
+                    pass
             else:
                 pass
 
-            template_vn = obj.Vnom
-            vn = self.get_max_bus_nominal_voltage()
+            template_vn: float = obj.Vnom
+            vn: float = rating_voltage
 
             if not accept_line_connection(template_vn, vn, 0.1):
                 raise Exception('Template voltage differs too much from the line nominal voltage')
+            else:
+                pass
 
             if obj.has_sequence_data():
                 (self.R, self.X, self.B,
@@ -743,12 +841,24 @@ class Line(BranchParent):
                  self.rate) = obj.get_values(Sbase=Sbase,
                                              length=self.length,
                                              circuit_index=self.circuit_idx,
-                                             Vnom=vn)
+                                             Vnom=electrical_voltage)
+                # Sequence shunts include genuine zero conductance; overwrite
+                # stale values from any previously applied provider.
+                sequence_shunt: np.ndarray | None = obj.y_seq
+                zero_index: int = 3 * (self.circuit_idx - 1)
+                positive_index: int = zero_index + 1
+                if sequence_shunt is not None and positive_index < sequence_shunt.shape[0]:
+                    shunt_factor: float = self.length * electrical_voltage * electrical_voltage / Sbase
+                    self.G = float(sequence_shunt[positive_index, positive_index].real * shunt_factor)
+                    self.G0 = float(sequence_shunt[zero_index, zero_index].real * shunt_factor)
+                else:
+                    pass
+                self.rate *= rating_voltage / electrical_voltage
             else:
                 logger.add_info("No sequence data", device=obj.name)
 
-            self.ys = obj.get_ys(circuit_idx=self.circuit_idx, Sbase=Sbase, length=self.length, Vnom=vn)
-            self.ysh = obj.get_ysh(circuit_idx=self.circuit_idx, Sbase=Sbase, length=self.length, Vnom=vn)
+            self.ys = obj.get_ys(circuit_idx=self.circuit_idx, Sbase=Sbase, length=self.length, Vnom=electrical_voltage)
+            self.ysh = obj.get_ysh(circuit_idx=self.circuit_idx, Sbase=Sbase, length=self.length, Vnom=electrical_voltage)
 
             self.template = obj
             self.rms_template = obj.rms_template
@@ -760,9 +870,9 @@ class Line(BranchParent):
             else:
                 pass
 
-            connected_voltage_kv: float = self.get_max_bus_nominal_voltage()
+            connected_voltage_kv: float = rating_voltage
             if connected_voltage_kv > 0.0:
-                line_voltage_kv: float = connected_voltage_kv
+                line_voltage_kv: float = electrical_voltage
             else:
                 line_voltage_kv = obj.Vnom
             (self.R, self.X, self.B,
@@ -771,6 +881,25 @@ class Line(BranchParent):
                                          length=self.length,
                                          circuit_index=self.circuit_idx,
                                          Vnom=line_voltage_kv)
+
+            # Geometry-backed cables expose loss conductance through public
+            # sequence data. The legacy scalar representation is lossless.
+            sequence_shunt = obj.y_seq
+            zero_index = 3 * (self.circuit_idx - 1)
+            positive_index = zero_index + 1
+            if sequence_shunt is not None and positive_index < sequence_shunt.shape[0]:
+                shunt_factor = self.length * line_voltage_kv * line_voltage_kv / Sbase
+                self.G = float(sequence_shunt[positive_index, positive_index].real * shunt_factor)
+                self.G0 = float(sequence_shunt[zero_index, zero_index].real * shunt_factor)
+            elif not obj.has_physical_data():
+                self.G = 0.0
+                self.G0 = 0.0
+            else:
+                logger.add_info("No complete sequence conductance data", device=obj.name)
+            if connected_voltage_kv > 0.0:
+                self.rate *= connected_voltage_kv / line_voltage_kv
+            else:
+                pass
 
             self.ys = obj.get_ys(circuit_idx=self.circuit_idx,
                                  Sbase=Sbase,
@@ -782,22 +911,22 @@ class Line(BranchParent):
                                    Vnom=line_voltage_kv)
 
             self.template = obj
-            self.rms_template = obj.rms_template
-            self.emt_template = obj.emt_template
+            self.rms_template, self.emt_template = obj.get_branch_dynamic_templates(
+                device_type=self.device_type, logger=logger)
 
         elif isinstance(obj, SequenceLineType):
-            (self.R, self.X, self.B,
-             self.R0, self.X0, self.B0,
+            (self.R, self.X, self.B, self.G,
+             self.R0, self.X0, self.B0, self.G0,
              self.rate) = obj.get_values(Sbase=Sbase,
                                          freq=freq,
                                          length=self.length,
-                                         line_Vnom=self.get_max_bus_nominal_voltage(),
+                                         line_Vnom=electrical_voltage,
                                          decimals_rounding=decimals_rounding)
-
-            self.ys = obj.get_ys_nabc()
-            self.ysh = obj.get_ysh_nabc()
+            self.rate *= rating_voltage / electrical_voltage
 
             self.template = obj
+            # Reuse total per-unit sequence values, including length, base and frequency conversion.
+            self.fill_3_phase_from_sequence()
             self.rms_template = obj.rms_template
             self.emt_template = obj.emt_template
 
@@ -919,7 +1048,15 @@ class Line(BranchParent):
         :param logger: Logger
         :return self pointer
         """
-        Vnom = self.get_max_bus_nominal_voltage()
+        rating_voltage: float = self.get_max_bus_nominal_voltage()
+        Vnom: float = rating_voltage
+        if (np.isfinite(self.bus_from.Vnom) and self.bus_from.Vnom > 0.0
+                and np.isfinite(self.bus_to.Vnom) and self.bus_to.Vnom > 0.0
+                and not self.bus_from.is_dc and not self.bus_to.is_dc
+                and not self.should_this_be_a_transformer(0.1, logger=None)):
+            Vnom = self.bus_from.Vnom
+        else:
+            pass
 
         if Vnom > 0:
 
@@ -933,7 +1070,9 @@ class Line(BranchParent):
                                                                           Vnom=Vnom,
                                                                           logger=logger)
 
-            old_rate = float(self.rate)
+            # Ampacity policy uses the previous maximum nominal voltage.
+            new_rate *= rating_voltage / Vnom
+            old_rate: float = float(self.rate)
 
             self.rate = new_rate
             self._length = length
@@ -944,6 +1083,8 @@ class Line(BranchParent):
                     self.rate_prof.set(prof_old * new_rate / old_rate)
                 else:
                     self.rate_prof.fill(new_rate)
+            else:
+                pass
         else:
             logger.add_error("Nominal voltage is zero", device_class="Line", device=self.name)
 
@@ -980,16 +1121,41 @@ class Line(BranchParent):
 
     def fill_3_phase_from_sequence(self) -> None:
         """
-        Fill the 3x3 from the sequence values
+        Rebuild phase admittances from Z0 and Z1, assuming Z2 equals Z1.
+
+        Preserve connected phases without a template and use Z1 when Z0 is absent.
+
+        :return: None.
         """
-        if self.R0 > 1e-10 and self.X0 > 1e-10:
-            obj = SequenceLineType(R=self.R, R0=self.R0, X=self.X, X0=self.X0, B=self.B, B0=self.B0)
+        # A purely resistive or reactive Z0 is valid; both components need not be positive.
+        if abs(self.R0) > 1e-10 or abs(self.X0) > 1e-10:
+            r0: float = self.R0
+            x0: float = self.X0
+            b0: float = self.B0
         else:
-            obj = SequenceLineType(R=self.R, R0=2.0 * self.R, X=self.X, X0=2.0 * self.X, B=self.B * 1e6,
-                                   B0=self.B * 1e6)
-            obj = SequenceLineType(R=self.R, R0=self.R, X=self.X, X0=self.X, B=self.B * 1e6, B0=self.B * 1e6)
-        self.ys = obj.get_ys_nabc()
-        self.ysh = obj.get_ysh_nabc()
+            r0 = self.R
+            x0 = self.X
+            b0 = self.B
+
+        # Line impedances are already in p.u.; the compiler converts stored shunts by 1e-6.
+        obj: SequenceLineType = SequenceLineType(R=self.R, R0=r0, X=self.X, X0=x0,
+                                                 B=self.B * 1e6, B0=b0 * 1e6,
+                                                 G=self.G * 1e6, G0=self.G0 * 1e6)
+        stored: AdmittanceMatrix
+        rebuilt: AdmittanceMatrix
+        for stored, rebuilt in ((self._ys, obj.get_ys_nabc()), (self._ysh, obj.get_ysh_nabc())):
+            # Automatic refresh keeps phase selections; explicit template conversion starts with ABC.
+            if stored.size <= 0 or self.template is not None:
+                stored.phN = rebuilt.phN
+                stored.phA = rebuilt.phA
+                stored.phB = rebuilt.phB
+                stored.phC = rebuilt.phC
+            else:
+                pass
+            active_phases: np.ndarray = np.array((stored.phN, stored.phA, stored.phB, stored.phC))
+            rebuilt.values[~active_phases, :] = 0.0
+            rebuilt.values[:, ~active_phases] = 0.0
+            stored.values = rebuilt.values
 
     # Scalar property accessors coerce assignments to the declared schema types.
 

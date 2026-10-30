@@ -21,8 +21,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spla
 from typing import Any, Optional
-from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import (NUMBA_AVAILABLE,
-                                                                                          apply_ak_stack_block_numba)
+from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import apply_ak_stack_block_numba
 from VeraGridEngine.basic_structures import Mat, Vec
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 
@@ -492,11 +491,10 @@ class AkStackBlockEmtFloquetOperator(spla.LinearOperator):
     Monodromy operator from an explicit stack of state-transition matrices A_k.
 
     This is the preferred path for EMT/Floquet benchmarking when the EMT engine can
-    expose the per-step linearized state map:
-        x_{k+1} = A_k x_k
-    for one limit-cycle period. The operator applies:
-        Phi = A_{M-1} * ... * A_1 * A_0
-    on vectors or blocks. When Numba is available and use_numba=True, the block
+    expose the per-step linearized state map ``x_{k+1} = A_k x_k`` for one
+    limit-cycle period. The operator applies
+    ``Phi = A_{M-1} * ... * A_1 * A_0`` on vectors or blocks. When Numba is
+    available and ``use_numba=True``, the block
     path is JIT-compiled to reduce Python overhead in repeated Arnoldi calls.
     """
     __slots__ = (
@@ -522,7 +520,7 @@ class AkStackBlockEmtFloquetOperator(spla.LinearOperator):
         self.n_states = int(Ak.shape[1])
         self.Ak_stack = Ak
         self.n_steps = int(Ak.shape[0])
-        self.use_numba = bool(use_numba and NUMBA_AVAILABLE and apply_ak_stack_block_numba is not None)
+        self.use_numba = bool(use_numba)
         super().__init__(dtype=np.float64, shape=(self.n_states, self.n_states), **kwargs)
 
     def _matvec(self, x: Vec) -> Vec:

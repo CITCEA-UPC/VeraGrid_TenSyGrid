@@ -40,6 +40,7 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_dae import EmtProblemDa
 from VeraGridEngine.Simulations.EMT.solvers.jit_symbolic_solver import JitSymbolicSolver
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowOptions
 from VeraGridEngine.Templates.Emt.dc_source_emt_template import get_dc_voltage_source_emt_template
+from VeraGridEngine.Templates.Emt.pi_line_emt_template import get_pi_line_emt_template
 from VeraGridEngine.Templates.Emt.load_RLC_emt_template import get_shunt_r_emt_template
 from VeraGridEngine.Templates.Emt.bergeron_line_emt_template import get_bergeron_line_emt_template
 from VeraGridEngine.Templates.Emt.vsc_gfm_emt import get_gfm_emt_template
@@ -155,6 +156,12 @@ def _build_rl_line_emt_template(
         R_par: vf.add_const(float(R_pu)),
         X_par: vf.add_const(float(X_pu)),
     }
+    # The series RL model owns its internal-current initialization.
+    templ.block.init_eqs = {
+        i_ser_A: if_A,
+        i_ser_B: if_B,
+        i_ser_C: if_C,
+    }
     templ.block.diff_init_eqs = {
         di_A: omega_base * (vf_A - vt_A - R_par * i_ser_A) / X_par,
         di_B: omega_base * (vf_B - vt_B - R_par * i_ser_B) / X_par,
@@ -175,6 +182,7 @@ def _find_name_in_block(name: str, block: Block) -> Any:
         block.algebraic_vars
         + block.state_vars
         + list(block.event_dict.keys())
+        + list(block.parameters.keys())
         + block.diff_vars
     ):
         if name == var.name:
@@ -186,7 +194,7 @@ def _find_name_in_block(name: str, block: Block) -> Any:
     return None
 
 
-def _build_dc_fed_gfm_island() -> tuple:
+def _build_dc_fed_gfm_island(balanced_line: bool = False) -> tuple:
     """
     Assemble the small DC-fed GFM island grid with EMT models attached.
 
@@ -222,6 +230,7 @@ def _build_dc_fed_gfm_island() -> tuple:
     # operating point matches the PF prediction at every bus.
     vsc: gce.VSC = gce.VSC(
         name="GFM_VSC",
+        alpha1=0.0, alpha2=0.0, alpha3=0.0,
         bus_from=bus_dc,
         bus_to=bus_vsc_int,
         rate=2.0,
@@ -266,12 +275,16 @@ def _build_dc_fed_gfm_island() -> tuple:
     tower.add_wire_relationship(wire=wire, xpos=12.65, ypos=27.5, phase=3)
     tower.compute()
     line.apply_template(tower, grid.Sbase, grid.fBase)
+    if balanced_line:
+        # Use the sequence equivalent in both balanced PF and EMT.
+        line.template = None
     grid.add_line(line)
 
     # Constant-admittance loads (G/B), so PF and EMT see the same load
     # model: ``S_load = (G + jB) * |V|^2``. The EMT shunt-R template is
     # a fixed resistor per phase, so its draw scales with ``V^2``; using
-    # G in PF makes the PF and EMT equilibria coincide → flat init.
+    # G in PF matches the EMT resistor voltage dependence. The balanced PI
+    # variant also matches the line model for the steady-state regression.
     R_load_initial: float = 100.0
     v_ph: float = vnom_ac / np.sqrt(3.0)
     G_ph_initial: float = (v_ph * v_ph) / R_load_initial
@@ -310,9 +323,10 @@ def _build_dc_fed_gfm_island() -> tuple:
     for bus in grid.buses:
         get_bus_emt_template(grid, bus)
 
+    # Include the Norton voltage drop when deriving the source setpoint.
     dc_src_mdl = get_dc_voltage_source_emt_template(
         vf=grid.var_factory,
-        source_voltage_value=1.0,
+        source_voltage_value=None,
         source_conductance_value=200.0,
         name="DC_Gen",
     ).block
@@ -325,16 +339,19 @@ def _build_dc_fed_gfm_island() -> tuple:
     R_s_var = _find_name_in_block("R_s", vsc_template.block)
     X_s_var = _find_name_in_block("X_s", vsc_template.block)
     assert R_s_var is not None and X_s_var is not None
-    vsc_template.block.event_dict[R_s_var] = grid.var_factory.add_const(1.0e-4)
-    vsc_template.block.event_dict[X_s_var] = grid.var_factory.add_const(1.0e-4)
+    vsc_template.block.children[0].parameters[R_s_var] = grid.var_factory.add_const(1.0e-4)
+    vsc_template.block.children[0].parameters[X_s_var] = grid.var_factory.add_const(1.0e-4)
     vsc_mdl = vsc_template.block
-    line_mdl = get_bergeron_line_emt_template(
-        vf=grid.var_factory,
-        phN=False,
-        phA=True,
-        phB=True,
-        phC=True,
-    ).block
+    if balanced_line:
+        line_mdl = get_pi_line_emt_template(vf=grid.var_factory).block
+    else:
+        line_mdl = get_bergeron_line_emt_template(
+            vf=grid.var_factory,
+            phN=False,
+            phA=True,
+            phB=True,
+            phC=True,
+        ).block
     filter_mdl = _build_rl_line_emt_template(
         vf=grid.var_factory,
         R_pu=filter_R_pu,
@@ -365,12 +382,19 @@ def _build_dc_fed_gfm_island() -> tuple:
     # because the events overwrite the entry at the event time.
     def _override_shunt_r(template: Any, event_suffix: str,
                           G_total_pu: float) -> None:
-        G_per_phase_pu: float = G_total_pu / 3.0
-        R_pu: float = 1.0 / G_per_phase_pu
+        # EMT phase currents use the system three-phase current base.
+        # A phase resistor therefore sees the total per-unit conductance.
+        R_pu: float = 1.0 / G_total_pu
         for phase_label in ("A", "B", "C"):
             R_var = _find_name_in_block(f"R_{phase_label}_{event_suffix}", template)
             assert R_var is not None
-            template.event_dict[R_var] = grid.var_factory.add_const(R_pu)
+            # The resistance is owned by a child block. Replacing only the
+            # wrapper entry leaves the compiled runtime equation at 1e9 pu.
+            owners = [block for block in template.get_all_blocks()
+                      if any(var.uid == R_var.uid for var in block.event_dict)]
+            assert owners, f"No runtime owner for {R_var.name}"
+            for owner in owners:
+                owner.event_dict[R_var] = grid.var_factory.add_const(R_pu)
 
     _override_shunt_r(load_mdl, "Shunt_R_3ph",
                       G_total_pu=G_total_initial / grid.Sbase)
@@ -392,12 +416,7 @@ def _build_dc_fed_gfm_island() -> tuple:
 
 
 def test_vsc_gfm_emt_dc_fed_island_initializes_consistently() -> None:
-    """
-    Build the DC-fed GFM island and verify the EMT initializer reaches a
-    PF-consistent operating point with small residual norms.
-
-    :return: None.
-    """
+    """Check mapped GFM references and the initialized operating point."""
     grid, vsc, _, _, _, _ = _build_dc_fed_gfm_island()
 
     pf_options: PowerFlowOptions = PowerFlowOptions(
@@ -411,11 +430,11 @@ def test_vsc_gfm_emt_dc_fed_island_initializes_consistently() -> None:
     assert pf_results.converged
 
     options: EmtOptions = EmtOptions(
-        time_step=5.0e-5,
+        time_step=1.0e-5,  # Resolve the 10 km Bergeron line's shortest modal delay.
         simulation_time=0.01,
         tolerance=1e-6,
         solver_type=EmtSolverTypes.Symbolic,
-        initialization_method=EmtInitializationMethod.Auto,
+        initialization_method=EmtInitializationMethod.Explicit,
         integration_method=DynamicIntegrationMethod.DaeBackEuler,
         verbose=0,
     )
@@ -456,6 +475,48 @@ def test_vsc_gfm_emt_dc_fed_island_initializes_consistently() -> None:
     assert Pe_init > 0.1, (
         f"Steady-state Pe should be positive (converter generating into AC load), got {Pe_init:.6f}"
     )
+    expected_pe: float = float(-np.real(pf_results.St_vsc[0]) / grid.Sbase)
+    assert abs(Pe_init - expected_pe) < 1.0e-6, (
+        f"VSC Pe must match total AC PF export: {Pe_init:.6f} vs {expected_pe:.6f}"
+    )
+    p_ref_var = _find_name_in_block("P_ref", vsc.emt_model)
+    assert p_ref_var is not None
+    p_ref_idx = problem.uid2idx_event_params[p_ref_var.uid]
+    assert abs(float(problem.event_params_values[p_ref_idx]) - Pe_init) < 1.0e-6
+    # The voltage controller must start at the internal EMF, including the
+    # impedance drop, rather than at the terminal voltage magnitude.
+    voltage_ref = _find_name_in_block("V_ref", vsc.emt_model)
+    terminal_peak = _find_name_in_block("Vpk_ref", vsc.emt_model)
+    emf_derivative = _find_name_in_block("d_Epk", vsc.emt_model)
+    assert voltage_ref is not None and terminal_peak is not None and emf_derivative is not None
+    reference_value = problem.event_params_values[problem.uid2idx_event_params[voltage_ref.uid]]
+    terminal_value = problem.event_params_values[problem.uid2idx_event_params[terminal_peak.uid]]
+    np.testing.assert_allclose(reference_value, Epk_init, rtol=0.0, atol=1e-9)
+    assert abs(reference_value - terminal_value) > 1e-5
+    reactive_ref = _find_name_in_block("Q_ref", vsc.emt_model)
+    reactive_power = _find_name_in_block("Qe", vsc.emt_model)
+    q_reference = problem.event_params_values[problem.uid2idx_event_params[reactive_ref.uid]]
+    q_actual = x0[problem.get_var_idx(reactive_power)]
+    np.testing.assert_allclose(q_actual, q_reference, rtol=0.0, atol=1e-8)
+    np.testing.assert_allclose(
+        problem.get_dx0()[problem.get_diff_var_idx(emf_derivative)],
+        0.0, rtol=0.0, atol=1e-8,
+    )
+    # PF projection must give equal and opposite converter/filter current on
+    # the shared AC bus, using the same three-phase system current base.
+    i_a_var = _find_name_in_block("i_A", vsc.emt_model)
+    filter_if_a_var = _find_name_in_block("if_A_VSC_Filter", grid.lines[0].emt_model)
+    assert i_a_var is not None and filter_if_a_var is not None
+    assert abs(float(x0[problem.get_var_idx(i_a_var)] +
+                     x0[problem.get_var_idx(filter_if_a_var)])) < 1.0e-6
+
+    # Bergeron PF history sources must survive runtime-vector construction.
+    history = problem.history_models[0]
+    history_values = np.asarray([
+        problem.event_params_values[problem.uid2idx_event_params[var.uid]]
+        for var in (*history.Ih_f, *history.Ih_t)
+    ])
+    assert np.any(np.abs(history_values) > 1.0e-6)
 
 
 def test_vsc_gfm_emt_dc_fed_island_event_registration_and_update_path() -> None:
@@ -499,11 +560,11 @@ def test_vsc_gfm_emt_dc_fed_island_event_registration_and_update_path() -> None:
         )
 
     options: EmtOptions = EmtOptions(
-        time_step=5.0e-5,
+        time_step=1.0e-5,  # Resolve the 10 km Bergeron line's shortest modal delay.
         simulation_time=0.05,
         tolerance=1e-6,
         solver_type=EmtSolverTypes.Symbolic,
-        initialization_method=EmtInitializationMethod.Auto,
+        initialization_method=EmtInitializationMethod.Explicit,
         integration_method=DynamicIntegrationMethod.DaeBackEuler,
         verbose=0,
     )
@@ -583,10 +644,9 @@ def test_vsc_gfm_emt_dc_fed_island_full_simulate_load_step_response() -> None:
 
     events_group: EmtEventsGroup = EmtEventsGroup(name="gfm_load_step_sim")
     grid.add_emt_events_group(events_group)
-    # The shunt-R template initializes ``R_phase`` to about 6 ohm at this
-    # operating point, so a 3 ohm post-event value cuts ``R`` in half and
-    # this means double conductance, raising the converter active power.
-    R_step_value: float = 3.0
+    # The system-base shunt resistance starts near 2 pu; halving it to
+    # 1 pu doubles conductance and raises converter active power.
+    R_step_value: float = 1.0
     event_time: float = 0.04
     for phase_R in (R_A, R_B, R_C):
         grid.add_emt_event(
@@ -600,11 +660,11 @@ def test_vsc_gfm_emt_dc_fed_island_full_simulate_load_step_response() -> None:
         )
 
     options: EmtOptions = EmtOptions(
-        time_step=5.0e-5,
+        time_step=1.0e-5,  # Resolve the 10 km Bergeron line's shortest modal delay.
         simulation_time=0.10,
         tolerance=1e-6,
         solver_type=EmtSolverTypes.Symbolic,
-        initialization_method=EmtInitializationMethod.Auto,
+        initialization_method=EmtInitializationMethod.Explicit,
         integration_method=DynamicIntegrationMethod.DaeBackEuler,
         verbose=0,
     )
@@ -656,6 +716,15 @@ def test_vsc_gfm_emt_dc_fed_island_full_simulate_load_step_response() -> None:
         f"omega should stay close to 1.0 pu; got range [{omega_min:.4f}, {omega_max:.4f}]"
     )
 
+    steady_window = (t >= 0.005) & (t <= event_time - 0.005)
+    pe_steady = y[steady_window, Pe_idx]
+    omega_steady = y[steady_window, omega_idx]
+    assert abs(float(np.mean(pe_steady)) - float(y[0, Pe_idx])) < 0.05, (
+        "VSC power must stay near the PF operating point before the load step"
+    )
+    assert float(np.max(np.abs(omega_steady - 1.0))) < 0.005, (
+        "GFM frequency must stay near nominal before the load step"
+    )
     pre_window = (t > event_time - 0.01) & (t < event_time)
     post_window = t > event_time + 0.04
     pe_pre: float = float(np.mean(y[pre_window, Pe_idx]))
@@ -666,3 +735,46 @@ def test_vsc_gfm_emt_dc_fed_island_full_simulate_load_step_response() -> None:
         f"Load step (R lowered to {R_step_value:.1f} ohm) should increase the "
         f"magnitude of converter active power; pre={pe_pre:.4f}, post={pe_post:.4f}"
     )
+
+
+def test_vsc_gfm_explicit_initialization_stays_at_steady_state() -> None:
+    """Verify two cycles with matching balanced PF and EMT PI-line models."""
+    grid, vsc, _, _, _, _ = _build_dc_fed_gfm_island(balanced_line=True)
+    pf_results = gce.power_flow(grid, PowerFlowOptions(
+        solver_type=SolverType.NR, tolerance=1e-10, max_iter=50,
+    ))
+    assert pf_results.converged
+    options = EmtOptions(
+        time_step=1e-5, simulation_time=0.04, tolerance=1e-8,
+        solver_type=EmtSolverTypes.Symbolic,
+        initialization_method=EmtInitializationMethod.Explicit,
+        integration_method=DynamicIntegrationMethod.DaeTrapezoidal,
+        init_periodic_samples=0, verbose=0,
+    )
+    problem = EmtProblemDae(grid=grid, options=options, pf_results=pf_results)
+    assert problem.initialization_report.final_residual_inf < 1e-8
+    solver = JitSymbolicSolver(
+        problem=problem, t0=0.0, t_end=options.simulation_time,
+        h=options.time_step, method=options.integration_method,
+        pred_method=DynamicIntegrationMethod.OdeEuler,
+        dense_threshold=0, verbose=False,
+    )
+    times, values, _, _, _ = solver.simulate(boundary_updater=problem)
+    assert np.all(np.isfinite(values))
+    samples_per_cycle = round(1.0 / (grid.fBase * options.time_step))
+    assert len(times) >= 2 * samples_per_cycle
+
+    for name in ("i_A", "i_B", "i_C"):
+        variable = _find_name_in_block(name, vsc.emt_model)
+        trace = values[:, problem.get_var_idx(variable)]
+        np.testing.assert_allclose(
+            trace[samples_per_cycle:], trace[:-samples_per_cycle],
+            rtol=0.0, atol=1e-6, err_msg=f"{name} does not repeat after one cycle",
+        )
+    for name in ("Pe", "Qe", "omega", "Epk"):
+        variable = _find_name_in_block(name, vsc.emt_model)
+        trace = values[:, problem.get_var_idx(variable)]
+        np.testing.assert_allclose(
+            trace, trace[0], rtol=0.0, atol=1e-6,
+            err_msg=f"{name} drifts from its initialized operating point",
+        )
