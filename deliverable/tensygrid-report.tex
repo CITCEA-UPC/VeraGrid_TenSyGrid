@@ -41,9 +41,9 @@
 \addbibresource{ref.bib}  % Adjust to your .bib file name
 
 \author{Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez\\Prof.~Eduardo~Prieto~Araujo}
-\title{TenSyGrid Toolbox: Use cases identification and description }
-\setkomavar{docname}{Deliverable Report}
-\subject{Deliverable Report}
+\title{TenSyGrid toolbox: Use case identification and description}
+\setkomavar{docname}{Deliverable report}
+\subject{Deliverable report}
 \setkomavar{docnumber}{D4.1}
 \setkomavar{projectnumber}{CETP-FP-2023-00138}
 \setkomavar{workpackage}{WP 4}
@@ -60,22 +60,25 @@ CETPartnership \\
 % Leave the optional director/management field empty to avoid duplicating the role.
 \setkomavar{director}{}
 \setkomavar{projectcoordinator}{Dr.~Carlos~Cateriano~Yáñez}
+\setkomavar*{projectcoordinator}{Project coordinator}
 \setkomavar{classification}{Public} % Confidential or Public
 \colorlet{classificationcolor}{tgred} % tgred CO tglime PU
 \setkomavar{contributions}{}
-\subtitle{Project: Tensors for System Analysis of\\ Converter-dominated Power Grids}
+\subtitle{Project: Tensors for system analysis of\\ converter-dominated power grids}
 \date{31 October 2026}
 \tgsigsetup{
   fromname         = {Eduardo~Prieto-Araujo\\Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez},
   fromfunction     = {Principal Investigator and Full Professor at UPC\\PhD Student\\PhD Student},
   headname         = {Dr.~Carlos~Cateriano~Yáñez},
-  headfunction     = {Project Coordinator},
+  headfunction     = {Project coordinator},
   reviewername     = {Dr.~John Licari},
   reviewerfunction = {Principal Investigator at UM},
 }
 
 \BeforeStartingTOC[lof]{\def\autodot{:}}
 \BeforeStartingTOC[lot]{\def\autodot{:}}
+\renewcaptionname{english}{\listfigurename}{List of figures}
+\renewcaptionname{english}{\listtablename}{List of tables}
 
 \begin{document}
 {\raggedright
@@ -120,10 +123,10 @@ The use cases that are already implemented in an experimental way cover the core
 \chapter{Introduction}
 \input{Chapters/introduction.tex}
 
-\chapter{Methodology and Tool Architecture}
+\chapter{Methodology and tool architecture}
 \input{Chapters/methodology_architecture.tex}
 
-\chapter{Use Cases}
+\chapter{Use cases}
 \input{Chapters/use_cases.tex}
 
 \chapter{Conclusions}

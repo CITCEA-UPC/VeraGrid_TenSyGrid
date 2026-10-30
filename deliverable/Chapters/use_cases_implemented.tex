@@ -3,7 +3,7 @@
 The following five use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the native Python TenSyGrid calculation engine (the ported MTI implementation integrated within VeraGrid), running on a dedicated backend server. 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions}
+\subsection{UC-01: Assessment of small-signal stability under given operating conditions}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -12,7 +12,8 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Preconditions.]
         \begin{itemize}[before=\leavevmode, leftmargin=*]
           \item The TenSyGrid engine backend is running and accessible via a web browser.
-          \item At least one valid grid model file (in \texttt{.veragrid} format) is available in the grids directory.
+          \item At least one valid grid model is available. It may be supplied as a native \texttt{.veragrid} file, through any file format supported by VeraGrid's import layer, through the IPSA adapter from an external tool, or through a configured API endpoint.
+          \item External adapters and API integrations must provide the topology, equipment parameters, operating point, and dynamic-model information required by the selected analysis, and the imported model must pass VeraGrid validation.
         \end{itemize}
 
   \item[Theoretical basis.] The iMTI formulation leads to the descriptor system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$, from which the generalized eigenvalue problem
@@ -24,9 +25,10 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator opens the \textbf{Run Analysis} tab.
-          \item The dropdown list is populated with all available \texttt{.veragrid} files. The operator selects the desired grid.
+          \item The input selector is populated with available grid-model files, IPSA-connected external sources, and configured API endpoints. The operator selects the desired source.
+          \item The selected input is imported through the corresponding VeraGrid or IPSA adapter, validated, and converted into VeraGrid's internal \texttt{MultiCircuit} representation.
           \item The operator clicks the \textbf{Run Analysis} button.
-          \item The backend launches the computational script as a subprocess, using the selected grid file as input.
+          \item The backend launches the computational script as a subprocess, using the validated internal model and operating point as input.
           \item A log output panel displays the analysis progress: power-flow solution, state-matrix assembly, and eigenvalue computation.
           \item Upon completion, the result is stored as a \texttt{.tensygrid} file in the precomputed-results directory.
           \item The status indicator changes from \textit{Running} to \textit{Completed}, and the new result appears in the result list with a colour-coded stability badge (green: stable, yellow: marginal, red: unstable). A configurable numerical tolerance, currently $10^{-6}$ for the dominant real part, is used to distinguish a marginal result from numerical noise.
@@ -36,10 +38,10 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-01.run_simulation.png}
-          \caption[UC-01: Assessment of Small-Signal Stability.]{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions. The operator selects a grid model, runs the analysis, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
+          \caption[UC-01: Assessment of small-signal stability.]{UC-01: Assessment of small-signal stability under given operating conditions. The operator selects a grid model, runs the analysis, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
         \end{figure}
 
-  \item[GUI interaction.] The \textbf{Run Analysis} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the analysis timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete or failed results.
+  \item[GUI interaction.] The \textbf{Run Analysis} tab contains an input-source selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. File-based inputs display the detected format and any conversion warnings. IPSA and API-based sources additionally display connector status and validation results before the analysis starts. Each result item shows the analysis timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete or failed results.
   \item[Expected result.] A \texttt{.tensygrid} file containing the full stability analysis output: eigenvalues, critical modes with participation factors, bus voltages from the power flow, grid topology information, the stability margin, and an operation hash for traceability. This file serves as input for all subsequent use cases (UC-02 to UC-05).
 \end{description}
 
@@ -47,7 +49,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-02: Monitoring and Screening of Power System Small-Signal Stability Margins}
+\subsection{UC-02: Monitoring and screening of power system small-signal stability margins}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -100,7 +102,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-03.eigenvalues.png}
-          \caption[UC-02: Eigenvalue Analysis.]{UC-02: Eigenvalue Analysis. The operator explores the eigenvalue distribution in the complex plane from the Eigenvalues tab.}
+          \caption[UC-02: Eigenvalue analysis.]{UC-02: Eigenvalue analysis. The operator explores the eigenvalue distribution in the complex plane from the Eigenvalues tab.}
         \end{figure}
 
   \item[GUI interaction.] The \textbf{Status} tab is designed as a control-room dashboard. Colour-coded status badges draw the operator's attention to abnormal conditions without relying on animated traffic-light graphics. All metrics are displayed in large-format cards for quick scanning. The eigenvalue canvas of the \textbf{Eigenvalues} tab supports interactive zoom and pan via mouse or touch gestures. The damping plot and table are synchronised with the same data set and update when a different analysis result is loaded.
@@ -108,7 +110,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-03: Identification and Diagnosis of Critical Oscillatory Modes}
+\subsection{UC-03: Identification and diagnosis of critical oscillatory modes}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -138,14 +140,14 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-04.critical_modes.png}
-          \caption[UC-03: Critical Modes.]{UC-03: Critical Modes. The operator identifies the least-damped oscillation modes.}
+          \caption[UC-03: Critical modes.]{UC-03: Critical modes. The operator identifies the least-damped oscillation modes.}
         \end{figure}
   \item[GUI interaction.] Participation factors are rendered as horizontal bar charts inside expandable table rows. The expansion is animated. The operator can collapse a row and expand another to compare participation profiles across different modes.
   \item[Expected result.] The operator learns \textit{which physical components are responsible for each critical oscillation}. For example, Mode 3 with $\zeta = 0.02$ at 1.2 Hz may show strong participation from Generator 7's speed and AVR states, indicating that retuning the PSS at that generator would be the most effective mitigation. This directly informs the decisions proposed in next use cases.
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-04: Assessment of Bus Voltage Profiles and Operating Limit Violations}
+\subsection{UC-04: Assessment of bus voltage profiles and operating limit violations}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -168,7 +170,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-05.bus_voltages.png}
-          \caption[UC-04: Bus Voltage Assessment.]{UC-04: Bus Voltage Assessment. The operator validates the voltage profile under the current operating point.}
+          \caption[UC-04: Bus voltage assessment.]{UC-04: Bus voltage assessment. The operator validates the voltage profile under the current operating point.}
         \end{figure}
   \item[GUI interaction.] The bus voltage table is a scrollable table with sortable columns. The OK/WARNING badges use the same colour semantics as the stability traffic lights, maintaining visual consistency across the interface.
   \item[Expected result.] The operator obtains a quick validation of the voltage profile under the current operating point. Buses with voltage excursions are highlighted, prompting further investigation into reactive power support, tap-changer settings, or load behaviour.
@@ -177,7 +179,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-05: Identification of Stability Risks under $N-1$ Contingencies}
+\subsection{UC-05: Identification of stability risks under $N-1$ contingencies}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -208,7 +210,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-06.contingencies.png}
-          \caption[UC-05: Contingency Analysis.]{UC-05: Contingency Analysis. The operator evaluates the impact of different contingencies on system stability.}
+          \caption[UC-05: Contingency analysis.]{UC-05: Contingency analysis. The operator evaluates the impact of different contingencies on system stability.}
         \end{figure}
   \item[GUI interaction.] The Contingencies tab uses a three-column layout: controls on the left, eigenvalue comparison in the centre, and recommendations on the right. The before/after plots share the same axis scales for direct visual comparison.
   \item[Expected result.] The operator determines whether the grid remains stable under the selected $N-1$ contingency. If instability or marginal stability is detected, the operator receives targeted, actionable recommendations. This use case supports transmission planning studies and operational security assessment, enabling the operator to identify critical contingencies and plan mitigation measures.

@@ -26,7 +26,7 @@ This interaction sequence supports both rapid operational screening and deeper t
 
 \subsection{Initial tool scheme and architectural evolution}
 
-\paragraph{Initial Conceptual Scheme (Figure~\ref{fig:tool_scheme}).}
+\paragraph{Initial conceptual scheme (Figure~\ref{fig:tool_scheme}).}
 At the outset of the TenSyGrid project, the preliminary architectural roadmap considered MATLAB as a key foundation of the development platform. This initial strategy was primarily motivated by the pre-existing research legacy within the consortium, specifically the Multilinear Time-Invariant (MTI) Toolbox developed in earlier and concurrent project stages~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21}, alongside the STAMP simulation framework. In this early phase, before key design decisions regarding runtime dependencies were finalized, the toolbox was conceived as a hybrid, multi-branch framework connecting open-source components with existing MATLAB prototypes through dedicated runtime adapters.
 
 This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_scheme}. As originally planned, the platform established two parallel simulation branches:
@@ -43,7 +43,7 @@ This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_sche
   \label{fig:tool_scheme}
 \end{figure}
 
-\paragraph{Strategic Architectural Consolidation within VeraGrid.}
+\paragraph{Strategic architectural consolidation within VeraGrid.}
 While this initial hybrid layout enabled rapid early prototyping by leveraging existing research codebases, detailed evaluation during the architectural definition phase showed that maintaining multiple distinct software packages and heterogeneous runtimes introduced significant operational and maintenance complexity. To establish a production-grade, highly cohesive toolbox for Transmission System Operators (TSOs), the consortium identified substantial advantages in consolidating the entire calculation pipeline into a unified, native Python framework centered around VeraGrid:
 \begin{itemize}[before=\leavevmode, leftmargin=*]
   \item \textbf{Single-Stack Architectural Simplicity and Cohesion:} Interfacing separate runtimes across language boundaries required dedicated inter-process communication (IPC) bridges, serialization adapters, and dual-environment management. Consolidating the core multilinear routines natively within VeraGrid's architecture removes multi-package glue code, eliminates data marshaling overhead, and ensures unified memory structures directly shared between the power flow, descriptor assembly, and eigenvalue solvers.
@@ -85,16 +85,17 @@ Following this architectural consolidation, the multi-branch concept of Figure~\
         }
     ]
 
-    % Stage 1: Ingestion (IPSA Green)
+    % Stage 1: Model and data ingestion
     \node[stagebox, fill=schemepass] (stage1) {
-      \textbf{\normalsize 1. External Model Ingestion} \hfill \textsf{\footnotesize [IPSA Adapter]} \\[2pt]
-      \textbullet~Ingests grid topology, equipment parameters, and dynamic controller models from external commercial tools (PSCAD, DIgSILENT PowerFactory, PSS/E, MATLAB/Simulink). \\
-      \textbullet~Standardizes network definitions and dynamic parameter structures for downstream simulation.
+      \textbf{\normalsize 1. Model and data ingestion} \hfill \textsf{\footnotesize [VeraGrid import layer \& IPSA adapter]} \\[2pt]
+      \textbullet~Accepts native \texttt{.veragrid} files and the network-model formats supported by VeraGrid, including CIM/CGMES, PSS/E RAW/RAWX, PowerFactory DGS, UCTE, MATPOWER, and PSLF EPC. \\
+      \textbullet~Uses the IPSA adapter as an integration layer for models originating from external tools such as PSCAD, DIgSILENT PowerFactory, PSS/E, and MATLAB/Simulink. \\
+      \textbullet~Provides an extensible API entry point for additional model sources and converts all validated inputs into VeraGrid's internal \texttt{MultiCircuit} representation.
     };
 
     % Stage 2: VeraGrid Engine (Python Yellow)
     \node[stagebox, fill=schemepython, below=of stage1] (stage2) {
-      \textbf{\normalsize 2. Grid Modeling \& Operating Point Solution} \hfill \textsf{\footnotesize [VeraGridEngine]} \\[2pt]
+      \textbf{\normalsize 2. Grid modeling \& operating point solution} \hfill \textsf{\footnotesize [VeraGridEngine]} \\[2pt]
       \textbullet~Instantiates internal \texttt{MultiCircuit} model (buses, branches, generators, converters, loads, shunts). \\
       \textbullet~Attaches dynamic phasor RMS templates and performs algebraic descriptor conversion (\texttt{to\_implicit}). \\
       \textbullet~Solves AC/DC Power Flow (\texttt{vge.power\_flow}) to establish the pre-disturbance equilibrium state $\mathbf{x}_0$.
@@ -102,21 +103,21 @@ Following this architectural consolidation, the multi-branch concept of Figure~\
 
     % Stage 3: TenSyGrid Engine (Python Yellow)
     \node[stagebox, fill=schemepython, below=of stage2] (stage3) {
-      \textbf{\normalsize 3. Multilinear Stability \& Contingency Engine} \hfill \textsf{\footnotesize [TenSyGridEngine]} \\[2pt]
-      \textbullet~\textbf{Descriptor Assembly:} Builds multilinear system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$ using \texttt{RmsProblemMultilinear}. \\
-      \textbullet~\textbf{Modal Analysis:} Solves $\lambda_k\mathbf{E}\mathbf{v}_k=\mathbf{A}\mathbf{v}_k$ to extract damping ratios $\zeta_k$, frequencies $f_k$, and participation factors $p_{ki}$ (\texttt{small\_signal\_analysis\_main.py}). \\
-      \textbullet~\textbf{$N-1$ Contingency Screening:} Iteratively disconnects transmission elements to evaluate post-fault security margins (\texttt{run\_contingency.py}), caching results into \texttt{.tensygrid} files.
+      \textbf{\normalsize 3. Multilinear stability \& contingency engine} \hfill \textsf{\footnotesize [TenSyGridEngine]} \\[2pt]
+      \textbullet~\textbf{Descriptor assembly:} Builds multilinear system $\mathbf{E}\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}$ using \texttt{RmsProblemMultilinear}. \\
+      \textbullet~\textbf{Modal analysis:} Solves $\lambda_k\mathbf{E}\mathbf{v}_k=\mathbf{A}\mathbf{v}_k$ to extract damping ratios $\zeta_k$, frequencies $f_k$, and participation factors $p_{ki}$ (\texttt{small\_signal\_analysis\_main.py}). \\
+      \textbullet~\textbf{$N-1$ contingency screening:} Iteratively disconnects transmission elements to evaluate post-fault security margins (\texttt{run\_contingency.py}), caching results into \texttt{.tensygrid} files.
     };
 
     % Stage 4: GUI / Stability Monitor (Web / Soft Blue)
     \node[stagebox, fill=schemematlab, below=of stage3] (stage4) {
-      \textbf{\normalsize 4. Operational \& Diagnostic Interface} \hfill \textsf{\footnotesize [FastAPI Backend \& Web GUI]} \\[2pt]
-      \textbullet~\textbf{REST Backend:} Asynchronous service (\texttt{dashboard.py}) managing runs and precomputed caches. \\
+      \textbf{\normalsize 4. Operational \& diagnostic interface} \hfill \textsf{\footnotesize [FastAPI backend \& web GUI]} \\[2pt]
+      \textbullet~\textbf{REST backend:} Asynchronous service (\texttt{dashboard.py}) managing runs and precomputed caches. \\
       \textbullet~\textbf{Stability Monitor (\texttt{index.html}):} Executive status badges (green/yellow/red), complex-plane eigenvalue plot ($\sigma \pm j\omega$), critical mode participation ranking, $N-1$ contingency tables, and voltage profiles.
     };
 
     % Connections with clear vertical space and visible arrows
-    \draw[flowarrow] (stage1.south) -- node[arrowlabel, midway] {Standardized grid definitions \& dynamic parameters} (stage2.north);
+    \draw[flowarrow] (stage1.south) -- node[arrowlabel, midway] {Validated \texttt{MultiCircuit} model \& operating-point data} (stage2.north);
     \draw[flowarrow] (stage2.south) -- node[arrowlabel, midway] {Operating point $\mathbf{x}_0$ \& implicit phasor equations} (stage3.north);
     \draw[flowarrow] (stage3.south) -- node[arrowlabel, midway] {Eigenvalues, damping ratios, participation factors \& contingency outcomes} (stage4.north);
 
@@ -124,6 +125,8 @@ Following this architectural consolidation, the multi-branch concept of Figure~\
   \caption[Final integrated tool architecture and operational workflow.]{Final integrated architecture and computational workflow of the TenSyGrid toolbox, adopted following the architectural consolidation from the initial hybrid multi-language concept into a unified, native open-source Python/VeraGrid environment. The four-stage pipeline spans external model ingestion, VeraGrid modeling, native TenSyGrid multilinear stability analysis, and the operator web interface.}
   \label{fig:tool_pipeline}
 \end{figure}
+
+All downstream analyses operate on VeraGrid's internal \texttt{MultiCircuit} representation and are therefore independent of the original input channel. A model may be loaded directly from any format supported by VeraGrid, obtained through the IPSA integration layer from tools such as PSCAD, DIgSILENT PowerFactory, PSS/E, or MATLAB/Simulink, or supplied through a configured API endpoint. In every case, the input must provide the topology, equipment parameters, operating point, and dynamic-model information required by the selected analysis and must pass the same conversion and validation process before execution.
 
 The modular decoupling illustrated in Figure~\ref{fig:tool_pipeline} ensures clear separation of concerns across the pipeline:
 \begin{enumerate}[before=\leavevmode, leftmargin=*]
