@@ -8,6 +8,8 @@
 \usepackage[english]{babel}
 \usepackage{lmodern,lipsum,microtype}
 \usepackage[UPC]{tensygrid}
+% Use the main (Raleway) family for description labels; TikZ keeps the sans family.
+\setkomafont{descriptionlabel}{\normalfont\bfseries}
 \geometry{
   paper=a4paper,
   left=25mm,
@@ -62,8 +64,8 @@ CETPartnership \\
 \subtitle{Project: Tensors for System Analysis of\\ Converter-dominated Power Grids}
 \date{31 October 2026}
 \tgsigsetup{
-  fromname         = {Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez},
-  fromfunction     = {Phd Student\\Phd Student},
+  fromname         = {Eduardo~Prieto-Araujo\\Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez},
+  fromfunction     = {Principal Investigator and Full Professor at UPC\\PhD Student\\PhD Student},
   headname         = {Dr.~Carlos~Cateriano~Yáñez},
   headfunction     = {Project Coordinator},
   reviewername     = {Dr.~John Licari},
@@ -102,9 +104,9 @@ CETPartnership \\
 \clearpage
 
 \section*{Summary}
-This deliverable identifies and describes the use cases that the TenSyGrid Toolbox must support to serve network operators in assessing the small-signal stability of converter-dominated power grids. Fourteen use cases are catalogued and described, organised into two groups: six use cases already prototyped in an initial web-based Stability Monitor, and eight additional use cases proposed for discussion with operators during a dedicated workshop.
+This deliverable identifies and describes the use cases that the TenSyGrid Toolbox is expected and desired to include to serve network operators in assessing the small-signal stability of converter-dominated power grids. Fourteen use cases are cataloged and described, organised into two groups: six use cases already prototyped in an initial web-based Stability Monitor, and eight additional use cases proposed from discussion with operators and other industry agents.
 
-The implemented use cases cover the core stability-analysis workflow: launching a small-signal eigenvalue computation, inspecting the system status via a dashboard, exploring the eigenvalue spectrum, diagnosing critical oscillation modes through participation factors, verifying bus voltage profiles, and performing N-1 contingency analysis with some recommendations.
+The use cases that are already implemented in an experimental way cover the core stability-analysis workflow: launching a small-signal eigenvalue computation, inspecting the system current status via a dashboard, exploring the eigenvalue spectrum, diagnosing critical oscillation modes through participation factors, verifying bus voltage profiles, and performing $N-1$ contingency analysis with some recommendations.
 
 
 

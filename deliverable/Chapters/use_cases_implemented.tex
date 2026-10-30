@@ -3,7 +3,7 @@
 The following five use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the TenSyGrid engine, running in a sepparate backend server. 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-01: Run Small-Signal Stability Simulation}
+\subsection{UC-01: Run Small-Signal Stability Analysis}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -36,7 +36,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-01.run_simulation.png}
-          \caption[UC-01: Run Small-Signal Stability Simulation.]{UC-01: Run Small-Signal Stability Simulation. The operator selects a grid model, runs the simulation, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
+          \caption[UC-01: Run Small-Signal Stability Analysis.]{UC-01: Run Small-Signal Stability Analysis. The operator selects a grid model, runs the simulation, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
         \end{figure}
 
   \item[GUI interaction.] The \textbf{Run Analysis} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the simulation timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete/failed results.
@@ -114,7 +114,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 \begin{description}
   \item[Actor.] Stability engineer or control designer.
   \item[Objective.] Identify the least-damped oscillation modes and determine which state variables (generators, controls, components) contribute most to each mode.
-  \item[Preconditions.] an analysis (UC-01) has been completed. Eigenvalues have been computed.
+  \item[Preconditions.] An analysis (UC-01) has been completed. Eigenvalues have been computed.
   \item[Theoretical basis.] Each eigenvalue corresponds to an oscillation mode that is a specific combination of perturbations in the state vector. The modal participation factor is defined as
         \[
           p_{ki}=\frac{v_{ki}\,(\mathbf{w}_k^{\top}\mathbf{E})_i}{\mathbf{w}_k^{\top}\mathbf{E}\,\mathbf{v}_k},
@@ -159,8 +159,8 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
           \item A table lists every bus in the network with its name (or index) and its voltage magnitude in per-unit (p.u.).
           \item Each bus row carries a colour-coded status badge:
                 \begin{itemize}[before=\leavevmode, leftmargin=*]
-                  \item \textbf{OK} (green) --- voltage is within the normal operating range (e.g., $0.95$--$1.05$ p.u.).
-                  \item \textbf{WARNING} (orange) --- voltage is outside the normal range but within emergency limits (e.g., $0.90$--$1.10$ p.u.).
+                  \item \textbf{OK} (green) | voltage is within the normal operating range (e.g., $0.95$--$1.05$ p.u.).
+                  \item \textbf{WARNING} (orange) | voltage is outside the normal range but within emergency limits (e.g., $0.90$--$1.10$ p.u.).
                 \end{itemize}
           \item Buses with WARNING status are flagged for operator attention. The operator can sort the table by voltage magnitude to quickly locate under-voltage or over-voltage buses.
         \end{enumerate}
