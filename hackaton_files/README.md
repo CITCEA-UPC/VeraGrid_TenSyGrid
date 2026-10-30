@@ -15,7 +15,12 @@ IDs from the loaded grid. The four generators (Gen1–Gen4) each expose:
 The ranges are initial search limits for the hackathon. They do not certify
 stability; candidate settings still need RMS or small-signal evaluation.
 The tuner selects a `TunableParameter` from `tunable_grid.tunable_parameters`
-and returns `RmsTuning({parameter: 20.0})`. It can also select existing lines
+and returns `RmsTuning({parameter: 20.0})`. For numeric tuning,
+`tunable_grid.control_tensor` is a read-only NumPy tensor with one row per
+parameter and columns `[initial_value, minimum, maximum]`. A tuner can compute
+a vector of candidate values and pair each value with the parameter at the
+same row index. The evaluator still owns the full grid for simulation.
+It can also select existing lines
 from `openable_lines`, a new corridor from `line_candidates`, or shunt
 placements from `shunt_options`. Generator setpoints are listed in
 `dispatch_options`; use `dispatch_mw={option: new_mw}` to move generation

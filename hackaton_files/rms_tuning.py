@@ -179,6 +179,17 @@ class TunableGrid:
     tests_used: int = 0
     evaluator: RmsTunerEvaluator | None = None
 
+    @property
+    def control_tensor(self) -> np.ndarray:
+        """Read-only [value, minimum, maximum] rows aligned with parameters."""
+        tensor = np.array(
+            [(p.initial_value, p.minimum, p.maximum)
+             for p in self.tunable_parameters],
+            dtype=np.float64,
+        ).reshape((-1, 3))
+        tensor.flags.writeable = False
+        return tensor
+
     def test_tuning(self, tuning: RmsTuning) -> RmsTuningMetrics:
         """Evaluate one proposal without changing this grid or RMS problem."""
         if self.evaluator is None:

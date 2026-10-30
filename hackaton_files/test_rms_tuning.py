@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import numpy as np
 
 from VeraGridEngine.api import open_file
 
@@ -10,6 +11,24 @@ from hackaton_files import BasicRmsTuner, RmsTuner, RmsTuning, RmsTunerEvaluator
 
 
 GRID_PATH = Path(__file__).with_name("stable_rms_grid.veragrid")
+
+
+def test_control_tensor_matches_tunable_parameters() -> None:
+    grid = open_file(str(GRID_PATH))
+
+    class TensorTuner(BasicRmsTuner):
+        def tune(self, tunable_grid: TunableGrid) -> RmsTuning:
+            tensor = tunable_grid.control_tensor
+            assert tensor.shape == (len(tunable_grid.tunable_parameters), 3)
+            assert not tensor.flags.writeable
+            np.testing.assert_allclose(
+                tensor,
+                [(p.initial_value, p.minimum, p.maximum)
+                 for p in tunable_grid.tunable_parameters],
+            )
+            return RmsTuning()
+
+    evaluate_participant(TensorTuner(), grid)
 
 
 class ChangeGen1Kp(RmsTuner):
