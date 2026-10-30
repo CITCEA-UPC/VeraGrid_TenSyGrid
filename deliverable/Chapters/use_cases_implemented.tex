@@ -27,19 +27,19 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
           \item The dropdown list is populated with all available \texttt{.veragrid} files. The operator selects the desired grid.
           \item The operator clicks the \textbf{Run Analysis} button.
           \item The backend launches the computational script as a subprocess, using the selected grid file as input.
-          \item A log output panel displays the simulation progress (power-flow solution, state matrix assembly, eigenvalue computation) results.
+          \item A log output panel displays the analysis progress: power-flow solution, state-matrix assembly, and eigenvalue computation.
           \item Upon completion, the result is stored as a \texttt{.tensygrid} file in the precomputed-results directory.
-          \item The status indicator changes from \textit{Running} to \textit{Completed}, and the new result appears in the result list with a colour-coded stability badge (green: stable, yellow: marginal, red: unstable). It should be emphasized that the numerical threshold (currently \texttt{STABLE\_MAX\_REAL\_PART} $= 10^{-6}$) determines whether the system is classified as stable within the margin of error.
+          \item The status indicator changes from \textit{Running} to \textit{Completed}, and the new result appears in the result list with a colour-coded stability badge (green: stable, yellow: marginal, red: unstable). A configurable numerical tolerance, currently $10^{-6}$ for the dominant real part, is used to distinguish a marginal result from numerical noise.
           \item If the operator needs to abort, the \textbf{Stop} button terminates the subprocess gracefully.
         \end{enumerate}
 
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-01.run_simulation.png}
-          \caption[UC-01: Assessment of Small-Signal Stability.]{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions. The operator selects a grid model, runs the simulation, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
+          \caption[UC-01: Assessment of Small-Signal Stability.]{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions. The operator selects a grid model, runs the analysis, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
         \end{figure}
 
-  \item[GUI interaction.] The \textbf{Run Analysis} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the simulation timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete/failed results.
+  \item[GUI interaction.] The \textbf{Run Analysis} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the analysis timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete or failed results.
   \item[Expected result.] A \texttt{.tensygrid} file containing the full stability analysis output: eigenvalues, critical modes with participation factors, bus voltages from the power flow, grid topology information, the stability margin, and an operation hash for traceability. This file serves as input for all subsequent use cases (UC-02 to UC-05).
 \end{description}
 
@@ -53,7 +53,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 \begin{description}
   \item[Actor.] Network operator; planning engineer or stability analyst for the detailed spectrum exploration.
   \item[Objective.] Obtain an immediate, general classification of grid stability together with key topological and operational metrics, and explore the full eigenvalue distribution in the complex plane to identify clusters, assess damping ratios, and detect modes of concern.
-  \item[Preconditions.] At least one simulation (UC-01) has been completed and its result is loaded.
+  \item[Preconditions.] At least one analysis (UC-01) has been completed and its result is loaded.
   \item[Theoretical basis.] Using UC-01 theoretical basis, we find different regimes in the system stability. We define the dominant eigenvalue $\lambda_1$ as the one with the biggest $\Re(\lambda)=\sigma$. For a sufficiently large time $t$, any other mode becomes negligible relative to the dominant one, since
         \[
           \frac{\mathrm{e}^{\lambda_n t}}{\mathrm{e}^{\lambda_1 t}}
@@ -73,16 +73,16 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Status} tab.
-          \item A traffic lights-like indicator displays the overall stability classification:
+          \item A compact colour-coded badge displays the overall stability classification:
                 \begin{itemize}[before=\leavevmode, leftmargin=*]
                   \item \textbf{Green} | Stable: all eigenvalues have negative real parts with sufficient damping.
-                  \item \textbf{Yellow} | Marginal: the stability margin is below a predefined threshold (\texttt{STABLE\_MAX\_REAL\_PART} $< 10^{-6}$) or some modes exhibit low damping ($\zeta < 0.05$).
+                  \item \textbf{Yellow} | Marginal: the dominant real part lies within the configured numerical tolerance of the imaginary axis (currently $10^{-6}$), or some modes exhibit low damping ($\zeta < 0.05$).
                   \item \textbf{Red} | Unstable: at least one eigenvalue has a positive real part.
                 \end{itemize}
           \item The \textbf{Grid Information} card shows the network topology: number of buses, generators, lines, loads, and transformers.
           \item The \textbf{Key Metrics} card reports the stability margin, the number of critical modes, the total eigenvalue count, and the number of state variables.
           \item A compact complex-plane eigenvalue plot provides a visual overview of the spectrum, with a red dashed line marking the stability boundary ($\Re(\lambda) = 0$).
-          \item The \textbf{Stability Assessment} card presents a textual summary with colour-coded recommendations (e.g., ``All modes stable'', ``Caution: low damping detected'', or ``Warning: positive real parts --- system is unstable'').
+          \item The \textbf{Stability Assessment} card presents a textual summary with colour-coded recommendations (e.g., ``All modes stable'', ``Caution: low damping detected'', or ``Warning: positive real parts; the system is unstable'').
           \item When a detailed exploration is required, the operator navigates to the \textbf{Eigenvalues} tab, where a full-page complex-plane scatter plot displays all eigenvalues: horizontal axis = real part $\sigma$, vertical axis = imaginary part $\omega$ (angular frequency). A red dashed vertical line marks the stability boundary ($\sigma = 0$).
           \item The operator can \textbf{scroll to zoom} and \textbf{drag to pan} across the plot, allowing inspection of dense clusters or outlying modes.
           \item Hovering over a point displays a tooltip with the eigenvalue's real part, imaginary part, frequency in Hz, and damping ratio $\zeta$.
@@ -103,7 +103,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
           \caption[UC-02: Eigenvalue Analysis.]{UC-02: Eigenvalue Analysis. The operator explores the eigenvalue distribution in the complex plane from the Eigenvalues tab.}
         \end{figure}
 
-  \item[GUI interaction.] The \textbf{Status} tab is designed as a control-room dashboard. The traffic lights have a glowing animation when active, drawing the operator's attention to abnormal conditions. All metrics are displayed in large-format cards for quick scanning. The eigenvalue canvas of the \textbf{Eigenvalues} tab supports interactive zoom and pan via mouse or touch gestures. The damping plot and table are synchronised with the same data set and update when a different simulation result is loaded.
+  \item[GUI interaction.] The \textbf{Status} tab is designed as a control-room dashboard. Colour-coded status badges draw the operator's attention to abnormal conditions without relying on animated traffic-light graphics. All metrics are displayed in large-format cards for quick scanning. The eigenvalue canvas of the \textbf{Eigenvalues} tab supports interactive zoom and pan via mouse or touch gestures. The damping plot and table are synchronised with the same data set and update when a different analysis result is loaded.
   \item[Expected result.] The operator obtains a clear answer to the question \textit{``Is the grid stable''?} together with enough context (topology, metrics) and a detailed understanding of the oscillatory modes (their frequencies, damping levels, and proximity to instability) to decide whether further investigation is needed. If the status is yellow or red, the operator is expected to proceed to UC-03 for detailed diagnosis of the critical modes, and uses this view to evaluate the effectiveness of remedial measures in contingency scenarios (UC-05).
 \end{description}
 
@@ -152,7 +152,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Actor.] Network operator.
   \item[Objective.] Verify that the voltage magnitudes obtained from the power-flow solution are within acceptable operating limits.
   \item[Preconditions.] An analysis (UC-01) has been completed and the power-flow solution is available.
-  \item[Theoretical basis.] The power-flow solution provides the steady-state voltage magnitude and angle at each bus of the network. The per-unit voltage magnitude $V_\mathrm{p.u.}$ is compared against operational limits: normal operating range (e.g.\ $0.95$--$1.05$ p.u.) and emergency limits (e.g.\ $0.90$--$1.10$ p.u.). Buses outside the normal range but within emergency limits are flagged as WARNING; buses beyond emergency limits would indicate a severe violation. This snapshot check complements the eigenvalue-based stability assessment: a system can be small-signal stable yet have unacceptable voltage profiles, especially in weak or converter-heavy networks.
+  \item[Theoretical basis.] The power-flow solution provides the steady-state voltage magnitude and angle at each bus of the network. The per-unit voltage magnitude $V_\mathrm{p.u.}$ is compared against operational limits: normal operating range (e.g.\ $0.95$--$1.05$ p.u.) and emergency limits (e.g.\ $0.90$--$1.10$ p.u.). Buses outside the normal range but within emergency limits are flagged as WARNING; buses beyond emergency limits indicate a severe violation. UC-04 does not perform an iMTI calculation independently. It reuses the operating-point power flow already required by UC-01 and complements the eigenvalue-based assessment, because a system can be small-signal stable while exhibiting unacceptable voltage profiles.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Bus Voltages} tab.
@@ -185,16 +185,16 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
   \item[Objective.] Evaluate the impact of a single-element outage (generator, line, or load) on the small-signal stability of the grid.
   \item[Preconditions.]
         \begin{itemize}[before=\leavevmode, leftmargin=*]
-          \item A base-case simulation (UC-01) has been completed and serves as the pre-contingency reference.
+          \item A base-case analysis (UC-01) has been completed and serves as the pre-contingency reference.
           \item The grid model contains the values of the element to be removed.
         \end{itemize}
-  \item[Theoretical basis.] When a device is selected, it goes from \texttt{active} to \texttt{inactive}. Then, a new power flow, enforcing that their variables are null, is computed to find the new equilibrium point and the small signal is performed.
+  \item[Theoretical basis.] For each selected outage, the affected device is changed from \texttt{active} to \texttt{inactive}. A new power flow determines the post-contingency equilibrium, after which the iMTI descriptor matrices and eigenvalues are recomputed. The use case is therefore not a conventional $N-1$ power-flow check alone: its TenSyGrid contribution is the comparison of pre- and post-contingency small-signal stability margins and critical modes.
   \item[Main flow.]
         \begin{enumerate}[before=\leavevmode, leftmargin=*]
           \item The operator navigates to the \textbf{Contingencies} tab.
           \item The operator selects the contingency type from a dropdown: \textbf{Generator}, \textbf{Line}, or \textbf{Load}.
           \item A second dropdown is populated with the available elements of the selected type (e.g., "Generator 0", "Line 3"). The operator selects the specific element to be removed.
-          \item The operator clicks the \textbf{Simulate Contingency} button.
+          \item The operator clicks the \textbf{Analyse Contingency} button.
           \item The backend launches the contingency analysis script, which removes the selected element from the grid model, re-computes the power flow and the small-signal stability, and returns the post-contingency eigenvalues.
           \item The results are displayed as a side-by-side comparison: two complex-plane eigenvalue plots (pre-contingency vs.~post-contingency) sharing the same axis scales, plus a summary table listing the contingency type, the element removed, and the change in stability margin.
           \item The tool generates \textbf{automatic recommendations} based on the observed change:
@@ -203,7 +203,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
                   \item If damping degrades below the 5\% threshold: ``Low-damped modes detected; evaluate PSS retuning or FACTS placement''
                   \item If the stability margin decreases significantly: ``Re-dispatch generation or reinforce the affected corridor to recover margin''
                 \end{itemize}
-          \item The operator can repeat the analysis for different elements to explore multiple N-1 scenarios. A \textbf{Stop} button is available to cancel a running contingency simulation in case it takes too long.
+          \item The operator can repeat the analysis for different elements to explore multiple $N-1$ scenarios. A \textbf{Stop} button is available to cancel a running contingency analysis if it takes too long.
         \end{enumerate}
         \begin{figure}[H]
           \centering
