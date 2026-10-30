@@ -1,3 +1,7 @@
+All the use cases presented in this chapter are methodologically grounded in the implicit Multilinear Time-Invariant (iMTI) and tensor formulations developed within the TenSyGrid project~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21}. Originally researched, prototyped, and validated as a dedicated MTI Toolbox in MATLAB during the preliminary project stages, these mathematical algorithms and tensor routines have been ported and natively integrated into Python within the open-source VeraGrid simulation platform (forming the 	exttt{TensyGridEngine}).
+
+As a result, whether addressing single-operating-point stability screening (UC-01 to UC-05), planning-horizon scenario sweeps (UC-06 to UC-12), or advanced nonlinear dynamics near bifurcation limits (UC-13 and UC-14), all workflows share this consolidated multilinear computational engine.
+
 \section{Use case inventory}
 
 Table~\ref{tab:uc-inventory} provides a summary of all identified use cases, grouped by their current implementation status. The first five have been prototyped in the Stability Monitor GUI; the remaining nine are candidates to be discussed within the consortium to check which ones transfer more impact into the community and industry. 
@@ -7,28 +11,29 @@ From proposed use cases to be implemented, UC-13 and UC-14 will have a relevant 
   \centering
   \caption{Use case inventory for the TenSyGrid Toolbox.}
   \label{tab:uc-inventory}
-  \begin{tabular}{lp{0.30\textwidth}p{0.15\textwidth}p{0.40\textwidth}}
+  {\small\begin{tabular}{lp{0.32\textwidth}lp{0.38\textwidth}}
     \toprule
     \textbf{ID} & \textbf{Name}                                  & \textbf{Status} & \textbf{Objective}                                                                     \\
     \midrule
-    UC-01       & Run Small-Signal Stability Analysis          & Implemented     & Execute a stability computation on a grid model                                        \\
-    UC-02       & System Status Dashboard \& Eigenvalue Spectrum & Implemented     & Obtain an at-a-glance stability classification and explore the eigenvalue distribution \\
-    UC-03       & Critical Mode Diagnosis                        & Implemented     & Identify low-damped modes and their physical origin                                    \\
-    UC-04       & Bus Voltage Assessment                         & Implemented     & Verify voltage profile from the power-flow solution                                    \\
-    UC-05       & N-1 Contingency Analysis                       & Implemented     & Evaluate stability impact of single-element outages                                    \\
+    UC-01       & Assessment of Small-Signal Stability under Given Operating Conditions & Implemented     & Execute a stability computation on a grid model                                        \\
+    UC-02       & Monitoring and Screening of Power System Small-Signal Stability Margins & Implemented     & Obtain an at-a-glance stability classification and explore the eigenvalue distribution \\
+    UC-03       & Identification and Diagnosis of Critical Oscillatory Modes & Implemented     & Identify low-damped modes and their physical origin                                    \\
+    UC-04       & Assessment of Bus Voltage Profiles and Operating Limit Violations & Implemented     & Verify voltage profile from the power-flow solution                                    \\
+    UC-05       & Identification of Stability Risks under $N-1$ Contingencies & Implemented     & Evaluate stability impact of single-element outages                                    \\
     \midrule
-    UC-06       & Operating Scenario Comparison                  & Proposed        & Compare stability between two grid snapshots                                           \\
-    UC-07       & Critical Device List                           & Proposed        & Rank devices by their participation in the critical modes                              \\
-    UC-08       & Stability Trend Analysis                       & Proposed        & Track stability evolution across multiple operating points                             \\
-    UC-09       & Critical Element Ranking                       & Proposed        & Rank elements by their contribution to stability degradation                           \\
-    UC-10       & Damping Controller Placement Guidance          & Proposed        & Suggest candidate locations for PSS or FACTS devices                                   \\
-    UC-11       & Renewable Scenario Assessment                  & Proposed        & Evaluate stability at different renewable penetration levels                           \\
-    UC-12       & Automated Stability Report Generation          & Proposed        & Produce a standardised stability report for stakeholders                               \\
-    UC-13       & Centre Manifold Analysis                       & Proposed        & Characterise the dynamics behind zero eigenvalues                                      \\
-    UC-14       & Basin of Attraction Estimation                 & Proposed        & Quantify security margins against specified disturbances                               \\
+    UC-06       & Comparative Stability Assessment across Operating Scenarios & Proposed        & Compare stability between two grid snapshots                                           \\
+    UC-07       & Identification of Devices Contributing to Stability Issues & Proposed        & Rank devices by their participation in the critical modes                              \\
+    UC-08       & Assessment of Stability Margins under Increasing System Loading & Proposed        & Track stability evolution across multiple operating points                             \\
+    UC-08.1     & Online Tracking of Stability Margins along Operating Trajectories & Proposed & Real-time tracking of stability margin evolution towards critical points \\
+    UC-09       & Ranking of Critical System Elements Affecting Stability & Proposed        & Rank elements by their contribution to stability degradation                           \\
+    UC-10       & Identification of Suitable Locations for Damping Controller Installation & Proposed        & Suggest candidate locations for PSS or FACTS devices                                   \\
+    UC-11       & Assessment of Renewable Energy Integration Impact on System Stability & Proposed        & Evaluate stability at different renewable penetration levels                           \\
+    UC-12       & Automated Documentation and Reporting of Stability Assessment Results & Proposed        & Produce a standardised stability report for stakeholders                               \\
+    UC-13       & Assessment of Nonlinear System Behaviour near Critical Operating Points & Proposed        & Characterise the dynamics behind zero eigenvalues                                      \\
+    UC-14       & Assessment of the Region of Attraction following System Disturbances & Proposed        & Quantify security margins against specified disturbances                               \\
     %   UC-15       & <name>                                & Proposed        & <objective>                                                  \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 \end{table}
 
 \input{Chapters/use_cases_implemented.tex}

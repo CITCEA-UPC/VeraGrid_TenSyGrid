@@ -1,9 +1,9 @@
 \section{Implemented use cases}
 
-The following five use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the TenSyGrid engine, running in a sepparate backend server. 
+The following five use cases have been prototyped in the TenSyGrid Stability Monitor, a web-based graphical interface that communicates with the native Python TenSyGrid calculation engine (the ported MTI implementation integrated within VeraGrid), running on a dedicated backend server. 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-01: Run Small-Signal Stability Analysis}
+\subsection{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -36,7 +36,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
         \begin{figure}[H]
           \centering
           \includegraphics[width=0.7\textwidth]{pictures/UC-01.run_simulation.png}
-          \caption[UC-01: Run Small-Signal Stability Analysis.]{UC-01: Run Small-Signal Stability Analysis. The operator selects a grid model, runs the simulation, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
+          \caption[UC-01: Assessment of Small-Signal Stability.]{UC-01: Assessment of Small-Signal Stability under Given Operating Conditions. The operator selects a grid model, runs the simulation, and monitors progress in the log panel. Upon completion, the result is stored and classified by stability status.}
         \end{figure}
 
   \item[GUI interaction.] The \textbf{Run Analysis} tab contains a grid selector, action buttons (Run / Stop), a status badge, an execution log panel, and a list of previously computed results. Each result item shows the simulation timestamp, the grid name, and the stability classification. A delete button allows removal of obsolete/failed results.
@@ -47,7 +47,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-02: System Status Dashboard \& Eigenvalue Spectrum}
+\subsection{UC-02: Monitoring and Screening of Power System Small-Signal Stability Margins}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -108,7 +108,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-03: Critical Mode Diagnosis}
+\subsection{UC-03: Identification and Diagnosis of Critical Oscillatory Modes}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -145,7 +145,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 \end{description}
 
 % ---------------------------------------------------------------------------
-\subsection{UC-04: Bus Voltage Assessment}
+\subsection{UC-04: Assessment of Bus Voltage Profiles and Operating Limit Violations}
 % ---------------------------------------------------------------------------
 
 \begin{description}
@@ -177,7 +177,7 @@ The following five use cases have been prototyped in the TenSyGrid Stability Mon
 
 
 % ---------------------------------------------------------------------------
-\subsection{UC-05: $N-1$ Contingency Analysis}
+\subsection{UC-05: Identification of Stability Risks under $N-1$ Contingencies}
 % ---------------------------------------------------------------------------
 
 \begin{description}

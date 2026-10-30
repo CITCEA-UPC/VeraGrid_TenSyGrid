@@ -39,25 +39,26 @@ This initial conceptual architecture is illustrated in Figure~\ref{fig:tool_sche
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{pictures/esquema.png}
-  \caption[Initial TenSyGrid modular scheme and hybrid integration concept.]{Initial conceptual scheme of the TenSyGrid toolbox, conceived during early project stages prior to resolving the MATLAB software dependency. In this preliminary design, external models fed into VeraGrid (Python) while relying on runtime adapters to bridge into MATLAB-based MTI and STAMP simulation packages.}
+  \caption[Initial TenSyGrid modular scheme and hybrid integration concept.]{Initial conceptual scheme of the TenSyGrid toolbox, conceived during early project stages to explore multi-environment integration. In this preliminary design, external models fed into VeraGrid (Python) while relying on runtime adapters to bridge into MATLAB-based research prototypes for the MTI formulation and STAMP routines.}
   \label{fig:tool_scheme}
 \end{figure}
 
-\paragraph{The MATLAB Decision and Strategic Architectural Pivot.}
-Although this initial hybrid layout enabled early prototyping by recycling legacy MATLAB scripts, in-depth evaluation revealed that maintaining a dependency on MATLAB was incompatible with the operational, technical, and regulatory requirements of a production-grade toolbox for Transmission System Operators (TSOs):
+\paragraph{Strategic Architectural Consolidation within VeraGrid.}
+While this initial hybrid layout enabled rapid early prototyping by leveraging existing research codebases, detailed evaluation during the architectural definition phase showed that maintaining multiple distinct software packages and heterogeneous runtimes introduced significant operational and maintenance complexity. To establish a production-grade, highly cohesive toolbox for Transmission System Operators (TSOs), the consortium identified substantial advantages in consolidating the entire calculation pipeline into a unified, native Python framework centered around VeraGrid:
 \begin{itemize}[before=\leavevmode, leftmargin=*]
-  \item \textbf{Licensing and Open-Source Distribution:} MATLAB is commercial proprietary software subject to strict per-seat or concurrent network licensing. Requiring proprietary licenses creates a severe barrier for widespread dissemination among TSOs, academic researchers, and industrial stakeholders. A core requirement of the European CETPartnership initiative is fostering fully accessible, transparent, and reproducible tooling, necessitating a zero-cost, open-source distribution model.
-  \item \textbf{Supercomputing and Cloud Scalability:} Assessing small-signal stability in modern converter-dominated grids demands computationally intensive batch runs, including massive $N-1$ contingency evaluations, broad parameter sweeps, and Monte Carlo-based renewable scenario assessments. In High-Performance Computing (HPC) clusters and cloud environments (e.g., managed via SLURM or container orchestration platforms), MATLAB license-token checkouts severely constrain parallel scaling across hundreds of worker nodes. In contrast, Python runs natively in headless Linux containers (e.g., Docker, Apptainer/Singularity) and leverages distributed computing paradigms without licensing bottlenecks.
-  \item \textbf{Adapter Complexity and Runtime Fragility:} Bridging Python and MATLAB at runtime required IPC adapters, cross-language data serialization, and dual-runtime environments. This increased software maintenance overhead, introduced memory transfer latencies, and complicated installation on control-room workstations.
-  \item \textbf{Unified Scientific and Web Ecosystem:} The modern Python scientific stack (NumPy, SciPy, sparse matrix solvers, and compiled acceleration libraries) provides numerical performance on par with or exceeding MATLAB, while modern asynchronous frameworks (such as FastAPI) enable seamless coupling with web-based operational monitoring interfaces.
+  \item \textbf{Single-Stack Architectural Simplicity and Cohesion:} Interfacing separate runtimes across language boundaries required dedicated inter-process communication (IPC) bridges, serialization adapters, and dual-environment management. Consolidating the core multilinear routines natively within VeraGrid's architecture removes multi-package glue code, eliminates data marshaling overhead, and ensures unified memory structures directly shared between the power flow, descriptor assembly, and eigenvalue solvers.
+  \item \textbf{Direct VeraGrid Integration and Codebase Maintainability:} Embedding the multilinear formulation directly into the \texttt{VeraGridEngine} ecosystem leverages VeraGrid's native high-performance data model and compiled extensions (C++/Python). This streamlines continuous integration, simplifies testing, and provides a single, uniform API for developers, researchers, and operators alike.
+  \item \textbf{Turnkey Deployment in HPC and Cloud Environments:} Assessing small-signal stability in modern converter-dominated grids demands computationally intensive batch runs, including massive $N-1$ contingency evaluations, broad parameter sweeps, and Monte Carlo-based renewable scenario assessments. A unified Python stack facilitates turnkey containerization (e.g., Docker, Apptainer/Singularity) and frictionless deployment across distributed Linux clusters and cloud environments, avoiding the configuration complexity of multi-platform execution environments on worker nodes.
+  \item \textbf{Open-Source Accessibility and Reproducibility:} A primary pillar of the European CETPartnership initiative is the creation of openly accessible, transparent, and easily reproducible tools for the broader power systems community. Delivering a fully open-source Python codebase enables TSOs, research institutions, and industry stakeholders to readily inspect, customize, and extend the algorithms without prerequisite software barriers.
+  \item \textbf{Seamless Web and Modern Service Coupling:} Python's extensive ecosystem natively bridges scientific computing libraries (NumPy, SciPy, optimized sparse solvers) with modern asynchronous web frameworks (such as FastAPI). This architecture enables high-throughput data streaming to the operator-facing browser interface with minimal overhead.
 \end{itemize}
 
-Consequently, the consortium formally decided to eliminate the MATLAB dependency entirely and pivot to a 100\% native Python architecture. The tensor formulation and multilinear algorithms of the MTI Toolbox were re-engineered directly into Python within the dedicated \texttt{TensyGridEngine}, built seamlessly on top of \texttt{VeraGridEngine}.
+Consequently, the consortium agreed to consolidate the computational core natively within Python and VeraGrid. The multilinear algorithms and tensor formulations of the MTI framework were re-engineered directly into the dedicated \texttt{TensyGridEngine}, running seamlessly as an integrated calculation layer built directly on top of \texttt{VeraGridEngine}.
 
 
 \subsection{Integrated tool architecture and operational workflow}
 
-Following the decision to transition away from MATLAB, the initial hybrid concept of Figure~\ref{fig:tool_scheme} evolved into the streamlined, end-to-end computational and visualization pipeline shown in Figure~\ref{fig:tool_pipeline}. This final architecture eliminates all external runtime bridges and provides a clean, four-stage data flow from external model ingestion to the operator interface:
+Following this architectural consolidation, the multi-branch concept of Figure~\ref{fig:tool_scheme} evolved into the streamlined, end-to-end computational and visualization pipeline shown in Figure~\ref{fig:tool_pipeline}. This unified architecture eliminates multi-runtime bridges and provides a clean, four-stage data flow from external model ingestion to the operator interface:
 
 \begin{figure}[H]
   \centering
@@ -120,7 +121,7 @@ Following the decision to transition away from MATLAB, the initial hybrid concep
     \draw[flowarrow] (stage3.south) -- node[arrowlabel, midway] {Eigenvalues, damping ratios, participation factors \& contingency outcomes} (stage4.north);
 
   \end{tikzpicture}
-  \caption[Final integrated tool architecture and operational workflow.]{Final integrated architecture and computational workflow of the TenSyGrid toolbox, adopted following the architectural decision to transition from the initial MATLAB-dependent hybrid scheme to a fully native open-source Python stack. The four-stage pipeline spans external model ingestion, VeraGrid modeling, native TenSyGrid multilinear stability analysis, and the operator web interface.}
+  \caption[Final integrated tool architecture and operational workflow.]{Final integrated architecture and computational workflow of the TenSyGrid toolbox, adopted following the architectural consolidation from the initial hybrid multi-language concept into a unified, native open-source Python/VeraGrid environment. The four-stage pipeline spans external model ingestion, VeraGrid modeling, native TenSyGrid multilinear stability analysis, and the operator web interface.}
   \label{fig:tool_pipeline}
 \end{figure}
 
@@ -128,7 +129,7 @@ The modular decoupling illustrated in Figure~\ref{fig:tool_pipeline} ensures cle
 \begin{enumerate}[before=\leavevmode, leftmargin=*]
   \item \textbf{Ingestion and standardisation:} Downstream computational modules remain completely agnostic to the proprietary origins of the network models, relying exclusively on standard internal interfaces.
   \item \textbf{High-performance core computing:} Heavy numerical operations (power flow, descriptor matrix assembly, generalized eigenvalue solves, and batch contingency runs) run natively in optimized C++/Python libraries on dedicated servers or HPC compute nodes.
-  \item \textbf{Zero-footprint operator access:} Transmission operators access results through an intuitive, lightweight web browser interface without needing local numerical software or specialized compiler toolchains installed on control-room workstations.
+  \item \textbf{Browser-based operator access:} Transmission operators access results through an intuitive, lightweight web browser interface without needing local numerical software or specialized compiler toolchains installed on control-room workstations.
 \end{enumerate}
 
 
