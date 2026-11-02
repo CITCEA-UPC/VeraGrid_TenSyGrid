@@ -85,19 +85,39 @@ def main():
 
         problem = results["problem"]
         var_to_device: dict[int, str] = {}
-        if is_emt:
-            state_vars = list(problem.get_state_vars())
-        else:
-            state_vars = list(problem.state_and_algebraic_vars)
-            for dev, var_list in problem.get_device_vars_dict().items():
+        get_device_vars_dict = getattr(problem, "get_device_vars_dict", None)
+        if get_device_vars_dict is not None:
+            for dev, var_list in get_device_vars_dict().items():
                 dev_name = dev.name if hasattr(dev, "name") else type(dev).__name__
                 for var in var_list:
                     var_to_device[var.uid] = dev_name
 
-        state_var_names = [
-            str(v.name) if hasattr(v, "name") else f"state_{i}"
-            for i, v in enumerate(state_vars)
-        ]
+        if is_emt:
+            # Match the variable order used by the Floquet driver, which may
+            # append history states to the physical state variables.
+            base_state_vars = list(problem.get_state_vars())
+            diff_vars = list(problem.get_diff_vars())
+            stat_names = [
+                str(name) for name in getattr(results["results"], "stat_vars_array", [])
+            ]
+            if len(stat_names) == len(base_state_vars) + len(diff_vars):
+                state_vars = base_state_vars + diff_vars
+            elif len(stat_names) == len(base_state_vars):
+                state_vars = base_state_vars
+            else:
+                state_vars = base_state_vars[:len(stat_names)]
+            if not state_vars:
+                state_vars = base_state_vars
+        else:
+            state_vars = list(problem.state_and_algebraic_vars)
+
+        if is_emt and len(stat_names) == len(state_vars):
+            state_var_names = stat_names
+        else:
+            state_var_names = [
+                str(v.name) if hasattr(v, "name") else f"state_{i}"
+                for i, v in enumerate(state_vars)
+            ]
 
         critical_modes = []
         for i, ev in enumerate(eigenvalues):
@@ -127,7 +147,7 @@ def main():
                 "damping": damping,
                 "freq_hz": float(_freq_hz(im)),
                 "critical": bool(abs(damping) < 0.05),
-                "participation_factors": {item["variable"]: item["value"] for item in top_participation},
+                "participation_factors": top_participation,
             })
         critical_modes.sort(key=lambda m: m["damping"])
 

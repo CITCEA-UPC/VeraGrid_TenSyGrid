@@ -1,0 +1,124 @@
+% !TEX program = lualatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{
+  paper=a4paper,
+  left=22mm,
+  right=22mm,
+  top=20mm,
+  bottom=20mm
+}
+
+\usepackage{fontspec}
+\setmainfont{Raleway}[
+  Path = ./fonts/,
+  Extension = .ttf,
+  UprightFont = *-Regular,
+  BoldFont = *-Bold,
+  ItalicFont = *-Italic,
+  BoldItalicFont = *-BoldItalic,
+]
+
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+
+% --- Official TenSyGrid Color Palette ---
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tggrey}{HTML}{A6BBC8}
+\definecolor{tgbg}{HTML}{F4F8FA}
+\definecolor{tglime}{HTML}{B2D235}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\newcommand{\eventdate}{26 November 2026}
+\newcommand{\eventtime}{09:00--17:00}
+\newcommand{\eventvenue}{Sala InnoEnergy, UPC, Barcelona}
+\newcommand{\eventlanguage}{English}
+\newcommand{\eventversion}{v1.0}
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+% --- HEADER WITH LOGOS ---
+\noindent
+\begin{minipage}[c]{0.66\textwidth}
+  {\fontsize{22pt}{26pt}\selectfont \textbf{\color{tgblue}Keep the grid stable}}\\[2pt]
+  {\fontsize{13pt}{16pt}\selectfont \textbf{\color{tgpetrol}Dynamic topology optimization \& converter tuning}}\\[3pt]
+  {\small \textbf{\color{tggraphit}TenSyGrid 1-day hackathon challenge}}\\[1pt]
+  {\footnotesize \color{tggrey}Universitat Polit\`ecnica de Catalunya \textperiodcentered\ CETPartnership Horizon Europe (GA 101069750)}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.30\textwidth}
+  \raggedleft
+  \includegraphics[height=1.25cm]{./config/tglogo.pdf}\\[3pt]
+  \includegraphics[height=0.82cm]{./config/eRoots-logo.pdf}\\[3pt]
+  \includegraphics[height=0.70cm]{./config/UPC-logo.pdf}
+\end{minipage}
+
+\vspace{6pt}
+\noindent{\color{tglime}\rule{\textwidth}{2pt}}
+\vspace{8pt}
+
+% --- INTRO TEXT ---
+\small
+Power systems are rapidly transitioning towards inverter-dominated operation. This 1-day hackathon challenges teams
+to use the VeraGrid Python API to \textbf{minimize transmission losses} via topology switching while \textbf{preserving (and improving)
+small-signal stability} through converter control tuning. Submissions are scored automatically across multiple operating scenarios.
+
+\vspace{6pt}
+
+% --- EVENT INFO ---
+\normalsize
+\begin{minipage}[t]{0.48\textwidth}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \textbf{\color{tgblue}Date} & \eventdate \\
+    \textbf{\color{tgblue}Time} & \eventtime \\
+  \end{tabularx}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \textbf{\color{tgblue}Venue} & \eventvenue \\
+    \textbf{\color{tgblue}Language} & \eventlanguage \\
+  \end{tabularx}
+\end{minipage}
+
+\vspace{10pt}
+{\large\bfseries\color{tgblue}Programme}\par
+\vspace{4pt}
+
+\small
+\renewcommand{\arraystretch}{1.10}
+\begin{tabularx}{\textwidth}{@{}p{26mm}X@{}}
+  \toprule
+  \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone} \\
+  \midrule
+  \textbf{09:00--09:15} & \textbf{Hackathon kick-off:} Challenge presentation, stability criteria, and VeraGrid platform introduction. \\
+  \textbf{09:15--11:00} & \textbf{Welcome and sprint 1: Static grid and topology switching.} Team setup, onboarding with VeraGrid Python API, and line loss optimization. \\
+  \textbf{11:00--11:30} & \textit{\color{tgpetrol}Coffee break.} \\
+  \textbf{11:30--12:00} & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers. \\
+  \textbf{12:00--13:00} & \textbf{Sprint 2: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes. \\
+  \textbf{13:00--14:00} & \textit{\color{tgpetrol}Lunch break.} \\
+  \textbf{14:00--15:30} & \textbf{Sprint 3: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization. \\
+  \textbf{15:30--16:00} & \textit{\color{tgpetrol}Coffee break and code freeze.} Submission of final scripts to the automated scoring harness. \\
+  \textbf{16:00--17:00} & \textbf{Hackathon wrap-up and winners announcement:} Team presentations, live leaderboard reveal, and awards ceremony. \\
+  \bottomrule
+\end{tabularx}
+
+\vfill
+\hfill{\footnotesize\color{tggrey}\textbf{\eventversion}}
+
+\end{document}
+

@@ -2,6 +2,8 @@ __pycache__
 __pycache_jit__
 .pytest_cache
 *.swp
+*.synctex.gz
+*.synctex.gz(busy)
 /doc/build
 /doc/_build
 /.venv
