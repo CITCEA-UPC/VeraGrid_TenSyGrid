@@ -1190,6 +1190,20 @@ function _freqHz(im) {
   return Math.abs(im) / (2 * Math.PI);
 }
 
+function _formatNumber(value, digits = 3) {
+  if (!Number.isFinite(value)) return '—';
+  if (Math.abs(value) < 1.0e-12) return '0';
+  return Number(value.toPrecision(digits)).toString();
+}
+
+function _niceStep(range, targetTicks) {
+  const raw = range / Math.max(1, targetTicks);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const residual = raw / magnitude;
+  const nice = residual <= 1 ? 1 : residual <= 2 ? 2 : residual <= 5 ? 5 : 10;
+  return nice * magnitude;
+}
+
 function _unstableThreshold(data) {
   if (data && Number.isFinite(Number(data.unstable_threshold))) {
     return Number(data.unstable_threshold);
@@ -1318,7 +1332,10 @@ function renderDampingFreq(eigs, zoomLevel = 1, unstableThreshold = 0.001) {
   const W = rect.width, H = rect.height;
   ctx.clearRect(0, 0, W, H);
   
-  const modes = eigs.filter(e => Math.abs(e.im) > 0.1).map(e => {
+  // Match the critical-mode definition (any non-zero imaginary part). Slow
+  // Floquet modes can have frequencies well below 0.1 rad/s and must still be
+  // shown here.
+  const modes = eigs.filter(e => Math.abs(e.im) > 1.0e-9).map(e => {
     const damping = _damping(e.re, e.im);
     return {
       freq: Math.abs(e.im) / (2 * Math.PI),
@@ -1328,9 +1345,17 @@ function renderDampingFreq(eigs, zoomLevel = 1, unstableThreshold = 0.001) {
     };
   });
   
-  if (modes.length === 0) return;
+  if (modes.length === 0) {
+    ctx.fillStyle = '#A6BBC8';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No oscillatory modes to plot', W / 2, H / 2);
+    ctx.textAlign = 'start';
+    return;
+  }
   
-  const freqMax = Math.max(10, ...modes.map(m => m.freq)) * 1.1 / zoomLevel;
+  const maxFreq = Math.max(...modes.map(m => m.freq));
+  const freqMax = Math.max(maxFreq * 1.1, 1.0e-12) / zoomLevel;
   const dampMin = Math.min(-0.5, ...modes.map(m => m.damping)) - 0.1;
   const dampMax = Math.max(0.5, ...modes.map(m => m.damping)) + 0.1;
   const dampRange = (dampMax - dampMin) / zoomLevel;
@@ -1349,12 +1374,14 @@ function renderDampingFreq(eigs, zoomLevel = 1, unstableThreshold = 0.001) {
   
   ctx.fillStyle = '#A6BBC8';
   ctx.font = '10px sans-serif';
-  const freqStep = Math.ceil(freqMax / 8);
-  for (let f = 0; f <= freqMax; f += freqStep) {
+  const freqStep = _niceStep(freqMax, 8);
+  ctx.textAlign = 'center';
+  for (let f = 0; f <= freqMax + freqStep * 1.0e-6; f += freqStep) {
     const x = ox + f * sx;
     ctx.beginPath(); ctx.moveTo(x, H - 25); ctx.lineTo(x, H - 20); ctx.stroke();
-    ctx.fillText(f.toFixed(0), x - 5, H - 8);
+    ctx.fillText(_formatNumber(f), x, H - 8);
   }
+  ctx.textAlign = 'start';
   const dampStep = 0.1;
   for (let d = dampMinZ; d <= dampMaxZ; d += dampStep) {
     const y = oy + (dampMaxZ - d) * sy;
@@ -1441,7 +1468,7 @@ function renderModes(modes, unstableThreshold = 0.001) {
     const rowStyle = unstable ? 'background:rgba(227,0,26,0.05)' : critical ? 'background:rgba(178,210,53,0.05)' : '';
     const dampColor = unstable ? 'color:var(--red);font-weight:700' : critical ? 'color:var(--yellow);font-weight:700' : '';
     const pf = m.participation_factors || {};
-    const pfEntries = Object.entries(pf);
+    const pfEntries = Array.isArray(pf) ? pf : Object.entries(pf).map(([k,v]) => ({variable:k, device:'', value:v}));
     const hasParticipation = pfEntries.length > 0;
     
     const pfRowsHtml = hasParticipation 
@@ -1454,26 +1481,30 @@ function renderModes(modes, unstableThreshold = 0.001) {
                <table style="font-size:14px;width:100%">
                  <thead>
                    <tr>
+                     <th style="padding:6px 16px;font-size:12px">Device</th>
                      <th style="padding:6px 16px;font-size:12px">State Variable</th>
                      <th style="padding:6px 16px;font-size:12px">Value</th>
                      <th style="padding:6px 16px;font-size:12px">Magnitude</th>
                    </tr>
                  </thead>
                  <tbody>
-                   ${pfEntries.map(([k,v]) => `
+                   ${pfEntries.map(entry => {
+                     const value = Number(entry.value);
+                     return `
                      <tr>
-                       <td style="padding:6px 16px;font-family:monospace;font-size:13px">${k}</td>
-                       <td style="padding:6px 16px">${!isNaN(Number(v)) && v !== null ? Number(v).toFixed(4) : '-'}</td>
+                       <td style="padding:6px 16px">${entry.device ? entry.device : '—'}</td>
+                       <td style="padding:6px 16px;font-family:monospace;font-size:13px">${entry.variable}</td>
+                       <td style="padding:6px 16px">${Number.isFinite(value) ? value.toFixed(4) : '-'}</td>
                        <td style="padding:6px 16px">
                          <div style="display:flex;align-items:center;gap:10px">
                            <div style="width:160px;height:8px;background:#D6E2EA;border-radius:4px;overflow:hidden">
-                             <div style="width:${Math.abs(v) * 100}%;height:100%;background:var(--blue);border-radius:4px"></div>
+                             <div style="width:${Math.abs(value) * 100}%;height:100%;background:var(--blue);border-radius:4px"></div>
                            </div>
-                           <span style="font-size:12px;color:var(--muted);min-width:36px">${(Math.abs(v) * 100).toFixed(1)}%</span>
+                           <span style="font-size:12px;color:var(--muted);min-width:36px">${(Math.abs(value) * 100).toFixed(1)}%</span>
                          </div>
                        </td>
                      </tr>
-                   `).join('')}
+                   `;}).join('')}
                  </tbody>
                </table>
              </div>
@@ -2019,10 +2050,10 @@ dampCanvas.addEventListener('mousemove', (e) => {
   if (closest) {
     dampTooltip.innerHTML = `
       <div class="tooltip-title">Mode</div>
-      <div class="tooltip-row">Frequency: ${closest.freq.toFixed(2)} Hz</div>
+      <div class="tooltip-row">Frequency: ${_formatNumber(closest.freq)} Hz</div>
       <div class="tooltip-row">Damping ζ: ${closest.damping.toFixed(4)}</div>
-      <div class="tooltip-row">Re(λ): ${closest.re.toFixed(2)}</div>
-      <div class="tooltip-row">Im(λ): ${closest.im.toFixed(2)}</div>
+      <div class="tooltip-row">Re(λ): ${_formatNumber(closest.re)}</div>
+      <div class="tooltip-row">Im(λ): ${_formatNumber(closest.im)}</div>
     `;
     dampTooltip.style.left = (e.clientX - cardRect.left + 15) + 'px';
     dampTooltip.style.top = (e.clientY - cardRect.top + 15) + 'px';

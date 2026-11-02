@@ -156,14 +156,26 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
     rho = float(np.max(np.abs(finite_mu))) if len(finite_mu) else float("nan")
     unstable_threshold = float(np.log(1.0 + MARGINAL_MULTIPLIER_TOLERANCE) / period)
 
-    # Stability margin in 1/s: the real part of the dominant continuous
-    # eigenvalue. This is coherent with the eigenvalue axis and with
-    # ``unstable_threshold`` (also 1/s), unlike the old dimensionless rho - 1.
-    margin = float(np.max(np.real(finite))) if len(finite) else float("nan")
-    stable = bool(margin <= unstable_threshold) if len(finite) else False
-
+    # A single zero eigenvalue (unit Floquet multiplier) is the structural
+    # periodicity mode that every periodic orbit carries; it is not evidence of
+    # a non-hyperbolic equilibrium. Only additional zero eigenvalues make the
+    # Hartman-Grobman assessment indeterminate.
     zero_mask = np.abs(finite) <= ZERO_EIGENVALUE_TOLERANCE
-    has_zero_eigenvalue = bool(np.any(zero_mask))
+    n_zero_eigenvalues = int(np.count_nonzero(zero_mask))
+    structural_zero_mask = (
+        zero_mask if n_zero_eigenvalues == 1 else np.zeros(finite.shape, dtype=bool)
+    )
+
+    # Stability margin in 1/s: the real part of the dominant non-structural
+    # continuous eigenvalue. Excluding the structural mode keeps the reported
+    # margin and status tied to the physical spectrum. This is coherent with
+    # the eigenvalue axis and with ``unstable_threshold`` (also 1/s), unlike
+    # the old dimensionless rho - 1.
+    assessment = finite[~structural_zero_mask]
+    margin = float(np.max(np.real(assessment))) if len(assessment) else float("nan")
+    stable = bool(margin <= unstable_threshold) if len(assessment) else False
+
+    has_zero_eigenvalue = n_zero_eigenvalues > 1
     zero_eigenvalues = [
         {
             "re": float(np.real(ev)),
@@ -192,7 +204,11 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
             f"({unstable_threshold:.3e} 1/s)."
         )
 
-    dominant_index = int(np.argmax(np.real(finite))) if len(finite) else -1
+    candidate_indices = np.flatnonzero(~structural_zero_mask)
+    dominant_index = (
+        int(candidate_indices[int(np.argmax(np.real(finite[candidate_indices])))])
+        if len(candidate_indices) else -1
+    )
     dominant_eigenvalue = (
         {
             "re": float(np.real(finite[dominant_index])),
@@ -209,8 +225,10 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
     print(f"Finite eigenvalues={len(finite)} rho={rho:.9f} status={status} "
           f"margin={margin:.6e} 1/s threshold={unstable_threshold:.6e} 1/s")
     if has_zero_eigenvalue:
-        print(f"Zero eigenvalue(s)={len(zero_eigenvalues)} -> MARGINAL "
+        print(f"Zero eigenvalue(s)={n_zero_eigenvalues} -> MARGINAL "
               f"(Hartman-Grobman may not apply)")
+    elif n_zero_eigenvalues == 1:
+        print("Single structural zero eigenvalue (mu = 1) ignored in the stability assessment")
 
     return {
         "problem": problem,
@@ -225,6 +243,8 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
         "dominant_eigenvalue": dominant_eigenvalue,
         "has_zero_eigenvalue": has_zero_eigenvalue,
         "zero_eigenvalues": zero_eigenvalues,
+        "n_zero_eigenvalues": n_zero_eigenvalues,
+        "structural_zero_eigenvalue": n_zero_eigenvalues == 1,
         "warnings": warnings,
         "unstable_threshold": unstable_threshold,
         "period": period,
@@ -283,10 +303,34 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
     ]
 
     pf_matrix = emt_results.participation_factors
-    state_var_names = [
-        str(v.name) if hasattr(v, "name") else f"state_{i}"
-        for i, v in enumerate(problem.get_state_vars())
+
+    # The Floquet participation matrix may include history states appended by
+    # the consistent DAE tangent. Rebuild the same variable order used by the
+    # driver so every row can be attributed to its owning device.
+    base_state_vars = list(problem.get_state_vars())
+    diff_vars = list(problem.get_diff_vars())
+    stat_var_names = [
+        str(name) for name in getattr(emt_results, "stat_vars_array", [])
     ]
+    if len(stat_var_names) == len(base_state_vars) + len(diff_vars):
+        stat_var_objects = base_state_vars + diff_vars
+    elif len(stat_var_names) == len(base_state_vars):
+        stat_var_objects = base_state_vars
+    else:
+        stat_var_objects = base_state_vars[:len(stat_var_names)]
+
+    if not stat_var_names:
+        stat_var_names = [
+            str(v.name) if hasattr(v, "name") else f"state_{i}"
+            for i, v in enumerate(base_state_vars)
+        ]
+        stat_var_objects = base_state_vars
+
+    var_to_device: dict[int, str] = {}
+    for dev, var_list in problem.get_device_vars_dict().items():
+        dev_name = str(getattr(dev, "name", type(dev).__name__))
+        for var in var_list:
+            var_to_device[var.uid] = dev_name
 
     critical_modes = []
     for i, ev in enumerate(eigenvalues):
@@ -295,14 +339,19 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
             continue
         damping = float(_damping(re, im))
 
-        participation = {}
-        if pf_matrix is not None and i < pf_matrix.shape[1]:
+        participation = []
+        if pf_matrix is not None and pf_matrix.ndim == 2 and i < pf_matrix.shape[1]:
             pf_col = pf_matrix[:, i]
-            for j, var_name in enumerate(state_var_names):
+            for j, var_name in enumerate(stat_var_names):
                 if j < len(pf_col):
-                    participation[str(var_name)] = float(pf_col[j])
+                    var = stat_var_objects[j] if j < len(stat_var_objects) else None
+                    participation.append({
+                        "variable": str(var_name),
+                        "device": var_to_device.get(var.uid, "") if var is not None else "",
+                        "value": float(pf_col[j]),
+                    })
 
-        top_participation = dict(sorted(participation.items(), key=lambda x: abs(x[1]), reverse=True)[:5])
+        top_participation = sorted(participation, key=lambda x: abs(x["value"]), reverse=True)[:5]
 
         critical_modes.append({
             "mode": i,
@@ -358,6 +407,8 @@ def save_results(results: dict, grid, grid_filename: str, elapsed: float) -> Non
         "dominant_eigenvalue": results.get("dominant_eigenvalue"),
         "has_zero_eigenvalue": results.get("has_zero_eigenvalue", False),
         "zero_eigenvalues": results.get("zero_eigenvalues", []),
+        "n_zero_eigenvalues": results.get("n_zero_eigenvalues", len(results.get("zero_eigenvalues", []))),
+        "structural_zero_eigenvalue": results.get("structural_zero_eigenvalue", False),
         "warnings": results.get("warnings", []),
         "unstable_threshold": results["unstable_threshold"],
         "period": results["period"],

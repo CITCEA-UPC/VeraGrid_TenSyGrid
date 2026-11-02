@@ -192,29 +192,46 @@ def _assess_result(data: dict, study: str) -> dict:
         if isinstance(ev, dict)
     ]
 
+    # A single near-zero exponent (unit Floquet multiplier) is the structural
+    # periodicity mode that every periodic orbit carries. Only additional zero
+    # eigenvalues make the equilibrium non-hyperbolic.
+    n_zero = data.get("n_zero_eigenvalues")
+    if n_zero is None:
+        if is_emt and eigen_pairs:
+            n_zero = sum(
+                1 for re_, im_ in eigen_pairs
+                if abs(complex(re_, im_)) <= ZERO_EIGENVALUE_TOLERANCE
+            )
+        elif is_emt and data.get("has_zero_eigenvalue"):
+            n_zero = 1
+        else:
+            n_zero = 0
+    has_zero = bool(is_emt and int(n_zero) > 1)
+
+    # Ignore the single structural mode when deriving the margin and status.
+    stability_pairs = eigen_pairs
+    if is_emt and int(n_zero) == 1:
+        stability_pairs = [
+            (re_, im_) for re_, im_ in eigen_pairs
+            if abs(complex(re_, im_)) > ZERO_EIGENVALUE_TOLERANCE
+        ]
+
     margin = data.get("margin")
     margin_definition = data.get("margin_definition")
 
     # Legacy EMT files stored the dimensionless rho - 1. Recompute the margin
     # as the dominant continuous eigenvalue (1/s), matching the eigen plot and
     # the unstable threshold axis.
-    if is_emt and eigen_pairs and margin_definition != "max_real_part":
-        margin = max(re for re, _ in eigen_pairs)
+    if is_emt and stability_pairs and margin_definition != "max_real_part":
+        margin = max(re_ for re_, _ in stability_pairs)
         margin_definition = "max_real_part"
 
     stable = data.get("stable")
-    if stable is None and eigen_pairs:
+    if stable is None and stability_pairs:
         if is_emt and data.get("unstable_threshold") is not None:
-            stable = max(re for re, _ in eigen_pairs) <= float(data["unstable_threshold"])
+            stable = max(re_ for re_, _ in stability_pairs) <= float(data["unstable_threshold"])
         else:
-            stable = max(re for re, _ in eigen_pairs) <= 0.0
-
-    has_zero = data.get("has_zero_eigenvalue")
-    if has_zero is None:
-        has_zero = bool(is_emt and any(
-            abs(complex(re, im)) <= ZERO_EIGENVALUE_TOLERANCE
-            for re, im in eigen_pairs
-        ))
+            stable = max(re_ for re_, _ in stability_pairs) <= 0.0
 
     warnings = list(data.get("warnings") or [])
     if is_emt and has_zero and not warnings:
@@ -223,10 +240,16 @@ def _assess_result(data: dict, study: str) -> dict:
             "equilibrium is non-hyperbolic, so the Hartman-Grobman theorem may "
             "not apply and the linear stability assessment is indeterminate."
         )
+    elif is_emt and not has_zero:
+        # Older files warned about the structural mode; do not surface it.
+        warnings = [w for w in warnings if not re.search(r"zero|hartman", w, re.IGNORECASE)]
 
     status = data.get("status")
     if is_emt and has_zero:
         status = "MARGINAL"
+    elif is_emt and status == "MARGINAL":
+        # Older files forced MARGINAL for the single structural zero.
+        status = "STABLE" if stable else "UNSTABLE"
     elif status not in ("STABLE", "MARGINAL", "UNSTABLE"):
         if stable:
             status = "STABLE"
