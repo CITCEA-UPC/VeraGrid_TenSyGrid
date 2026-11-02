@@ -23,8 +23,6 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 import VeraGridEngine.api as vge
-from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
-from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_driver import (
     SmallSignalStabilityEmtDriver,
 )
@@ -33,6 +31,7 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
 )
 from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes
 from TensyGridEngine.emt.emt_ieee9 import attach_emt_models, build_emt_options, build_power_flow_options
+from TensyGridEngine.emt.emt_power_flow import run_emt_power_flows
 
 
 DEFAULT_GRID = "IEEE 9 Bus EMT.veragrid"
@@ -113,13 +112,7 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
         LIFTED_STEPS_PER_PERIOD if lifted_machine else STEPS_PER_PERIOD)
     period = 1.0 / float(grid.fBase)
 
-    power_flow_options = build_power_flow_options()
-    balanced_pf = PowerFlowDriver(grid=grid, options=power_flow_options)
-    balanced_pf.run()
-    three_phase_pf = PowerFlowDriver3Ph(grid=grid, options=power_flow_options)
-    three_phase_pf.run()
-    if not bool(balanced_pf.results.converged) or not bool(three_phase_pf.results.converged):
-        raise RuntimeError("Power flow failed before EMT small-signal analysis")
+    balanced_results, three_phase_results = run_emt_power_flows(grid, build_power_flow_options())
 
     emt_options = build_emt_options()
     emt_options.time_step = period / float(steps_per_period)
@@ -141,8 +134,8 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
         grid=grid,
         emt_options=emt_options,
         sss_options=small_signal_options,
-        pf_results=balanced_pf.results,
-        pf_results_3ph=three_phase_pf.results,
+        pf_results=balanced_results,
+        pf_results_3ph=three_phase_results,
     )
     problem = driver.problem
     driver.run()
@@ -214,7 +207,7 @@ def run_emt_small_signal_analysis(grid, fast: bool = False):
 
     return {
         "problem": problem,
-        "pf_results": balanced_pf.results,
+        "pf_results": balanced_results,
         "results": driver.results,
         "eigenvalues": finite,
         "stable": stable,

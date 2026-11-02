@@ -26,8 +26,7 @@ from TensyGridEngine.emt.emt_ieee9 import (
     build_power_flow_options,
 )
 from VeraGridEngine.Simulations.EMT.emt_problem_factory import build_emt_problem
-from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
-from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_driver_3ph import PowerFlowDriver3Ph
+from TensyGridEngine.emt.emt_power_flow import run_emt_power_flows
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_driver import (
     SmallSignalStabilityEmtDriver,
 )
@@ -95,13 +94,7 @@ def run_small_signal_analysis(
             for parameter_name, value in event_overrides.items():
                 generator.emt_model.set_parameter_in_model(parameter_name, float(value))
 
-    power_flow_options = build_power_flow_options()
-    balanced_pf = PowerFlowDriver(grid=grid, options=power_flow_options)
-    balanced_pf.run()
-    three_phase_pf = PowerFlowDriver3Ph(grid=grid, options=power_flow_options)
-    three_phase_pf.run()
-    if not bool(balanced_pf.results.converged) or not bool(three_phase_pf.results.converged):
-        raise RuntimeError("IEEE9 power flow failed before EMT small-signal analysis")
+    balanced_results, three_phase_results = run_emt_power_flows(grid, build_power_flow_options())
 
     emt_options = build_emt_options()
     emt_options.time_step = time_step
@@ -109,8 +102,8 @@ def run_small_signal_analysis(
     problem = build_emt_problem(
         grid=grid,
         options=emt_options,
-        pf_results=balanced_pf.results,
-        pf_results_3ph=three_phase_pf.results,
+        pf_results=balanced_results,
+        pf_results_3ph=three_phase_results,
     )
 
     small_signal_options = SmallSignalStabilityEmtOptions(
@@ -127,7 +120,7 @@ def run_small_signal_analysis(
         grid=grid,
         emt_options=emt_options,
         sss_options=small_signal_options,
-        pf_results=balanced_pf.results,
+        pf_results=balanced_results,
     )
     # The public driver currently accepts one PF result in its constructor.
     # Retain the DAE initialized with both balanced and PF3 operating points.
