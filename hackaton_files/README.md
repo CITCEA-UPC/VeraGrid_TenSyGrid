@@ -66,7 +66,14 @@ runs a three-second RMS simulation with a 2% increase in the first load at
 0.2 seconds, reporting peak generator frequency and bus voltage deviations
 from their initial values. A failed transient marks the tuning unstable.
 The peak deviations measure excursion size, not settled-value overshoot.
-Scenario robustness and code-quality scores require separate evaluation.
+Scenario robustness and the minimal-grid-change score require separate evaluation.
+The latter replaces code quality in the brief and retains its 15% weight:
+`S_changes = 1 / (1 + n)` per scenario, averaged over the evaluation suite.
+Each line connection/disconnection and model addition/removal counts as one
+equally weighted action relative to the scenario's initial grid. Variables and
+equations introduced or removed by that action are not counted separately.
+Replacing a model counts as two actions; adjusting existing control parameters
+or generation setpoints does not count.
 
 Run `python -m hackaton_files.control_response_experiment` with `PYTHONPATH=src:.`
 to compare baseline, increased `Kp`, and increased `Ki` on the Kundur grid.
