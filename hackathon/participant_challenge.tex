@@ -1,0 +1,163 @@
+% !TEX program = lualatex
+% Compile from hackathon/: lualatex participant_challenge.tex
+\documentclass[10pt,a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[a4paper,margin=20mm,headheight=16pt,headsep=8mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Raleway}[
+  Path=./fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold,
+  ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\usepackage{amsmath,amssymb,booktabs,tabularx,enumitem,graphicx}
+\usepackage{xcolor,microtype,titlesec,fancyhdr}
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tglime}{HTML}{B2D235}
+\usepackage[colorlinks=true,urlcolor=tgpetrol,linkcolor=tgblue]{hyperref}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\textcolor{tgpetrol}{\textbf{TenSyGrid $\times$ VeraGrid}}\enspace|\enspace Participant challenge}
+\rhead{\small 26 November 2026}
+\cfoot{\small\thepage\ / 2}
+\renewcommand{\headrulewidth}{0.5pt}
+\titleformat{\section}{\large\bfseries\color{tgblue}}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{11pt}{5pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=*,topsep=3pt,itemsep=2pt,parsep=0pt}
+\setlist[enumerate]{leftmargin=*,topsep=3pt,itemsep=3pt,parsep=0pt}
+
+\begin{document}
+\noindent
+\begin{minipage}[c]{0.73\textwidth}
+  {\fontsize{23}{27}\selectfont\bfseries\color{tgblue}Keep the grid stable}\par
+  {\large\color{tgpetrol}Lower losses. Better damping. Fewer changes.}\par
+  {\small Participant brief | First draft, version 0.1}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.23\textwidth}
+  \raggedleft
+  \includegraphics[height=1.0cm]{./config/tglogo.pdf}\par\vspace{4pt}
+  \includegraphics[height=0.55cm]{./config/UPC-logo.pdf}
+\end{minipage}
+\par\vspace{5pt}{\color{tglime}\hrule height 2pt}\vspace{6pt}
+
+\section{Your mission}
+Power grids need to operate efficiently while keeping oscillations under control.
+Changing a line connection can reduce transmission losses, but can also worsen
+dynamic stability. Your challenge is to find a good balance with as few structural
+changes as possible.
+
+In teams of \textbf{2--4}, build an \textbf{automated Python strategy using VeraGrid}
+that takes a supplied grid scenario and returns an improved configuration. It should:
+\begin{enumerate}
+  \item \textbf{Reduce active power losses} through permitted network and dispatch actions.
+  \item \textbf{Maintain or improve small-signal stability} by tuning available controls.
+  \item \textbf{Generalise to unseen scenarios} with different operating conditions and action limits.
+  \item \textbf{Use fewer structural changes} when achieving these objectives.
+\end{enumerate}
+The challenge is part of TenSyGrid, a research project on tensor methods for
+analysing converter-dominated grids. Use the supplied simulation and analysis
+tools to explore candidate solutions and test your strategy.
+
+\section{What you may change}
+\textbf{Each scenario defines its own permitted actions, parameter ranges and budgets.}
+Depending on the case, these may include line connections or disconnections,
+model additions or removals, controller tuning, and generator active-power setpoints.
+Choose only from the options exposed by that scenario; not every action is available
+in every grid. Keep demand, fixed equipment data and evaluation settings unchanged.
+
+For the structural-change score, each line connection/disconnection or model
+addition/removal counts as \textbf{one equally weighted action}. Replacing a model
+counts as two: one removal and one addition. The resulting variables and equations
+are not counted separately. Adjusting existing controls or generation setpoints
+does not increase this count.
+
+\section{Operating requirements}
+\begin{itemize}
+  \item The AC power flow must converge; bus voltages must remain within
+        $0.95 \le |V_i| \le 1.05$ p.u., with no branch above its thermal rating.
+  \item Physical small-signal modes must satisfy $\max_i\Re(\lambda_i)<-10^{-5}$ s$^{-1}$.
+        The evaluator excludes the neutral reference-angle mode where applicable.
+  \item All oscillatory modes above $0.05$ Hz must have damping ratio
+        $\zeta_i=-\Re(\lambda_i)/|\lambda_i|\ge 5\%$.
+  \item Respect the scenario's action and candidate-evaluation budgets. Use local
+        validation to check constraints and any supplied RMS disturbance tests.
+\end{itemize}
+
+\section{How to approach the day}
+Start by running the unchanged baseline and reading its metrics. Then improve
+losses and damping, checking both after each change. Finally, test across several
+scenarios and remove actions that do not help. The morning focuses on topology
+and dispatch; midday on dynamic stability; the afternoon on automation and testing.
+Mentors are available for questions about the models, tools and rules.
+
+\newpage
+\section{How your solution is evaluated}
+The final evaluation runs the same submitted strategy on \textbf{100 hidden scenarios}.
+All teams receive the same evaluation cases. Each case has its own initial grid,
+permitted actions and maximum structural-change count $n_{\max}$.
+
+\begin{equation*}
+  \mathrm{Score}=0.35\,\mathcal S_{\mathrm{damping}}
+  +0.25\,\mathcal S_{\mathrm{loss}}
+  +0.25\,\mathcal S_{\mathrm{robustness}}
+  +0.15\,\mathcal S_{\mathrm{changes}}.
+\end{equation*}
+\begingroup
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}l r X@{}}
+\toprule
+\textbf{Criterion} & \textbf{Weight} & \textbf{What earns points}\\
+\midrule
+Dynamic stability & 35\% & Higher minimum oscillatory damping, up to a 10\% reference.\\
+Loss reduction & 25\% & Lower active power losses than the same scenario's baseline.\\
+Robustness & 25\% & More scenarios meeting stability and operating requirements.\\
+Minimal grid changes & 15\% & Fewer structural actions relative to the scenario's maximum.\\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+The per-scenario damping, loss and change scores are averaged over the evaluation
+suite. Robustness is the fraction of scenarios that pass the stability and
+operating checks. The criteria are defined as follows:
+\begin{align*}
+ s_{\mathrm{damping}}&=\min\!\left(1,\max\!\left(0,\frac{\zeta_{\min}}{0.10}\right)\right),
+ &s_{\mathrm{loss}}&=\max\!\left(0,1-\frac{P_{\mathrm{loss}}}{P_{\mathrm{loss,baseline}}}\right),\\
+ \mathcal S_{\mathrm{robustness}}&=\frac{N_{\mathrm{pass}}}{N_{\mathrm{total}}},
+ &s_{\mathrm{changes}}&=1-\frac{n}{n_{\max}}.
+\end{align*}
+An unstable case receives zero damping points. Here $\zeta_{\min}$ is the minimum
+damping ratio of the assessed oscillatory modes, and losses are measured by the
+supplied evaluator. The change count satisfies $0\le n\le n_{\max}$ by construction.
+If $n_{\max}=0$, no structural changes are possible and $s_{\mathrm{changes}}=1$.
+
+\textbf{Example:} if a scenario allows at most 8 structural changes and you use 2,
+then $s_{\mathrm{changes}}=1-2/8=0.75$. This contributes $0.15\times0.75=0.1125$
+to that scenario's weighted score.
+
+\section{Getting started and submission}
+Use the supplied grids, Python starter interface and local evaluator. First run
+the baseline, then implement your strategy and compare it across the practice
+cases. Read each scenario's action catalogue rather than relying on device names
+or a fixed ordering. Local results help development; hidden cases determine the
+final ranking.
+
+\textbf{Submit by the end of code freeze at 16:00:}
+\begin{itemize}
+  \item Your Python strategy in the supplied submission interface, runnable without
+        manual choices for each scenario.
+  \item A short README with the team name, members, run command and any dependencies.
+  \item A brief explanation of your approach and the practice results you obtained,
+        including its main limitations, for the final presentation.
+\end{itemize}
+Submit through the channel announced at kick-off. Keep the evaluator and hidden
+test assumptions unchanged. The jury may review exceptional technical issues or
+exploits when determining the final standings. Wrap-up, presentations and awards
+take place from 16:00 to 17:00.
+
+\vfill
+{\footnotesize\color{tggraphit}First draft for review. Final submission details and evaluation conventions
+will be confirmed before the event.\par
+Universitat Polit\`ecnica de Catalunya | CETPartnership Horizon Europe (GA 101069750)}
+\end{document}
