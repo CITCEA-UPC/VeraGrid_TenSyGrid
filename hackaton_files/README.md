@@ -68,11 +68,11 @@ from their initial values. A failed transient marks the tuning unstable.
 The peak deviations measure excursion size, not settled-value overshoot.
 Scenario robustness and the minimal-grid-change score require separate evaluation.
 The latter replaces code quality in the brief and retains its 15% weight:
-`S_changes = max(0, 1 - n / n_max)` per scenario, averaged over the evaluation
+`S_changes = 1 - n / n_max` per scenario, averaged over the evaluation
 suite. Each scenario defines `n_max`, the maximum number of changes possible
-in that scenario, shared by all teams. Zero actions gives full marks; reaching
-or exceeding `n_max` gives zero. For `n_max = 0`, the score is 1 if `n = 0`
-and 0 otherwise.
+in that scenario, shared by all teams. By construction, `0 <= n <= n_max`.
+Zero actions gives full marks; reaching `n_max` gives zero. For `n_max = 0`,
+no changes are possible and the score is defined as 1.
 Each line connection/disconnection and model addition/removal counts as one
 equally weighted action relative to the scenario's initial grid. Variables and
 equations introduced or removed by that action are not counted separately.
