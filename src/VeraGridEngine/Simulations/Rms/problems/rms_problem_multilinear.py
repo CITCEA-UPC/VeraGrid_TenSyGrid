@@ -891,6 +891,22 @@ class RmsProblemMultilinear(RmsProblemPhasor):
                 return left_terms + neg_right
 
             if expr.op == "*":
+                # A product of factors depending on disjoint basis variables is
+                # already one separable CP/CPN1 term. Keep its affine factors
+                # together instead of distributing every sum into monomials.
+                factors = get_expr_factors(expr)
+                seen_vars: set[int] = set()
+                separable = True
+                basis_idx = self._ml_uid_to_basis_idx or {}
+                for factor in factors:
+                    active = {v.uid for v in factor.get_vars() if v.uid in basis_idx}
+                    if len(active) > 1 or seen_vars.intersection(active):
+                        separable = False
+                        break
+                    seen_vars.update(active)
+                if separable:
+                    return [expr]
+
                 left_terms = self._collect_monomials(expr.left)
                 right_terms = self._collect_monomials(expr.right)
                 out: list[Expr] = []
