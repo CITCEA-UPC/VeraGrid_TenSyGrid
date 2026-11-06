@@ -188,7 +188,7 @@ where:
   \item $\mathcal{S}_{\text{damping}} = \min\!\left(1,\ \max\!\left(0,\ \frac{\min_{i} \zeta_i}{\zeta_{\text{ref}}}\right)\right)$ with $\zeta_{\text{ref}} = 10\%$: Minimum damping ratio across all electromechanical and converter modes, normalised to $[0,1]$ (0 if any mode is unstable).
   \item $\mathcal{S}_{\text{loss}} = \max\left(0, 1 - \frac{P_{\text{loss}}}{P_{\text{loss, baseline}}}\right)$: Relative loss reduction achieved compared to the unoptimized baseline grid.
   \item $\mathcal{S}_{\text{robustness}} = \frac{N_{\text{stable}}}{N_{\text{total}}}$: Proportion of scenarios surviving without voltage violations or instability.
-  \item $\mathcal{S}_{\text{changes}} = \frac{1}{1+n}$: Reward for minimal structural changes relative to each scenario's initial grid. Each line connection or disconnection and each model addition or removal counts as one action, with equal weight. Variables and equations added or removed as a consequence of that action are not counted separately. Replacing a model counts as two actions (one removal and one addition); adjusting existing control parameters or generation setpoints does not count. With $n=0,1,2$ actions, this criterion gives $1,\frac{1}{2},\frac{1}{3}$, respectively. It is computed per scenario and averaged over the hidden evaluation suite.
+  \item $\mathcal{S}_{\text{changes}} = \max\!\left(0, 1 - \frac{n}{n_{\max}}\right)$: Linear reward for minimal structural changes relative to each scenario's initial grid. Here $n$ is the number of actions performed and $n_{\max}$ is the maximum number of changes possible in that scenario, specified by the scenario definition and shared by all teams. Each line connection or disconnection and each model addition or removal counts as one action, with equal weight. Variables and equations added or removed as a consequence of that action are not counted separately. Replacing a model counts as two actions (one removal and one addition); adjusting existing control parameters or generation setpoints does not count. Zero actions gives full marks; reaching or exceeding $n_{\max}$ gives zero. If $n_{\max}=0$, the criterion is defined as 1 for $n=0$ and 0 otherwise. It is computed per scenario and averaged over the hidden evaluation suite.
   \end{itemize}
 
 \subsection{Scoring breakdown table}
@@ -203,7 +203,7 @@ where:
     \textbf{Dynamic stability}           & \textbf{35\%}                 & Small-signal damping margin ($\zeta_{\min}$) and absence of undamped modes. \\
     \textbf{Static loss reduction}       & \textbf{25\%}                 & Active power transmission loss minimization via topology switching.         \\
     \textbf{Multi-scenario robustness}   & \textbf{25\%}                 & Stability and constraint compliance across 100 hidden stress scenarios.     \\
-    \textbf{Minimal grid changes}        & \textbf{15\%}                 & Fewer line connections/disconnections and model additions/removals, rewarded by $1/(1+n)$. \\
+    \textbf{Minimal grid changes}        & \textbf{15\%}                 & Linear reward $\max(0, 1-n/n_{\max})$ for fewer line switching and model addition or removal actions; $n_{\max}$ is set by each scenario. \\
     \bottomrule
   \end{tabularx}
 \end{table}
