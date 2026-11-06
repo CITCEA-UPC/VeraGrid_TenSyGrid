@@ -19,7 +19,7 @@
 \fancyhf{}
 \lhead{\small\textcolor{tgpetrol}{\textbf{TenSyGrid $\times$ VeraGrid}}\enspace|\enspace Participant challenge}
 \rhead{\small 26 November 2026}
-\cfoot{\small\thepage\ / 2}
+\cfoot{\small\thepage\ / 3}
 \renewcommand{\headrulewidth}{0.5pt}
 \titleformat{\section}{\large\bfseries\color{tgblue}}{\thesection}{0.6em}{}
 \titlespacing*{\section}{0pt}{11pt}{5pt}
@@ -43,6 +43,68 @@
 \end{minipage}
 \par\vspace{5pt}{\color{tglime}\hrule height 2pt}\vspace{6pt}
 
+\section{Warm-up: reconstruct the function (09:15--10:15)}\label{sec:warmup}
+\textbf{This one-hour warm-up is ungraded and does not contribute to the final score.}
+Given a structural matrix $S$ and a coefficient matrix $\Phi$,
+\textbf{reconstruct the vector-valued function $\mathbf f$ that they encode}.
+Build a Python routine that returns readable expressions for its components
+$f_1,\ldots,f_E$ and a callable evaluator:
+\[
+ \boxed{\quad \mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x).\quad}
+\]
+The inputs defining the function are $S$ and $\Phi$. The variables
+$\mathbf x=(x_1,\ldots,x_N)^\mathsf T$ follow the row order of $S$;
+numerical values of $\mathbf x$ are supplied only when evaluating the function.
+
+\paragraph{Matrix convention.}
+Let $N$ be the number of variables, $M$ the number of product terms, and $E$ the
+number of equations. The input dimensions are
+\[
+ \mathbf x\in\mathbb R^N,\qquad S\in\mathbb R^{N\times M},\qquad
+ \Phi\in\mathbb R^{E\times M}.
+\]
+\textbf{Rows of $S$ identify variables; columns identify terms.} Column $j$ of
+$S$ and column $j$ of $\Phi$ refer to the same term. Row $k$ of $\Phi$ supplies
+its coefficients in equation $k$. Preserve the supplied variable order.
+
+For this challenge, use the factor convention of the supplied multilinear tools:
+\[
+ a_{ij}(\mathbf x)=S_{ij}x_i+1-|S_{ij}|,\qquad
+ m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
+ f_k(\mathbf x)=\sum_{j=1}^{M}\Phi_{kj}m_j(\mathbf x).
+\]
+An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$;
+$S_{ij}=-1$ gives $-x_i$. Entries encode factors, \textbf{not powers}.
+With binary $S$, each column simply selects which variables appear in a monomial.
+An all-zero column represents the constant term 1. Each variable appears at most
+once in a term, so the representation is multi-affine in $\mathbf x$.
+
+\paragraph{Reconstruction and example.}
+For each column of $S$, build its product term. Multiply by the corresponding
+coefficients in each row of $\Phi$, then sum to obtain each component $f_k$. Reconstructing $\mathbf f$ does not
+require solving $\mathbf f(\mathbf x)=\mathbf 0$.
+
+\textbf{Worked example.} For $\mathbf x=(x_1,x_2)^\mathsf T$, take
+\[
+ S=\begin{pmatrix}0&1&0&1\\0&0&1&1\end{pmatrix},\qquad
+ \Phi=\begin{pmatrix}-1&1&0&2\\0&0&3&-1\end{pmatrix}.
+\]
+Then $\mathbf m=(1,x_1,x_2,x_1x_2)^\mathsf T$, giving
+\[
+ \boxed{\quad f_1(\mathbf x)=-1+x_1+2x_1x_2,\qquad
+ f_2(\mathbf x)=3x_2-x_1x_2.\quad}
+\]
+At $\mathbf x=(1,2)^\mathsf T$, the expected output is $\mathbf f(1,2)=(4,4)^\mathsf T$.
+
+
+\paragraph{Check your result.}
+At 10:15, compare your expressions and evaluator with the reference results and
+ask mentors about any differences before moving to grid optimisation. There is
+no graded warm-up submission. Check constant terms, zero-valued inputs, signed
+factors and rectangular systems. Work with the $M$ supplied columns rather than
+building all $2^N$ possible monomials.
+
+\newpage
 \section{Your mission}
 Power grids need to operate efficiently while keeping oscillations under control.
 Changing a line connection can reduce transmission losses, but can also worsen
@@ -87,14 +149,14 @@ does not increase this count.
 \end{itemize}
 
 \section{How to approach the day}
-Start by running the unchanged baseline and reading its metrics. Then improve
-losses and damping, checking both after each change. Finally, test across several
-scenarios and remove actions that do not help. The morning focuses on topology
-and dispatch; midday on dynamic stability; the afternoon on automation and testing.
-Mentors are available for questions about the models, tools and rules.
+After the 09:00--09:15 kick-off, reconstruct the function from 09:15 to 10:15.
+From 10:15 to 11:00, run the grid baseline and optimise topology and dispatch.
+After the coffee break and mentoring, work on dynamic stability from 12:00 to
+13:00, then automation and testing from 14:00 to 15:30. Code freeze ends at 16:00.
 
 \newpage
 \section{How your solution is evaluated}
+The warm-up is ungraded. The composite score below applies only to grid optimisation.
 The final evaluation runs the same submitted strategy on \textbf{100 hidden scenarios}.
 All teams receive the same evaluation cases. Each case has its own initial grid,
 permitted actions and maximum structural-change count $n_{\max}$.

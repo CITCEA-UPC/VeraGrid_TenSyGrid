@@ -128,8 +128,9 @@ The European research project \textbf{TenSyGrid} (\textit{Tensors for System Ana
 % ===========================================================================
 
 \paragraph{Mission statement.}
-Participating teams are given a benchmark transmission grid in native \texttt{.veragrid} format with multiple candidate corridors and converter-interfaced generation. Your mission is to:
+Participating teams are given a benchmark transmission grid in native \texttt{.veragrid} format with multiple candidate corridors and converter-interfaced generation. The hackathon starts with an ungraded one-hour warm-up reconstructing $\mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x)$ from supplied matrices $S$ and $\Phi$, before moving to grid optimisation. Your mission is to:
 \begin{enumerate}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Reconstruct the function} encoded by $S$ and $\Phi$: return readable expressions and a callable numerical evaluator.
   \item \textbf{Decide line breaker switching} ($u_{\text{line}, k} \in \{0, 1\}$) to minimize steady-state transmission losses.
   \item \textbf{Tune converter control parameters} (virtual damping, droop gains, voltage controls) to ensure the system is small-signal stable.
   \item \textbf{Automate your strategy across 300 test scenarios} with variable renewable generation, loads, and $N-1$ line outages.
@@ -143,7 +144,83 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
 
 \subsection{Phase-by-phase roadmap}
 
-\begin{challengebox}{Phase 1: Static topology and power dispatch (morning)}
+\begin{challengebox}{Phase 1: Ungraded reconstruction warm-up (09:15--10:15)}
+  \textbf{Focus: From the structural representation to equations.} Given
+  $S\in\mathbb{R}^{N\times M}$ and $\Phi\in\mathbb{R}^{E\times M}$, reconstruct
+  $\mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x)$ using the factor convention
+  and worked example in Section~\ref{sec:warmup}.
+  \begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \textbf{Output:} Readable component expressions and a callable Python evaluator.
+    \item \textbf{Validation:} Compare numerical outputs with supplied reference cases,
+    including constants, zero inputs and signed factors. Solving for roots is not required.
+    \item \textbf{Milestone:} Review the reference results with mentors at 10:15.
+    The warm-up is ungraded, requires no graded submission, and does not
+    contribute to the final score.
+  \end{itemize}
+\end{challengebox}
+
+\subsection{Warm-up instructions and worked example}\label{sec:warmup}
+\textbf{This one-hour warm-up is ungraded and does not contribute to the final score.}
+Given a structural matrix $S$ and a coefficient matrix $\Phi$,
+\textbf{reconstruct the vector-valued function $\mathbf f$ that they encode}.
+Build a Python routine that returns readable expressions for its components
+$f_1,\ldots,f_E$ and a callable evaluator:
+\[
+ \boxed{\quad \mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x).\quad}
+\]
+The inputs defining the function are $S$ and $\Phi$. The variables
+$\mathbf x=(x_1,\ldots,x_N)^\mathsf T$ follow the row order of $S$;
+numerical values of $\mathbf x$ are supplied only when evaluating the function.
+
+\paragraph{Matrix convention.}
+Let $N$ be the number of variables, $M$ the number of product terms, and $E$ the
+number of equations. The input dimensions are
+\[
+ \mathbf x\in\mathbb R^N,\qquad S\in\mathbb R^{N\times M},\qquad
+ \Phi\in\mathbb R^{E\times M}.
+\]
+\textbf{Rows of $S$ identify variables; columns identify terms.} Column $j$ of
+$S$ and column $j$ of $\Phi$ refer to the same term. Row $k$ of $\Phi$ supplies
+its coefficients in equation $k$. Preserve the supplied variable order.
+
+For this challenge, use the factor convention of the supplied multilinear tools:
+\[
+ a_{ij}(\mathbf x)=S_{ij}x_i+1-|S_{ij}|,\qquad
+ m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
+ f_k(\mathbf x)=\sum_{j=1}^{M}\Phi_{kj}m_j(\mathbf x).
+\]
+An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$;
+$S_{ij}=-1$ gives $-x_i$. Entries encode factors, \textbf{not powers}.
+With binary $S$, each column simply selects which variables appear in a monomial.
+An all-zero column represents the constant term 1. Each variable appears at most
+once in a term, so the representation is multi-affine in $\mathbf x$.
+
+\paragraph{Reconstruction and example.}
+For each column of $S$, build its product term. Multiply by the corresponding
+coefficients in each row of $\Phi$, then sum to obtain each component $f_k$. Reconstructing $\mathbf f$ does not
+require solving $\mathbf f(\mathbf x)=\mathbf 0$.
+
+\textbf{Worked example.} For $\mathbf x=(x_1,x_2)^\mathsf T$, take
+\[
+ S=\begin{pmatrix}0&1&0&1\\0&0&1&1\end{pmatrix},\qquad
+ \Phi=\begin{pmatrix}-1&1&0&2\\0&0&3&-1\end{pmatrix}.
+\]
+Then $\mathbf m=(1,x_1,x_2,x_1x_2)^\mathsf T$, giving
+\[
+ \boxed{\quad f_1(\mathbf x)=-1+x_1+2x_1x_2,\qquad
+ f_2(\mathbf x)=3x_2-x_1x_2.\quad}
+\]
+At $\mathbf x=(1,2)^\mathsf T$, the expected output is $\mathbf f(1,2)=(4,4)^\mathsf T$.
+
+
+\paragraph{Check your result.}
+At 10:15, compare your expressions and evaluator with the reference results and
+ask mentors about any differences before moving to grid optimisation. There is
+no graded warm-up submission. Check constant terms, zero-valued inputs, signed
+factors and rectangular systems. Work with the $M$ supplied columns rather than
+building all $2^N$ possible monomials.
+
+\begin{challengebox}{Phase 2: Static topology and power dispatch (morning)}
   \textbf{Focus: Steady-state optimization.} Given candidate line corridors and fixed demand, teams decide which breakers to keep closed or opened and schedule generation setpoints.
   \begin{itemize}[leftmargin=*, itemsep=1pt]
     \item \textbf{Tool:} Solve the non-linear AC power flow via VeraGrid's Python API (\texttt{power\_flow()}).
@@ -152,7 +229,7 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
   \end{itemize}
 \end{challengebox}
 
-\begin{challengebox}{Phase 2: Converter control tuning and dynamic stability (midday)}
+\begin{challengebox}{Phase 3: Converter control tuning and dynamic stability (midday)}
   \textbf{Focus: Small-signal stability.} Opening lines alters the electrical distance and impedance between converter-interfaced resources. The dynamic layer is activated!
   \begin{itemize}[leftmargin=*, itemsep=1pt]
     \item \textbf{Tensor \& Descriptor Model:} Converter interactions and parameter variations exhibit a non-linear structure that can be multilinearized. VeraGrid expresses the grid as a descriptor pencil $\mathbf{E}\,\dot{\mathbf{x}} = \mathbf{A}\,\mathbf{x}$, where $\mathbf{A}$ stores the linearized interactions between the parameter space $\mathbf{p}$ (droops, damping, virtual inertia).
@@ -165,7 +242,7 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
   \end{itemize}
 \end{challengebox}
 
-\begin{challengebox}{Phase 3: Automated multi-scenario batch sweep (afternoon)}
+\begin{challengebox}{Phase 4: Automated multi-scenario batch sweep (afternoon)}
   \textbf{Focus: Algorithmic resilience and speed.} Real power systems never operate at a single fixed snapshot!
   \begin{itemize}[leftmargin=*, itemsep=1pt]
     \item \textbf{Stress Test:} The evaluation engine tests each team's script against a batch of $N = 300$ operating conditions: variable renewable penetration (from 20\% to 100\%), demand fluctuations, and $N-1$ line contingencies.
@@ -180,7 +257,7 @@ Teams are formed by 2--4 participants. A multidisciplinary skill set is strongly
 At the end of the hackathon, an automated scoring harness runs each team's submission against a hidden evaluation test suite of 100 operating points.
 
 \subsection{Composite scoring function}
-The final score is computed as:
+The grid-optimisation score (Phases 2--4) is computed as:
 \begin{equation}
   \text{Score} = 0.35 \cdot \mathcal{S}_{\text{damping}} + 0.25 \cdot \mathcal{S}_{\text{loss}} + 0.25 \cdot \mathcal{S}_{\text{robustness}} + 0.15 \cdot \mathcal{S}_{\text{changes}}
 \end{equation}
@@ -227,12 +304,13 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
     \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone}                                                                                                                                              \\
     \midrule
     \textbf{09:00 -- 09:15}     & \textbf{Hackathon kick-off:} Challenge presentation by Eduardo Prieto Araujo, problem statement, stability criteria, and VeraGrid platform introduction.                                  \\
-    \textbf{09:15 -- 11:00}     & \textbf{Welcome and sprint 1: Static grid and topology switching.} Team setup, onboarding with VeraGrid Python API, and line loss optimization.                                           \\
+    \textbf{09:15 -- 10:15} & \textbf{Ungraded warm-up: Reconstruct the function.} Build readable expressions and a Python evaluator for $\mathbf f=\Phi\,\mathbf m$ from $S$ and $\Phi$; validate on reference cases. \\
+    \textbf{10:15 -- 11:00}     & \textbf{Part 2: Static grid and topology switching.} Run the baseline and optimise topology and dispatch with the VeraGrid Python API.                                           \\
     \textbf{11:00 -- 11:30}     & \textit{\color{tgpetrol}Coffee break.}                                                                                                                                                    \\
     \textbf{11:30 -- 12:00}     & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers.                                                                                 \\
-    \textbf{12:00 -- 13:00}     & \textbf{Sprint 2: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes (parallel to Plenary WP1--WP2 overview). \\
+    \textbf{12:00 -- 13:00}     & \textbf{Part 3: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes (parallel to Plenary WP1--WP2 overview). \\
     \textbf{13:00 -- 14:00}     & \textit{\color{tgpetrol}Lunch break.}                                                                                                                                                     \\
-    \textbf{14:00 -- 15:30}     & \textbf{Sprint 3: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization (parallel to Plenary WP3--WP5 overview).       \\
+    \textbf{14:00 -- 15:30}     & \textbf{Part 4: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization (parallel to Plenary WP3--WP5 overview).       \\
     \textbf{15:30 -- 16:00}     & \textit{\color{tgpetrol}Coffee break and code freeze.} Submission of final scripts to the automated scoring harness.                                                                      \\
     \textbf{16:00 -- 17:00}     & \textbf{Hackathon wrap-up and winners announcement:} Team presentations, live leaderboard reveal, and awards ceremony.                                                                    \\
     \bottomrule
@@ -245,6 +323,7 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
 
 Each team will receive a starter Git repository containing:
 \begin{itemize}[leftmargin=*, itemsep=1pt, parsep=0pt]
+  \item \textbf{Warm-up matrix examples}: The integrated reconstruction instructions in Section~\ref{sec:warmup}, plus reference input/output cases for $S$ and $\Phi$.
   \item \texttt{benchmark\_grid.veragrid}: Benchmark grid with synchronous generators and grid-following/grid-forming converters.
   \item \texttt{starter\_script.py}: Ready-to-run template demonstrating model loading, AC power flow execution, descriptor state matrix assembly, and eigenvalue calculation in VeraGrid.
   \item \texttt{evaluate\_quick.py}: Fast validation tool evaluating a reduced subset of 5--10 representative scenarios for sub-second iterative feedback during prototyping.
@@ -297,7 +376,7 @@ VeraGrid assembles the system matrices from physical component models and expose
 
 \subsection*{Why it matters for this hackathon}
 
-The 300-scenario batch sweep in Phase 3 is the practical motivation: teams that exploit the multilinear structure --- or simply profile and batch the VeraGrid API efficiently --- can evaluate stability margins substantially faster than a brute-force eigensolve per scenario, and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
+The 300-scenario batch sweep in Phase 4 is the practical motivation: teams that exploit the multilinear structure --- or simply profile and batch the VeraGrid API efficiently --- can evaluate stability margins substantially faster than a brute-force eigensolve per scenario, and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
 
 \bigskip
 \noindent\textit{Note: this document is a first iteration. The challenge definition and the scoring function will be refined and improved over the coming days.}
