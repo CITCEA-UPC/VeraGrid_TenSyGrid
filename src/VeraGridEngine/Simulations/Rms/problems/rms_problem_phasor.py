@@ -316,11 +316,18 @@ class RmsProblemPhasor(RmsProblemTemplate):
                 self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Vdc,
                                     np.abs(self.power_flow_results.voltage[bus_num]))
             else:
-                # AC bus: use Vm and Va
+                # AC bus: seed rectangular coordinates and any polar bridge
+                # variables exposed for devices with Vm/Va terminal models.
                 self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Vi,
                                     np.imag(self.power_flow_results.voltage[bus_num]))
                 self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Vr,
                                     np.real(self.power_flow_results.voltage[bus_num]))
+                if VarPowerFlowReferenceType.Vm in elm.rms_model.external_mapping:
+                    self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Vm,
+                                        np.abs(self.power_flow_results.voltage[bus_num]))
+                if VarPowerFlowReferenceType.Va in elm.rms_model.external_mapping:
+                    self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Va,
+                                        np.angle(self.power_flow_results.voltage[bus_num]))
 
             # add model to system block
             self.sys_block.add(elm.rms_model)
@@ -343,12 +350,16 @@ class RmsProblemPhasor(RmsProblemTemplate):
                 b_val = active_factor * float(-elm.X / z2)
                 bsh_val = active_factor * float(elm.B)
 
-                elm.rms_model.parameters[
-                elm.rms_model.api_obj_mapping[ParamPowerFlowReferenceType.g]] = Const(g_val)
-                elm.rms_model.parameters[
-                elm.rms_model.api_obj_mapping[ParamPowerFlowReferenceType.b]] = Const(b_val)
-                elm.rms_model.parameters[
-                elm.rms_model.api_obj_mapping[ParamPowerFlowReferenceType.bsh]] = Const(bsh_val)
+                # Dynamic line models use R/X/B in their state equations and
+                # have no static admittance parameter slots to overwrite.
+                for reference, value in (
+                    (ParamPowerFlowReferenceType.g, g_val),
+                    (ParamPowerFlowReferenceType.b, b_val),
+                    (ParamPowerFlowReferenceType.bsh, bsh_val),
+                ):
+                    parameter = elm.rms_model.api_obj_mapping.get(reference)
+                    if parameter is not None:
+                        elm.rms_model.parameters[parameter] = Const(value)
 
                 # Line.G is already total system-pu shunt conductance. Supply
                 # its declared slot with the same inactive gate as R/X/B so the

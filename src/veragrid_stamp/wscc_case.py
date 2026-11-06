@@ -73,21 +73,45 @@ def _get_impedance_load_rms_template(vfactory: Any, name: str) -> Any:
 
 def _assign_network_rms_models(grid: Any, impedance_loads: bool = False,
                                dynamic_lines: bool = False,
-                               full_dynamic_network: bool = False) -> None:
+                               full_dynamic_network: bool = False,
+                               phasor_network: bool = False) -> None:
     from VeraGridEngine.Templates.Rms.line_rms_template import get_line_rms_template
     from VeraGridEngine.Templates.Rms.load_rms_template import get_load_rms_template
     from VeraGridEngine.Utils.Symbolic.bus_rms_template import initialize_bus_rms
     from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
 
-    for bus in grid.buses:
-        initialize_bus_rms(bus, vf=grid.var_factory)
+    if phasor_network:
+        from VeraGridEngine.Templates.Rms.bus_phasor_rms_template import initialize_bus_phasor_rms
+        from VeraGridEngine.Utils.Symbolic import symbolic as sym
+        from VeraGridEngine.enumerations import VarPowerFlowReferenceType as R
+
+        for bus in grid.buses:
+            initialize_bus_phasor_rms(bus, vf=grid.var_factory)
+            block = bus.rms_model
+            vr, vi = block.external_mapping[R.Vr], block.external_mapping[R.Vi]
+            vm = grid.var_factory.add_var(f"{bus.name}.Vm", R.Vm)
+            va = grid.var_factory.add_var(f"{bus.name}.Va", R.Va)
+            # STAMP source and load equations use Vm/Va; bridge them to the
+            # rectangular network without changing their dynamic equations.
+            block.algebraic_vars.extend([vm, va])
+            block.algebraic_eqs.extend([
+                vm * vm - vr * vr - vi * vi,
+                sym.sin(va) * vr - sym.cos(va) * vi,
+            ])
+            block.out_vars.extend([vm, va])
+            block.external_mapping.update({R.Vm: vm, R.Va: va})
+    else:
+        for bus in grid.buses:
+            initialize_bus_rms(bus, vf=grid.var_factory)
     for index, line in enumerate(grid.lines, start=1):
         if dynamic_lines:
-            from .dynamic_line import build_stamp_dynamic_line_rms
+            from .dynamic_line import build_stamp_dynamic_line_phasor_rms, build_stamp_dynamic_line_rms
             bus_f = int(line.bus_from.name.removeprefix("Bus"))
             bus_t = int(line.bus_to.name.removeprefix("Bus"))
             line_name = f"NET.{min(bus_f, bus_t)}{max(bus_f, bus_t)}"
-            template = build_stamp_dynamic_line_rms(
+            line_builder = (build_stamp_dynamic_line_phasor_rms if phasor_network
+                            else build_stamp_dynamic_line_rms)
+            template = line_builder(
                 grid.var_factory, resistance=line.R, reactance=line.X,
                 shunt_susceptance=line.B, name=line_name,
                 dynamic_shunts=full_dynamic_network)
@@ -114,10 +138,14 @@ def _assign_network_rms_models(grid: Any, impedance_loads: bool = False,
 def build_stamp_wscc_grid(*, impedance_loads: bool = False,
                           dynamic_lines: bool = False,
                           full_dynamic_network: bool = False,
-                          nonlinear_converters: bool = False) -> Any:
+                          nonlinear_converters: bool = False,
+                          phasor_network: bool = False) -> Any:
     """Import VeraGrid's six-bus IEEE9 case and populate STAMP RMS models."""
     import VeraGridEngine.api as gce
     from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
+
+    if phasor_network and not dynamic_lines:
+        raise ValueError("The STAMP phasor network requires dynamic lines")
 
     grid = gce.open_file(VERAGRID_IEEE9_PATH)
     grid.name = "STAMP WSCC SG-GFOR-GFOL"
@@ -163,7 +191,8 @@ def build_stamp_wscc_grid(*, impedance_loads: bool = False,
 
     _assign_network_rms_models(grid, impedance_loads=impedance_loads,
                                dynamic_lines=dynamic_lines,
-                               full_dynamic_network=full_dynamic_network)
+                               full_dynamic_network=full_dynamic_network,
+                               phasor_network=phasor_network)
     sg_template = get_stamp_synchronous_generator_rms(grid.var_factory)
     set_rms_model(generator, sg_template.block, grid.var_factory)
     reference_omega = next(var for var in sg_template.block.state_vars

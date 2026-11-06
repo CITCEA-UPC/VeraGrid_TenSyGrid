@@ -13,6 +13,9 @@ import sys
 import time
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")  # Dashboard studies render files without a desktop GUI.
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -22,6 +25,7 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 import VeraGridEngine.api as vge
+from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 from VeraGridEngine.basic_structures import Logger
 from VeraGridEngine.IO.veragrid.pack_unpack import parse_veragrid_data
 from VeraGridEngine.IO.veragrid.zip_interface import get_frames_from_zip
@@ -230,8 +234,26 @@ def set_models(grid) -> None:
     print("Attached RMS phasor models using saved grid parameters")
 
 
+def validate_phasor_rms_models(grid) -> None:
+    """Reject saved polar RMS blocks before constructing a phasor SSA problem."""
+    required = (VarPowerFlowReferenceType.Vr, VarPowerFlowReferenceType.Vi)
+    incompatible = [bus.name for bus in grid.buses if not bus.is_dc and
+                    any(ref not in bus.rms_model.external_mapping for ref in required)]
+    if incompatible:
+        names = ", ".join(incompatible[:3])
+        suffix = "..." if len(incompatible) > 3 else ""
+        raise ValueError(
+            "RMS small-signal analysis requires phasor RMS bus models with Vr and Vi; "
+            f"{len(incompatible)} bus(es) lack them ({names}{suffix}). "
+            "This grid has saved polar Vm/Va RMS models and cannot use the "
+            "dashboard's RmsProblemMultilinear study. Select EMT Floquet for "
+            "this grid, or provide compatible phasor RMS models."
+        )
+
+
 def run_small_signal_analysis(grid) -> dict:
     """Run power flow and small-signal analysis with ``RmsProblemMultilinear``."""
+    validate_phasor_rms_models(grid)
     pf_results = vge.power_flow(grid, vge.PowerFlowOptions(tolerance=1e-5))
     if not pf_results.converged:
         raise RuntimeError("Power flow did not converge")

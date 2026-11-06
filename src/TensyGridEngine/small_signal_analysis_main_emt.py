@@ -14,6 +14,9 @@ import sys
 import time
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")  # Dashboard studies render files without a desktop GUI.
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -63,3 +63,52 @@ def build_stamp_dynamic_line_rms(vf: Any, *, resistance: float, reactance: float
     template.tpe = DeviceType.LineDevice
     template.block = block
     return template
+
+
+def build_stamp_dynamic_line_phasor_rms(vf: Any, *, resistance: float,
+                                        reactance: float, shunt_susceptance: float,
+                                        name: str, dynamic_shunts: bool = False) -> Any:
+    """The STAMP series-RL line with rectangular voltage and current ports."""
+    from VeraGridEngine.Devices.Dynamic.rms_template import RmsModelTemplate
+    from VeraGridEngine.Utils.Symbolic.block import Block
+    from VeraGridEngine.enumerations import DeviceType, VarPowerFlowReferenceType as R
+
+    c = vf.add_const
+    vrf = vf.add_var(f"{name}.Vrf", R.Vrf)
+    vif = vf.add_var(f"{name}.Vif", R.Vif)
+    vrt = vf.add_var(f"{name}.Vrt", R.Vrt)
+    vit = vf.add_var(f"{name}.Vit", R.Vit)
+    irf = vf.add_var(f"{name}.Irf", R.Irf)
+    iif = vf.add_var(f"{name}.Iif", R.Iif)
+    irt = vf.add_var(f"{name}.Irt", R.Irt)
+    iit = vf.add_var(f"{name}.Iit", R.Iit)
+    iq = vf.add_var(f"{name}.iq")
+    id_ = vf.add_var(f"{name}.id")
+    half_b = c(0.0 if dynamic_shunts else shunt_susceptance / 2.0)
+
+    block = Block(
+        state_vars=[iq, id_],
+        state_eqs=[
+            c(OMEGA_BASE / reactance) * (vrf - vrt - c(resistance) * iq - c(reactance) * id_),
+            c(OMEGA_BASE / reactance) * (-vif + vit - c(resistance) * id_ + c(reactance) * iq),
+        ],
+        algebraic_vars=[irf, iif, irt, iit],
+        algebraic_eqs=[
+            irf - (iq - half_b * vif),
+            iif - (-id_ + half_b * vrf),
+            irt - (-iq - half_b * vit),
+            iit - (id_ + half_b * vrt),
+        ],
+        init_eqs={iq: irf + half_b * vif, id_: -iif + half_b * vrf},
+        in_vars=[vrf, vif, vrt, vit],
+        out_vars=[irf, iif, irt, iit],
+        external_mapping={
+            R.Vrf: vrf, R.Vif: vif, R.Vrt: vrt, R.Vit: vit,
+            R.Irf: irf, R.Iif: iif, R.Irt: irt, R.Iit: iit,
+        },
+        name=name,
+    )
+    template = RmsModelTemplate(name=name)
+    template.tpe = DeviceType.LineDevice
+    template.block = block
+    return template
