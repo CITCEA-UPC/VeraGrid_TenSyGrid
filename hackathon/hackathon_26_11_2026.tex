@@ -43,7 +43,7 @@
 \newcommand{\eventtime}{09:00--17:00}
 \newcommand{\eventvenue}{Sala InnoEnergy, ETSEIB, Barcelona}
 \newcommand{\eventlanguage}{English}
-\newcommand{\eventversion}{v1.1, 2 November 2026}
+\newcommand{\eventversion}{v1.2, 6 November 2026}
 
 \begin{document}
 
@@ -72,7 +72,7 @@
 % --- INTRO TEXT ---
 \small
 Power systems are rapidly transitioning towards inverter-dominated operation. This 1-day hackathon challenges teams
-to use the VeraGrid Python API to \textbf{minimize transmission losses} via topology switching while \textbf{preserving (and improving)
+to first \textbf{reconstruct a function from structural and coefficient matrices} in an ungraded one-hour warm-up, then use the VeraGrid Python API to \textbf{minimize transmission losses} via topology switching while \textbf{preserving (and improving)
 small-signal stability} through converter control tuning. Submissions are scored automatically across multiple operating scenarios.
 
 \vspace{6pt}
@@ -106,12 +106,13 @@ small-signal stability} through converter control tuning. Submissions are scored
   \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone} \\
   \midrule
   \textbf{09:00--09:15} & \textbf{Hackathon kick-off:} Challenge presentation, stability criteria, and VeraGrid platform introduction. \\
-  \textbf{09:15--11:00} & \textbf{Welcome and sprint 1: Static grid and topology switching.} Team setup, onboarding with VeraGrid Python API, and line loss optimization. \\
+  \textbf{09:15--10:15} & \textbf{Ungraded warm-up: Reconstruct the function.} From matrices $S$ and $\Phi$, build expressions and a Python evaluator; validate on reference cases. \\
+  \textbf{10:15--11:00} & \textbf{Part 2: Static grid and topology switching.} Baseline evaluation, topology and dispatch optimisation with VeraGrid. \\
   \textbf{11:00--11:30} & \textit{\color{tgpetrol}Coffee break.} \\
   \textbf{11:30--12:00} & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers. \\
-  \textbf{12:00--13:00} & \textbf{Sprint 2: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes. \\
+  \textbf{12:00--13:00} & \textbf{Part 3: Dynamic layer and converter control tuning.} Computing eigenvalues, modal analysis, and stabilizing critical oscillation modes. \\
   \textbf{13:00--14:00} & \textit{\color{tgpetrol}Lunch break.} \\
-  \textbf{14:00--15:30} & \textbf{Sprint 3: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization. \\
+  \textbf{14:00--15:30} & \textbf{Part 4: Automation and batch resilience.} Multi-scenario batch sweep across 300 test operating points and parameter optimization. \\
   \textbf{15:30--16:00} & \textit{\color{tgpetrol}Coffee break and code freeze.} Submission of final scripts to the automated scoring harness. \\
   \textbf{16:00--17:00} & \textbf{Hackathon wrap-up and winners announcement:} Team presentations, live leaderboard reveal, and awards ceremony. \\
   \bottomrule
