@@ -223,6 +223,8 @@ class EmtFloquetOperator(spla.LinearOperator):
         # the default remains zero for analyses without a tangent map.
         eta_prev = self.h * (self.initial_tangent_derivative @ v0)
         rhs = np.zeros_like(v_curr)
+        valid_diff = np.flatnonzero(self.diff_base_indices >= 0)
+        base_indices = self.diff_base_indices[valid_diff]
 
         for step_index, lu in enumerate(self.lu_solvers):
             if self.method == DynamicIntegrationMethod.DaeBackEuler:
@@ -240,11 +242,9 @@ class EmtFloquetOperator(spla.LinearOperator):
             v_curr = lu.solve(rhs)
 
             if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                for diff_index, base_index in enumerate(self.diff_base_indices):
-                    if base_index >= 0:
-                        eta_prev[diff_index] = 2.0 * (
-                            v_curr[base_index] - v_prev[base_index]
-                        ) - eta_prev[diff_index]
+                eta_prev[valid_diff] = 2.0 * (
+                    v_curr[base_indices] - v_prev[base_indices]
+                ) - eta_prev[valid_diff]
 
             v_prev2 = v_prev.copy()
             v_prev = v_curr.copy()
@@ -447,6 +447,8 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
         # Scaled derivative history eta = h * delta(xdot), internal only.
         eta_prev = self.h * (self.initial_tangent_derivative @ X)
         rhs_block = np.zeros_like(X_curr)
+        valid_diff = np.flatnonzero(self.diff_base_indices >= 0)
+        base_indices = self.diff_base_indices[valid_diff]
 
         for step_index, lu in enumerate(self.lu_solvers):
             if self.method == DynamicIntegrationMethod.DaeBackEuler:
@@ -465,11 +467,9 @@ class BlockEmtFloquetOperator(spla.LinearOperator):
             X_curr = lu.solve(rhs_block)
 
             if self.method == DynamicIntegrationMethod.DaeTrapezoidal:
-                for diff_index, base_index in enumerate(self.diff_base_indices):
-                    if base_index >= 0:
-                        eta_prev[diff_index, :] = 2.0 * (
-                            X_curr[base_index, :] - X_prev[base_index, :]
-                        ) - eta_prev[diff_index, :]
+                eta_prev[valid_diff, :] = 2.0 * (
+                    X_curr[base_indices, :] - X_prev[base_indices, :]
+                ) - eta_prev[valid_diff, :]
 
             X_prev2 = X_prev.copy()
             X_prev = X_curr.copy()

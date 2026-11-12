@@ -141,7 +141,7 @@ def get_load_ZIP_emt_template(
     phC: bool = True,
     connection_type: ShuntConnectionType | None = None,
     name: str = "ZIP_Load_EMT_3ph",
-    conventional_three_phase_base: bool = False,
+    conventional_three_phase_base: bool = True,
 ) -> EmtModelTemplate:
     """Build the phase-selective EMT ZIP-load template.
 

@@ -26,6 +26,9 @@ from VeraGridEngine.Simulations.Rms.rms_options import RmsOptions
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_driver import SmallSignalStabilityRmsDriver
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_options import RmsSmallSignalStabilityOptions
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
+from .rms_diagnostics import analyze_grid, get_modes_from_unstable_eigenvalues
+from .rms_sensitivity import (build_parameterized_state_matrix, evaluate_state_matrix,
+                              state_matrix_derivative, eigenvalue_sensitivities, equilibrium_residual)
 
 
 @dataclass(frozen=True)
@@ -321,6 +324,63 @@ class RmsTuner(ABC):
         return test_tuning(self, grid, evaluator)
 
 
+    def get_modal_analysis(
+        self, grid: MultiCircuit | TunableGrid | dict,
+    ) -> dict:
+        """Inspect the supplied operating point without tuning or using test budget.
+
+        Accepts the TunableGrid passed to tune(), a raw grid, or a reusable
+        analysis snapshot. This does not automatically apply self.tune().
+        """
+        return analyze_grid(grid)
+
+    def get_parameterized_state_matrix(self, grid: TunableGrid) -> dict:
+        """Keep editable controls symbolic for fixed-point matrix/mode sensitivities."""
+        return build_parameterized_state_matrix(grid)
+
+    def evaluate_state_matrix(self, grid: TunableGrid, values=None, **options) -> np.ndarray:
+        """Evaluate A at proposed controls, constructing symbolic blocks internally."""
+        return evaluate_state_matrix(build_parameterized_state_matrix(grid), values, **options)
+
+    def get_state_matrix_derivative(self, grid: TunableGrid, parameter, values=None, **options) -> np.ndarray:
+        """Return analytic dA/dparameter at the grid's initialized operating point."""
+        return state_matrix_derivative(build_parameterized_state_matrix(grid), parameter, values, **options)
+
+    def get_eigenvalue_sensitivities(self, grid: TunableGrid, values=None, **options) -> dict:
+        """Return mode sensitivities using the supplied grid and editable controls."""
+        return eigenvalue_sensitivities(build_parameterized_state_matrix(grid), values, **options)
+
+    def get_equilibrium_residual(self, grid: TunableGrid, values=None) -> float:
+        """Check the grid's initialized operating point under proposed controls."""
+        return equilibrium_residual(build_parameterized_state_matrix(grid), values)
+
+    def get_state_matrix(
+        self, grid: MultiCircuit | TunableGrid | dict, values=None, **options,
+    ) -> np.ndarray:
+        """Return numerical A directly from a grid.
+
+        TunableGrid supports parameter overrides and equilibrium-check options.
+        Raw grids and modal snapshots use native SSA without parameter overrides;
+        descriptor snapshots also provide mass_matrix for E delta_z_dot = A delta_z.
+        """
+        if isinstance(grid, TunableGrid):
+            return self.evaluate_state_matrix(grid, values, **options)
+        if values is not None or options:
+            raise TypeError('Parameter overrides and equilibrium options require a TunableGrid')
+        return self.get_modal_analysis(grid)['state_matrix']
+
+    def get_modes_from_unstable_eigenvalues(
+        self, grid: MultiCircuit | TunableGrid | dict, *,
+        real_tolerance: float = 1e-8, top_n: int | None = 5,
+        include_conjugates: bool = False,
+    ) -> tuple[dict, ...]:
+        """Rank growing modes and their participating variables, worst first."""
+        return get_modes_from_unstable_eigenvalues(self.get_modal_analysis(grid),
+            real_tolerance=real_tolerance, top_n=top_n,
+            include_conjugates=include_conjugates,
+        )
+
+
 class BasicRmsTuner(RmsTuner):
     """Baseline participant entry point that leaves the RMS model unchanged."""
 
@@ -526,6 +586,13 @@ class RmsTunerEvaluator:
         ssa.run()
 
         eigenvalues = np.asarray(ssa.results.eigenvalues, dtype=complex)
+        # Descriptor systems include infinite eigenvalues for algebraic
+        # constraints. Score their finite physical spectrum, while still
+        # rejecting NaNs and non-finite results from an ordinary state matrix.
+        if np.any(np.isnan(eigenvalues)):
+            raise RuntimeError("Small-signal analysis returned NaN eigenvalues")
+        if ssa.problem.get_diff_var_number():
+            eigenvalues = eigenvalues[np.isfinite(eigenvalues)]
         if eigenvalues.size == 0 or not np.all(np.isfinite(eigenvalues)):
             raise RuntimeError("Small-signal analysis returned no finite eigenvalues")
         neutral_modes = np.abs(eigenvalues) <= 1e-8

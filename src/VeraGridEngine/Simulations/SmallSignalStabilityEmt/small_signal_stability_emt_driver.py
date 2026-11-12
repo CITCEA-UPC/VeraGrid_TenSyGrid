@@ -357,6 +357,8 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             t_end=self.sss_options.ss_assessment_time,
             h=h,
             method=self.emt_options.integration_method,
+            newton_max_iter=self.emt_options.init_newton_max_iter,
+            newton_tolerance=self.emt_options.tolerance,
             verbose=self.sss_options.verbose > 0
         )
         sim_result = solver.simulate()
@@ -486,10 +488,18 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         self.toc()
 
     def _build_consistent_tangent(self, y_traj, d_traj, t_traj, h, jac_eval, stat_params, n_ev_params):
-        """Construct admissible initial DAE perturbations when requested."""
+        """Initialize ODE slopes automatically; project DAE tangents on request."""
         self._consistent_basis = None
         if not self.sss_options.consistent_dae_tangent:
-            return None
+            if (self.emt_options.integration_method != DynamicIntegrationMethod.DaeTrapezoidal
+                    or self.problem.get_algebraic_var_number() != 0):
+                return None
+            states = self.problem.get_state_vars()
+            differentials = self.problem.get_diff_vars()
+            if (len(differentials) != len(states)
+                    or any(diff.base_var is None or diff.base_var.uid != state.uid
+                           for diff, state in zip(differentials, states))):
+                return None
         if self.emt_options.integration_method != DynamicIntegrationMethod.DaeTrapezoidal:
             raise ValueError("Consistent DAE tangent currently requires DAE trapezoidal integration")
         tangent = build_consistent_emt_tangent(

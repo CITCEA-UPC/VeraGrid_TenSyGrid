@@ -109,6 +109,61 @@ def test_trapezoidal_zero_dynamics_has_only_the_physical_unit_multiplier() -> No
     np.testing.assert_allclose(np.linalg.eigvals(dense), [1.0])
 
 
+def test_ode_tangent_derivative_is_initialized_with_default_options() -> None:
+    """A default ODE SSA run must use the physical trapezoidal tangent."""
+    problem = _ScalarProblem()
+    h, a = 0.01, -2.0
+    trajectory = np.array([[1.0], [0.98]])
+    derivatives = a * trajectory
+    times = np.array([0.0, h])
+
+    def jacobian(**kwargs):
+        return sparse.csc_matrix([[2.0 / h - a]])
+
+    driver = SmallSignalStabilityEmtDriver.__new__(SmallSignalStabilityEmtDriver)
+    driver.problem = problem
+    driver.emt_options = EmtOptions(integration_method=DynamicIntegrationMethod.DaeTrapezoidal)
+    driver.sss_options = SmallSignalStabilityEmtOptions()
+    tangent = driver._build_consistent_tangent(
+        trajectory, derivatives, times, h, jacobian, np.empty(0), 0)
+    np.testing.assert_allclose(tangent.initial_derivative_map, [[a]])
+    op = EmtFloquetOperator(
+        problem=problem, trajectory=trajectory, h=h, n_states=1,
+        method=DynamicIntegrationMethod.DaeTrapezoidal,
+        jac_evaluator=jacobian, static_params=np.empty(0),
+        t_trajectory=times, d_trajectory=derivatives,
+        initial_tangent_derivative=tangent.initial_derivative_map,
+    )
+    expected = (1.0 + h * a / 2.0) / (1.0 - h * a / 2.0)
+    np.testing.assert_allclose(op.matvec(np.array([1.0])), [expected])
+
+
+def test_ssa_capture_honors_emt_newton_settings() -> None:
+    class CaptureProblem(_ScalarProblem):
+        def get_parameters_values(self):
+            return []
+
+        def get_variable_parameter_number(self):
+            return 0
+
+        def get_floquet_jacobian_evaluator(self, default):
+            return default
+
+    driver = SmallSignalStabilityEmtDriver.__new__(SmallSignalStabilityEmtDriver)
+    driver.problem = CaptureProblem()
+    driver.emt_options = EmtOptions(time_step=0.01, tolerance=2e-7,
+                                    init_newton_max_iter=50)
+    driver.sss_options = SmallSignalStabilityEmtOptions(
+        target_period=0.01, ss_assessment_time=0.01)
+    with patch('VeraGridEngine.Simulations.SmallSignalStabilityEmt.'
+               'small_signal_stability_emt_driver.StructuralVectorizedSolver') as solver:
+        solver.return_value.simulate.return_value = (
+            np.array([0.0, 0.01]), np.zeros((2, 1)), np.zeros((2, 1)), True, True)
+        driver._capture_limit_cycle_and_evaluator(0.01)
+    assert solver.call_args.kwargs['newton_max_iter'] == 50
+    assert solver.call_args.kwargs['newton_tolerance'] == 2e-7
+
+
 def test_trapezoidal_initial_tangent_derivative_matches_rotation_step() -> None:
     """An initialized lifted oscillator must use the same Cayley rotation as EMT."""
     class OscillatorProblem:

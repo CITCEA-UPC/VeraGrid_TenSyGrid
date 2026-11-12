@@ -23,7 +23,7 @@ from scipy.sparse.linalg import MatrixRankWarning, spsolve
 
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
-from VeraGridEngine.enumerations import EmtInitializationMethod
+from VeraGridEngine.enumerations import EmtInitializationMethod, DynamicIntegrationMethod
 from VeraGridEngine.Simulations.EMT.initialization_emt import _emt_phase_groups, _emt_is_absolute_angle
 from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian, SymbolicVector
 
@@ -100,15 +100,34 @@ def solve_periodic_initialization(
                             / np.sqrt(3.0) * np.sin(phases)
                         )
 
-    compiler_options = dict(
-        compiler_names_dict=problem.get_compiler_names_dict().copy(),
-        alias_names_dict=problem.get_alias_names_dict().copy(),
-        VARS_NAME=problem.VARS_NAME, DIFF_NAME=problem.DIFF_NAME,
-        EVENT_PARAMS_NAME=problem.VARIABLE_PARAMS_NAME, PARAMS_NAME=problem.CONSTANT_PARAMS_NAME,
-        use_jit=False,
-    )
-    residual_fn = SymbolicVector(eqs=equations, **compiler_options)
-    jacobian_fn = SymbolicJacobian(eqs=equations, variables=variables, static=True, **compiler_options)
+    tape_jacobian = None
+    if variable_count >= 20:
+        from VeraGridEngine.Simulations.EMT.solvers.StructuralVectorizedSolver import SparseADJacobian
+
+        # These are continuous RHS/algebraic expressions, with derivative leaves
+        # already rejected above. The integration strategy is therefore unused.
+        # Avoid large symbolic simplification and differentiation when the same
+        # compact evaluator as EMT integration can evaluate the original DAE.
+        try:
+            tape_jacobian = SparseADJacobian(
+                equations, variables,
+                problem.get_variable_parameters() + problem.get_constant_parameters(),
+                [], DynamicIntegrationMethod.DaeBackEuler, tape_only=True,
+            )
+        except NotImplementedError:
+            pass
+    if tape_jacobian is None:
+        compiler_options = dict(
+            compiler_names_dict=problem.get_compiler_names_dict().copy(),
+            alias_names_dict=problem.get_alias_names_dict().copy(),
+            VARS_NAME=problem.VARS_NAME, DIFF_NAME=problem.DIFF_NAME,
+            EVENT_PARAMS_NAME=problem.VARIABLE_PARAMS_NAME, PARAMS_NAME=problem.CONSTANT_PARAMS_NAME,
+            use_jit=False,
+        )
+        residual_fn = SymbolicVector(eqs=equations, **compiler_options)
+        jacobian_fn = SymbolicJacobian(eqs=equations, variables=variables, static=True, **compiler_options)
+    full_parameters = np.r_[runtime, constants]
+    no_derivatives = np.empty(0, dtype=np.float64)
     # Electrical state derivatives have units per second; scale their rows to
     # the same order as the algebraic equations for the linear solve only.
     row_scale = np.r_[np.full(state_count, 1.0 / omega), np.ones(variable_count - state_count)]
@@ -130,11 +149,23 @@ def solve_periodic_initialization(
         for k in range(len(phase)):
             compiled_values[columns] = values[k]
             compiled_values[columns[angle_rows]] += phase[k]
-            residual[k] = residual_fn(compiled_values, initial_derivatives, runtime, constants)
-            if with_jacobian:
-                jacobians.append(scale_matrix @ jacobian_fn(
-                    compiled_values, initial_derivatives, runtime, constants, 0.0,
-                ).copy())
+            if tape_jacobian is None:
+                residual[k] = residual_fn(compiled_values, initial_derivatives, runtime, constants)
+                if with_jacobian:
+                    jacobians.append(scale_matrix @ jacobian_fn(
+                        compiled_values, initial_derivatives, runtime, constants, 0.0,
+                    ).copy())
+            else:
+                sample_values = compiled_values[columns]
+                tape_jacobian._tape.residual(
+                    sample_values, full_parameters, sample_values, no_derivatives,
+                    1.0, residual[k], sample_values,
+                )
+                if with_jacobian:
+                    jacobians.append(scale_matrix @ tape_jacobian(
+                        sample_values, full_parameters, sample_values, no_derivatives,
+                        1.0, sample_values,
+                    ).copy())
         residual[:, :state_count] -= derivatives
         residual[:, angle_rows] -= omega
         jacobian = sp.block_diag(jacobians, format="csc") - derivative_matrix if with_jacobian else None

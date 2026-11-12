@@ -44,6 +44,7 @@ from VeraGridEngine.Simulations.driver_template import DummySignal
 from VeraGridEngine.Utils.NumericalMethods.external_sparse_solver_interface import SparseLinearSolverBackendProvider
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
 from VeraGridEngine.basic_structures import Vec, Mat
+from VeraGridEngine.Simulations.EMT.solvers.structural_ad_tape import build_structural_ad_tape
 
 
 DenseFactorization = Tuple[Any, Any]
@@ -859,7 +860,7 @@ class SparseADJacobian:
         'verbose', 'equations', 'variables', 'parameters', 'diff_vars', 'method', 'dtype',
         'n_rows', 'n_cols', 'var_map', 'col_rows', 'J', 'colors', 'n_colors',
         'color_groups', 'color_ptr', 'color_cols', 'col_ptr', 'row_idx', 'data_idx',
-        '_compiler', '_ad_kernel', '_master_dispatcher', '_seed_matrix', '_jvp_work_buffer', '_data_buffer'
+        '_compiler', '_ad_kernel', '_master_dispatcher', '_seed_matrix', '_jvp_work_buffer', '_data_buffer', '_tape'
     ]
     def __init__(
             self,
@@ -871,6 +872,7 @@ class SparseADJacobian:
             use_cse: bool = True,
             dtype: Any = np.float64,
             verbose: bool = False,
+            tape_only: bool = False,
     ) -> None:
         self.verbose = verbose
         self.equations = equations
@@ -983,6 +985,21 @@ class SparseADJacobian:
         self.color_ptr, self.color_cols = color_ptr, np.asarray(color_cols, dtype=np.int32)
         self.col_ptr, self.row_idx, self.data_idx = col_ptr, row_idx, data_idx
 
+        # Large arithmetic models use one compact compiled evaluator for all
+        # colors, avoiding huge generated functions and repeated Python AD.
+        self._tape = (build_structural_ad_tape(
+            equations, variables, parameters, self.colors, self.J, method, diff_vars)
+            if self.n_rows >= 20 else None)
+        if self._tape is not None:
+            self._compiler = self._ad_kernel = self._master_dispatcher = None
+            self._seed_matrix = np.empty((0, 0), dtype=self.dtype)
+            self._jvp_work_buffer = np.empty((0, 0), dtype=self.dtype)
+            self._data_buffer = self.J.data
+            return
+
+        if tape_only:
+            raise NotImplementedError("Residual system is not supported by the compact AD tape")
+
         # Compile the generic eager AD kernel once and reuse it across graph colors.
         self._compiler = EagerEquationCompiler(variables=variables, parameters=parameters, diff_vars=diff_vars, method=method)
         k_name = f"advec_step_generic_{method.name}_{self.n_rows}_{self.n_cols}"
@@ -1053,6 +1070,9 @@ class SparseADJacobian:
                  history2: Vec | None = None) -> csc_matrix:
         if history2 is None:
             history2 = history
+
+        if self._tape is not None:
+            return self._tape.jacobian(states, params, history, d_history, h, history2)
 
         self._master_dispatcher(
             states,
@@ -1343,7 +1363,18 @@ class StructuralVectorizedSolver:
 
         residual_compile_t0: float = time.perf_counter()
 
-        if use_direct_residual:
+        jacobian_build_t0 = time.perf_counter()
+        if method not in self.jit_jacobians_ad:
+            self.jit_jacobians_ad[method] = SparseADJacobian(
+                full_eq_list, self.sorted_vars, all_params, self._diff_vars, method, verbose=self.verbose
+            )
+        self.vec_jacobian = self.jit_jacobians_ad[method]
+        jacobian_build_s = time.perf_counter() - jacobian_build_t0
+
+        if self.vec_jacobian._tape is not None:
+            self.fused_residual = DirectResidualDispatcher(self.vec_jacobian._tape.residual)
+            self.vec_kernels = list()
+        elif use_direct_residual:
             direct_name: str = f"structural_vectorized_residual_{backend_cache_token}"
             py_func: Callable[..., Any]
             signature_tpe: Any
@@ -1382,7 +1413,7 @@ class StructuralVectorizedSolver:
 
             self.fused_residual = FusedResidualDispatcher(self.vec_kernels)
 
-        residual_compile_s: float = time.perf_counter() - residual_compile_t0
+        residual_compile_s: float = time.perf_counter() - residual_compile_t0 - jacobian_build_s
 
         # -----------------------------
         # PHASE 4: DISPATCHER SETUP
@@ -1397,21 +1428,12 @@ class StructuralVectorizedSolver:
         # -----------------------------
         # PHASE 5: JACOBIAN SETUP
         # -----------------------------
-        jacobian_build_t0: float = time.perf_counter()
-
-        if method not in self.jit_jacobians_ad:
-            self.jit_jacobians_ad[method] = SparseADJacobian(
-                full_eq_list, self.sorted_vars, all_params, self._diff_vars, method, verbose=self.verbose
-            )
-
-        self.vec_jacobian = self.jit_jacobians_ad[method]
         self._sparse_factorization_manager = StructuralCompiledSparseFactorizationManager(
             self.vec_jacobian.get_matrix(),
             self.vec_jacobian.get_data_buffer(),
             self._sparse_solver_backend_provider,
         )
         self.vectorized_ready = True
-        jacobian_build_s: float = time.perf_counter() - jacobian_build_t0
 
         self._backend_build_stats = dict(
             grouping_s=grouping_s,

@@ -108,6 +108,9 @@ def build_problem(*, use_pi_lines: bool = False,
                   first_gfl_power_scale: float = 1.0) -> EmtProblemLinearReduced:
     """Assemble the experiment; optionally change charging or one GFL setpoint."""
     grid = build_ieee9_grid()
+    # The explicit converter demo and its saved S/Phi data use a 50 Hz source.
+    # The archived IEEE-9 file is 60 Hz, so set the demo base explicitly.
+    grid.fBase = 50.0
     if replace_zero_line_B is not None:
         if not use_pi_lines or replace_zero_line_B <= 0.0:
             raise ValueError("Positive replacement charging requires pi lines")

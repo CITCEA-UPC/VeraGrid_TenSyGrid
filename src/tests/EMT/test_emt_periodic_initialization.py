@@ -5,6 +5,7 @@
 
 """Check independent cycle constraints, rather than trusting convergence flags."""
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -22,15 +23,18 @@ class PeriodicProblem(EmtProblemTemplate):
     __slots__ = ("grid",)
 
 
-def build_periodic_problem(harmonic=2):
+def build_periodic_problem(harmonic=2, extra_states=0):
     vf = VarFactory()
     theta, x, y = (vf.add_var(name) for name in ("theta_abs_", "x", "y"))
     dtheta = vf.add_diff_var("dtheta", base_var=theta)
     dx = vf.add_diff_var("dx", base_var=x)
+    extra = [vf.add_var(f'extra{i}') for i in range(extra_states)]
+    extra_diff = [vf.add_diff_var(f'dextra{i}', base_var=var) for i, var in enumerate(extra)]
     omega = 2 * np.pi
     block = Block(
-        state_vars=[theta, x], diff_vars=[dtheta, dx],
-        state_eqs=[Const(omega), -4 * x + sin(harmonic * theta)],
+        state_vars=[theta, x] + extra, diff_vars=[dtheta, dx] + extra_diff,
+        state_eqs=[Const(omega), -4 * x + sin(harmonic * theta)]
+                   + [-4 * var + sin(harmonic * theta) for var in extra],
         algebraic_vars=[y], algebraic_eqs=[y - x],
         # This assignment duplicates the algebraic equation. Treating it as
         # another global constraint would leave the amplitude undetermined.
@@ -40,7 +44,9 @@ def build_periodic_problem(harmonic=2):
                               static_parameter_values_mapping={})
     problem.grid = SimpleNamespace(fBase=1., buses=[], lines=[], transformers2w=[], loads=[], generators=[])
     problem.init_guess.update({theta.uid: .3, x.uid: .8, y.uid: .8})
+    problem.init_guess.update({var.uid: .8 for var in extra})
     problem.diff_init_guess.update({dtheta.uid: omega, dx.uid: 0.})
+    problem.diff_init_guess.update({var.uid: 0. for var in extra_diff})
     return problem, theta, x, y, dx
 
 
@@ -76,6 +82,27 @@ def test_underresolved_cycle_does_not_apply_false_solution():
     assert "between samples" in report.message
     np.testing.assert_array_equal(problem.get_x0(), before)
     np.testing.assert_array_equal(problem.get_dx0(), before_dx)
+
+
+@pytest.mark.parametrize('method', [EmtInitializationMethod.ConsistentNewton,
+                                    EmtInitializationMethod.PseudoTransient])
+def test_large_periodic_problem_uses_tape_and_matches_analytic_orbit(method):
+    problem, theta, x, y, dx = build_periodic_problem(extra_states=18)
+    with patch('VeraGridEngine.Simulations.EMT.periodic_initialization_emt.SymbolicVector',
+               side_effect=AssertionError('Large arithmetic system should use compact AD')), patch(
+            'VeraGridEngine.Simulations.EMT.periodic_initialization_emt.SymbolicJacobian',
+            side_effect=AssertionError('Large arithmetic system should use compact AD')):
+        report = run_emt_native_initialization(problem, EmtOptions(
+            initialization_method=method, init_periodic_samples=17))
+    assert report.status == EmtInitializationStatus.RESOLVED, report.message
+    w = 4 * np.pi
+    expected = (4 * np.sin(.6) - w * np.cos(.6)) / (16 + w*w)
+    values = problem.get_x0()
+    for var in problem.get_state_vars()[1:]:
+        assert values[problem.get_var_idx(var)] == pytest.approx(expected, abs=1e-9)
+    assert values[problem.get_var_idx(y)] == pytest.approx(expected, abs=1e-9)
+    assert problem.get_dx0()[problem.get_diff_var_idx(dx)] == pytest.approx(
+        -4 * expected + np.sin(.6), abs=1e-8)
 
 
 def test_time_dependent_runtime_source_is_rejected():

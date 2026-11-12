@@ -55,7 +55,7 @@ SAVED_IEEE9_GRIDS = {
 def run_small_signal_analysis(
     event_overrides: dict[str, float] | None = None,
     multilinear_controls: bool = True,
-    n_modes: int = N_MODES,
+    n_modes: int | None = N_MODES,
     grid_path: str | Path | None = None,
     governor_k: float | None = None,
     multilinear_machine: bool = False,
@@ -105,6 +105,8 @@ def run_small_signal_analysis(
         pf_results=balanced_results,
         pf_results_3ph=three_phase_results,
     )
+    if n_modes is None:
+        n_modes = problem.get_states_number()
 
     small_signal_options = SmallSignalStabilityEmtOptions(
         k=n_modes,

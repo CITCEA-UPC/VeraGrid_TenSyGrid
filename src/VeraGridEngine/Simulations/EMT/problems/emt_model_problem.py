@@ -16,7 +16,6 @@ from scipy import sparse
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.emt_solver_factory import build_emt_solver
-from VeraGridEngine.Simulations.EMT.initialization_emt import init_explicit_emt
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_multilinear import EmtProblemMultilinear
 from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import EmtProblemTemplate
 from VeraGridEngine.Utils.Symbolic.block import Block
@@ -131,38 +130,26 @@ class EmtModelProblem(EmtProblemMultilinear):
 
     def _run_model_explicit_initialization(self) -> None:
         """Resolve the model's native ``init_eqs`` using inputs sampled at t=0."""
-        original_event_dict = dict(self.sys_block.event_dict)
-        try:
-            for variable in self.sys_block.event_dict:
-                idx = self.uid2idx_event_params[variable.uid]
-                self.sys_block.event_dict[variable] = Const(float(self._event_params_values[idx]))
-            result = init_explicit_emt(
-                mdl=self.sys_block,
-                sys_vars={v.uid: v for v in self._state_vars + self._algebraic_vars},
-                sys_diff_vars={v.uid: v for v in self._diff_vars},
-                variable_parameters=self._variable_parameters,
-                event_parameters_eqs=self._event_parameters_eqs,
-                constant_parameters=self._constant_parameters,
-                constant_parameter_values=self.get_parameters_values(),
-                init_guess=self.init_guess,
-                diff_init_guess=self.diff_init_guess,
-                uid2idx_vars=self.uid2idx_vars,
-                uid2idx_diff=self.uid2idx_diff,
-                uid2idx_params=self.uid2idx_params,
-                uid2idx_event_params=self.uid2idx_event_params,
-                compiler_names_dict=self._compiler_names_dict,
-                alias_names_dict=self._alias_names_dict,
-                VARIABLE_PARAMS_NAME=self.VARIABLE_PARAMS_NAME,
-                VARS_NAME=self.VARS_NAME,
-                DIFF_NAME=self.DIFF_NAME,
-                CONSTANT_PARAMS_NAME=self.CONSTANT_PARAMS_NAME,
-                verbose=bool(self.options.verbose),
-            )
-            if result is not None:
-                self.init_guess, self.diff_init_guess = result
-        finally:
-            self.sys_block.event_dict.clear()
-            self.sys_block.event_dict.update(original_event_dict)
+        pending = [
+            (variable, expression, self.init_guess)
+            for variable, expression in self._init_eqs_flat.items()
+        ] + [
+            (variable, expression, self.diff_init_guess)
+            for variable, expression in self._diff_init_eqs_flat.items()
+        ]
+        while pending:
+            remaining = []
+            for variable, expression, destination in pending:
+                if isinstance(expression, Expr) and not self._runtime_expression_dependencies_available(expression):
+                    remaining.append((variable, expression, destination))
+                    continue
+                destination[variable.uid] = self._evaluate_runtime_expression(
+                    expression, self._event_params_values, 0.0
+                )
+            if len(remaining) == len(pending):
+                names = ", ".join(variable.name for variable, _, _ in remaining)
+                raise ValueError(f"Unresolved model initialization equations: {names}")
+            pending = remaining
 
     @property
     def boundary_update(self):

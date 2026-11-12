@@ -198,7 +198,11 @@ def get_pf_positive_sequence_init_refs(
 
 def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_type_generator_template") -> EmtModelTemplate:
     """
-    EMT type machine model without damping effects.
+    Single-field EMT machine without damper windings.
+
+    Stator currents are positive out of the machine. Phase voltage/current
+    values use conventional phase bases; torque and power use system Sbase.
+    Flux is in pu on Vbase/omega_base and simulation time is in seconds.
     :param vf: grid.var_factory
     :param name: string to identify the generator and model
     :return: EmtModelTemplate
@@ -320,10 +324,12 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
         # STATE EQUATIONS (seconds + pu)
         # --------------------------------------------------------------------------------------
         state_eqs=[
-            -v_d - Ra * i_d + omega * psi_q,
-            -v_q - Ra * i_q - omega * psi_d,
-            -v_0 - R0 * i_0,
-            v_f - Rf * i_f,
+            # Currents leave the machine: stator flux contains -L*i.
+            # Positive terminal/resistive terms give passive RL decay.
+            omega_base * (v_d + Ra * i_d + omega * psi_q),
+            omega_base * (v_q + Ra * i_q - omega * psi_d),
+            omega_base * (v_0 + R0 * i_0),
+            omega_base * (v_f - Rf * i_f),
             omega_base * omega,
             (Tm - Te - D * (omega - omega_ref)) / (2 * H),
         ],
@@ -352,9 +358,11 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
             i_B - (i_d * sym.sin(theta - 2 * np.pi / 3) + i_q * sym.cos(theta - 2 * np.pi / 3) + i_0),
             i_C - (i_d * sym.sin(theta + 2 * np.pi / 3) + i_q * sym.cos(theta + 2 * np.pi / 3) + i_0),
 
-            Te - (3 / 2) * (psi_q * i_d - psi_d * i_q),
-            Pe - (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]),
-            Qe - (1 / np.sqrt(3)) * ((inputs[0] - inputs[1]) * i_C +
+            # Phase voltages/currents use their conventional phase bases;
+            # total power and torque use the three-phase system Sbase.
+            Te - (1 / 2) * (psi_d * i_q - psi_q * i_d),
+            Pe - (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]) / 3,
+            Qe - (1 / (3 * np.sqrt(3))) * ((inputs[0] - inputs[1]) * i_C +
                                      (inputs[1] - inputs[2]) * i_A +
                                      (inputs[2] - inputs[0]) * i_B),
             Pe - Pm,
@@ -426,9 +434,9 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
         q_B: vf.add_const(None),
         p_C: vf.add_const(None),
         q_C: vf.add_const(None),
-        delta: sym.atan(
-            (Ra * ipk_init * sym.sin(phi_init) - omega * (Lmq + La) * ipk_init * sym.cos(phi_init)) /
-            (vpk_init + Ra * ipk_init * sym.cos(phi_init) + omega * (Lmq + La) * ipk_init * sym.sin(phi_init))
+        delta: sym.atan2(
+            Ra * ipk_init * sym.sin(phi_init) + omega * (Lmq + La) * ipk_init * sym.cos(phi_init),
+            vpk_init + Ra * ipk_init * sym.cos(phi_init) - omega * (Lmq + La) * ipk_init * sym.sin(phi_init),
         ),
     }
     templ.block.parameters.update({
@@ -453,7 +461,9 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
 
     templ.block.init_eqs = {
         omega: omega_ref,
-        theta: phi_v_init + delta,
+        # The d=sin, q=cos Park convention puts the rotor d axis 90 degrees
+        # from the internal-voltage phasor used by the PF angle calculation.
+        theta: phi_v_init + delta - np.pi / 2,
 
         v_d: 2 / 3 * (sym.sin(theta) * inputs[0] +
                       sym.sin(theta - 2 * np.pi / 3) * inputs[1] +
@@ -471,20 +481,22 @@ def get_simple_generator_emt_template(vf: VarFactory, name: str = "simple_emt_ty
                       sym.cos(theta + 2 * np.pi / 3) * i_C),
         i_0: (1 / 3) * (i_A + i_B + i_C),
 
-        psi_q: (v_d + Ra * i_d),
-        psi_d: -(v_q + Ra * i_q),
+        psi_q: -(v_d + Ra * i_d) / omega,
+        psi_d: (v_q + Ra * i_q) / omega,
         psi_0: -L0 * i_0,
 
         i_f: (psi_d + (Lmd + La) * i_d) / Lmd,
         psi_f: (Lmd + Lf) * i_f - Lmd * i_d,
 
-        Pe: (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]),
-        Qe: (1 / np.sqrt(3)) * ((inputs[0] - inputs[1]) * i_C +
+        Pe: (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]) / 3,
+        Qe: (1 / (3 * np.sqrt(3))) * ((inputs[0] - inputs[1]) * i_C +
                                      (inputs[1] - inputs[2]) * i_A +
                                      (inputs[2] - inputs[0]) * i_B),
 
-        Te: (3 / 2) * (psi_q * i_d - psi_d * i_q),
+        Te: (1 / 2) * (psi_d * i_q - psi_q * i_d),
         Pm: Pe,
+        Tm: Te,
+        v_f: Rf * i_f,
 
 
     }

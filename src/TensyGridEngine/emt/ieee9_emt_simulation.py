@@ -112,8 +112,11 @@ def attach_emt_models(grid: gce.MultiCircuit) -> None:
         model.external_mapping[VarPowerFlowReferenceType.v_A] = model.in_vars[0]
         model.external_mapping[VarPowerFlowReferenceType.v_B] = model.in_vars[1]
         model.external_mapping[VarPowerFlowReferenceType.v_C] = model.in_vars[2]
-        model.event_dict[model.in_vars[3]] = grid.var_factory.add_const(generator.P / grid.Sbase)
-        model.event_dict[model.in_vars[4]] = grid.var_factory.add_const(1.0)
+        # Resolve constant mechanical torque and field voltage from the PF seed.
+        # Fixed arbitrary inputs introduce a transient before SSA even at a
+        # converged network operating point.
+        model.event_dict[model.in_vars[3]] = model.init_eqs[model.in_vars[3]]
+        model.event_dict[model.in_vars[4]] = model.init_eqs[model.in_vars[4]]
         set_emt_model(device=generator, model=model, var_factory=grid.var_factory)
 
     for transformer in grid.transformers2w:

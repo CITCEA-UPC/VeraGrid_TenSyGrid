@@ -168,3 +168,85 @@ For this grid, generator RMS models expose `X1`, rather than separate `Xd` and
 `Xq`. These internal reactances affect the dynamic equations and modes; the
 reported static power-flow losses at fixed dispatch come from network flows
 and shunt conductance, not directly from `X1`.
+
+## Inspect modes and parameter sensitivities
+
+The helpers live on `RmsTuner` and return plain dictionaries and NumPy arrays.
+Inside `tune(tunable_grid)`:
+
+```python
+analysis = self.get_modal_analysis(tunable_grid)
+A = self.get_state_matrix(analysis)
+modes = self.get_modes_from_unstable_eigenvalues(analysis, top_n=3)
+for mode in modes:
+    print(mode["eigenvalue"], mode["frequency_hz"], mode["damping_ratio"])
+    for entry in mode["participants"]:
+        variable = entry["variable"]
+        print(variable["device_name"], variable["name"], entry["participation"])
+        print(variable["tunable_parameters"])
+
+kp = next(p for p in tunable_grid.tunable_parameters if p.name == "Kp")
+print(self.get_equilibrium_residual(tunable_grid))
+A = self.get_state_matrix(tunable_grid)
+dA = self.get_state_matrix_derivative(tunable_grid, kp)
+sensitivity = self.get_eigenvalue_sensitivities(tunable_grid, values={kp: 20.0})
+print(sensitivity["eigenvalues"], sensitivity["derivatives"])
+```
+
+### Modal diagnostics
+
+`get_modal_analysis` accepts a raw grid (copied before power flow), a `TunableGrid`,
+or a previous analysis dictionary. Reuse the dictionary to avoid another eigensolve.
+It contains `state_matrix`, `mass_matrix`, `eigenvalues`, `participation_factors`,
+and `variables` in matrix-row order. Variables include UID, device ID/name, block
+path and the owning block's editable parameter handles (available for TunableGrid).
+
+Growing modes are sorted by decreasing real part. The default `real_tolerance=1e-8`
+excludes neutral modes. Conjugate pairs appear once; `include_conjugates=True`
+returns both. `top_n` limits participants per mode; `None` returns all participants.
+Participation identifies modal involvement, not causation or parameter sensitivity.
+An empty tuple means no growing modes under this criterion, not that all tuning
+acceptance criteria pass. Arrays are read-only; dictionaries are ordinary snapshots.
+
+For ordinary systems `delta_x_dot = A @ delta_x`. Descriptor analyses also supply
+`mass_matrix`, with `E @ delta_z_dot = A @ delta_z`; labels include algebraic rows.
+Infinite eigenvalues are excluded from unstable-mode reports. The dense eigensolve
+uses original variable coordinates and is intended for exercise-sized grids.
+
+### Parameterized matrices
+
+The matrix and sensitivity helpers accept `tunable_grid` directly. Symbolic blocks
+are constructed internally from its current initialized problem on each call, so
+there is no caller-managed model or stale implicit cache. Parameter overrides are
+local to the call. The operating point is still fixed within that calculation.
+`evaluate_state_matrix(tunable_grid, ...)` is also available as an explicit alias
+for the parameterized evaluation path.
+
+For inspection only,
+`get_parameterized_state_matrix` takes a `TunableGrid` and returns a dictionary
+containing `parameters`, `parameter_symbols`, `default_values`, `operating_point`,
+`state_variables`, `algebraic_variables` and `symbolic_blocks` (`fx`, `fy`, `gx`, `gy`).
+Underscore-prefixed entries hold internal evaluation data. The numeric reduction
+is `A = fx - fy @ solve(gy, gx)`; no symbolic inverse is expanded.
+
+Pass a mapping of parameter handles to values as the second argument of
+`get_state_matrix(tunable_grid, ...)`, or as `values=...` to the derivative/sensitivity helpers.
+Omitted parameters retain their saved runtime values. Handles and bounds are
+validated. All helpers preserve the source grid and tuning-test budgets.
+
+`get_state_matrix_derivative` analytically differentiates the blocks and algebraic
+elimination. `get_eigenvalue_sensitivities` returns a dictionary with `eigenvalues`,
+`parameters`, `derivatives`, `valid_modes` and `equilibrium_residual`. Derivative rows
+are modes and columns are parameters, in actual parameter units. Negative real
+sensitivity means increasing the parameter locally reduces that mode's growth rate.
+Repeated or ill-conditioned modes are invalid and have NaN derivatives. Verify
+finite changes with `test_tuning()`.
+
+These are fixed-operating-point partial derivatives: they exclude equilibrium
+movement and recomputation of other held initialization parameters. Reinitialize the problem after changing its equilibrium; each helper reads that
+initialized problem anew. The default equilibrium check requires
+a residual <= `1e-6`; the bundled unstable case has about `7.7e-4` and fails it.
+Explicitly pass `require_equilibrium=False` to inspect its approximate-point
+Jacobian, or choose an appropriate `equilibrium_tolerance`. The sensitivity report
+includes the residual. Parameterized models containing explicit derivative variables
+are currently rejected; their sensitivities need both `A(p)` and `E(p)` derivatives.

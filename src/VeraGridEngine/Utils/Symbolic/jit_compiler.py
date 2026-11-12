@@ -1459,6 +1459,8 @@ class SymbolicToPythonVisitor:
                 result = self.visit_var(node, precedence)
             case Func():
                 result = self.visit_func(node, precedence)
+            case Func2():
+                result = self.visit_func2(node, precedence)
             case _:
                 result = self.generic_visit(node, precedence)
 
@@ -1555,8 +1557,21 @@ class SymbolicToPythonVisitor:
             return f"_heaviside({arg})"
         if op == 'abs':
             return f"np.abs({arg})"
+        if op == 'atan':
+            return f"np.arctan({arg})"
 
         return f"np.{op}({arg})"
+
+    def visit_func2(self, node: Func2, _precedence: int) -> str:
+        first = self.visit(node.arg1, 0)
+        second = self.visit(node.arg2, 0)
+        if node.name == "atan2":
+            return f"np.arctan2({first}, {second})"
+        if node.name == "min":
+            return f"np.minimum({first}, {second})"
+        if node.name == "max":
+            return f"np.maximum({first}, {second})"
+        raise NotImplementedError(f"Binary function not supported: {node.name}")
 
 
 class RuntimeParameterToPythonVisitor(SymbolicToPythonVisitor):
@@ -1683,6 +1698,8 @@ class RuntimeParameterCompiler:
 
         full_source = "\n".join(source_lines)
         python_function = _compile_to_file(full_source, "runtime_parameter_update")
+        if os.environ.get("VERAGRID_RUNTIME_PARAMETER_PYTHON") == "1":
+            return python_function
         signature_tpe = types.void(
             types.float64[::1],
             types.float64[::1],

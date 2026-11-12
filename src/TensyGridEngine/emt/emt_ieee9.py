@@ -136,6 +136,11 @@ def build_ieee9_grid(grid_path: str | Path | None = None) -> gce.MultiCircuit:
         generator.Snom = grid.Sbase
         generator.R1 = 0.002 if generator.bus.is_slack else 0.001
         generator.X1 = 0.25 if generator.bus.is_slack else 1.7
+        # The archive also omits zero- and negative-sequence impedances. The
+        # three-phase power flow requires finite values for its passive sequence
+        # response; use the positive-sequence impedance as the demo surrogate.
+        generator.R0 = generator.R2 = generator.R1
+        generator.X0 = generator.X2 = generator.X1
 
     return grid
 
