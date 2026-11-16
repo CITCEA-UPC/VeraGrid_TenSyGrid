@@ -88,7 +88,7 @@ plus catalogs of permitted actions:
 | `openable_lines` | Existing lines that may be opened |
 | `line_candidates` | Allowed new-line candidates, if provided |
 | `shunt_options` | Allowed shunt candidates, if provided |
-| `max_test_tunings` / `tests_used` | Trial evaluation budget and consumption |
+| `max_test_tunings` / `tests_used` | Read-only trial budget and consumption, owned by the evaluator session |
 
 Return your chosen actions through `RmsTuning(parameters=..., dispatch_mw=...,
 open_lines=..., add_lines=..., add_shunts=...)`. Omitted actions leave the
@@ -142,7 +142,7 @@ metrics = tunable_grid.test_tuning(proposal)
 ```
 
 This uses the attached **full evaluator**, including its load-step simulation,
-and consumes one trial (default budget: 10 per scenario). Therefore, using trial
+and consumes one trial (default budget: 5 per scenario). Therefore, using trial
 evaluations can add transient simulations and runtime even when the outer command
 is the basic screen. Do not call `self.test_tuning(...)` inside `tune()`: that
 entry point invokes the tuner again and would recurse.
@@ -154,8 +154,8 @@ entry point invokes the tuner again and would recurse.
 1. Creates a fresh grid copy and adjusts load and generation.
 2. Constructs a fresh `FinalTuner()` so algorithm state does not leak across cases.
 3. Runs AC power flow and initializes the RMS problem.
-4. Calls `tune()` and checks that the returned proposal uses permitted handles,
-   bounds and action budgets.
+4. Calls `tune()` and sanitizes the returned proposal against permitted handles,
+   bounds and action budgets, warning about skipped actions.
 5. Applies the proposal and reruns power flow if dispatch or network actions
    require it, then rebuilds the RMS problem and computes its modes.
 6. Prints the maximum physical-mode real part, minimum oscillatory damping,
@@ -183,7 +183,7 @@ A basic scenario passes only when all these conditions hold:
 | Criterion | Requirement |
 | --- | --- |
 | AC power flow | Converges |
-| Proposal | Uses allowed actions and values within their bounds |
+| Proposal | Must be an `RmsTuning`; invalid actions are skipped with warnings |
 | Physical-mode real parts | Maximum is below `-1e-5` |
 | Neutral modes | At most one mode with `abs(lambda) <= 1e-8` |
 | Oscillatory damping | At least 5% for every mode above 0.05 Hz |
@@ -198,7 +198,8 @@ cutoff, the damping result is `n/a`.
 A negative real part means a mode decays, but does not guarantee sufficient
 damping: a slowly decaying oscillation can still fail the 5% criterion.
 
-An exception is printed as ERROR and counts as a failed scenario; the runner
+Invalid actions produce warnings and do not by themselves fail the scenario.
+An exception (such as a wrong return type or failed solve) is printed as ERROR and counts as a failed scenario; the runner
 continues to report the remaining cases. Exit status is **0** when all scenarios
 pass and **1** if any fails or raises an error. A failure does not necessarily
 mean an import or implementation error—it may be a valid proposal with
@@ -241,3 +242,46 @@ final competition score is defined by these examples.
 For more scenarios, reuse `LOCAL_SCENARIOS` with `make_scenario()` and a fresh
 `FinalTuner()` per case. The `evaluate_local` command itself continues to use
 `StarterTuner`, so it should not be mistaken for testing your final class.
+
+## Per-scenario trial enforcement
+
+Each scenario starts a new evaluator-owned session with **five trial attempts**.
+The budget resets even when the same evaluator or tuner instance is reused for a
+new run. Old scenario callbacks retain their own counters; starting another
+scenario does not replenish an old session. Invalid proposals and failed solves
+consume attempts. The sixth request raises a budget error before scoring starts.
+The organizer scores the final returned proposal separately, even if all five
+trials have been used.
+
+`TunableGrid` is frozen: catalogs, action limits and its read-only budget
+properties cannot be reassigned through normal Python assignment. It exposes
+`test_tuning(proposal)` but no evaluator reference. The participant's diagnostic
+problem is a separate copy; trial and final proposals are checked against the
+organizer's original scenario and bounds. Nested diagnostic objects are still
+mutable, so avoid modifying them when exploring sensitivities.
+
+This enforces the intended API for cooperative submissions. It is not a security
+sandbox against deliberate Python introspection. The separate `RmsTuner` outer
+`test_tuning()` budget counts whole-grid evaluations, not these per-scenario
+proposal attempts.
+
+## Lenient proposal handling
+
+Trial and final scoring retain valid actions and issue Python `UserWarning`
+messages for each skipped action. Parameter values are never clamped. Unknown
+or unavailable parameter handles, non-finite values and out-of-range values are
+skipped. Network actions are processed in submitted order: unknown handles and
+duplicates are skipped, and only the first permitted number of valid unique
+actions are kept. Empty catalogs permit no actions of that kind.
+
+Redispatch is treated as one group. If any dispatch entry is invalid or the
+resulting total scheduled MW is unbalanced, the entire redispatch is omitted;
+valid controller and network actions still apply. Malformed action containers
+are skipped with warnings. Returning something other than `RmsTuning` remains
+an error.
+
+If every action is skipped, the unchanged baseline is evaluated. This is not an
+automatic PASS: the resulting grid still undergoes the same electrical checks.
+A trial consumes one attempt whether all, some, or none of its actions survive.
+`proposal.is_accepted(grid)` remains a strict diagnostic for the original
+proposal; use the emitted warnings to identify what scoring omitted.

@@ -30,10 +30,11 @@ between units. Each value must stay within its generator limits and within
 `X1` are fixed.
 
 `TunableGrid` groups an initialized `RmsProblem` with its permitted actions.
-Its default limits are two opened lines, one new line, one new shunt, and ten
-candidate tests per tuner run. `RmsTuning.is_accepted()` checks these limits.
+Its default limits are two opened lines, one new line, one new shunt, and five
+candidate attempts per scenario. The frozen participant view exposes read-only
+budget properties; the evaluator owns an independent counter for each scenario. `RmsTuning.is_accepted()` checks these limits.
 Inside `tune()`, participants may call `tunable_grid.test_tuning(proposal)` to
-compare proposals. Each call consumes one test; exceeding the budget raises
+compare proposals. Each call, including an invalid proposal, consumes one test; exceeding the budget raises
 `RuntimeError`. The final proposal is evaluated separately. `apply_tuning()`
 returns an RMS problem rebuilt from the modified grid. All proposal evaluations
 use copies, so they start from the same baseline.
@@ -250,3 +251,13 @@ Explicitly pass `require_equilibrium=False` to inspect its approximate-point
 Jacobian, or choose an appropriate `equilibrium_tolerance`. The sensitivity report
 includes the residual. Parameterized models containing explicit derivative variables
 are currently rejected; their sensitivities need both `A(p)` and `E(p)` derivatives.
+
+### Invalid actions in proposals
+
+The evaluator sanitizes trial and final `RmsTuning` proposals, warning about
+skipped actions. Valid controls and network actions are retained in submitted
+order; duplicates and actions beyond their limits are skipped. Values are not
+clamped. Invalid or unbalanced redispatch is omitted as a whole. Wrong proposal
+return types still raise an error, and electrical checks remain unchanged.
+`is_accepted()` remains a strict diagnostic; sanitized trials still cost one
+attempt, including when every action is skipped.

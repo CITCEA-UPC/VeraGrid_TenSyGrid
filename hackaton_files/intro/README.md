@@ -98,7 +98,7 @@ and an empty finite spectrum still raise an error.
 
 Inside `tune()`, use `tunable_grid.test_tuning(proposal)` to compare trial
 proposals without changing the baseline. It runs full validation and consumes
-the per-scenario budget (default 10). Diagnostic helpers do not consume that
+the per-scenario budget (default 5). Diagnostic helpers do not consume that
 budget. Sensitivities are local, fixed-operating-point guidance; validate the
 chosen proposal with the full evaluator. See the parent README for the detailed
 sensitivity result fields and examples.
@@ -172,3 +172,8 @@ class is an unchanged baseline; replace its method with your team's algorithm.
 See [the FinalTuner evaluation guide](EVALUATOR.md) for the complete submission
 contract, environment setup, scenario definitions, pass/fail criteria, baseline
 results, and optional full evaluation of the final class.
+
+Proposal evaluation is lenient: invalid individual controls and network actions
+are skipped with warnings; invalid or unbalanced redispatch is skipped as a
+whole. Valid actions remain, values are not clamped, and each trial still counts.
+See [lenient proposal handling](EVALUATOR.md#lenient-proposal-handling).

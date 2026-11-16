@@ -6,18 +6,20 @@ This is a screening result, not a substitute for full local validation.
 from time import perf_counter
 import numpy as np
 from hackaton_files import TunableGrid
+from .settings import make_evaluator
 from .starter_script import StarterTuner, initialize_grid
 from .scenarios import QUICK_SCENARIOS, load_benchmark, make_scenario
 
 
 def evaluate_quick(tuner, grid):
     """Validate/apply a proposal and recompute its operating point and modes."""
-    tunable = initialize_grid(grid)
-    proposal = tuner.tune(tunable)
+    evaluator = make_evaluator()
+    tunable = initialize_grid(grid, enable_trials=False)
+    proposal = tuner.tune(evaluator.start_session(tunable))
     # apply_tuning validates the handles/bounds and reruns PF for grid actions.
-    problem = tunable.evaluator.apply_tuning(tunable, proposal)
+    problem = evaluator.apply_tuning(tunable, proposal)
     tuned = TunableGrid.from_problem(
-        problem, tunable.evaluator.control_ranges,
+        problem, evaluator.control_ranges,
         shunt_bus_names=(), line_corridors=(),
     )
     analysis = tuner.get_modal_analysis(tuned)

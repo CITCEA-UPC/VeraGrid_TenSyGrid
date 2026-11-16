@@ -35,14 +35,16 @@ def test_descriptor_matches_diagnostic_physical_modes():
         assert np.min(np.abs(finite - value)) < 1e-6
 
 
-def test_quick_rejects_invalid_proposal():
+def test_quick_skips_invalid_parameter():
     class InvalidTuner(StarterTuner):
         def tune(self, grid):
             parameter = grid.tunable_parameters[0]
             return RmsTuning(parameters={parameter: parameter.maximum + 1})
 
-    with pytest.raises(ValueError, match="out-of-range"):
-        evaluate_quick(InvalidTuner(), load_benchmark())
+    baseline = evaluate_quick(StarterTuner(), load_benchmark())
+    with pytest.warns(UserWarning, match="Skipped parameter"):
+        sanitized = evaluate_quick(InvalidTuner(), load_benchmark())
+    assert sanitized == baseline
 
 
 def test_benchmark_has_dynamic_gfm_controls():

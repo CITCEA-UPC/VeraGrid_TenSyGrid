@@ -43,7 +43,7 @@ class StarterTuner(RmsTuner):
         return RmsTuning()
 
 
-def initialize_grid(grid):
+def initialize_grid(grid, *, enable_trials=True):
     """Solve the operating point and assemble an initialized RMS problem."""
     power_flow = PowerFlowDriver(grid)
     power_flow.run()
@@ -58,7 +58,9 @@ def initialize_grid(grid):
     evaluator = make_evaluator()  # No Kundur-specific line corridors.
     tunable = TunableGrid.from_problem(
         driver.problem, evaluator.control_ranges,
-        shunt_bus_names=(), line_corridors=(), evaluator=evaluator,
+        shunt_bus_names=(), line_corridors=(),
+        max_test_tunings=evaluator.max_test_tunings,
+        evaluator=evaluator if enable_trials else None,
     )
     return tunable
 

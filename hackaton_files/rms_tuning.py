@@ -5,10 +5,13 @@ Participants select parameter handles from the tunable grid's catalog.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from abc import ABC, abstractmethod
-from typing import Mapping
+from typing import Mapping, Callable
+from threading import Lock
+from copy import deepcopy
 import math
+import warnings
 import numpy as np
 
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
@@ -165,7 +168,7 @@ def _parameter_indices(problem: RmsProblemTemplate) -> dict[str, int]:
     return indices
 
 
-@dataclass
+@dataclass(frozen=True)
 class TunableGrid:
     """One initialized RMS problem and the controls participants may change."""
 
@@ -178,9 +181,18 @@ class TunableGrid:
     max_open_lines: int = 2
     max_new_lines: int = 1
     max_new_shunts: int = 1
-    max_test_tunings: int = 10
-    tests_used: int = 0
-    evaluator: RmsTunerEvaluator | None = None
+    _trial: Callable | None = field(default=None, repr=False, compare=False)
+    _budget_status: Callable | None = field(default=None, repr=False, compare=False)
+
+    @property
+    def max_test_tunings(self) -> int:
+        """Read-only trial allowance for this scenario."""
+        return self._budget_status()[0] if self._budget_status else 0
+
+    @property
+    def tests_used(self) -> int:
+        """Read-only count; the evaluator session owns the counter."""
+        return self._budget_status()[1] if self._budget_status else 0
 
     @property
     def control_tensor(self) -> np.ndarray:
@@ -195,12 +207,9 @@ class TunableGrid:
 
     def test_tuning(self, tuning: RmsTuning) -> RmsTuningMetrics:
         """Evaluate one proposal without changing this grid or RMS problem."""
-        if self.evaluator is None:
-            raise RuntimeError("This TunableGrid has no evaluator")
-        if self.tests_used >= self.max_test_tunings:
-            raise RuntimeError("The tuning test budget is exhausted")
-        self.tests_used += 1
-        return self.evaluator.evaluate_proposal(self, tuning)
+        if self._trial is None:
+            raise RuntimeError("This TunableGrid has no trial evaluation session")
+        return self._trial(tuning)
 
     @classmethod
     def from_problem(
@@ -212,12 +221,12 @@ class TunableGrid:
         max_open_lines: int = 2,
         max_new_lines: int = 1,
         max_new_shunts: int = 1,
-        max_test_tunings: int = 10,
+        max_test_tunings: int = 5,
         evaluator: RmsTunerEvaluator | None = None,
     ) -> "TunableGrid":
         grid = problem.grid
         buses_by_name = {bus.name: bus for bus in grid.buses}
-        return cls(
+        snapshot = cls(
             problem=problem,
             tunable_parameters=build_rms_tunables(grid, control_ranges),
             dispatch_options=tuple(
@@ -243,9 +252,10 @@ class TunableGrid:
             max_open_lines=max_open_lines,
             max_new_lines=max_new_lines,
             max_new_shunts=max_new_shunts,
-            max_test_tunings=max_test_tunings,
-            evaluator=evaluator,
         )
+        if evaluator is not None:
+            return evaluator.start_session(snapshot, max_test_tunings)
+        return snapshot
 
 
 @dataclass(frozen=True)
@@ -398,7 +408,7 @@ class RmsTunerEvaluator:
                  max_open_lines: int = 2,
                  max_new_lines: int = 1,
                  max_new_shunts: int = 1,
-                 max_test_tunings: int = 10,
+                 max_test_tunings: int = 5,
                  load_step_fraction: float = 0.02,
                  load_step_time_s: float = 0.2,
                  transient_duration_s: float = 3.0,
@@ -414,6 +424,40 @@ class RmsTunerEvaluator:
         self.load_step_time_s = load_step_time_s
         self.transient_duration_s = transient_duration_s
         self.transient_time_step_s = transient_time_step_s
+
+    def start_session(self, baseline: TunableGrid, limit: int | None = None) -> TunableGrid:
+        """Create a fresh per-scenario budget and an isolated participant problem.
+
+        The closure retains the authoritative baseline and counter. Participant
+        edits to their diagnostic problem cannot change the scoring baseline.
+        This is cooperative API enforcement, not a Python security sandbox.
+        """
+        limit = self.max_test_tunings if limit is None else limit
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
+            raise ValueError("Trial budget must be a nonnegative integer")
+        used = 0
+        lock = Lock()
+
+        def trial(proposal):
+            nonlocal used
+            with lock:
+                if used >= limit:
+                    raise RuntimeError("The tuning test budget is exhausted")
+                used += 1  # Invalid proposals and failed solves also cost a trial.
+            return self.evaluate_proposal(baseline, proposal)
+
+        def status():
+            with lock:
+                return limit, used
+
+        problem = baseline.problem
+        participant_problem = SmallSignalStabilityRmsDriver(
+            grid=problem.grid.copy(),
+            pf_results=deepcopy(problem.power_flow_results),
+            sss_options=RmsSmallSignalStabilityOptions(k=0, ss_assessment_time=0.0),
+        ).problem
+        return replace(baseline, problem=participant_problem,
+                       _trial=trial, _budget_status=status)
 
     def evaluate_load_step(self, grid: MultiCircuit, pf_results) -> tuple[float, float, bool]:
         """Run a fixed load increase and measure peak speed and voltage excursions."""
@@ -475,11 +519,76 @@ class RmsTunerEvaluator:
         peak_voltage_pu = float(np.max(np.abs(voltages - voltages[0])))
         return peak_frequency_hz, peak_voltage_pu, converged
 
+    def sanitize_tuning(self, tunable_grid: TunableGrid, tuning: RmsTuning) -> RmsTuning:
+        """Keep valid actions in submission order and warn about every omission.
+
+        No values are clamped. Redispatch is atomic because dropping only one
+        generator update can break the scheduled MW balance. A wrong return
+        type remains an error; malformed action containers are skipped.
+        """
+        if not isinstance(tuning, RmsTuning):
+            raise ValueError("The tuner must return an RmsTuning proposal")
+
+        def skipped(message):
+            warnings.warn(message, UserWarning, stacklevel=3)
+
+        parameters = {}
+        if not isinstance(tuning.parameters, Mapping):
+            skipped("Skipped parameters: expected a mapping of handles to values")
+        else:
+            for parameter, value in tuning.parameters.items():
+                if RmsTuning(parameters={parameter: value}).is_accepted(tunable_grid):
+                    parameters[parameter] = value
+                else:
+                    skipped(f"Skipped parameter {parameter!r}: unknown/unavailable handle "
+                            "or non-finite/out-of-range value")
+
+        dispatch = {}
+        if not isinstance(tuning.dispatch_mw, Mapping):
+            skipped("Skipped entire redispatch: expected a mapping")
+        elif tuning.dispatch_mw:
+            valid_values = all(
+                isinstance(option, DispatchOption)
+                and option in tunable_grid.dispatch_options
+                and isinstance(value, (int, float)) and math.isfinite(value)
+                and option.minimum_mw <= value <= option.maximum_mw
+                for option, value in tuning.dispatch_mw.items()
+            )
+            if valid_values and RmsTuning(dispatch_mw=tuning.dispatch_mw).is_accepted(tunable_grid):
+                dispatch = dict(tuning.dispatch_mw)
+            else:
+                skipped("Skipped entire redispatch: invalid handle/value or unbalanced total MW")
+
+        def actions(values, catalog, limit, label):
+            if not isinstance(values, (tuple, list)):
+                skipped(f"Skipped {label}: expected a tuple or list of action handles")
+                return ()
+            kept = []
+            for action in values:
+                if not any(type(action) is type(allowed) and action == allowed for allowed in catalog):
+                    skipped(f"Skipped {label} {action!r}: unknown or unavailable handle")
+                elif action in kept:
+                    skipped(f"Skipped {label} {action!r}: duplicate action")
+                elif len(kept) >= limit:
+                    skipped(f"Skipped {label} {action!r}: action budget exceeded")
+                else:
+                    kept.append(action)
+            return tuple(kept)
+
+        return RmsTuning(
+            parameters=parameters, dispatch_mw=dispatch,
+            open_lines=actions(tuning.open_lines, tunable_grid.openable_lines,
+                               tunable_grid.max_open_lines, "open line"),
+            add_lines=actions(tuning.add_lines, tunable_grid.line_candidates,
+                              tunable_grid.max_new_lines, "new line"),
+            add_shunts=actions(tuning.add_shunts, tunable_grid.shunt_options,
+                               tunable_grid.max_new_shunts, "new shunt"),
+        )
+
     def apply_tuning(self, tunable_grid: TunableGrid, tuning: RmsTuning) -> RmsProblemTemplate:
         """Apply grid and control choices, then build the candidate RMS problem."""
         problem = tunable_grid.problem
-        if not isinstance(tuning, RmsTuning) or not tuning.is_accepted(tunable_grid):
-            raise ValueError("The RMS tuning contains unknown, unavailable, or out-of-range parameters")
+        tuning = self.sanitize_tuning(tunable_grid, tuning)
         grid = problem.grid
         generators = {generator.idtag: generator for generator in grid.generators}
         for option, value in tuning.dispatch_mw.items():
@@ -551,16 +660,14 @@ class RmsTunerEvaluator:
             self.max_open_lines,
             self.max_new_lines,
             self.max_new_shunts,
-            self.max_test_tunings,
-            self,
         )
-        tuning = tuner.tune(tunable_grid)
+        participant_grid = self.start_session(tunable_grid)
+        tuning = tuner.tune(participant_grid)
         return self.evaluate_proposal(tunable_grid, tuning)
 
     def evaluate_proposal(self, tunable_grid: TunableGrid, tuning: RmsTuning) -> "RmsTuningMetrics":
         """Score a proposal on a fresh copy of the same baseline grid."""
-        if not isinstance(tuning, RmsTuning) or not tuning.is_accepted(tunable_grid):
-            raise ValueError("The RMS tuning contains unknown, unavailable, or out-of-range actions")
+        tuning = self.sanitize_tuning(tunable_grid, tuning)
         tuned_grid = tunable_grid.problem.grid.copy()
         power_flow = PowerFlowDriver(tuned_grid)
         power_flow.run()
