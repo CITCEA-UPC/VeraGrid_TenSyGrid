@@ -1,123 +1,78 @@
-% !TEX program = lualatex
+% !TEX program = xelatex
+% !BIB program = biber
 \documentclass[
     bibliography=totoc,
-    listof=totoc,
-    listof=entryprefix,
+%    listof=totoc,
+%    listof=entryprefix,
     toc=sectionentrywithdots
 ]{scrreprt}
 \usepackage[english]{babel}
 \usepackage{lmodern,lipsum,microtype}
-\usepackage[UPC]{tensygrid}
-% Use the main (Raleway) family for description labels; TikZ keeps the sans family.
-\setkomafont{descriptionlabel}{\normalfont\bfseries}
-\geometry{
-  paper=a4paper,
-  left=25mm,
-  right=25mm,
-  top=25mm,
-  bottom=25mm,
-  bindingoffset=0mm,
-  marginparwidth=0pt,
-  marginparsep=0pt,
-  includeheadfoot
-}
-\usepackage{tikz}
-\usetikzlibrary{positioning, arrows.meta, calc}
+% Resolve the uninstalled template package from its repository subdirectory.
+\makeatletter
+\def\input@path{{./tensygrid-latex-package/koma/}{./tensygrid-latex-package/config/}}
+\makeatother
+\usepackage[UPC]{tensygrid-latex-package/tensygrid}
+\PassOptionsToPackage{pass}{geometry}
+\geometry{marginparwidth=0pt,marginparsep=0pt} % Adjust margins
+\usepackage[backend=biber,sorting=none]{biblatex}
+\addbibresource{ref.bib}
 \usepackage{mathtools}
 \usepackage{ieeetrantools}
 \usepackage{siunitx}
+%\usepackage[sections]{placeins} % Uncomment to avoid floats crossing section boundaries
+\usepackage{booktabs}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+% Additional packages required by the D4.1 content.
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
 \usepackage{bm}
 \usepackage{circuitikz}
 \usepackage{rotating}
 \usepackage{float}
 \usepackage{amssymb}
-\usepackage{xcolor}
-%\usepackage[sections]{placeins}
-\usepackage{booktabs}
 \usepackage{enumitem}
-\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 
-\usepackage[backend=biber, sorting=none]{biblatex}
-\addbibresource{ref.bib}  % Adjust to your .bib file name
+\setkomavar{fromname}{Alexandre~Gràcia~Calvo (UPC)\\ Carlos~Herrera~Vázquez (UPC)\\ Prof.~Eduardo~Prieto~Araujo (UPC)}
+\author{\usekomavar{fromname}}
+\setkomavar{docname}{TenSyGrid Toolbox: Use Case Identification and Description}
+\title{\usekomavar{docname}}
+\subject{Deliverable Report}
+\setkomavar{docnumber}{D 4.1}
+\setkomavar{workpackage}{4}
+\setkomavar{doclead}{\usekomavar{institute}}
+\setkomavar{version}{V2.2.0}
+\setkomavar{docduedate}{30.11.2026}
+\setkomavar{docsubmissiondate}{30.11.2026}
+\setkomavar{docreviewdate}{}
+\setkomavar{docwpdate}{23.11.2026}
+\setkomavar{classification}{Public} % Confidential or leave blank for Public
+\setkomavar{classificationacronym}{PU} % CO for Confidential or PU for Public
+\colorlet{classificationcolor}{tglime} % tgred CO tglime PU
+\setkomavar{reviewer}{Dr.~John~Licari (UM)}
+\setkomavar{summary}{This deliverable identifies and describes the use cases that the TenSyGrid Toolbox is expected to support for assessing the stability of converter-dominated power grids. Fourteen use cases are catalogued and organised into two groups: five use cases already prototyped in an initial web-based Stability Monitor and nine additional use cases proposed on the basis of project objectives, existing-tool experience, internal technical discussions, and interviews with industry stakeholders.
 
-\author{Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez\\Prof.~Eduardo~Prieto~Araujo}
-\title{TenSyGrid toolbox: Use case identification and description}
-\setkomavar{docname}{Deliverable report}
-\subject{Deliverable report}
-\setkomavar{docnumber}{D4.1}
-\setkomavar{projectnumber}{CETP-FP-2023-00138}
-\setkomavar{workpackage}{WP 4}
-\setkomavar{version}{v2.1.0}
-\setkomavar{callman}{CETPartnership}
-\setkomavar{toname}{Universitat Politècnica de Catalunya - BarcelonaTech}
-\setkomavar{fromphone}{30/11/2026}
-\setkomavar{toaddress}{%
-CETPartnership \\
-  Call Management}
-\setkomavar{fromname}{Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez\\Prof.~Eduardo~Prieto~Araujo}
-\setkomavar{yourref}{Universitat Politècnica de Catalunya}
-% The principal investigator is already listed among the report authors.
-% Leave the optional director/management field empty to avoid duplicating the role.
-\setkomavar{director}{}
-\setkomavar{projectcoordinator}{Dr.~Carlos~Cateriano~Yáñez}
-\setkomavar*{projectcoordinator}{Project coordinator}
-\setkomavar{classification}{Public} % Confidential or Public
-\colorlet{classificationcolor}{tgred} % tgred CO tglime PU
-\setkomavar{contributions}{}
-\subtitle{Project: Tensors for system analysis of\\ converter-dominated power grids}
-\date{31 October 2026}
-\tgsigsetup{
-  fromname         = {Eduardo~Prieto-Araujo\\Alexandre~Gràcia~Calvo\\Carlos~Herrera~Vázquez},
-  fromfunction     = {Principal Investigator and Full Professor at UPC\\PhD Student\\PhD Student},
-  headname         = {Dr.~Carlos~Cateriano~Yáñez},
-  headfunction     = {Project coordinator},
-  reviewername     = {Dr.~John Licari},
-  reviewerfunction = {Principal Investigator at UM},
-}
+The use cases that are already implemented in an experimental way cover the core stability-analysis workflow: launching a small-signal eigenvalue computation, inspecting the system current status via a dashboard, exploring the eigenvalue spectrum, diagnosing critical oscillation modes through participation factors, verifying bus voltage profiles, and performing $N-1$ contingency analysis with some recommendations.}
 
-\BeforeStartingTOC[lof]{\def\autodot{:}}
-\BeforeStartingTOC[lot]{\def\autodot{:}}
-\renewcaptionname{english}{\listfigurename}{List of figures}
-\renewcaptionname{english}{\listtablename}{List of tables}
+% For confidential deliverables, prepare a public summary of around 10% of the document.
+
+%\BeforeStartingTOC[lof]{\def\autodot{:}}
+%\BeforeStartingTOC[lot]{\def\autodot{:}}
 
 \begin{document}
 {\raggedright
 \maketitle}
-\section*{Acknowledgement}
-\insertack
-\vspace*{2ex}
-\newline
-{\center
-  \insertcallorg}
-\newline
-{\center
-  \insertagencies}
-\clearpage
-\section*{About TenSyGrid}
-\insertabout
-\vspace*{8ex}
-\newline
-\textbf{Project coordinator:}
-{\center
-  \insertcoord}
-\vspace*{2ex}
-\newline
-\textbf{Consortium:}
-{\center
-  \insertconsortium}
-\newline
-\clearpage
-
-\section*{Summary}
-This deliverable identifies and describes the use cases that the TenSyGrid Toolbox is expected to support for assessing the stability of converter-dominated power grids. Fourteen use cases are catalogued and organised into two groups: five use cases already prototyped in an initial web-based Stability Monitor and nine additional use cases proposed on the basis of project objectives, existing-tool experience, internal technical discussions, and interviews with industry stakeholders.
-
-The use cases that are already implemented in an experimental way cover the core stability-analysis workflow: launching a small-signal eigenvalue computation, inspecting the system current status via a dashboard, exploring the eigenvalue spectrum, diagnosing critical oscillation modes through participation factors, verifying bus voltage profiles, and performing $N-1$ contingency analysis with some recommendations.
-
-
-
+\newgeometry{paper=a4paper,margin=20mm,bindingoffset=5mm,top=50mm,bottom=35mm,headheight=5cm,headsep=37.16mm,marginparwidth=0pt,marginparsep=0pt,foot=20mm}
 \tableofcontents
-\listoffigures
-\listoftables
+\begingroup
+  \let\addcontentsline\relax
+  \listoffigures
+\endgroup
+\begingroup
+  \let\addcontentsline\relax
+  \listoftables
+\endgroup
 \clearpage
 
 \chapter{Introduction}
