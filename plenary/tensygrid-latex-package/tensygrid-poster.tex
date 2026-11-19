@@ -1,0 +1,53 @@
+% !TEX program = xelatex
+% !BIB program = biber
+\documentclass{beamer}
+\usepackage[english]{babel}
+\usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}
+\usepackage[IWES]{tensygrid}
+\usepackage[backend=biber]{biblatex}
+\usepackage{lipsum}
+\author{Luke Skywalker}
+\title{Fraunhofer {\LaTeX} Poster Template}
+\subtitle{Combine the Beauty of Science with Excellent Typesetting}
+\date[International Symposium on Typography 2020]{February 17, 2020}
+\begin{document}
+\begin{frame}
+\maketitle
+\begin{columns}[onlytextwidth,t]
+\begin{column}{.30\textwidth}
+  \begin{block}{Introduction}
+    The basic \structure{block} looks like this.
+  \end{block}
+  \begin{exampleblock}{Does it come in black?}
+    Sure, use an \textbf{exampleblock}!
+  \end{exampleblock}
+  \begin{alertblock}{How do you make it pop?}
+    Use an \alert{alertblock}!
+  \end{alertblock}
+  \begin{block}{Methods}
+    \lipsum[1]
+  \end{block}
+\end{column}
+\begin{column}{.30\textwidth}
+  \begin{block}{Results}
+    \lipsum[2]
+    \unskip
+  \end{block}
+  \begin{block}{Conclusions}
+    \lipsum[4]
+  \end{block}
+\end{column}
+\begin{column}{.30\textwidth}
+  \begin{block}{Acknowledgements}
+    \lipsum[5]
+  \end{block}
+  \begin{block}{References}
+    \lipsum[6]
+  \end{block}
+  \begin{block}{Contact information}
+    \lipsum[7]
+  \end{block}
+\end{column}
+\end{columns}
+\end{frame}
+\end{document}

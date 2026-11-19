@@ -1,0 +1,218 @@
+% !TEX program = xelatex
+% Compile from this directory: xelatex -no-shell-escape tensygrid-beamer.tex
+% Run twice to update navigation and PDF metadata.
+%
+% DRAFT: WP4 update for the November 2026 plenary.
+% Reporting period: since the Malta plenary, November 2025.
+% Target: approximately 20 minutes; no live GUI demo.
+% The hackathon runs concurrently with the plenary: do not report outcomes.
+%
+% TO CONFIRM BEFORE PRESENTING (kept out of the projected slides):
+% 1. Exact plenary date: source slides contain conflicting dates. Month only below.
+% 2. What was already presented in Malta; overview describes current outputs,
+%    without assigning an unverified completion date to each feature.
+% 3. Latest tested networks, reference comparisons and performance measurements.
+%    Do not describe IEEE-25 / IEEE-118 as validated without supporting results.
+% 4. Formal D4.1 / MS4.1 submission and approval status. The supplied D4.1 has
+%    future approval/submission dates; MS4.1 still records review pending.
+% 5. Final hackathon rules and scoring: intentionally omitted here.
+%
+% SOURCES (paths relative to this package):
+% ../D-4.1-v2.2.0.pdf: printed pp. 9-19, 20-30 and 43.
+% ../MS4.1-TenSyGrid-UPC.pdf: pp. 4-6, including the generator-outage example.
+% ../Plenary_November_26_TenSyGrid_WP4.pptx.pdf: authors and task headings.
+% Extracted screenshots retain their original values. They show separate runs.
+
+\documentclass[aspectratio=1609,9pt]{beamer}
+\usepackage[english]{babel}
+\usepackage[UPC]{tensygrid}
+\usepackage{mathtools}
+
+% Configuration is loaded lowercase, whereas the supplied logo is UPC-logo.pdf.
+% Restore its case for the existing footer after the configuration is loaded.
+\makeatletter
+\def\TG@config{UPC}
+\makeatother
+% Use the template's original logo files in its two-row acknowledgement layout.
+\newcommand{\compactfundinglogos}{%
+  \begin{center}
+    \includegraphics[height=14mm]{config/CETP-logo.pdf}\hspace{12mm}%
+    \includegraphics[height=16mm]{config/EU-logo.pdf}\\[5mm]
+    \includegraphics[width=.12\linewidth,height=18mm,keepaspectratio]{config/BMWE-logo.pdf}\hfill
+    \includegraphics[width=.24\linewidth,height=18mm,keepaspectratio]{config/MCIU-logo.pdf}\hfill
+    \includegraphics[width=.16\linewidth,height=18mm,keepaspectratio]{config/AEI-logo.pdf}\hfill
+    \includegraphics[width=.12\linewidth,height=18mm,keepaspectratio]{config/CDTI-logo.pdf}\hfill
+    \includegraphics[width=.15\linewidth,height=18mm,keepaspectratio]{config/XJENZA-logo.pdf}
+  \end{center}}
+\setbeamertemplate{navigation symbols}{}
+
+\author[UPC -- CITCEA]{\texorpdfstring{Eduardo Prieto-Araujo\\Alexandre Gràcia Calvo\\Carlos Herrera Vázquez}{Eduardo Prieto-Araujo; Alexandre Gràcia Calvo; Carlos Herrera Vázquez}}
+\title[WP4 -- TenSyGrid Toolbox]{WP4 updates}
+\subtitle{TenSyGrid Toolbox Development}
+\date[Nov 2026]{Plenary meeting -- November 2026}
+\hypersetup{pdfauthor={Eduardo Prieto-Araujo; Alexandre Gràcia Calvo; Carlos Herrera Vázquez},
+  pdftitle={TenSyGrid WP4 -- November 2026 plenary}}
+
+\begin{document}
+
+% 1 -- 0:30. Reporting period confirmed by Alexandre.
+\begingroup
+\setbeamertemplate{footline}{}
+\begin{frame}
+  \titlepage
+\end{frame}
+\endgroup
+
+% 2 -- 2:00. Current documented outputs; not a verified feature-by-feature delta.
+% Sources: D4.1 summary and conclusions; MS4.1 p. 4.
+\begin{frame}[t]{WP4 progress since Malta}
+  \framesubtitle{November 2025 -- November 2026}
+  \vspace{1.5ex}
+  \begin{itemize}\setlength{\itemsep}{2ex}
+    \item \textbf{T4.1 -- Use cases:} a structured catalogue informed by industry interviews and prototype development.
+    \item \textbf{T4.2 -- Analysis methods:} multilinear stability analysis within the VeraGrid-based workflow.
+    \item \textbf{T4.3--T4.4 -- Implementation:} five core use cases functional in the Stability Monitor prototype.
+  \end{itemize}
+  \vfill
+  {\color{tgpetrol}\textbf{Current focus:} consolidate the working core and select the next extensions.}
+\end{frame}
+
+% 3 -- 2:30. Sources: D4.1 sections 2.3, 3.1 and 4; MS4.1 p. 4.
+% Stakeholder interviews validate relevance, not numerical model accuracy.
+\begin{frame}[t]{T4.1 -- Use-case catalogue}
+  \framesubtitle{14 documented cases: 5 implemented, 9 proposed}
+  \vspace{1.5ex}
+  \begin{itemize}\setlength{\itemsep}{2ex}
+    \item Input from network-operation, consulting and equipment-manufacturing stakeholders.
+    \item Core needs: stability screening, critical-mode diagnosis and contingency assessment.
+    \item Further needs: scenario comparison, device attribution and repeatable reporting.
+  \end{itemize}
+  \vfill
+  \textbf{D4.1:} use-case descriptions and stakeholder findings.\\[0.7ex]
+  \textbf{MS4.1:} toolbox roadmap supported by the catalogue and working core.
+\end{frame}
+
+% 4 -- 3:00. Source: D4.1 sections 2.2 and 3.2.1.
+% Explain equilibrium and local linearization. Do not claim a measured speed-up
+% or describe local small-signal analysis as a large-disturbance certificate.
+\begin{frame}[t]{T4.2 -- Multilinear stability analysis}
+  \vspace{1ex}
+  \begin{itemize}\setlength{\itemsep}{1.5ex}
+    \item Multilinear component models support system assembly and linearization at the operating point.
+    \item The resulting descriptor model is used for small-signal analysis:
+  \end{itemize}
+  \vspace{0.5ex}
+  \[
+    E\,\Delta\dot{x}=A\,\Delta x,
+    \qquad A v_k=\lambda_k E v_k
+  \]
+  \vspace{0.5ex}
+  \begin{itemize}\setlength{\itemsep}{1.5ex}
+    \item Outputs: eigenvalues, oscillation frequencies, damping ratios and participation factors.
+    \item These results support system screening, mode diagnosis and contingency comparison.
+  \end{itemize}
+\end{frame}
+
+% 5 -- 2:00. Source: D4.1 section 2.2.2, final architecture.
+% Do not imply every external format includes complete, validated dynamic data.
+\begin{frame}[t]{T4.3 -- Integrated toolbox workflow}
+  \framesubtitle{Native Python implementation built on VeraGrid}
+  \vspace{1ex}
+  \begin{enumerate}\setlength{\itemsep}{1.5ex}
+    \item \textbf{Grid model}\\
+      Load the network and required dynamic-model data.
+    \item \textbf{Operating point -- VeraGridEngine}\\
+      Solve the power flow and establish the equilibrium.
+    \item \textbf{Stability analysis -- TenSyGridEngine}\\
+      Assemble the descriptor model and compute modal and contingency results.
+    \item \textbf{Result inspection -- Stability Monitor}\\
+      Explore system status, critical modes and contingency comparisons.
+  \end{enumerate}
+\end{frame}
+
+% 6 -- 3:30. Source: D4.1 UC-01 to UC-05; screenshot from PDF page 25,
+% printed p. 24, Figure 3.4. This is a different run from the next slide.
+\begin{frame}[t]{T4.4 -- Five implemented use cases}
+  \vspace{1ex}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.43\textwidth}
+      \begin{itemize}\setlength{\itemsep}{1.5ex}
+        \item \textbf{UC-01} -- Run small-signal analysis.
+        \item \textbf{UC-02} -- Screen system status and eigenvalues.
+        \item \textbf{UC-03} -- Diagnose critical modes.
+        \item \textbf{UC-04} -- Check bus-voltage profiles.
+        \item \textbf{UC-05} -- Assess N$-$1 contingencies.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.55\paperheight,keepaspectratio]{assets/stability-status.png}\\[0.5ex]
+      {\scriptsize Stability Monitor: system status and eigenvalue screening.\\Source: D4.1, Fig. 3.4; illustrative prototype run.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 7 -- 3:30. Source: MS4.1 p. 6, Figure 3.
+% The caption identifies an IEEE 9-bus EMT multilinear example.
+% This result illustrates the workflow, not validation across all networks.
+\begin{frame}[t]{Example -- Generator outage}
+  \framesubtitle{IEEE 9-bus EMT multilinear model}
+  \vspace{0.5ex}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.59\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.52\paperheight,keepaspectratio]{assets/generator-outage.png}\\[0.5ex]
+      {\scriptsize Source: MS4.1, Fig. 3; base case and generator-outage comparison.}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \begin{itemize}\setlength{\itemsep}{2ex}
+        \item \textbf{Base case:} stable, no unstable eigenvalues.
+        \item \textbf{After the outage:} unstable, with \textbf{8 unstable eigenvalues}.
+        \item Compare the spectra, then inspect the critical modes to investigate the change.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 8 -- 1:00. Concurrent hackathon confirmed by Alexandre.
+% Source: challenge concept in the original plenary slides.
+% No participants, awards or lessons are reported before the event finishes.
+\begin{frame}[t]{Hackathon}
+  \framesubtitle{Hands-on use of the toolbox -- running alongside the plenary}
+  \vspace{2ex}
+  \begin{itemize}\setlength{\itemsep}{2.5ex}
+    \item Participants explore a grid-design challenge using the toolbox.
+    \item The exercise considers stability, network configuration and renewable generation.
+    \item Feedback will inform usability improvements and example documentation.
+  \end{itemize}
+\end{frame}
+
+% 9 -- 2:00. Sources: D4.1 sections 3.3 and 4; MS4.1 further development.
+% Prioritisation proposals, not commitments to implement all nine extensions.
+% Nonlinear methods, particularly region of attraction, remain exploratory.
+\begin{frame}[t]{Next steps and priorities}
+  \vspace{1ex}
+  \begin{itemize}\setlength{\itemsep}{1.8ex}
+    \item \textbf{Select extensions:} prioritise scenario comparison, critical-element ranking and reporting according to user value and feasibility.
+    \item \textbf{Expand validation:} test different network sizes and generation mixes, with reference comparisons.
+    \item \textbf{Consolidate the toolbox:} improve error diagnostics, usability and documentation.
+    \item \textbf{Agree the implementation scope:} define partner contributions and investigate the feasibility of nonlinear methods.
+  \end{itemize}
+  \vfill
+  {\color{tgpetrol}\textbf{The catalogue guides selection; proposed cases are not implementation commitments.}}
+\end{frame}
+
+% 10 -- Funding acknowledgement, kept from the supplied template.
+% Funding logos and legal wording also appear on the title slide.
+\begingroup
+\setbeamertemplate{footline}{}
+\begin{frame}[c]{Acknowledgement}
+  \small
+  \insertack
+  \vspace*{3ex}
+  % Keep the template's logo rows within the available text width.
+  \compactfundinglogos
+\end{frame}
+\endgroup
+
+\end{document}
