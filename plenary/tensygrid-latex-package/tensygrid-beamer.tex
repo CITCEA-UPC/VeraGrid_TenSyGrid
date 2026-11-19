@@ -27,6 +27,13 @@
 \usepackage[english]{babel}
 \usepackage[UPC]{tensygrid}
 \usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows.meta}
+\usepackage{pgfgantt}
+
+\definecolor{wpblue}{HTML}{1B587C}
+\definecolor{taskpurple}{HTML}{9E2A8F}
+\definecolor{highlightred}{HTML}{FF0000}
 
 % Configuration is loaded lowercase, whereas the supplied logo is UPC-logo.pdf.
 % Restore its case for the existing footer after the configuration is loaded.
@@ -75,6 +82,98 @@
   \end{itemize}
   \vfill
   {\color{tgpetrol}\textbf{Current focus:} consolidate the working core and select the next extensions.}
+\end{frame}
+
+% 2b -- WP4 progress timeline (Gantt chart).
+\begin{frame}[t]{WP4 progress -- Timeline}
+  \vspace{2ex}
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{ganttchart}[
+      x unit=0.38cm,
+      y unit title=0.55cm,
+      y unit chart=0.8cm,
+      hgrid=false,
+      vgrid=false,
+      canvas/.style={draw=none},
+      title/.style={draw=none, fill=none},
+      title label font=\sffamily\scriptsize\bfseries,
+      title height=1,
+      bar height=0.6,
+      bar/.style={draw=none},
+      bar label font=\sffamily\scriptsize,
+      bar label text={},
+      include title in canvas=false
+    ]{1}{36}
+    % Month numbers header row (space reserved)
+    \gantttitle{}{36} \\
+
+    % Tasks (bars via pgfgantt)
+    \ganttbar[name=wp4, bar/.append style={fill=wpblue}]{}{6}{36} \\
+    \ganttbar[name=t41, bar/.append style={fill=taskpurple}]{}{6}{12} \\
+    \ganttbar[name=t42, bar/.append style={fill=taskpurple}]{}{12}{24} \\
+    \ganttbar[name=t43, bar/.append style={fill=taskpurple}]{}{10}{27} \\
+    \ganttbar[name=t44, bar/.append style={fill=taskpurple}]{}{10}{36}
+
+    % Custom overlays: lines, labels, and current status indicator
+    \begin{scope}[line width=0.4pt, black]
+      % Key positions (1 month = 0.38cm). wp4 starts at month 6.
+      \coordinate (m1L)  at ($(wp4.west |- wp4.north) + (-5*0.38cm, 0.55cm)$); % before month 1, top of header
+      \coordinate (m1Lb) at ($(wp4.west |- t44.south) + (-5*0.38cm, 0)$);       % before month 1, bottom
+      \coordinate (m13L) at ($(wp4.west |- wp4.north) + (7*0.38cm, 0.55cm)$);   % between 12-13, top
+      \coordinate (m13b) at ($(wp4.west |- t44.south) + (7*0.38cm, 0)$);
+      \coordinate (m25L) at ($(wp4.west |- wp4.north) + (19*0.38cm, 0.55cm)$);  % between 24-25, top
+      \coordinate (m25b) at ($(wp4.west |- t44.south) + (19*0.38cm, 0)$);
+      \coordinate (hdrTR) at ($(wp4.east |- wp4.north) + (0, 0.55cm)$);          % header top-right (month 36 end)
+      \coordinate (hdrBR) at (wp4.east |- wp4.north);                            % header bottom-right
+      \coordinate (hdrTL) at ($(wp4.west |- wp4.north) + (-7.2cm, 0.55cm)$);     % header top-left (label area)
+      \coordinate (hdrBL) at ($(wp4.west |- wp4.north) + (-7.2cm, 0)$);          % header bottom-left
+
+      % Header horizontal lines (above and below header row: Nº, Title, 1..36)
+      \draw (hdrTL) -- (hdrTR);
+      \draw (hdrBL) -- (hdrBR);
+
+      % Year separators: before month 1, between 12-13, between 24-25
+      \draw (m1L) -- (m1Lb);
+      \draw (m13L) -- (m13b);
+      \draw (m25L) -- (m25b);
+    \end{scope}
+
+    % "Month" label above month 1 and header/row labels, consistently aligned
+    \node[font=\sffamily\scriptsize\bfseries, anchor=south west]
+      at ($(wp4.west |- wp4.north) + (-5*0.38cm, 0.62cm)$) {Month};
+    \node[font=\sffamily\scriptsize\bfseries, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at ($(wp4.west |- wp4.north) + (0, 0.24cm)$) {\makebox[1.0cm][l]{Nº}\hspace{0.2cm}\parbox[c]{6.0cm}{Title}};
+    \foreach \m in {1,...,36} {
+      \node[font=\sffamily\scriptsize\bfseries, anchor=center]
+        at ($(wp4.west |- wp4.north) + ({(-5.5+\m)*0.38cm}, 0.24cm)$) {\m};
+    }
+
+    \node[font=\sffamily\scriptsize\bfseries, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at (wp4.west |- wp4.center) {\makebox[1.0cm][l]{WP4}\hspace{0.2cm}\parbox[t]{6.0cm}{TenSyGrid Toolbox Development $\rightarrow$}};
+    \node[font=\sffamily\scriptsize, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at (wp4.west |- t41.center) {\makebox[1.0cm][l]{T4.1}\hspace{0.2cm}\parbox[t]{6.0cm}{Identification of Use-cases}};
+    \node[font=\sffamily\scriptsize, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at (wp4.west |- t42.center) {\makebox[1.0cm][l]{T4.2}\hspace{0.2cm}\parbox[t]{6.0cm}{Multilinear tools for power system\\stability analysis}};
+    \node[font=\sffamily\scriptsize, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at (wp4.west |- t43.center) {\makebox[1.0cm][l]{T4.3}\hspace{0.2cm}\parbox[t]{6.0cm}{Toolbox framework development and\\implementation}};
+    \node[font=\sffamily\scriptsize, anchor=east, align=left, text width=7.2cm, inner xsep=0pt]
+      at (wp4.west |- t44.center) {\makebox[1.0cm][l]{T4.4}\hspace{0.2cm}\parbox[t]{6.0cm}{Network analysis applications}};
+
+    % Current status indicator: month 23 column (WP4 to T4.4) and arrow above 23
+    \coordinate (m23L) at ($(wp4.west |- wp4.north) + (17*0.38cm, 0)$);
+    \coordinate (m23R) at ($(wp4.west |- wp4.north) + (18*0.38cm, 0)$);
+    \coordinate (m23Lb) at ($(m23L |- t44.south)$);
+    \coordinate (m23Rb) at ($(m23R |- t44.south)$);
+    \draw[highlightred, line width=1.2pt] (m23L) rectangle (m23Rb);
+
+    \coordinate (m23Top) at ($(m23L)!0.5!(m23R) + (0,0.55cm)$);
+    \fill[highlightred]
+      ($(m23Top) + (0,0.08cm)$) --
+      ($(m23Top) + (-0.11cm,0.30cm)$) --
+      ($(m23Top) + (0.11cm,0.30cm)$) -- cycle;
+  \end{ganttchart}%
+  }
 \end{frame}
 
 % 3 -- 2:30. Sources: D4.1 sections 2.3, 3.1 and 4; MS4.1 p. 4.
