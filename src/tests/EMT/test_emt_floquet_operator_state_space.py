@@ -258,3 +258,77 @@ def test_capture_solver_jacobian_adapter(solver_type, is_sparse) -> None:
         jit_jacobian_ad={method: evaluator},
         jit_jacobian_symbolic={f"{method}_{is_sparse}": wrapper})
     assert _capture_solver_jacobian(solver, solver_type, method) is evaluator
+
+
+class _DiagonalProblem:
+    """Known linear ODE spectrum for the sparse Arnoldi driver workflow."""
+
+    def __init__(self, count: int) -> None:
+        self.states = [_StateVariable(index + 1) for index in range(count)]
+        self.diffs = [_DifferentialVariable(1000 + index, state)
+                      for index, state in enumerate(self.states)]
+
+    def get_state_vars(self):
+        return self.states
+
+    def get_diff_vars(self):
+        return self.diffs
+
+    def get_states_number(self):
+        return len(self.states)
+
+    def get_algebraic_var_number(self):
+        return 0
+
+    def def_event_params_fn(self, parameters, time):
+        return parameters
+
+
+def test_sparse_arnoldi_driver_recovers_known_linear_period_map() -> None:
+    from VeraGridEngine.Simulations.driver_template import DriverTemplate
+    count, step = 30, 0.01
+    rates = -np.arange(1, count + 1, dtype=float)
+    trajectory = np.ones((3, count))
+    derivatives = trajectory * rates
+    times = np.array([0.0, step, 2.0 * step])
+
+    def jacobian(**kwargs):
+        return sparse.diags(2.0 / kwargs['h'] - rates, format='csc')
+
+    driver = SmallSignalStabilityEmtDriver.__new__(SmallSignalStabilityEmtDriver)
+    DriverTemplate.__init__(driver, MultiCircuit())
+    driver.problem = _DiagonalProblem(count)
+    driver.emt_options = EmtOptions(time_step=step)
+    driver.sss_options = SmallSignalStabilityEmtOptions(k=3, target_period=2*step,
+                                                      max_krylov_dim=24)
+    captured = (trajectory, derivatives, times, jacobian, np.empty(0), 0)
+    with patch.object(SmallSignalStabilityEmtDriver, '_capture_limit_cycle_and_evaluator',
+                      return_value=captured):
+        driver.run_arnoldi()
+    expected = ((1.0 + step * rates[:3] / 2.0) / (1.0 - step * rates[:3] / 2.0)) ** 2
+    np.testing.assert_allclose(np.sort(driver.results.multipliers.real), np.sort(expected), atol=1e-9)
+
+
+def test_capture_retains_full_period_despite_floating_point_roundoff() -> None:
+    """0.3/0.1 is just below three; truncation would capture only two steps."""
+    class CaptureProblem(_ScalarProblem):
+        def get_parameters_values(self):
+            return []
+
+        def get_variable_parameter_number(self):
+            return 0
+
+        def get_floquet_jacobian_evaluator(self, default):
+            return default
+
+    driver = SmallSignalStabilityEmtDriver.__new__(SmallSignalStabilityEmtDriver)
+    driver.problem = CaptureProblem()
+    driver.emt_options = EmtOptions(solver_type=EmtSolverTypes.StructuralAD, time_step=.1)
+    driver.sss_options = SmallSignalStabilityEmtOptions(target_period=.3, ss_assessment_time=.3)
+    with patch('VeraGridEngine.Simulations.SmallSignalStabilityEmt.'
+               'small_signal_stability_emt_driver.build_emt_solver') as solver:
+        solver.return_value.simulate.return_value = (
+            np.array([0., .1, .2, .3]), np.zeros((4, 1)), np.zeros((4, 1)), True, True)
+        captured = driver._capture_limit_cycle_and_evaluator(.1)
+    assert len(captured[0]) == 4
+    assert captured[2][-1] - captured[2][0] == pytest.approx(.3)

@@ -43,6 +43,82 @@ if njit is not None:
         return out
 
 
+@njit(cache=True, fastmath=False)
+def _multilinear_jacobian_csc_numba(data: np.ndarray, indices: np.ndarray,
+                                    indptr: np.ndarray, values: np.ndarray
+                                    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Differentiate monomials into CSC buffers without changing zero rules.
+
+    :param data: Sparse monomial factor coefficients.
+    :param indices: Variable index of each stored factor.
+    :param indptr: Column boundaries for each monomial.
+    :param values: Current real variable values.
+    :return: Derivative data, row indices and column pointers.
+    """
+    # Every derivative occupies at most one slot per original factor.
+    result_data: np.ndarray = np.empty(len(data), dtype=np.float64)
+    result_indices: np.ndarray = np.empty_like(indices)
+    result_indptr: np.ndarray = np.empty_like(indptr)
+    result_indptr[0] = 0
+    count: int = 0
+    column: int
+    position: int
+    other: int
+    start: int
+    end: int
+    product: float
+    zero_hits: int
+    zero_position: int
+    coefficient: float
+    factor: float
+    derivative: float
+    other_product: float
+    other_coefficient: float
+    include: bool
+    for column in range(len(indptr) - 1):
+        start, end = indptr[column], indptr[column + 1]
+        product = 1.0
+        zero_hits = 0
+        zero_position = -1
+        for position in range(start, end):
+            coefficient = data[position]
+            factor = coefficient * values[indices[position]] + (1.0 - abs(coefficient))
+            product *= factor
+            if abs(factor) <= 1e-12:
+                zero_hits += 1
+                zero_position = position
+            else:
+                pass
+        # Preserve the original single-zero product derivative and threshold.
+        for position in range(start, end):
+            coefficient = data[position]
+            factor = coefficient * values[indices[position]] + (1.0 - abs(coefficient))
+            derivative = 0.0
+            include = True
+            if abs(factor) > 1e-12:
+                derivative = coefficient * product / factor
+            elif zero_hits == 1 and position == zero_position:
+                other_product = 1.0
+                for other in range(start, end):
+                    if other != position:
+                        other_coefficient = data[other]
+                        other_product *= (other_coefficient * values[indices[other]]
+                                          + (1.0 - abs(other_coefficient)))
+                    else:
+                        pass
+                derivative = coefficient * other_product
+            else:
+                include = False
+            if include:
+                result_data[count] = derivative
+                result_indices[count] = indices[position]
+                count += 1
+            else:
+                pass
+        result_indptr[column + 1] = count
+    return result_data[:count], result_indices[:count], result_indptr
+
+
 @dataclass(slots=True)
 class SparseCoefficientTensor:
     """
@@ -1324,64 +1400,6 @@ class RmsProblemMultilinear(RmsProblemPhasor):
     @staticmethod
     def _compute_jacobian_sparse_from_S(S: sparse.csc_matrix, v: np.ndarray) -> sparse.csc_matrix:
         """Sparse multilinear Jacobian equivalent to PolynomialMatrixBuilder logic."""
-        n_vars, n_mon = S.shape
-        data = S.data
-        indices = S.indices
-        indptr = S.indptr
-
-        col_prod = np.ones(n_mon, dtype=float)
-        for j in range(n_mon):
-            start = indptr[j]
-            end = indptr[j + 1]
-            prod = 1.0
-            for p in range(start, end):
-                i = indices[p]
-                s_ij = data[p]
-                prod *= (s_ij * v[i] + (1.0 - abs(s_ij)))
-            col_prod[j] = prod
-
-        f_row: list[int] = []
-        f_col: list[int] = []
-        f_val: list[float] = []
-
-        for j in range(n_mon):
-            start = indptr[j]
-            end = indptr[j + 1]
-            if start == end:
-                continue
-
-            zero_hits = 0
-            zero_pos = -1
-            for p in range(start, end):
-                i = indices[p]
-                s_ij = data[p]
-                x_ij = s_ij * v[i] + (1.0 - abs(s_ij))
-                if abs(x_ij) <= 1e-12:
-                    zero_hits += 1
-                    zero_pos = p
-
-            for p in range(start, end):
-                i = indices[p]
-                s_ij = data[p]
-                x_ij = s_ij * v[i] + (1.0 - abs(s_ij))
-
-                if abs(x_ij) > 1e-12:
-                    val = s_ij * col_prod[j] / x_ij
-                    f_row.append(i)
-                    f_col.append(j)
-                    f_val.append(val)
-                elif zero_hits == 1 and p == zero_pos:
-                    prod_other = 1.0
-                    for q in range(start, end):
-                        if q == p:
-                            continue
-                        iq = indices[q]
-                        s_iq = data[q]
-                        x_iq = s_iq * v[iq] + (1.0 - abs(s_iq))
-                        prod_other *= x_iq
-                    val = s_ij * prod_other
-                    f_row.append(i)
-                    f_col.append(j)
-                    f_val.append(val)
-
-        return sparse.csc_matrix((f_val, (f_row, f_col)), shape=(n_vars, n_mon))
+        data, indices, indptr = _multilinear_jacobian_csc_numba(
+            S.data, S.indices, S.indptr, np.asarray(v, dtype=np.float64))
+        return sparse.csc_matrix((data, indices, indptr), shape=S.shape)

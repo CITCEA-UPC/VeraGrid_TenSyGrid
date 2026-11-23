@@ -23,10 +23,36 @@ SciPy subtraction would drop), the SciPy expression itself is evaluated instead.
 from __future__ import annotations
 
 import numpy as np
+from numba import njit
 import scipy.sparse as sp
 from scipy.sparse import csc_matrix, spmatrix
 
 from VeraGridEngine.Utils.Sparse.csc import pack_4_by_4_scipy
+
+
+@njit(cache=True, fastmath=False)
+def _fill_bdf_blocks(base: np.ndarray, output: np.ndarray, c: float,
+                     region: np.ndarray, map_j11: np.ndarray,
+                     map_j12: np.ndarray, map_j21: np.ndarray,
+                     map_j22: np.ndarray, j11: np.ndarray, j12: np.ndarray,
+                     j21: np.ndarray, j22: np.ndarray) -> bool:
+    """Fill BDF CSC data on the cached pattern and detect dropped diagonals."""
+    for entry in range(region.size):
+        position = region[entry]
+        output[position] = c * base[position]
+    for entry in range(j11.size):
+        position = map_j11[entry]
+        output[position] = c * base[position] - j11[entry]
+    for entry in range(j12.size):
+        output[map_j12[entry]] = -j12[entry]
+    for entry in range(j21.size):
+        output[map_j21[entry]] = j21[entry]
+    for entry in range(j22.size):
+        output[map_j22[entry]] = j22[entry]
+    for entry in range(region.size):
+        if output[region[entry]] == 0.0:
+            return False
+    return True
 
 
 def _csc_storage_is_consistent(indptr: np.ndarray, indices: np.ndarray, data: np.ndarray, shape: tuple[int, int]) -> bool:
@@ -352,3 +378,30 @@ class ImplicitJacobianAssembler:
         self._fallback_assemblies += 1
         identity: sp.dia_matrix = sp.eye(m=ns, n=ns)
         return pack_4_by_4_scipy((identity - h * j11).tocsc(), - h * j12, j21, j22)
+
+    def assemble_jacobian_bdf(self, ns: int, c: float, j11: spmatrix, j12: spmatrix,
+                              j21: spmatrix, j22: spmatrix) -> csc_matrix:
+        """Assemble the semi-explicit DAE Newton matrix for a BDF step.
+
+        The blocks are ``[[c*I - J11, -J12], [J21, J22]]``. ``c`` is the
+        coefficient of the current trial state in the BDF derivative.
+        Existing block-pattern checks and scatter maps are reused.
+        """
+        if self._blocks_are_eligible(ns, j11, j12, j21, j22):
+            ready = self._pattern_matches(j11, j12, j21, j22)
+            if not ready:
+                ready = self._build_pattern(ns, j11, j12, j21, j22)
+            if ready:
+                values = self._values
+                if _fill_bdf_blocks(self._base, values, c, self._region,
+                                    self._map_j11, self._map_j12, self._map_j21,
+                                    self._map_j22, j11.data, j12.data,
+                                    j21.data, j22.data):
+                    self._fast_assemblies += 1
+                    return csc_matrix((values.copy(), self._indices.copy(),
+                                       self._indptr.copy()), shape=self._shape)
+        self._fallback_assemblies += 1
+        return pack_4_by_4_scipy(
+            (c * sp.eye(ns, format="csc") - j11).tocsc(),
+            -j12, j21, j22,
+        )

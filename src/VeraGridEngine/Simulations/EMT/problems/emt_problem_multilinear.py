@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from VeraGridEngine.Simulations.Rms.numerical.implicit_jacobian_assembler import ImplicitJacobianAssembler
+
 import numpy as np
 from scipy import sparse
 
@@ -358,6 +360,8 @@ class EmtProblemMultilinear(EmtProblemDae):
             p_val.append(1.0)
 
         diff_to_state_alg = sparse.csc_matrix((p_val, (p_row, p_col)), shape=(n_diff, n_state_alg), dtype=float)
+        # Reuse the RMS assembler's checked CSC pattern and compiled BDF fill.
+        assembler = ImplicitJacobianAssembler()
 
         def _alpha(h: float) -> float:
             method = self.options.integration_method
@@ -429,12 +433,13 @@ class EmtProblemMultilinear(EmtProblemDae):
             alpha = _alpha(step)
             jac_state_alg = residual_jac[:, :n_state_alg]
             jac_diff = residual_jac[:, n_state_alg:]
-            jac = (jac_state_alg + alpha * (jac_diff @ diff_to_state_alg)).tolil()
-            if n_states > 0:
-                jac[:n_states, :] = -jac[:n_states, :]
-                for row in range(n_states):
-                    jac[row, row] = jac[row, row] + alpha
-            return jac.tocsc()
+            jac = jac_state_alg + alpha * (jac_diff @ diff_to_state_alg)
+            jac = jac.tocsc()
+            return assembler.assemble_jacobian_bdf(
+                n_states, alpha,
+                jac[:n_states, :n_states].tocsc(), jac[:n_states, n_states:].tocsc(),
+                jac[n_states:, :n_states].tocsc(), jac[n_states:, n_states:].tocsc(),
+            )
 
         return multilinear_jacobian
 

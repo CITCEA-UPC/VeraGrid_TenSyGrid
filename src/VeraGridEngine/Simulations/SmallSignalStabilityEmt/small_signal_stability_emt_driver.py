@@ -379,7 +379,10 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         t_full: Vec = sim_result[0]
         y_full: Mat = sim_result[1]
         d_full: Mat = sim_result[2]
-        steps_per_period: int = int(self.sss_options.target_period / h)
+        period_steps: float = self.sss_options.target_period / h
+        steps_per_period: int = int(round(period_steps))
+        if not np.isclose(period_steps, steps_per_period, rtol=1e-10, atol=1e-10):
+            raise ValueError("EMT Floquet period must contain an integer number of time steps")
         samples_per_period: int = steps_per_period + 1
         expected_samples: int = int(np.ceil(self.sss_options.ss_assessment_time / h)) + 1
         static_params: Vec = np.array([c.value for c in params_values], dtype=np.float64)
@@ -459,10 +462,18 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
             mu, v = la.eig(C_M)
         else:
             # High-Performance Sparse Arnoldi
-            search_k = min(self.sss_options.k * 2, operator_states - 2)
+            # Largest-magnitude extraction needs only the requested modes.
+            # Frequency filtering retains oversampling to select nearby pairs.
+            requested_search = (2 * self.sss_options.k
+                                if self.sss_options.target_frequency_hz is not None
+                                else self.sss_options.k)
+            search_k = min(requested_search, operator_states - 2)
             v0 = np.zeros(operator_states, dtype=np.float64)
             v0[:] = np.random.default_rng(42).standard_normal(operator_states)
-            mu, v = spla.eigs(monodromy_op, k=search_k, which='LM', tol=1e-8, v0=v0)
+            # Honor the configured Krylov space for clustered multipliers;
+            # ARPACK's small default subspace can stall on large EMT cases.
+            ncv = min(operator_states, max(2 * search_k + 1, self.sss_options.max_krylov_dim))
+            mu, v = spla.eigs(monodromy_op, k=search_k, ncv=ncv, which='LM', tol=1e-8, v0=v0)
 
         # 4. SPECTRAL SHIFT FILTERING (Resonance Hunt)
         if self.sss_options.target_frequency_hz is not None:

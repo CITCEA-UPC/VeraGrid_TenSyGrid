@@ -47,6 +47,69 @@ def _numerical_rank(values: np.ndarray, shape: tuple[int, int]) -> int:
     return int(np.count_nonzero(values > max(shape) * np.finfo(float).eps * values[0]))
 
 
+def _constraint_basis(constraints: np.ndarray, n_state: int) -> np.ndarray:
+    """Return orthonormal state directions satisfying linear constraints."""
+    if constraints.shape[0]:
+        _, singular_values, vh = la.svd(constraints, full_matrices=True)
+        rank = _numerical_rank(singular_values, constraints.shape)
+        return vh[rank:, :].T.copy()
+    return np.eye(n_state)
+
+
+def _sparse_algebraic_tangent(gx: sp.csc_matrix, gz: sp.csc_matrix
+                              ) -> tuple[np.ndarray, np.ndarray] | None:
+    """Eliminate a matched sparse minor, preserving minimum-norm sensitivities.
+
+    Structural matching exposes the small null-space problem without taking
+    an SVD of the entire network algebraic Jacobian. Numerically singular
+    matched minors fall back to the general dense rank-revealing calculation.
+    """
+    gz = gz.copy()
+    gz.eliminate_zeros()
+    matching = sp.csgraph.maximum_bipartite_matching(gz, perm_type="column")
+    rows = np.flatnonzero(matching >= 0)
+    columns = matching[rows]
+    remaining_rows = np.setdiff1d(np.arange(gz.shape[0]), rows)
+    remaining_columns = np.setdiff1d(np.arange(gz.shape[1]), columns)
+    if not len(rows) or len(remaining_columns) > gz.shape[1] // 2:
+        return None
+    try:
+        factor = spla.splu(gz[rows][:, columns].tocsc())
+        # Left null vectors are [-W, I]. Whiten them so the numerical rank
+        # decision has the same orthonormal scaling as the dense SVD path.
+        coupling = gz[remaining_rows][:, columns].toarray()
+        weights = factor.solve(coupling.T, trans="T").T
+        free_block = gz[rows][:, remaining_columns].toarray()
+        remainder = gz[remaining_rows][:, remaining_columns].toarray() - weights @ free_block
+        if remainder.size and np.max(np.abs(remainder)) > 1e-8:
+            return None
+        hidden = gx[remaining_rows].toarray() - weights @ gx[rows]
+        if len(remaining_rows):
+            left_gram = np.eye(len(remaining_rows)) + weights @ weights.T
+            chol = la.cholesky(left_gram, lower=True)
+            hidden = la.solve_triangular(chol, hidden, lower=True)
+        basis = _constraint_basis(np.asarray(hidden), gx.shape[1])
+        particular = -factor.solve(np.asarray(gx[rows] @ basis))
+        # z_dep = particular + free_sensitivity*z_free. Select the same
+        # minimum-norm algebraic perturbation as the Moore-Penrose inverse.
+        free_sensitivity = -factor.solve(free_block)
+        if len(remaining_columns):
+            right_gram = np.eye(len(remaining_columns)) + free_sensitivity.T @ free_sensitivity
+            free_values = -la.solve(right_gram, free_sensitivity.T @ particular, assume_a="pos")
+            particular += free_sensitivity @ free_values
+        else:
+            free_values = np.empty((0, basis.shape[1]))
+        algebraic = np.empty((gz.shape[1], basis.shape[1]))
+        algebraic[columns] = particular
+        algebraic[remaining_columns] = free_values
+        residual = np.asarray(gx @ basis + gz @ algebraic)
+        if residual.size and np.linalg.norm(residual, ord=np.inf) > 1e-7:
+            return None
+        return basis, algebraic
+    except (RuntimeError, la.LinAlgError):
+        return None
+
+
 def build_consistent_emt_tangent(
     problem: Any,
     trajectory: np.ndarray,
@@ -91,9 +154,17 @@ def build_consistent_emt_tangent(
     discrete_mass = sp.hstack(
         (mass_state, sp.csc_matrix((n_total, n_alg))), format="csc"
     )
-    continuous_jacobian = (jacobian - (2.0 / h) * discrete_mass).toarray()
-    gx = continuous_jacobian[n_diff:, :n_state]
-    gz = continuous_jacobian[n_diff:, n_state:]
+    continuous_jacobian = (jacobian - (2.0 / h) * discrete_mass).tocsc()
+    gx_sparse = continuous_jacobian[n_diff:, :n_state].tocsc()
+    gz_sparse = continuous_jacobian[n_diff:, n_state:].tocsc()
+    sparse_tangent = _sparse_algebraic_tangent(gx_sparse, gz_sparse) if n_alg >= 256 else None
+    if sparse_tangent is not None:
+        basis, algebraic = sparse_tangent
+        derivative = -(continuous_jacobian[:n_diff, :n_state] @ basis
+                       + continuous_jacobian[:n_diff, n_state:] @ algebraic)
+        return ConsistentEmtTangent(basis=basis, initial_derivative_map=derivative @ basis.T)
+    gx = gx_sparse.toarray()
+    gz = gz_sparse.toarray()
 
     if n_alg:
         uz, sz, vzh = la.svd(gz, full_matrices=True)

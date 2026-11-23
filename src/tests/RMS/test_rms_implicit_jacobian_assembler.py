@@ -594,3 +594,50 @@ def test_kundur_trajectory_is_bitwise_identical_to_head() -> None:
     y_reference: Mat = _simulate(reference)
     assert np.array_equal(y_production.view(np.int64), y_reference.view(np.int64))
     assert production._jacobian_assembler.get_fast_assembly_count() > 0
+
+
+def test_bdf_jacobian_uses_current_derivative_coefficient() -> None:
+    """BDF1/BDF2 coefficients change only the state diagonal of the DAE matrix."""
+    j11 = sp.csc_matrix([[2.0, 0.0], [3.0, 4.0]])
+    j12 = sp.csc_matrix([[5.0], [6.0]])
+    j21 = sp.csc_matrix([[7.0, 8.0]])
+    j22 = sp.csc_matrix([[9.0]])
+    assembler = ImplicitJacobianAssembler()
+    for c in (100.0, 150.0):
+        expected = sp.bmat(
+            [[c * sp.eye(2, format="csc") - j11, -j12], [j21, j22]],
+            format="csc",
+        )
+        actual = assembler.assemble_jacobian_bdf(2, c, j11, j12, j21, j22)
+        np.testing.assert_array_equal(actual.toarray(), expected.toarray())
+    assert assembler.get_pattern_build_count() == 1
+    assert assembler.get_fast_assembly_count() == 2
+
+def test_bdf_native_fill_matches_sparse_reference_and_reuses_pattern() -> None:
+    """Compare CSC storage, not just dense values, over changing BDF coefficients."""
+    assembler = ImplicitJacobianAssembler()
+    ns, na = 12, 7
+    blocks = (_random_block(ns, ns, 41, 0.25),
+              _random_block(ns, na, 42, 0.2),
+              _random_block(na, ns, 43, 0.2),
+              _random_block(na, na, 44, 0.3))
+    j11, j12, j21, j22 = blocks
+    for coefficient in (0.4, 2.0, 100.0, 1.3):
+        reference = pack_4_by_4_scipy(
+            (coefficient * sp.eye(ns, format="csc") - j11).tocsc(),
+            -j12, j21, j22)
+        actual = assembler.assemble_jacobian_bdf(ns, coefficient, *blocks)
+        _assert_identical(actual, reference)
+    assert assembler.get_pattern_build_count() == 1
+    assert assembler.get_fast_assembly_count() == 4
+
+def test_bdf_native_fill_falls_back_when_state_diagonal_cancels() -> None:
+    assembler = ImplicitJacobianAssembler()
+    j11 = csc_matrix([[2.0]])
+    empty_top = csc_matrix((1, 0))
+    empty_left = csc_matrix((0, 1))
+    empty_bottom = csc_matrix((0, 0))
+    actual = assembler.assemble_jacobian_bdf(
+        1, 2.0, j11, empty_top, empty_left, empty_bottom)
+    assert actual.toarray()[0, 0] == 0.0
+    assert assembler.get_fallback_assembly_count() == 1
