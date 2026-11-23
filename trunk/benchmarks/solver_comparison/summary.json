@@ -1,0 +1,38 @@
+[
+  {
+    "solver": "StructuralAD",
+    "status": "completed",
+    "stage": "finished",
+    "parent_wall_seconds": 69.37020754499827,
+    "build_seconds": 41.5933706539945,
+    "ssa_seconds": 20.046890988000087,
+    "trajectory_and_jacobian_setup_seconds": 1.7897238879959332,
+    "floquet_after_capture_seconds": 18.21322887200222,
+    "total_seconds": 68.0045098959963,
+    "max_multiplier_magnitude": 7.136071110398431,
+    "trajectory_scaled_difference_inf": 0.0,
+    "matched_mode_difference_inf_per_s": 0.0,
+    "compared_mode_count": 6
+  },
+  {
+    "solver": "StructuralCompiled",
+    "status": "timeout",
+    "stage": "ssa",
+    "parent_wall_seconds": 240.07720146299107,
+    "build_seconds": 63.22375961000216
+  },
+  {
+    "solver": "Automatic",
+    "status": "timeout",
+    "stage": "ssa",
+    "parent_wall_seconds": 240.08133179300057,
+    "build_seconds": 106.71670608400018
+  },
+  {
+    "solver": "Symbolic",
+    "status": "timeout",
+    "stage": "ssa",
+    "parent_wall_seconds": 240.09950388899597,
+    "build_seconds": 95.76386983299744
+  }
+]

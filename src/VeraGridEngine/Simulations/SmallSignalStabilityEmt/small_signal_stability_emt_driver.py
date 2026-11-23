@@ -12,7 +12,7 @@ from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Simulations.driver_template import DriverTemplate
 from VeraGridEngine.Simulations.EMT.emt_options import EmtOptions
 from VeraGridEngine.Simulations.EMT.emt_problem_factory import build_emt_problem
-from VeraGridEngine.Simulations.EMT.solvers.StructuralVectorizedSolver import StructuralVectorizedSolver
+from VeraGridEngine.Simulations.EMT.emt_solver_factory import build_emt_solver
 from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowResults
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator import (EmtFloquetOperator,
@@ -28,7 +28,22 @@ from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_e
     SmallSignalStabilityEmtResults
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_numba_kernels import bmgs_twice_numba
 from VeraGridEngine.basic_structures import Vec, CxVec, Mat, CxMat
-from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes, DynamicIntegrationMethod
+from VeraGridEngine.enumerations import SmallSignalEmtBuildTypes, DynamicIntegrationMethod, EmtSolverTypes
+
+
+def _capture_solver_jacobian(solver: Any, solver_type: EmtSolverTypes,
+                             method: DynamicIntegrationMethod) -> Any:
+    """Normalize the selected solver's discrete Jacobian after simulation."""
+    if solver_type == EmtSolverTypes.StructuralAD:
+        return solver.vec_jacobian
+    if solver_type == EmtSolverTypes.StructuralCompiled:
+        return solver._jacobian_evaluator.evaluate
+    if solver_type == EmtSolverTypes.Automatic:
+        return solver.jit_jacobian_ad[method]
+    if solver_type == EmtSolverTypes.Symbolic:
+        is_sparse = solver.problem.get_all_vars_number() > solver.dense_threshold
+        return solver.jit_jacobian_symbolic[f"{method}_{is_sparse}"].evaluate
+    raise ValueError(f"Unsupported EMT capture solver: {solver_type}")
 
 
 def build_restart_seed(U_sel: CxMat, p_target: int, seed: int = 42) -> Mat:
@@ -336,7 +351,7 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
                                            verbose: int = 0)-> Tuple[Mat, Vec, Any, Vec, int]:
         """
         Captures the limit cycle by simulating the system up to ss_assessment_time.
-        Extracts the JIT Jacobian evaluator directly from the StructuralVectorizedSolver.
+        Uses the selected EMT solver and its discrete Jacobian as the default evaluator.
 
         :param h: Integration time step.
         :param verbose: Verbosity level flag.
@@ -345,21 +360,20 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         """
 
         if verbose > 0:
-            print("-> Capturing limit cycle via StructuralVectorizedSolver...")
+            print(f"-> Capturing limit cycle via {self.emt_options.solver_type.value}...")
 
         # Direct contract access. If 'problem' is invalid, it will fail natively here.
         params_values = self.problem.get_parameters_values()
         n_event_params = self.problem.get_variable_parameter_number()
 
-        solver = StructuralVectorizedSolver(
+        solver = build_emt_solver(
+            options=self.emt_options,
             problem=self.problem,
             t0=0.0,
             t_end=self.sss_options.ss_assessment_time,
             h=h,
             method=self.emt_options.integration_method,
-            newton_max_iter=self.emt_options.init_newton_max_iter,
-            newton_tolerance=self.emt_options.tolerance,
-            verbose=self.sss_options.verbose > 0
+            logger=getattr(self, "logger", None),
         )
         sim_result = solver.simulate()
         t_full: Vec = sim_result[0]
@@ -381,7 +395,9 @@ class SmallSignalStabilityEmtDriver(DriverTemplate):
         d_limit = d_full[-samples_per_period:]
         t_limit = t_full[-samples_per_period:]
 
-        jacobian_evaluator = self.problem.get_floquet_jacobian_evaluator(solver.vec_jacobian)
+        default_jacobian = _capture_solver_jacobian(
+            solver, self.emt_options.solver_type, self.emt_options.integration_method)
+        jacobian_evaluator = self.problem.get_floquet_jacobian_evaluator(default_jacobian)
 
         return y_limit, d_limit, t_limit, jacobian_evaluator, static_params, n_event_params
 

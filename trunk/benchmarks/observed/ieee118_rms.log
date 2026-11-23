@@ -1,0 +1,4 @@
+Loading ieee118 rms: /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/tests/data/grids/RAW/IEEE 118 Bus.raw
+Balanced PF converged; building multilinear problem
+Compiling RMS using JIT Native Compiler...
+Problem built; running SSA

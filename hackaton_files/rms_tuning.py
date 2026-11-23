@@ -28,8 +28,13 @@ from VeraGridEngine.Simulations.Rms.rms_driver import RmsSimulationDriver
 from VeraGridEngine.Simulations.Rms.rms_options import RmsOptions
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_driver import SmallSignalStabilityRmsDriver
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_options import RmsSmallSignalStabilityOptions
+from VeraGridEngine.Templates.Rms.line_rms_template import get_line_rms_template
+from VeraGridEngine.Templates.Rms.shunt_template import get_shunt_template
+from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 from .rms_diagnostics import analyze_grid, get_modes_from_unstable_eigenvalues
+from hackaton_files.rms_controllers import (ControllerBlock, ControllerMode, controller_blocks,
+                                           controller_parameters, controller_modes)
 from .rms_sensitivity import (build_parameterized_state_matrix, evaluate_state_matrix,
                               state_matrix_derivative, eigenvalue_sensitivities, equilibrium_residual)
 
@@ -75,7 +80,7 @@ class DispatchOption:
 
 @dataclass(frozen=True)
 class LineOption:
-    """An existing line that a participant may open."""
+    """An existing line offered for a specific opening or closing action."""
 
     idtag: str
     name: str
@@ -102,6 +107,38 @@ class ShuntOption:
     bus_name: str
     conductance_mw: float
     susceptance_mvar: float
+
+
+def _sanitize_action_handles[T: (LineOption, LineCandidate, ShuntOption)](
+        values: object, catalog: tuple[T, ...], limit: int, label: str) -> tuple[T, ...]:
+    """Validate an action list and return the actual organizer handles.
+
+    :param values: Submitted action container, potentially malformed.
+    :param catalog: Permitted handles of one explicit action type.
+    :param limit: Maximum number of distinct actions.
+    :param label: Human-readable warning label.
+    :return: Valid actions in submission order, with every omission reported.
+    """
+    result: tuple[T, ...]
+    if not isinstance(values, (tuple, list)):
+        warnings.warn(f"Skipped {label}: expected a tuple or list of action handles", UserWarning, stacklevel=3)
+        result = tuple()
+    else:
+        kept: list[T] = list()
+        action: object
+        for action in values:
+            selected: T | None = next((allowed for allowed in catalog
+                                       if type(action) is type(allowed) and action == allowed), None)
+            if selected is None:
+                warnings.warn(f"Skipped {label} {action!r}: unknown or unavailable handle", UserWarning, stacklevel=3)
+            elif selected in kept:
+                warnings.warn(f"Skipped {label} {action!r}: duplicate action", UserWarning, stacklevel=3)
+            elif len(kept) >= limit:
+                warnings.warn(f"Skipped {label} {action!r}: action budget exceeded", UserWarning, stacklevel=3)
+            else:
+                kept.append(selected)
+        result = tuple(kept)
+    return result
 
 
 KUNDUR_SHUNT_BUSES = ("Bus7", "Bus9")
@@ -183,6 +220,8 @@ class TunableGrid:
     max_new_shunts: int = 1
     _trial: Callable | None = field(default=None, repr=False, compare=False)
     _budget_status: Callable | None = field(default=None, repr=False, compare=False)
+    closable_lines: tuple[LineOption, ...] = ()
+    max_close_lines: int = 1
 
     @property
     def max_test_tunings(self) -> int:
@@ -223,6 +262,7 @@ class TunableGrid:
         max_new_shunts: int = 1,
         max_test_tunings: int = 5,
         evaluator: RmsTunerEvaluator | None = None,
+        max_close_lines: int = 1,
     ) -> "TunableGrid":
         grid = problem.grid
         buses_by_name = {bus.name: bus for bus in grid.buses}
@@ -236,6 +276,8 @@ class TunableGrid:
                 for generator in grid.generators if generator.active
             ),
             openable_lines=tuple(LineOption(line.idtag, line.name) for line in grid.lines if line.active),
+            closable_lines=tuple(LineOption(line.idtag, line.name) for line in grid.lines if not line.active),
+            max_close_lines=max_close_lines,
             line_candidates=tuple(
                 LineCandidate(
                     buses_by_name[from_name].idtag,
@@ -267,6 +309,7 @@ class RmsTuning:
     open_lines: tuple[LineOption, ...] = ()
     add_lines: tuple[LineCandidate, ...] = ()
     add_shunts: tuple[ShuntOption, ...] = ()
+    close_lines: tuple[LineOption, ...] = ()
 
     def is_accepted(
         self,
@@ -302,13 +345,17 @@ class RmsTuning:
             controls_valid
             and dispatch_valid
             and dispatch_balanced
+            and len(self.close_lines) <= tunable_grid.max_close_lines
             and len(self.open_lines) <= tunable_grid.max_open_lines
             and len(self.add_lines) <= tunable_grid.max_new_lines
             and len(self.add_shunts) <= tunable_grid.max_new_shunts
+            and len(set(self.close_lines)) == len(self.close_lines)
+            and set(self.close_lines).issubset(tunable_grid.closable_lines)
             and len(set(self.open_lines)) == len(self.open_lines)
             and len(set(self.add_lines)) == len(self.add_lines)
             and len(set(self.add_shunts)) == len(self.add_shunts)
             and set(self.open_lines).issubset(tunable_grid.openable_lines)
+            and set(option.idtag for option in self.open_lines).isdisjoint(option.idtag for option in self.close_lines)
             and set(self.add_lines).issubset(tunable_grid.line_candidates)
             and set(self.add_shunts).issubset(tunable_grid.shunt_options)
         )
@@ -343,6 +390,36 @@ class RmsTuner(ABC):
         analysis snapshot. This does not automatically apply self.tune().
         """
         return analyze_grid(grid)
+
+    def get_controller_blocks(self, device: DynamicDevice | DynamicBusDevice) -> tuple[ControllerBlock, ...]:
+        """Discover native controller views without running PF/SSA or spending trials.
+
+        :param device: RMS device whose actual symbolic model is inspected.
+        :return: Classified template views and explicitly unclassified blocks.
+        """
+        return controller_blocks(device)
+
+    def get_controller_parameters(self, grid: TunableGrid, controller: ControllerBlock) -> tuple[TunableParameter, ...]:
+        """Select permitted handles, never merely all parameters in an equation.
+
+        :param grid: Participant snapshot providing permissions and bounds.
+        :param controller: Device-specific discovered controller view.
+        :return: Existing tunable handles for this controller.
+        """
+        return controller_parameters(grid, controller)
+
+    def get_controller_modes(self, grid: TunableGrid | dict, controller: ControllerBlock,
+                             minimum_participation: float = 0.01,
+                             include_conjugates: bool = False) -> tuple[ControllerMode, ...]:
+        """Associate system modes with a controller without using tuning trials.
+
+        :param grid: Participant snapshot or cached modal-analysis result.
+        :param controller: Discovered controller view.
+        :param minimum_participation: Minimum fraction of modal participation.
+        :param include_conjugates: Return both conjugate members when true.
+        :return: Physical modes with their controller participation and scope.
+        """
+        return controller_modes(grid, controller, minimum_participation, include_conjugates)
 
     def get_parameterized_state_matrix(self, grid: TunableGrid) -> dict:
         """Keep editable controls symbolic for fixed-point matrix/mode sensitivities."""
@@ -412,11 +489,25 @@ class RmsTunerEvaluator:
                  load_step_fraction: float = 0.02,
                  load_step_time_s: float = 0.2,
                  transient_duration_s: float = 3.0,
-                 transient_time_step_s: float = 0.02):
+                 transient_time_step_s: float = 0.02,
+                 minimum_damping_ratio: float = 0.05,
+                 max_close_lines: int = 1) -> None:
+        """Configure tuning permissions and acceptance thresholds.
+
+        :param minimum_damping_ratio: Minimum oscillatory damping ratio;
+            existing exercises retain the default five percent.
+        :return: None.
+        """
+        if not math.isfinite(minimum_damping_ratio) or not 0.0 <= minimum_damping_ratio <= 1.0:
+            raise ValueError('minimum_damping_ratio must be finite and between zero and one')
+        else:
+            pass
+        self.minimum_damping_ratio: float = minimum_damping_ratio
         self.control_ranges = control_ranges
         self.shunt_bus_names = shunt_bus_names
         self.line_corridors = line_corridors
         self.max_open_lines = max_open_lines
+        self.max_close_lines: int = max_close_lines
         self.max_new_lines = max_new_lines
         self.max_new_shunts = max_new_shunts
         self.max_test_tunings = max_test_tunings
@@ -529,23 +620,20 @@ class RmsTunerEvaluator:
         if not isinstance(tuning, RmsTuning):
             raise ValueError("The tuner must return an RmsTuning proposal")
 
-        def skipped(message):
-            warnings.warn(message, UserWarning, stacklevel=3)
-
-        parameters = {}
+        parameters = dict()
         if not isinstance(tuning.parameters, Mapping):
-            skipped("Skipped parameters: expected a mapping of handles to values")
+            warnings.warn("Skipped parameters: expected a mapping of handles to values", UserWarning, stacklevel=2)
         else:
             for parameter, value in tuning.parameters.items():
                 if RmsTuning(parameters={parameter: value}).is_accepted(tunable_grid):
                     parameters[parameter] = value
                 else:
-                    skipped(f"Skipped parameter {parameter!r}: unknown/unavailable handle "
-                            "or non-finite/out-of-range value")
+                    warnings.warn(f"Skipped parameter {parameter!r}: unknown/unavailable handle "
+                                  "or non-finite/out-of-range value", UserWarning, stacklevel=2)
 
-        dispatch = {}
+        dispatch = dict()
         if not isinstance(tuning.dispatch_mw, Mapping):
-            skipped("Skipped entire redispatch: expected a mapping")
+            warnings.warn("Skipped entire redispatch: expected a mapping", UserWarning, stacklevel=2)
         elif tuning.dispatch_mw:
             valid_values = all(
                 isinstance(option, DispatchOption)
@@ -557,31 +645,24 @@ class RmsTunerEvaluator:
             if valid_values and RmsTuning(dispatch_mw=tuning.dispatch_mw).is_accepted(tunable_grid):
                 dispatch = dict(tuning.dispatch_mw)
             else:
-                skipped("Skipped entire redispatch: invalid handle/value or unbalanced total MW")
+                warnings.warn("Skipped entire redispatch: invalid handle/value or unbalanced total MW", UserWarning, stacklevel=2)
 
-        def actions(values, catalog, limit, label):
-            if not isinstance(values, (tuple, list)):
-                skipped(f"Skipped {label}: expected a tuple or list of action handles")
-                return ()
-            kept = []
-            for action in values:
-                if not any(type(action) is type(allowed) and action == allowed for allowed in catalog):
-                    skipped(f"Skipped {label} {action!r}: unknown or unavailable handle")
-                elif action in kept:
-                    skipped(f"Skipped {label} {action!r}: duplicate action")
-                elif len(kept) >= limit:
-                    skipped(f"Skipped {label} {action!r}: action budget exceeded")
-                else:
-                    kept.append(action)
-            return tuple(kept)
-
+        opened: tuple[LineOption, ...] = _sanitize_action_handles(
+            tuning.open_lines, tunable_grid.openable_lines, tunable_grid.max_open_lines, "open line")
+        requested_closed: tuple[LineOption, ...] = _sanitize_action_handles(
+            tuning.close_lines, tunable_grid.closable_lines, tunable_grid.max_close_lines, "close line")
+        opened_ids: set[str] = set(option.idtag for option in opened)
+        closed: tuple[LineOption, ...] = tuple(option for option in requested_closed if option.idtag not in opened_ids)
+        if len(closed) != len(requested_closed):
+            warnings.warn("Skipped conflicting close line: the same line is also opened", UserWarning, stacklevel=2)
+        else:
+            pass
         return RmsTuning(
             parameters=parameters, dispatch_mw=dispatch,
-            open_lines=actions(tuning.open_lines, tunable_grid.openable_lines,
-                               tunable_grid.max_open_lines, "open line"),
-            add_lines=actions(tuning.add_lines, tunable_grid.line_candidates,
+            open_lines=opened, close_lines=closed,
+            add_lines=_sanitize_action_handles(tuning.add_lines, tunable_grid.line_candidates,
                               tunable_grid.max_new_lines, "new line"),
-            add_shunts=actions(tuning.add_shunts, tunable_grid.shunt_options,
+            add_shunts=_sanitize_action_handles(tuning.add_shunts, tunable_grid.shunt_options,
                                tunable_grid.max_new_shunts, "new shunt"),
         )
 
@@ -596,9 +677,13 @@ class RmsTunerEvaluator:
         lines = {line.idtag: line for line in grid.lines}
         for line_option in tuning.open_lines:
             lines[line_option.idtag].active = False
+            lines[line_option.idtag].rms_model.set_parameter_in_model('u', 0.0)
+        for line_option in tuning.close_lines:
+            lines[line_option.idtag].active = True
+            lines[line_option.idtag].rms_model.set_parameter_in_model('u', 1.0)
         buses = {bus.idtag: bus for bus in grid.buses}
         for candidate in tuning.add_lines:
-            grid.add_line(Line(
+            new_line: Line = Line(
                 name=candidate.name,
                 bus_from=buses[candidate.bus_from_idtag],
                 bus_to=buses[candidate.bus_to_idtag],
@@ -606,16 +691,16 @@ class RmsTunerEvaluator:
                 x=candidate.reactance,
                 b=candidate.susceptance,
                 rate=candidate.rate_mva,
-            ))
-        for shunt_option in tuning.add_shunts:
-            grid.add_shunt(
-                bus=buses[shunt_option.bus_idtag],
-                api_obj=Shunt(
-                    name=f"Tuning shunt {shunt_option.bus_name}",
-                    G=shunt_option.conductance_mw,
-                    B=shunt_option.susceptance_mvar,
-                ),
             )
+            grid.add_line(new_line)
+            set_rms_model(new_line, get_line_rms_template(grid.var_factory).block, grid.var_factory)
+        for shunt_option in tuning.add_shunts:
+            new_shunt: Shunt = Shunt(
+                name=f"Tuning shunt {shunt_option.bus_name}",
+                G=shunt_option.conductance_mw, B=shunt_option.susceptance_mvar,
+            )
+            grid.add_shunt(bus=buses[shunt_option.bus_idtag], api_obj=new_shunt)
+            set_rms_model(new_shunt, get_shunt_template(grid.var_factory, phasor=False).block, grid.var_factory)
         devices = {device.idtag: device for device in problem.grid.get_all_elements_iter()
                    if isinstance(device, (DynamicDevice, DynamicBusDevice))}
         for parameter, value in tuning.parameters.items():
@@ -623,7 +708,7 @@ class RmsTunerEvaluator:
                 parameter.name, float(value)
             )
         pf = problem.power_flow_results
-        if tuning.dispatch_mw or tuning.open_lines or tuning.add_lines or tuning.add_shunts:
+        if tuning.dispatch_mw or tuning.open_lines or tuning.close_lines or tuning.add_lines or tuning.add_shunts:
             power_flow = PowerFlowDriver(grid)
             power_flow.run()
             pf = power_flow.results
@@ -660,6 +745,7 @@ class RmsTunerEvaluator:
             self.max_open_lines,
             self.max_new_lines,
             self.max_new_shunts,
+            max_close_lines=self.max_close_lines,
         )
         participant_grid = self.start_session(tunable_grid)
         tuning = tuner.tune(participant_grid)
@@ -679,14 +765,18 @@ class RmsTunerEvaluator:
             pf_results=pf,
             sss_options=RmsSmallSignalStabilityOptions(ss_assessment_time=0.0),
         )
-        candidate_grid = TunableGrid.from_problem(
-            ssa.problem,
-            self.control_ranges,
-            self.shunt_bus_names,
-            self.line_corridors,
-            self.max_open_lines,
-            self.max_new_lines,
-            self.max_new_shunts,
+        candidate_grid: TunableGrid = TunableGrid(
+            problem=ssa.problem,
+            tunable_parameters=tunable_grid.tunable_parameters,
+            dispatch_options=tunable_grid.dispatch_options,
+            openable_lines=tunable_grid.openable_lines,
+            closable_lines=tunable_grid.closable_lines,
+            line_candidates=tunable_grid.line_candidates,
+            shunt_options=tunable_grid.shunt_options,
+            max_open_lines=tunable_grid.max_open_lines,
+            max_close_lines=tunable_grid.max_close_lines,
+            max_new_lines=tunable_grid.max_new_lines,
+            max_new_shunts=tunable_grid.max_new_shunts,
         )
         ssa.problem = self.apply_tuning(candidate_grid, tuning)
         pf = ssa.problem.power_flow_results
@@ -736,7 +826,7 @@ class RmsTunerEvaluator:
             stable=(transient_converged
                     and int(np.count_nonzero(neutral_modes)) <= 1
                     and max_real < -1e-5
-                    and (min_damping is None or min_damping >= 0.05)),
+                    and (min_damping is None or min_damping >= self.minimum_damping_ratio)),
             eigenvalue_count=int(eigenvalues.size),
             neutral_mode_count=int(np.count_nonzero(neutral_modes)),
             peak_frequency_deviation_hz=peak_frequency_hz,

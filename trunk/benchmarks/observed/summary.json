@@ -1,0 +1,35 @@
+[
+  {
+    "grid": "ieee39",
+    "formulation": "rms",
+    "status": "completed",
+    "stage": "finished",
+    "finite_modes": 6,
+    "initial_residual_inf": 8.862349027181141,
+    "equilibrium_validated": false
+  },
+  {
+    "grid": "ieee39",
+    "formulation": "emt",
+    "status": "completed",
+    "stage": "finished",
+    "finite_modes": 6,
+    "last_period_scaled_closure_inf": 1.9392195117357793,
+    "periodicity_validated": false
+  },
+  {
+    "grid": "ieee118",
+    "formulation": "rms",
+    "status": "completed",
+    "stage": "finished",
+    "finite_modes": 6,
+    "initial_residual_inf": 5.942643451359338,
+    "equilibrium_validated": false
+  },
+  {
+    "grid": "ieee118",
+    "formulation": "emt",
+    "status": "timeout",
+    "timeout_seconds": 300.0
+  }
+]

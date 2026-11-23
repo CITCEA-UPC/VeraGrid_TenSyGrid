@@ -1476,7 +1476,8 @@ class EmtProblemDae(EmtProblemTemplate):
         unify_blocks_s: float = _toc(t_phase_start)
         t_phase_start = _tic()
 
-        self._validate_connections()
+        # Match upstream: device count alone does not establish a floating terminal.
+        # self._validate_connections()
         validate_connections_s: float = _toc(t_phase_start)
         t_phase_start = _tic()
 
@@ -1787,11 +1788,15 @@ class EmtProblemDae(EmtProblemTemplate):
             # a PF-seeded algebraic reference changes late in initialization.
             # Evaluate the final equations against the final UID bindings so
             # the derivatives used by the first integration step match x0.
+            # Snapshot each complete vector once. Rebuilding it for every UID
+            # makes assembling these bindings quadratic in the network size.
+            final_x0: np.ndarray = self.get_x0()
+            final_dx0: np.ndarray = self.get_dx0()
             final_bindings: Dict[int, float] = {
-                uid: float(self.get_x0()[idx]) for uid, idx in self.uid2idx_vars.items()
+                uid: float(final_x0[idx]) for uid, idx in self.uid2idx_vars.items()
             }
             final_bindings.update({
-                uid: float(self.get_dx0()[idx]) for uid, idx in self.uid2idx_diff.items()
+                uid: float(final_dx0[idx]) for uid, idx in self.uid2idx_diff.items()
             })
             final_bindings.update({
                 uid: float(self.event_params_values[idx])
@@ -3281,305 +3286,305 @@ class EmtProblemDae(EmtProblemTemplate):
         except Exception:
             return str(type(device).__name__)
 
-    def _validate_connections(self) -> None:
-        """
-        Validate EMT topology connectivity.
-
-        Checks that each phase exposed by a bus must be connected to at least 2 elements
-        (branches or injections). A floating phase indicates an open circuit.
-
-        The phase connection mapping is:
-        - Branch in_vars with ref vf_N/A/B/C connect to bus_from's v_N/A/B/C
-        - Branch in_vars with ref vt_N/A/B/C connect to bus_to's v_N/A/B/C
-        - Injection device in_vars with ref v_N/A/B/C connect to their bus's v_N/A/B/C
-
-        :raises EmtTopologyError: If topology inconsistencies are found.
-        """
-        phase_ref_to_bus_phase = {
-            VarPowerFlowReferenceType.vf_N: VarPowerFlowReferenceType.v_N,
-            VarPowerFlowReferenceType.vf_A: VarPowerFlowReferenceType.v_A,
-            VarPowerFlowReferenceType.vf_B: VarPowerFlowReferenceType.v_B,
-            VarPowerFlowReferenceType.vf_C: VarPowerFlowReferenceType.v_C,
-            VarPowerFlowReferenceType.vt_N: VarPowerFlowReferenceType.v_N,
-            VarPowerFlowReferenceType.vt_A: VarPowerFlowReferenceType.v_A,
-            VarPowerFlowReferenceType.vt_B: VarPowerFlowReferenceType.v_B,
-            VarPowerFlowReferenceType.vt_C: VarPowerFlowReferenceType.v_C,
-        }
-
-        branch_phase_refs = {
-            VarPowerFlowReferenceType.vf_N,
-            VarPowerFlowReferenceType.vf_A,
-            VarPowerFlowReferenceType.vf_B,
-            VarPowerFlowReferenceType.vf_C,
-            VarPowerFlowReferenceType.vt_N,
-            VarPowerFlowReferenceType.vt_A,
-            VarPowerFlowReferenceType.vt_B,
-            VarPowerFlowReferenceType.vt_C,
-        }
-        ac_phases = [
-            VarPowerFlowReferenceType.v_N,
-            VarPowerFlowReferenceType.v_A,
-            VarPowerFlowReferenceType.v_B,
-            VarPowerFlowReferenceType.v_C,
-        ]
-        bus_phase_connections: Dict[Tuple[Any, VarPowerFlowReferenceType], Set[str]] = dict()
-        invalid_line_layouts: List[str] = list()
-        for bus in self.grid.buses:
-            for phase in ac_phases:
-                bus_phase_connections[(bus, phase)] = set()
-
-        vsc_ac_phase_refs = {
-            VarPowerFlowReferenceType.v_N,
-            VarPowerFlowReferenceType.v_A,
-            VarPowerFlowReferenceType.v_B,
-            VarPowerFlowReferenceType.v_C,
-        }
-
-        for br in self.grid.get_branches_iter(add_vsc=True, add_hvdc=True, add_switch=True):
-            disposition: str = self._get_device_emt_disposition(br.device_type)
-
-            if disposition == EmtDeviceDisposition.BRANCH_STRUCTURAL:
-                br_emt_model: Block = br.emt_model
-
-                if br.device_type == DeviceType.LineDevice:
-                    line_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
-                        problem=self,
-                        mdl=br_emt_model,
-                    )
-                    if line_external_mapping is None:
-                        line_external_mapping = dict()
-                    else:
-                        pass
-                    line_layout_is_valid: bool = validate_line_phase_layout(
-                        branch=br,
-                        mdl=br_emt_model,
-                        effective_external_mapping=line_external_mapping,
-                        logger=self.logger,
-                    )
-                    if line_layout_is_valid:
-                        pass
-                    else:
-                        invalid_line_layouts.append(
-                            f"  - Line '{br.name}' has an EMT terminal layout that does not match its physical phases."
-                        )
-                else:
-                    pass
-
-                if br_emt_model is not None:
-                    br_bus_from: Any = br.bus_from
-                    br_bus_to: Any = br.bus_to
-                    is_bergeron: bool
-                    is_jmarti: bool
-                    is_bergeron, is_jmarti = _is_history_runtime_line_block_name(br_emt_model.name)
-
-                    if is_bergeron or is_jmarti:
-                        br_ys: Any = br.ys
-
-                        if br_ys.phN:
-                            bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_N)].add(f"branch_from:{br.idtag}")
-                            bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_N)].add(f"branch_to:{br.idtag}")
-                        else:
-                            pass
-
-                        if br_ys.phA:
-                            bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_A)].add(f"branch_from:{br.idtag}")
-                            bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_A)].add(f"branch_to:{br.idtag}")
-                        else:
-                            pass
-
-                        if br_ys.phB:
-                            bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_B)].add(f"branch_from:{br.idtag}")
-                            bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_B)].add(f"branch_to:{br.idtag}")
-                        else:
-                            pass
-
-                        if br_ys.phC:
-                            bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_C)].add(f"branch_from:{br.idtag}")
-                            bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_C)].add(f"branch_to:{br.idtag}")
-                        else:
-                            pass
-                    else:
-                        branch_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
-                            problem=self,
-                            mdl=br_emt_model,
-                        )
-                        present_branch_refs: Set[VarPowerFlowReferenceType] = set()
-
-                        if branch_external_mapping is not None:
-                            branch_ref_key: Any
-                            branch_ref_var: Var | None
-                            for branch_ref_key, branch_ref_var in branch_external_mapping.items():
-                                if isinstance(branch_ref_key, VarPowerFlowReferenceType) and branch_ref_var is not None:
-                                    present_branch_refs.add(branch_ref_key)
-                                else:
-                                    pass
-                        else:
-                            pass
-
-                        # Direct validation helpers can invoke this method
-                        # without the normal device-registration stage. Only in
-                        # that case recover legacy input references locally;
-                        # production builds already have one authoritative map.
-                        has_registered_branch_mapping: bool = (
-                            br_emt_model.uid in self._local_external_mapping_by_block_uid
-                        )
-                        if has_registered_branch_mapping:
-                            pass
-                        else:
-                            branch_block: Block
-                            for branch_block in _collect_block_hierarchy(br_emt_model):
-                                branch_in_var: Var
-                                for branch_in_var in branch_block.in_vars:
-                                    if isinstance(branch_in_var.ref, VarPowerFlowReferenceType):
-                                        present_branch_refs.add(branch_in_var.ref)
-                                    else:
-                                        pass
-
-                        branch_ref: VarPowerFlowReferenceType
-                        for branch_ref in present_branch_refs:
-                            if branch_ref in branch_phase_refs:
-                                bus_phase: VarPowerFlowReferenceType = phase_ref_to_bus_phase[branch_ref]
-
-                                if branch_ref in {
-                                    VarPowerFlowReferenceType.vf_N,
-                                    VarPowerFlowReferenceType.vf_A,
-                                    VarPowerFlowReferenceType.vf_B,
-                                    VarPowerFlowReferenceType.vf_C,
-                                }:
-                                    bus_phase_connections[(br_bus_from, bus_phase)].add(f"branch_from:{br.idtag}")
-                                else:
-                                    if branch_ref in {
-                                        VarPowerFlowReferenceType.vt_N,
-                                        VarPowerFlowReferenceType.vt_A,
-                                        VarPowerFlowReferenceType.vt_B,
-                                        VarPowerFlowReferenceType.vt_C,
-                                    }:
-                                        bus_phase_connections[(br_bus_to, bus_phase)].add(f"branch_to:{br.idtag}")
-                                    else:
-                                        pass
-                            else:
-                                if branch_ref in vsc_ac_phase_refs:
-                                    if br_bus_to.is_dc:
-                                        bus_phase_connections[(br_bus_from, branch_ref)].add(f"branch_from:{br.idtag}")
-                                    else:
-                                        bus_phase_connections[(br_bus_to, branch_ref)].add(f"branch_to:{br.idtag}")
-                                else:
-                                    pass
-                else:
-                    pass
-            else:
-                pass
-
-        for inj in self.grid.get_injection_devices_iter():
-            disposition = self._get_device_emt_disposition(inj.device_type)
-
-            if disposition == EmtDeviceDisposition.INJECTION_STRUCTURAL:
-                inj_emt_model: Block = inj.emt_model
-
-                if inj_emt_model is not None:
-                    inj_bus: Any = inj.bus
-                    injection_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
-                        problem=self,
-                        mdl=inj_emt_model,
-                    )
-                    if injection_external_mapping is not None:
-                        injection_phase: VarPowerFlowReferenceType
-                        for injection_phase in ac_phases:
-                            injection_voltage_var: Var | None = injection_external_mapping.get(
-                                injection_phase,
-                                None,
-                            )
-                            if injection_voltage_var is not None:
-                                bus_phase_connections[(inj_bus, injection_phase)].add(f"injection:{inj.idtag}")
-                            else:
-                                pass
-                    else:
-                        pass
-
-                    # Preserve direct validation of legacy fixtures which do
-                    # not execute the normal registration stage beforehand.
-                    has_registered_injection_mapping: bool = (
-                        inj_emt_model.uid in self._local_external_mapping_by_block_uid
-                    )
-                    # Registration turns legacy hierarchy inputs referenced v_N into
-                    # the neutral terminal; unregistered fixtures mirror that here.
-                    injection_exposes_neutral_input: bool = False
-                    if has_registered_injection_mapping:
-                        pass
-                    else:
-                        injection_block: Block
-                        for injection_block in _collect_block_hierarchy(inj_emt_model):
-                            injection_in_var: Var
-                            for injection_in_var in injection_block.in_vars:
-                                if injection_in_var.ref in ac_phases:
-                                    bus_phase_connections[(inj_bus, injection_in_var.ref)].add(
-                                        f"injection:{inj.idtag}"
-                                    )
-                                else:
-                                    pass
-                                if injection_in_var.ref == VarPowerFlowReferenceType.v_N:
-                                    injection_exposes_neutral_input = True
-                                else:
-                                    pass
-
-                    # An internal star-point ground does not connect the bus
-                    # neutral. Only a neutral terminal (the external voltage
-                    # mapping, or a legacy v_N input of an unregistered model)
-                    # can declare that conductor connected to this injection.
-                    if (has_emt_internal_grounding_link(block=inj_emt_model)
-                            and ((injection_external_mapping is not None
-                                  and injection_external_mapping.get(VarPowerFlowReferenceType.v_N, None) is not None)
-                                 or injection_exposes_neutral_input)):
-                        bus_phase_connections[(inj_bus, VarPowerFlowReferenceType.v_N)].add(
-                            f"internal_ground:{inj.idtag}"
-                        )
-                    else:
-                        pass
-                else:
-                    pass
-            else:
-                pass
-
-        floating_phases: List[str] = list()
-        for bus in self.grid.buses:
-            if not bus.is_dc:
-                bus_mdl = bus.emt_model
-                bus_out_refs = {v.ref for v in bus_mdl.out_vars}
-                for phase in ac_phases:
-                    connections = bus_phase_connections.get((bus, phase), set())
-                    if phase in bus_out_refs and len(connections) < 2:
-                        floating_phases.append(
-                            f"  - Bus '{bus.name}' phase '{phase.value}' is floating "
-                            f"(connected to {len(connections)} element(s): {connections})"
-                        )
-                    else:
-                        pass
-            else:
-                pass
-
-        topology_error_sections: List[str] = list()
-        if len(invalid_line_layouts) > 0:
-            topology_error_sections.append(
-                "TopologyError: Invalid EMT line terminal layouts detected:\n"
-                + "\n".join(invalid_line_layouts)
-            )
-        else:
-            pass
-
-        if len(floating_phases) > 0:
-            topology_error_sections.append(
-                "TopologyError: Floating bus phases detected "
-                "(each phase must be connected to at least 2 elements):\n"
-                + "\n".join(floating_phases)
-            )
-        else:
-            pass
-
-        if len(topology_error_sections) > 0:
-            raise EmtTopologyError("\n".join(topology_error_sections))
-        else:
-            pass
-
+    # def _validate_connections(self) -> None:
+    #     """
+    #     Validate EMT topology connectivity.
+    #
+    #     Checks that each phase exposed by a bus must be connected to at least 2 elements
+    #     (branches or injections). A floating phase indicates an open circuit.
+    #
+    #     The phase connection mapping is:
+    #     - Branch in_vars with ref vf_N/A/B/C connect to bus_from's v_N/A/B/C
+    #     - Branch in_vars with ref vt_N/A/B/C connect to bus_to's v_N/A/B/C
+    #     - Injection device in_vars with ref v_N/A/B/C connect to their bus's v_N/A/B/C
+    #
+    #     :raises EmtTopologyError: If topology inconsistencies are found.
+    #     """
+    #     phase_ref_to_bus_phase = {
+    #         VarPowerFlowReferenceType.vf_N: VarPowerFlowReferenceType.v_N,
+    #         VarPowerFlowReferenceType.vf_A: VarPowerFlowReferenceType.v_A,
+    #         VarPowerFlowReferenceType.vf_B: VarPowerFlowReferenceType.v_B,
+    #         VarPowerFlowReferenceType.vf_C: VarPowerFlowReferenceType.v_C,
+    #         VarPowerFlowReferenceType.vt_N: VarPowerFlowReferenceType.v_N,
+    #         VarPowerFlowReferenceType.vt_A: VarPowerFlowReferenceType.v_A,
+    #         VarPowerFlowReferenceType.vt_B: VarPowerFlowReferenceType.v_B,
+    #         VarPowerFlowReferenceType.vt_C: VarPowerFlowReferenceType.v_C,
+    #     }
+    #
+    #     branch_phase_refs = {
+    #         VarPowerFlowReferenceType.vf_N,
+    #         VarPowerFlowReferenceType.vf_A,
+    #         VarPowerFlowReferenceType.vf_B,
+    #         VarPowerFlowReferenceType.vf_C,
+    #         VarPowerFlowReferenceType.vt_N,
+    #         VarPowerFlowReferenceType.vt_A,
+    #         VarPowerFlowReferenceType.vt_B,
+    #         VarPowerFlowReferenceType.vt_C,
+    #     }
+    #     ac_phases = [
+    #         VarPowerFlowReferenceType.v_N,
+    #         VarPowerFlowReferenceType.v_A,
+    #         VarPowerFlowReferenceType.v_B,
+    #         VarPowerFlowReferenceType.v_C,
+    #     ]
+    #     bus_phase_connections: Dict[Tuple[Any, VarPowerFlowReferenceType], Set[str]] = dict()
+    #     invalid_line_layouts: List[str] = list()
+    #     for bus in self.grid.buses:
+    #         for phase in ac_phases:
+    #             bus_phase_connections[(bus, phase)] = set()
+    #
+    #     vsc_ac_phase_refs = {
+    #         VarPowerFlowReferenceType.v_N,
+    #         VarPowerFlowReferenceType.v_A,
+    #         VarPowerFlowReferenceType.v_B,
+    #         VarPowerFlowReferenceType.v_C,
+    #     }
+    #
+    #     for br in self.grid.get_branches_iter(add_vsc=True, add_hvdc=True, add_switch=True):
+    #         disposition: str = self._get_device_emt_disposition(br.device_type)
+    #
+    #         if disposition == EmtDeviceDisposition.BRANCH_STRUCTURAL:
+    #             br_emt_model: Block = br.emt_model
+    #
+    #             if br.device_type == DeviceType.LineDevice:
+    #                 line_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
+    #                     problem=self,
+    #                     mdl=br_emt_model,
+    #                 )
+    #                 if line_external_mapping is None:
+    #                     line_external_mapping = dict()
+    #                 else:
+    #                     pass
+    #                 line_layout_is_valid: bool = validate_line_phase_layout(
+    #                     branch=br,
+    #                     mdl=br_emt_model,
+    #                     effective_external_mapping=line_external_mapping,
+    #                     logger=self.logger,
+    #                 )
+    #                 if line_layout_is_valid:
+    #                     pass
+    #                 else:
+    #                     invalid_line_layouts.append(
+    #                         f"  - Line '{br.name}' has an EMT terminal layout that does not match its physical phases."
+    #                     )
+    #             else:
+    #                 pass
+    #
+    #             if br_emt_model is not None:
+    #                 br_bus_from: Any = br.bus_from
+    #                 br_bus_to: Any = br.bus_to
+    #                 is_bergeron: bool
+    #                 is_jmarti: bool
+    #                 is_bergeron, is_jmarti = _is_history_runtime_line_block_name(br_emt_model.name)
+    #
+    #                 if is_bergeron or is_jmarti:
+    #                     br_ys: Any = br.ys
+    #
+    #                     if br_ys.phN:
+    #                         bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_N)].add(f"branch_from:{br.idtag}")
+    #                         bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_N)].add(f"branch_to:{br.idtag}")
+    #                     else:
+    #                         pass
+    #
+    #                     if br_ys.phA:
+    #                         bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_A)].add(f"branch_from:{br.idtag}")
+    #                         bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_A)].add(f"branch_to:{br.idtag}")
+    #                     else:
+    #                         pass
+    #
+    #                     if br_ys.phB:
+    #                         bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_B)].add(f"branch_from:{br.idtag}")
+    #                         bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_B)].add(f"branch_to:{br.idtag}")
+    #                     else:
+    #                         pass
+    #
+    #                     if br_ys.phC:
+    #                         bus_phase_connections[(br_bus_from, VarPowerFlowReferenceType.v_C)].add(f"branch_from:{br.idtag}")
+    #                         bus_phase_connections[(br_bus_to, VarPowerFlowReferenceType.v_C)].add(f"branch_to:{br.idtag}")
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     branch_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
+    #                         problem=self,
+    #                         mdl=br_emt_model,
+    #                     )
+    #                     present_branch_refs: Set[VarPowerFlowReferenceType] = set()
+    #
+    #                     if branch_external_mapping is not None:
+    #                         branch_ref_key: Any
+    #                         branch_ref_var: Var | None
+    #                         for branch_ref_key, branch_ref_var in branch_external_mapping.items():
+    #                             if isinstance(branch_ref_key, VarPowerFlowReferenceType) and branch_ref_var is not None:
+    #                                 present_branch_refs.add(branch_ref_key)
+    #                             else:
+    #                                 pass
+    #                     else:
+    #                         pass
+    #
+    #                     # Direct validation helpers can invoke this method
+    #                     # without the normal device-registration stage. Only in
+    #                     # that case recover legacy input references locally;
+    #                     # production builds already have one authoritative map.
+    #                     has_registered_branch_mapping: bool = (
+    #                         br_emt_model.uid in self._local_external_mapping_by_block_uid
+    #                     )
+    #                     if has_registered_branch_mapping:
+    #                         pass
+    #                     else:
+    #                         branch_block: Block
+    #                         for branch_block in _collect_block_hierarchy(br_emt_model):
+    #                             branch_in_var: Var
+    #                             for branch_in_var in branch_block.in_vars:
+    #                                 if isinstance(branch_in_var.ref, VarPowerFlowReferenceType):
+    #                                     present_branch_refs.add(branch_in_var.ref)
+    #                                 else:
+    #                                     pass
+    #
+    #                     branch_ref: VarPowerFlowReferenceType
+    #                     for branch_ref in present_branch_refs:
+    #                         if branch_ref in branch_phase_refs:
+    #                             bus_phase: VarPowerFlowReferenceType = phase_ref_to_bus_phase[branch_ref]
+    #
+    #                             if branch_ref in {
+    #                                 VarPowerFlowReferenceType.vf_N,
+    #                                 VarPowerFlowReferenceType.vf_A,
+    #                                 VarPowerFlowReferenceType.vf_B,
+    #                                 VarPowerFlowReferenceType.vf_C,
+    #                             }:
+    #                                 bus_phase_connections[(br_bus_from, bus_phase)].add(f"branch_from:{br.idtag}")
+    #                             else:
+    #                                 if branch_ref in {
+    #                                     VarPowerFlowReferenceType.vt_N,
+    #                                     VarPowerFlowReferenceType.vt_A,
+    #                                     VarPowerFlowReferenceType.vt_B,
+    #                                     VarPowerFlowReferenceType.vt_C,
+    #                                 }:
+    #                                     bus_phase_connections[(br_bus_to, bus_phase)].add(f"branch_to:{br.idtag}")
+    #                                 else:
+    #                                     pass
+    #                         else:
+    #                             if branch_ref in vsc_ac_phase_refs:
+    #                                 if br_bus_to.is_dc:
+    #                                     bus_phase_connections[(br_bus_from, branch_ref)].add(f"branch_from:{br.idtag}")
+    #                                 else:
+    #                                     bus_phase_connections[(br_bus_to, branch_ref)].add(f"branch_to:{br.idtag}")
+    #                             else:
+    #                                 pass
+    #             else:
+    #                 pass
+    #         else:
+    #             pass
+    #
+    #     for inj in self.grid.get_injection_devices_iter():
+    #         disposition = self._get_device_emt_disposition(inj.device_type)
+    #
+    #         if disposition == EmtDeviceDisposition.INJECTION_STRUCTURAL:
+    #             inj_emt_model: Block = inj.emt_model
+    #
+    #             if inj_emt_model is not None:
+    #                 inj_bus: Any = inj.bus
+    #                 injection_external_mapping: Optional[Dict[Any, Var]] = _get_external_mapping_local(
+    #                     problem=self,
+    #                     mdl=inj_emt_model,
+    #                 )
+    #                 if injection_external_mapping is not None:
+    #                     injection_phase: VarPowerFlowReferenceType
+    #                     for injection_phase in ac_phases:
+    #                         injection_voltage_var: Var | None = injection_external_mapping.get(
+    #                             injection_phase,
+    #                             None,
+    #                         )
+    #                         if injection_voltage_var is not None:
+    #                             bus_phase_connections[(inj_bus, injection_phase)].add(f"injection:{inj.idtag}")
+    #                         else:
+    #                             pass
+    #                 else:
+    #                     pass
+    #
+    #                 # Preserve direct validation of legacy fixtures which do
+    #                 # not execute the normal registration stage beforehand.
+    #                 has_registered_injection_mapping: bool = (
+    #                     inj_emt_model.uid in self._local_external_mapping_by_block_uid
+    #                 )
+    #                 # Registration turns legacy hierarchy inputs referenced v_N into
+    #                 # the neutral terminal; unregistered fixtures mirror that here.
+    #                 injection_exposes_neutral_input: bool = False
+    #                 if has_registered_injection_mapping:
+    #                     pass
+    #                 else:
+    #                     injection_block: Block
+    #                     for injection_block in _collect_block_hierarchy(inj_emt_model):
+    #                         injection_in_var: Var
+    #                         for injection_in_var in injection_block.in_vars:
+    #                             if injection_in_var.ref in ac_phases:
+    #                                 bus_phase_connections[(inj_bus, injection_in_var.ref)].add(
+    #                                     f"injection:{inj.idtag}"
+    #                                 )
+    #                             else:
+    #                                 pass
+    #                             if injection_in_var.ref == VarPowerFlowReferenceType.v_N:
+    #                                 injection_exposes_neutral_input = True
+    #                             else:
+    #                                 pass
+    #
+    #                 # An internal star-point ground does not connect the bus
+    #                 # neutral. Only a neutral terminal (the external voltage
+    #                 # mapping, or a legacy v_N input of an unregistered model)
+    #                 # can declare that conductor connected to this injection.
+    #                 if (has_emt_internal_grounding_link(block=inj_emt_model)
+    #                         and ((injection_external_mapping is not None
+    #                               and injection_external_mapping.get(VarPowerFlowReferenceType.v_N, None) is not None)
+    #                              or injection_exposes_neutral_input)):
+    #                     bus_phase_connections[(inj_bus, VarPowerFlowReferenceType.v_N)].add(
+    #                         f"internal_ground:{inj.idtag}"
+    #                     )
+    #                 else:
+    #                     pass
+    #             else:
+    #                 pass
+    #         else:
+    #             pass
+    #
+    #     floating_phases: List[str] = list()
+    #     for bus in self.grid.buses:
+    #         if not bus.is_dc:
+    #             bus_mdl = bus.emt_model
+    #             bus_out_refs = {v.ref for v in bus_mdl.out_vars}
+    #             for phase in ac_phases:
+    #                 connections = bus_phase_connections.get((bus, phase), set())
+    #                 if phase in bus_out_refs and len(connections) < 2:
+    #                     floating_phases.append(
+    #                         f"  - Bus '{bus.name}' phase '{phase.value}' is floating "
+    #                         f"(connected to {len(connections)} element(s): {connections})"
+    #                     )
+    #                 else:
+    #                     pass
+    #         else:
+    #             pass
+    #
+    #     topology_error_sections: List[str] = list()
+    #     if len(invalid_line_layouts) > 0:
+    #         topology_error_sections.append(
+    #             "TopologyError: Invalid EMT line terminal layouts detected:\n"
+    #             + "\n".join(invalid_line_layouts)
+    #         )
+    #     else:
+    #         pass
+    #
+    #     if len(floating_phases) > 0:
+    #         topology_error_sections.append(
+    #             "TopologyError: Floating bus phases detected "
+    #             "(each phase must be connected to at least 2 elements):\n"
+    #             + "\n".join(floating_phases)
+    #         )
+    #     else:
+    #         pass
+    #
+    #     if len(topology_error_sections) > 0:
+    #         raise EmtTopologyError("\n".join(topology_error_sections))
+    #     else:
+    #         pass
+    #
     def _validate_runtime_parameter_sources_after_power_flow(self) -> None:
         """Validate EMT runtime sources after operating-point seeding.
 

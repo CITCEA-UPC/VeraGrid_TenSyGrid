@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from unittest.mock import patch
 
 import numpy as np
+import pytest
+from types import SimpleNamespace
+from VeraGridEngine.enumerations import EmtSolverTypes
 from scipy import sparse
 
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.emt_floquet_operator import (
@@ -22,6 +25,7 @@ from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowRes
 from VeraGridEngine.Simulations.PowerFlow3ph.power_flow_results_3ph import PowerFlowResults3Ph
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_driver import (
     SmallSignalStabilityEmtDriver,
+    _capture_solver_jacobian,
 )
 from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options import (
     SmallSignalStabilityEmtOptions,
@@ -138,7 +142,8 @@ def test_ode_tangent_derivative_is_initialized_with_default_options() -> None:
     np.testing.assert_allclose(op.matvec(np.array([1.0])), [expected])
 
 
-def test_ssa_capture_honors_emt_newton_settings() -> None:
+@pytest.mark.parametrize("solver_type", list(EmtSolverTypes))
+def test_ssa_capture_honors_emt_newton_settings(solver_type) -> None:
     class CaptureProblem(_ScalarProblem):
         def get_parameters_values(self):
             return []
@@ -151,17 +156,22 @@ def test_ssa_capture_honors_emt_newton_settings() -> None:
 
     driver = SmallSignalStabilityEmtDriver.__new__(SmallSignalStabilityEmtDriver)
     driver.problem = CaptureProblem()
-    driver.emt_options = EmtOptions(time_step=0.01, tolerance=2e-7,
+    driver.emt_options = EmtOptions(solver_type=solver_type, time_step=0.01, tolerance=2e-7,
                                     init_newton_max_iter=50)
     driver.sss_options = SmallSignalStabilityEmtOptions(
         target_period=0.01, ss_assessment_time=0.01)
     with patch('VeraGridEngine.Simulations.SmallSignalStabilityEmt.'
-               'small_signal_stability_emt_driver.StructuralVectorizedSolver') as solver:
+               'small_signal_stability_emt_driver.build_emt_solver') as solver:
         solver.return_value.simulate.return_value = (
             np.array([0.0, 0.01]), np.zeros((2, 1)), np.zeros((2, 1)), True, True)
+        solver.return_value.problem.get_all_vars_number.return_value = 1
+        solver.return_value.dense_threshold = 100
         driver._capture_limit_cycle_and_evaluator(0.01)
-    assert solver.call_args.kwargs['newton_max_iter'] == 50
-    assert solver.call_args.kwargs['newton_tolerance'] == 2e-7
+    options = solver.call_args.kwargs['options']
+    assert options.solver_type == solver_type
+    assert options.init_newton_max_iter == 50
+    assert options.tolerance == 2e-7
+    assert solver.call_args.kwargs['problem'] is driver.problem
 
 
 def test_trapezoidal_initial_tangent_derivative_matches_rotation_step() -> None:
@@ -234,3 +244,17 @@ def test_emt_ssa_driver_uses_problem_factory_and_forwards_both_pf_results() -> N
     assert factory.call_args.kwargs["options"].problem_type == EmtProblemTypes.Multilinear
     assert factory.call_args.kwargs["pf_results"] is balanced
     assert factory.call_args.kwargs["pf_results_3ph"] is three_phase
+
+
+@pytest.mark.parametrize("solver_type", list(EmtSolverTypes))
+@pytest.mark.parametrize("is_sparse", [False, True])
+def test_capture_solver_jacobian_adapter(solver_type, is_sparse) -> None:
+    method = DynamicIntegrationMethod.DaeTrapezoidal
+    def evaluator(*args):
+        return sparse.eye(1)
+    wrapper = SimpleNamespace(evaluate=evaluator)
+    solver = SimpleNamespace(problem=SimpleNamespace(get_all_vars_number=lambda: 200 if is_sparse else 1),
+        dense_threshold=100, vec_jacobian=evaluator, _jacobian_evaluator=wrapper,
+        jit_jacobian_ad={method: evaluator},
+        jit_jacobian_symbolic={f"{method}_{is_sparse}": wrapper})
+    assert _capture_solver_jacobian(solver, solver_type, method) is evaluator

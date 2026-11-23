@@ -1,0 +1,62 @@
+{
+  "status": "completed",
+  "settings": {
+    "grid": "ieee118",
+    "grid_file": null,
+    "formulation": "rms",
+    "all": false,
+    "output": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/observed",
+    "timeout": 1800,
+    "rms_init": "explicit",
+    "rms_spectrum": "sparse",
+    "modes": 6,
+    "steps_per_period": 120,
+    "assessment_periods": 1
+  },
+  "random_seed": 0,
+  "grid_file": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/tests/data/grids/RAW/IEEE 118 Bus.raw",
+  "formulation": "rms",
+  "stage": "finished",
+  "grid_sha256": "396e5eb09723a010d3794dc974352cc7739c010422e92d6ae992ab5b7d7d97c8",
+  "python_version": "3.12.3",
+  "numpy_version": "2.3.0",
+  "machine_profile": "template defaults; fixed PF-seeded torque and field voltage",
+  "buses": 118,
+  "generators": 54,
+  "balanced_pf_converged": true,
+  "problem_class": "RmsProblemMultilinear",
+  "states": 0,
+  "algebraics": 3510,
+  "derivatives": 432,
+  "build_seconds": 4.677160375009407,
+  "initial_residual_inf": 5.942643451359338,
+  "largest_initial_residual_rows": [
+    {
+      "row": 3450,
+      "residual": -5.942643451359338
+    },
+    {
+      "row": 3410,
+      "residual": -4.964858665591251
+    },
+    {
+      "row": 3432,
+      "residual": -4.5679517282290565
+    },
+    {
+      "row": 3292,
+      "residual": -4.213436173971296
+    },
+    {
+      "row": 3402,
+      "residual": -3.855186317296434
+    }
+  ],
+  "equilibrium_validated": false,
+  "ssa_seconds": 2.5270595460024197,
+  "interpretation": "Numerical SSA completed; operating-point or periodic-orbit validity must be checked before interpreting stability.",
+  "modes": 6,
+  "finite_modes": 6,
+  "max_real_per_s": 6.776263578034403e-21,
+  "total_seconds": 14.317623971990542
+}

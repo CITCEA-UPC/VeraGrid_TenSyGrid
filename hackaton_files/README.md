@@ -21,16 +21,19 @@ parameter and columns `[initial_value, minimum, maximum]`. A tuner can compute
 a vector of candidate values and pair each value with the parameter at the
 same row index. The evaluator still owns the full grid for simulation.
 It can also select existing lines
-from `openable_lines`, a new corridor from `line_candidates`, or shunt
+from `openable_lines`, close an existing out-of-service circuit using
+`close_lines` handles from `closable_lines`, build a new corridor from `line_candidates`, or shunt
 placements from `shunt_options`. Generator setpoints are listed in
 `dispatch_options`; use `dispatch_mw={option: new_mw}` to move generation
 between units. Each value must stay within its generator limits and within
-10% of its starting value, and total scheduled generation must remain fixed.
+the published per-case interval, and total scheduled generation must remain fixed.
+The generic factory uses 10% intervals; the general basic collection has its own
+explicit intervals. Opening and closing the same line in one proposal is invalid.
 `BasicRmsTuner` proposes no changes. Machine parameters `M`, `D`, `R1`, and
 `X1` are fixed.
 
 `TunableGrid` groups an initialized `RmsProblem` with its permitted actions.
-Its default limits are two opened lines, one new line, one new shunt, and five
+Its default limits are two opened lines, one closed line, one new line, one new shunt, and five
 candidate attempts per scenario. The frozen participant view exposes read-only
 budget properties; the evaluator owns an independent counter for each scenario. `RmsTuning.is_accepted()` checks these limits.
 Inside `tune()`, participants may call `tunable_grid.test_tuning(proposal)` to
@@ -261,3 +264,129 @@ clamped. Invalid or unbalanced redispatch is omitted as a whole. Wrong proposal
 return types still raise an error, and electrical checks remain unchanged.
 `is_accepted()` remains a strict diagnostic; sanitized trials still cost one
 attempt, including when every action is skipped.
+
+## Inspect controllers from a tuner
+
+`RmsTuner` (and `BasicRmsTuner`) provides three related helpers:
+
+```python
+controllers = tuner.get_controller_blocks(device)
+parameters = tuner.get_controller_parameters(tunable_grid, controllers[0])
+modes = tuner.get_controller_modes(tunable_grid, controllers[0])
+```
+
+Parameter lookup needs the `TunableGrid` because a parameter appearing in a
+controller equation does **not** automatically make it editable. Returned objects
+are the original `TunableParameter` handles from that snapshot, with their
+`initial_value`, `minimum`, `maximum`, `device_idtag`, and `name`. No new tuning
+permission is created. A stable synchronous governor can therefore be discovered
+in a converter case while its editable parameter tuple is empty.
+
+### Example: inspect a PLL or current loop
+
+```python
+from VeraGridEngine.api import open_file
+from hackaton_files import BasicRmsTuner, ControllerRole
+from hackaton_files.basic import case_files, initialize_grid
+
+# Fifth case of IEEE9: synchronous machines, GFL, and GFM.
+path = next(path for path in case_files() if path.name == "basic_ieee9_05.veragrid")
+grid = initialize_grid(open_file(str(path)))
+tuner = BasicRmsTuner()
+
+# Cache one full-system eigensolve for all controller queries.
+analysis = tuner.get_modal_analysis(grid)
+for device in grid.problem.grid.generators:
+    for controller in tuner.get_controller_blocks(device):
+        if controller.role in (ControllerRole.PLL, ControllerRole.INNER_CURRENT):
+            print(device.name, controller.role.name, controller.path)
+            for parameter in tuner.get_controller_parameters(grid, controller):
+                print(parameter.name, parameter.initial_value,
+                      parameter.minimum, parameter.maximum)
+            for equation in controller.state_equations:
+                print("state:", equation)
+            for equation in controller.algebraic_equations:
+                print("connected algebraic:", equation)
+            for mode in tuner.get_controller_modes(analysis, controller):
+                print(mode.eigenvalue, mode.frequency_hz, mode.damping_ratio,
+                      mode.participation, mode.scope.name)
+```
+
+The same pattern selects `ControllerRole.GOVERNOR`, `OUTER_POWER`,
+`OUTER_VOLTAGE`, or `DROOP`. A runnable version is included:
+
+```bash
+python -m hackaton_files.controller_examples
+```
+
+Run using this checkout's engine and repository root on the Python import path.
+The example inspects a real saved mixed-converter case and consumes zero trials.
+
+### Example: propose changes using discovered handles
+
+For this particular IEEE9 case, both converters can be stabilized through their
+inner-loop handles. This is an example reference, not a universal tuning rule:
+
+```python
+from hackaton_files import ControllerRole, RmsTuning
+
+values = dict()
+for device in grid.problem.grid.generators:
+    for controller in tuner.get_controller_blocks(device):
+        if controller.role == ControllerRole.INNER_CURRENT:
+            for parameter in tuner.get_controller_parameters(grid, controller):
+                if parameter.name == "Kp_icl":
+                    values[parameter] = 0.5
+                elif parameter.name == "Ki_icl":
+                    values[parameter] = 5.0
+                else:
+                    pass
+        else:
+            pass
+
+proposal = RmsTuning(parameters=values)
+metrics = grid.test_tuning(proposal)  # This evaluation consumes one trial.
+```
+
+### Interpret the results
+
+A `ControllerBlock` contains `role`, `path`, `device_idtag`, `variables`,
+`state_equations`, `algebraic_equations`, and `affected_states`.
+`template_view=True` identifies an adapter view of a flattened model. Equation
+views include directly connected algebraic equations; different views may overlap
+and should not be interpreted as independent isolated subsystems. In particular,
+the native GFM voltage and current loops share `Kp_icl`/`Ki_icl`: editing that
+handle affects both loops, even when obtained through just one view.
+
+Discovery has explicit adapters for the native Genrow, flattened GFL P/Q,
+and GFM template contracts, including the saved basic cases. Other physical
+blocks are returned as `UNCLASSIFIED`; arbitrary display names are not guessed
+into controller roles. For a custom model, explicitly construct a `ControllerBlock`
+with its device, actual block, role, diagnostic path, owned coordinate names,
+and parameter names, then pass that view to the parameter/mode helpers.
+
+Modes are **full-system modes associated with the selected coordinates**, not
+poles of an isolated controller. `ControllerMode` provides `index`, `eigenvalue`,
+`frequency_hz`, `damping_ratio`, `participation`, `scope`, and `variable_uids`.
+Participation is the selected coordinates' share of the total for that mode,
+matched by device identity and symbolic UID. Views can overlap, so participation
+fractions should not be summed across controllers. Infinite descriptor constraints
+and neutral modes are omitted; conjugate duplicates are omitted by default.
+Use `include_conjugates=True` to retain both and `minimum_participation=0.05`
+to require at least 5% participation. This filter is not a damping requirement.
+
+An algebraic governor has no independent dynamic state. Its results explicitly
+use `ParticipationScope.AFFECTED` for downstream rotor states; dynamic controller
+coordinates use `ParticipationScope.OWNED`. Both ordinary state matrices and
+converter descriptor snapshots are supported. Diagnostic calls consume no tuning
+trials and never invoke the tuner's `tune()` method.
+
+## General basic grid actions
+
+The [50-case basic collection](basic/README.md) includes existing open circuits,
+line outage/restoration cases, non-islanding opening options, new-line
+reinforcements, capacitor/reactor candidates, and balanced redispatch, alongside
+synchronous and GFM/GFL controller tuning. Its minimum damping remains 2.5%.
+The validation report records exact action catalogs and reference restoration
+actions. The evaluator keeps these organizer-specific permissions on every trial
+copy and gives added lines/shunts their native RMS models.

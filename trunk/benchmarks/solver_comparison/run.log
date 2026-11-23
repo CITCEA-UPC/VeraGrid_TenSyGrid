@@ -1,0 +1,11 @@
+Running StructuralAD
+StructuralAD: completed
+Running StructuralCompiled
+StructuralCompiled: timeout
+Running Automatic
+
+Resumed unfinished trials:
+Running Automatic
+Automatic: timeout
+Running Symbolic
+Symbolic: timeout
