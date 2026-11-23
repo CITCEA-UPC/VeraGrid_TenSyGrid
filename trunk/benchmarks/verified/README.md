@@ -1,5 +1,12 @@
 # Verified EMT SSA: staged source from load to modes
 
+> **RMS follow-up:** [RMS SSA results](../rms_ssa/README.md) correct the cause of the
+> earlier RMS rejections below. The symbolic PF equilibrium was valid; the old
+> S/Phi export omitted rational generator-current terms. Current RMS runs use
+> existing current ports and validate the export independently. The historical
+> RMS rejection records below describe that old exporter, not a bad equilibrium.
+
+
 All four runs below passed from an exported **Git-index snapshot**, not from the
 working tree. The export contained the staged engine, benchmark scripts and
 tracked grid inputs. It included the remaining generator and transformer fixes.
@@ -87,14 +94,15 @@ CSV was produced in any rejected case:
 
 | Setup | Rejection | Measured residual/error |
 |---|---|---:|
-| IEEE39 RMS, explicit seed | Before SSA: not an equilibrium | 8.86235 |
-| IEEE118 RMS, explicit seed | Before SSA: not an equilibrium | 5.94264 |
+| IEEE39 RMS, old exporter | Before SSA: incorrect S/Phi residual | 8.86235 |
+| IEEE118 RMS, old exporter | Before SSA: incorrect S/Phi residual | 5.94264 |
 | IEEE39 standard non-lifted EMT templates | Cycle closure exceeds 1e-4 | 0.00174152 |
 | IEEE118 standard non-lifted EMT templates | Before capture: initial DAE residual exceeds 1e-6 | 0.00103544 |
 
 These are correctly reported failures, not successful SSA timing measurements.
-RMS fixture initialization and fully standard non-lifted model comparisons still
-need their own work; they are not silently passed by this benchmark.
+The RMS export issue is now corrected and separately verified in the linked
+RMS report. Fully standard non-lifted EMT model comparisons still require
+initialization/periodicity work and are not silently passed.
 Diagnostic overrides are explicit (`--allow-nonequilibrium` or
 `--allow-nonperiodic`) and do not turn a failed validation flag into a pass.
 See `rejection_checks/summary.json` and each JSON/log.
@@ -118,13 +126,14 @@ python trunk/benchmarks/multilinear_ssa.py --grid ieee118 --formulation emt \
 ```
 
 Use `--emt-problem CurrentBalance` for the native backend or `--grid ieee39`.
-`--all` in the general runner additionally includes the exploratory RMS cases;
-it therefore currently returns failure for their invalid initial equilibria.
+`--all` in the general runner additionally includes RMS cases;
+RMS now passes its independently checked equilibrium with the export correction;
+the historical RMS negative controls above belong to the earlier source revision.
 It is not the four-EMT-case verification command above.
 
-For a rejection check, run `--formulation rms` on either grid, or select
+For a current rejection check, select
 `--emt-problem CurrentBalance --emt-models canonical --capture-only` for standard
-EMT templates. Both commands are expected to fail at the documented precondition.
+EMT templates. RMS is no longer an expected rejection after the export correction.
 
 The commit keeps compact JSON, CSV, logs and this report. Large NPZ trajectory
 captures, saved-grid files and profiles are regenerated and ignored by Git.

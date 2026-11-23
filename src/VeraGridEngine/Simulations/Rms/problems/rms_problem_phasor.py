@@ -15,7 +15,7 @@ from VeraGridEngine.Utils.Symbolic.symbolic import (Var, Const, Expr, piecewise)
 from VeraGridEngine.Utils.Symbolic.compiled_functions import SymbolicJacobian
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic_io import block_deep_copy
-from VeraGridEngine.enumerations import VarPowerFlowReferenceType, RmsInitializationMethod, DeviceType
+from VeraGridEngine.enumerations import VarPowerFlowReferenceType, RmsInitializationMethod, RmsProblemTypes, DeviceType
 from VeraGridEngine.basic_structures import Vec, ObjVec, BoolVec, Logger
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowResults
 from VeraGridEngine.Simulations.Rms.rms_options import RmsOptions
@@ -34,6 +34,7 @@ from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import (
 )
 from VeraGridEngine.Simulations.Rms.problems.rms_terminal_power_assembly import (
     assemble_rms_mapped_power_references,
+    resolve_rms_mapped_power_references,
     convert_rms_ac_power_balance_to_current_balance,
 )
 from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
@@ -799,7 +800,7 @@ class RmsProblemPhasor(RmsProblemTemplate):
                         self.set_init_guess(elm.rms_model, VarPowerFlowReferenceType.Q, Sdev.imag)
 
                 k = bus_dict[elm.bus]
-                assembled_power = assemble_rms_mapped_power_references(
+                assembled_power = self._assemble_injection_power_references(
                     model=elm.rms_model,
                     active_power_balance=P,
                     active_power_balance_used=P_used,
@@ -1210,6 +1211,36 @@ class RmsProblemPhasor(RmsProblemTemplate):
             vars_names.append((key, var_name, value))
 
         return pd.DataFrame(data=vars_names, columns=["key", "var_name", "value"])
+
+    def _assemble_injection_power_references(
+            self, model: Block, active_power_balance: ObjVec,
+            active_power_balance_used: BoolVec, reactive_power_balance: ObjVec,
+            reactive_power_balance_used: BoolVec, bus_index: int, bus_is_dc: bool) -> bool:
+        """Keep explicit AC current ports polynomial in the multilinear backend.
+
+        :param model: Device model with mapped physical terminal references.
+        :param active_power_balance: Active terminal powers collected per bus.
+        :param active_power_balance_used: Active-power presence flags.
+        :param reactive_power_balance: Reactive terminal powers collected per bus.
+        :param reactive_power_balance_used: Reactive-power presence flags.
+        :param bus_index: Static device's terminal bus.
+        :param bus_is_dc: Whether that terminal belongs to a DC bus.
+        :return: Whether powers were assembled instead of existing current ports.
+        """
+        current_ports = (VarPowerFlowReferenceType.Ir in model.external_mapping
+                         and VarPowerFlowReferenceType.Ii in model.external_mapping)
+        if self.options.problem_type == RmsProblemTypes.Multilinear and not bus_is_dc and current_ports:
+            # Validate the power contract even though KCL consumes the same
+            # device's current ports. Converting P/Q back to I would introduce
+            # voltage division that S/Phi cannot represent as a polynomial.
+            resolve_rms_mapped_power_references(model=model, bus_index=bus_index, bus_is_dc=bus_is_dc)
+            return False
+        return assemble_rms_mapped_power_references(
+            model=model, active_power_balance=active_power_balance,
+            active_power_balance_used=active_power_balance_used,
+            reactive_power_balance=reactive_power_balance,
+            reactive_power_balance_used=reactive_power_balance_used,
+            bus_index=bus_index, bus_is_dc=bus_is_dc)
 
     def get_E_matrix(self, x:Vec, dx:Vec):
         #We first find all diff_vars

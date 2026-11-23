@@ -1,0 +1,4 @@
+Loading ieee39 rms: /tmp/veragrid-rms-verified-ajjj05qx/Grids_and_profiles/grids/IEEE39.gridcal
+Balanced PF converged; building dynamic problem
+Compiling RMS using JIT Native Compiler...
+Problem built; running SSA

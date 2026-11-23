@@ -241,6 +241,15 @@ def run_case(args, record):
         record['initial_residual_inf'] = float(np.max(np.abs(residual)))
         rows = np.argsort(np.abs(residual))[-5:][::-1]
         record['largest_initial_residual_rows'] = [dict(row=int(i), residual=float(residual[i])) for i in rows]
+        record['rms_descriptor_source_sha256'] = hashlib.sha256(
+            Path(__file__).with_name('rms_descriptor.py').read_bytes()).hexdigest()
+        record['stage'] = 'representation_validation'
+        from trunk.benchmarks.rms_descriptor import check_symbolic_representation
+        record.update(check_symbolic_representation(problem, x0))
+        initialized_voltage = np.array([
+            x0[problem.get_var_idx(bus.rms_model.out_vars[0])]
+            + 1j*x0[problem.get_var_idx(bus.rms_model.out_vars[1])] for bus in grid.buses])
+        record['power_flow_voltage_difference_inf'] = float(np.max(abs(initialized_voltage - pf.results.voltage)))
         record['equilibrium_validated'] = bool(np.all(np.isfinite(residual))
                                               and record['initial_residual_inf'] <= options.tolerance)
         if not record['equilibrium_validated'] and not args.allow_nonequilibrium:
@@ -250,7 +259,14 @@ def run_case(args, record):
         print('Problem built; running SSA', flush=True)
         record['stage'] = 'ssa'
         start = time.perf_counter()
-        if args.rms_spectrum == 'full':
+        checkpoint(args, record)
+        if args.rms_spectrum == 'reduced':
+            from trunk.benchmarks.rms_descriptor import finite_descriptor_modes
+            values, _, descriptor_report = finite_descriptor_modes(problem, x0, dx0)
+            record.update(descriptor_report)
+        elif args.rms_spectrum == 'full':
+            record['descriptor_regularization'] = 1e-7
+            record['method'] = 'Legacy dense descriptor solver with diagonal regularization'
             values = run_dense_small_signal_stability(problem, x0, dx0)[0]
         else:
             values = run_sparse_small_signal_stability(problem, x0, dx0, k=args.modes)[0]
@@ -419,8 +435,8 @@ def main():
     parser.add_argument('--output', type=Path, default=Path(__file__).parent / 'results')
     parser.add_argument('--timeout', type=float, default=1800, help='Seconds allowed per child in --all mode')
     parser.add_argument('--rms-init', choices=['explicit', 'consistent'], default='explicit')
-    parser.add_argument('--rms-spectrum', choices=['sparse', 'full'], default='sparse',
-                        help='Sparse targets modes near zero; full computes the descriptor spectrum')
+    parser.add_argument('--rms-spectrum', choices=['sparse', 'full', 'reduced'], default='reduced',
+                        help='Reduced computes all finite descriptor modes; sparse targets near zero; full uses the legacy dense solver')
     parser.add_argument('--krylov-dim', type=int, default=24, help='Arnoldi subspace dimension; increase if convergence is slow')
     parser.add_argument('--modes', type=int, default=6)
     parser.add_argument('--steps-per-period', type=int, default=600)
@@ -495,9 +511,12 @@ def main():
     import numpy as np
     np.random.seed(np_seed)
     record['random_seed'] = np_seed
+    from numba.core import event as numba_event
+    compilation_timer = numba_event.TimingListener()
     start = time.perf_counter()
     try:
-        run_case(args, record)
+        with numba_event.install_listener('numba:compile', compilation_timer):
+            run_case(args, record)
     except KeyboardInterrupt:
         record['status'] = 'interrupted'
         raise
@@ -506,6 +525,10 @@ def main():
         traceback.print_exc()
     finally:
         record['total_seconds'] = time.perf_counter() - start
+        record['compilation_seconds'] = compilation_timer.duration if compilation_timer.done else 0.
+        record['calculation_seconds'] = record['total_seconds'] - record['compilation_seconds']
+        record['compilation_scope'] = 'Outermost numba:compile events; cache hits excluded'
+        record['calculation_scope'] = 'Remaining measured pipeline time: loading, PF, assembly, cache loading, initialization, checks and SSA'
         (args.output / f'{args.grid}_{args.formulation}.json').write_text(json.dumps(record, indent=2) + '\n')
     return int(record['status'] != 'completed')
 

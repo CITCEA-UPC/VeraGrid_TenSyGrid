@@ -1,4 +1,9 @@
-# EMT and exploratory RMS small-signal benchmarks
+# RMS and EMT small-signal benchmarks
+
+The current RMS benchmark is documented in [rms_ssa/README.md](rms_ssa/README.md).
+It checks original symbolic equations against S/Phi, validates the PF equilibrium,
+and solves all finite descriptor modes with algebraic elimination and full-pencil
+eigenpair checks. Reproduce with `python trunk/benchmarks/verify_rms_benchmarks.py`.
 
 The current end-to-end verification is documented in [verified/README.md](verified/README.md).
 It runs **both EMT backends on both grids**, sequentially, checks their source
@@ -42,9 +47,13 @@ stdout/stderr logs.
   constant-power load current constraints, phasor PI lines, transformers, and
   shunts. Mechanical torque and field voltage are held at their initialized
   operating-point values; no exciter, governor, or stabilizer is attached.
-  `RmsProblemMultilinear` supplies the multilinear matrix linearization and the
-  engine's sparse generalized SSA routine targets the requested modes near zero.
-  Use `--rms-spectrum full` for the full descriptor spectrum (more expensive).
+  `RmsProblemMultilinear` supplies the multilinear matrix linearization.
+  The default `--rms-spectrum reduced` computes every finite mode by algebraic
+  elimination and an unchanged reduced pencil. Algebraic infinite modes are not
+  returned. `--rms-spectrum sparse` targets only the requested modes near zero,
+  which can mostly be neutral lifted-state/gauge modes. The legacy `full`
+  solver is more expensive and adds a 1e-7 diagonal regularization; its output
+  is not the unregularized reference used by the RMS report.
 - EMT: multilinear simple synchronous generators, multilinear ZIP loads in
   constant-power configuration, multilinear transformers, linear PI lines,
   and multilinear ZIP shunts in constant-impedance configuration. Torque and
@@ -79,11 +88,12 @@ python trunk/benchmarks/multilinear_ssa.py --all --timeout 300 \
 
 That coarse run is not a convergence study. Repeat with finer time steps and
 longer assessment before interpreting Floquet results as physical stability.
-The RMS fixtures remain exploratory: their explicit PF-seeded dynamic states
-have not passed the steady-state residual check. RMS now stops before SSA when
-`equilibrium_validated` is false; `--allow-nonequilibrium` is an explicit
-diagnostic override, not a validation result. Thus `--all` can correctly return
-failure for RMS even when both EMT cases pass.
+The earlier RMS rejection was traced to S/Phi dropping voltage-division terms
+introduced by generator power-to-current conversion, not to an invalid PF
+operating point. The multilinear backend now uses the generator's existing
+current ports. Independent checks compare the original equations with S/Phi at
+the initial state and two perturbations. RMS still stops if representation or
+equilibrium validation fails; `--allow-nonequilibrium` is diagnostic only.
 
 RMS also records the steady-state residual and `equilibrium_validated`;
 `--rms-init consistent` requests the engine's Newton initialization instead of

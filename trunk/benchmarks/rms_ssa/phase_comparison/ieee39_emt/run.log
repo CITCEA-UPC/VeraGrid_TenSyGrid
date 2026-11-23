@@ -1,0 +1,4 @@
+Loading ieee39 emt: /tmp/veragrid-rms-verified-ajjj05qx/Grids_and_profiles/grids/IEEE39.gridcal
+Balanced PF converged; building dynamic problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; running SSA

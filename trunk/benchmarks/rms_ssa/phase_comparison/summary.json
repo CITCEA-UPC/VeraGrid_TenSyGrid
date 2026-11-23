@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "cache_policy": "Fresh separate Numba disk-cache directory per case; other caches unchanged",
+  "engine_source_sha256": "541cd9f4497bb659340364737f87b568add265c9a73f62badd933987a20312b2",
+  "benchmark_source_sha256": "1b61b458c2e9765020d1892b827a1da64946921ef4baf2bfece6806e1de10786",
+  "cases": {
+    "ieee39/rms": {
+      "compilation_seconds": 9.53450228102156,
+      "calculation_seconds": 4.978003842974431,
+      "total_seconds": 14.51250612399599,
+      "ssa_seconds": 0.542499774004682,
+      "finite_modes": 80,
+      "numba_cache_directory": "/tmp/veragrid-ieee39-rms-numba-3n79p614"
+    },
+    "ieee39/emt": {
+      "compilation_seconds": 13.179775274998974,
+      "calculation_seconds": 21.46941498799424,
+      "total_seconds": 34.649190262993216,
+      "ssa_seconds": 17.97980285299127,
+      "finite_modes": 6,
+      "numba_cache_directory": "/tmp/veragrid-ieee39-emt-numba-uj7kvc_h"
+    },
+    "ieee118/rms": {
+      "compilation_seconds": 8.982065663018147,
+      "calculation_seconds": 8.469398474975605,
+      "total_seconds": 17.451464137993753,
+      "ssa_seconds": 2.118706759007182,
+      "finite_modes": 432,
+      "numba_cache_directory": "/tmp/veragrid-ieee118-rms-numba-z3utt4g5"
+    },
+    "ieee118/emt": {
+      "compilation_seconds": 11.593679345023702,
+      "calculation_seconds": 72.38535207697714,
+      "total_seconds": 83.97903142200084,
+      "ssa_seconds": 54.54417408100562,
+      "finite_modes": 6,
+      "numba_cache_directory": "/tmp/veragrid-ieee118-emt-numba-zt13e3un"
+    }
+  }
+}

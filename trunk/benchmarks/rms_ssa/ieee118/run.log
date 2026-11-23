@@ -1,0 +1,4 @@
+Loading ieee118 rms: /tmp/veragrid-rms-verified-ajjj05qx/src/tests/data/grids/RAW/IEEE 118 Bus.raw
+Balanced PF converged; building dynamic problem
+Compiling RMS using JIT Native Compiler...
+Problem built; running SSA

@@ -1,5 +1,8 @@
 # IEEE39 and IEEE118 multilinear SSA: results and timing
 
+> **RMS correction:** [rms_ssa/README.md](rms_ssa/README.md) contains independently validated RMS results. The previously reported large RMS residuals were S/Phi export errors, not failures of the original symbolic PF equilibrium. Historical RMS modes from the faulty export are superseded.
+
+
 > **Authoritative current verification:** [verified/README.md](verified/README.md) records fresh runs from an exported Git-index snapshot, with source fingerprints, residual/period checks and backend comparisons. The sections below are historical measurements from multiple implementation stages. Earlier numeric completion alone did not validate an operating point.
 
 

@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "engine_source_sha256": "541cd9f4497bb659340364737f87b568add265c9a73f62badd933987a20312b2",
+  "benchmark_source_sha256": "1b61b458c2e9765020d1892b827a1da64946921ef4baf2bfece6806e1de10786",
+  "rms_descriptor_source_sha256": "f80b91413ad95e9a408944fc0529aa8b31bf9da7598edc086016268bbe739212",
+  "cases": {
+    "ieee39": {
+      "total_seconds": 6.7133805110061076,
+      "build_seconds": 0.7077254000032553,
+      "ssa_seconds": 0.27558019499701913,
+      "matrix_build_seconds": 0.13486334099434316,
+      "finite_modes": 80,
+      "descriptor_dimension": 736,
+      "reduced_dimension": 80,
+      "initial_residual_inf": 1.5196999214595053e-10,
+      "symbolic_initial_residual_inf": 1.5196999214595053e-10,
+      "representation_error_inf": 1.7763568394002505e-14,
+      "power_flow_voltage_difference_inf": 0.0,
+      "eigenpair_backward_error_max": 1.6505479870684257e-16,
+      "max_real_per_s": 2.5491306759832552e-14
+    },
+    "ieee118": {
+      "total_seconds": 11.223888619002537,
+      "build_seconds": 4.030456476990366,
+      "ssa_seconds": 2.112725088998559,
+      "matrix_build_seconds": 0.536413348003407,
+      "finite_modes": 432,
+      "descriptor_dimension": 3510,
+      "reduced_dimension": 432,
+      "initial_residual_inf": 4.083400284571326e-13,
+      "symbolic_initial_residual_inf": 4.083400284571326e-13,
+      "representation_error_inf": 9.769962616701378e-15,
+      "power_flow_voltage_difference_inf": 0.0,
+      "eigenpair_backward_error_max": 9.491077398221757e-16,
+      "max_real_per_s": 0.3414578033744313
+    }
+  },
+  "verification_seconds": 20.023188777006
+}
