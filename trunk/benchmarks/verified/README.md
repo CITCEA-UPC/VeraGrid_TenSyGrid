@@ -36,6 +36,21 @@ not certification of an exact periodic orbit or of every physical-model
 assumption. No outages, redispatch or extra independent terminal devices were
 introduced. IEEE39's stored fBase is 50 Hz; IEEE118's is 60 Hz.
 
+## Fastest verified runs
+
+![Fastest verified EMT SSA total times](fastest_runs.png)
+
+Only the minimum observed total for each grid from this verification is shown:
+IEEE39 **23.89 s** (S/Phi) and IEEE118 **87.60 s** (native DAE). This is a selection
+of individual observed runs, not a claim that the selected backend is always
+faster. [SVG export](fastest_runs.svg).
+
+Regenerate directly from the committed summary:
+
+```sh
+python trunk/benchmarks/plot_fastest_runs.py
+```
+
 ## Fresh observations
 
 | Grid/backend | Total (s) | Construction (s) | SSA incl. capture (s) | Scaled cycle closure | Largest real exponent (/s) |
