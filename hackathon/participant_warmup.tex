@@ -1,0 +1,299 @@
+% !TEX program = lualatex
+% Compile from hackathon/: lualatex participant_warmup.tex
+\documentclass[10pt,a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[a4paper,margin=20mm,headheight=16pt,headsep=8mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Raleway}[
+  Path=./fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold,
+  ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\usepackage{amsmath,amssymb,booktabs,tabularx,enumitem,graphicx}
+\usepackage{xcolor,microtype,titlesec,fancyhdr,lastpage}
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tglime}{HTML}{B2D235}
+\usepackage[colorlinks=true,urlcolor=tgpetrol,linkcolor=tgblue]{hyperref}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\textcolor{tgpetrol}{\textbf{TenSyGrid $\times$ VeraGrid}}\enspace|\enspace Warm-up worksheet}
+\rhead{\small 26 November 2026}
+\cfoot{\small\thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\titleformat{\section}{\large\bfseries\color{tgblue}}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{11pt}{5pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=*,topsep=3pt,itemsep=2pt,parsep=0pt}
+\setlist[enumerate]{leftmargin=*,topsep=3pt,itemsep=3pt,parsep=0pt}
+
+% Blank cell for hand-filling a small matrix: \anscell
+\newcommand{\anscell}{\rule{5em}{0.5pt}}
+
+% Ruled writing space: \answerlines{3} prints three blank lines.
+\newcount\anslinecount
+\newcommand{\answerlines}[1]{%
+  \par\vspace{2pt}%
+  \anslinecount=0\relax
+  \loop
+    \ifnum\anslinecount<#1
+      \noindent\rule{\textwidth}{0.4pt}\par\vspace{24pt}%
+      \advance\anslinecount by 1\relax
+  \repeat
+  \par\vspace{2pt}}
+
+% Mentors: change to \answerkeytrue to print the answer key at the end.
+\newif\ifanswerkey
+\answerkeyfalse
+
+\begin{document}
+\noindent
+\begin{minipage}[c]{0.73\textwidth}
+  {\fontsize{23}{27}\selectfont\bfseries\color{tgblue}Reconstruct the function}\par
+  {\large\color{tgpetrol}Warm-up worksheet | 09:15--10:15}\par
+  {\small Participant worksheet | First draft, version 0.1}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.23\textwidth}
+  \raggedleft
+  \includegraphics[height=1.0cm]{./config/tglogo.pdf}\par\vspace{4pt}
+  \includegraphics[height=0.55cm]{./config/UPC-logo.pdf}\hspace{8pt}%
+  \includegraphics[height=0.9cm]{./config/eRoots-logo.pdf}
+\end{minipage}
+\par\vspace{5pt}{\color{tglime}\hrule height 2pt}\vspace{6pt}
+
+\section{Introduction}\label{sec:warmup}
+\textbf{This one-hour warm-up is ungraded and does not contribute to the final score.}
+Given a structural matrix $\mathbf{S}$ and a coefficient matrix $\boldsymbol{\Phi}$,
+\textbf{reconstruct the vector-valued function $\mathbf f$ that they encode}:
+\[
+ \boxed{\quad \mathbf f(\mathbf x)=\boldsymbol{\Phi}\,\mathbf m(\mathbf x)=\mathbf{0},\qquad
+ \mathbf f=(f_1,\ldots,f_E)^\mathsf T=\mathbf{0}.\quad\textrm{(implicit system of equations)}\quad}
+\]
+The inputs defining the function are $\mathbf{S}$ and $\boldsymbol{\Phi}$. The variables
+$\mathbf x=(x_1,\ldots,x_N)^\mathsf T$ follow the row order of $\mathbf{S}$;
+numerical values of $\mathbf x$ are supplied only when evaluating the function.
+
+\paragraph{Matrix convention.}
+Let $N$ be the number of variables, $M$ the number of product terms (monomials), and $E$ the
+number of equations. The input dimensions are
+\[
+ \mathbf x\in\mathbb R^N,\qquad \mathbf{S}\in\mathbb R^{N\times M},\qquad
+ \boldsymbol{\Phi}\in\mathbb R^{E\times M}.
+\]
+\textbf{Rows of $\mathbf{S}$ identify variables; columns identify terms.} Column $j$ of
+$\mathbf{S}$ and column $j$ of $\boldsymbol{\Phi}$ refer to the same term. Row $k$ of $\boldsymbol{\Phi}$ supplies
+its coefficients in equation $k$. Preserve the supplied variable order.
+
+In TenSyGrid's CPN formulation, $\mathbf{S}$ is binary and the monomials are nonnegative:
+\[
+ a_{ij}(\mathbf x)=S_{ij}x_i+1-S_{ij},\qquad S_{ij}\in\{0,1\},
+ \qquad m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
+ f_k(\mathbf x)=\sum_{j=1}^{M}\Phi_{kj}m_j(\mathbf x).
+\]
+An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$.
+Entries encode factors, \textbf{not powers}, and each column simply selects
+which variables appear in a monomial. An all-zero column represents the
+constant term 1. Each variable appears at most once in a term, so the
+representation is multi-affine in $\mathbf x$. \textbf{Any minus sign belongs to
+the coefficient in $\boldsymbol{\Phi}$, never to the monomial.}
+
+\paragraph{Reconstruction and example.}
+For each column of $\mathbf{S}$, build its product term. Multiply by the corresponding
+coefficients in each row of $\boldsymbol{\Phi}$, then sum to obtain each component $f_k$. Reconstructing $\mathbf f$ does not
+require solving $\mathbf f(\mathbf x)=\mathbf 0$.
+
+\textbf{Worked example.} For $\mathbf x=(x_1,x_2)^\mathsf T$, take
+\[
+ \mathbf{S}=\begin{pmatrix}0&1&0&1\\0&0&1&1\end{pmatrix},\qquad
+ \boldsymbol{\Phi}=\begin{pmatrix}-1&1&0&2\\0&0&3&-1\end{pmatrix}.
+\]
+Then $\mathbf m=(1,x_1,x_2,x_1x_2)^\mathsf T$, giving
+\[
+ \boxed{\quad f_1(\mathbf x)=-1+x_1+2x_1x_2,\qquad
+ f_2(\mathbf x)=3x_2-x_1x_2.\quad}
+\]
+At $\mathbf x=(1,2)^\mathsf T$, the expected output is $\mathbf f(1,2)=(4,4)^\mathsf T$.
+
+\paragraph{Check your result.}
+At 10:15, compare your expressions and evaluator with the reference results and
+ask mentors about any differences before moving to grid optimisation. There is
+no graded warm-up submission. Check constant terms, zero-valued inputs, signed
+coefficients and rectangular systems. Work with the $M$ supplied columns rather than
+building all $2^N$ possible monomials.
+
+\newpage
+\section{Practice case: from \texorpdfstring{$\mathbf{S}$ and $\boldsymbol{\Phi}$}{S and Phi} to the equations}\label{sec:practice}
+The same convention applies, now with the variable vector
+\[
+ \mathbf v=(\dot x_1,\;x_1,\;u_1,\;y_1,\;z_1)^\mathsf T,
+\]
+so $N=5$, $M=7$ and $E=2$. The state derivative $\dot x_1$ is a variable in its
+own right: the first equation is implicit because it contains the product
+$\dot x_1\,y_1$. The supplied structural and coefficient matrices are
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+\setlength{\arraycolsep}{8pt}
+\[
+ \mathbf{S}=\begin{pmatrix}
+  1&0&0&0&0&1&0\\
+  0&1&1&1&1&0&0\\
+  0&0&1&1&0&0&0\\
+  1&0&0&0&0&0&1\\
+  0&1&0&1&0&0&0
+ \end{pmatrix},\qquad
+ \boldsymbol{\Phi}=\begin{pmatrix}
+   3& 2&-1&-1& 2& 0& 0\\
+   0& 0& 0& 0& 0& 1&-1
+ \end{pmatrix}.
+\]
+\endgroup
+Reconstruct the two residual equations $0=f_1(\mathbf v)$ and $0=f_2(\mathbf v)$
+encoded by these matrices.
+
+\paragraph{(a) Product terms.} Read each column of $\mathbf{S}$ and write the
+corresponding factor product $m_j$:
+\par\vspace{3pt}
+\begingroup
+\renewcommand{\arraystretch}{1.8}
+\begin{tabularx}{\textwidth}{@{}c X@{}}
+\toprule
+\textbf{Column} & \textbf{Product term $m_j(\mathbf v)$}\\
+\midrule
+$1$ & \\
+$2$ & \\
+$3$ & \\
+$4$ & \\
+$5$ & \\
+$6$ & \\
+$7$ & \\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+\paragraph{(b) Residual equations.} Multiply each term by the coefficient in
+the corresponding row of $\boldsymbol{\Phi}$, then simplify:
+\vspace{2pt}
+\par\noindent $0=f_1(\mathbf v)=$~\hrulefill
+\par\vspace{14pt}\noindent\rule{\textwidth}{0.4pt}
+\par\vspace{18pt}
+\par\noindent $0=f_2(\mathbf v)=$~\hrulefill
+\vspace{18pt}
+
+\paragraph{(c) Equilibrium check.} Verify that the residuals vanish at the
+equilibrium point $\mathbf v=(2,2,3,2,5)^\mathsf T$:
+\vspace{2pt}
+\par\noindent $f_1(2,2,3,2,5)=$~\hrulefill
+\vspace{14pt}
+\par\noindent $f_2(2,2,3,2,5)=$~\hrulefill
+\vspace{14pt}
+
+\newpage
+\section{Inverse exercise: from equations to \texorpdfstring{$\mathbf{S}$ and $\boldsymbol{\Phi}$}{S and Phi}}\label{sec:inverse}
+Now reverse the direction. You are given the two residual equations
+\begin{align*}
+  0 &= 2 + 3x_1x_2 - 4u_1,\\
+  0 &= -1 - x_1x_2 + 5x_2,
+\end{align*}
+with variable vector $\mathbf v=(x_1,x_2,u_1)^\mathsf T$, so $N=3$ and $E=2$.
+Write them as $\mathbf 0=\boldsymbol{\Phi}\,\mathbf m(\mathbf x)$ using exactly the four
+factors, in this order,
+\[
+ \mathbf m(\mathbf v)=\bigl(1,\;x_1x_2,\;u_1,\;x_2\bigr)^\mathsf T,
+\]
+so $M=4$. Entries of $\mathbf{S}$ are only 0 or 1: a 1 means that the variable appears in
+the monomial, an all-zero column gives the constant factor 1, and every minus
+sign is placed in $\boldsymbol{\Phi}$.
+
+\paragraph{(a) Structural matrix $\mathbf{S}$.} Rows follow $\mathbf v=(x_1,x_2,u_1)$;
+columns follow the prescribed factor order:
+\begingroup
+\renewcommand{\arraystretch}{2}
+\setlength{\arraycolsep}{16pt}
+\[
+ \mathbf{S}=\begin{pmatrix}
+  \anscell&\anscell&\anscell&\anscell\\[18pt]
+  \anscell&\anscell&\anscell&\anscell\\[18pt]
+  \anscell&\anscell&\anscell&\anscell
+ \end{pmatrix}
+\]
+\endgroup
+\vspace{6pt}
+
+\paragraph{(b) Coefficient matrix $\boldsymbol{\Phi}$.} Row $k$ holds the coefficients of
+equation $k$; column $j$ refers to the same factor as column $j$ of $\mathbf{S}$:
+\begingroup
+\renewcommand{\arraystretch}{2}
+\setlength{\arraycolsep}{16pt}
+\[
+ \boldsymbol{\Phi}=\begin{pmatrix}
+  \anscell&\anscell&\anscell&\anscell\\[18pt]
+  \anscell&\anscell&\anscell&\anscell
+ \end{pmatrix}
+\]
+\endgroup
+\vspace{6pt}
+
+\paragraph{(c) Check.} Expand $\boldsymbol{\Phi}\,\mathbf m(\mathbf v)$ and confirm that you
+recover both equations:
+\answerlines{2}
+
+\vfill
+{\footnotesize\color{tggraphit}First draft for review. Final submission details and evaluation conventions
+will be confirmed before the event.\par
+Universitat Polit\`ecnica de Catalunya | CETPartnership Horizon Europe (GA 101069750)}
+
+\ifanswerkey
+\newpage
+\section*{Mentor answer key --- do not distribute}
+\addcontentsline{toc}{section}{Mentor answer key}
+With the column order used above,
+\[
+ \mathbf m(\mathbf v)=(v_1v_4,\;v_2v_5,\;v_2v_3,\;v_2v_3v_5,\;v_2,\;v_1,\;v_4)^\mathsf T,
+\]
+that is,
+\[
+ \mathbf m(\mathbf v)=(\dot x_1y_1,\;z_1x_1,\;u_1x_1,\;u_1z_1x_1,\;x_1,\;\dot x_1,\;y_1)^\mathsf T.
+\]
+Therefore
+\[
+ \boxed{\quad
+ \begin{aligned}
+  0 &= 3\dot x_1 y_1 + 2z_1 x_1 - u_1 x_1 - u_1 z_1 x_1 + 2x_1,\\
+  0 &= \dot x_1 - y_1.
+ \end{aligned}\quad}
+\]
+At the equilibrium $\mathbf v=(2,2,3,2,5)^\mathsf T$,
+$\mathbf m=(4,10,6,30,2,2,2)^\mathsf T$ and
+$\boxed{\;f_1=0,\quad f_2=0\;}$: the point satisfies $\dot x_1=y_1=2$ and
+$3\dot x_1y_1+x_1(2z_1-u_1-u_1z_1+2)=12-12=0$.
+Common pitfalls: confusing $\dot x_1$ with $x_1$, forgetting that an entry
+$S_{ij}=0$ contributes a factor 1, putting a minus sign in $\mathbf{S}$ instead of
+$\boldsymbol{\Phi}$, and taking coefficients from the wrong row of $\boldsymbol{\Phi}$.
+
+\section*{Inverse exercise --- solution}
+With the prescribed column order $(1,x_1x_2,u_1,x_2)$,
+\[
+ \mathbf{S}=\begin{pmatrix}
+  0&1&0&0\\
+  0&1&0&1\\
+  0&0&1&0
+ \end{pmatrix},\qquad
+ \boldsymbol{\Phi}=\begin{pmatrix}
+  2& 3&-4&0\\
+ -1&-1& 0&5
+ \end{pmatrix}.
+\]
+Indeed,
+\[
+ \boldsymbol{\Phi}\,\mathbf m(\mathbf x)=
+ \begin{pmatrix}
+  2+3x_1x_2-4u_1\\
+  -1-x_1x_2+5x_2
+ \end{pmatrix}.
+\]
+Fixing the order of $\mathbf m$ makes the answer unique; the minus signs are
+coefficients in $\boldsymbol{\Phi}$, not part of the monomials.
+\fi
+
+\end{document}
