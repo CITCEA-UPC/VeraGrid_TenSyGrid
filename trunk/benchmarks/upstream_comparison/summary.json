@@ -1,0 +1,28 @@
+{
+  "upstream_commit": "37e7d867ba8241b03c5e0208cbec606ca3b90534",
+  "ieee39_before": {
+    "total_seconds": 65.74098850099836,
+    "build_seconds": 37.55132694699569,
+    "ssa_seconds": 18.590699485997902
+  },
+  "ieee39_optimized": {
+    "total_seconds": 30.047160354995867,
+    "build_seconds": 0.8619593589974102,
+    "ssa_seconds": 20.665630495001096
+  },
+  "upstream_ieee39": {
+    "status": "timeout",
+    "stage": "build_problem",
+    "parent_wall_seconds": 180.06937543700042
+  },
+  "ieee118_optimized": {
+    "status": "failed",
+    "build_seconds": 14.136735128995497,
+    "total_seconds": 28.560790918010753,
+    "stage": "ssa"
+  },
+  "agreement": {
+    "trajectory_max_abs_difference": 0.0,
+    "matched_mode_max_abs_difference_per_s": 0.0
+  }
+}

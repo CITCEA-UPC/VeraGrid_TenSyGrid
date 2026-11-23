@@ -1,0 +1,49 @@
+Mon Nov 23 12:43:52 2026    trunk/benchmarks/upstream_comparison/downstream_baseline.prof
+
+         374105419 function calls (370167303 primitive calls) in 176.652 seconds
+
+   Ordered by: cumulative time
+   List reduced from 18546 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   5268/1    0.156    0.000  176.763  176.763 {built-in method builtins.exec}
+        1    0.000    0.000  176.763  176.763 multilinear_ssa.py:1(<module>)
+        1    0.000    0.000  176.737  176.737 multilinear_ssa.py:278(main)
+        1    0.001    0.001  176.550  176.550 multilinear_ssa.py:121(run_case)
+        1    0.000    0.000  136.236  136.236 small_signal_stability_emt_driver.py:287(__init__)
+        1    0.000    0.000  136.236  136.236 emt_problem_factory.py:25(build_emt_problem)
+        1    0.000    0.000  136.236  136.236 emt_problem_multilinear.py:41(__init__)
+        1    0.017    0.017  136.236  136.236 emt_problem_dae.py:1357(__init__)
+   111/30    0.004    0.000  132.641    4.421 dispatcher.py:862(compile)
+     24/3    0.000    0.000  131.478   43.826 dispatcher.py:79(compile)
+     24/3    0.000    0.000  131.478   43.826 dispatcher.py:86(_compile_cached)
+     24/3    0.008    0.000  131.478   43.826 dispatcher.py:101(_compile_core)
+     24/3    0.000    0.000  131.471   43.824 compiler.py:713(compile_extra)
+     29/3    0.000    0.000  131.466   43.822 compiler.py:433(compile_extra)
+ 6095/358    0.019    0.000  131.311    0.367 compiler_lock.py:32(_acquire_compile_lock)
+     29/3    0.000    0.000  130.968   43.656 compiler.py:500(_compile_bytecode)
+     29/3    0.001    0.000  130.968   43.656 compiler.py:456(_compile_core)
+     29/3    0.006    0.000  130.965   43.655 compiler_machinery.py:342(run)
+   783/81    0.030    0.000  130.960    1.617 compiler_machinery.py:267(_runPass)
+ 2349/243    0.009    0.000  130.884    0.539 compiler_machinery.py:271(check)
+  385/343    0.003    0.000  128.336    0.374 decorators.py:204(wrapper)
+        2    0.001    0.000  127.677   63.838 initialization_emt.py:2714(_compute_missing_dx0)
+        2    0.000    0.000  127.255   63.628 initialization_emt.py:556(_load_or_build_state_rhs_vector)
+        1    0.000    0.000  127.246  127.246 initialization_emt.py:327(__init__)
+    29/14    0.005    0.000  109.913    7.851 typed_passes.py:439(run_pass)
+
+
+Mon Nov 23 12:43:52 2026    trunk/benchmarks/upstream_comparison/downstream_baseline.prof
+
+         374105419 function calls (370167303 primitive calls) in 176.652 seconds
+
+   Ordered by: cumulative time
+   List reduced from 18546 to 4 due to restriction <'get_x0|get_dx0|_compute_missing_dx0|_load_or_build_state_rhs_vector'>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        2    0.001    0.000  127.677   63.838 initialization_emt.py:2714(_compute_missing_dx0)
+        2    0.000    0.000  127.255   63.628 initialization_emt.py:556(_load_or_build_state_rhs_vector)
+     2219    4.265    0.002    4.964    0.002 emt_problem_template.py:1493(get_x0)
+      624    0.328    0.001    0.369    0.001 emt_problem_template.py:1513(get_dx0)
+
+

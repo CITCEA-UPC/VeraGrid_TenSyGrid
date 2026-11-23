@@ -601,10 +601,10 @@ def _load_or_build_state_rhs_vector(
     else:
         pass
 
-    if len(missing_state_eqs) <= 16:
-        use_jit_for_state_rhs: bool = False
-    else:
-        use_jit_for_state_rhs = True
+    # Initial derivative completion evaluates this vector only a few times.
+    # Compiling a network-sized kernel costs far more than those evaluations;
+    # retain compiled integration kernels separately in the EMT solver.
+    use_jit_for_state_rhs: bool = False
 
     source_code: str = _build_state_rhs_source(
         missing_state_eqs,
@@ -1061,7 +1061,7 @@ def _build_state_rhs_cache_key(problem: EmtProblemTemplate, state_eqs: List[Expr
         index += 1
 
     payload: str = "|".join([
-        "state-rhs-vector",
+        "state-rhs-vector-python-v2",
         problem.VARS_NAME,
         problem.DIFF_NAME,
         problem.VARIABLE_PARAMS_NAME,

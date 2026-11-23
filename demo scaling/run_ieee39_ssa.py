@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exploratory IEEE-39 RMS and EMT SSA on the stable RMS operating point.
 
-RMS uses the models saved in hackaton_files/grids/ieee39_rms.veragrid.
+RMS uses the models saved in hackathon_files/grids/ieee39_rms.veragrid.
 EMT attaches the existing simple-generator, pi-line, and constant-power ZIP
 templates to a fresh load of that same network and dispatch. These are not
 equivalent generator models; separate stability results must be reported.
@@ -34,7 +34,7 @@ from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriv
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_driver import SmallSignalStabilityRmsDriver
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_options import RmsSmallSignalStabilityOptions
 
-GRID = ROOT / "hackaton_files/grids/ieee39_rms.veragrid"
+GRID = ROOT / "hackathon_files/grids/ieee39_rms.veragrid"
 STATIC_GRID = ROOT / "Grids_and_profiles/grids/IEEE39.gridcal"
 OUT = Path(__file__).resolve().parent
 

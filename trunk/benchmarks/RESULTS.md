@@ -198,3 +198,103 @@ python trunk/benchmarks/multilinear_ssa.py --grid ieee39 --formulation emt \
 The sweep keeps existing caches and defaults BLAS/OpenMP to one thread unless
 the environment explicitly sets otherwise. Single trials include cold/warm
 cache differences and process startup; they are exploratory measurements.
+
+## Initialization acceleration and pinned upstream trial
+
+### Concrete optimization
+
+Profiling found repeated compilation of the state-RHS function used only to
+complete initial derivatives (`_compute_missing_dx0`). The profiled old run
+made 374 million calls and took 176.55 seconds; 127.68 seconds were inside
+that initialization helper, dominated by Numba compilation. Profiling adds
+overhead: **176.55 seconds is not the ordinary baseline runtime**.
+
+The implementation now uses the existing generated Python evaluator for this
+initialization-only function, instead of eagerly JIT-compiling large RHS
+vectors. The persistent cache key was versioned so old JIT-enabled payloads
+cannot silently restore that policy. Integration solver kernels remain compiled.
+Initial-state and derivative vectors are also snapshotted once when building
+final UID bindings, replacing per-UID full-vector rebuilds. The latter accounted
+for about 5.33 seconds combined in the profiled run, much less than compilation.
+
+| Downstream IEEE39, six modes / 120 steps / one assessment period | Before (s) | Optimized (s) |
+| --- | ---: | ---: |
+| DAE build | 37.551 | 0.862 |
+| Complete SSA | 18.591 | 20.666 |
+| End-to-end | 65.741 | 30.047 |
+
+These single unprofiled observations show about
+2.19x lower end-to-end runtime and
+43.6x lower build time. They are not
+controlled repeated trials: the optimized trial loaded saved model blocks,
+whereas the earlier baseline attached them from templates. The decisive
+numerical check is that the captured **121 x 2122 trajectory values and all six
+matched modes are identical** in the saved before/after output comparison
+(maximum recorded differences both zero). Initialization residual and periodicity
+caveats are unchanged. Twenty-four tests passed, including real EMT residual,
+Jacobian, and short-trajectory checks across all four backends.
+
+IEEE118 now builds in **14.137 seconds**, compared with
+previous whole-case timeouts. The run reaches SSA but fails trajectory capture
+(failed, nonfinite, or incomplete history) and exits after
+**28.561 seconds**. It returns no modes; this is an exposed
+numerical initialization/capture issue, not a successful stability analysis.
+Its explicit initialization residual is approximately
+14.607.
+
+Evidence: [optimization summary](upstream_comparison/summary.json),
+[optimized IEEE39](upstream_comparison/downstream_optimized/ieee39_emt.json),
+[before/after agreement](upstream_comparison/downstream_optimized/agreement.json),
+[optimized IEEE118](upstream_comparison/downstream_optimized_ieee118/ieee118_emt.json),
+[profile summary](upstream_comparison/profile_summary.txt),
+[24-test output](upstream_comparison/regression_tests.log).
+
+### What happened on upstream?
+
+Pinned upstream: [SanPen/VeraGrid `37e7d867`, version 6.8.5](https://github.com/SanPen/VeraGrid/commit/37e7d867ba8241b03c5e0208cbec606ca3b90534).
+A source snapshot was downloaded into `/tmp/veragrid-upstream-37e7d867`;
+neither the upstream snapshot nor the sibling user checkout was patched.
+The upstream and optimized downstream trials load the same saved IEEE39 grid
+and downstream-defined multilinear device blocks, rather than different model
+defaults. Input SHA-256:
+`91297e9c35bfdb954e55dbf664f3ed58f7aef3be3f8d5679d65f1505e1cc569c`.
+
+Upstream did **not** complete within the **180-second whole-process limit**
+(measured parent wall time 180.069 s). Its last saved
+phase was **DAE construction**, so there is no measured completed upstream SSA
+time or mode set. This is a lower-bound/timeout observation, not proof of an
+intrinsic downstream-versus-upstream speed ratio. No upstream IEEE118 timing
+was measured in this experiment.
+
+A strict public-API comparison is also unavailable at this revision:
+
+- Upstream SSA options lack `consistent_dae_tangent`. The native trial explicitly
+  disables that downstream feature.
+- Upstream SSA accepts one `pf_results` argument, not the downstream separate
+  balanced and three-phase inputs. The native driver received the balanced
+  result after both power flows were checked by the harness.
+- Upstream's public SSA constructor directly creates `EmtProblemDae`, ignoring
+  the requested multilinear problem selection. Its native Floquet path therefore
+  does not match the downstream `EmtProblemMultilinear` S/Phi and consistent-tangent
+  path. The saved devices still have multilinear equations.
+
+Two preliminary harness attempts stopped on those unsupported API arguments;
+they are saved separately in `upstream` and `upstream_native`, and are **excluded
+from timing comparisons**. The actual compatible native attempt is
+[recorded here](upstream_comparison/upstream_native_compatible/ieee39_emt.json),
+with its [log](upstream_comparison/upstream_native_compatible/ieee39_emt.log).
+Upstream contains the same eager initialization JIT and repeated-vector code,
+but no upstream speedup was inferred from source inspection alone.
+
+To repeat using a checkout of that pinned upstream revision:
+
+```bash
+python trunk/benchmarks/multilinear_ssa.py --grid ieee39 --formulation emt \
+  --engine-root /path/to/upstream --reuse-models --no-consistent-tangent \
+  --grid-file trunk/benchmarks/upstream_comparison/ieee39_multilinear.veragrid \
+  --steps-per-period 120 --assessment-periods 1 --modes 6 --output /tmp/upstream-result
+```
+
+The single-case command itself has no wall-clock cap; the recorded experiment
+used a parent subprocess timeout of 180 seconds. `--all --timeout` enforces
+per-case limits for the ordinary batch runner.

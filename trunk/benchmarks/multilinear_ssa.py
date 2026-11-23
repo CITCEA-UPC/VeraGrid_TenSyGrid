@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import inspect
 import platform
 import json
 import os
@@ -122,6 +123,7 @@ def run_case(args, record):
     import numpy as np
     import VeraGridEngine.api as vge
     from VeraGridEngine.Simulations.Rms.problems.rms_problem_multilinear import RmsProblemMultilinear
+    from VeraGridEngine.Simulations.EMT.problems.emt_problem_multilinear import EmtProblemMultilinear
     from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_driver import run_dense_small_signal_stability, run_sparse_small_signal_stability
     from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_driver import SmallSignalStabilityEmtDriver
     from VeraGridEngine.Simulations.SmallSignalStabilityEmt.small_signal_stability_emt_options import SmallSignalStabilityEmtOptions
@@ -212,18 +214,29 @@ def run_case(args, record):
         ssa = SmallSignalStabilityEmtOptions(
             k=args.modes, target_period=period, ss_assessment_time=options.simulation_time,
             max_krylov_dim=max(30, 2 * args.modes), max_restarts=1,
-            consistent_dae_tangent=True, build_type=SmallSignalEmtBuildTypes.Arnoldi)
+            build_type=SmallSignalEmtBuildTypes.Arnoldi)
+        if args.consistent_tangent:
+            if 'consistent_dae_tangent' not in type(ssa).__slots__:
+                raise RuntimeError('This engine lacks consistent DAE tangents; use --no-consistent-tangent for its native SSA path')
+            ssa.consistent_dae_tangent = True
+        record['consistent_dae_tangent_requested'] = args.consistent_tangent
         start = time.perf_counter()
         class TimedEmtDriver(SmallSignalStabilityEmtDriver):
             def _capture_limit_cycle_and_evaluator(self, h, verbose=0):
                 capture_start = time.perf_counter()
                 try:
-                    return super()._capture_limit_cycle_and_evaluator(h, verbose)
+                    captured = super()._capture_limit_cycle_and_evaluator(h, verbose)
+                    self.benchmark_trajectory = captured[0]
+                    self.benchmark_derivatives = captured[1] if len(captured) == 6 else np.empty((0, 0))
+                    return captured
                 finally:
                     record['trajectory_and_jacobian_setup_seconds'] = time.perf_counter() - capture_start
 
-        driver = TimedEmtDriver(grid=grid, emt_options=options,
-            sss_options=ssa, pf_results=pf.results, pf_results_3ph=pf3.results)
+        driver_arguments = dict(grid=grid, emt_options=options,
+                                sss_options=ssa, pf_results=pf.results)
+        if 'pf_results_3ph' in inspect.signature(SmallSignalStabilityEmtDriver.__init__).parameters:
+            driver_arguments['pf_results_3ph'] = pf3.results
+        driver = TimedEmtDriver(**driver_arguments)
         problem = driver.problem
         record.update(problem_class=type(problem).__name__, states=problem.get_states_number(),
                       algebraics=problem.get_algebraic_var_number(),
@@ -231,7 +244,8 @@ def run_case(args, record):
         record['build_seconds'] = time.perf_counter() - start
         record['emt_build_breakdown'] = problem.get_build_report()
         record['trajectory_solver_actual'] = args.emt_solver
-        record['floquet_jacobian_actual'] = 'EmtProblemMultilinear S/Phi adapter'
+        record['floquet_jacobian_actual'] = ('EmtProblemMultilinear S/Phi adapter'
+            if isinstance(problem, EmtProblemMultilinear) else 'Native solver discrete Jacobian')
         report = problem.initialization_report
         record['initialization_report'] = dict(status=str(report.status),
             initial_residual_inf=float(report.initial_residual_inf),
@@ -247,7 +261,7 @@ def run_case(args, record):
             raise RuntimeError('EMT SSA returned no results: ' + str(driver.logger))
         values = driver.results.eigenvalues
         multipliers = driver.results.multipliers
-        trajectory = driver.last_period_trajectory
+        trajectory = driver.benchmark_trajectory
         if trajectory is not None and len(trajectory) > 1:
             from VeraGridEngine.Simulations.EMT.initialization_emt import _emt_is_absolute_angle
             closure = trajectory[-1] - trajectory[0]
@@ -257,7 +271,8 @@ def run_case(args, record):
             scales = np.maximum(1.0, np.max(np.abs(trajectory), axis=0))
             record['last_period_scaled_closure_inf'] = float(np.max(np.abs(closure) / scales))
             record['periodicity_validated'] = False
-            np.savez_compressed(args.output / f'{args.grid}_emt_trajectory.npz', trajectory=trajectory)
+            np.savez_compressed(args.output / f'{args.grid}_emt_trajectory.npz',
+                                trajectory=trajectory, derivatives=driver.benchmark_derivatives)
     record.update(ssa_seconds=time.perf_counter() - start,
                   problem_class=type(problem).__name__, states=problem.get_states_number(),
                   algebraics=problem.get_algebraic_var_number(),
@@ -288,6 +303,7 @@ def main():
     parser.add_argument('--reuse-models', action='store_true', help='Use models saved in the input grid')
     parser.add_argument('--grid-file', help='Override the input case without altering its dispatch')
     parser.add_argument('--formulation', choices=['rms', 'emt'], default='rms')
+    parser.add_argument('--consistent-tangent', action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument('--emt-solver', choices=['StructuralAD', 'StructuralCompiled', 'Symbolic', 'Automatic'],
                         default='StructuralAD')
     parser.add_argument('--all', action='store_true', help='Run all four combinations in isolated processes')
@@ -318,6 +334,8 @@ def main():
                            '--formulation', formulation, '--emt-solver', args.emt_solver, '--output', str(args.output), '--timeout', str(args.timeout),
                            '--modes', str(args.modes), '--rms-spectrum', args.rms_spectrum, '--rms-init', args.rms_init, '--steps-per-period', str(args.steps_per_period),
                            '--assessment-periods', str(args.assessment_periods)]
+                if not args.consistent_tangent:
+                    command.append('--no-consistent-tangent')
                 if args.engine_root:
                     command.extend(['--engine-root', str(args.engine_root)])
                 if args.reuse_models:

@@ -1,0 +1,46 @@
+--- a/src/VeraGridEngine/Simulations/EMT/initialization_emt.py
++++ b/src/VeraGridEngine/Simulations/EMT/initialization_emt.py
+@@ -604,10 +604,10 @@
+     else:
+         pass
+ 
+-    if len(missing_state_eqs) <= 16:
+-        use_jit_for_state_rhs: bool = False
+-    else:
+-        use_jit_for_state_rhs = True
++    # Initial derivative completion evaluates this vector only a few times.
++    # Compiling a network-sized kernel costs far more than those evaluations;
++    # retain compiled integration kernels separately in the EMT solver.
++    use_jit_for_state_rhs: bool = False
+ 
+     source_code: str = _build_state_rhs_source(
+         missing_state_eqs,
+@@ -1064,7 +1064,7 @@
+         index += 1
+ 
+     payload: str = "|".join([
+-        "state-rhs-vector",
++        "state-rhs-vector-python-v2",
+         problem.VARS_NAME,
+         problem.DIFF_NAME,
+         problem.VARIABLE_PARAMS_NAME,
+--- a/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py
++++ b/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py
+@@ -1787,11 +1787,15 @@
+             # a PF-seeded algebraic reference changes late in initialization.
+             # Evaluate the final equations against the final UID bindings so
+             # the derivatives used by the first integration step match x0.
++            # Snapshot each complete vector once. Rebuilding it for every UID
++            # makes assembling these bindings quadratic in the network size.
++            final_x0: np.ndarray = self.get_x0()
++            final_dx0: np.ndarray = self.get_dx0()
+             final_bindings: Dict[int, float] = {
+-                uid: float(self.get_x0()[idx]) for uid, idx in self.uid2idx_vars.items()
++                uid: float(final_x0[idx]) for uid, idx in self.uid2idx_vars.items()
+             }
+             final_bindings.update({
+-                uid: float(self.get_dx0()[idx]) for uid, idx in self.uid2idx_diff.items()
++                uid: float(final_dx0[idx]) for uid, idx in self.uid2idx_diff.items()
+             })
+             final_bindings.update({
+                 uid: float(self.event_params_values[idx])
