@@ -1,0 +1,129 @@
+% !TEX program = xelatex
+% Compile from plenary/: xelatex -no-shell-escape indications.tex
+% Run twice after changing copy counts to update TikZ page positions.
+% COPIES TO PRINT: edit these non-negative integers, then compile.
+% Use 0 to omit a sign. Copies of each sign are grouped together.
+\providecommand{\CopiesAhead}{1}     % Endavant
+\providecommand{\CopiesRight}{2}     % Dreta
+\providecommand{\CopiesLeft}{1}      % Esquerra
+\providecommand{\CopiesHackathon}{1} % Cartell de la hackathon
+\providecommand{\CopiesPlenary}{1}   % Cartell del plenary
+
+\documentclass[a4paper,landscape]{article}
+\usepackage[margin=0mm]{geometry}
+% Use the same Raleway font files as tensygrid.sty.
+\usepackage{fontspec}
+\IfFileExists{tensygrid-latex-package/fonts/Raleway-Regular.ttf}{%
+  \def\TenSyGridFonts{tensygrid-latex-package/fonts/}%
+}{%
+  \def\TenSyGridFonts{plenary/tensygrid-latex-package/fonts/}%
+}
+\setmainfont{Raleway}[
+  Path=\TenSyGridFonts,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic]
+\usepackage{graphicx}
+\usepackage{tikz}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tggrey}{HTML}{A6BBC8}
+\definecolor{tglime}{HTML}{B2D235}
+
+% Edit the room names here; they are shared by all signs.
+\newcommand{\HackathonRoom}{InnoEnergy Room}
+\newcommand{\PlenaryRoom}{Room LS5}
+\graphicspath{{tensygrid-latex-package/config/}{plenary/tensygrid-latex-package/config/}{assets/}{plenary/assets/}}
+% Official source: https://citcea.upc.edu/ca/shared/logos/logocitceaupc.png
+\newcommand{\CITCEALogo}{%
+  \node[anchor=north,inner sep=0pt] at (158,-12)
+    {\includegraphics[width=70mm]{citcea-upc.png}};%
+}
+
+% #1: arrow rotation (0 = right, 90 = straight ahead, 180 = left).
+\newcommand{\DirectionSign}[1]{%
+  \null
+  \begin{tikzpicture}[remember picture,overlay,x=1mm,y=1mm]
+    \begin{scope}[shift={(current page.north west)}]
+      % Header treatment from tensygrid-certificate.tex.
+      \fill[tgpetrol] (0,0) rectangle (297,-3);
+      \fill[tglime] (255,0) rectangle (297,-3);
+      \node[anchor=north west,inner sep=0pt] at (20,-14)
+        {\includegraphics[width=90mm]{tglogo.pdf}};
+      \CITCEALogo
+      \node[anchor=north east,inner sep=0pt,text=tggraphit,
+            font=\fontsize{32}{38}\selectfont\bfseries] at (281,-20)
+        {Pavilion L};
+
+      \node[anchor=north west,inner sep=0pt,text=tgpetrol,
+            font=\fontsize{64}{72}\selectfont\bfseries] at (12,-63)
+        {HACKATHON};
+      \node[anchor=north west,inner sep=0pt,text=tggraphit,
+            font=\fontsize{42}{49}\selectfont] at (12,-94)
+        {\HackathonRoom};
+
+      \draw[tggrey,line width=0.4pt] (12,-122) -- (195,-122);
+
+      \node[anchor=north west,inner sep=0pt,text=tgpetrol,
+            font=\fontsize{64}{72}\selectfont\bfseries] at (12,-134)
+        {PLENARY};
+      \node[anchor=north west,inner sep=0pt,text=tggraphit,
+            font=\fontsize{42}{49}\selectfont] at (12,-165)
+        {\PlenaryRoom};
+
+      % Solid vector arrow: legible from a distance and sharp in print.
+      \begin{scope}[shift={(244,-128)},rotate=#1,scale=1.15]
+        \fill[tgpetrol] (-31,-12) -- (0,-12) -- (0,-30)
+          -- (34,0) -- (0,30) -- (0,12) -- (-31,12) -- cycle;
+      \end{scope}
+      \draw[tggrey,line width=0.4pt] (12,-198) -- (285,-198);
+    \end{scope}
+  \end{tikzpicture}%
+  \newpage
+}
+
+% Full-page arrival sign: event name and room, without a direction arrow.
+\newcommand{\ArrivalSign}[2]{%
+  \null
+  \begin{tikzpicture}[remember picture,overlay,x=1mm,y=1mm]
+    \begin{scope}[shift={(current page.north west)}]
+      \fill[tgpetrol] (0,0) rectangle (297,-3);
+      \fill[tglime] (255,0) rectangle (297,-3);
+      \node[anchor=north west,inner sep=0pt] at (20,-14)
+        {\includegraphics[width=90mm]{tglogo.pdf}};
+      \CITCEALogo
+      \node[anchor=north east,inner sep=0pt,text=tggraphit,
+            font=\fontsize{32}{38}\selectfont\bfseries] at (281,-20)
+        {Pavilion L};
+      \node[anchor=center,inner sep=0pt,text=tgpetrol,
+            font=\fontsize{100}{110}\selectfont\bfseries] at (148.5,-94)
+        {#1};
+      \draw[tglime,line width=1.2pt] (70,-125) -- (227,-125);
+      \node[anchor=center,inner sep=0pt,text=tggraphit,
+            font=\fontsize{50}{58}\selectfont] at (148.5,-153)
+        {#2};
+      \draw[tggrey,line width=0.4pt] (12,-198) -- (285,-198);
+    \end{scope}
+  \end{tikzpicture}%
+  \newpage
+}
+
+% Repeat the supplied sign exactly #1 times; zero produces no pages.
+\ExplSyntaxOn
+\NewDocumentCommand{\PrintCopies}{m +m}
+  { \int_step_inline:nn {#1} {#2} }
+\ExplSyntaxOff
+
+\begin{document}
+\PrintCopies{\CopiesAhead}{\DirectionSign{90}}
+\PrintCopies{\CopiesRight}{\DirectionSign{0}}
+\PrintCopies{\CopiesLeft}{\DirectionSign{180}}
+\PrintCopies{\CopiesHackathon}{\ArrivalSign{HACKATHON}{\HackathonRoom}}
+\PrintCopies{\CopiesPlenary}{\ArrivalSign{PLENARY}{\PlenaryRoom}}
+\end{document}
