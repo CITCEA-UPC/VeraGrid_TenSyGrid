@@ -1,0 +1,27 @@
+{
+  "ieee39": {
+    "status": "completed",
+    "build_seconds": 0.9705890019977232,
+    "ssa_seconds": 19.307047120993957,
+    "total_seconds": 25.78218093299074,
+    "modes": 6,
+    "last_period_scaled_closure_inf": 1.1704538884418607
+  },
+  "ieee118_sparse": {
+    "status": "completed",
+    "build_seconds": 12.308700064997538,
+    "ssa_seconds": 127.066096406008,
+    "total_seconds": 149.75949992900132,
+    "modes": 6,
+    "last_period_scaled_closure_inf": 1.4547758575937795
+  },
+  "ieee118_arnoldi": {
+    "status": "completed",
+    "build_seconds": 13.55281244800426,
+    "ssa_seconds": 122.85472829100036,
+    "total_seconds": 147.44427236699266,
+    "modes": 6,
+    "last_period_scaled_closure_inf": 1.4547758575937795
+  },
+  "matched_ieee118_mode_difference_per_s": 2.8984570199058825e-13
+}

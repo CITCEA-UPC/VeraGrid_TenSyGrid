@@ -122,10 +122,12 @@ def get_simple_generator_emt_multilinear_template(
 
     templ.block = Block(
         state_eqs=[
-            -v_d - Ra * i_d + omega * psi_q,
-            -v_q - Ra * i_q - omega * psi_d,
-            -v_0 - R0 * i_0,
-            v_f - Rf * i_f,
+            # Match the conventional-phase-base machine: current leaves the
+            # stator and flux derivatives are expressed per second.
+            omega_base * (v_d + Ra * i_d + omega * psi_q),
+            omega_base * (v_q + Ra * i_q - omega * psi_d),
+            omega_base * (v_0 + R0 * i_0),
+            omega_base * (v_f - Rf * i_f),
             omega_base * omega,
             (Tm - Te - D * (omega - omega_ref)) / (2 * H),
             -(omega_base * omega) * sin_theta,
@@ -143,9 +145,9 @@ def get_simple_generator_emt_multilinear_template(
             i_A - (i_d * sin_theta + i_q * cos_theta + i_0),
             i_B - (i_d * sin_t_m120 + i_q * cos_t_m120 + i_0),
             i_C - (i_d * sin_t_p120 + i_q * cos_t_p120 + i_0),
-            Te - (3 / 2) * (psi_q * i_d - psi_d * i_q),
-            Pe - (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]),
-            Qe - (1 / np.sqrt(3)) * ((inputs[0] - inputs[1]) * i_C + (inputs[1] - inputs[2]) * i_A + (inputs[2] - inputs[0]) * i_B),
+            Te - (1 / 2) * (psi_d * i_q - psi_q * i_d),
+            Pe - (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]) / 3,
+            Qe - (1 / (3 * np.sqrt(3))) * ((inputs[0] - inputs[1]) * i_C + (inputs[1] - inputs[2]) * i_A + (inputs[2] - inputs[0]) * i_B),
             Pe - Pm,
         ],
         algebraic_vars=[i_d, i_q, i_0, i_f, v_d, v_q, v_0, i_A, i_B, i_C, Te, Pe, Qe, Pm],
@@ -186,9 +188,9 @@ def get_simple_generator_emt_multilinear_template(
         q_B: vf.add_const(None),
         p_C: vf.add_const(None),
         q_C: vf.add_const(None),
-        delta: sym.atan(
-            (Ra * ipk_init * sym.sin(phi_init) - omega * (Lmq + La) * ipk_init * sym.cos(phi_init))
-            / (vpk_init + Ra * ipk_init * sym.cos(phi_init) + omega * (Lmq + La) * ipk_init * sym.sin(phi_init))
+        delta: sym.atan2(
+            Ra * ipk_init * sym.sin(phi_init) + omega * (Lmq + La) * ipk_init * sym.cos(phi_init),
+            vpk_init + Ra * ipk_init * sym.cos(phi_init) - omega * (Lmq + La) * ipk_init * sym.sin(phi_init),
         ),
     }
     templ.block.parameters.update({
@@ -208,7 +210,9 @@ def get_simple_generator_emt_multilinear_template(
 
     templ.block.init_eqs = {
         omega: omega_ref,
-        theta: phi_v_init + delta,
+        # The sine/cosine Park convention places the rotor d axis 90 degrees
+        # behind the internal-voltage phasor, as in the standard template.
+        theta: phi_v_init + delta - np.pi / 2,
         cos_theta: sym.cos(theta),
         sin_theta: sym.sin(theta),
         v_d: 2 / 3 * (sym.sin(theta) * inputs[0] + sym.sin(theta - 2 * np.pi / 3) * inputs[1] + sym.sin(theta + 2 * np.pi / 3) * inputs[2]),
@@ -217,15 +221,17 @@ def get_simple_generator_emt_multilinear_template(
         i_d: 2 / 3 * (sym.sin(theta) * i_A + sym.sin(theta - 2 * np.pi / 3) * i_B + sym.sin(theta + 2 * np.pi / 3) * i_C),
         i_q: 2 / 3 * (sym.cos(theta) * i_A + sym.cos(theta - 2 * np.pi / 3) * i_B + sym.cos(theta + 2 * np.pi / 3) * i_C),
         i_0: (1 / 3) * (i_A + i_B + i_C),
-        psi_q: (v_d + Ra * i_d),
-        psi_d: -(v_q + Ra * i_q),
+        psi_q: -(v_d + Ra * i_d) / omega,
+        psi_d: (v_q + Ra * i_q) / omega,
         psi_0: -L0 * i_0,
         i_f: (psi_d + (Lmd + La) * i_d) / Lmd,
         psi_f: (Lmd + Lf) * i_f - Lmd * i_d,
-        Pe: (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]),
-        Qe: (1 / np.sqrt(3)) * ((inputs[0] - inputs[1]) * i_C + (inputs[1] - inputs[2]) * i_A + (inputs[2] - inputs[0]) * i_B),
-        Te: (3 / 2) * (psi_q * i_d - psi_d * i_q),
+        Pe: (i_A * inputs[0] + i_B * inputs[1] + i_C * inputs[2]) / 3,
+        Qe: (1 / (3 * np.sqrt(3))) * ((inputs[0] - inputs[1]) * i_C + (inputs[1] - inputs[2]) * i_A + (inputs[2] - inputs[0]) * i_B),
+        Te: (1 / 2) * (psi_d * i_q - psi_q * i_d),
         Pm: Pe,
+        Tm: Te,
+        v_f: Rf * i_f,
     }
 
     c0 = vf.add_const(0.0)

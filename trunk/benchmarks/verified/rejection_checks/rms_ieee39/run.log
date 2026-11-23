@@ -1,0 +1,9 @@
+Loading ieee39 rms: /tmp/veragrid-staged-emt-yamyzb3d/Grids_and_profiles/grids/IEEE39.gridcal
+Balanced PF converged; building dynamic problem
+Traceback (most recent call last):
+  File "/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py", line 500, in main
+    run_case(args, record)
+  File "/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py", line 248, in run_case
+    raise RuntimeError('RMS initial residual exceeds tolerance; SSA was stopped. '
+RuntimeError: RMS initial residual exceeds tolerance; SSA was stopped. Use --allow-nonequilibrium only for diagnostics.
+Compiling RMS using JIT Native Compiler...

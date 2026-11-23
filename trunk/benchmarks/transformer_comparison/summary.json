@@ -1,0 +1,22 @@
+{
+  "conclusion": "No evidence of self-excited growth from the isolated linear coupled-core transformer. This does not establish full-network stability.",
+  "ieee39_loaded_transformer_devices": 0,
+  "ieee118_transformer_devices": 9,
+  "tests_passed": 51,
+  "max_simple_vs_static_admittance_error": 7.105427357601002e-15,
+  "max_coupled_vs_static_admittance_error": 0.0005800096157742018,
+  "max_balanced_return_path_coupling_effect": 4.31322404813791e-15,
+  "min_sampled_passivity_eigenvalue": -2.842170943040401e-14,
+  "largest_isolated_coupled_pole_real": -0.00556091451718779,
+  "network_comparison": {
+    "same_bus_order": true,
+    "same_time_grid": true,
+    "max_abs_bus_voltage_difference": 3.7957927614518105e-05,
+    "max_scaled_bus_voltage_difference": 2.55622591336025e-05,
+    "largest_difference_bus": "Breed",
+    "phase": "A",
+    "time_seconds": 0.0095,
+    "coupled_closure": 8.815181204417285e-05,
+    "simple_closure": 5.742088846878731e-05
+  }
+}

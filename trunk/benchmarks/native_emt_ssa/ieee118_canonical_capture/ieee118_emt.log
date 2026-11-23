@@ -1,0 +1,4 @@
+Loading ieee118 emt: /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/tests/data/grids/RAW/IEEE 118 Bus.raw
+Balanced PF converged; building multilinear problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; capturing EMT trajectory

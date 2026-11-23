@@ -1,0 +1,155 @@
+{
+  "status": "failed",
+  "settings": {
+    "grid": "ieee39",
+    "engine_root": null,
+    "reuse_models": false,
+    "grid_file": null,
+    "formulation": "emt",
+    "consistent_tangent": true,
+    "emt_models": "canonical",
+    "emt_problem": "CurrentBalance",
+    "emt_solver": "StructuralAD",
+    "periodicity_tolerance": 0.0001,
+    "allow_nonperiodic": false,
+    "transformer_model": "coupled_core",
+    "capture_only": true,
+    "all": false,
+    "output": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/native_emt_ssa/ieee39_canonical_capture",
+    "timeout": 1800,
+    "rms_init": "explicit",
+    "rms_spectrum": "sparse",
+    "krylov_dim": 24,
+    "modes": 6,
+    "steps_per_period": 600,
+    "assessment_periods": 1
+  },
+  "random_seed": 0,
+  "grid_file": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/Grids_and_profiles/grids/IEEE39.gridcal",
+  "formulation": "emt",
+  "stage": "capture",
+  "grid_sha256": "5ee1b56bb93b7d8ea7929126b2c7e1b475d59c64e6b5fb5c692b939c7dca6bf9",
+  "python_version": "3.12.3",
+  "numpy_version": "2.3.0",
+  "engine_module": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/__init__.py",
+  "machine_profile": "template defaults; fixed PF-seeded torque and field voltage",
+  "load_seconds": 0.9309602550056297,
+  "buses": 39,
+  "generators": 10,
+  "transformers": 0,
+  "transformer_model": "coupled_core",
+  "emt_models": "canonical",
+  "attach_seconds": 0.17417146600200795,
+  "balanced_pf_seconds": 2.1138736749999225,
+  "balanced_pf_converged": true,
+  "three_phase_pf_seconds": 0.9415835419931682,
+  "three_phase_pf_converged": true,
+  "emt_problem_requested": "CurrentBalance",
+  "consistent_dae_tangent_requested": true,
+  "problem_class": "EmtProblemDae",
+  "states": 600,
+  "algebraics": 1187,
+  "derivatives": 600,
+  "build_seconds": 1.2496920170087833,
+  "emt_build_breakdown": {
+    "validate_models_s": 0.0009393049986101687,
+    "structure_collect_s": 0.22377135200076737,
+    "unify_blocks_s": 0.0036144629993941635,
+    "validate_connections_s": 2.6100315153598785e-07,
+    "template_init_s": 0.3984471980074886,
+    "runtime_partition_s": 2.779198985081166e-05,
+    "explicit_init_s": 0.31171289199846797,
+    "native_init_s": 6.0183010646142066e-05,
+    "events_group_finalize_s": 0.30456537900317926,
+    "structural_cold_s": 0.9385132629977306,
+    "numeric_refresh_s": 0.30456537900317926,
+    "native_structural_cold_s": 0.0,
+    "native_numeric_refresh_s": 0.0,
+    "compiled_function_cache_delta": 0.0,
+    "persistent_init_cache_hit": 0.0,
+    "persistent_init_cache_load_s": 0.0,
+    "persistent_init_cache_store_s": 0.0,
+    "total_s": 1.2489975589996902
+  },
+  "trajectory_solver_actual": "StructuralAD",
+  "floquet_jacobian_actual": "Native solver discrete Jacobian",
+  "initialization_report": {
+    "status": "RESOLVED",
+    "initial_residual_inf": 7.279186142739036e-10,
+    "final_residual_inf": 7.279186142739036e-10,
+    "message": "Explicit device initialization completed with algebraic residual 7.279e-10; periodic steady state was not verified."
+  },
+  "last_period_scaled_closure_inf": 0.0017415232334601072,
+  "periodicity_tolerance": 0.0001,
+  "captured_period_seconds": 0.02,
+  "target_period_seconds": 0.02,
+  "absolute_angle_count": 10,
+  "periodicity_validated": false,
+  "largest_period_closure_errors": [
+    {
+      "index": 1206,
+      "name": "Qe",
+      "difference": -0.0017415232334601072,
+      "scaled_error": 0.0017415232334601072
+    },
+    {
+      "index": 1276,
+      "name": "Qe",
+      "difference": -0.0016682547934691039,
+      "scaled_error": 0.0016682547934691039
+    },
+    {
+      "index": 1220,
+      "name": "Qe",
+      "difference": -0.0018251004269995708,
+      "scaled_error": 0.0013022016129171279
+    },
+    {
+      "index": 1192,
+      "name": "Qe",
+      "difference": -0.001841730228089311,
+      "scaled_error": 0.001225362763925111
+    },
+    {
+      "index": 1290,
+      "name": "Qe",
+      "difference": -0.002474889293313076,
+      "scaled_error": 0.0011955911536151
+    },
+    {
+      "index": 1262,
+      "name": "Qe",
+      "difference": -0.0011624372519276893,
+      "scaled_error": 0.0011624372519276893
+    },
+    {
+      "index": 1178,
+      "name": "Qe",
+      "difference": -0.0019376502189958345,
+      "scaled_error": 0.0011531925681439277
+    },
+    {
+      "index": 1248,
+      "name": "Qe",
+      "difference": -0.001876560030360519,
+      "scaled_error": 0.0009520516936088234
+    },
+    {
+      "index": 1234,
+      "name": "Qe",
+      "difference": -0.0021937113595993374,
+      "scaled_error": 0.0009514301026070358
+    },
+    {
+      "index": 886,
+      "name": "it_B",
+      "difference": 0.0008110162253051056,
+      "scaled_error": 0.0008110162253051056
+    }
+  ],
+  "trajectory_and_jacobian_setup_seconds": 2.966635796998162,
+  "error_type": "RuntimeError",
+  "error": "Captured EMT trajectory is not periodic at the requested tolerance; SSA was stopped. Use --allow-nonperiodic only for diagnostics.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/multilinear_ssa.py\", line 467, in main\n    run_case(args, record)\n  File \"/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/multilinear_ssa.py\", line 331, in run_case\n    captured = driver._capture_limit_cycle_and_evaluator(options.time_step)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/multilinear_ssa.py\", line 300, in _capture_limit_cycle_and_evaluator\n    raise RuntimeError('Captured EMT trajectory is not periodic at the requested '\nRuntimeError: Captured EMT trajectory is not periodic at the requested tolerance; SSA was stopped. Use --allow-nonperiodic only for diagnostics.\n",
+  "total_seconds": 11.6894233639905
+}

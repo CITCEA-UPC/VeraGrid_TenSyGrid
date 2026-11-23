@@ -1,0 +1,4 @@
+Loading ieee39 emt: /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/model_fixes/ieee39_multilinear_fixed.veragrid
+Balanced PF converged; building multilinear problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; running SSA

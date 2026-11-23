@@ -1,0 +1,9 @@
+ieee118 8_5_1 {"simple_vs_static_max_abs": 0.0, "coupled_vs_static_max_abs": 0.0005800096157742018, "largest_finite_terminated_pole_real": {"coupled": -0.005870855564873916, "simple": -28672.345542083858}}
+ieee118 30_17_1 {"simple_vs_static_max_abs": 3.552713678800501e-15, "coupled_vs_static_max_abs": 0.0002919574507735945, "largest_finite_terminated_pole_real": {"coupled": -0.0057177372633043545, "simple": -20259.089223374896}}
+ieee118 26_25_1 {"simple_vs_static_max_abs": 7.105427357601002e-15, "coupled_vs_static_max_abs": 0.000301345349246418, "largest_finite_terminated_pole_real": {"coupled": -0.005717737290184941, "simple": -20577.294813270837}}
+ieee118 38_37_1 {"simple_vs_static_max_abs": 3.552713678800501e-15, "coupled_vs_static_max_abs": 0.00033810625741281797, "largest_finite_terminated_pole_real": {"coupled": -0.00556091451718779, "simple": -21552.53484143996}}
+ieee118 63_59_1 {"simple_vs_static_max_abs": 3.552713678800501e-15, "coupled_vs_static_max_abs": 0.0002950374177466131, "largest_finite_terminated_pole_real": {"coupled": -0.005717737272268478, "simple": -20364.058597589275}}
+ieee118 64_61_1 {"simple_vs_static_max_abs": 7.105427357601002e-15, "coupled_vs_static_max_abs": 0.0005755905283209017, "largest_finite_terminated_pole_real": {"coupled": -0.005870855560232786, "simple": -28565.35917812086}}
+ieee118 65_66_1 {"simple_vs_static_max_abs": 0.0, "coupled_vs_static_max_abs": 0.00034744671371811364, "largest_finite_terminated_pole_real": {"coupled": -0.005560914539070994, "simple": -21843.785312270233}}
+ieee118 68_69_1 {"simple_vs_static_max_abs": 0.0, "coupled_vs_static_max_abs": 0.00034744671371811364, "largest_finite_terminated_pole_real": {"coupled": -0.005560914539070994, "simple": -21843.785312270233}}
+ieee118 81_80_1 {"simple_vs_static_max_abs": 0.0, "coupled_vs_static_max_abs": 0.00034744671371811364, "largest_finite_terminated_pole_real": {"coupled": -0.005560914539070994, "simple": -21843.785312270233}}

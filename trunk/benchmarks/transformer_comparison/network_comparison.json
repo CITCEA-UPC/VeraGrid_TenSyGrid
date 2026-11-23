@@ -1,0 +1,11 @@
+{
+  "same_bus_order": true,
+  "same_time_grid": true,
+  "max_abs_bus_voltage_difference": 3.7957927614518105e-05,
+  "max_scaled_bus_voltage_difference": 2.55622591336025e-05,
+  "largest_difference_bus": "Breed",
+  "phase": "A",
+  "time_seconds": 0.0095,
+  "coupled_closure": 8.815181204417285e-05,
+  "simple_closure": 5.742088846878731e-05
+}

@@ -1,0 +1,13 @@
+Loading ieee39 emt: /tmp/veragrid-staged-emt-yamyzb3d/Grids_and_profiles/grids/IEEE39.gridcal
+Balanced PF converged; building dynamic problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; capturing EMT trajectory
+Traceback (most recent call last):
+  File "/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py", line 500, in main
+    run_case(args, record)
+  File "/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py", line 358, in run_case
+    captured = driver._capture_limit_cycle_and_evaluator(options.time_step)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py", line 319, in _capture_limit_cycle_and_evaluator
+    raise RuntimeError('Captured EMT trajectory is not periodic at the requested '
+RuntimeError: Captured EMT trajectory is not periodic at the requested tolerance; SSA was stopped. Use --allow-nonperiodic only for diagnostics.

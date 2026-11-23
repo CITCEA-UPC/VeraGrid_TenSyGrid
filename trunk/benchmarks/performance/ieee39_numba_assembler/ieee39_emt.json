@@ -1,0 +1,155 @@
+{
+  "status": "completed",
+  "settings": {
+    "grid": "ieee39",
+    "engine_root": null,
+    "reuse_models": false,
+    "grid_file": null,
+    "formulation": "emt",
+    "consistent_tangent": true,
+    "emt_solver": "StructuralAD",
+    "periodicity_tolerance": 0.0001,
+    "allow_nonperiodic": false,
+    "transformer_model": "coupled_core",
+    "capture_only": false,
+    "all": false,
+    "output": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/performance/ieee39_numba_assembler",
+    "timeout": 1800,
+    "rms_init": "explicit",
+    "rms_spectrum": "sparse",
+    "krylov_dim": 24,
+    "modes": 6,
+    "steps_per_period": 600,
+    "assessment_periods": 1
+  },
+  "random_seed": 0,
+  "grid_file": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/Grids_and_profiles/grids/IEEE39.gridcal",
+  "formulation": "emt",
+  "stage": "finished",
+  "grid_sha256": "5ee1b56bb93b7d8ea7929126b2c7e1b475d59c64e6b5fb5c692b939c7dca6bf9",
+  "python_version": "3.12.3",
+  "numpy_version": "2.3.0",
+  "engine_module": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/__init__.py",
+  "machine_profile": "template defaults; fixed PF-seeded torque and field voltage",
+  "load_seconds": 0.7778726099932101,
+  "buses": 39,
+  "generators": 10,
+  "transformers": 0,
+  "transformer_model": "coupled_core",
+  "attach_seconds": 0.15717387899348978,
+  "balanced_pf_seconds": 1.5966337580030086,
+  "balanced_pf_converged": true,
+  "three_phase_pf_seconds": 0.7819648790027713,
+  "three_phase_pf_converged": true,
+  "consistent_dae_tangent_requested": true,
+  "problem_class": "EmtProblemMultilinear",
+  "states": 620,
+  "algebraics": 1502,
+  "derivatives": 620,
+  "build_seconds": 0.8431965630006744,
+  "emt_build_breakdown": {
+    "validate_models_s": 0.0007061609940137714,
+    "structure_collect_s": 0.14795990000129677,
+    "unify_blocks_s": 0.0022171669988892972,
+    "validate_connections_s": 2.2001040633767843e-07,
+    "template_init_s": 0.18474472800153308,
+    "runtime_partition_s": 3.089700476266444e-05,
+    "explicit_init_s": 0.299755654996261,
+    "native_init_s": 8.422700921073556e-05,
+    "events_group_finalize_s": 0.20196871799998917,
+    "structural_cold_s": 0.6354147280071629,
+    "numeric_refresh_s": 0.20196871799998917,
+    "native_structural_cold_s": 0.0,
+    "native_numeric_refresh_s": 0.0,
+    "compiled_function_cache_delta": 0.0,
+    "persistent_init_cache_hit": 0.0,
+    "persistent_init_cache_load_s": 0.0,
+    "persistent_init_cache_store_s": 0.0,
+    "total_s": 0.8426224779977929
+  },
+  "trajectory_solver_actual": "StructuralAD",
+  "floquet_jacobian_actual": "EmtProblemMultilinear S/Phi adapter",
+  "initialization_report": {
+    "status": "RESOLVED",
+    "initial_residual_inf": 7.279186142739036e-10,
+    "final_residual_inf": 7.279186142739036e-10,
+    "message": "Explicit device initialization completed with algebraic residual 7.279e-10; periodic steady state was not verified."
+  },
+  "last_period_scaled_closure_inf": 5.743127151192638e-05,
+  "periodicity_tolerance": 0.0001,
+  "captured_period_seconds": 0.02,
+  "target_period_seconds": 0.02,
+  "absolute_angle_count": 10,
+  "periodicity_validated": true,
+  "largest_period_closure_errors": [
+    {
+      "index": 0,
+      "name": "i_ser_A",
+      "difference": 0.00014251283571812805,
+      "scaled_error": 5.743127151192638e-05
+    },
+    {
+      "index": 396,
+      "name": "i_ser_A",
+      "difference": 0.00027805320826383706,
+      "scaled_error": 5.741846923764382e-05
+    },
+    {
+      "index": 2101,
+      "name": "v_A",
+      "difference": -8.096900779157833e-05,
+      "scaled_error": 5.741491645422841e-05
+    },
+    {
+      "index": 2098,
+      "name": "v_A",
+      "difference": -7.99058148798343e-05,
+      "scaled_error": 5.741488243877734e-05
+    },
+    {
+      "index": 608,
+      "name": "u_A",
+      "difference": -7.973416963639367e-05,
+      "scaled_error": 5.741402449022624e-05
+    },
+    {
+      "index": 1939,
+      "name": "u_aux_A",
+      "difference": -7.973416963639367e-05,
+      "scaled_error": 5.741402449022624e-05
+    },
+    {
+      "index": 2095,
+      "name": "v_A",
+      "difference": -7.973338274485715e-05,
+      "scaled_error": 5.741345779865902e-05
+    },
+    {
+      "index": 1169,
+      "name": "it_A",
+      "difference": -0.0006575283057641268,
+      "scaled_error": 5.741134037735881e-05
+    },
+    {
+      "index": 1166,
+      "name": "if_A",
+      "difference": 0.000657528305764099,
+      "scaled_error": 5.741134037735638e-05
+    },
+    {
+      "index": 405,
+      "name": "i_ser_A",
+      "difference": 0.000657528305764099,
+      "scaled_error": 5.741134037735638e-05
+    }
+  ],
+  "trajectory_and_jacobian_setup_seconds": 3.74372322500858,
+  "floquet_after_capture_seconds": 12.08872612498817,
+  "ssa_seconds": 15.832454489005613,
+  "interpretation": "Numerical SSA completed; operating-point or periodic-orbit validity must be checked before interpreting stability.",
+  "modes": 6,
+  "finite_modes": 6,
+  "max_real_per_s": 243.0428736392761,
+  "max_multiplier_magnitude": 129.13488429605968,
+  "total_seconds": 22.360873320998508
+}

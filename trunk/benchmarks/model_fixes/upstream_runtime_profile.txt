@@ -1,0 +1,16 @@
+Mon Nov 23 13:10:49 2026    trunk/benchmarks/upstream_comparison/upstream_optimized_profile/profile.prof
+
+         314710833 function calls (300870083 primitive calls) in 119.651 seconds
+
+   Ordered by: cumulative time
+   List reduced from 19108 to 8 due to restriction <'runtime_parameter|_build_runtime_param'>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   91.779   91.779 emt_problem_template.py:894(_build_runtime_param_vectors)
+        1    0.001    0.001   91.639   91.639 emt_problem_template.py:1116(_build_runtime_parameter_kernel)
+   410725    0.142    0.000    0.142    0.000 enumerations.py:5842(is_runtime_parameter_reference)
+        1    0.001    0.001    0.069    0.069 emt_problem_template.py:1301(_initialize_runtime_parameter_values)
+        1    0.000    0.000    0.001    0.001 emt_problem_template.py:1058(_rebuild_runtime_parameter_partition)
+      369    0.000    0.000    0.001    0.000 emt_problem_dae.py:7892(_set_runtime_parameter_seed_by_uid)
+      369    0.000    0.000    0.000    0.000 emt_problem_dae.py:7838(_set_runtime_parameter_value_by_uid)
+        1    0.000    0.000    0.000    0.000 runtime_parameter_update_e6f2ecc4f5a56723.py:1(<module>)

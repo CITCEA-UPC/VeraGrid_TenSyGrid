@@ -1,0 +1,12 @@
+{
+  "shape": [
+    12972,
+    20000
+  ],
+  "nnz": 59993,
+  "first_numba_call_seconds": 0.004328141003497876,
+  "python_median_seconds": 0.11210361749544973,
+  "numba_median_seconds": 0.00036863500281469896,
+  "speedup": 304.1046472513101,
+  "max_absolute_difference": 0.0
+}

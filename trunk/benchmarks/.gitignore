@@ -1,2 +1,7 @@
 __pycache__/
 results/
+
+# Generated large captures are reproducible; keep source and compact reports.
+**/*_trajectory.npz
+**/*.prof
+**/*.veragrid

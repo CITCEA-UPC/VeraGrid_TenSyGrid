@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "engine_source_sha256": "ee37b8b3ca6940774e6160a5df94216bdc61be5506b62885fe44fab1ff9d6c65",
+  "benchmark_source_sha256": "5574c101da0b2f9d9f57ccf1d7654a52a12b07a3c5adfa5f4a72b56999d45eb7",
+  "verifier_source_sha256": "3600337a915f4850a55f70b0abf3ac665b5186a464a4d72dc83dd826aa57b3b4",
+  "checkout": "/tmp/veragrid-staged-emt-yamyzb3d",
+  "cases": {
+    "ieee39/Multilinear": {
+      "total_seconds": 23.88573226099834,
+      "ssa_seconds": 16.28707688000577,
+      "build_seconds": 0.9140717270056484,
+      "last_period_scaled_closure_inf": 5.743127151192638e-05,
+      "max_real_per_s": 243.0428736392761,
+      "max_multiplier_magnitude": 129.13488429605968,
+      "states": 620,
+      "algebraics": 1502
+    },
+    "ieee39/CurrentBalance": {
+      "total_seconds": 24.213546992992633,
+      "ssa_seconds": 16.44672045399784,
+      "build_seconds": 0.8934996010066243,
+      "last_period_scaled_closure_inf": 5.743127151192638e-05,
+      "max_real_per_s": 243.04287363927597,
+      "max_multiplier_magnitude": 129.13488429605923,
+      "states": 620,
+      "algebraics": 1502
+    },
+    "ieee118/Multilinear": {
+      "total_seconds": 88.22471077700902,
+      "ssa_seconds": 61.44817619099922,
+      "build_seconds": 13.806074079999235,
+      "last_period_scaled_closure_inf": 8.815181204417285e-05,
+      "max_real_per_s": 35.24144560253965,
+      "max_multiplier_magnitude": 1.799227537049536,
+      "states": 2811,
+      "algebraics": 7350
+    },
+    "ieee118/CurrentBalance": {
+      "total_seconds": 87.59819852100918,
+      "ssa_seconds": 60.288539321991266,
+      "build_seconds": 14.38317638800072,
+      "last_period_scaled_closure_inf": 8.815181204417285e-05,
+      "max_real_per_s": 35.24144560254101,
+      "max_multiplier_magnitude": 1.7992275370495772,
+      "states": 2811,
+      "algebraics": 7350
+    }
+  },
+  "comparisons": {
+    "ieee39": {
+      "max_mode_family_difference_per_s": 1.2644107982850983e-11,
+      "max_trajectory_difference": 0.0
+    },
+    "ieee118": {
+      "max_mode_family_difference_per_s": 2.319462255752929e-12,
+      "max_trajectory_difference": 0.0
+    }
+  },
+  "verification_seconds": 230.13025363600173
+}

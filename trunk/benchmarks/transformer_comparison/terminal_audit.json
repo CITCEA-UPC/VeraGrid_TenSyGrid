@@ -1,0 +1,663 @@
+[
+  {
+    "grid": "ieee39",
+    "frequency_hz": 50.0,
+    "transformer_count": 0,
+    "transformers": []
+  },
+  {
+    "grid": "ieee118",
+    "frequency_hz": 60.0,
+    "transformer_count": 9,
+    "transformers": [
+      {
+        "name": "8_5_1",
+        "tap": 0.985,
+        "R": 0.0,
+        "X": 0.0267,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 0.0,
+        "coupled_vs_static_max_abs": 0.0005800096157742018,
+        "balanced_coupled_vs_simple_max_abs": 0.0005800096157742018,
+        "core_shunt_susceptance_eigenvalues": [
+          3.162377660117379e-05,
+          3.1623776601173796e-05,
+          7.905944155113515e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 4.31322404813791e-15,
+        "arbitrary_phase_return_path_coupling_effect": 1.5796076432650352e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": 0.0,
+          "simple": -2.220446049250313e-16
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005870855564873916,
+          "simple": -28672.345542083858
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005870855564873916,
+              0.0
+            ],
+            [
+              -0.014677134274711616,
+              0.0
+            ],
+            [
+              -28671.923302762003,
+              0.0
+            ],
+            [
+              -28671.914226216355,
+              0.0
+            ],
+            [
+              -0.005870855564902008,
+              0.0
+            ],
+            [
+              -28671.91422621633,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -28672.345542083858,
+              0.0
+            ],
+            [
+              -28672.34554208386,
+              0.0
+            ],
+            [
+              -28672.34554208386,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11619174299994484
+      },
+      {
+        "name": "30_17_1",
+        "tap": 0.96,
+        "R": 0.0,
+        "X": 0.0388,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 3.552713678800501e-15,
+        "coupled_vs_static_max_abs": 0.0002919574507735945,
+        "balanced_coupled_vs_simple_max_abs": 0.0002919574507735945,
+        "core_shunt_susceptance_eigenvalues": [
+          3.1623776597621075e-05,
+          3.162377659762108e-05,
+          7.905944154758244e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": 0.0,
+          "simple": -1.7763568394002505e-15
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.0057177372633043545,
+          "simple": -20259.089223374896
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.0057177372633043545,
+              0.0
+            ],
+            [
+              -0.014294336600512039,
+              0.0
+            ],
+            [
+              -20258.884419571517,
+              0.0
+            ],
+            [
+              -20258.875113346465,
+              0.0
+            ],
+            [
+              -0.005717737263304978,
+              0.0
+            ],
+            [
+              -20258.875113346472,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -20259.089223374904,
+              0.0
+            ],
+            [
+              -20259.089223374896,
+              0.0
+            ],
+            [
+              -20259.089223374896,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11058251099893823
+      },
+      {
+        "name": "26_25_1",
+        "tap": 0.96,
+        "R": 0.0,
+        "X": 0.0382,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 7.105427357601002e-15,
+        "coupled_vs_static_max_abs": 0.000301345349246418,
+        "balanced_coupled_vs_simple_max_abs": 0.00030134534924286527,
+        "core_shunt_susceptance_eigenvalues": [
+          3.162377660117379e-05,
+          3.1623776601173796e-05,
+          7.905944155113515e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": 0.0,
+          "simple": -2.842170943040401e-14
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005717737290184941,
+          "simple": -20577.294813270837
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005717737290382599,
+              0.0
+            ],
+            [
+              -0.014294336769743904,
+              0.0
+            ],
+            [
+              -20577.082925260016,
+              0.0
+            ],
+            [
+              -20577.073619035094,
+              4.184861660831774e-11
+            ],
+            [
+              -20577.073619035098,
+              -4.184861660831776e-11
+            ],
+            [
+              -0.005717737290184941,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -20577.29481327084,
+              0.0
+            ],
+            [
+              -20577.294813270837,
+              0.0
+            ],
+            [
+              -20577.294813270837,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11040093199699186
+      },
+      {
+        "name": "38_37_1",
+        "tap": 0.935,
+        "R": 0.0,
+        "X": 0.0375,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 3.552713678800501e-15,
+        "coupled_vs_static_max_abs": 0.00033810625741281797,
+        "balanced_coupled_vs_simple_max_abs": 0.00033810625740926525,
+        "core_shunt_susceptance_eigenvalues": [
+          3.162377660827921e-05,
+          3.162377660827922e-05,
+          7.905944155824056e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": -1.7763568394002505e-15,
+          "simple": 0.0
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.00556091451718779,
+          "simple": -21552.53484143996
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.00556091451718779,
+              0.0
+            ],
+            [
+              -0.013902280146601302,
+              0.0
+            ],
+            [
+              -21552.29524178542,
+              0.0
+            ],
+            [
+              -21552.2857003267,
+              0.0
+            ],
+            [
+              -21552.285700326607,
+              0.0
+            ],
+            [
+              -0.005560914517355617,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -21552.53484143996,
+              0.0
+            ],
+            [
+              -21552.534841439963,
+              0.0
+            ],
+            [
+              -21552.534841439963,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11055384700011928
+      },
+      {
+        "name": "63_59_1",
+        "tap": 0.96,
+        "R": 0.0,
+        "X": 0.0386,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 3.552713678800501e-15,
+        "coupled_vs_static_max_abs": 0.0002950374177466131,
+        "balanced_coupled_vs_simple_max_abs": 0.00029503741774306036,
+        "core_shunt_susceptance_eigenvalues": [
+          3.162377660117379e-05,
+          3.1623776601173796e-05,
+          7.905944155113515e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": -2.220446049250313e-16,
+          "simple": 0.0
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005717737272268478,
+          "simple": -20364.058597589275
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005717737272330009,
+              0.0
+            ],
+            [
+              -0.014294336656923395,
+              0.0
+            ],
+            [
+              -20363.851469610254,
+              0.0
+            ],
+            [
+              -20363.84216338524,
+              0.0
+            ],
+            [
+              -0.005717737272268478,
+              0.0
+            ],
+            [
+              -20363.842163385267,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -20364.058597589275,
+              0.0
+            ],
+            [
+              -20364.058597589275,
+              0.0
+            ],
+            [
+              -20364.058597589275,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11094014899572358
+      },
+      {
+        "name": "64_61_1",
+        "tap": 0.985,
+        "R": 0.0,
+        "X": 0.0268,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 7.105427357601002e-15,
+        "coupled_vs_static_max_abs": 0.0005755905283209017,
+        "balanced_coupled_vs_simple_max_abs": 0.0005755905283137964,
+        "core_shunt_susceptance_eigenvalues": [
+          3.162377660827921e-05,
+          3.162377660827922e-05,
+          7.905944155824056e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 4.31322404813791e-15,
+        "arbitrary_phase_return_path_coupling_effect": 1.5796076432650352e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": 0.0,
+          "simple": 0.0
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005870855560232786,
+          "simple": -28565.35917812086
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005870855560232786,
+              0.0
+            ],
+            [
+              -0.014677134245709338,
+              0.0
+            ],
+            [
+              -28564.94027109303,
+              0.0
+            ],
+            [
+              -28564.931194547313,
+              0.0
+            ],
+            [
+              -28564.931194547546,
+              0.0
+            ],
+            [
+              -0.005870855560277112,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -28565.35917812086,
+              0.0
+            ],
+            [
+              -28565.359178120863,
+              0.0
+            ],
+            [
+              -28565.359178120863,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11350769700948149
+      },
+      {
+        "name": "65_66_1",
+        "tap": 0.935,
+        "R": 0.0,
+        "X": 0.037,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 0.0,
+        "coupled_vs_static_max_abs": 0.00034744671371811364,
+        "balanced_coupled_vs_simple_max_abs": 0.00034744671371811364,
+        "core_shunt_susceptance_eigenvalues": [
+          3.1623776597621075e-05,
+          3.162377659762108e-05,
+          7.905944154758244e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": -2.220446049250313e-16,
+          "simple": -2.842170943040401e-14
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005560914539070994,
+          "simple": -21843.785312270233
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005560914539070994,
+              0.0
+            ],
+            [
+              -0.01390228028337207,
+              0.0
+            ],
+            [
+              -21843.538654165794,
+              0.0
+            ],
+            [
+              -21843.529112707143,
+              0.0
+            ],
+            [
+              -21843.529112707158,
+              0.0
+            ],
+            [
+              -0.005560914539942743,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.10978394800622482
+      },
+      {
+        "name": "68_69_1",
+        "tap": 0.935,
+        "R": 0.0,
+        "X": 0.037,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 0.0,
+        "coupled_vs_static_max_abs": 0.00034744671371811364,
+        "balanced_coupled_vs_simple_max_abs": 0.00034744671371811364,
+        "core_shunt_susceptance_eigenvalues": [
+          3.1623776597621075e-05,
+          3.162377659762108e-05,
+          7.905944154758244e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": -2.220446049250313e-16,
+          "simple": -2.842170943040401e-14
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005560914539070994,
+          "simple": -21843.785312270233
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005560914539070994,
+              0.0
+            ],
+            [
+              -0.01390228028337207,
+              0.0
+            ],
+            [
+              -21843.538654165794,
+              0.0
+            ],
+            [
+              -21843.529112707143,
+              0.0
+            ],
+            [
+              -21843.529112707158,
+              0.0
+            ],
+            [
+              -0.005560914539942743,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11435167399758939
+      },
+      {
+        "name": "81_80_1",
+        "tap": 0.935,
+        "R": 0.0,
+        "X": 0.037,
+        "coupled_origin_residual": 0.0,
+        "simple_origin_residual": 0.0,
+        "linear_core_enabled": true,
+        "core_L_pu": 31621.776633305566,
+        "simple_vs_static_max_abs": 0.0,
+        "coupled_vs_static_max_abs": 0.00034744671371811364,
+        "balanced_coupled_vs_simple_max_abs": 0.00034744671371811364,
+        "core_shunt_susceptance_eigenvalues": [
+          3.1623776597621075e-05,
+          3.162377659762108e-05,
+          7.905944154758244e-05
+        ],
+        "return_path_geometry_multiplier": 1000,
+        "balanced_return_path_coupling_effect": 7.605102337731361e-16,
+        "arbitrary_phase_return_path_coupling_effect": 1.579607642909764e-05,
+        "minimum_admittance_hermitian_eigenvalue": {
+          "coupled": -2.220446049250313e-16,
+          "simple": -2.842170943040401e-14
+        },
+        "largest_finite_terminated_pole_real": {
+          "coupled": -0.005560914539070994,
+          "simple": -21843.785312270233
+        },
+        "terminated_poles": {
+          "coupled": [
+            [
+              -0.005560914539070994,
+              0.0
+            ],
+            [
+              -0.01390228028337207,
+              0.0
+            ],
+            [
+              -21843.538654165794,
+              0.0
+            ],
+            [
+              -21843.529112707143,
+              0.0
+            ],
+            [
+              -21843.529112707158,
+              0.0
+            ],
+            [
+              -0.005560914539942743,
+              0.0
+            ]
+          ],
+          "simple": [
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ],
+            [
+              -21843.785312270233,
+              0.0
+            ]
+          ]
+        },
+        "elapsed_seconds": 0.11258203700708691
+      }
+    ]
+  }
+]

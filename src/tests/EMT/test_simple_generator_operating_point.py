@@ -6,16 +6,20 @@ import pytest
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Templates.Emt.generator_emt_type_template import get_simple_generator_emt_template
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
+from VeraGridEngine.Templates.Emt.simple_generator_emt_multilinear_template import get_simple_generator_emt_multilinear_template
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 
 
+@pytest.mark.parametrize('multilinear', [False, True])
 @pytest.mark.parametrize('angle', [0.3, 2.2])
 @pytest.mark.parametrize('reactive_power', [-0.2, 0.2])
-def test_simple_generator_pf_seed_satisfies_flux_power_and_steady_state(angle, reactive_power):
-    block = get_simple_generator_emt_template(VarFactory()).block
+def test_simple_generator_pf_seed_satisfies_flux_power_and_steady_state(angle, reactive_power, multilinear):
+    template = (get_simple_generator_emt_multilinear_template(VarFactory()) if multilinear
+                else get_simple_generator_emt_template(VarFactory()))
+    block = template.block
     all_vars = (block.state_vars + block.algebraic_vars + block.in_vars
                 + list(block.event_dict) + list(block.parameters))
-    names = {var.name: var for var in all_vars}
+    names = {var.name.removesuffix("_" + template.name): var for var in all_vars}
     bindings = {var.uid: float(expr.value)
                 for var, expr in list(block.event_dict.items()) + list(block.parameters.items())
                 if isinstance(expr, Const) and expr.value is not None}
@@ -57,14 +61,20 @@ def test_simple_generator_pf_seed_satisfies_flux_power_and_steady_state(angle, r
     rhs = np.array([eq.eval_uid(bindings) for eq in block.state_eqs])
     expected = np.zeros(len(rhs))
     expected[4] = omega_base
+    if multilinear:
+        expected[-2] = -omega_base * bindings[names['u_sin'].uid]
+        expected[-1] = omega_base * bindings[names['u_cos'].uid]
     np.testing.assert_allclose(rhs, expected, atol=1e-10)
     bindings[block.in_vars[4].uid] += 0.01
     assert block.state_eqs[3].eval_uid(bindings) == pytest.approx(omega_base * 0.01)
 
 
-def test_simple_generator_stator_resistance_dissipates_flux_at_standstill():
-    block = get_simple_generator_emt_template(VarFactory()).block
-    names = {var.name: var for var in block.state_vars + block.algebraic_vars
+@pytest.mark.parametrize('multilinear', [False, True])
+def test_simple_generator_stator_resistance_dissipates_flux_at_standstill(multilinear):
+    template = (get_simple_generator_emt_multilinear_template(VarFactory()) if multilinear
+                else get_simple_generator_emt_template(VarFactory()))
+    block = template.block
+    names = {var.name.removesuffix("_" + template.name): var for var in block.state_vars + block.algebraic_vars
              + list(block.event_dict) + list(block.parameters)}
     omega_base, resistance, q_inductance, zero_inductance = 2*np.pi*50, 0.02, 1.7, 0.15
     values = {'omega_base': omega_base, 'Ra': resistance, 'R0': resistance,

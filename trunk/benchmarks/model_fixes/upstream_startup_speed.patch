@@ -1,0 +1,161 @@
+diff --git a/src/VeraGridEngine/Simulations/EMT/initialization_emt.py b/src/VeraGridEngine/Simulations/EMT/initialization_emt.py
+index 36c23f6c2b..54185bc8c5 100644
+--- a/src/VeraGridEngine/Simulations/EMT/initialization_emt.py
++++ b/src/VeraGridEngine/Simulations/EMT/initialization_emt.py
+@@ -604,10 +604,10 @@ def _load_or_build_state_rhs_vector(
+     else:
+         pass
+ 
+-    if len(missing_state_eqs) <= 16:
+-        use_jit_for_state_rhs: bool = False
+-    else:
+-        use_jit_for_state_rhs = True
++    # Initial derivative completion evaluates this vector only a few times.
++    # Avoid compiling a network-sized kernel just for those initial values;
++    # the integration solvers retain their independently compiled kernels.
++    use_jit_for_state_rhs: bool = False
+ 
+     source_code: str = _build_state_rhs_source(
+         missing_state_eqs,
+@@ -1064,7 +1064,7 @@ def _build_state_rhs_cache_key(problem: EmtProblemTemplate, state_eqs: List[Expr
+         index += 1
+ 
+     payload: str = "|".join([
+-        "state-rhs-vector",
++        "state-rhs-vector-python-v2",
+         problem.VARS_NAME,
+         problem.DIFF_NAME,
+         problem.VARIABLE_PARAMS_NAME,
+diff --git a/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py b/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py
+index 3369118b18..f969a4f7f4 100644
+--- a/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py
++++ b/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py
+@@ -1788,11 +1788,15 @@ class EmtProblemDae(EmtProblemTemplate):
+             # a PF-seeded algebraic reference changes late in initialization.
+             # Evaluate the final equations against the final UID bindings so
+             # the derivatives used by the first integration step match x0.
++            # Read each complete vector once before mapping its individual UIDs.
++            # Rebuilding it for every entry makes initialization quadratic.
++            final_x0: np.ndarray = self.get_x0()
++            final_dx0: np.ndarray = self.get_dx0()
+             final_bindings: Dict[int, float] = {
+-                uid: float(self.get_x0()[idx]) for uid, idx in self.uid2idx_vars.items()
++                uid: float(final_x0[idx]) for uid, idx in self.uid2idx_vars.items()
+             }
+             final_bindings.update({
+-                uid: float(self.get_dx0()[idx]) for uid, idx in self.uid2idx_diff.items()
++                uid: float(final_dx0[idx]) for uid, idx in self.uid2idx_diff.items()
+             })
+             final_bindings.update({
+                 uid: float(self.event_params_values[idx])
+diff --git a/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_template.py b/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_template.py
+index 6613a2b72a..22e5b91835 100644
+--- a/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_template.py
++++ b/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_template.py
+@@ -921,9 +921,9 @@ class EmtProblemTemplate(ABC):
+             dtype=np.float64
+         )
+ 
+-        # Runtime equations are structurally final for this rebuild. Compile
+-        # them now so the first simulation step performs numerical work only.
+-        self._build_runtime_parameter_kernel()
++        # Initialization may rebuild these equations several times. Generate
++        # the update kernel once, when a solver enables the finalized runtime
++        # evaluator, instead of compiling each temporary initialization graph.
+ 
+     def rebuild_runtime_param_vectors(self) -> None:
+         """
+diff --git a/src/VeraGridEngine/Utils/Symbolic/jit_compiler.py b/src/VeraGridEngine/Utils/Symbolic/jit_compiler.py
+index 68bddfc9c4..4d572efa0a 100644
+--- a/src/VeraGridEngine/Utils/Symbolic/jit_compiler.py
++++ b/src/VeraGridEngine/Utils/Symbolic/jit_compiler.py
+@@ -1767,7 +1767,8 @@ class RuntimeParameterCompiler:
+             time_uids=time_uids,
+         )
+ 
+-    def compile(self, equations: List[Expr], output_offset: int = 0) -> Callable:
++    def compile(self, equations: List[Expr], output_offset: int = 0,
++                use_jit: bool | None = None) -> Callable:
+         """Compile ordered expressions into an eagerly specialized Numba kernel.
+ 
+         Each assignment is emitted in declaration order. Consequently, an
+@@ -1777,6 +1778,8 @@ class RuntimeParameterCompiler:
+ 
+         :param equations: Ordered continuous runtime equations.
+         :param output_offset: First runtime-vector index written by the kernel.
++        :param use_jit: Force a backend, or use Python for more than 256 equations
++            when unset to avoid excessive startup compilation.
+         :return: Eagerly compiled in-place runtime update function.
+         """
+         source_lines: List[str] = list()
+@@ -1809,6 +1812,17 @@ class RuntimeParameterCompiler:
+ 
+         full_source = "\n".join(source_lines)
+         python_function = _compile_to_file(full_source, "runtime_parameter_update")
++        # Large update sweeps cost little as generated Python assignments,
++        # while eager specialization can dominate short EMT studies. Callers
++        # can explicitly request JIT for long simulations that amortize it.
++        if use_jit is None:
++            use_jit = len(equations) <= 256
++        else:
++            pass
++        if not use_jit:
++            return python_function
++        else:
++            pass
+         signature_tpe = types.void(
+             types.float64[::1],
+             types.float64[::1],
+diff --git a/src/tests/EMT/test_emt_problem_parameter_validation.py b/src/tests/EMT/test_emt_problem_parameter_validation.py
+index 8e13f7ed67..6f3ce3a2ff 100644
+--- a/src/tests/EMT/test_emt_problem_parameter_validation.py
++++ b/src/tests/EMT/test_emt_problem_parameter_validation.py
+@@ -5,7 +5,7 @@
+ """Tests for contextual EMT parameter diagnostics."""
+ 
+ from __future__ import annotations
+-from typing import Dict
++from typing import Dict, Callable
+ import numpy as np
+ import pytest
+ from VeraGridEngine.Devices.Branches.dc_line import DcLine
+@@ -21,6 +21,7 @@ from VeraGridEngine.Templates.Emt.synchronous_machines.thevenin_equivalent_emt_g
+ )
+ from VeraGridEngine.Utils.Symbolic.block import Block
+ from VeraGridEngine.Utils.Symbolic.symbolic import Const, Var, Expr
++from VeraGridEngine.Utils.Symbolic.jit_compiler import RuntimeParameterCompiler
+ from VeraGridEngine.enumerations import (
+     DynamicSimulationMode,
+     EmtInitializationMethod,
+@@ -654,3 +655,31 @@ def test_emt_zero_start_energizes_after_source_event() -> None:
+     assert initialized and converged and times.size > 1
+     assert np.all(np.isfinite(values)) and np.all(np.isfinite(derivatives))
+     assert float(np.max(np.abs(values[:, voltage_indices]))) > 1e-3
++
++
++@pytest.mark.parametrize("use_jit", [False, True, None])
++def test_runtime_update_preserves_sequential_reads_for_each_backend(use_jit: bool | None) -> None:
++    """Update dependencies in declaration order for Python and JIT kernels.
++
++    :param use_jit: Explicit backend selection or the automatic policy.
++    :return: None.
++    """
++    count: int = 300 if use_jit is None else 8
++    parameters: list[Var] = list(Var(f"parameter_{index}") for index in range(count))
++    time_var: Var = Var("time")
++    equations: list[Expr] = list((parameters[0] + Const(1.0),))
++    index: int
++    for index in range(1, count):
++        equations.append(parameters[index - 1] + time_var)
++    compiler: RuntimeParameterCompiler = RuntimeParameterCompiler(
++        runtime_map=dict((var.uid, index) for index, var in enumerate(parameters)),
++        fixed_map=dict(), time_uids=set((time_var.uid,)))
++    kernel: Callable = compiler.compile(equations, use_jit=use_jit)
++    values: np.ndarray = np.zeros(count)
++    fixed: np.ndarray = np.empty(0)
++    kernel(values, fixed, 2.0)
++    np.testing.assert_allclose(values, 1.0 + 2.0 * np.arange(count))
++    # Self references consume the incoming value; earlier references observe
++    # writes made during this same sweep.
++    kernel(values, fixed, 2.0)
++    np.testing.assert_allclose(values, 2.0 + 2.0 * np.arange(count))

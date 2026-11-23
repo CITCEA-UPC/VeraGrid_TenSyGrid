@@ -33,5 +33,7 @@
   "balanced_pf_seconds": 2.8823471780051477,
   "balanced_pf_converged": true,
   "three_phase_pf_seconds": 12.174439236012404,
-  "three_phase_pf_converged": true
+  "three_phase_pf_converged": true,
+  "consistent_dae_tangent_requested": false,
+  "total_seconds": 119.82419310200203
 }

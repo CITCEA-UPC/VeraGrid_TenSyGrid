@@ -1,0 +1,35 @@
+{
+  "ieee118_first": {
+    "baseline_seconds": 104.71533278100833,
+    "total_seconds": 92.06822921399726,
+    "ssa_seconds": 65.90881084499415,
+    "speedup": 1.1373666429232063,
+    "time_reduction_percent": 12.077604330838565,
+    "max_mode_family_difference_per_s": 2.0120909264347705e-12,
+    "max_trajectory_difference": 0.0,
+    "periodicity_validated": true,
+    "scaled_closure": 8.815181204417285e-05
+  },
+  "ieee118_repeat": {
+    "baseline_seconds": 104.71533278100833,
+    "total_seconds": 81.24798699500388,
+    "ssa_seconds": 59.09052255000279,
+    "speedup": 1.288836027253789,
+    "time_reduction_percent": 22.410610903640837,
+    "max_mode_family_difference_per_s": 2.0120909264347705e-12,
+    "max_trajectory_difference": 0.0,
+    "periodicity_validated": true,
+    "scaled_closure": 8.815181204417285e-05
+  },
+  "ieee39": {
+    "baseline_seconds": 26.971048521998455,
+    "total_seconds": 22.360873320998508,
+    "ssa_seconds": 15.832454489005613,
+    "speedup": 1.2061715182058945,
+    "time_reduction_percent": 17.093051451966133,
+    "max_mode_family_difference_per_s": 0.0,
+    "max_trajectory_difference": 0.0,
+    "periodicity_validated": true,
+    "scaled_closure": 5.743127151192638e-05
+  }
+}

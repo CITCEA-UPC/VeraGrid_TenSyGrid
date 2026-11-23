@@ -1,0 +1,11 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "2.3.0",
+  "scipy": "1.15.3",
+  "numba": "0.64.0",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "logical_cpus": 16,
+  "blas_threads": 1,
+  "validation": "Export of staged engine, runner, verifier, helpers and tracked grid inputs; no unstaged source required."
+}

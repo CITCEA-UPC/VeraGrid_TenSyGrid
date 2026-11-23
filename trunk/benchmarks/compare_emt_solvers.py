@@ -17,10 +17,11 @@ def main():
                         choices=['StructuralAD', 'StructuralCompiled', 'Automatic', 'Symbolic'],
                         default=['StructuralAD', 'StructuralCompiled', 'Automatic', 'Symbolic'])
     parser.add_argument('--timeout', type=float, default=240)
+    parser.add_argument('--steps-per-period', type=int, default=600)
     parser.add_argument('--output', type=Path, default=Path(__file__).parent / 'solver_comparison')
     args = parser.parse_args()
-    if args.timeout <= 0:
-        parser.error('timeout must be positive')
+    if args.timeout <= 0 or args.steps_per_period <= 0:
+        parser.error('timeout and steps per period must be positive')
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     summary_path = output / 'summary.json'
@@ -33,7 +34,7 @@ def main():
         report_path.unlink(missing_ok=True)
         command = [sys.executable, '-u', str(Path(__file__).with_name('multilinear_ssa.py')),
                    '--grid', args.grid, '--formulation', 'emt', '--emt-solver', solver,
-                   '--steps-per-period', '120', '--assessment-periods', '1', '--modes', '6',
+                   '--steps-per-period', str(args.steps_per_period), '--assessment-periods', '1', '--modes', '6',
                    '--output', str(destination)]
         print(f'Running {solver}', flush=True)
         start = time.perf_counter()

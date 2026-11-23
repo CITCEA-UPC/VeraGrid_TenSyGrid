@@ -1,0 +1,30 @@
+{
+  "rms_ieee39": {
+    "status": "correctly_rejected",
+    "stage": "equilibrium_validation",
+    "error": "RMS initial residual exceeds tolerance; SSA was stopped. Use --allow-nonequilibrium only for diagnostics.",
+    "initial_residual_inf": 8.862349027181141,
+    "scaled_closure": null
+  },
+  "rms_ieee118": {
+    "status": "correctly_rejected",
+    "stage": "equilibrium_validation",
+    "error": "RMS initial residual exceeds tolerance; SSA was stopped. Use --allow-nonequilibrium only for diagnostics.",
+    "initial_residual_inf": 5.942643451359338,
+    "scaled_closure": null
+  },
+  "canonical_ieee39": {
+    "status": "correctly_rejected",
+    "stage": "capture",
+    "error": "Captured EMT trajectory is not periodic at the requested tolerance; SSA was stopped. Use --allow-nonperiodic only for diagnostics.",
+    "initial_residual_inf": 7.279186142739036e-10,
+    "scaled_closure": 0.0017415232334601072
+  },
+  "canonical_ieee118": {
+    "status": "correctly_rejected",
+    "stage": "initialization_validation",
+    "error": "EMT initial DAE residual exceeds tolerance; capture and SSA were stopped. Use --allow-nonequilibrium only for diagnostics.",
+    "initial_residual_inf": 0.0010354402296511855,
+    "scaled_closure": null
+  }
+}

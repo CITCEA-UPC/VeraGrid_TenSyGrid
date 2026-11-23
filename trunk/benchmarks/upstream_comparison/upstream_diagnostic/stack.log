@@ -1,0 +1,78 @@
+Loading ieee39 emt: /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/upstream_comparison/ieee39_multilinear.veragrid
+Balanced PF converged; building multilinear problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; running SSA
+Timeout (0:00:20)!
+Thread 0x000073c9ca1bf080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 321 in _rec_list_vars
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 337 in _rec_list_vars
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 355 in list_vars
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/postproc.py", line 191 in _patch_var_dels
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/postproc.py", line 176 in _insert_var_dels
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/postproc.py", line 98 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/inline_closurecall.py", line 95 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/untyped_passes.py", line 206 in run_pass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 272 in check
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 311 in _runPass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_lock.py", line 35 in _acquire_compile_lock
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 356 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 473 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 505 in _compile_bytecode
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 439 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 739 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 107 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 94 in _compile_cached
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 80 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 908 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/decorators.py", line 234 in wrapper
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 304 in _safe_njit
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 1374 in auto_detect_vectorization
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 1247 in __init__
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 321 in _capture_limit_cycle_and_evaluator
+  File "trunk/benchmarks/multilinear_ssa.py", line 228 in _capture_limit_cycle_and_evaluator
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 366 in run_arnoldi
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 711 in run
+  File "trunk/benchmarks/multilinear_ssa.py", line 258 in run_case
+  File "trunk/benchmarks/multilinear_ssa.py", line 377 in main
+  File "trunk/benchmarks/multilinear_ssa.py", line 388 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "<string>", line 1 in <module>
+Timeout (0:00:20)!
+Thread 0x000073c9ca1bf080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 337 in _rec_list_vars
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 355 in list_vars
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/analysis.py", line 40 in compute_use_defs
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/postproc.py", line 44 in usedefs
+  File "/usr/lib/python3.12/functools.py", line 995 in __get__
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/postproc.py", line 84 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/rewrites/registry.py", line 94 in apply
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/typed_passes.py", line 249 in run_pass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 272 in check
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 311 in _runPass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_lock.py", line 35 in _acquire_compile_lock
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 356 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 473 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 505 in _compile_bytecode
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 439 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 739 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 107 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 94 in _compile_cached
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 80 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 908 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/decorators.py", line 234 in wrapper
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 304 in _safe_njit
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 1374 in auto_detect_vectorization
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/EMT/solvers/StructuralVectorizedSolver.py", line 1247 in __init__
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 321 in _capture_limit_cycle_and_evaluator
+  File "trunk/benchmarks/multilinear_ssa.py", line 228 in _capture_limit_cycle_and_evaluator
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 366 in run_arnoldi
+  File "/tmp/veragrid-upstream-37e7d867/src/VeraGridEngine/Simulations/SmallSignalStabilityEmt/small_signal_stability_emt_driver.py", line 711 in run
+  File "trunk/benchmarks/multilinear_ssa.py", line 258 in run_case
+  File "trunk/benchmarks/multilinear_ssa.py", line 377 in main
+  File "trunk/benchmarks/multilinear_ssa.py", line 388 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "<string>", line 1 in <module>

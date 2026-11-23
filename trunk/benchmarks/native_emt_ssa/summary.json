@@ -1,0 +1,58 @@
+{
+  "ieee39": {
+    "native_total_seconds": 24.576188409002498,
+    "native_ssa_seconds": 16.882725699993898,
+    "native_build_seconds": 1.0097163040045416,
+    "multilinear_total_seconds": 22.360873320998508,
+    "multilinear_ssa_seconds": 15.832454489005613,
+    "mode_family_difference_per_s": 1.2644107982850983e-11,
+    "trajectory_difference": 0.0,
+    "scaled_closure": 5.743127151192638e-05,
+    "problem_class": "EmtProblemDae",
+    "jacobian": "Native solver discrete Jacobian",
+    "modes": 6,
+    "states": 620,
+    "algebraics": 1502,
+    "canonical_diagnostic": {
+      "status": "failed",
+      "total_seconds": 11.6894233639905,
+      "last_period_scaled_closure_inf": 0.0017415232334601072,
+      "initialization_report": {
+        "status": "RESOLVED",
+        "initial_residual_inf": 7.279186142739036e-10,
+        "final_residual_inf": 7.279186142739036e-10,
+        "message": "Explicit device initialization completed with algebraic residual 7.279e-10; periodic steady state was not verified."
+      },
+      "error": "Captured EMT trajectory is not periodic at the requested tolerance; SSA was stopped. Use --allow-nonperiodic only for diagnostics.",
+      "benchmark_note": null
+    }
+  },
+  "ieee118": {
+    "native_total_seconds": 87.99113560700789,
+    "native_ssa_seconds": 60.94324520199734,
+    "native_build_seconds": 15.000385235995054,
+    "multilinear_total_seconds": 81.24798699500388,
+    "multilinear_ssa_seconds": 59.09052255000279,
+    "mode_family_difference_per_s": 2.319462255752929e-12,
+    "trajectory_difference": 0.0,
+    "scaled_closure": 8.815181204417285e-05,
+    "problem_class": "EmtProblemDae",
+    "jacobian": "Native solver discrete Jacobian",
+    "modes": 6,
+    "states": 2811,
+    "algebraics": 7350,
+    "canonical_diagnostic": {
+      "status": "interrupted",
+      "total_seconds": null,
+      "last_period_scaled_closure_inf": null,
+      "initialization_report": {
+        "status": "RESOLVED",
+        "initial_residual_inf": 0.0010354402296511855,
+        "final_residual_inf": 0.0010354402296511855,
+        "message": "Explicit device initialization completed with algebraic residual 1.035e-03; periodic steady state was not verified."
+      },
+      "error": null,
+      "benchmark_note": "Optional canonical-template diagnostic interrupted: initial DAE residual 0.00103544 already exceeds the common 1e-6 tolerance. No periodic capture or SSA timing was established."
+    }
+  }
+}

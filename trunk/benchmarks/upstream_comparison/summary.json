@@ -24,5 +24,14 @@
   "agreement": {
     "trajectory_max_abs_difference": 0.0,
     "matched_mode_max_abs_difference_per_s": 0.0
+  },
+  "upstream_optimized": {
+    "status": "completed",
+    "build_seconds": 1.1054571849963395,
+    "ssa_seconds": 24.591634914002498,
+    "total_seconds": 39.781353908998426,
+    "modes": 6,
+    "generated_python_structural_kernels": true,
+    "generated_python_runtime_parameters": true
   }
 }

@@ -1,0 +1,4 @@
+# CSV newline normalization does not change measured numeric values.
+*.csv text eol=lf
+# Unified patches must retain their original whitespace context.
+*.patch -whitespace

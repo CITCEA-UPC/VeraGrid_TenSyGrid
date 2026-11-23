@@ -148,6 +148,9 @@ def get_xfmr_emt_template_multilinear(
     xfmr_core_knee_current_mult: Var = vf.add_var(name=f"xfmr_core_knee_current_mult")
 
     xfmr_sc_resistance_pct: Var = vf.add_var(name=f"xfmr_sc_resistance_pct")
+    # Static mapping retains branch R when no copper-loss test is supplied.
+    templ.block.api_obj_mapping[ParamPowerFlowReferenceType.transformer_short_circuit_resistance_pct] = xfmr_sc_resistance_pct
+    templ.block.parameters[xfmr_sc_resistance_pct] = vf.add_const(None)
     xfmr_core_linear_l_pu: Var = vf.add_var(name=f"xfmr_core_linear_l_pu")
     xfmr_core_a_prime: Var = vf.add_var(name=f"xfmr_core_a_prime")
     xfmr_core_b_prime: Var = vf.add_var(name=f"xfmr_core_b_prime")
@@ -165,8 +168,6 @@ def get_xfmr_emt_template_multilinear(
     # ------------------------------------------------------------------
     # Derived local parameters of the dynamic model.
     # ------------------------------------------------------------------
-    templ.block.event_dict[xfmr_sc_resistance_pct] = xfmr_sc_loss_kw / (c10 * xfmr_s_rated_mva + c_eps)
-
     oc_loss_pu: Expr = (xfmr_oc_loss_kw / c1000) / (xfmr_s_rated_mva + c_eps)
     oc_current_pu: Expr = xfmr_oc_current_pct / c100
     i_mag_pu: Expr = sym.sqrt(oc_current_pu * oc_current_pu - oc_loss_pu * oc_loss_pu + c_eps)
@@ -188,8 +189,14 @@ def get_xfmr_emt_template_multilinear(
     # Leakage-branch parameters.
     # ------------------------------------------------------------------
     z_sc_pu: Expr = xfmr_sc_voltage_pct / c100
-    r_sc_pu: Expr = xfmr_sc_resistance_pct / c100
-    x_sc_pu: Expr = sym.sqrt(z_sc_pu * z_sc_pu - r_sc_pu * r_sc_pu + c_eps)
+    r_sc_base: Expr = xfmr_sc_resistance_pct / c100
+    x_sc_base: Expr = sym.sqrt(z_sc_pu * z_sc_pu - r_sc_base * r_sc_base + c_eps)
+    # PF places Z behind the from-side ideal tap: If=(Vf/t-Vt)/(t*Z).
+    # Here the winding equation uses Vf-t*Vt and the terminal current If,
+    # so its equivalent leakage impedance is t**2 * Z.
+    tap_square: Expr = xfmr_tap_module * xfmr_tap_module
+    r_sc_pu: Expr = tap_square * r_sc_base
+    x_sc_pu: Expr = tap_square * x_sc_base
     l_sigma: Expr = x_sc_pu / (omega_base + c_eps)
     l_inv: Expr = c1 / (l_sigma + c_eps)
 
@@ -247,8 +254,16 @@ def get_xfmr_emt_template_multilinear(
     i_loss_leg: list[Var] = [vf.add_var(name=f"i_loss_leg_{ph}") for ph in ("A", "B", "C")]
     i_cap_f: list[Var] = [vf.add_var(name=f"i_cap_f_{ph}") for ph in ("A", "B", "C")]
     i_cap_t: list[Var] = [vf.add_var(name=f"i_cap_t_{ph}") for ph in ("A", "B", "C")]
-    if_act: list[Var] = [vf.add_var(name=f"if_{ph}") for ph in ("A", "B", "C")]
-    it_act: list[Var] = [vf.add_var(name=f"it_{ph}") for ph in ("A", "B", "C")]
+    # Attachment rebuilds terminal mappings from root IO references. Preserve
+    # the equation-owned currents when that interface is normalized.
+    if_act: list[Var] = [vf.add_var(name=f"if_{ph}", reference=reference)
+                        for ph, reference in zip(("A", "B", "C"),
+                            (VarPowerFlowReferenceType.if_A, VarPowerFlowReferenceType.if_B,
+                             VarPowerFlowReferenceType.if_C))]
+    it_act: list[Var] = [vf.add_var(name=f"it_{ph}", reference=reference)
+                        for ph, reference in zip(("A", "B", "C"),
+                            (VarPowerFlowReferenceType.it_A, VarPowerFlowReferenceType.it_B,
+                             VarPowerFlowReferenceType.it_C))]
     i_return_path: Var = vf.add_var(name=f"i_return_path")
     i_return_total: Var = vf.add_var(name=f"i_return_total")
 

@@ -1,0 +1,24 @@
+{
+  "ieee39": {
+    "before_total_seconds": 81.08829502300068,
+    "after_total_seconds": 26.971048521998455,
+    "before_ssa_seconds": 73.78535133900004,
+    "after_ssa_seconds": 20.456954544002656,
+    "speedup": 3.0064939802715664,
+    "max_mode_family_difference_per_s": 1.0038359565811561e-07,
+    "max_trajectory_difference": 0.0,
+    "periodicity_validated": true,
+    "scaled_closure": 5.743127151192638e-05
+  },
+  "ieee118": {
+    "before_total_seconds": 634.2591961750004,
+    "after_total_seconds": 104.71533278100833,
+    "before_ssa_seconds": 609.3147076110035,
+    "after_ssa_seconds": 77.81565657901228,
+    "speedup": 6.056984964192681,
+    "max_mode_family_difference_per_s": 1.4515063236051405e-08,
+    "max_trajectory_difference": 0.0,
+    "periodicity_validated": true,
+    "scaled_closure": 8.815181204417285e-05
+  }
+}

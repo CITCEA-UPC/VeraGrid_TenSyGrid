@@ -1,4 +1,18 @@
-# Multilinear small-signal benchmarks
+# EMT and exploratory RMS small-signal benchmarks
+
+The current end-to-end verification is documented in [verified/README.md](verified/README.md).
+It runs **both EMT backends on both grids**, sequentially, checks their source
+hashes and numerical agreement, and rejects failed power flows, initialization,
+cycle closure or mode extraction:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python trunk/benchmarks/verify_emt_benchmarks.py
+```
+
+Outputs default to `results/end_to_end/`. Large NPZ captures and profiles are
+regenerated and ignored by Git; compact JSON, CSV and Markdown records are kept.
+The reference machine data are generic assumptions, so this validates the
+implementation and those benchmark models, not standard IEEE dynamic data.
 
 The runner covers IEEE 39-bus (New England) and IEEE 118-bus, with separate
 RMS eigenvalue and EMT Floquet analyses. Run from any working directory using
@@ -53,8 +67,9 @@ The upstream connectivity-validator disablement is present in this checkout.
 
 ## Resolution and interpretation
 
-EMT defaults to 600 steps per electrical period, five assessment periods,
-12 requested modes, and one Arnoldi restart. Adjust with `--steps-per-period`,
+EMT defaults to 600 steps per electrical period, one assessment period,
+six requested modes and a 24-vector Krylov budget. Standard Arnoldi honors
+the Krylov dimension; the hybrid-only restart option does not control ARPACK. Adjust with `--steps-per-period`,
 `--assessment-periods`, and `--modes`. A quick setup check is:
 
 ```bash
@@ -64,11 +79,19 @@ python trunk/benchmarks/multilinear_ssa.py --all --timeout 300 \
 
 That coarse run is not a convergence study. Repeat with finer time steps and
 longer assessment before interpreting Floquet results as physical stability.
+The RMS fixtures remain exploratory: their explicit PF-seeded dynamic states
+have not passed the steady-state residual check. RMS now stops before SSA when
+`equilibrium_validated` is false; `--allow-nonequilibrium` is an explicit
+diagnostic override, not a validation result. Thus `--all` can correctly return
+failure for RMS even when both EMT cases pass.
+
 RMS also records the steady-state residual and `equilibrium_validated`;
 `--rms-init consistent` requests the engine's Newton initialization instead of
 the default explicit seed. EMT records the initialization report and scaled
-last-period closure error. `periodicity_validated` remains false because this
-benchmark does not certify periodic orbits.
+last-period closure error. `periodicity_validated` reports whether the measured cycle closure meets the
+declared tolerance (`--periodicity-tolerance`, default 1e-4). The benchmark
+stops before SSA on a failed check unless `--allow-nonperiodic` is explicitly
+requested for diagnostics. This tolerance check does not certify an exact orbit.
 
 Initialization errors, singular matrices, and missing SSA results are recorded
 as failures. A completed numerical analysis alone does not prove a valid
@@ -91,8 +114,21 @@ and remaining Floquet work. Phase checkpoints survive batch timeouts.
 
 SSA now honors `EmtOptions.solver_type` through the public solver factory.
 `--emt-solver` selects StructuralAD (the benchmark default), StructuralCompiled,
-Automatic, or Symbolic. The multilinear Floquet Jacobian remains the S/Phi
-adapter. Run `python trunk/benchmarks/compare_emt_solvers.py --timeout 240`
-for isolated sequential trials with identical IEEE39 settings. The comparison
+Automatic, or Symbolic. With `--emt-problem Multilinear`, the Floquet Jacobian uses the S/Phi
+adapter. `--emt-problem CurrentBalance` instead uses the native StructuralAD
+Jacobian on identical device equations. This is different from selecting
+`--emt-models canonical`, which changes the device representations and must
+pass its own initialization and periodicity checks. Run `python trunk/benchmarks/compare_emt_solvers.py --timeout 240`
+for isolated sequential trials with identical IEEE39 settings (600 steps per
+period by default; coarse overrides may fail the closure check). Earlier
+alternate-solver timing records used older models and are historical, not
+measurements of the current corrected setup. The comparison
 saves per-solver JSON/log/trajectory/mode files and `summary.json`, including
 trajectory differences and matched mode differences versus StructuralAD.
+
+## Transformer comparison
+
+See [transformer_comparison/README.md](transformer_comparison/README.md) for
+the static terminal-equivalent audit, isolated passivity/termination checks,
+and matched IEEE118 captures using `--transformer-model simple_linear` or
+`coupled_core`. `--capture-only` saves trajectories without mode extraction.

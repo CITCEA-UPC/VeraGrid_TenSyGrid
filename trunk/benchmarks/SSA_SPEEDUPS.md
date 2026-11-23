@@ -39,3 +39,8 @@ PYTHONPATH=src /home/pablo/myenv/bin/python -m pytest -q \
 The earlier initialization optimizations are already present in this repository's
 base revision. No benchmark binary captures or unrelated template edits are part
 of this commit.
+
+The remaining model corrections and benchmark harness are included by the
+subsequent end-to-end benchmark commit. Its current provenance and measurements
+are in [verified/README.md](verified/README.md); the performance-only scope above
+describes the earlier commit, not the combined repository state.

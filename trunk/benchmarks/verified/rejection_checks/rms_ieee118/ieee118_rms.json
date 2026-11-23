@@ -1,0 +1,83 @@
+{
+  "status": "failed",
+  "settings": {
+    "grid": "ieee118",
+    "engine_root": null,
+    "reuse_models": false,
+    "grid_file": null,
+    "formulation": "rms",
+    "consistent_tangent": true,
+    "emt_models": "auxiliary",
+    "emt_problem": "Multilinear",
+    "emt_solver": "StructuralAD",
+    "periodicity_tolerance": 0.0001,
+    "allow_nonequilibrium": false,
+    "allow_nonperiodic": false,
+    "transformer_model": "coupled_core",
+    "capture_only": false,
+    "all": false,
+    "output": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/trunk/benchmarks/verified/rejection_checks/rms_ieee118",
+    "timeout": 1800,
+    "rms_init": "explicit",
+    "rms_spectrum": "sparse",
+    "krylov_dim": 24,
+    "modes": 6,
+    "steps_per_period": 600,
+    "assessment_periods": 1
+  },
+  "random_seed": 0,
+  "grid_file": "/tmp/veragrid-staged-emt-yamyzb3d/src/tests/data/grids/RAW/IEEE 118 Bus.raw",
+  "formulation": "rms",
+  "stage": "equilibrium_validation",
+  "grid_sha256": "396e5eb09723a010d3794dc974352cc7739c010422e92d6ae992ab5b7d7d97c8",
+  "python_version": "3.12.3",
+  "numpy_version": "2.3.0",
+  "engine_module": "/tmp/veragrid-staged-emt-yamyzb3d/src/VeraGridEngine/__init__.py",
+  "engine_source_sha256": "ee37b8b3ca6940774e6160a5df94216bdc61be5506b62885fe44fab1ff9d6c65",
+  "benchmark_source_sha256": "5574c101da0b2f9d9f57ccf1d7654a52a12b07a3c5adfa5f4a72b56999d45eb7",
+  "transformer_helper_sha256": "4f228d12d064b136fa2090867e8c4324131d6fa131e5188f7cac1de2006a3b00",
+  "machine_profile": "template defaults; fixed PF-seeded torque and field voltage",
+  "load_seconds": 0.07143692299723625,
+  "buses": 118,
+  "generators": 54,
+  "transformers": 9,
+  "transformer_model": "coupled_core",
+  "emt_models": "auxiliary",
+  "attach_seconds": 0.3426532710000174,
+  "balanced_pf_seconds": 1.6424067329935497,
+  "balanced_pf_converged": true,
+  "problem_class": "RmsProblemMultilinear",
+  "states": 0,
+  "algebraics": 3510,
+  "derivatives": 432,
+  "build_seconds": 3.6264696860016556,
+  "matrix_build_seconds": 0.5824031369993463,
+  "initial_residual_inf": 5.942643451359338,
+  "largest_initial_residual_rows": [
+    {
+      "row": 3450,
+      "residual": -5.942643451359338
+    },
+    {
+      "row": 3410,
+      "residual": -4.964858665591251
+    },
+    {
+      "row": 3432,
+      "residual": -4.5679517282290565
+    },
+    {
+      "row": 3292,
+      "residual": -4.213436173971296
+    },
+    {
+      "row": 3402,
+      "residual": -3.855186317296434
+    }
+  ],
+  "equilibrium_validated": false,
+  "error_type": "RuntimeError",
+  "error": "RMS initial residual exceeds tolerance; SSA was stopped. Use --allow-nonequilibrium only for diagnostics.",
+  "traceback": "Traceback (most recent call last):\n  File \"/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py\", line 500, in main\n    run_case(args, record)\n  File \"/tmp/veragrid-staged-emt-yamyzb3d/trunk/benchmarks/multilinear_ssa.py\", line 248, in run_case\n    raise RuntimeError('RMS initial residual exceeds tolerance; SSA was stopped. '\nRuntimeError: RMS initial residual exceeds tolerance; SSA was stopped. Use --allow-nonequilibrium only for diagnostics.\n",
+  "total_seconds": 9.028701454008115
+}

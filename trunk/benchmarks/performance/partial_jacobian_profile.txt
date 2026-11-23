@@ -1,0 +1,33 @@
+Mon Nov 23 14:25:57 2026    /tmp/ieee118-saved-progress.prof
+
+         163861464 function calls (159126906 primitive calls) in 133.740 seconds
+
+   Ordered by: internal time
+   List reduced from 5091 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1216   63.704    0.052   63.713    0.052 _lil.py:255(_set_arrayXarray)
+     9630    6.878    0.001   11.003    0.001 emt_problem_dae.py:7810(_set_runtime_parameter_value_by_uid)
+       98    4.269    0.044    4.269    0.044 {built-in method scipy.sparse._sparsetools.coo_todense}
+       98    4.072    0.042    5.695    0.058 rms_problem_multilinear.py:1324(_compute_jacobian_sparse_from_S)
+      213    3.767    0.018    3.775    0.018 _lil.py:23(__init__)
+    43088    3.508    0.000    3.537    0.000 static_parameter_mapping_unified.py:792(get_api_parameter_initial_value_by_uid)
+ 53046083    3.168    0.000    3.204    0.000 {built-in method builtins.isinstance}
+44073086/44068102    2.670    0.000    2.671    0.000 {built-in method builtins.len}
+     3033    2.307    0.001    4.901    0.002 pf_basic_formulation_3ph.py:301(compute_current_loads)
+     3033    1.954    0.001    2.073    0.001 pf_basic_formulation_3ph.py:588(compute_power_loads)
+  2102087    1.772    0.000    2.349    0.000 _function_base_impl.py:1671(angle)
+   452685    1.666    0.000    2.047    0.000 emt_problem_template.py:1277(_evaluate_runtime_expression)
+        1    1.475    1.475    3.970    3.970 emt_consistent_tangent.py:59(_sparse_algebraic_tangent)
+       44    1.418    0.032    1.418    0.032 {method 'compress' of 'zlib.Compress' objects}
+     5622    1.185    0.000    1.185    0.000 emt_problem_template.py:940(get_compiler_names_dict)
+23714/23693    1.100    0.000    1.385    0.000 ffi.py:210(__call__)
+      353    1.072    0.003    3.221    0.009 explicit_initialization_symbolic.py:1327(init_explicit_common)
+        1    1.020    1.020    1.023    1.023 _decomp_svd.py:13(svd)
+   656986    0.995    0.000    1.278    0.000 uuid.py:139(__init__)
+2547162/176481    0.947    0.000    1.577    0.000 symbolic.py:2182(_collect_vars)
+        2    0.873    0.437    2.725    1.363 initialization_emt.py:1045(_build_state_rhs_cache_key)
+10833277/10832928    0.776    0.000    0.791    0.000 {built-in method builtins.abs}
+      100    0.758    0.008    3.481    0.035 _csr.py:36(tolil)
+1421967/52883    0.755    0.000    1.421    0.000 symbolic.py:2463(get_expression_vars)
+       11    0.720    0.065    0.720    0.065 {method 'solve' of 'SuperLU' objects}

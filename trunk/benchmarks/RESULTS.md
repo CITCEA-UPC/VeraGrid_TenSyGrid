@@ -1,5 +1,25 @@
 # IEEE39 and IEEE118 multilinear SSA: results and timing
 
+> **Authoritative current verification:** [verified/README.md](verified/README.md) records fresh runs from an exported Git-index snapshot, with source fingerprints, residual/period checks and backend comparisons. The sections below are historical measurements from multiple implementation stages. Earlier numeric completion alone did not validate an operating point.
+
+
+> **Numba update (23 November 2026):** Reusing the JacobianAssembler BDF fill and compiling monomial derivatives reduces IEEE118 from 104.72 s to 92.07 s on the first run and **81.25 s** on a repeat; IEEE39 takes **22.36 s**. Trajectories are identical and the mode families agree. See [Numba and assembler results](performance/numba_assembler/README.md) for timing conditions and tests.
+
+
+> **Performance update (23 November 2026):** Sparse Jacobian assembly and a smaller mode search reduce the corrected IEEE118 total from 634.26 s to **104.72 s**, and IEEE39 from 81.09 s to **26.97 s**. Both retain 600 steps per period and the same trajectories. See [performance results](performance/README.md).
+
+
+> **Periodicity correction (23 November 2026):** The original closure diagnostic missed
+> the multilinear `theta_generator_*` states and counted their normal 2π advance as
+> drift. Corrected original closure: IEEE39 0.001435, IEEE118 0.041858. A further
+> off-nominal transformer tap scaling bug was found and corrected. Earlier IEEE118
+> modes are superseded. See [periodicity validation](periodicity_validation/README.md) for current checks.
+
+
+**Update:** the completed, corrected-model results are in the final section
+“Corrected multilinear models and completed IEEE118 SSA.” Earlier sections
+retain historical attempts and their limitations.
+
 Date: 2026-11-23. Checkout: VeraGrid_TenSyGrid, including the requested upstream
 connectivity-validator disablement. Python 3.12.3; NumPy 2.3.0.
 
@@ -253,7 +273,7 @@ Evidence: [optimization summary](upstream_comparison/summary.json),
 
 Pinned upstream: [SanPen/VeraGrid `37e7d867`, version 6.8.5](https://github.com/SanPen/VeraGrid/commit/37e7d867ba8241b03c5e0208cbec606ca3b90534).
 A source snapshot was downloaded into `/tmp/veragrid-upstream-37e7d867`;
-neither the upstream snapshot nor the sibling user checkout was patched.
+the upstream snapshot was unmodified for this original baseline.
 The upstream and optimized downstream trials load the same saved IEEE39 grid
 and downstream-defined multilinear device blocks, rather than different model
 defaults. Input SHA-256:
@@ -298,3 +318,208 @@ python trunk/benchmarks/multilinear_ssa.py --grid ieee39 --formulation emt \
 The single-case command itself has no wall-clock cap; the recorded experiment
 used a parent subprocess timeout of 180 seconds. `--all --timeout` enforces
 per-case limits for the ordinary batch runner.
+
+## Upstream startup patch and completed SSA
+
+The local pinned upstream snapshot now has a portable
+[upstream startup-speed patch](upstream_comparison/upstream_initialization_speed.patch)
+against commit `37e7d867ba8241b03c5e0208cbec606ca3b90534`. Five files are covered:
+initial derivative evaluation, final UID binding construction, runtime-parameter
+compilation, structural solver compilation, and a new regression-test module.
+Upstream's SSA algorithm and public problem-selection behavior were not changed.
+
+### Measured upstream results
+
+| Same upstream native IEEE39 SSA configuration | Original | Patched short-study mode |
+| --- | ---: | ---: |
+| DAE construction | Not completed within whole-process limit | 1.105 s |
+| Capture + Jacobian setup | Not reached | 7.080 s |
+| Remaining Floquet work | Not reached | 17.464 s |
+| Complete SSA | Not reached | 24.592 s |
+| Worker end-to-end | Timed out at 180 s (parent limit) | 39.781 s |
+| Parent process wall time | 180.069 s (timeout) | 40.952 s |
+| Finite modes returned | None | 6 |
+
+This is now a completed **native upstream** run, using `EmtProblemDae` and its
+original Floquet solver. It still differs from downstream's consistent-tangent
+multilinear SSA, so do not rank their mode sets or timings as identical algorithms.
+The scaled closure error is 1.889; a periodic
+steady state and physical stability interpretation remain unverified.
+
+### Changes and required options
+
+1. Use the existing generated Python state-RHS evaluator for initial derivative
+   completion, avoiding eager network-sized compilation. Version the persistent
+   cache key so old JIT-enabled payloads do not re-enable it.
+2. Snapshot full initial state and derivative vectors once when constructing
+   final UID bindings.
+3. Port downstream's opt-in `VERAGRID_RUNTIME_PARAMETER_PYTHON=1` behavior.
+   Earlier comparison runs requested that option, but unpatched upstream did
+   not implement it and still compiled its large runtime-parameter kernel.
+   The first initialization-only attempt therefore remained in construction;
+   it is preserved as `upstream_optimized_init_only` and marked interrupted.
+4. Add an independent opt-in `VERAGRID_STRUCTURAL_PYTHON=1` path for generated
+   structural residual and JVP kernels. A diagnostic stack trace located another
+   expensive Numba compilation in `auto_detect_vectorization` before trajectory
+   integration. The same generated equations execute as Python in this mode.
+   Without this option, the initialization/runtime-patched trial built in
+   approximately 1.01 s but timed out inside SSA at 180 s; that trial is saved as
+   `upstream_optimized_init_runtime`.
+
+The runtime and structural options leave their compiled paths as the default.
+They target short studies where compilation is not amortized. Generated Python
+can have slower per-step execution for long studies; no long-duration throughput
+claim is made. The successful trial enabled **both** options. Initialization-only
+changes alone do not explain or reproduce the completed 39.78-second result.
+
+### Validation
+
+**Four tests passed when run from the upstream source tree**. The first harness
+attempt resolved imports from downstream; that was corrected before recording
+the final upstream test result. Tests compare generated Python and JIT state-RHS
+values across input changes, preserve sequential runtime-parameter writes, and
+compare the structural Jacobian against both its compiled counterpart and an
+analytic nonlinear DAE Jacobian. The large IEEE39 case completed and returned
+six finite modes. The original run produced no modes, so full-network numerical
+agreement against an unpatched upstream result cannot be asserted.
+
+The saved patch passes `git apply --check --reverse` on the modified snapshot.
+[Final upstream test output](upstream_comparison/upstream_regression_tests.log),
+[completed benchmark JSON](upstream_comparison/upstream_optimized/ieee39_emt.json),
+[benchmark log](upstream_comparison/upstream_optimized/ieee39_emt.log), and
+[compilation stack trace](upstream_comparison/upstream_diagnostic/stack.log)
+are preserved. The stack diagnostic was a separate bounded probe, not a timing
+trial.
+
+### Apply and reproduce
+
+From an upstream checkout at the pinned commit, apply the patch using its
+absolute path:
+
+```bash
+git apply /path/to/upstream_initialization_speed.patch
+```
+
+Then run the benchmark from the downstream workspace with both short-study
+options enabled:
+
+```bash
+VERAGRID_RUNTIME_PARAMETER_PYTHON=1 VERAGRID_STRUCTURAL_PYTHON=1 \
+python trunk/benchmarks/multilinear_ssa.py --grid ieee39 --formulation emt \
+  --engine-root /path/to/patched-upstream --reuse-models --no-consistent-tangent \
+  --grid-file trunk/benchmarks/upstream_comparison/ieee39_multilinear.veragrid \
+  --steps-per-period 120 --assessment-periods 1 --modes 6 \
+  --output /tmp/upstream-fast-result
+```
+
+To run the added tests, change into that upstream checkout and use its source
+path, avoiding downstream pytest configuration:
+
+```bash
+PYTHONPATH=src python -m pytest -q src/tests/EMT/test_initialization_state_rhs_evaluation.py
+```
+
+## Corrected multilinear models and completed IEEE118 SSA
+
+The previous capture failure was traced to two concrete model defects:
+
+1. The multilinear simple generator had diverged from the corrected standard
+   generator: Park-angle initialization, outgoing-current flux signs, conversion
+   of flux derivatives to seconds, and total three-phase power/torque normalization.
+   These are now aligned with the standard machine. Analytical tests cover
+   operating points in different angle quadrants and reactive-power directions,
+   and passive stator-resistance decay.
+2. The multilinear transformer declared its six terminal-current variables
+   without their terminal reference tags. Public model attachment rebuilt the
+   root contract from those tags, dropped the current mappings, and omitted
+   transformer currents from bus KCL. The equation-owned currents now retain
+   their canonical from/to phase references through attachment.
+
+IEEE118 initial algebraic residual fell from **14.607 to 2.200e-12**. A direct
+capture converged through all 120 steps (121 samples). No network devices were
+added, no dispatch was changed, and no convergence tolerance was relaxed.
+
+### Consistency reduction and SSA
+
+The existing consistency reduction was introduced downstream by **PabloDJ**,
+commit `f56528509`, dated **2026-10-20**. It restricts state perturbations to
+ones satisfying the linearized algebraic DAE constraints. Its optional dense
+SVD implementation is not a mathematical requirement; equivalent formulations
+can impose the same constraints.
+
+For this case, the algebraic Jacobian is 7350 x 7350, with a structurally
+matched rank of 6588. A sparse matched minor now eliminates that part and
+reduces the remaining constraint problem. Left-null-space whitening and a
+minimum-norm algebraic correction preserve the dense pseudoinverse semantics.
+Numerically singular matched minors retain the original dense fallback.
+The direct IEEE118 reduction took **3.778 seconds** and retained 2049 admissible
+state directions out of 2811. Dense-reference tests verify the constraint
+projector and minimum-norm algebraic sensitivities, including permuted inputs.
+
+Standard Arnoldi now honors `max_krylov_dim` through ARPACK's `ncv` argument;
+the benchmark exposes `--krylov-dim`, defaulting to 180. This is a subspace-budget
+control, not a relaxation of the equations or Newton tolerance.
+
+| Corrected case | Build (s) | Capture + SSA (s) | End-to-end (s) | Returned modes |
+| --- | ---: | ---: | ---: | ---: |
+| IEEE39 | 0.971 | 19.307 | 25.782 | 6 |
+| IEEE118, earlier subspace | 12.309 | 127.066 | 149.759 | 6 |
+| IEEE118, subspace 180 | 13.553 | 122.855 | 147.444 | 6 |
+
+Both IEEE118 runs returned six finite modes; the maximum matched difference
+is **2.898e-13 per second**. Single-run timing variation is not proof that the
+larger subspace is faster. The previously quoted **3.78 seconds is reduction
+only**, not the complete IEEE118 analysis. IEEE118 is slower overall than IEEE39.
+
+**Periodic steady state remains unverified.** The corrected run has a small
+initial algebraic residual, but that alone does not prove a periodic orbit.
+Its last-period closure check is still large; the returned modes are exploratory
+trajectory linearizations and are not a certified physical stability conclusion.
+The earlier report's model spectra and timings are historical and must not be
+compared as though the device equations were unchanged by these model fixes.
+
+Evidence: [current summary](model_fixes/summary.json),
+[IEEE118](model_fixes/ieee118_arnoldi/ieee118_emt.json),
+[IEEE39](model_fixes/ieee39/ieee39_emt.json),
+[capture diagnostics](model_fixes/ieee118_capture_diagnostic.log),
+[downstream tests: 41 passed](model_fixes/downstream_regression_tests.log).
+
+### Upstream startup port
+
+The initialization-only evaluator and vector-snapshot changes have also been
+applied to the local `/home/pablo/Desktop/eroots/VeraGrid` checkout (eRoots fork,
+base `c01289170de69e8357295338ac8ce3cd7db7d885`) and the pinned SanPen snapshot.
+A subsequent upstream profile confirmed an additional bottleneck: eager runtime
+parameter-kernel compilation consumed **91.6 seconds** in the interrupted profile.
+Runtime updates are now generated only after initialization is finalized. For
+more than 256 assignments, the compiler defaults to the sequential generated
+Python function; callers can force `use_jit=True` to amortize compilation in
+long-running studies. Small updates retain JIT by default. This avoids a new
+global/environment configuration requirement in the local checkout.
+
+The patched pinned upstream snapshot constructed the corrected IEEE39 problem
+in **0.838 seconds**. Its different native SSA path did not return before the
+manual interruption; no completed upstream SSA time is claimed. The local
+upstream tests pass **41 tests**, including residual/Jacobian/trajectory checks,
+parameter initialization, and sequential update ordering for both backends.
+
+[Upstream startup patch](model_fixes/upstream_startup_speed.patch) contains only
+the relevant startup and regression changes from the local checkout; unrelated
+user edits were preserved. [Upstream test log](model_fixes/upstream_regression_tests.log)
+and [profile detail](model_fixes/upstream_runtime_profile.txt) are saved alongside it.
+
+Reproduce the corrected downstream case:
+
+```bash
+python trunk/benchmarks/multilinear_ssa.py --grid ieee118 --formulation emt \
+  --emt-solver StructuralAD --steps-per-period 120 --assessment-periods 1 \
+  --modes 6 --krylov-dim 180
+```
+
+## End-to-end committed model verification
+
+See [verified/README.md](verified/README.md). Four fresh EMT analyses passed from
+an exported Git-index snapshot with all model corrections included. Initial
+residual, cycle closure and source provenance are enforced. Invalid RMS and
+canonical-template setups are explicitly rejected instead of being counted as
+completed stability benchmarks.

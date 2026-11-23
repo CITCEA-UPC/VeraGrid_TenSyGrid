@@ -1,0 +1,4 @@
+Loading ieee118 emt: /tmp/veragrid-staged-emt-yamyzb3d/src/tests/data/grids/RAW/IEEE 118 Bus.raw
+Balanced PF converged; building dynamic problem
+Three-phase PF converged; constructing EMT DAE
+Problem built; running SSA
