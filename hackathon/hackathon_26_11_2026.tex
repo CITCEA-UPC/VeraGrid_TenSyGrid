@@ -2,42 +2,8 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[english]{babel}
-\usepackage{geometry}
-\geometry{
-  paper=a4paper,
-  left=22mm,
-  right=22mm,
-  top=20mm,
-  bottom=20mm
-}
-
-\usepackage{fontspec}
-\setmainfont{Raleway}[
-  Path = ./fonts/,
-  Extension = .ttf,
-  UprightFont = *-Regular,
-  BoldFont = *-Bold,
-  ItalicFont = *-Italic,
-  BoldItalicFont = *-BoldItalic,
-]
-
-\usepackage{microtype}
-\usepackage{xcolor}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{enumitem}
-
-% --- Official TenSyGrid Color Palette ---
-\definecolor{tgpetrol}{HTML}{008598}
-\definecolor{tgblue}{HTML}{005B7F}
-\definecolor{tggraphit}{HTML}{1C3F52}
-\definecolor{tggrey}{HTML}{A6BBC8}
-\definecolor{tgbg}{HTML}{F4F8FA}
-\definecolor{tglime}{HTML}{B2D235}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
+\usepackage{tensygrid-hackathon}
+\usepackage{booktabs,tabularx,enumitem}
 
 \newcommand{\eventdate}{26 November 2026}
 \newcommand{\eventtime}{09:00--17:00}
@@ -49,25 +15,10 @@
 
 \pagenumbering{gobble}
 
-% --- HEADER WITH LOGOS ---
-\noindent
-\begin{minipage}[c]{0.66\textwidth}
-  {\fontsize{22pt}{26pt}\selectfont \textbf{\color{tgblue}Keep the grid stable}}\\[2pt]
-  {\fontsize{13pt}{16pt}\selectfont \textbf{\color{tgpetrol}Dynamic topology optimization \& converter tuning}}\\[3pt]
-  {\small \textbf{\color{tggraphit}TenSyGrid 1-day hackathon challenge}}\\[1pt]
-  {\footnotesize \color{tggrey}Universitat Polit\`ecnica de Catalunya \textperiodcentered\ CETPartnership Horizon Europe (GA 101069750)}
-\end{minipage}
-\hfill
-\begin{minipage}[c]{0.30\textwidth}
-  \raggedleft
-  \includegraphics[height=1.25cm]{./config/tglogo.pdf}\\[3pt]
-  \includegraphics[height=0.82cm]{./config/eRoots-logo.pdf}\\[3pt]
-  \includegraphics[height=0.70cm]{./config/UPC-logo.pdf}
-\end{minipage}
-
-\vspace{6pt}
-\noindent{\color{tglime}\rule{\textwidth}{2pt}}
-\vspace{8pt}
+\HackathonHeader{Keep the grid stable}
+  {Dynamic topology optimization \& converter tuning}
+  {\textbf{TenSyGrid 1-day hackathon challenge}\\[1pt]
+   {\footnotesize \color{tggrey}Universitat Polit\`ecnica de Catalunya \textperiodcentered\ CETPartnership Horizon Europe \mbox{(GA 101069750)}}}
 
 % --- INTRO TEXT ---
 \small
