@@ -1,0 +1,165 @@
+% !LW recipe = Certificate batch (XeLaTeX, shell escape)
+\documentclass[11pt]{scrreprt}
+\usepackage[english]{babel}
+% EDIT HERE: choose the signatory's institution: IWES, UPC, eRoots, HAW, or UM.
+\usepackage[UPC]{tensygrid}
+\usepackage{tikz}
+\usepackage{shellesc}
+
+% EDIT HERE: event and signature details. Paths are relative to this file.
+\newcommand{\CertificateTitle}{Certificate of Attendance}
+\newcommand{\CertificateEvent}{TenSyGrid Hackathon}
+\newcommand{\CertificateTheme}{Keep the Grid Stable - Dynamic Topology Optimization \& Converter Tuning}
+\newcommand{\CertificateEventDate}{November 26, 2026}
+\newcommand{\CertificateLocation}{Barcelona, Spain}
+\newcommand{\CertificateIssueDate}{[Date of issue]}
+\newcommand{\CertificateSigner}{[Signatory name]}
+\newcommand{\CertificateSignerRole}{Event Organizer}
+\newcommand{\CertificateSignerInstitution}{\usekomavar{institute}}
+\newcommand{\CertificateSignatureFile}{}
+
+% EDIT HERE: add one entry per attendee. Accents and escaped characters are valid.
+\newcommand{\CertificateAttendees}{%
+  \Attendee{Luke Skywalker}
+  \Attendee{Jabba the Hutt}
+  \Attendee{Padmé Amidala}
+}
+
+% EDIT HERE: 0 generates everyone; 1, 2, ... selects a person by list position.
+\providecommand{\CertificateOnly}{0}
+
+% EDIT HERE: 1 also exports a separate PDF for everyone; 0 is normal compilation.
+% Batch export requires shell escape and always includes the full attendee list.
+\providecommand{\CertificateBatchExport}{1}
+
+% LAYOUT BELOW: no changes needed for normal use.
+\ifnum\CertificateBatchExport=1\relax
+  \ifnum\ShellEscapeStatus=1\relax
+    \renewcommand{\CertificateOnly}{0}
+  \else
+    \PackageError{certificate}{Batch export requires unrestricted shell escape}{Enable shell escape or set CertificateBatchExport to 0 for normal compilation.}
+    \renewcommand{\CertificateBatchExport}{0}
+  \fi
+\fi
+\geometry{a4paper,landscape,margin=0mm,bindingoffset=0mm}
+\pagestyle{empty}
+\hypersetup{pdftitle={Certificate of attendance},pdfauthor={TenSyGrid}}
+\newcommand{\CertificateName}{}
+\newcounter{CertificateAttendeeCount}
+\newcounter{CertificateExportIndex}
+\newif\ifCertificateExportSuccessful
+\newread\CertificateStatusRead
+\newsavebox{\CertificateNameBox}
+\newcommand{\CertificateNameDisplay}{%
+  \sbox{\CertificateNameBox}{\fontsize{30}{36}\selectfont\bfseries\CertificateName}%
+  \ifdim\wd\CertificateNameBox>245mm
+    \resizebox{245mm}{!}{\usebox{\CertificateNameBox}}%
+  \else
+    \usebox{\CertificateNameBox}%
+  \fi}
+\newcommand{\CertificateSignature}{%
+  \ifthenelse{\equal{\CertificateSignatureFile}{}}{%
+    \vphantom{\rule{0pt}{13mm}}%
+  }{%
+    \IfFileExists{\CertificateSignatureFile}{%
+      \includegraphics[width=57mm,height=13mm,keepaspectratio]{\CertificateSignatureFile}%
+    }{\PackageError{certificate}{Signature image not found: \CertificateSignatureFile}{Check CertificateSignatureFile at the top of this file.}}%
+  }}
+\newcommand{\MakeAttendanceCertificate}[1]{%
+\renewcommand{\CertificateName}{#1}%
+\thispagestyle{empty}
+\null
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[tgpetrol] (current page.north west) rectangle ([yshift=-3mm]current page.north east);
+  \fill[tglime] ([xshift=-42mm]current page.north east) rectangle ([yshift=-3mm]current page.north east);
+  \node[anchor=north west,inner sep=0pt] at ([xshift=20mm,yshift=-14mm]current page.north west)
+    {\includegraphics[width=55mm]{config/tglogo.pdf}};
+  \node[anchor=north east,inner sep=0pt,text=tggraphit,align=right,font=\small] at ([xshift=-20mm,yshift=-19mm]current page.north east)
+    {\usekomavar{projectwebsite}\\[2mm]\textcolor{tgpetrol}{\CertificateEvent}};
+  \node[anchor=north,inner sep=0pt,text=tggraphit,font=\fontsize{28}{34}\selectfont] at ([yshift=-45mm]current page.north)
+    {\CertificateTitle};
+  \node[anchor=north,inner sep=0pt,text=tggraphit,font=\normalsize] at ([yshift=-65mm]current page.north)
+    {This is to certify that};
+  \node[anchor=north,inner sep=0pt,text=tgpetrol] at ([yshift=-77mm]current page.north)
+    {\CertificateNameDisplay};
+  \draw[tglime,line width=1.2pt] ([xshift=-37mm,yshift=-89mm]current page.north) -- ([xshift=37mm,yshift=-89mm]current page.north);
+  \node[anchor=north,inner sep=0pt,text=tggraphit,text width=245mm,align=center,font=\normalsize] at ([yshift=-102mm]current page.north)
+    {attended the \textbf{\CertificateEvent}\\[2mm]
+     \CertificateTheme\\[3mm]
+     \CertificateEventDate\enspace\textbar\enspace\CertificateLocation};
+  \node[anchor=north west,inner sep=0pt,text=tggraphit,text width=110mm,align=left,font=\small] at ([xshift=22mm,yshift=-142mm]current page.north west)
+    {\textcolor{tgpetrol}{Issued on}\quad\CertificateIssueDate};
+  \node[anchor=south,inner sep=0pt] at ([xshift=76mm,yshift=-143mm]current page.north)
+    {\CertificateSignature};
+  \draw[tggrey,line width=.5pt] ([xshift=42mm,yshift=-144mm]current page.north) -- ([xshift=110mm,yshift=-144mm]current page.north);
+  \node[anchor=north,inner sep=0pt,text=tggraphit,text width=98mm,align=center,font=\fontsize{8.5}{10}\selectfont] at ([xshift=76mm,yshift=-146mm]current page.north)
+    {\textbf{\CertificateSigner}\\[1mm]\CertificateSignerRole\\[1mm]\CertificateSignerInstitution};
+  \draw[tggrey,line width=.4pt] ([xshift=20mm,yshift=44mm]current page.south west) -- ([xshift=-20mm,yshift=44mm]current page.south east);
+  \node[anchor=center,inner sep=0pt] at ([xshift=36mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=30mm,height=20mm,keepaspectratio]{config/CETP-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=75mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=34mm,height=20mm,keepaspectratio]{config/EU-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=119mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=43mm,height=26mm,keepaspectratio]{config/BMWE-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=160mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=32mm,height=20mm,keepaspectratio]{config/MCIU-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=199mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=26mm,height=20mm,keepaspectratio]{config/AEI-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=233mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=24mm,height=18mm,keepaspectratio]{config/CDTI-logo.pdf}};
+  \node[anchor=center,inner sep=0pt] at ([xshift=265mm,yshift=25mm]current page.south west)
+    {\includegraphics[width=26mm,height=20mm,keepaspectratio]{config/XJENZA-logo.pdf}};
+  \node[anchor=south west,inner sep=0pt,text=tggraphit,text width=257mm,align=left,font=\fontsize{6.5}{8}\selectfont] at ([xshift=20mm,yshift=4mm]current page.south west)
+    {\insertack};
+\end{tikzpicture}
+\clearpage}
+\newcommand{\Attendee}[1]{%
+  \stepcounter{CertificateAttendeeCount}%
+  \ifnum\CertificateOnly=0\relax
+    \MakeAttendanceCertificate{#1}%
+  \else
+    \ifnum\CertificateOnly=\value{CertificateAttendeeCount}\relax
+      \MakeAttendanceCertificate{#1}%
+    \fi
+  \fi}
+\newcommand{\CertificateExportPass}{%
+  \ShellEscape{echo 0 > certificates/\CertificateExportJob.export-status}%
+  \ShellEscape{\CertificateExportCommand\space && echo 1 > certificates/\CertificateExportJob.export-status}%
+  \openin\CertificateStatusRead=certificates/\CertificateExportJob.export-status\relax
+  \read\CertificateStatusRead to \CertificateExportStatus
+  \closein\CertificateStatusRead
+  \ifnum\CertificateExportStatus=1\relax
+  \else
+    \CertificateExportSuccessfulfalse
+    \PackageError{certificate}{Export failed for \CertificateExportJob}{Check the corresponding log file in certificates/. The individual PDF may be missing or out of date.}%
+  \fi}
+\newcommand{\CertificateExportAll}{%
+  \setcounter{CertificateExportIndex}{1}%
+  \loop\ifnum\value{CertificateExportIndex}<\numexpr\value{CertificateAttendeeCount}+1\relax
+    \edef\CertificateExportJob{certificate-\ifnum\value{CertificateExportIndex}<10 00\else\ifnum\value{CertificateExportIndex}<100 0\fi\fi\arabic{CertificateExportIndex}}%
+    \edef\CertificateExportCommand{xelatex -interaction=batchmode -halt-on-error -no-shell-escape -output-directory=certificates -jobname=\CertificateExportJob\space "\string\def\string\CertificateBatchExport{0}\string\def\string\CertificateOnly{\arabic{CertificateExportIndex}}\string\input{tensygrid-certificate.tex}"}%
+    \CertificateExportSuccessfultrue
+    \CertificateExportPass
+    \ifCertificateExportSuccessful
+      \CertificateExportPass
+    \fi
+    \ifCertificateExportSuccessful
+      \typeout{Certificate exported: certificates/\CertificateExportJob.pdf}%
+    \fi
+    \stepcounter{CertificateExportIndex}%
+  \repeat}
+\begin{document}
+\CertificateAttendees
+\ifnum\value{CertificateAttendeeCount}=0\relax
+  \PackageError{certificate}{The attendee list is empty}{Add at least one Attendee entry at the top of this file.}
+\fi
+\ifnum\CertificateOnly<0\relax
+  \PackageError{certificate}{Invalid attendee selection}{Use 0 for everyone or a positive list position.}
+\fi
+\ifnum\CertificateOnly>\value{CertificateAttendeeCount}\relax
+  \PackageError{certificate}{Selected attendee is not in the list}{Check CertificateOnly at the top of this file.}
+\fi
+\ifnum\CertificateBatchExport=1\relax
+  \CertificateExportAll
+\fi
+\end{document}

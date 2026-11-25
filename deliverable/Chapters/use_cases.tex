@@ -1,3 +1,4 @@
+% !TEX root = ../tensygrid-report.tex
 The computational core of the use-case catalogue is the implicit Multilinear Time-Invariant (iMTI) and tensor formulation developed within the TenSyGrid project~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21}. Originally researched and prototyped as a dedicated MTI Toolbox in MATLAB, its algorithms and tensor routines have been ported to Python and integrated into the open-source VeraGrid platform as the \texttt{TenSyGridEngine}.
 
 The formulation represents the time-invariant component models in multilinear form~\cite{deJuanVela2026TenSyGridD33}. The complete system of equations is then transformed following~\cite{Kaufmann2025TenSyGridD11,Wong2025TenSyGridD21} into a tensor representation whose contractions can accelerate Jacobian-matrix computation~\cite{kaufmann2026small}.

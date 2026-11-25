@@ -1,0 +1,35 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tensygrid-hackathon}
+
+\RequirePackage[a4paper,margin=20mm,headheight=16pt,headsep=8mm]{geometry}
+\RequirePackage{fontspec}
+\setmainfont{Raleway}[
+  Path=./fonts/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold,
+  ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\RequirePackage{graphicx,xcolor,microtype}
+\definecolor{tgpetrol}{HTML}{008598}
+\definecolor{tgblue}{HTML}{005B7F}
+\definecolor{tggraphit}{HTML}{1C3F52}
+\definecolor{tggrey}{HTML}{A6BBC8}
+\definecolor{tglime}{HTML}{B2D235}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\newcommand{\HackathonHeader}[3]{%
+  \noindent
+  \begin{minipage}[c]{\dimexpr\textwidth-52mm\relax}
+    \raggedright
+    {\fontsize{23}{27}\selectfont\bfseries\color{tgblue}#1\par}
+    {\large\color{tgpetrol}#2\par}
+    {\small\color{tggraphit}#3\par}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{46mm}
+    \centering
+    \includegraphics[width=42mm]{../plenary/tensygrid-latex-package/config/tglogo.pdf}\\[3pt]
+    \includegraphics[width=21mm]{../plenary/assets/citcea-upc.png}\hspace{2mm}%
+    % Align the symbols above the tagline in the CITCEA artwork.
+    \raisebox{5mm}{\includegraphics[width=21mm]{../plenary/tensygrid-latex-package/config/eRoots-logo.pdf}}
+  \end{minipage}%
+  \par\vspace{5pt}{\color{tglime}\hrule height 2pt}\vspace{6pt}%
+}
