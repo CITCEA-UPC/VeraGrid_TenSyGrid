@@ -1,0 +1,1 @@
+Failed intermediate trial. Factorization invalidated after gate changes only; stopped at 5.32 ms. The converged 10 ms result is in ../deferred_edges and uses a fresh factorization for every local interval. Do not present this partial trajectory as a completed stability result.

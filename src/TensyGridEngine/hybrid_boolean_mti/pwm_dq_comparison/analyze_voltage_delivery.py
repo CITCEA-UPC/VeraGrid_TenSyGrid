@@ -44,11 +44,15 @@ def analyze(output):
         raise ValueError('Phase RL balance disagrees: check benchmark R/X/f or recorded state selection')
     # Reconstruct a left-held waveform on this recorded trajectory. This is a
     # quadrature diagnostic, not a rerun with corrected event/integration rules.
-    gates = np.column_stack([signal('gate_'+phase) for phase in 'abc'])
+    # Scheduling rows contain the post-edge gate sequence, including when
+    # accepted algebraic outputs use left limits in the deferred-edge trial.
+    pwm = data['pwm']
+    gate_rows = np.clip(np.searchsorted(pwm[:, 0], time[:-1], side='right')-1, 0, len(pwm)-1)
+    left_gates = pwm[gate_rows, 7:10]
     theta_mid = .5*(signal('theta_pll')[:-1]+signal('theta_pll')[1:])
     scale_mid = .5*(signal('k_v_conv')[:-1]*signal('v_dc')[:-1]
                      +signal('k_v_conv')[1:]*signal('v_dc')[1:])
-    phase_voltage = 2*scale_mid[:, None]*(gates[:-1]-gates[:-1].mean(axis=1)[:, None])
+    phase_voltage = 2*scale_mid[:, None]*(left_gates-left_gates.mean(axis=1)[:, None])
     angles = theta_mid[:, None]+np.array([0., -2*np.pi/3, 2*np.pi/3])
     left_switched = np.column_stack([2/3*np.sum(np.sin(angles)*phase_voltage, axis=1),
                                      -2/3*np.sum(np.cos(angles)*phase_voltage, axis=1)])

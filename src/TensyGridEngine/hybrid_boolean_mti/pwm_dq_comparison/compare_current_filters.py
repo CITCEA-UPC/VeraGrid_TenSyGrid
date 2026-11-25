@@ -11,11 +11,17 @@ def compare(baseline, experiment, output):
     output.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(3, 2, figsize=(12, 9), sharex=True, layout='constrained')
     metrics = {}
+    deferred_trial = json.loads((experiment/'metadata.json').read_text()).get('defer_pwm_edges', False)
     common_end = min(float(np.load(directory/'controls.npz')['time'][-1]) for directory in (baseline, experiment))
     for directory in (baseline, experiment):
         metadata = json.loads((directory/'metadata.json').read_text())
         tau = metadata.get('current_filter_seconds_at_5khz', .001)
         label = f'{tau*1e6:g} µs current filter'
+        if metadata.get('defer_pwm_edges', False):
+            label += ', deferred edges'
+            deferred_trial = True
+        if deferred_trial:
+            label = 'Deferred edge ordering' if directory == experiment else 'Original edge ordering'
         data = np.load(directory/'controls.npz')
         t, x = data['time'], data['x']
         indices = {v['name']: v['index'] for v in metadata['variables']}
@@ -44,7 +50,8 @@ def compare(baseline, experiment, output):
         ax.set_xlabel('Time [ms]')
         ax.legend(fontsize=7)
         ax.ticklabel_format(axis='y', useOffset=False)
-    fig.suptitle('Native procedural PWM: only current-feedback filtering changed; gains unchanged')
+    fig.suptitle('Native procedural PWM: edge ordering changed; gains and filters unchanged'
+                 if deferred_trial else 'Native procedural PWM: only current-feedback filtering changed; gains unchanged')
     fig.savefig(output/'filter_comparison.png', dpi=160)
     plt.close(fig)
     (output/'filter_metrics.json').write_text(json.dumps(metrics, indent=2)+'\n')

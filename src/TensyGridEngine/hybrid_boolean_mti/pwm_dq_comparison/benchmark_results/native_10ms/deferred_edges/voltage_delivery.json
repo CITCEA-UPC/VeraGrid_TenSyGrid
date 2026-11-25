@@ -1,0 +1,69 @@
+{
+  "converged": true,
+  "final_time": 0.01,
+  "accepted_samples": 1298,
+  "averaging_period_seconds": 0.0002,
+  "phase_RL_voltage_balance_max_error": 9.748471452297736e-08,
+  "phase_RL_check_parameters": {
+    "R": 0.02,
+    "X": 0.08,
+    "frequency_hz": 50.0
+  },
+  "statistics_start_seconds": 0.002,
+  "axes": {
+    "d": {
+      "mean_error": 0.006723794534675092,
+      "rmse": 0.007552163794364541,
+      "max_abs_error": 0.01019981703398587,
+      "left_reconstruction_mean_error": 0.006762611210484437,
+      "left_reconstruction_rmse": 0.0075724886575298574
+    },
+    "q": {
+      "mean_error": 0.005347460252580559,
+      "rmse": 0.005538461194310796,
+      "max_abs_error": 0.0070434997803850395,
+      "left_reconstruction_mean_error": 0.0033786272104187123,
+      "left_reconstruction_rmse": 0.003671260182120548
+    }
+  },
+  "command_delay_sensitivity": {
+    "0.0": [
+      0.007552163794364543,
+      0.005538461194310796
+    ],
+    "2.5e-05": [
+      0.007513083997431064,
+      0.005541468507835451
+    ],
+    "5e-05": [
+      0.007741193398807195,
+      0.005543098433737483
+    ],
+    "0.0001": [
+      0.007492390202514273,
+      0.005541419729166816
+    ]
+  },
+  "windows": {
+    "2 to 8.5 ms": {
+      "mean_applied_minus_command": [
+        0.0071980766805748025,
+        0.005523189420934892
+      ],
+      "mean_left_reconstruction_minus_command": [
+        0.0072255212339696895,
+        0.0035560821290231154
+      ]
+    },
+    "8.5 to 10 ms": {
+      "mean_applied_minus_command": [
+        0.004826665951076253,
+        0.004644543579163221
+      ],
+      "mean_left_reconstruction_minus_command": [
+        0.004910971116543428,
+        0.002668807536001099
+      ]
+    }
+  }
+}
