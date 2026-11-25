@@ -1,0 +1,31 @@
+........................................................................ [ 66%]
+.....................................                                    [100%]
+=============================== warnings summary ===============================
+../../../myenv/lib/python3.12/site-packages/autograd/numpy/numpy_wrapper.py:7
+  /home/pablo/myenv/lib/python3.12/site-packages/autograd/numpy/numpy_wrapper.py:7: DeprecationWarning: numpy.core.einsumfunc is deprecated and has been renamed to numpy._core.einsumfunc. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.einsumfunc._parse_einsum_input.
+    from numpy.core.einsumfunc import _parse_einsum_input
+
+src/tests/EMT/test_alignment_step_three_solvers.py: 36 warnings
+  /home/pablo/myenv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2791: RuntimeWarning: overflow encountered in dot
+    sqnorm = x.dot(x)
+
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-0-DAE_BackEuler-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-0-DAE_bdf2-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-100-DAE_BackEuler-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-100-DAE_bdf2-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-0-DAE_BackEuler-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-0-DAE_bdf2-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-100-DAE_BackEuler-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-100-DAE_bdf2-structuralCompiled]
+  /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/__pycache_jit__/eager_matrix_b4869214d8173d7f_d72c8dde5f431596.py:7: RuntimeWarning: overflow encountered in multiply
+    data_out[:indices.shape[0]] = states[indices[:, 0]] * states[indices[:, 0]] - params[0]
+
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-0-DAE_Trapezoidal-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[False-100-DAE_Trapezoidal-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-0-DAE_Trapezoidal-structuralCompiled]
+src/tests/EMT/test_alignment_step_three_solvers.py::test_newton_rejection_preserves_completed_samples[True-100-DAE_Trapezoidal-structuralCompiled]
+  /home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/__pycache_jit__/eager_matrix_8b1052ec2e5b48ea_1a03646644f19b39.py:7: RuntimeWarning: overflow encountered in multiply
+    data_out[:indices.shape[0]] = states[indices[:, 0]] * states[indices[:, 0]] - params[0]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+109 passed, 49 warnings in 16.51s

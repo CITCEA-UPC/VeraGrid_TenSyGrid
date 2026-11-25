@@ -3366,6 +3366,22 @@ class ValveStateLogic(ProceduralLogicBase):
         )
 
 
+def carrier_half_interval_index(shifted_phase: float) -> int:
+    """Select a carrier half-period robustly at floating-point clock boundaries.
+
+    :param shifted_phase: Carrier phase shifted so extrema are multiples of pi.
+    :return: Half-period containing the phase, with near-integer clocks snapped.
+    """
+    position: float = shifted_phase / np.pi
+    nearest: int = round(position)
+    tolerance: float = 4.0 * np.finfo(np.float64).eps * max(1.0, abs(position))
+    if abs(position - nearest) <= tolerance:
+        result: int = nearest
+    else:
+        result = int(math.floor(position))
+    return result
+
+
 class ThreePhaseCarrierPwmLogic(ProceduralLogicBase):
     """
     Regularly sampled three-phase carrier PWM logic.
@@ -3550,7 +3566,7 @@ class ThreePhaseCarrierPwmLogic(ProceduralLogicBase):
 
             half_period = self._get_half_period(params)
             shifted_phase = omega_sw * sample_time + carrier_phase + 0.5 * np.pi
-            interval_index = int(math.floor(shifted_phase / np.pi))
+            interval_index = carrier_half_interval_index(shifted_phase)
             interval_start_time = (float(interval_index) * np.pi - carrier_phase - 0.5 * np.pi) / omega_sw
             interval_end_time = interval_start_time + half_period
 
@@ -3740,10 +3756,9 @@ class ThreePhaseCarrierPwmLogic(ProceduralLogicBase):
         :return: None.
         """
         tol: float = 1.0e-12
-        # ``x`` intentionally belongs to the previous accepted state, but gate
-        # scheduling belongs to the boundary currently being prepared.  Using
-        # the previous accepted time here delays every forced PWM transition to
-        # the following solver step and defeats exact event alignment.
+        # The supplied boundary time owns the gate transition. EMT interval
+        # preparation defers this call until that endpoint has been accepted;
+        # startup and standalone callers may still update gates immediately.
         sample_time: float = float(t)
         omega_sw_now: float = float(params[self.omega_sw_idx])
         transition_idx: int = 0
@@ -3942,7 +3957,7 @@ class ThreePhaseCarrierSampledModulationLogic(ProceduralLogicBase):
             else:
                 carrier_phase = 0.0
             shifted_phase = omega_sw * sample_time + carrier_phase + 0.5 * np.pi
-            interval_index = int(math.floor(shifted_phase / np.pi))
+            interval_index = carrier_half_interval_index(shifted_phase)
             interval_start_time = (float(interval_index) * np.pi - carrier_phase - 0.5 * np.pi) / omega_sw
             return float(interval_start_time + self._get_half_period(params))
 
@@ -4737,6 +4752,8 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
         "_output_parameter_indices",
         "_compiled_plan",
         "_expression_mode",
+        "_preparing_interval",
+        "_pwm_pending_commit",
     ]
 
     def __init__(self,
@@ -4761,6 +4778,8 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
         self.runtime_session: ManufacturerNativeRuntimeSessionProtocol | None = runtime_session
         self.model_mode: int | None = model_mode
         self.runtime_initialized: bool = False
+        self._preparing_interval: bool = False
+        self._pwm_pending_commit: bool = False
         self._output_parameter_indices: set[int] = set()
         if self.runtime_session is not None:
             if self.model_mode is None:
@@ -4864,6 +4883,8 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
         :return: None.
         """
         self.runtime_initialized = False
+        self._preparing_interval = False
+        self._pwm_pending_commit = False
 
         if self._compiled_plan is not None:
             # All retained state belongs to the fixed-size kernel memory; the
@@ -4874,6 +4895,33 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
             for logic in self.logic_entries:
                 logic.bind(self.problem, self._expression_mode)
             self._refresh_output_parameter_indices()
+
+    def prepare_interval(self, t: float, x: Vec, params: Vec) -> None:
+        """Prepare an interval without advancing its retained PWM gates.
+
+        :param t: Target endpoint of the continuous interval.
+        :param x: Previous accepted continuous solution.
+        :param params: Mutable runtime parameter vector.
+        :return: None.
+        """
+        self._preparing_interval = True
+        try:
+            self.update(t, x, params)
+        finally:
+            self._preparing_interval = False
+        self._pwm_pending_commit = True
+
+    def resolve_step(self, accepted: bool, params: Vec) -> None:
+        """Discard a rejected PWM preparation without consuming any edge.
+
+        :param accepted: Whether the continuous solve was accepted.
+        :param params: Runtime parameters, unchanged on rejection.
+        :return: None.
+        """
+        if not accepted:
+            self._pwm_pending_commit = False
+        else:
+            pass
 
     def update(self, t: float, x: Vec, params: Vec) -> None:
         """
@@ -4895,6 +4943,10 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
             logic: ProceduralLogicBase
             for logic in self.logic_entries:
                 if isinstance(logic, ManufacturerNativeControllerLogic):
+                    pass
+                elif self._preparing_interval and isinstance(logic, ThreePhaseCarrierPwmLogic):
+                    # The incoming interval retains the old gates. Only an
+                    # accepted endpoint may consume edges or sample modulation.
                     pass
                 else:
                     # Repeated calls at one timestamp can contain a newer nonlinear
@@ -4975,13 +5027,25 @@ class BlockProceduralLogicUpdater(BoundaryUpdateWrapper):
             return min(candidates)
 
     def commit_boundary(self, t: float, x: Vec, params: Vec) -> None:
-        """Commit due manufacturer controllers after an accepted network step.
+        """Commit PWM gates and native samples after an accepted network step.
 
         :param t: Accepted solver boundary.
         :param x: Accepted network state.
         :param params: Mutable runtime parameter vector.
         :return: None.
         """
+        # PWM updates use the accepted endpoint state, not a previous state
+        # labelled with a future timestamp. Rejection leaves the scheduler intact.
+        if self._pwm_pending_commit:
+            pwm_logic: ProceduralLogicBase
+            for pwm_logic in self.logic_entries:
+                if isinstance(pwm_logic, ThreePhaseCarrierPwmLogic):
+                    pwm_logic.update(t, x, params)
+                else:
+                    pass
+            self._pwm_pending_commit = False
+        else:
+            pass
         if self.runtime_session is not None:
             self.runtime_session.commit_boundary(t, x, params)
         else:

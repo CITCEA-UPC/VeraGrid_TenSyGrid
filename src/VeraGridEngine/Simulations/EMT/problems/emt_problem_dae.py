@@ -8383,7 +8383,8 @@ class EmtProblemDae(EmtProblemTemplate):
             self,
             t_curr: float,
             x_prev: np.ndarray,
-            full_params: np.ndarray
+            full_params: np.ndarray,
+            prepare_interval: bool = False,
     ) -> None:
         """
         Update runtime boundaries before the Newton step.
@@ -8393,6 +8394,7 @@ class EmtProblemDae(EmtProblemTemplate):
 
         :param t_curr: Current simulation time.
         :param x_prev: Previous accepted state vector.
+        :param prepare_interval: Preserve incoming PWM gates until acceptance.
         :param full_params: Flat full parameter vector.
         :return: None
         """
@@ -8400,7 +8402,10 @@ class EmtProblemDae(EmtProblemTemplate):
 
         if self._block_boundary_updater is not None:
             # The retained procedural logic reacts after scheduled events so it sees the latest gate commands.
-            self._block_boundary_updater.update(t_curr, x_prev, full_params)
+            if prepare_interval:
+                self._block_boundary_updater.prepare_interval(t_curr, x_prev, full_params)
+            else:
+                self._block_boundary_updater.update(t_curr, x_prev, full_params)
         else:
             pass
 
@@ -8460,6 +8465,28 @@ class EmtProblemDae(EmtProblemTemplate):
         :return: None
         """
         self.emt_boundary_update(t, x, params)
+
+    def prepare_interval(self, t: float, x: np.ndarray, params: np.ndarray) -> None:
+        """Prepare a continuous EMT interval with one-sided PWM gates.
+
+        :param t: Target endpoint time.
+        :param x: Previous accepted solution.
+        :param params: Full runtime parameter vector.
+        :return: None.
+        """
+        self.emt_boundary_update(t, x, params, prepare_interval=True)
+
+    def resolve_step(self, accepted: bool, params: np.ndarray) -> None:
+        """Resolve problem-owned PWM preparation after the continuous solve.
+
+        :param accepted: Whether the continuous solve was accepted.
+        :param params: Mutable runtime parameters.
+        :return: None.
+        """
+        if self._block_boundary_updater is not None:
+            self._block_boundary_updater.resolve_step(accepted, params)
+        else:
+            pass
 
     def commit_boundary(self, t: float, x: np.ndarray, params: np.ndarray) -> None:
         """Commit due manufacturer-native samples after an accepted EMT step.

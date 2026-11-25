@@ -29,6 +29,7 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
     EmtProblemTemplate,
     get_solver_forced_event_time,
     resolve_solver_boundary_step,
+    prepare_solver_boundary_interval,
     resolve_solver_boundary_updater,
 )
 from VeraGridEngine.Utils.emt_boundary_update_wrapper import BoundaryUpdateWrapper
@@ -1709,7 +1710,10 @@ class StructuralVectorizedSolver:
 
                 if boundary_updater is not None:
                     state_event_retry_time: float | None = (
-                        boundary_updater.update(t_curr, x_prev, full_params)
+                        prepare_solver_boundary_interval(
+                            boundary_updater, t_curr, x_prev, full_params,
+                            one_sided=effective_method == DynamicIntegrationMethod.DaeBackEuler,
+                        )
                     )
                 else:
                     state_event_retry_time = None

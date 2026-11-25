@@ -1,5 +1,7 @@
 # One-sided native PWM edge trial
 
+Historical opt-in prototype from commit 416f8d741. The current diagnostic wrapper no longer accepts --defer-pwm-edges or changes gates/factors; production prepare/commit logic supersedes it. The measurements below describe that historical prototype, not the newer production result.
+
 The trial completed 10 ms with initialization and convergence flags passing. Controller gains, 1 ms current filter, voltage and PLL filters, grid, 5 kHz carrier, startup handover, and 10 us Backward Euler step are unchanged. Production defaults were not modified: enable the experiment with diagnose_native_controls.py --defer-pwm-edges --output <directory>.
 
 ## Integration change

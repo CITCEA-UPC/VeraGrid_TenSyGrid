@@ -179,6 +179,16 @@ class EmtBoundaryUpdateProtocol(Protocol):
         """
         ...
 
+    def prepare_interval(self, t: float, x: Vec, params: Vec) -> float | None:
+        """Prepare an incoming interval without publishing endpoint PWM gates.
+
+        :param t: Target endpoint.
+        :param x: Previous accepted solution.
+        :param params: Full mutable parameter vector.
+        :return: Optional earlier retry target.
+        """
+        ...
+
     def get_next_forced_event_time(self, t_prev: float, t_target: float) -> float | None:
         """
         Return the next exact-alignment event time inside ``(t_prev, t_target]``.
@@ -296,6 +306,26 @@ def get_solver_forced_event_time(
         return None
     else:
         return float(next_time)
+
+
+def prepare_solver_boundary_interval(
+        boundary_updater: EmtBoundaryUpdateProtocol, t: float, x: Vec, params: Vec,
+        one_sided: bool,
+) -> float | None:
+    """Prepare an endpoint while preserving the modes of its incoming interval.
+
+    :param one_sided: Use the Backward Euler incoming-interval convention.
+    :param boundary_updater: Problem-owned or external boundary provider.
+    :param t: Target endpoint time.
+    :param x: Previous accepted solution.
+    :param params: Full mutable runtime parameter vector.
+    :return: Optional earlier retry time requested by an external provider.
+    """
+    if one_sided and "prepare_interval" in dir(boundary_updater):
+        return boundary_updater.prepare_interval(t, x, params)
+    else:
+        # Existing external/FMU providers retain their transactional update API.
+        return boundary_updater.update(t, x, params)
 
 
 def resolve_solver_boundary_step(

@@ -1,0 +1,14 @@
+native_control_diagnostic: templates and power flow ready after 43.124 s
+native_control_diagnostic: EMT problem ready after 43.332 s
+Boundary reached 0.000 ms
+Boundary reached 1.000 ms
+Boundary reached 2.000 ms
+Boundary reached 3.000 ms
+Boundary reached 4.000 ms
+Boundary reached 5.000 ms
+Boundary reached 6.000 ms
+Boundary reached 7.000 ms
+Boundary reached 8.000 ms
+Boundary reached 9.000 ms
+Boundary reached 10.000 ms
+{"initialized": true, "converged": true, "initialization_residual": 6.150067011212457e-09, "setup_seconds": 44.44731016900005, "solve_seconds": 173.11546281200026, "current_filter_periods": 5.0, "current_filter_seconds_at_5khz": 0.001, "nominal_step_seconds": 1e-05, "defer_pwm_edges": true, "production_boundary_logic": true, "factorization_policy": "solver-managed step and parameter snapshots", "edge_output_convention": "left limit at PWM edges"}

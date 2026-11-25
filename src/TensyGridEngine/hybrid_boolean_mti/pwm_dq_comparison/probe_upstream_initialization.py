@@ -14,6 +14,7 @@ parser.add_argument('--source', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
 parser.add_argument('--initialization', default='Explicit', choices=['Explicit', 'Auto', 'ConsistentNewton'])
 parser.add_argument('--duration', type=float, default=.002)
+parser.add_argument('--problem-owned', action='store_true', help='Use the default problem-owned boundary updater')
 parser.add_argument('--backend', choices=['Symbolic', 'StructuralCompiled'], default='Symbolic')
 args = parser.parse_args()
 sys.path.insert(0, str(args.source.resolve()))
@@ -96,8 +97,11 @@ def run() -> None:
     print(f'Problem/solver built: {perf_counter() - started:.3f} s', flush=True)
     setup_s = perf_counter() - started
     started = perf_counter()
-    time, values, derivatives, initialized, converged = solver.simulate(
-        boundary_updater=build_boundary_updater_from_block(problem))
+    if args.problem_owned:
+        time, values, derivatives, initialized, converged = solver.simulate()
+    else:
+        time, values, derivatives, initialized, converged = solver.simulate(
+            boundary_updater=build_boundary_updater_from_block(problem))
     elapsed = perf_counter() - started
     signals = dict(time_arr=time)
     initial = dict()

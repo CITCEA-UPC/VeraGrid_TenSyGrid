@@ -100,7 +100,9 @@ def analyze(output):
         ax.grid(alpha=.25)
         ax.legend(fontsize=7)
         ax.set_xlabel('Carrier-period center [ms]')
-    fig.suptitle('Native PWM: 200 µs carrier averages; no production changes')
+    fig.suptitle('Native PWM: production prepare/commit; 200 µs carrier averages'
+                 if metadata.get('production_boundary_logic', False)
+                 else 'Native PWM: 200 µs carrier averages; no production changes')
     fig.savefig(output/'voltage_delivery.png', dpi=160)
     plt.close(fig)
     np.savez_compressed(output/'carrier_averages.npz', time=centers, command=cmd_mean,

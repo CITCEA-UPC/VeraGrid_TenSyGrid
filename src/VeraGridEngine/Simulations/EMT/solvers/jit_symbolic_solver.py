@@ -16,6 +16,7 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
     EmtProblemTemplate,
     get_solver_forced_event_time,
     resolve_solver_boundary_step,
+    prepare_solver_boundary_interval,
     resolve_solver_boundary_updater,
 )
 from VeraGridEngine.Utils.emt_boundary_update_wrapper import BoundaryUpdateWrapper
@@ -1186,10 +1187,12 @@ class JitSymbolicSolver:
                 if active_boundary_updater is None:
                     state_event_retry_time: float | None = None
                 else:
-                    state_event_retry_time = active_boundary_updater.update(
+                    state_event_retry_time = prepare_solver_boundary_interval(
+                        active_boundary_updater,
                         t_curr,
                         x_prev,
                         full_params,
+                        one_sided=effective_method == DynamicIntegrationMethod.DaeBackEuler,
                     )
                     ev_params[:] = full_params[:len(ev_params)]
 

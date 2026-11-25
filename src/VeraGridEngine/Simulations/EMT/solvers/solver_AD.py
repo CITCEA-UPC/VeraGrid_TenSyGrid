@@ -16,6 +16,7 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
     get_solver_forced_event_time,
     is_problem_owned_boundary_updater,
     resolve_solver_boundary_step,
+    prepare_solver_boundary_interval,
     resolve_solver_boundary_updater,
 )
 from VeraGridEngine.enumerations import DynamicIntegrationMethod
@@ -1101,10 +1102,12 @@ class JitAdSolver:
 
                 if active_boundary_updater is not None:
                     state_event_retry_time: float | None = (
-                        active_boundary_updater.update(
+                        prepare_solver_boundary_interval(
+                            active_boundary_updater,
                             t_curr,
                             x_prev,
                             full_params,
+                            one_sided=self.method == DynamicIntegrationMethod.DaeBackEuler,
                         )
                     )
                 else:

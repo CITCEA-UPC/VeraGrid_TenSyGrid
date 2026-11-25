@@ -46,6 +46,7 @@ from VeraGridEngine.Simulations.EMT.problems.emt_problem_template import (
     EmtProblemTemplate,
     get_solver_forced_event_time,
     resolve_solver_boundary_step,
+    prepare_solver_boundary_interval,
     resolve_solver_boundary_updater,
 )
 from VeraGridEngine.Simulations.driver_template import DummySignal
@@ -2173,6 +2174,7 @@ class StructuralCompiledSolver:
         "_full_parameter_buffer",
         "_last_factorization_parameter_snapshot",
         "_has_factorization_parameter_snapshot",
+        "_last_factorization_step",
         "_delta_buffer",
         "_trial_state_buffer",
         "_trial_residual_buffer",
@@ -2323,6 +2325,7 @@ class StructuralCompiledSolver:
             dtype=np.float64,
         )
         self._has_factorization_parameter_snapshot = False
+        self._last_factorization_step: float = 0.0
         self._delta_buffer = np.zeros(self._n_vars, dtype=np.float64)
         self._trial_state_buffer = np.zeros(self._n_vars, dtype=np.float64)
         self._trial_residual_buffer = np.zeros(self._n_vars, dtype=np.float64)
@@ -2959,10 +2962,12 @@ class StructuralCompiledSolver:
                 if active_boundary_updater is None:
                     state_event_retry_time: float | None = None
                 else:
-                    state_event_retry_time = active_boundary_updater.update(
+                    state_event_retry_time = prepare_solver_boundary_interval(
+                        active_boundary_updater,
                         float(t_curr),
                         x_prev,
                         full_params,
+                        one_sided=effective_method == DynamicIntegrationMethod.DaeBackEuler,
                     )
 
                 if self._n_event_parameters > 0:
@@ -2977,14 +2982,17 @@ class StructuralCompiledSolver:
                 if sparse_factor_manager is None:
                     pass
                 else:
-                    if is_aligned_substep and sparse_factor_manager.has_factorization():
+                    if sparse_factor_manager.has_factorization():
                         params_changed: bool = True
 
                         if self._has_factorization_parameter_snapshot:
                             params_changed = _max_abs_diff_vectors(
                                 full_params,
                                 self._last_factorization_parameter_snapshot,
-                            ) > 1.0e-14
+                            ) > 1.0e-14 or (
+                                abs(h_eff - self._last_factorization_step)
+                                > 1.0e-6 * abs(self._last_factorization_step)
+                            )
                         else:
                             params_changed = True
 
@@ -3102,6 +3110,7 @@ class StructuralCompiledSolver:
                                 sparse_factor_manager.factorize()
                                 self._last_factorization_parameter_snapshot[:] = full_params
                                 self._has_factorization_parameter_snapshot = True
+                                self._last_factorization_step = h_eff
 
                             cached_lu_dense = None
                     else:
