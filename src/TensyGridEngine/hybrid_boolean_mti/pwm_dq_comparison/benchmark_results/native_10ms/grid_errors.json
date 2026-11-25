@@ -1,0 +1,31 @@
+{
+  "baseline": "grid_standard_StructuralCompiled",
+  "cases": {
+    "grid_standard_StructuralCompiled": {
+      "i_a": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      },
+      "v_dc": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      },
+      "i_dc": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      },
+      "p": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      },
+      "p_filtered": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      },
+      "q_filtered": {
+        "max_abs": 0.0,
+        "rmse": 0.0
+      }
+    }
+  }
+}

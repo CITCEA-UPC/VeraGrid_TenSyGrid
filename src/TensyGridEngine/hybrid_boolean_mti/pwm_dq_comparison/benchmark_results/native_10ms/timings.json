@@ -1,0 +1,40 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "numpy": "2.3.0",
+  "revision": "849ce83e403bf0416b519f91759bbaa1b2f1ea26",
+  "working_tree": "benchmark run includes local uncommitted changes",
+  "engine_patch_sha256": "40722cf9c29005c6bc9572142d059365ec62c569bd282008cee428623c651abf",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "settings": {
+    "grid_pwm_hz": 5000.0,
+    "pwm_duration_s": 0.004,
+    "pwm_step_s": 5e-05,
+    "grid_duration_s": 0.01,
+    "grid_step_s": 1e-05,
+    "pwm_timing": "one first call + three repeats, includes setup",
+    "grid_timing": "one fresh process, setup separate; simulation includes first-use compilation"
+  },
+  "results": [
+    {
+      "case": "grid_standard_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 53.53188396299993,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "nominal_step_seconds": 1e-05,
+      "requested_duration_seconds": 0.01,
+      "soft_sign_lambda": null,
+      "event_bisect_iter": null,
+      "solve_seconds": 211.0835502709997,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.01,
+      "points": 1001
+    }
+  ]
+}

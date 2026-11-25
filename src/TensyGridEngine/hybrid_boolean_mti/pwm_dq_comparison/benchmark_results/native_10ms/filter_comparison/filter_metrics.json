@@ -1,0 +1,36 @@
+{
+  "1000 \u00b5s current filter": {
+    "initialized": true,
+    "converged": true,
+    "final_time": 0.01,
+    "vdc_min": 0.9882205216758755,
+    "vdc_final": 0.9902613220537376,
+    "tracking_metrics_end_seconds": 0.00898,
+    "q_filtered_min": -0.007022093790225584,
+    "q_filtered_max": 0.0012435952608940161,
+    "q_filtered_final": -0.00348634533340198,
+    "q_filtered_final_available_ms_mean": -0.004589273117373748,
+    "id_tracking_rmse": 0.1214677459180699,
+    "iq_tracking_rmse": 0.03651363808512138,
+    "id_final": 0.7105058985996197,
+    "id_reference_final": 0.5007951257803489,
+    "solve_seconds": 170.80527022200022
+  },
+  "200 \u00b5s current filter": {
+    "initialized": true,
+    "converged": false,
+    "final_time": 0.00898,
+    "vdc_min": 0.9899048297240023,
+    "vdc_final": 0.9900714210100154,
+    "tracking_metrics_end_seconds": 0.00898,
+    "q_filtered_min": -0.007550739429681705,
+    "q_filtered_max": 0.0012324261154529105,
+    "q_filtered_final": -0.006355914785475861,
+    "q_filtered_final_available_ms_mean": -0.007064060560190937,
+    "id_tracking_rmse": 0.10807230762673603,
+    "iq_tracking_rmse": 0.03678199506622351,
+    "id_final": 0.3798247655565862,
+    "id_reference_final": 0.47811051224611417,
+    "solve_seconds": 155.19203983399984
+  }
+}
