@@ -1,0 +1,78 @@
+% !TEX program = lualatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{tensygrid-hackathon}
+\usepackage{array,tabularx,colortbl}
+
+\geometry{left=12mm,right=12mm}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\attendancerow}[2]{\rule{0pt}{#2}\centering #1 & & & & \\ \hline}
+\newcommand{\hackathonrows}{%
+  \attendancerow{1}{5.25mm}\attendancerow{2}{5.25mm}\attendancerow{3}{5.25mm}
+  \attendancerow{4}{5.25mm}\attendancerow{5}{5.25mm}\attendancerow{6}{5.25mm}
+  \attendancerow{7}{5.25mm}\attendancerow{8}{5.25mm}\attendancerow{9}{5.25mm}
+  \attendancerow{10}{5.25mm}\attendancerow{11}{5.25mm}\attendancerow{12}{5.25mm}
+  \attendancerow{13}{5.25mm}\attendancerow{14}{5.25mm}\attendancerow{15}{5.25mm}
+  \attendancerow{16}{5.25mm}\attendancerow{17}{5.25mm}\attendancerow{18}{5.25mm}
+  \attendancerow{19}{5.25mm}\attendancerow{20}{5.25mm}\attendancerow{21}{5.25mm}
+  \attendancerow{22}{5.25mm}\attendancerow{23}{5.25mm}\attendancerow{24}{5.25mm}
+  \attendancerow{25}{5.25mm}\attendancerow{26}{5.25mm}\attendancerow{27}{5.25mm}
+  \attendancerow{28}{5.25mm}\attendancerow{29}{5.25mm}\attendancerow{30}{5.25mm}}
+\newcommand{\advisoryrows}{%
+  \attendancerow{1}{8.4mm}\attendancerow{2}{8.4mm}\attendancerow{3}{8.4mm}
+  \attendancerow{4}{8.4mm}\attendancerow{5}{8.4mm}\attendancerow{6}{8.4mm}
+  \attendancerow{7}{8.4mm}\attendancerow{8}{8.4mm}\attendancerow{9}{8.4mm}
+  \attendancerow{10}{8.4mm}\attendancerow{11}{8.4mm}\attendancerow{12}{8.4mm}
+  \attendancerow{13}{8.4mm}\attendancerow{14}{8.4mm}\attendancerow{15}{8.4mm}
+  \attendancerow{16}{8.4mm}\attendancerow{17}{8.4mm}\attendancerow{18}{8.4mm}
+  \attendancerow{19}{8.4mm}\attendancerow{20}{8.4mm}}
+
+\newcommand{\attendancesheet}[4]{%
+  \HackathonHeader{#1}
+    {Attendance register}
+    {\textbf{TenSyGrid}\\[1pt]
+     {\footnotesize \color{tggrey}Universitat Polit\`ecnica de Catalunya \textperiodcentered\ CETPartnership Horizon Europe \mbox{(GA 101069750)}}}
+
+  \vspace{2pt}
+  \begin{tabularx}{\textwidth}{@{}lXlX@{}}
+    \textbf{\color{tgblue}Date} & #2 &
+    \textbf{\color{tgblue}Venue} & #3 \\
+  \end{tabularx}
+
+  \vspace{8pt}
+  \small
+  \renewcommand{\arraystretch}{1.12}
+  \begin{tabularx}{\textwidth}{|p{4mm}|Y|p{44mm}|p{65mm}|p{27mm}|}
+    \hline
+    \rowcolor{tgblue}
+    \multicolumn{1}{|c|}{\color{white}\textbf{No.}} &
+    \multicolumn{1}{c|}{\color{white}\textbf{Name}} &
+    \multicolumn{1}{c|}{\color{white}\textbf{Surname(s)}} &
+    \multicolumn{1}{c|}{\color{white}\textbf{Email}} &
+    \multicolumn{1}{c|}{\color{white}\textbf{Signature}} \\
+    \hline
+    #4
+  \end{tabularx}
+}
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\attendancesheet
+  {TenSyGrid Hackathon}
+  {26 November 2026}
+  {Sala InnoEnergy, ETSEIB, Barcelona}
+  {\hackathonrows}
+
+\clearpage
+
+\attendancesheet
+  {Advisory Board}
+  {27 November 2026}
+  {ETSEIB, Barcelona}
+  {\advisoryrows}
+
+\end{document}
