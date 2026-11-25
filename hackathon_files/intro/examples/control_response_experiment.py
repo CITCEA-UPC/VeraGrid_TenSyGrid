@@ -1,4 +1,9 @@
-"""Compare Kundur control gains using the same load-step disturbance."""
+"""Compare Kundur control gains using the same load-step disturbance.
+
+Each setup runs a full simulation and can take time. Read the table alongside
+small-signal stability: peak deviations describe the simulated disturbance,
+while damping and eigenvalues describe the local linearized operating point.
+"""
 
 from pathlib import Path
 
@@ -26,7 +31,9 @@ class SetGeneratorGains(RmsTuner):
 
 
 def main() -> None:
+    # 1. Load once; the outer test API evaluates each tuner independently.
     grid = open_file(str(GRID_PATH))
+    # 2. Vary one gain at a time, keeping the same disturbance settings.
     setups = (
         ("baseline", BasicRmsTuner()),
         ("Kp=5", SetGeneratorGains({"Kp": 5.0})),
@@ -34,16 +41,21 @@ def main() -> None:
         ("Ki=1", SetGeneratorGains({"Ki": 1.0})),
         ("Ki=5", SetGeneratorGains({"Ki": 5.0})),
     )
-    print("setup,damping_ratio,max_real,peak_frequency_hz,peak_voltage_pu,ssa_stable")
+    # 3. Report units in the header and align values for side-by-side comparison.
+    print(
+        f"{'Setup':<12} {'Damping':>10} {'Max Re (1/s)':>14} "
+        f"{'Peak df (Hz)':>14} {'Peak dV (pu)':>14} {'SSA stable':>12}"
+    )
     for name, tuner in setups:
         metrics = tuner.test_tuning(grid)
         print(
-            f"{name},{metrics.min_oscillatory_damping:.8f},"
-            f"{metrics.max_eigenvalue_real:.8f},"
-            f"{metrics.peak_frequency_deviation_hz:.8f},"
-            f"{metrics.peak_voltage_deviation_pu:.8f},"
-            f"{metrics.stable}"
+            f"{name:<12} {metrics.min_oscillatory_damping:>10.2%} "
+            f"{metrics.max_eigenvalue_real:>14.6g} "
+            f"{metrics.peak_frequency_deviation_hz:>14.6f} "
+            f"{metrics.peak_voltage_deviation_pu:>14.6f} "
+            f"{str(metrics.stable):>12}"
         )
+
 
 
 if __name__ == "__main__":

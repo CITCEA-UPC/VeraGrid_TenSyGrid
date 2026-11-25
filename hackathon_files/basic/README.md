@@ -2,7 +2,7 @@
 
 **50 initially unstable `.veragrid` cases on ten AC networks**, with five
 controller, operating-point and topology variants per network. `initialize_grid()` exposes the
-existing `TunableGrid` interface, with a five-trial evaluation budget.
+existing `TunableGrid` interface, with case-specific evaluation budgets.
 
 | Network | Buses | Variants |
 | --- | ---: | ---: |
@@ -55,7 +55,11 @@ print(metrics)
 The basic set uses a 2.5% minimum damping ratio. The shared evaluator now accepts
 `minimum_damping_ratio`; its default remains 5% for existing exercises.
 
-Cases expose controller parameters **and physical grid actions**:
+The ten `_02` cases (one per network) are **controller-only exercises**: no
+redispatch, line opening/closing, reinforcement, or shunt actions are permitted.
+Their physical-action catalogs are empty and their action budgets are zero.
+Existing equipment stays in the grid, but contestants cannot switch or add it.
+The other 40 cases expose controller parameters **and physical grid actions**:
 
 | Catalog / proposal field | Meaning | Basic budget |
 | --- | --- | ---: |
@@ -65,7 +69,8 @@ Cases expose controller parameters **and physical grid actions**:
 | `shunt_options` / `add_shunts` | Add a capacitor or reactor at a load bus | 1 |
 | `dispatch_options` / `dispatch_mw` | Redistribute scheduled MW within bounds | Balanced total |
 
-Each saved case contains an existing open line. The `_01` variants use a real
+Each saved case contains an existing open line; in controller-only `_02` cases
+it stays fixed and is not offered as a closing action. The `_01` variants use a real
 screened line outage where a connected, voltage/thermal-feasible operating point
 can be found. Other variants include a normally-open standby circuit on an
 existing corridor. If no suitable outage is found, `_01` also uses a standby.
@@ -236,3 +241,17 @@ See the [controller helper examples](../README.md#inspect-controllers-from-a-tun
 for discovering PLL, governor, outer and inner loops, finding permitted handles,
 and associating full-system modes with those loops. A runnable mixed-converter
 example is available as `python -m hackathon_files.intro.examples.controller_examples`.
+
+## Evaluation budgets
+
+The basic collection has **25 unlimited cases and 25 cases capped at 20 full
+`case.test_tuning(proposal)` trials**. Budgets alternate by network and variant,
+so each variant has five unlimited and five capped cases.
+Read `case.max_test_tunings`: `math.inf` means unlimited. Intro scenarios retain
+their five-trial allowance. Invalid
+proposals and failed solves consume a trial. Final scoring is separate and does
+not consume the trial allowance. A fresh session is created for every case.
+Modal/controller diagnostics, sensitivity helpers, `run_powerflow`, and
+`get_losses` do not spend full RMS trials. The outer
+`tuner.test_tuning(raw_grid, evaluator)` helper separately defaults to ten calls
+per tuner instance; do not call it inside `tune()`.

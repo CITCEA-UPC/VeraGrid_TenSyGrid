@@ -22,6 +22,8 @@ from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
 from VeraGridEngine.Devices.Parents.dynamic_parent import DynamicDevice
 from VeraGridEngine.Devices.Parents.dynamic_bus_parent import DynamicBusDevice
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
+from VeraGridEngine.Simulations.PowerFlow.power_flow_options import PowerFlowOptions
+from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowResults
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import RmsProblemDae
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProblemTemplate
 from VeraGridEngine.Simulations.Rms.rms_driver import RmsSimulationDriver
@@ -33,10 +35,11 @@ from VeraGridEngine.Templates.Rms.shunt_template import get_shunt_template
 from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
 from VeraGridEngine.Utils.Symbolic.symbolic import Const
 from .rms_diagnostics import analyze_grid, get_modes_from_unstable_eigenvalues
-from hackathon_files.src.rms_controllers import (ControllerBlock, ControllerMode, controller_blocks,
+from hackathon_files.src.rms_controllers import (ControllerBlock, ControllerMode, ControllerRole, controller_blocks,
                                            controller_parameters, controller_modes)
 from .rms_sensitivity import (build_parameterized_state_matrix, evaluate_state_matrix,
-                              state_matrix_derivative, eigenvalue_sensitivities, equilibrium_residual)
+                              state_matrix_derivative, eigenvalue_sensitivities, equilibrium_residual,
+                              symbolic_state_matrices)
 
 
 @dataclass(frozen=True)
@@ -110,7 +113,8 @@ class ShuntOption:
 
 
 def _sanitize_action_handles[T: (LineOption, LineCandidate, ShuntOption)](
-        values: object, catalog: tuple[T, ...], limit: int, label: str) -> tuple[T, ...]:
+        values: object, catalog: tuple[T, ...], limit: int, label: str,
+        report: Callable[[str], None] | None = None) -> tuple[T, ...]:
     """Validate an action list and return the actual organizer handles.
 
     :param values: Submitted action container, potentially malformed.
@@ -120,8 +124,11 @@ def _sanitize_action_handles[T: (LineOption, LineCandidate, ShuntOption)](
     :return: Valid actions in submission order, with every omission reported.
     """
     result: tuple[T, ...]
+    if report is None:
+        def report(message):
+            warnings.warn(message, UserWarning, stacklevel=3)
     if not isinstance(values, (tuple, list)):
-        warnings.warn(f"Skipped {label}: expected a tuple or list of action handles", UserWarning, stacklevel=3)
+        report(f"Skipped {label}: expected a tuple or list of action handles")
         result = tuple()
     else:
         kept: list[T] = list()
@@ -130,11 +137,11 @@ def _sanitize_action_handles[T: (LineOption, LineCandidate, ShuntOption)](
             selected: T | None = next((allowed for allowed in catalog
                                        if type(action) is type(allowed) and action == allowed), None)
             if selected is None:
-                warnings.warn(f"Skipped {label} {action!r}: unknown or unavailable handle", UserWarning, stacklevel=3)
+                report(f"Skipped {label} {action!r}: unknown or unavailable handle")
             elif selected in kept:
-                warnings.warn(f"Skipped {label} {action!r}: duplicate action", UserWarning, stacklevel=3)
+                report(f"Skipped {label} {action!r}: duplicate action")
             elif len(kept) >= limit:
-                warnings.warn(f"Skipped {label} {action!r}: action budget exceeded", UserWarning, stacklevel=3)
+                report(f"Skipped {label} {action!r}: action budget exceeded (maximum {limit})")
             else:
                 kept.append(selected)
         result = tuple(kept)
@@ -224,7 +231,7 @@ class TunableGrid:
     max_close_lines: int = 1
 
     @property
-    def max_test_tunings(self) -> int:
+    def max_test_tunings(self) -> int | float:
         """Read-only trial allowance for this scenario."""
         return self._budget_status()[0] if self._budget_status else 0
 
@@ -260,7 +267,7 @@ class TunableGrid:
         max_open_lines: int = 2,
         max_new_lines: int = 1,
         max_new_shunts: int = 1,
-        max_test_tunings: int = 5,
+        max_test_tunings: int | float = 5,
         evaluator: RmsTunerEvaluator | None = None,
         max_close_lines: int = 1,
     ) -> "TunableGrid":
@@ -315,7 +322,12 @@ class RmsTuning:
         self,
         tunable_grid: TunableGrid,
     ) -> bool:
-        """Accept an unchanged model or in-range updates to allowed controls."""
+        """Check well-formed proposal handles, bounds and action limits.
+
+        For malformed containers or reasons for rejection, use
+        RmsTuner.validate_proposal(grid, proposal). Neither check establishes
+        electrical feasibility or consumes tuning trials.
+        """
         tunables = set(tunable_grid.tunable_parameters)
         indices = _parameter_indices(tunable_grid.problem)
         controls_valid = all(
@@ -361,6 +373,83 @@ class RmsTuning:
         )
 
 
+def _active_losses(grid: MultiCircuit, results: PowerFlowResults) -> float:
+    """Use the same branch and active-shunt loss accounting for all checks."""
+    voltages = {bus.idtag: abs(results.voltage[i]) for i, bus in enumerate(grid.buses)}
+    shunts = sum(shunt.G * voltages[shunt.bus.idtag] ** 2
+                 for shunt in grid.shunts if shunt.active)
+    return float(np.sum(np.asarray(results.losses).real) + shunts)
+
+
+def _apply_proposal(grid: MultiCircuit, tuning: RmsTuning) -> None:
+    """Apply a sanitized proposal to a private grid copy (or scoring candidate)."""
+    generators = {generator.idtag: generator for generator in grid.generators}
+    for option, value in tuning.dispatch_mw.items():
+        generators[option.device_idtag].P = float(value)
+    lines = {line.idtag: line for line in grid.lines}
+    for line_option in tuning.open_lines:
+        lines[line_option.idtag].active = False
+        lines[line_option.idtag].rms_model.set_parameter_in_model('u', 0.0)
+    for line_option in tuning.close_lines:
+        lines[line_option.idtag].active = True
+        lines[line_option.idtag].rms_model.set_parameter_in_model('u', 1.0)
+    buses = {bus.idtag: bus for bus in grid.buses}
+    for candidate in tuning.add_lines:
+        new_line: Line = Line(
+            name=candidate.name,
+            bus_from=buses[candidate.bus_from_idtag],
+            bus_to=buses[candidate.bus_to_idtag],
+            r=candidate.resistance,
+            x=candidate.reactance,
+            b=candidate.susceptance,
+            rate=candidate.rate_mva,
+        )
+        grid.add_line(new_line)
+        set_rms_model(new_line, get_line_rms_template(grid.var_factory).block, grid.var_factory)
+    for shunt_option in tuning.add_shunts:
+        new_shunt: Shunt = Shunt(
+            name=f"Tuning shunt {shunt_option.bus_name}",
+            G=shunt_option.conductance_mw, B=shunt_option.susceptance_mvar,
+        )
+        grid.add_shunt(bus=buses[shunt_option.bus_idtag], api_obj=new_shunt)
+        set_rms_model(new_shunt, get_shunt_template(grid.var_factory, phasor=False).block, grid.var_factory)
+    devices = {device.idtag: device for device in grid.get_all_elements_iter()
+               if isinstance(device, (DynamicDevice, DynamicBusDevice))}
+    for parameter, value in tuning.parameters.items():
+        devices[parameter.device_idtag].rms_model.set_parameter_in_model(
+            parameter.name, float(value)
+        )
+
+
+@dataclass(frozen=True)
+class ControllerInfo:
+    """An installed controller view together with its permitted tuning handles."""
+
+    controller: ControllerBlock
+    parameters: tuple[TunableParameter, ...]
+
+
+@dataclass(frozen=True)
+class AnalysisCapability:
+    """Structural API support, not a guarantee of convergence or valid derivatives."""
+
+    supported: bool
+    reason: str
+
+
+@dataclass(frozen=True)
+class ProposalValidationReport:
+    """Catalog validation only; electrical feasibility requires simulation.
+
+    accepted means no part of the submitted proposal was omitted. The effective
+    proposal is exactly what the evaluator's sanitization would retain.
+    """
+
+    accepted: bool
+    issues: tuple[str, ...]
+    effective_proposal: RmsTuning
+
+
 class RmsTuner(ABC):
     """Base class for participant tuners, with a one-grid evaluation helper."""
 
@@ -381,6 +470,43 @@ class RmsTuner(ABC):
         return test_tuning(self, grid, evaluator)
 
 
+    def run_powerflow(
+        self, tuning: RmsTuning, *, grid: TunableGrid,
+        options: PowerFlowOptions | None = None,
+    ) -> PowerFlowResults:
+        """Solve a proposal on an isolated copy without spending RMS trials.
+
+        Uses the same action sanitization as full evaluation. Nonconvergence is
+        reported in results.converged; no SSA or transient simulation is run.
+        """
+        _, results = self._proposal_powerflow(tuning, grid, options)
+        return results
+
+    def get_losses(
+        self, tuning: RmsTuning, *, grid: TunableGrid,
+        options: PowerFlowOptions | None = None,
+    ) -> float:
+        """Return active losses in MW for this proposal, including shunt G.
+
+        Raises RuntimeError on nonconvergence. This is an electrical diagnostic,
+        not a stability assessment, and consumes no full tuning trials.
+        """
+        candidate, results = self._proposal_powerflow(tuning, grid, options)
+        if not bool(results.converged):
+            raise RuntimeError("Tuned grid power flow did not converge")
+        return _active_losses(candidate, results)
+
+    def _proposal_powerflow(self, tuning, grid, options):
+        if not isinstance(grid, TunableGrid):
+            raise TypeError("Expected the current TunableGrid")
+        # Sanitization depends on the supplied catalogs, not evaluator defaults.
+        tuning = RmsTunerEvaluator().sanitize_tuning(grid, tuning)
+        candidate = grid.problem.grid.copy()
+        _apply_proposal(candidate, tuning)
+        driver = PowerFlowDriver(candidate, options=options)
+        driver.run()
+        return candidate, driver.results
+
     def get_modal_analysis(
         self, grid: MultiCircuit | TunableGrid | dict,
     ) -> dict:
@@ -398,6 +524,83 @@ class RmsTuner(ABC):
         :return: Classified template views and explicitly unclassified blocks.
         """
         return controller_blocks(device)
+
+    def get_controllers(
+        self, grid: TunableGrid, *, role: ControllerRole | None = None,
+    ) -> tuple[ControllerInfo, ...]:
+        """Discover installed controllers and permitted handles without solves.
+
+        Includes unclassified views by default; filter by ControllerRole to
+        select a known family. Views can overlap and are not isolated models.
+        Empty parameter tuples mean the view has no permitted editable controls.
+        """
+        if not isinstance(grid, TunableGrid):
+            raise TypeError('Expected the current TunableGrid')
+        if role is not None and not isinstance(role, ControllerRole):
+            raise TypeError('role must be a ControllerRole or None')
+        discovered = []
+        for device in grid.problem.grid.get_all_elements_iter():
+            if not isinstance(device, (DynamicDevice, DynamicBusDevice)):
+                continue
+            for controller in controller_blocks(device):
+                if role is None or controller.role == role:
+                    discovered.append(ControllerInfo(
+                        controller, controller_parameters(grid, controller)
+                    ))
+        return tuple(discovered)
+
+    def get_analysis_capabilities(self, grid: TunableGrid) -> dict[str, AnalysisCapability]:
+        """Inspect model structure without symbolic assembly, solves or trials.
+
+        Support does not promise a nonsingular reduction, an equilibrium after
+        overrides, or well-conditioned eigenvalue derivatives. Both descriptor
+        and semi-explicit models support native numerical modal analysis.
+        """
+        if not isinstance(grid, TunableGrid):
+            raise TypeError('Expected the current TunableGrid')
+        descriptor = bool(grid.problem.get_diff_var_number())
+        parameterized = AnalysisCapability(
+            not descriptor,
+            'Native descriptor models need parameterized A(p) and E(p); '
+            'symbolic matrices, overrides and analytic sensitivities are not implemented.'
+            if descriptor else
+            'Semi-explicit DAE supported; reduction and equilibrium checks still apply.',
+        )
+        has_trials = grid._trial is not None
+        return {
+            'modal_analysis': AnalysisCapability(True, 'Native numerical analysis supports this model structure.'),
+            'state_matrix': AnalysisCapability(
+                True, 'Returns unreduced numerical A; obtain E from modal analysis and use generalized eigenvalues.'
+                if descriptor else 'Returns the reduced numerical state matrix.'
+            ),
+            'symbolic_state_matrices': parameterized,
+            'parameter_overrides': parameterized,
+            'analytic_sensitivities': parameterized,
+            'full_trials': AnalysisCapability(
+                has_trials,
+                f'Trial session attached; {grid.tests_used} of {grid.max_test_tunings} trials used.'
+                if has_trials else 'No trial session attached; initialize through an evaluator session.',
+            ),
+        }
+
+    def validate_proposal(self, grid: TunableGrid, proposal: object) -> ProposalValidationReport:
+        """Explain omissions and preview evaluator sanitization without warnings.
+
+        No grid mutation, solves or trial consumption. Invalid redispatch is
+        omitted as a group; independent valid controls/actions are retained.
+        This checks action budgets, not remaining full-trial allowance or
+        electrical feasibility. A wrong proposal type produces a failed report;
+        submitting that type to the evaluator still raises an error.
+        """
+        if not isinstance(grid, TunableGrid):
+            raise TypeError('Expected the current TunableGrid')
+        if not isinstance(proposal, RmsTuning):
+            return ProposalValidationReport(
+                False, ('Expected an RmsTuning proposal.',), RmsTuning()
+            )
+        issues = []
+        effective = RmsTunerEvaluator().sanitize_tuning(grid, proposal, _issues=issues)
+        return ProposalValidationReport(not issues, tuple(issues), effective)
 
     def get_controller_parameters(self, grid: TunableGrid, controller: ControllerBlock) -> tuple[TunableParameter, ...]:
         """Select permitted handles, never merely all parameters in an equation.
@@ -422,8 +625,26 @@ class RmsTuner(ABC):
         return controller_modes(grid, controller, minimum_participation, include_conjugates)
 
     def get_parameterized_state_matrix(self, grid: TunableGrid) -> dict:
-        """Keep editable controls symbolic for fixed-point matrix/mode sensitivities."""
+        """Return native symbolic fx/fy/gx/gy blocks and editable parameter symbols.
+
+        State/algebraic values and noneditable parameters are fixed at the
+        initialized operating point. Supports semi-explicit DAEs only.
+        """
         return build_parameterized_state_matrix(grid)
+
+    def get_symbolic_state_matrices(self, grid: TunableGrid) -> dict:
+        """Return symbolic state_matrix A(p), mass_matrix E and variable order.
+
+        For semi-explicit DAEs, z=(x,y), A=[[fx,fy],[gx,gy]], E=diag(I,0).
+        This unreduced pencil retains algebraic variables; it is not the reduced
+        numerical A returned by get_state_matrix(). Entries are native VeraGrid
+        expressions supporting get_vars(), subs(), diff() and eval_uid(). Only
+        permitted controls remain symbolic at the frozen operating point.
+        Native descriptor models are not yet supported by this symbolic helper.
+        Inspection uses no tuning trials and does not check equilibrium under
+        changed controls; use get_equilibrium_residual() before evaluation.
+        """
+        return symbolic_state_matrices(build_parameterized_state_matrix(grid))
 
     def evaluate_state_matrix(self, grid: TunableGrid, values=None, **options) -> np.ndarray:
         """Evaluate A at proposed controls, constructing symbolic blocks internally."""
@@ -446,11 +667,15 @@ class RmsTuner(ABC):
     ) -> np.ndarray:
         """Return numerical A directly from a grid.
 
-        TunableGrid supports parameter overrides and equilibrium-check options.
+        Semi-explicit TunableGrid models support parameter overrides and
+        equilibrium-check options. Native descriptor models without overrides
+        use modal analysis and return unreduced A with E in its snapshot.
         Raw grids and modal snapshots use native SSA without parameter overrides;
         descriptor snapshots also provide mass_matrix for E delta_z_dot = A delta_z.
         """
         if isinstance(grid, TunableGrid):
+            if grid.problem.get_diff_var_number() and values is None and not options:
+                return self.get_modal_analysis(grid)['state_matrix']
             return self.evaluate_state_matrix(grid, values, **options)
         if values is not None or options:
             raise TypeError('Parameter overrides and equilibrium options require a TunableGrid')
@@ -485,7 +710,7 @@ class RmsTunerEvaluator:
                  max_open_lines: int = 2,
                  max_new_lines: int = 1,
                  max_new_shunts: int = 1,
-                 max_test_tunings: int = 5,
+                 max_test_tunings: int | float = 5,
                  load_step_fraction: float = 0.02,
                  load_step_time_s: float = 0.2,
                  transient_duration_s: float = 3.0,
@@ -516,16 +741,20 @@ class RmsTunerEvaluator:
         self.transient_duration_s = transient_duration_s
         self.transient_time_step_s = transient_time_step_s
 
-    def start_session(self, baseline: TunableGrid, limit: int | None = None) -> TunableGrid:
+    def start_session(self, baseline: TunableGrid, limit: int | float | None = None) -> TunableGrid:
         """Create a fresh per-scenario budget and an isolated participant problem.
 
         The closure retains the authoritative baseline and counter. Participant
         edits to their diagnostic problem cannot change the scoring baseline.
         This is cooperative API enforcement, not a Python security sandbox.
         """
-        limit = self.max_test_tunings if limit is None else limit
-        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-            raise ValueError("Trial budget must be a nonnegative integer")
+        if limit is None:
+            limit = baseline.max_test_tunings if baseline._budget_status else self.max_test_tunings
+        if isinstance(limit, bool) or not (
+            isinstance(limit, int) and limit >= 0
+            or isinstance(limit, float) and limit == math.inf
+        ):
+            raise ValueError("Trial budget must be a nonnegative integer or math.inf")
         used = 0
         lock = Lock()
 
@@ -610,60 +839,93 @@ class RmsTunerEvaluator:
         peak_voltage_pu = float(np.max(np.abs(voltages - voltages[0])))
         return peak_frequency_hz, peak_voltage_pu, converged
 
-    def sanitize_tuning(self, tunable_grid: TunableGrid, tuning: RmsTuning) -> RmsTuning:
-        """Keep valid actions in submission order and warn about every omission.
+    def sanitize_tuning(
+        self, tunable_grid: TunableGrid, tuning: RmsTuning, *,
+        _issues: list[str] | None = None,
+    ) -> RmsTuning:
+        """Keep valid actions in submission order and report every omission.
 
         No values are clamped. Redispatch is atomic because dropping only one
         generator update can break the scheduled MW balance. A wrong return
         type remains an error; malformed action containers are skipped.
+        The participant validation helper collects these same messages instead
+        of emitting warnings, keeping validation and scoring rules identical.
         """
         if not isinstance(tuning, RmsTuning):
             raise ValueError("The tuner must return an RmsTuning proposal")
 
+        def report(message):
+            if _issues is None:
+                warnings.warn(message, UserWarning, stacklevel=3)
+            else:
+                _issues.append(message)
+
         parameters = dict()
         if not isinstance(tuning.parameters, Mapping):
-            warnings.warn("Skipped parameters: expected a mapping of handles to values", UserWarning, stacklevel=2)
+            report("Skipped parameters: expected a mapping of handles to values")
         else:
+            indices = _parameter_indices(tunable_grid.problem)
             for parameter, value in tuning.parameters.items():
-                if RmsTuning(parameters={parameter: value}).is_accepted(tunable_grid):
-                    parameters[parameter] = value
+                if not isinstance(parameter, TunableParameter) or parameter not in tunable_grid.tunable_parameters:
+                    reason = 'unknown or unavailable handle in this scenario'
+                elif parameter.runtime_key not in indices:
+                    reason = 'parameter is missing from the initialized problem'
+                elif not isinstance(value, (int, float)) or not math.isfinite(value):
+                    reason = 'value must be a finite real number'
+                elif not parameter.minimum <= value <= parameter.maximum:
+                    reason = f'value {value!r} outside [{parameter.minimum:g}, {parameter.maximum:g}]'
                 else:
-                    warnings.warn(f"Skipped parameter {parameter!r}: unknown/unavailable handle "
-                                  "or non-finite/out-of-range value", UserWarning, stacklevel=2)
+                    parameters[parameter] = value
+                    continue
+                report(f"Skipped parameter {parameter!r}: {reason}")
 
         dispatch = dict()
         if not isinstance(tuning.dispatch_mw, Mapping):
-            warnings.warn("Skipped entire redispatch: expected a mapping", UserWarning, stacklevel=2)
+            report("Skipped entire redispatch: expected a mapping")
         elif tuning.dispatch_mw:
-            valid_values = all(
-                isinstance(option, DispatchOption)
-                and option in tunable_grid.dispatch_options
-                and isinstance(value, (int, float)) and math.isfinite(value)
-                and option.minimum_mw <= value <= option.maximum_mw
-                for option, value in tuning.dispatch_mw.items()
-            )
-            if valid_values and RmsTuning(dispatch_mw=tuning.dispatch_mw).is_accepted(tunable_grid):
-                dispatch = dict(tuning.dispatch_mw)
+            reasons = []
+            for option, value in tuning.dispatch_mw.items():
+                if not isinstance(option, DispatchOption) or option not in tunable_grid.dispatch_options:
+                    reasons.append(f'{option!r}: unknown or unavailable handle')
+                elif not isinstance(value, (int, float)) or not math.isfinite(value):
+                    reasons.append(f'{option.device_name}: value must be a finite real number')
+                elif not option.minimum_mw <= value <= option.maximum_mw:
+                    reasons.append(
+                        f'{option.device_name}: value {value!r} MW outside '
+                        f'[{option.minimum_mw:g}, {option.maximum_mw:g}] MW'
+                    )
+            if not reasons:
+                imbalance = sum(
+                    tuning.dispatch_mw.get(option, option.initial_mw) - option.initial_mw
+                    for option in tunable_grid.dispatch_options
+                )
+                # Match the acceptance check's absolute scheduled-MW tolerance.
+                if not RmsTuning(dispatch_mw=tuning.dispatch_mw).is_accepted(tunable_grid):
+                    reasons.append(f'unbalanced total MW (change {imbalance:+.9g} MW; tolerance 1e-6 MW)')
+            if reasons:
+                report('Skipped entire redispatch: ' + '; '.join(reasons))
             else:
-                warnings.warn("Skipped entire redispatch: invalid handle/value or unbalanced total MW", UserWarning, stacklevel=2)
+                dispatch = dict(tuning.dispatch_mw)
 
-        opened: tuple[LineOption, ...] = _sanitize_action_handles(
-            tuning.open_lines, tunable_grid.openable_lines, tunable_grid.max_open_lines, "open line")
-        requested_closed: tuple[LineOption, ...] = _sanitize_action_handles(
-            tuning.close_lines, tunable_grid.closable_lines, tunable_grid.max_close_lines, "close line")
-        opened_ids: set[str] = set(option.idtag for option in opened)
-        closed: tuple[LineOption, ...] = tuple(option for option in requested_closed if option.idtag not in opened_ids)
+        opened = _sanitize_action_handles(
+            tuning.open_lines, tunable_grid.openable_lines,
+            tunable_grid.max_open_lines, "open line", report)
+        requested_closed = _sanitize_action_handles(
+            tuning.close_lines, tunable_grid.closable_lines,
+            tunable_grid.max_close_lines, "close line", report)
+        opened_ids = {option.idtag for option in opened}
+        closed = tuple(option for option in requested_closed if option.idtag not in opened_ids)
         if len(closed) != len(requested_closed):
-            warnings.warn("Skipped conflicting close line: the same line is also opened", UserWarning, stacklevel=2)
-        else:
-            pass
+            report("Skipped conflicting close line: the same line is also opened")
         return RmsTuning(
             parameters=parameters, dispatch_mw=dispatch,
             open_lines=opened, close_lines=closed,
-            add_lines=_sanitize_action_handles(tuning.add_lines, tunable_grid.line_candidates,
-                              tunable_grid.max_new_lines, "new line"),
-            add_shunts=_sanitize_action_handles(tuning.add_shunts, tunable_grid.shunt_options,
-                               tunable_grid.max_new_shunts, "new shunt"),
+            add_lines=_sanitize_action_handles(
+                tuning.add_lines, tunable_grid.line_candidates,
+                tunable_grid.max_new_lines, "new line", report),
+            add_shunts=_sanitize_action_handles(
+                tuning.add_shunts, tunable_grid.shunt_options,
+                tunable_grid.max_new_shunts, "new shunt", report),
         )
 
     def apply_tuning(self, tunable_grid: TunableGrid, tuning: RmsTuning) -> RmsProblemTemplate:
@@ -671,42 +933,7 @@ class RmsTunerEvaluator:
         problem = tunable_grid.problem
         tuning = self.sanitize_tuning(tunable_grid, tuning)
         grid = problem.grid
-        generators = {generator.idtag: generator for generator in grid.generators}
-        for option, value in tuning.dispatch_mw.items():
-            generators[option.device_idtag].P = float(value)
-        lines = {line.idtag: line for line in grid.lines}
-        for line_option in tuning.open_lines:
-            lines[line_option.idtag].active = False
-            lines[line_option.idtag].rms_model.set_parameter_in_model('u', 0.0)
-        for line_option in tuning.close_lines:
-            lines[line_option.idtag].active = True
-            lines[line_option.idtag].rms_model.set_parameter_in_model('u', 1.0)
-        buses = {bus.idtag: bus for bus in grid.buses}
-        for candidate in tuning.add_lines:
-            new_line: Line = Line(
-                name=candidate.name,
-                bus_from=buses[candidate.bus_from_idtag],
-                bus_to=buses[candidate.bus_to_idtag],
-                r=candidate.resistance,
-                x=candidate.reactance,
-                b=candidate.susceptance,
-                rate=candidate.rate_mva,
-            )
-            grid.add_line(new_line)
-            set_rms_model(new_line, get_line_rms_template(grid.var_factory).block, grid.var_factory)
-        for shunt_option in tuning.add_shunts:
-            new_shunt: Shunt = Shunt(
-                name=f"Tuning shunt {shunt_option.bus_name}",
-                G=shunt_option.conductance_mw, B=shunt_option.susceptance_mvar,
-            )
-            grid.add_shunt(bus=buses[shunt_option.bus_idtag], api_obj=new_shunt)
-            set_rms_model(new_shunt, get_shunt_template(grid.var_factory, phasor=False).block, grid.var_factory)
-        devices = {device.idtag: device for device in problem.grid.get_all_elements_iter()
-                   if isinstance(device, (DynamicDevice, DynamicBusDevice))}
-        for parameter, value in tuning.parameters.items():
-            devices[parameter.device_idtag].rms_model.set_parameter_in_model(
-                parameter.name, float(value)
-            )
+        _apply_proposal(grid, tuning)
         pf = problem.power_flow_results
         if tuning.dispatch_mw or tuning.open_lines or tuning.close_lines or tuning.add_lines or tuning.add_shunts:
             power_flow = PowerFlowDriver(grid)
@@ -806,19 +1033,11 @@ class RmsTunerEvaluator:
         loading = np.abs(np.asarray(pf.loading))
         voltage_violations = int(np.count_nonzero((voltage < 0.95) | (voltage > 1.05)))
         thermal_violations = int(np.count_nonzero(loading > 1.0))
-        voltage_by_bus_id = {
-            bus.idtag: abs(pf.voltage[index])
-            for index, bus in enumerate(tuned_grid.buses)
-        }
-        shunt_consumption = sum(
-            shunt.G * voltage_by_bus_id[shunt.bus.idtag] ** 2
-            for shunt in tuned_grid.shunts if shunt.active
-        )
         peak_frequency_hz, peak_voltage_pu, transient_converged = self.evaluate_load_step(
             tuned_grid, pf
         )
         return RmsTuningMetrics(
-            active_losses_mw=float(np.sum(np.asarray(pf.losses).real) + shunt_consumption),
+            active_losses_mw=_active_losses(tuned_grid, pf),
             max_eigenvalue_real=max_real,
             min_oscillatory_damping=min_damping,
             voltage_violations=voltage_violations,

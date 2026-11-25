@@ -1,5 +1,6 @@
 """Reproducible grid-action and controller RMS stabilization challenges."""
 from pathlib import Path
+import math
 
 import numpy as np
 
@@ -62,6 +63,15 @@ def network_specs() -> tuple[NetworkSpec, ...]:
         NetworkSpec('ieee57', 'src/tests/data/grids/IEEE57.gridcal', load_scale=0.38, voltage=1.0, tap_blend=0.3),
         NetworkSpec('ieee118', 'Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal', load_scale=0.4, voltage=1.0, tap_blend=0.0),
     )
+
+
+def case_trial_budget(name: str) -> int | float:
+    """Alternate budgets across the 50 ordered cases: 25 unlimited, 25 at 20."""
+    for network_index, spec in enumerate(network_specs()):
+        for variant in range(1, 6):
+            if name == f"basic_{spec.name}_{variant:02d}":
+                return math.inf if (network_index + variant) % 2 else 20
+    return 20
 
 
 def basic_evaluator() -> RmsTunerEvaluator:
@@ -187,7 +197,7 @@ def initialize_grid(grid: MultiCircuit) -> TunableGrid:
     """Solve PF and initialize the exact problem presented to a tuner.
 
     :param grid: Independent case grid, which may be initialized in place.
-    :return: Existing TunableGrid API with a five-trial evaluation session.
+    :return: Existing TunableGrid API with a case-specific evaluation budget.
     """
     power_flow: PowerFlowDriver = PowerFlowDriver(grid, options=PowerFlowOptions(tolerance=1e-10, max_iter=100))
     power_flow.run()
@@ -205,15 +215,22 @@ def initialize_grid(grid: MultiCircuit) -> TunableGrid:
         ranges.pop('Kp')
     else:
         pass
+    controller_only = grid.name.startswith("basic_") and grid.name.endswith("_02")
     actions: BasicActionCatalog = BasicActionCatalog(grid)
     snapshot: TunableGrid = TunableGrid(
         problem=driver.problem,
         tunable_parameters=build_rms_tunables(grid, ranges),
-        dispatch_options=actions.dispatch, openable_lines=actions.openable,
-        closable_lines=actions.closable, line_candidates=actions.lines, shunt_options=actions.shunts,
-        max_open_lines=1, max_close_lines=1, max_new_lines=1, max_new_shunts=1,
+        dispatch_options=() if controller_only else actions.dispatch,
+        openable_lines=() if controller_only else actions.openable,
+        closable_lines=() if controller_only else actions.closable,
+        line_candidates=() if controller_only else actions.lines,
+        shunt_options=() if controller_only else actions.shunts,
+        max_open_lines=0 if controller_only else 1,
+        max_close_lines=0 if controller_only else 1,
+        max_new_lines=0 if controller_only else 1,
+        max_new_shunts=0 if controller_only else 1,
     )
-    return evaluator.start_session(snapshot)
+    return evaluator.start_session(snapshot, limit=case_trial_budget(grid.name))
 
 
 def reference_tuning(grid: TunableGrid, gain: float = -400.0) -> RmsTuning:

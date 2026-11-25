@@ -417,7 +417,22 @@ trials and never invoke the tuner's `tune()` method.
 The [50-case basic collection](basic/README.md) includes existing open circuits,
 line outage/restoration cases, non-islanding opening options, new-line
 reinforcements, capacitor/reactor candidates, and balanced redispatch, alongside
-synchronous and GFM/GFL controller tuning. Its minimum damping remains 2.5%.
+synchronous and GFM/GFL controller tuning. Ten `_02` cases permit controller
+tuning only, with empty physical-action and redispatch catalogs; the other 40
+retain physical actions. Its minimum damping remains 2.5%.
 The validation report records exact action catalogs and reference restoration
 actions. The evaluator keeps these organizer-specific permissions on every trial
 copy and gives added lines/shunts their native RMS models.
+
+## Power-flow proposal helpers
+
+`RmsTuner.run_powerflow(proposal, grid=tunable_grid, options=None)` returns native
+power-flow results on a copy. `RmsTuner.get_losses(proposal, grid=tunable_grid,
+options=None)` independently solves that proposal and returns total active losses
+in MW, including shunt consumption. Neither spends full RMS trial budget.
+See the [power-flow example](intro/examples/powerflow_examples.py) and
+[API guide](intro/examples/README.md#power-flow-only-proposal-checks).
+
+The 50 basic cases split trial budgets evenly: 25 unlimited (`math.inf`) and
+25 capped at 20 full trials, spread across networks and controller variants.
+Intro cases retain five full trials. Final scoring is separate in both suites.

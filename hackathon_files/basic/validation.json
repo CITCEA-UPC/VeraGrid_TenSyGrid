@@ -129,7 +129,8 @@
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 1,
-    "sha256": "5c3d77f7969941e1ad360e928726d2a4f73a1caf0c98c3475fc351254e53d12f"
+    "sha256": "5c3d77f7969941e1ad360e928726d2a4f73a1caf0c98c3475fc351254e53d12f",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_lynn5_02.veragrid",
@@ -210,85 +211,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "f4229b42e2d44fb8a26ea3c11a67aa29",
-          "name": "B3-1"
-        },
-        {
-          "idtag": "3d6fa9877a874617b9d1fac9b5d7e3d7",
-          "name": "B4-3"
-        },
-        {
-          "idtag": "c9b6b8ad3b0b40a9bcc2cad8aafbf925",
-          "name": "B5-4"
-        },
-        {
-          "idtag": "699c53090d764c53b4c127b8f1040c3e",
-          "name": "B5-2"
-        },
-        {
-          "idtag": "36de0ff0f93b45a0ae2357484624312c",
-          "name": "B5-1"
-        },
-        {
-          "idtag": "8629e1111e5145d1933f747dfea15db8",
-          "name": "B2-1"
-        },
-        {
-          "idtag": "4c95c4155d244fb6b242d07bbfdfed17",
-          "name": "B2-3"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "710e4fcc165b4c9b93b35e692a2e5cb4",
-          "name": "Normally open standby: B3-1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "47263fd7bf4c45b5950fa271d6fc2146",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "5a02c76af2c748b8899c5607bc013222",
-          "initial": 12.455999999999998,
-          "minimum": 11.833199999999998,
-          "maximum": 13.078799999999998
-        },
-        {
-          "idtag": "d868f429e3c9462985a6eb8018c639bf",
-          "initial": 8.304,
-          "minimum": 7.804,
-          "maximum": 8.804
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: B4-3",
-          "bus_from": "94af50a2aaa84ffea51acaff4d770fec",
-          "bus_to": "0d3f88d2ea0a4ec7b40fa927eb1d7051",
-          "r": 0.06,
-          "x": 0.13,
-          "b": 0.03,
-          "rate_mva": 18.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "5b162c6359bc468e882e6c9e22b10ca1",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "5b162c6359bc468e882e6c9e22b10ca1",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 3.799738301779598e-14,
@@ -307,7 +234,8 @@
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 2,
-    "sha256": "e8054a828f1ada3a345c12a0fda7f64abb9016c1e426b379ddb04d75be1a6470"
+    "sha256": "e8054a828f1ada3a345c12a0fda7f64abb9016c1e426b379ddb04d75be1a6470",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_lynn5_03.veragrid",
@@ -485,7 +413,8 @@
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 3,
-    "sha256": "d3fa1001b238729e04a17bd7ec4f6020f9f9ef33ebbc77474f17a284ff95a9a4"
+    "sha256": "d3fa1001b238729e04a17bd7ec4f6020f9f9ef33ebbc77474f17a284ff95a9a4",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_lynn5_04.veragrid",
@@ -722,7 +651,8 @@
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 4,
-    "sha256": "68af76b7888d6db330b0c5cf81e86c28a0558b334fec3affe60f3ccb1b918b83"
+    "sha256": "68af76b7888d6db330b0c5cf81e86c28a0558b334fec3affe60f3ccb1b918b83",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_lynn5_05.veragrid",
@@ -959,7 +889,8 @@
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 5,
-    "sha256": "1d3f0ad81373cc19e874986df339d84bec337b2fcd4c9b842e1d9b59173b0c38"
+    "sha256": "1d3f0ad81373cc19e874986df339d84bec337b2fcd4c9b842e1d9b59173b0c38",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_six_bus_01.veragrid",
@@ -1078,7 +1009,8 @@
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 1,
-    "sha256": "e7501f5fe8665a31b1f4138ed681a5ccb47b7be9a70ef2847ba659f58a1c9b06"
+    "sha256": "e7501f5fe8665a31b1f4138ed681a5ccb47b7be9a70ef2847ba659f58a1c9b06",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_six_bus_02.veragrid",
@@ -1160,61 +1092,10 @@
     ],
     "action_catalog": {
       "open_lines": [],
-      "close_lines": [
-        {
-          "idtag": "d7aaee7d429d445baf3f83f2e9ef0437",
-          "name": "Normally open standby: Line 1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "aa70a724e9b54d75b6f6184fd95eab04",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "5c91df61e2834e868f4bc817bb76e946",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "82035fbaaeea400c8ec3efa08080c75e",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "07b42e8cc9ea4134b09ab1d5f16cf53d",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: Line 2",
-          "bus_from": "695fb1203196447e8cbc01898f523b05",
-          "bus_to": "d5fb945c6e4849d4bf17345b47af6aef",
-          "r": 0.008,
-          "x": 0.011,
-          "b": 1e-20,
-          "rate_mva": 200.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "d5fb945c6e4849d4bf17345b47af6aef",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "d5fb945c6e4849d4bf17345b47af6aef",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 8.979594845470729e-12,
@@ -1233,7 +1114,8 @@
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 2,
-    "sha256": "b6179aeebe714c483c33de922caf5cc72c83abfd9e9bd3a6ba04652f4b40b21c"
+    "sha256": "b6179aeebe714c483c33de922caf5cc72c83abfd9e9bd3a6ba04652f4b40b21c",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_six_bus_03.veragrid",
@@ -1388,7 +1270,8 @@
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 3,
-    "sha256": "5efa8a927b4c8b6ae4d1723645a69c63e86cbf3114547918b2daf78b2f5dfa0d"
+    "sha256": "5efa8a927b4c8b6ae4d1723645a69c63e86cbf3114547918b2daf78b2f5dfa0d",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_six_bus_04.veragrid",
@@ -1602,7 +1485,8 @@
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 4,
-    "sha256": "13723a66a8c00d2fd2b3ccb8c7be385917df0183e64765ef67eab9acbca4f86c"
+    "sha256": "13723a66a8c00d2fd2b3ccb8c7be385917df0183e64765ef67eab9acbca4f86c",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_six_bus_05.veragrid",
@@ -1816,7 +1700,8 @@
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 5,
-    "sha256": "438ebd98650266dd3bd8cc592487d90c2c47aad71538c765dea35bf6e919080e"
+    "sha256": "438ebd98650266dd3bd8cc592487d90c2c47aad71538c765dea35bf6e919080e",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee9_01.veragrid",
@@ -1937,7 +1822,8 @@
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 1,
-    "sha256": "94718089e7e955a11f4d20105d5b098f9371b8b9a5a2b711361c6353bc4f414b"
+    "sha256": "94718089e7e955a11f4d20105d5b098f9371b8b9a5a2b711361c6353bc4f414b",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee9_02.veragrid",
@@ -2018,87 +1904,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "0f6459a22c26415ab208012698928e20",
-          "name": "branch 1"
-        },
-        {
-          "idtag": "79a8f693d8cd4201b3d3183308d67dba",
-          "name": "branch 2"
-        },
-        {
-          "idtag": "dba3a531867e4f78929f644176c5fc3b",
-          "name": "branch 4"
-        },
-        {
-          "idtag": "5ec4dd272c2643e4b1f8e07cf5e3038a",
-          "name": "branch 5"
-        },
-        {
-          "idtag": "b78010348a464fa985ceae5dc76fd395",
-          "name": "branch 7"
-        },
-        {
-          "idtag": "dc8d14d191564a47861fc0a12edbba85",
-          "name": "branch 8"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "f490cff362c9466ca865fd4c302601ea",
-          "name": "Normally open standby: branch 1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "e823ce2bc6b8426e9dcfdfbd4973e985",
-          "initial": 62.5395,
-          "minimum": 59.412524999999995,
-          "maximum": 65.66647499999999
-        },
-        {
-          "idtag": "9cfc9c30928e49b9826501840df659f8",
-          "initial": 84.597,
-          "minimum": 80.36715,
-          "maximum": 88.82685
-        },
-        {
-          "idtag": "1bd197aa3b0a41a58be7cf9f91536399",
-          "initial": 73.525,
-          "minimum": 69.84875000000001,
-          "maximum": 77.20125
-        },
-        {
-          "idtag": "ffd0d1071e1a4c9ca62e3ae0d1ecc7a0",
-          "initial": 56.398,
-          "minimum": 53.578100000000006,
-          "maximum": 59.2179
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: branch 2",
-          "bus_from": "a57bad89e4ef454499d6c4659ece4506",
-          "bus_to": "b552a5a9ff524428936e4ce47f99b8b5",
-          "r": 0.039,
-          "x": 0.17,
-          "b": 0.358,
-          "rate_mva": 150.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "a57bad89e4ef454499d6c4659ece4506",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "a57bad89e4ef454499d6c4659ece4506",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 1.0963452368173421e-14,
@@ -2117,7 +1927,8 @@
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 2,
-    "sha256": "22381e491d4e0d84d3c5cf70d76217ae6c603c9c7b295c8bc06153cb8dfc3de1"
+    "sha256": "22381e491d4e0d84d3c5cf70d76217ae6c603c9c7b295c8bc06153cb8dfc3de1",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee9_03.veragrid",
@@ -2297,7 +2108,8 @@
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 3,
-    "sha256": "827bbea7994f271eb39eb266f5eef59a9ebcb140edb8b786eefb24327d4d7e41"
+    "sha256": "827bbea7994f271eb39eb266f5eef59a9ebcb140edb8b786eefb24327d4d7e41",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee9_04.veragrid",
@@ -2536,7 +2348,8 @@
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 4,
-    "sha256": "537ac39b20542d2004b88ed9db7cfa9bbee933b0e4c45ac7d7bdb8a045e963d5"
+    "sha256": "537ac39b20542d2004b88ed9db7cfa9bbee933b0e4c45ac7d7bdb8a045e963d5",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee9_05.veragrid",
@@ -2775,7 +2588,8 @@
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 5,
-    "sha256": "a1bb2c6f742577f35859ce959d2debdb3ff41712efd918f80dabaf2e7f7d2919"
+    "sha256": "a1bb2c6f742577f35859ce959d2debdb3ff41712efd918f80dabaf2e7f7d2919",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_kundur11_01.veragrid",
@@ -2959,7 +2773,8 @@
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 1,
-    "sha256": "903738ff504202feea24171e2890a8b5db388c7ce4ed9ac8e446967629fa8945"
+    "sha256": "903738ff504202feea24171e2890a8b5db388c7ce4ed9ac8e446967629fa8945",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_kundur11_02.veragrid",
@@ -3040,125 +2855,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "b030aef77ff34cbc8c724ed8530c2d3c",
-          "name": "line 5-6-1"
-        },
-        {
-          "idtag": "e409e14b191c4d3c8a9ffaccbafa0f9c",
-          "name": "line 5-6-2"
-        },
-        {
-          "idtag": "f946bbf92be34da887adc2d2bdc6a7d2",
-          "name": "line 6-7-1"
-        },
-        {
-          "idtag": "3c59facbfe054977bb5bade91027b514",
-          "name": "line 6-7-2"
-        },
-        {
-          "idtag": "1db50296b6f2462bbf64818f48677cdd",
-          "name": "line 6-7-3"
-        },
-        {
-          "idtag": "ed45cc071bdd4936a37120dc6b6d7a83",
-          "name": "line 7-8-1"
-        },
-        {
-          "idtag": "31830c51e26e4b138172adb0006ce10f",
-          "name": "line 7-8-2"
-        },
-        {
-          "idtag": "32822b4dc72847bfa0b4e4867d963d9d",
-          "name": "line 8-9-1"
-        },
-        {
-          "idtag": "01e33f7ac49c41d696bd8a9c16bd05ef",
-          "name": "line 8-9-2"
-        },
-        {
-          "idtag": "3d03dc25ff9f4bd4861f147ecc741fb9",
-          "name": "line 9-10-1"
-        },
-        {
-          "idtag": "daab47aaf3024dffa9a0c4f8a54ae8ca",
-          "name": "line 9-10-2"
-        },
-        {
-          "idtag": "2ecace5a32c940138b290aa836ed50fa",
-          "name": "line 9-10-3"
-        },
-        {
-          "idtag": "8212de7fe6fa46c29313603919eb9a34",
-          "name": "line 10-11-1"
-        },
-        {
-          "idtag": "27f7d6361be54280afdcd789867024b3",
-          "name": "line 10-11-2"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "7694505f22e54aadb49866c31d9a52bd",
-          "name": "Normally open standby: line 5-6-1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "0237d06d89f54aecb2996a6ed1650bd1",
-          "initial": 393.575,
-          "minimum": 373.89625,
-          "maximum": 413.25374999999997
-        },
-        {
-          "idtag": "9c983349274e4464b6719a6f785da5fb",
-          "initial": 393.575,
-          "minimum": 373.89625,
-          "maximum": 413.25374999999997
-        },
-        {
-          "idtag": "968e848988174479ae92aa1bacbcf10d",
-          "initial": 242.58534884999997,
-          "minimum": 230.45608140749997,
-          "maximum": 254.71461629249998
-        },
-        {
-          "idtag": "774c5fe0ae2d4000b8fe3bd496654575",
-          "initial": 393.575,
-          "minimum": 373.89625,
-          "maximum": 413.25374999999997
-        },
-        {
-          "idtag": "ace583d751d14bffb3f1691dbb3f9982",
-          "initial": 161.7235659,
-          "minimum": 153.63738760500001,
-          "maximum": 169.809744195
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: line 5-6-2",
-          "bus_from": "428096a656f545f6ac6747c8831abeed",
-          "bus_to": "327e576ca8f14accbe3f19f87261330c",
-          "r": 0.005,
-          "x": 0.05,
-          "b": 0.02187,
-          "rate_mva": 750.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "45b54026306946778bcd01ceebe0762c",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "45b54026306946778bcd01ceebe0762c",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 1.0128786698260228e-11,
@@ -3177,7 +2878,8 @@
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 2,
-    "sha256": "72225d71a582c451c46b3af55cef1075c3d3cb16a3543ff4640d61d11d467748"
+    "sha256": "72225d71a582c451c46b3af55cef1075c3d3cb16a3543ff4640d61d11d467748",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_kundur11_03.veragrid",
@@ -3395,7 +3097,8 @@
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 3,
-    "sha256": "4286b53b44b51d7cd474cf3334b5853c7830e1d3ebb9e0e84f2f7802add4102a"
+    "sha256": "4286b53b44b51d7cd474cf3334b5853c7830e1d3ebb9e0e84f2f7802add4102a",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_kundur11_04.veragrid",
@@ -3672,7 +3375,8 @@
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 4,
-    "sha256": "567272118d0cf6fe9bac6450fda6b6ef9ba43d59190566a4b6b772236334d228"
+    "sha256": "567272118d0cf6fe9bac6450fda6b6ef9ba43d59190566a4b6b772236334d228",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_kundur11_05.veragrid",
@@ -3949,7 +3653,8 @@
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 5,
-    "sha256": "3197158977df69eda788e6d6ee687b94fac17324297468d2ff97e462020a71da"
+    "sha256": "3197158977df69eda788e6d6ee687b94fac17324297468d2ff97e462020a71da",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee14_01.veragrid",
@@ -4155,7 +3860,8 @@
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 1,
-    "sha256": "7f6a02315984cf1544330551090935d8bb9719a4c053ee76790201922a3b4107"
+    "sha256": "7f6a02315984cf1544330551090935d8bb9719a4c053ee76790201922a3b4107",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee14_02.veragrid",
@@ -4236,139 +3942,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "ebca4dc88031436b9ed276804b0d1a5a",
-          "name": "1_2_1"
-        },
-        {
-          "idtag": "7ab5d150d2584c0494686eda30bc04cc",
-          "name": "1_5_1"
-        },
-        {
-          "idtag": "a63ff135a99a40259e7051787a157572",
-          "name": "2_3_1"
-        },
-        {
-          "idtag": "6f6e0130df734b828e38a5c9c4678546",
-          "name": "2_4_1"
-        },
-        {
-          "idtag": "f2e9dcd8b16142ada7c62985eab4f7fc",
-          "name": "2_5_1"
-        },
-        {
-          "idtag": "bf3e77b0b9c74fff977f63064e6c9b2f",
-          "name": "3_4_1"
-        },
-        {
-          "idtag": "035ab24c422d4926b1a301a3098cc9fd",
-          "name": "4_5_1"
-        },
-        {
-          "idtag": "3384c7587e5f4af0be5ba61b0a2ce6d3",
-          "name": "6_11_1"
-        },
-        {
-          "idtag": "d6cb12859c014481a1f121e38a0c6836",
-          "name": "6_12_1"
-        },
-        {
-          "idtag": "833e33a6747449a493906e7f38924679",
-          "name": "6_13_1"
-        },
-        {
-          "idtag": "bcc4dc40765741529ad8e8774419d1c7",
-          "name": "7_9_1"
-        },
-        {
-          "idtag": "da99f7788f294bc7a837b5321f67649b",
-          "name": "9_10_1"
-        },
-        {
-          "idtag": "2b568c96b8df4512a3a75388b0daa42a",
-          "name": "9_14_1"
-        },
-        {
-          "idtag": "f0b44f401d9f48458f3f05a46fa0b4f2",
-          "name": "10_11_1"
-        },
-        {
-          "idtag": "8e039f6457b3457fb60453b24cf880eb",
-          "name": "12_13_1"
-        },
-        {
-          "idtag": "9f907fed15b34c44835939d1b236ece9",
-          "name": "13_14_1"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "403410a92184429896c619241517ab6f",
-          "name": "Normally open standby: 1_2_1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "9c81a625f85c4708a85a6a6d62b4ba09",
-          "initial": 201.026,
-          "minimum": 190.9747,
-          "maximum": 211.0773
-        },
-        {
-          "idtag": "88f64fd50fb74335a40f7e4d3756904a",
-          "initial": 20.76,
-          "minimum": 19.722,
-          "maximum": 21.798000000000002
-        },
-        {
-          "idtag": "b566066a0e494f1d85c390a523d9f1f4",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "12b909f372804e6d9b7db55a1f1d978c",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "308799963b1647558f11873c6e6b398f",
-          "initial": 0.0,
-          "minimum": 0.0,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "5166030d4d904fccb3e71ab255d786c0",
-          "initial": 13.840000000000002,
-          "minimum": 13.148000000000001,
-          "maximum": 14.532000000000002
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: 1_5_1",
-          "bus_from": "e6602c3956844365ac09e825fbff3d64",
-          "bus_to": "c740d2dc8d8c448faff81a44e24d6796",
-          "r": 0.05403,
-          "x": 0.22304,
-          "b": 0.0492,
-          "rate_mva": 10000.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "4d2407a9f6ee43f8b42cf660dc7d102e",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "4d2407a9f6ee43f8b42cf660dc7d102e",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 4.649058915617843e-15,
@@ -4387,7 +3965,8 @@
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 2,
-    "sha256": "046fad8193ae5d53d6092a4ba6298ed4112807d6790c20954999c3bffe387339"
+    "sha256": "046fad8193ae5d53d6092a4ba6298ed4112807d6790c20954999c3bffe387339",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee14_03.veragrid",
@@ -4619,7 +4198,8 @@
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 3,
-    "sha256": "f9e35f8f6ec17c9ecfa21cdd9d4131a2140517c16522c8bd842a446660cf1aba"
+    "sha256": "f9e35f8f6ec17c9ecfa21cdd9d4131a2140517c16522c8bd842a446660cf1aba",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee14_04.veragrid",
@@ -4910,7 +4490,8 @@
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 4,
-    "sha256": "fe8bb2a602b3da97db12c515d13b548ca21816d2129a443ff07783d761a28428"
+    "sha256": "fe8bb2a602b3da97db12c515d13b548ca21816d2129a443ff07783d761a28428",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee14_05.veragrid",
@@ -5201,7 +4782,8 @@
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 5,
-    "sha256": "77b47c7ef905b555a4614910c20c0cbc83ce10a13b16621987db5a08efcf8740"
+    "sha256": "77b47c7ef905b555a4614910c20c0cbc83ce10a13b16621987db5a08efcf8740",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee24_01.veragrid",
@@ -5837,7 +5419,8 @@
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 1,
-    "sha256": "886c7f2700f3c9f9d93de5d9ae40199881f9da5262b0e4a885c763311c50c60d"
+    "sha256": "886c7f2700f3c9f9d93de5d9ae40199881f9da5262b0e4a885c763311c50c60d",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee24_02.veragrid",
@@ -5918,341 +5501,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "3ca3b83d9a374fb8a75d908f02f5e989",
-          "name": "1_2_1"
-        },
-        {
-          "idtag": "1035a74a3c1b4fbb8f19429a062e8ba0",
-          "name": "1_3_1"
-        },
-        {
-          "idtag": "560d8a2dd4874bafb08d5747829c168d",
-          "name": "1_5_1"
-        },
-        {
-          "idtag": "7892107960d34f57aa15358695d878ab",
-          "name": "2_4_1"
-        },
-        {
-          "idtag": "fd80511c7ba84bd5a02578e7151a273d",
-          "name": "2_6_1"
-        },
-        {
-          "idtag": "c5897c9b8d044bc78dd47177fd479356",
-          "name": "3_9_1"
-        },
-        {
-          "idtag": "798df4dd28da40ccacd6ddf94c78b126",
-          "name": "4_9_1"
-        },
-        {
-          "idtag": "afbb7ae7f80f4df086230c158b6d1a4c",
-          "name": "5_10_1"
-        },
-        {
-          "idtag": "b23c53fabe55424da10c5bcb66259a61",
-          "name": "6_10_1"
-        },
-        {
-          "idtag": "2d08cb73275b4ba1b6c791cec7528d2f",
-          "name": "8_9_1"
-        },
-        {
-          "idtag": "c0600ecc61b94e6eaca42d36f8dbf5b3",
-          "name": "8_10_1"
-        },
-        {
-          "idtag": "6df867a1c7f94e49905a6aada20e59bf",
-          "name": "11_13_1"
-        },
-        {
-          "idtag": "c51df91128684457b3248cdaf79d616f",
-          "name": "11_14_1"
-        },
-        {
-          "idtag": "dd71250b9ec04a99bfda31322ea6676b",
-          "name": "12_13_1"
-        },
-        {
-          "idtag": "7fc626c01a6641b5aef07daa15f04cce",
-          "name": "12_23_1"
-        },
-        {
-          "idtag": "37030d2d5681499aba73a51582d2b5da",
-          "name": "13_23_1"
-        },
-        {
-          "idtag": "40d3c0e2e8e5416f880c2af7618564ce",
-          "name": "14_16_1"
-        },
-        {
-          "idtag": "16f4190d85b24a0b95a5b786f494594a",
-          "name": "15_16_1"
-        },
-        {
-          "idtag": "0236dc45e5de45748fd3d8173b6a671e",
-          "name": "15_21_1"
-        },
-        {
-          "idtag": "68996d80f3504625b5adda17ab207542",
-          "name": "15_21_1"
-        },
-        {
-          "idtag": "7f37920e82c14f258091941bcdca541b",
-          "name": "15_24_1"
-        },
-        {
-          "idtag": "b5819b5bb70c4199acf2ce297bd2c382",
-          "name": "16_17_1"
-        },
-        {
-          "idtag": "b7141a850b854709a38514442b157748",
-          "name": "16_19_1"
-        },
-        {
-          "idtag": "03852eccb3e34829bda4d555d1acdede",
-          "name": "17_18_1"
-        },
-        {
-          "idtag": "4a7806e8cb7547f0a5f5161a71d159ad",
-          "name": "17_22_1"
-        },
-        {
-          "idtag": "b94236446246434593572d16898678dc",
-          "name": "18_21_1"
-        },
-        {
-          "idtag": "40bd5607e94c49de9b1becd4ce747156",
-          "name": "18_21_1"
-        },
-        {
-          "idtag": "986fdf97c63440c8ac475190ba7db8d9",
-          "name": "19_20_1"
-        },
-        {
-          "idtag": "938a2d60371e4702ac1b54e6548380d9",
-          "name": "19_20_1"
-        },
-        {
-          "idtag": "65e091dc3ab24db183efbc98db189a81",
-          "name": "20_23_1"
-        },
-        {
-          "idtag": "d355c29474214af9a79e52bd585fc75e",
-          "name": "20_23_1"
-        },
-        {
-          "idtag": "3755b49cd79243e28afa7900ce065823",
-          "name": "21_22_1"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "d9f16de82e0c423db506fdd61170a484",
-          "name": "Normally open standby: 1_2_1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "485e8f11a5044755bbe8f8792fb2098a",
-          "initial": 65.74,
-          "minimum": 62.452999999999996,
-          "maximum": 69.027
-        },
-        {
-          "idtag": "c730c839b97c45a0ab1d35ed016d685d",
-          "initial": 65.74,
-          "minimum": 62.452999999999996,
-          "maximum": 69.027
-        },
-        {
-          "idtag": "465d6e8a2dda476ba0bf8dae494deea8",
-          "initial": 65.74,
-          "minimum": 62.452999999999996,
-          "maximum": 69.027
-        },
-        {
-          "idtag": "e5b076e6f40e425d97d11fe81180fd4b",
-          "initial": 65.74,
-          "minimum": 62.452999999999996,
-          "maximum": 69.027
-        },
-        {
-          "idtag": "1fded7cd67c24da18e98f5ad9d3ccea2",
-          "initial": 69.2,
-          "minimum": 65.74000000000001,
-          "maximum": 72.66
-        },
-        {
-          "idtag": "79d23e3b88f44ab295b896cc043f4802",
-          "initial": 69.2,
-          "minimum": 65.74000000000001,
-          "maximum": 72.66
-        },
-        {
-          "idtag": "0b091bda9df94bb19d1a5cae952eb8ef",
-          "initial": 69.2,
-          "minimum": 65.74000000000001,
-          "maximum": 72.66
-        },
-        {
-          "idtag": "1b71694bc2894ef59b532909390cdd7c",
-          "initial": 82.2615,
-          "minimum": 78.148425,
-          "maximum": 86.374575
-        },
-        {
-          "idtag": "ccd2640c427c4c00bd7f961c462e0365",
-          "initial": 82.2615,
-          "minimum": 78.148425,
-          "maximum": 86.374575
-        },
-        {
-          "idtag": "2bfa9cf7e3404754a523e3afa2927945",
-          "initial": 82.2615,
-          "minimum": 78.148425,
-          "maximum": 86.374575
-        },
-        {
-          "idtag": "8df23f2be46b4326897f737cf49dd427",
-          "initial": 10.379999999999999,
-          "minimum": 9.860999999999999,
-          "maximum": 10.899
-        },
-        {
-          "idtag": "d112915ca31f42d49c93c949cc956513",
-          "initial": 10.379999999999999,
-          "minimum": 9.860999999999999,
-          "maximum": 10.899
-        },
-        {
-          "idtag": "1b41bea916d044098a2e83356274b2a0",
-          "initial": 10.379999999999999,
-          "minimum": 9.860999999999999,
-          "maximum": 10.899
-        },
-        {
-          "idtag": "7ecedee062fc41fe896eea9dd059b74c",
-          "initial": 10.379999999999999,
-          "minimum": 9.860999999999999,
-          "maximum": 10.899
-        },
-        {
-          "idtag": "83c585a07a354ec2b84d46aa1c7a6d74",
-          "initial": 10.379999999999999,
-          "minimum": 9.860999999999999,
-          "maximum": 10.899
-        },
-        {
-          "idtag": "fe19204a623343aaab604db2f3b31552",
-          "initial": 134.075,
-          "minimum": 127.37124999999999,
-          "maximum": 140.77875
-        },
-        {
-          "idtag": "fafec843631e45c690b33521d1aeef88",
-          "initial": 134.075,
-          "minimum": 127.37124999999999,
-          "maximum": 140.77875
-        },
-        {
-          "idtag": "ed8e9946ea9e49ef9f60ccc096f833d7",
-          "initial": 207.6,
-          "minimum": 197.22,
-          "maximum": 217.98
-        },
-        {
-          "idtag": "0b9818ec2b5f4245a76455b8c310af21",
-          "initial": 346.0,
-          "minimum": 328.7,
-          "maximum": 363.3
-        },
-        {
-          "idtag": "c9c0794af07843eab647bbc9a786b3de",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "976377a17d504e9b826940ebd477a7a4",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "104c1d645c574698a8f34fb150669176",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "739acfcb494c47df96fd705f86be477a",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "95020e75506c4223b9f2f3374b85f434",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "fc89864b78fc41ec80651402678b3b45",
-          "initial": 43.25,
-          "minimum": 41.0875,
-          "maximum": 45.4125
-        },
-        {
-          "idtag": "6bad3c50011d444b87492cecc5f6d3a9",
-          "initial": 134.075,
-          "minimum": 127.37124999999999,
-          "maximum": 140.77875
-        },
-        {
-          "idtag": "11fdafbbdcc1436195516840bdebd1c5",
-          "initial": 134.075,
-          "minimum": 127.37124999999999,
-          "maximum": 140.77875
-        },
-        {
-          "idtag": "ad0b616b6dd64ca6bc4f22da6c99c85e",
-          "initial": 302.75,
-          "minimum": 287.6125,
-          "maximum": 317.8875
-        },
-        {
-          "idtag": "e22bc72947cd4c80b734095ce719a255",
-          "initial": 138.4,
-          "minimum": 131.48000000000002,
-          "maximum": 145.32
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: 1_3_1",
-          "bus_from": "e7fd19224b2448e089665b8099c8b64a",
-          "bus_to": "5196602ae99744f4993fd00f57315ef9",
-          "r": 0.0546,
-          "x": 0.2112,
-          "b": 0.0572,
-          "rate_mva": 175.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "e7fd19224b2448e089665b8099c8b64a",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "e7fd19224b2448e089665b8099c8b64a",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 8.965050923848139e-14,
@@ -6271,7 +5524,8 @@
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 2,
-    "sha256": "cf90d6d8fd13e1da804d5bc0ff70cdc145ca33a6e3e4ab560c2b6b2927fdb603"
+    "sha256": "cf90d6d8fd13e1da804d5bc0ff70cdc145ca33a6e3e4ab560c2b6b2927fdb603",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee24_03.veragrid",
@@ -6705,7 +5959,8 @@
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 3,
-    "sha256": "c1d3c246d570941658088f7e4daf2dad7f76f091191647419d762432d97e38ac"
+    "sha256": "c1d3c246d570941658088f7e4daf2dad7f76f091191647419d762432d97e38ac",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee24_04.veragrid",
@@ -7198,7 +6453,8 @@
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 4,
-    "sha256": "8d93ad44f724dc546024a117ccc401c782acee68033c9e1b5395a40b756638e7"
+    "sha256": "8d93ad44f724dc546024a117ccc401c782acee68033c9e1b5395a40b756638e7",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee24_05.veragrid",
@@ -7691,7 +6947,8 @@
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 5,
-    "sha256": "67a338d37ae767b3d11024397015b26c4edffc8c4a516021a3588d775c94ed6d"
+    "sha256": "67a338d37ae767b3d11024397015b26c4edffc8c4a516021a3588d775c94ed6d",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee30_01.veragrid",
@@ -7995,7 +7252,8 @@
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 1,
-    "sha256": "1affd987126bbe74a44e71314b2b9f0c7290fbdec0d9b9c4c4249513182c3f88"
+    "sha256": "1affd987126bbe74a44e71314b2b9f0c7290fbdec0d9b9c4c4249513182c3f88",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee30_02.veragrid",
@@ -8076,233 +7334,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "cf133f11ab0043a080d6a0d8597b4d9d",
-          "name": "branch 0"
-        },
-        {
-          "idtag": "1df5f802e45d453b834184531327ceea",
-          "name": "branch 1"
-        },
-        {
-          "idtag": "9b9b1840aaa147ba8d16039e5ec392de",
-          "name": "branch 2"
-        },
-        {
-          "idtag": "1dc134d45eef466dbffa46752d7a5a5c",
-          "name": "branch 3"
-        },
-        {
-          "idtag": "766cb69b5265410abd3aa15842973143",
-          "name": "branch 4"
-        },
-        {
-          "idtag": "3572130c95a646e79bb41692f7f6e423",
-          "name": "branch 5"
-        },
-        {
-          "idtag": "061e59b65d924d2891057ad86c329c61",
-          "name": "branch 6"
-        },
-        {
-          "idtag": "8be049d6b3a243dcad63feb564f721c4",
-          "name": "branch 7"
-        },
-        {
-          "idtag": "ed15a8902c4940d28582980072a29067",
-          "name": "branch 8"
-        },
-        {
-          "idtag": "71b71b4c49f94ebb9c7e5ee1db653830",
-          "name": "branch 9"
-        },
-        {
-          "idtag": "4dc7157539744b9eb8a7ab385e7a6b68",
-          "name": "branch 10"
-        },
-        {
-          "idtag": "0275a644221c49f08c7b9e1ccdc80603",
-          "name": "branch 11"
-        },
-        {
-          "idtag": "ea22c9ecdc2046039f9d9e86a2b77cbb",
-          "name": "branch 13"
-        },
-        {
-          "idtag": "629089751d264db6b9c2bd76cfff6f2a",
-          "name": "branch 14"
-        },
-        {
-          "idtag": "ffc3731b1b784d6fb3521aa836a7c2e6",
-          "name": "branch 16"
-        },
-        {
-          "idtag": "0ef8354b3386494eb05c5ecfeee796ec",
-          "name": "branch 17"
-        },
-        {
-          "idtag": "11a11e1e77aa4532b76288dedb449f1d",
-          "name": "branch 18"
-        },
-        {
-          "idtag": "90d70450225540c0af2fc119365b94ea",
-          "name": "branch 19"
-        },
-        {
-          "idtag": "44c1ea4e6d1f4fada49b3cb08d5ba8e0",
-          "name": "branch 20"
-        },
-        {
-          "idtag": "61c2ede2c07645c6986f4dfc735e3b90",
-          "name": "branch 21"
-        },
-        {
-          "idtag": "d9eafbdf6bbb44d08c3b2dc4669bc1cb",
-          "name": "branch 22"
-        },
-        {
-          "idtag": "2b9c396775524209b2ef5e088c52f95b",
-          "name": "branch 23"
-        },
-        {
-          "idtag": "cc3742c204d843cca390ea8aeaafc540",
-          "name": "branch 24"
-        },
-        {
-          "idtag": "b1e9f9152ddb4f23bfe619f015e4a729",
-          "name": "branch 25"
-        },
-        {
-          "idtag": "8a5994d41645403aadad719adea04f38",
-          "name": "branch 26"
-        },
-        {
-          "idtag": "8dfc4c057fe341b6a5ab440d16b26e69",
-          "name": "branch 27"
-        },
-        {
-          "idtag": "38c87a3b0ce848bb871041ad2c5af98b",
-          "name": "branch 28"
-        },
-        {
-          "idtag": "6ca298fd13c2485e8787f0c4bb557b03",
-          "name": "branch 29"
-        },
-        {
-          "idtag": "92e9545c413c4b26b84de1721ee24ee1",
-          "name": "branch 30"
-        },
-        {
-          "idtag": "13e01d3d047643309f423fe6ae2cef4e",
-          "name": "branch 31"
-        },
-        {
-          "idtag": "892e3bc9bb2141c19f0b38794ac89889",
-          "name": "branch 32"
-        },
-        {
-          "idtag": "d64e038b752e45ad9b1068cc8ce3aec9",
-          "name": "branch 34"
-        },
-        {
-          "idtag": "46e0ee6e35c04fa885372fbc07045a67",
-          "name": "branch 35"
-        },
-        {
-          "idtag": "e4856025e9e04666a20602c6962f1bd1",
-          "name": "branch 36"
-        },
-        {
-          "idtag": "1298d4fe7f45478faa07fb0d46db173c",
-          "name": "branch 37"
-        },
-        {
-          "idtag": "fbdce1da1aaf4490b179714e0cf3bc58",
-          "name": "branch 38"
-        },
-        {
-          "idtag": "22beb49140e24aeaae989b33d1b0a771",
-          "name": "branch 39"
-        },
-        {
-          "idtag": "b021686f7174403b9d808b4ad44ae766",
-          "name": "branch 40"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "e5be540b71f440e68cb57400df01ae3c",
-          "name": "Normally open standby: branch 0"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "761c57d1065e40cfaacbc3baa97fe1a1",
-          "initial": 18.32589,
-          "minimum": 17.409595500000002,
-          "maximum": 19.2421845
-        },
-        {
-          "idtag": "1c493416b11740e88e226e639c5d01e6",
-          "initial": 28.479087,
-          "minimum": 27.05513265,
-          "maximum": 29.90304135
-        },
-        {
-          "idtag": "5a9f9118958e4031acf74c1386cefbb3",
-          "initial": 28.804500000000004,
-          "minimum": 27.364275000000003,
-          "maximum": 30.244725000000006
-        },
-        {
-          "idtag": "d275708eb1854f1c87012e241cddd3e3",
-          "initial": 16.807815,
-          "minimum": 15.96742425,
-          "maximum": 17.648205750000002
-        },
-        {
-          "idtag": "693e16cbdbf242e7813472fd9bec0f30",
-          "initial": 14.9472,
-          "minimum": 14.19984,
-          "maximum": 15.694560000000001
-        },
-        {
-          "idtag": "74a0472a72c74c6088812823f570cbed",
-          "initial": 20.949435,
-          "minimum": 19.90196325,
-          "maximum": 21.99690675
-        },
-        {
-          "idtag": "692d3e5953114a74b3160845a193af14",
-          "initial": 18.986058,
-          "minimum": 18.0367551,
-          "maximum": 19.9353609
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: branch 1",
-          "bus_from": "6e14f05a3c6d4ccfb4386c63372e48f0",
-          "bus_to": "2655ba9f61e942b3bb34c48eb4b371ce",
-          "r": 0.05,
-          "x": 0.19,
-          "b": 0.02,
-          "rate_mva": 130.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "51676731a9534a95b74f9ac36fd3634e",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "51676731a9534a95b74f9ac36fd3634e",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 1.547057620898684e-11,
@@ -8321,7 +7357,8 @@
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 2,
-    "sha256": "381f2f18ea7ea0a9b05c3ee445488cae07d59669823ae8907f7fe590fd0dbb49"
+    "sha256": "381f2f18ea7ea0a9b05c3ee445488cae07d59669823ae8907f7fe590fd0dbb49",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee30_03.veragrid",
@@ -8647,7 +7684,8 @@
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 3,
-    "sha256": "e627a4f664d7c95f903f428314a7d32afeacb0a094d317802bd33e66a1b34054"
+    "sha256": "e627a4f664d7c95f903f428314a7d32afeacb0a094d317802bd33e66a1b34054",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee30_04.veragrid",
@@ -9032,7 +8070,8 @@
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 4,
-    "sha256": "b8eeaadbc7c2be6b4da2762d8014042569d3ab2c6d595196f6264d805ae6c589"
+    "sha256": "b8eeaadbc7c2be6b4da2762d8014042569d3ab2c6d595196f6264d805ae6c589",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee30_05.veragrid",
@@ -9417,7 +8456,8 @@
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 5,
-    "sha256": "d17bf0028f96837ebe4eeb853cb769006ee14972faa2b1204b6326f93f83e933"
+    "sha256": "d17bf0028f96837ebe4eeb853cb769006ee14972faa2b1204b6326f93f83e933",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee39_01.veragrid",
@@ -9761,7 +8801,8 @@
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 1,
-    "sha256": "edea6b0419b5feda31f58a31f711a1d1b8bc39d6e0fe7daba32a07f1ec0b66f0"
+    "sha256": "edea6b0419b5feda31f58a31f711a1d1b8bc39d6e0fe7daba32a07f1ec0b66f0",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee39_02.veragrid",
@@ -9842,245 +8883,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "5aae7dad5b954fc9bd322dff41c16a45",
-          "name": "branch 0"
-        },
-        {
-          "idtag": "29e7d8f0a26548f9ba74b3baeeafc68a",
-          "name": "branch 1"
-        },
-        {
-          "idtag": "57f7b0c1f22f433a822f3e7d990781fd",
-          "name": "branch 2"
-        },
-        {
-          "idtag": "09d4d3a5b53d4280a367112d2354bf28",
-          "name": "branch 3"
-        },
-        {
-          "idtag": "44b745789c7b4f1bbbe37ec736671c82",
-          "name": "branch 5"
-        },
-        {
-          "idtag": "3b582589ec134ddb8896f1089a105884",
-          "name": "branch 6"
-        },
-        {
-          "idtag": "3f4b1240df0e4da2b0f842e00e173f29",
-          "name": "branch 7"
-        },
-        {
-          "idtag": "4c22af94ef664f238ff5c03528979147",
-          "name": "branch 8"
-        },
-        {
-          "idtag": "301838d5b59a46dfb79eead23ff269f7",
-          "name": "branch 9"
-        },
-        {
-          "idtag": "d84da992bc1c46c3b75bd9ab62cd5879",
-          "name": "branch 10"
-        },
-        {
-          "idtag": "dc3819d21e80461dbe7b0faa257c7810",
-          "name": "branch 11"
-        },
-        {
-          "idtag": "9088a901cadc4e55a4c75acce7230b1e",
-          "name": "branch 12"
-        },
-        {
-          "idtag": "cdc5257ae47b4005bfe82a7993c6ee69",
-          "name": "branch 14"
-        },
-        {
-          "idtag": "e10a914a28084fbf95589775271ce4b4",
-          "name": "branch 15"
-        },
-        {
-          "idtag": "24ef085ad45f4259a0afb669d1be638e",
-          "name": "branch 16"
-        },
-        {
-          "idtag": "f742f3a5802f4d729edb199e40489670",
-          "name": "branch 17"
-        },
-        {
-          "idtag": "b30a5ea1a4e24983afabd0e85e869221",
-          "name": "branch 18"
-        },
-        {
-          "idtag": "4d1bd457f93943dbb110492b53c24444",
-          "name": "branch 20"
-        },
-        {
-          "idtag": "78d4338284374381b1c3ed66bb089172",
-          "name": "branch 21"
-        },
-        {
-          "idtag": "65c6c2e350cf40cea084fe87effa8f4e",
-          "name": "branch 22"
-        },
-        {
-          "idtag": "a602489cfa794c7baf59a9b7cfea85f0",
-          "name": "branch 23"
-        },
-        {
-          "idtag": "2d51761c4ac04ef291dede61f94a54ad",
-          "name": "branch 24"
-        },
-        {
-          "idtag": "d0490310fc3e4aecbca7bab1f71680d7",
-          "name": "branch 25"
-        },
-        {
-          "idtag": "459819e4624c4e28b32a9ac0bc0dff56",
-          "name": "branch 27"
-        },
-        {
-          "idtag": "2c7e77a09c324879bf0c49b2dcc359a4",
-          "name": "branch 28"
-        },
-        {
-          "idtag": "449477d8f68e458a9cc6c6748c2ae811",
-          "name": "branch 29"
-        },
-        {
-          "idtag": "305f8d2940fc4b14afbce79083bb31e3",
-          "name": "branch 30"
-        },
-        {
-          "idtag": "b8ac885d592d43209f18d6e2c0c981e8",
-          "name": "branch 34"
-        },
-        {
-          "idtag": "5ae9bb97e8a14832aca722f1d1eb9e59",
-          "name": "branch 35"
-        },
-        {
-          "idtag": "a4fa0dcbf0cf475aaaa5ed4c10a0f962",
-          "name": "branch 37"
-        },
-        {
-          "idtag": "042656fcc4c048608ecb687480eb2c83",
-          "name": "branch 39"
-        },
-        {
-          "idtag": "5fab05be274942ee97a40c7b175c5122",
-          "name": "branch 41"
-        },
-        {
-          "idtag": "43db1ee5dee640d7a35829314da47bf7",
-          "name": "branch 42"
-        },
-        {
-          "idtag": "521c987a8a604432813c496e19068b5c",
-          "name": "branch 43"
-        },
-        {
-          "idtag": "7783bcb4045c43e8af4f6e93d8195082",
-          "name": "branch 44"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "02f3306e382f446d99524ba471fface4",
-          "name": "Normally open standby: branch 0"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "47b8a482ee704676944db3c1cd9a509c",
-          "initial": 205.4375,
-          "minimum": 195.165625,
-          "maximum": 215.709375
-        },
-        {
-          "idtag": "b7ab09b974d04d1bb225f9fbee10d9b3",
-          "initial": 557.0404942500002,
-          "minimum": 529.1884695375002,
-          "maximum": 584.8925189625002
-        },
-        {
-          "idtag": "ca7cb39ae6b04555a38ebefd2ba8365c",
-          "initial": 534.1375,
-          "minimum": 507.430625,
-          "maximum": 560.844375
-        },
-        {
-          "idtag": "95c53c101d8846749afb8523c4e58079",
-          "initial": 519.346,
-          "minimum": 493.3787,
-          "maximum": 545.3133
-        },
-        {
-          "idtag": "55088bc808bd41588d6e6096ce2a067a",
-          "initial": 417.44899999999996,
-          "minimum": 396.57654999999994,
-          "maximum": 438.32144999999997
-        },
-        {
-          "idtag": "239071c2662f4ad08d3a95d649278735",
-          "initial": 534.1375,
-          "minimum": 507.430625,
-          "maximum": 560.844375
-        },
-        {
-          "idtag": "ecb604e08ce74c8dbcd84f48f0d07e0c",
-          "initial": 460.18,
-          "minimum": 437.171,
-          "maximum": 483.189
-        },
-        {
-          "idtag": "ed0c60bde9f24407820b7be59b9dee0e",
-          "initial": 443.745,
-          "minimum": 421.55775,
-          "maximum": 465.93225
-        },
-        {
-          "idtag": "5fb74cf7c6424160ac563c3662a8a2bc",
-          "initial": 682.0525,
-          "minimum": 647.949875,
-          "maximum": 716.155125
-        },
-        {
-          "idtag": "f30e01809ebd4c009bfa9437c893ac9d",
-          "initial": 493.04999999999995,
-          "minimum": 468.3975,
-          "maximum": 517.7025
-        },
-        {
-          "idtag": "71a93f74f3034ceda5647f2677f5b25a",
-          "initial": 328.70000000000005,
-          "minimum": 312.26500000000004,
-          "maximum": 345.13500000000005
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: branch 1",
-          "bus_from": "0eeac9e788d447c491343eb334e73f7d",
-          "bus_to": "45e9915e9598470fbe70a264ecda963a",
-          "r": 0.001,
-          "x": 0.025,
-          "b": 0.75,
-          "rate_mva": 1000.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "0eeac9e788d447c491343eb334e73f7d",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "0eeac9e788d447c491343eb334e73f7d",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 5.400124791776761e-13,
@@ -10099,7 +8906,8 @@
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 2,
-    "sha256": "e3501ece4ddbada9f2379e50da171cb0a1d1c4c9c2ddfed8002791e867a0603a"
+    "sha256": "e3501ece4ddbada9f2379e50da171cb0a1d1c4c9c2ddfed8002791e867a0603a",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee39_03.veragrid",
@@ -10437,7 +9245,8 @@
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 3,
-    "sha256": "9d5d05a3239242cec4f893be916403d3da1a1765ff1339871252c80bd7802be0"
+    "sha256": "9d5d05a3239242cec4f893be916403d3da1a1765ff1339871252c80bd7802be0",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee39_04.veragrid",
@@ -10834,7 +9643,8 @@
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 4,
-    "sha256": "085ec37a8ab4371fb5cf68d0354c211e615e63f8e1719779ba20525434a69858"
+    "sha256": "085ec37a8ab4371fb5cf68d0354c211e615e63f8e1719779ba20525434a69858",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee39_05.veragrid",
@@ -11231,7 +10041,8 @@
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 5,
-    "sha256": "2342239bacadee683d929d33516eb9c18a87affaf97e5d91fd1a2231a8cbee93"
+    "sha256": "2342239bacadee683d929d33516eb9c18a87affaf97e5d91fd1a2231a8cbee93",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee57_01.veragrid",
@@ -11657,7 +10468,8 @@
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 1,
-    "sha256": "2907e5145b6c95eba106a29d37fb772775fd2041a3c95d540faa1e7a724191d2"
+    "sha256": "2907e5145b6c95eba106a29d37fb772775fd2041a3c95d540faa1e7a724191d2",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee57_02.veragrid",
@@ -11738,339 +10550,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "1_2_1",
-          "name": "1_2_1"
-        },
-        {
-          "idtag": "1_15_1",
-          "name": "1_15_1"
-        },
-        {
-          "idtag": "1_16_1",
-          "name": "1_16_1"
-        },
-        {
-          "idtag": "1_17_1",
-          "name": "1_17_1"
-        },
-        {
-          "idtag": "2_3_1",
-          "name": "2_3_1"
-        },
-        {
-          "idtag": "3_4_1",
-          "name": "3_4_1"
-        },
-        {
-          "idtag": "3_15_1",
-          "name": "3_15_1"
-        },
-        {
-          "idtag": "4_5_1",
-          "name": "4_5_1"
-        },
-        {
-          "idtag": "4_6_1",
-          "name": "4_6_1"
-        },
-        {
-          "idtag": "5_6_1",
-          "name": "5_6_1"
-        },
-        {
-          "idtag": "6_7_1",
-          "name": "6_7_1"
-        },
-        {
-          "idtag": "6_8_1",
-          "name": "6_8_1"
-        },
-        {
-          "idtag": "7_8_1",
-          "name": "7_8_1"
-        },
-        {
-          "idtag": "8_9_1",
-          "name": "8_9_1"
-        },
-        {
-          "idtag": "9_10_1",
-          "name": "9_10_1"
-        },
-        {
-          "idtag": "9_11_1",
-          "name": "9_11_1"
-        },
-        {
-          "idtag": "9_12_1",
-          "name": "9_12_1"
-        },
-        {
-          "idtag": "9_13_1",
-          "name": "9_13_1"
-        },
-        {
-          "idtag": "10_12_1",
-          "name": "10_12_1"
-        },
-        {
-          "idtag": "11_13_1",
-          "name": "11_13_1"
-        },
-        {
-          "idtag": "12_13_1",
-          "name": "12_13_1"
-        },
-        {
-          "idtag": "12_16_1",
-          "name": "12_16_1"
-        },
-        {
-          "idtag": "12_17_1",
-          "name": "12_17_1"
-        },
-        {
-          "idtag": "13_14_1",
-          "name": "13_14_1"
-        },
-        {
-          "idtag": "13_15_1",
-          "name": "13_15_1"
-        },
-        {
-          "idtag": "14_15_1",
-          "name": "14_15_1"
-        },
-        {
-          "idtag": "18_19_1",
-          "name": "18_19_1"
-        },
-        {
-          "idtag": "19_20_1",
-          "name": "19_20_1"
-        },
-        {
-          "idtag": "21_22_1",
-          "name": "21_22_1"
-        },
-        {
-          "idtag": "22_23_1",
-          "name": "22_23_1"
-        },
-        {
-          "idtag": "22_38_1",
-          "name": "22_38_1"
-        },
-        {
-          "idtag": "23_24_1",
-          "name": "23_24_1"
-        },
-        {
-          "idtag": "24_25_1",
-          "name": "24_25_1"
-        },
-        {
-          "idtag": "25_30_1",
-          "name": "25_30_1"
-        },
-        {
-          "idtag": "26_27_1",
-          "name": "26_27_1"
-        },
-        {
-          "idtag": "27_28_1",
-          "name": "27_28_1"
-        },
-        {
-          "idtag": "28_29_1",
-          "name": "28_29_1"
-        },
-        {
-          "idtag": "29_52_1",
-          "name": "29_52_1"
-        },
-        {
-          "idtag": "30_31_1",
-          "name": "30_31_1"
-        },
-        {
-          "idtag": "31_32_1",
-          "name": "31_32_1"
-        },
-        {
-          "idtag": "34_35_1",
-          "name": "34_35_1"
-        },
-        {
-          "idtag": "35_36_1",
-          "name": "35_36_1"
-        },
-        {
-          "idtag": "36_37_1",
-          "name": "36_37_1"
-        },
-        {
-          "idtag": "36_40_1",
-          "name": "36_40_1"
-        },
-        {
-          "idtag": "37_38_1",
-          "name": "37_38_1"
-        },
-        {
-          "idtag": "37_39_1",
-          "name": "37_39_1"
-        },
-        {
-          "idtag": "38_44_1",
-          "name": "38_44_1"
-        },
-        {
-          "idtag": "38_48_1",
-          "name": "38_48_1"
-        },
-        {
-          "idtag": "38_49_1",
-          "name": "38_49_1"
-        },
-        {
-          "idtag": "41_42_1",
-          "name": "41_42_1"
-        },
-        {
-          "idtag": "41_43_1",
-          "name": "41_43_1"
-        },
-        {
-          "idtag": "56_41_1",
-          "name": "56_41_1"
-        },
-        {
-          "idtag": "56_42_1",
-          "name": "56_42_1"
-        },
-        {
-          "idtag": "44_45_1",
-          "name": "44_45_1"
-        },
-        {
-          "idtag": "46_47_1",
-          "name": "46_47_1"
-        },
-        {
-          "idtag": "47_48_1",
-          "name": "47_48_1"
-        },
-        {
-          "idtag": "48_49_1",
-          "name": "48_49_1"
-        },
-        {
-          "idtag": "49_50_1",
-          "name": "49_50_1"
-        },
-        {
-          "idtag": "50_51_1",
-          "name": "50_51_1"
-        },
-        {
-          "idtag": "52_53_1",
-          "name": "52_53_1"
-        },
-        {
-          "idtag": "53_54_1",
-          "name": "53_54_1"
-        },
-        {
-          "idtag": "54_55_1",
-          "name": "54_55_1"
-        },
-        {
-          "idtag": "57_56_1",
-          "name": "57_56_1"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "c2652516bad94e77b42fe1b7f79702d8",
-          "name": "Normally open standby: 1_2_1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "1_1 ",
-          "initial": 157.3368568,
-          "minimum": 149.47001396,
-          "maximum": 165.20369964
-        },
-        {
-          "idtag": "2_1 ",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "3_1 ",
-          "initial": 13.148,
-          "minimum": 12.4906,
-          "maximum": 13.805399999999999
-        },
-        {
-          "idtag": "6_1 ",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "8_1 ",
-          "initial": 88.749,
-          "minimum": 84.31155,
-          "maximum": 93.18645
-        },
-        {
-          "idtag": "9_1 ",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "12_1 ",
-          "initial": 101.89699999999999,
-          "minimum": 96.80215,
-          "maximum": 106.99184999999999
-        },
-        {
-          "idtag": "4e6e3f7be1fe49979dd1bd0a76b0785e",
-          "initial": 59.166,
-          "minimum": 56.207699999999996,
-          "maximum": 62.1243
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: 1_15_1",
-          "bus_from": "65f55fccb63645be9710cf42c4ba127b",
-          "bus_to": "82f53e009b3c448d8188f69ffa4bba20",
-          "r": 0.0178,
-          "x": 0.091,
-          "b": 0.0988,
-          "rate_mva": 183.8
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "65f55fccb63645be9710cf42c4ba127b",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "65f55fccb63645be9710cf42c4ba127b",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 1.2701645291102182e-14,
@@ -12089,7 +10573,8 @@
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 2,
-    "sha256": "53db9485dba684c74f1c9db13f5f592bb5a6020deb682a2236dee942a2398a92"
+    "sha256": "53db9485dba684c74f1c9db13f5f592bb5a6020deb682a2236dee942a2398a92",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee57_03.veragrid",
@@ -12521,7 +11006,8 @@
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 3,
-    "sha256": "db179c12aca482709c2e4dda1e230c9f3bdb7c0853ad25dbd3ca1368a63d3e80"
+    "sha256": "db179c12aca482709c2e4dda1e230c9f3bdb7c0853ad25dbd3ca1368a63d3e80",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee57_04.veragrid",
@@ -13012,7 +11498,8 @@
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 4,
-    "sha256": "72c9fefff36a9033faf37a5626715f6df32f193a85627f17c6dcbfbc256ede68"
+    "sha256": "72c9fefff36a9033faf37a5626715f6df32f193a85627f17c6dcbfbc256ede68",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee57_05.veragrid",
@@ -13503,7 +11990,8 @@
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 5,
-    "sha256": "5d5227fde94961a9f0618fc1fd0a5f936c61b13cc102987941346fb2d7e1400a"
+    "sha256": "5d5227fde94961a9f0618fc1fd0a5f936c61b13cc102987941346fb2d7e1400a",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee118_01.veragrid",
@@ -14523,7 +13011,8 @@
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 1,
-    "sha256": "528650ca4fd2e10865ffb60b00d9add76ceebd55e0c3eedb5cabf7381a775cda"
+    "sha256": "528650ca4fd2e10865ffb60b00d9add76ceebd55e0c3eedb5cabf7381a775cda",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee118_02.veragrid",
@@ -14604,821 +13093,11 @@
       }
     ],
     "action_catalog": {
-      "open_lines": [
-        {
-          "idtag": "773ebca16efb4b5e94d7b0f15b40086b",
-          "name": "1_2_1"
-        },
-        {
-          "idtag": "85e7f6ffca5b40eea9a2ad61b8b4072e",
-          "name": "1_3_1"
-        },
-        {
-          "idtag": "a1caa1abb0db49b1bc4a7d57af91a9d5",
-          "name": "2_12_1"
-        },
-        {
-          "idtag": "d831f58a796f4df5b13dbe2202fba348",
-          "name": "3_5_1"
-        },
-        {
-          "idtag": "a4bd8e177da449f6ad3c3f8d91513063",
-          "name": "3_12_1"
-        },
-        {
-          "idtag": "cd4ac3b1a55541fbabf87a5d14b06776",
-          "name": "4_5_1"
-        },
-        {
-          "idtag": "a1dcb4fcb5444c1889ef23d7b6fe75f1",
-          "name": "4_11_1"
-        },
-        {
-          "idtag": "7d55bc8a509d459399d6a83276a260a2",
-          "name": "5_6_1"
-        },
-        {
-          "idtag": "3befe7bfadc74406a96779abb5c56dd3",
-          "name": "5_11_1"
-        },
-        {
-          "idtag": "c840729497fb41368a3845e13ef36416",
-          "name": "6_7_1"
-        },
-        {
-          "idtag": "43e0cd93913d4c2a9e86fc0530cdf5f1",
-          "name": "7_12_1"
-        },
-        {
-          "idtag": "b28a003acda348e88f9bf8ab99a2cb2b",
-          "name": "8_30_1"
-        },
-        {
-          "idtag": "7ef9cf77d9924fa29627995b9dc6cba0",
-          "name": "11_12_1"
-        },
-        {
-          "idtag": "4b1ff5fb9db64760a49c2a93c921c700",
-          "name": "11_13_1"
-        },
-        {
-          "idtag": "10226dc1a1a04b93bc9a72d99ffff309",
-          "name": "12_14_1"
-        },
-        {
-          "idtag": "dab5ed87a425410091569017fb6af2ec",
-          "name": "12_16_1"
-        },
-        {
-          "idtag": "e0cb8c8ced474532a70618f32c23ab82",
-          "name": "13_15_1"
-        },
-        {
-          "idtag": "ac2db066aa094b0eab6aa6ec1c1790fc",
-          "name": "14_15_1"
-        },
-        {
-          "idtag": "43282758e9fc4f06afda84100b3fba71",
-          "name": "15_17_1"
-        },
-        {
-          "idtag": "d83ac12763ce469e97599d7c813cd5b7",
-          "name": "15_19_1"
-        },
-        {
-          "idtag": "437e3172f4d5416eba0060aa46d50409",
-          "name": "15_33_1"
-        },
-        {
-          "idtag": "3da499a05b414b9a819b27103f8252d2",
-          "name": "16_17_1"
-        },
-        {
-          "idtag": "08b3a66833c5495b85d12a1eba4f50fd",
-          "name": "17_18_1"
-        },
-        {
-          "idtag": "165a6a8508484405ac9511a2c863360f",
-          "name": "17_31_1"
-        },
-        {
-          "idtag": "fa6d6003147c405c9bf2f397e7850e4a",
-          "name": "17_113_1"
-        },
-        {
-          "idtag": "92aa1756c6934b79a800e4f5e69e55f5",
-          "name": "18_19_1"
-        },
-        {
-          "idtag": "ae3656585daf4facae88dd70bde744f4",
-          "name": "19_20_1"
-        },
-        {
-          "idtag": "6dd1a8c0730549b4be230af6f0a0d034",
-          "name": "19_34_1"
-        },
-        {
-          "idtag": "158e9508e38a4392b36df2f495ff7d80",
-          "name": "20_21_1"
-        },
-        {
-          "idtag": "aa965d499b054bbfb16740791c785875",
-          "name": "21_22_1"
-        },
-        {
-          "idtag": "83214a8e5d80450594a701bc2b0d1957",
-          "name": "22_23_1"
-        },
-        {
-          "idtag": "8c40bff8e2724617a86e2817a9b61a43",
-          "name": "23_24_1"
-        },
-        {
-          "idtag": "02ce2857d5214cc7a0fe70bf692232a6",
-          "name": "23_25_1"
-        },
-        {
-          "idtag": "70159faca5ff48fc81c07e22e33beff5",
-          "name": "23_32_1"
-        },
-        {
-          "idtag": "cddc8444b44b442ab367118faf508f30",
-          "name": "24_70_1"
-        },
-        {
-          "idtag": "3af9ee0aee474ea6835b5a9ceac91380",
-          "name": "24_72_1"
-        },
-        {
-          "idtag": "1ad78a8a266d4eadb140ac272118e76d",
-          "name": "25_27_1"
-        },
-        {
-          "idtag": "2748f41e7b82485890fe65d744a50b9e",
-          "name": "26_30_1"
-        },
-        {
-          "idtag": "0c5c2fe7f7c54ddd889f3cf2b5dafb0e",
-          "name": "27_28_1"
-        },
-        {
-          "idtag": "555e0730bd064202b4a738a5bb331620",
-          "name": "27_32_1"
-        },
-        {
-          "idtag": "12dede91048740bfa5a7f7292c121725",
-          "name": "27_115_1"
-        },
-        {
-          "idtag": "c0f9ee86f90245008c79f2c0b0321fdb",
-          "name": "28_29_1"
-        },
-        {
-          "idtag": "843fcfd99aa042adbe70b2a5117a8781",
-          "name": "29_31_1"
-        },
-        {
-          "idtag": "0f192a813469469f93569ae2db7ae7d6",
-          "name": "30_38_1"
-        },
-        {
-          "idtag": "69c51bd1c62e4f378bf3cf1d711f6dca",
-          "name": "31_32_1"
-        },
-        {
-          "idtag": "b4cb01cd5a8646c798bd604c0e189d70",
-          "name": "32_113_1"
-        },
-        {
-          "idtag": "4975f7f3b3d54c9190853ab9c1bc9929",
-          "name": "32_114_1"
-        },
-        {
-          "idtag": "80f366fbc38147219b92bb5c162d0ea9",
-          "name": "33_37_1"
-        },
-        {
-          "idtag": "102009cd316f4783b159e80aca5bcf5e",
-          "name": "34_36_1"
-        },
-        {
-          "idtag": "1472c10e63594b34877442662e5accca",
-          "name": "34_37_1"
-        },
-        {
-          "idtag": "98f99836c6314a7483a3687dec83d846",
-          "name": "34_43_1"
-        },
-        {
-          "idtag": "fc41520b168846fb86cec80c1f7dbcb2",
-          "name": "35_36_1"
-        },
-        {
-          "idtag": "0fb5e9e02ab241e4ae6311883405c346",
-          "name": "35_37_1"
-        },
-        {
-          "idtag": "e33b68de820644fa9568b7bcfc4ddfe8",
-          "name": "37_39_1"
-        },
-        {
-          "idtag": "53c8a3a692c244489ecd9419acb695af",
-          "name": "37_40_1"
-        },
-        {
-          "idtag": "452a8bea93eb43058f5510dd100225f9",
-          "name": "38_65_1"
-        },
-        {
-          "idtag": "10c65c70d00044afa2d82c7a867d82ef",
-          "name": "39_40_1"
-        },
-        {
-          "idtag": "e0cc859daaa14b4391da164649c65bd7",
-          "name": "40_41_1"
-        },
-        {
-          "idtag": "db450638228947c9857bcde20f6d3223",
-          "name": "40_42_1"
-        },
-        {
-          "idtag": "c9022e29986544faab1cc86c091711f0",
-          "name": "41_42_1"
-        },
-        {
-          "idtag": "1dd81bfa56a5483e8e56eb0d2404d1c4",
-          "name": "42_49_1"
-        },
-        {
-          "idtag": "48443ea903b242739cba4b2d3b306f1a",
-          "name": "43_44_1"
-        },
-        {
-          "idtag": "11e2081904044b7aa07a364647adc71f",
-          "name": "44_45_1"
-        },
-        {
-          "idtag": "aa8e5b0259de4a11b575198ba36f5dcf",
-          "name": "45_46_1"
-        },
-        {
-          "idtag": "40bfcaabbc904e3f92eb60ab958fa93a",
-          "name": "45_49_1"
-        },
-        {
-          "idtag": "69c55b8cc904484c84c9d3c4eb42fb33",
-          "name": "46_47_1"
-        },
-        {
-          "idtag": "22cdde1bc3654bc885aceef17caa953a",
-          "name": "46_48_1"
-        },
-        {
-          "idtag": "2f386c31b3c540a5a82cc8f1ea0a39c0",
-          "name": "47_49_1"
-        },
-        {
-          "idtag": "f7365a79176045509932367160aca7cf",
-          "name": "47_69_1"
-        },
-        {
-          "idtag": "1a4e5f999812480e8278e3db2371cb3b",
-          "name": "48_49_1"
-        },
-        {
-          "idtag": "5b57941e2612447ba6c6ee33628e17d8",
-          "name": "49_50_1"
-        },
-        {
-          "idtag": "5068b1c5c5154a75a318d1f4958b22ed",
-          "name": "49_51_1"
-        },
-        {
-          "idtag": "b1e3c01b6cb1486badbbea36166d68ef",
-          "name": "49_54_1"
-        },
-        {
-          "idtag": "bd5e5b24bbf5425c8348c4bb34ee17e9",
-          "name": "49_66_1"
-        },
-        {
-          "idtag": "db7d84aefcb449c09972e82ad13f8909",
-          "name": "49_69_1"
-        },
-        {
-          "idtag": "ed9e96c6607b4b3298019ea77660e7b7",
-          "name": "50_57_1"
-        },
-        {
-          "idtag": "c135479d964748b0b9da497416a910c1",
-          "name": "51_52_1"
-        },
-        {
-          "idtag": "7bb170502f0c4834b444baa6c85fb9b2",
-          "name": "51_58_1"
-        },
-        {
-          "idtag": "9e931cfaf6f8426bbf9add9537c283b7",
-          "name": "52_53_1"
-        },
-        {
-          "idtag": "00707d90cfe14577a843988cf84d85ac",
-          "name": "53_54_1"
-        },
-        {
-          "idtag": "7c43ccf65c864f6db26cdbe2f1ec6cff",
-          "name": "54_55_1"
-        },
-        {
-          "idtag": "10465f16e4b5431c946051bf1cdc4bc1",
-          "name": "54_56_1"
-        },
-        {
-          "idtag": "8cd56eaa04364c35b95a192cf56056ce",
-          "name": "54_59_1"
-        },
-        {
-          "idtag": "d7f86db6d72f4ec5a2a1cde2077821d0",
-          "name": "55_56_1"
-        },
-        {
-          "idtag": "a03fdb612d384bbea4bf925ca90ec456",
-          "name": "55_59_1"
-        },
-        {
-          "idtag": "d9113746831b45c19da33c93c8d2232e",
-          "name": "56_57_1"
-        },
-        {
-          "idtag": "4589ca5fbec84ac3bd43220a1a822fce",
-          "name": "56_58_1"
-        },
-        {
-          "idtag": "ba583c8eaf7a47cbae71d0ce0b251be9",
-          "name": "56_59_1"
-        },
-        {
-          "idtag": "ce88dd25bfac4adebf22d1500cc207ce",
-          "name": "59_60_1"
-        },
-        {
-          "idtag": "bf1f71d3c35148998606a77e15c64fd7",
-          "name": "59_61_1"
-        },
-        {
-          "idtag": "07331c07d8a44cab8cc40481236268b4",
-          "name": "60_61_1"
-        },
-        {
-          "idtag": "34a45d788a084a44b1ca592ea87c53d3",
-          "name": "60_62_1"
-        },
-        {
-          "idtag": "15fa23b997214f61bff749164a1c86d7",
-          "name": "61_62_1"
-        },
-        {
-          "idtag": "83c7be8819ba4bafb7ef899ab08411d8",
-          "name": "62_66_1"
-        },
-        {
-          "idtag": "2594f9c018934b43946f32bf249efe7a",
-          "name": "62_67_1"
-        },
-        {
-          "idtag": "b16d6a6fe787430ab723ca36c295b34a",
-          "name": "63_64_1"
-        },
-        {
-          "idtag": "02348ccf4215414f808c55ada516f7af",
-          "name": "64_65_1"
-        },
-        {
-          "idtag": "bfd29db8ea9d4d55bcf484823435df31",
-          "name": "65_68_1"
-        },
-        {
-          "idtag": "559841c4700a4e4e998288f723b6368f",
-          "name": "66_67_1"
-        },
-        {
-          "idtag": "4eaacb4092f242dc854ec2c574e16336",
-          "name": "68_81_1"
-        },
-        {
-          "idtag": "8136ce98613c4c7a9af123aefeab89a1",
-          "name": "69_70_1"
-        },
-        {
-          "idtag": "ef445ce558784ce9ad246dc19b5d32e4",
-          "name": "69_75_1"
-        },
-        {
-          "idtag": "80460f266e4741ffa085da6651804d8c",
-          "name": "69_77_1"
-        },
-        {
-          "idtag": "1b35e84e833840b292106b511519bf1f",
-          "name": "70_71_1"
-        },
-        {
-          "idtag": "e83e4f010ca94639a8f048d2a3f3cbb2",
-          "name": "70_74_1"
-        },
-        {
-          "idtag": "d6875364fcb94853bf625deb7f9a6c16",
-          "name": "70_75_1"
-        },
-        {
-          "idtag": "b982877c647040919f99c7478df2d7db",
-          "name": "71_72_1"
-        },
-        {
-          "idtag": "d9d1ac18b84840138e6460235050d162",
-          "name": "74_75_1"
-        },
-        {
-          "idtag": "0a0821489dd64c2d895e6e7ab7fdcfe5",
-          "name": "75_77_1"
-        },
-        {
-          "idtag": "e973aa137ca0466fadec555878c9327e",
-          "name": "75_118_1"
-        },
-        {
-          "idtag": "6d43db044fa641849f2af5579b90b9a1",
-          "name": "76_77_1"
-        },
-        {
-          "idtag": "005acaeed67d4fdc9ee0653066188276",
-          "name": "76_118_1"
-        },
-        {
-          "idtag": "36302c5b618845d986fa0b61d71147d5",
-          "name": "77_78_1"
-        },
-        {
-          "idtag": "3b59b9f2d4784d72ab455535b4b1fa0d",
-          "name": "77_80_1"
-        },
-        {
-          "idtag": "2e790f1182fb4d3496c7e3890c3c47f1",
-          "name": "77_82_1"
-        },
-        {
-          "idtag": "97f60cc454ac48e1aaeb56d3cc1ce058",
-          "name": "78_79_1"
-        },
-        {
-          "idtag": "1cf665436faa429fae5d2efaff44b043",
-          "name": "79_80_1"
-        },
-        {
-          "idtag": "90b9805b366b4cd38a937209fa588107",
-          "name": "80_96_1"
-        },
-        {
-          "idtag": "98388c8e951c43219ca41ba76bee9784",
-          "name": "80_97_1"
-        },
-        {
-          "idtag": "f747ea8aa43a48cab6a748c10bd53959",
-          "name": "80_98_1"
-        },
-        {
-          "idtag": "12745327d6cb499899baf3c4f6932ea7",
-          "name": "80_99_1"
-        },
-        {
-          "idtag": "cf919fe606d4426fbc1a2c2e40e65408",
-          "name": "82_83_1"
-        },
-        {
-          "idtag": "231f3e5837d343269cff7880c06ed27d",
-          "name": "82_96_1"
-        },
-        {
-          "idtag": "fe35813da90443d294c94f1c7d656714",
-          "name": "83_84_1"
-        },
-        {
-          "idtag": "af265113d6114ab0a34d1b68bdf99a80",
-          "name": "83_85_1"
-        },
-        {
-          "idtag": "b9be1ff3df8a4346a109d389ec4e0bd1",
-          "name": "84_85_1"
-        },
-        {
-          "idtag": "978bfd6d1a6641f68dbebfdbd8baeba5",
-          "name": "85_88_1"
-        },
-        {
-          "idtag": "d1055b63d33344a0912a1b93f7e87ce7",
-          "name": "85_89_1"
-        },
-        {
-          "idtag": "68d547d808b042e48c405e1ca628a762",
-          "name": "88_89_1"
-        },
-        {
-          "idtag": "6180e21c02244b9c81c7f6a14ded7b17",
-          "name": "89_90_1"
-        },
-        {
-          "idtag": "65fa696bebd541b8905d23f7d8168997",
-          "name": "89_92_1"
-        },
-        {
-          "idtag": "fb10eab9b04a4fe083a9fa3d6286925a",
-          "name": "90_91_1"
-        },
-        {
-          "idtag": "fcfbb6daee8c40e7b0a58f50d38297ac",
-          "name": "91_92_1"
-        },
-        {
-          "idtag": "23e12329c1394200acc9e063925c0dcc",
-          "name": "92_93_1"
-        },
-        {
-          "idtag": "e8db035450474850bca27409e1aa1ffb",
-          "name": "92_94_1"
-        },
-        {
-          "idtag": "2d60e99e7e174649919947ae3c159b7e",
-          "name": "92_100_1"
-        },
-        {
-          "idtag": "4a83ca8ad9834974821be90277914b6e",
-          "name": "92_102_1"
-        },
-        {
-          "idtag": "9a0e41a941ce4d15982d7ebca501a4e9",
-          "name": "93_94_1"
-        },
-        {
-          "idtag": "75c324abf5e8403a9fb6166839c9b6c7",
-          "name": "94_95_1"
-        },
-        {
-          "idtag": "d09e3fc4640c47f9920dee9e2b77055b",
-          "name": "94_96_1"
-        },
-        {
-          "idtag": "06f075d0de0f4f01b51925b47a5ed261",
-          "name": "94_100_1"
-        },
-        {
-          "idtag": "6aec86ddd1ef48bc924db606d4626cda",
-          "name": "95_96_1"
-        },
-        {
-          "idtag": "b7f6fed0d069486b86b05eb155a93739",
-          "name": "96_97_1"
-        },
-        {
-          "idtag": "ba10347c47f646989b133e666cdab459",
-          "name": "98_100_1"
-        },
-        {
-          "idtag": "0250ce9233ce4cdeb25ea284d43f39a0",
-          "name": "99_100_1"
-        },
-        {
-          "idtag": "2a81ef73852740d2874e1ef5b8a3453b",
-          "name": "100_101_1"
-        },
-        {
-          "idtag": "b678094f64084807b8f5978aefe7261f",
-          "name": "100_103_1"
-        },
-        {
-          "idtag": "42241ce2c907433bac09331d7140c8ea",
-          "name": "100_104_1"
-        },
-        {
-          "idtag": "f854e62b298841dc98998dbc8c057c37",
-          "name": "100_106_1"
-        },
-        {
-          "idtag": "d2e8ad8b686b4eb4a667e21dbcb8280a",
-          "name": "101_102_1"
-        },
-        {
-          "idtag": "97acddae0a8f4ef2acef4822cf804c77",
-          "name": "103_104_1"
-        },
-        {
-          "idtag": "592515b0447742cfad4290a0000c87e9",
-          "name": "103_105_1"
-        },
-        {
-          "idtag": "41b8e59463494175bf2f90e47aa65e1d",
-          "name": "103_110_1"
-        },
-        {
-          "idtag": "1052feb7c10640378efaae629e8fc4dc",
-          "name": "104_105_1"
-        },
-        {
-          "idtag": "df9b16386dea4f31afe22dea6ac9a6b1",
-          "name": "105_106_1"
-        },
-        {
-          "idtag": "e4bedb7e379140d49188d4e53349e61a",
-          "name": "105_107_1"
-        },
-        {
-          "idtag": "3a3a836b66f1494d99dbc16e0d9713c1",
-          "name": "105_108_1"
-        },
-        {
-          "idtag": "58e6427073cf453189a11461df88fd66",
-          "name": "106_107_1"
-        },
-        {
-          "idtag": "c5759f97fb37453984cb7bbc772bd016",
-          "name": "108_109_1"
-        },
-        {
-          "idtag": "0a1c2f0ad85e439c96001be30c10424a",
-          "name": "109_110_1"
-        },
-        {
-          "idtag": "ad11c8afb0004c759b6e3181df3bd8fa",
-          "name": "114_115_1"
-        }
-      ],
-      "close_lines": [
-        {
-          "idtag": "df9a98ac79864df69bd15128231f95b1",
-          "name": "Normally open standby: 1_2_1"
-        }
-      ],
-      "dispatch": [
-        {
-          "idtag": "7a120c6121c649bcb96125148f5dcc54",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "429d95ca258d4af7a226f5e869836f58",
-          "initial": 96.88,
-          "minimum": 92.036,
-          "maximum": 101.72399999999999
-        },
-        {
-          "idtag": "62155548355b4f97b69f4613c3f1c7fc",
-          "initial": 29.41,
-          "minimum": 27.9395,
-          "maximum": 30.8805
-        },
-        {
-          "idtag": "0a22576a610f4b30992144db15575b99",
-          "initial": 76.12,
-          "minimum": 72.31400000000001,
-          "maximum": 79.926
-        },
-        {
-          "idtag": "f537d873877e4d97b777d8a52a8e91a9",
-          "initial": 108.644,
-          "minimum": 103.21180000000001,
-          "maximum": 114.0762
-        },
-        {
-          "idtag": "ad041b60638b4cb0a11022be4738ad2b",
-          "initial": 2.422,
-          "minimum": 1.9220000000000002,
-          "maximum": 2.922
-        },
-        {
-          "idtag": "f892d20524df4831a14ae9a7727cbe9e",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "9c1ccd96f30b481eb7c371b1aff14b6c",
-          "initial": 0.0,
-          "minimum": -0.5,
-          "maximum": 0.5
-        },
-        {
-          "idtag": "d36fa4758d5042fe9ae198feb29f4152",
-          "initial": 6.574000000000001,
-          "minimum": 6.074000000000001,
-          "maximum": 7.074000000000001
-        },
-        {
-          "idtag": "cb84ff90a270424493e6db9a91a50a9a",
-          "initial": 70.584,
-          "minimum": 67.0548,
-          "maximum": 74.1132
-        },
-        {
-          "idtag": "046152aae00949e78651371a2fa8d849",
-          "initial": 16.608,
-          "minimum": 15.7776,
-          "maximum": 17.4384
-        },
-        {
-          "idtag": "a4a384b30f2c47fc89884c3814116164",
-          "initial": 53.63,
-          "minimum": 50.9485,
-          "maximum": 56.3115
-        },
-        {
-          "idtag": "46728a52163446feb4179395e58312c6",
-          "initial": 55.36,
-          "minimum": 52.592,
-          "maximum": 58.128
-        },
-        {
-          "idtag": "5d696eeaa9264f2aac7be02e8273dd0b",
-          "initial": 135.286,
-          "minimum": 128.5217,
-          "maximum": 142.0503
-        },
-        {
-          "idtag": "8d43ae77726a4765b3cdde645cc562c9",
-          "initial": 135.632,
-          "minimum": 128.8504,
-          "maximum": 142.4136
-        },
-        {
-          "idtag": "4f44165726f1480dbb68cfca050dbcce",
-          "initial": 190.64600000000002,
-          "minimum": 181.11370000000002,
-          "maximum": 200.1783
-        },
-        {
-          "idtag": "3ac98f7178f44ebba234959bdd31fe38",
-          "initial": 165.042,
-          "minimum": 156.7899,
-          "maximum": 173.29410000000001
-        },
-        {
-          "idtag": "cc8229bc32864f58a7e23ee98b5b0ea7",
-          "initial": 1.3840000000000001,
-          "minimum": 0.8840000000000001,
-          "maximum": 1.8840000000000001
-        },
-        {
-          "idtag": "73382b0496c84f7ba11f0f5bbc5f9737",
-          "initial": 126.01320000000001,
-          "minimum": 119.71254000000002,
-          "maximum": 132.31386
-        },
-        {
-          "idtag": "bb15839b21c240aabf1aab24acb78ff1",
-          "initial": 87.19200000000001,
-          "minimum": 82.8324,
-          "maximum": 91.55160000000001
-        },
-        {
-          "idtag": "0240654fd8ad478c961cb2a561a17a21",
-          "initial": 13.84,
-          "minimum": 13.148,
-          "maximum": 14.532
-        },
-        {
-          "idtag": "d315977af70340b986707cd46a625099",
-          "initial": 12.456,
-          "minimum": 11.8332,
-          "maximum": 13.0788
-        },
-        {
-          "idtag": "c58408be2945402c869284e58e01d9af",
-          "initial": 84.00880000000001,
-          "minimum": 79.80836000000001,
-          "maximum": 88.20924000000001
-        }
-      ],
-      "new_lines": [
-        {
-          "name": "Reinforce corridor: 1_3_1",
-          "bus_from": "0d3f3740ce824dd087090d219a479cb5",
-          "bus_to": "b085123009c64059a71800b24e36b9a0",
-          "r": 0.0129,
-          "x": 0.0424,
-          "b": 0.01082,
-          "rate_mva": 180.0
-        }
-      ],
-      "new_shunts": [
-        {
-          "bus": "0d3f3740ce824dd087090d219a479cb5",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": -2.0
-        },
-        {
-          "bus": "0d3f3740ce824dd087090d219a479cb5",
-          "conductance_mw": 0.0,
-          "susceptance_mvar": 2.0
-        }
-      ]
+      "open_lines": [],
+      "close_lines": [],
+      "dispatch": [],
+      "new_lines": [],
+      "new_shunts": []
     },
     "witness_close_lines": [],
     "witness_equilibrium_error": 6.526927760496339e-14,
@@ -15437,7 +13116,8 @@
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 2,
-    "sha256": "ef7e80d9a80dc8208821bed61a8d70ad2078b19f41094f1691ea6d5544d36ddc"
+    "sha256": "ef7e80d9a80dc8208821bed61a8d70ad2078b19f41094f1691ea6d5544d36ddc",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee118_03.veragrid",
@@ -16351,7 +14031,8 @@
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 3,
-    "sha256": "21ad4a6f48f60cd2ba05420a1988f3ec862acae36db764b4706cbb05a1192f6e"
+    "sha256": "21ad4a6f48f60cd2ba05420a1988f3ec862acae36db764b4706cbb05a1192f6e",
+    "max_test_tunings": 20
   },
   {
     "file": "basic_ieee118_04.veragrid",
@@ -17324,7 +15005,8 @@
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 4,
-    "sha256": "437b34920a60264209065024672f0313e6f22bb4f949f7ca77d467e80f1f6dd4"
+    "sha256": "437b34920a60264209065024672f0313e6f22bb4f949f7ca77d467e80f1f6dd4",
+    "max_test_tunings": "unlimited"
   },
   {
     "file": "basic_ieee118_05.veragrid",
@@ -18297,6 +15979,7 @@
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 5,
-    "sha256": "2db2ac3b7d1140f245a611a644f726ba79014271b80414a8b184ebb896b155d6"
+    "sha256": "2db2ac3b7d1140f245a611a644f726ba79014271b80414a8b184ebb896b155d6",
+    "max_test_tunings": 20
   }
 ]

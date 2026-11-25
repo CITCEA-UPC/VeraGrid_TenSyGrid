@@ -10,6 +10,7 @@ from hackathon_files.src.rms_tuning import RmsTunerEvaluator, RmsTuning, RmsTuni
 from hackathon_files.basic.controllers import ConverterKind, attach_converter
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from hackathon_files.basic.validation import validate_case
+from hackathon_files.basic.cases import case_trial_budget
 
 
 @pytest.mark.parametrize('path', case_files(), ids=list(path.stem for path in case_files()))
@@ -38,7 +39,7 @@ def test_public_trial_session_preserves_baseline(index: int) -> None:
     tunable: TunableGrid = initialize_grid(open_file(str(case_files()[index])))
     initial_values: tuple[float, ...] = tuple(parameter.initial_value for parameter in tunable.tunable_parameters)
     assert tunable.tests_used == 0
-    assert tunable.max_test_tunings == 5
+    assert tunable.max_test_tunings == case_trial_budget(tunable.problem.grid.name)
     assert len(tunable.dispatch_options) >= 2
     assert tunable.closable_lines
     assert tunable.line_candidates
@@ -84,3 +85,20 @@ def test_minimum_damping_is_configurable_for_real_gfm_case() -> None:
     assert not rejected.stable
     assert accepted.transient_converged
     assert rejected.transient_converged
+
+
+@pytest.mark.parametrize('path', [p for p in case_files() if p.stem.endswith('_02')],
+                         ids=lambda p: p.stem)
+def test_controller_only_cases_hide_all_physical_actions(path):
+    case = initialize_grid(open_file(str(path)))
+    assert case.tunable_parameters
+    assert not any((case.dispatch_options, case.openable_lines, case.closable_lines,
+                    case.line_candidates, case.shunt_options))
+    assert (case.max_open_lines, case.max_close_lines,
+            case.max_new_lines, case.max_new_shunts) == (0, 0, 0, 0)
+    assert case.max_test_tunings == case_trial_budget(case.problem.grid.name)
+    proposal = reference_tuning(case)
+    assert not proposal.close_lines
+    metrics = case.test_tuning(proposal)
+    assert metrics.stable
+    assert metrics.voltage_violations == metrics.thermal_violations == 0

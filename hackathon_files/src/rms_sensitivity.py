@@ -59,6 +59,35 @@ def build_parameterized_state_matrix(grid: TunableGrid) -> dict:
     model['_derivatives'] = {}
     return model
 
+def symbolic_state_matrices(model):
+    """Expose the unreduced symbolic pencil E dz/dt = A(p) z, z=(x,y).
+
+    Entries are native VeraGrid expressions, not SymPy objects. The operating
+    point and noneditable parameters are frozen; only permitted controls remain
+    symbolic. Algebraic rows retain their original equations and angle reference.
+    No inverse or reference-row replacement is performed. Consequently E is
+    singular when algebraic variables exist; use generalized eigenvalues after
+    numerical evaluation, never ordinary eig(A).
+    """
+    blocks = model['symbolic_blocks']
+    matrix = np.block([[blocks['fx'], blocks['fy']],
+                       [blocks['gx'], blocks['gy']]])
+    mass = np.empty(matrix.shape, dtype=object)
+    mass.fill(Const(0))
+    for index in range(len(model['state_variables'])):
+        mass[index, index] = Const(1)
+    matrix.flags.writeable = False
+    mass.flags.writeable = False
+    return dict(
+        state_matrix=matrix,
+        mass_matrix=mass,
+        variables=model['state_variables'] + model['algebraic_variables'],
+        parameter_symbols=model['parameter_symbols'],
+        default_values=model['default_values'],
+        operating_point=model['operating_point'],
+    )
+
+
 def _bindings(model, values):
     proposed = dict(model['default_values'])
     for parameter, value in ({} if values is None else values).items():

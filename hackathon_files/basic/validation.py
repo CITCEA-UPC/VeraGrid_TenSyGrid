@@ -72,7 +72,12 @@ def validate_case(path: Path) -> dict:
     else:
         pass
     evaluator: RmsTunerEvaluator = basic_evaluator()
-    if not tunable.closable_lines or not tunable.line_candidates or not tunable.shunt_options or len(tunable.dispatch_options) < 2:
+    controller_only = tunable.problem.grid.name.endswith('_02')
+    if controller_only and any((tunable.openable_lines, tunable.closable_lines, tunable.line_candidates,
+                                tunable.shunt_options, tunable.dispatch_options)):
+        raise ValueError(f'{path.name}: controller-only case exposes physical actions')
+    if not controller_only and (not tunable.closable_lines or not tunable.line_candidates
+                                or not tunable.shunt_options or len(tunable.dispatch_options) < 2):
         raise ValueError(f'{path.name}: incomplete general-action catalog')
     else:
         pass
@@ -93,6 +98,8 @@ def validate_case(path: Path) -> dict:
         pass
     return dict(
         file=path.name,
+        max_test_tunings=("unlimited" if np.isinf(tunable.max_test_tunings)
+                          else tunable.max_test_tunings),
         buses=len(tunable.problem.grid.buses),
         generators=len(tunable.problem.grid.generators),
         lines=len(tunable.problem.grid.lines),

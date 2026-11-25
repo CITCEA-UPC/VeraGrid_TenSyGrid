@@ -1,4 +1,9 @@
-"""Implement tune(), inspect catalogs, and test proposals within a trial budget."""
+"""Build a proposal, test two control candidates, and return the better one.
+
+Start with TrialTuner.tune() for the search loop. action_examples() separately
+shows the permitted physical actions; these are not combined with the search.
+The ranking is illustrative, not the competition's composite scoring formula.
+"""
 from pathlib import Path
 from VeraGridEngine.api import open_file
 from hackathon_files import RmsTuner, RmsTuning, TunableGrid
@@ -12,14 +17,18 @@ def action_examples(grid: TunableGrid) -> dict[str, RmsTuning]:
     These actions are alternatives, not a combination promised to stabilize a case.
     """
     proposals = {}
-    for label, catalog, field in (
-        ('open', grid.openable_lines, 'open_lines'),
-        ('close', grid.closable_lines, 'close_lines'),
-        ('reinforce', grid.line_candidates, 'add_lines'),
-        ('shunt', grid.shunt_options, 'add_shunts'),
-    ):
-        if catalog:
-            proposals[label] = RmsTuning(**{field: (catalog[0],)})
+    # Each proposal uses one handle from the scenario's permitted catalog.
+    # Keep these explicit so each RmsTuning field is easy to copy and adapt.
+    if grid.openable_lines:
+        proposals['open'] = RmsTuning(open_lines=(grid.openable_lines[0],))
+    if grid.closable_lines:
+        proposals['close'] = RmsTuning(close_lines=(grid.closable_lines[0],))
+    if grid.line_candidates:
+        proposals['reinforce'] = RmsTuning(add_lines=(grid.line_candidates[0],))
+    if grid.shunt_options:
+        proposals['shunt'] = RmsTuning(add_shunts=(grid.shunt_options[0],))
+
+    # Transfer the same MW amount between two generators to keep dispatch balanced.
     if len(grid.dispatch_options) >= 2:
         first, second = grid.dispatch_options[:2]
         amount = min(0.1, first.maximum_mw - first.initial_mw,
@@ -36,19 +45,41 @@ class TrialTuner(RmsTuner):
     """Small demonstration search; contestants should implement their own strategy."""
 
     def tune(self, grid: TunableGrid) -> RmsTuning:
-        print('Controls [initial, minimum, maximum]:', grid.control_tensor)
+        # 1. Inspect controls in the same order as control_tensor rows.
+        print('1. Available controls (initial value; allowed range)')
+        for parameter in grid.tunable_parameters:
+            print(
+                f'   {parameter.name}: {parameter.initial_value:g}; '
+                f'[{parameter.minimum:g}, {parameter.maximum:g}]'
+            )
+        print('\n2. Independent physical actions (catalog checks only)')
         for name, proposal in action_examples(grid).items():
-            print(name, 'permitted:', proposal.is_accepted(grid))
-        # Control tensor rows align exactly with tunable_parameters.
-        proposals = [RmsTuning(), RmsTuning(parameters={
-            parameter: max(parameter.minimum, min(-400.0, parameter.maximum))
-            for parameter in grid.tunable_parameters if parameter.name == 'Kp'
-        })]
-        best, best_rank = RmsTuning(), None
-        for proposal in proposals:
+            report = self.validate_proposal(grid, proposal)
+            print(name, 'permitted:', report.accepted)
+            for issue in report.issues:
+                print('   ', issue)
+        # 3. Compare the baseline with one case-specific gain setting.
+        # -400 is a demonstration for this saved case, not a universal gain.
+        gain_values = {}
+        for parameter in grid.tunable_parameters:
+            if parameter.name == 'Kp':
+                gain_values[parameter] = max(
+                    parameter.minimum, min(-400.0, parameter.maximum)
+                )
+        candidates = [
+            ('baseline', RmsTuning()),
+            ('adjust Kp', RmsTuning(parameters=gain_values)),
+        ]
+        best = RmsTuning()
+        best_rank = None
+        print('\n3. Full control trials')
+        for name, proposal in candidates:
             if grid.tests_used >= grid.max_test_tunings:
+                print('   Trial budget exhausted; returning the best proposal so far.')
                 break
-            if not proposal.is_accepted(grid):
+            report = self.validate_proposal(grid, proposal)
+            if not report.accepted:
+                print(f'   {name}: skipped because {report.issues}')
                 continue
             # Inside tune(), use grid.test_tuning(). Calling self.test_tuning()
             # here would recursively invoke tune(). Failed trials also cost budget.
@@ -57,8 +88,20 @@ class TrialTuner(RmsTuner):
             except Exception as error:
                 print('Trial failed:', error)
                 continue
-            rank = (not metrics.stable, metrics.voltage_violations + metrics.thermal_violations,
-                    metrics.max_eigenvalue_real, metrics.active_losses_mw)
+            # Lower tuples win, comparing each criterion from left to right.
+            # Prefer stability, then fewer violations, then a smaller real part
+            # of the leading eigenvalue, then lower losses.
+            rank = (
+                not metrics.stable,
+                metrics.voltage_violations + metrics.thermal_violations,
+                metrics.max_eigenvalue_real,
+                metrics.active_losses_mw,
+            )
+            print(
+                f'   {name}: stable={metrics.stable}, '
+                f'violations={rank[1]}, max real part={metrics.max_eigenvalue_real:.6g}, '
+                f'losses={metrics.active_losses_mw:.6f} MW'
+            )
             if best_rank is None or rank < best_rank:
                 best, best_rank = proposal, rank
         print(f'Trials consumed: {grid.tests_used}/{grid.max_test_tunings}')

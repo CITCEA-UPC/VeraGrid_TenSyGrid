@@ -1483,3 +1483,20 @@ def ml_f_exc(vf: VarFactory, In:Expr):
         children = [ml_block1, ml_block2, ml_block3]
     )
     return res_block, b + c + d
+
+
+def multilinearize_block(
+        block: Block,
+        vfactory: VarFactory,
+        substitutions: Mapping[Expr, Var] | None = None,
+        derivatives: Mapping[Var, Expr] | None = None,
+) -> Block:
+    """Make an exact multilinear copy with shared expression substitutions.
+
+    Supports trig, exponentials, hard/min-max and smooth saturations, powers,
+    division and square-root lifts without adding approximation or smoothing.
+    See :func:`block_multilinearization.multilinearize_block` for supported
+    operations, derivative inputs, domains and initialization requirements.
+    """
+    from VeraGridEngine.Utils.Symbolic.block_multilinearization import multilinearize_block as convert
+    return convert(block, vfactory, substitutions=substitutions, derivatives=derivatives)

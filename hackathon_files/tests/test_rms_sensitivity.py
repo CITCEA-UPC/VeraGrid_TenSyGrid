@@ -56,6 +56,35 @@ def test_equilibrium_guard_bounds_and_snapshot():
     grid.problem._variable_parameters_values[0] = 3
     assert model['default_values'][p] == 2
 
+
+@pytest.mark.parametrize('no_algebraic', [False, True])
+def test_symbolic_pencil_matches_reduced_matrix(no_algebraic):
+    grid, parameter = synthetic(repeated=no_algebraic)
+    tuner = BasicRmsTuner()
+    pencil = tuner.get_symbolic_state_matrices(grid)
+    symbol = pencil['parameter_symbols'][parameter]
+    assert pencil['variables'] == tuple(grid.problem.state_vars + grid.problem.algebraic_vars)
+    assert not pencil['state_matrix'].flags.writeable
+    assert not pencil['mass_matrix'].flags.writeable
+    assert any(symbol in entry.get_vars() for entry in pencil['state_matrix'].flat)
+    for value in (1., 2., 3.):
+        bindings = {symbol.uid: value}
+        matrix, mass = [
+            np.array([entry.eval_uid(bindings) for entry in pencil[key].flat]).reshape(
+                pencil[key].shape
+            )
+            for key in ('state_matrix', 'mass_matrix')
+        ]
+        ns = len(grid.problem.state_vars)
+        np.testing.assert_array_equal(mass, np.diag([1.] * ns + [0.] * (len(matrix) - ns)))
+        reduced = matrix[:ns, :ns]
+        if not no_algebraic:
+            reduced = reduced - matrix[:ns, ns:] @ np.linalg.solve(
+                matrix[ns:, ns:], matrix[ns:, :ns]
+            )
+        np.testing.assert_allclose(reduced, tuner.get_state_matrix(grid, {parameter: value}))
+    assert grid.tests_used == 0
+
 def test_repeated_modes_are_not_assigned_individual_sensitivities():
     grid, _ = synthetic(repeated=True)
     result = eigenvalue_sensitivities(build_parameterized_state_matrix(grid))

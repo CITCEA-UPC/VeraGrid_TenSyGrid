@@ -48,11 +48,26 @@ grid, reuse another scenario's handles, or change the evaluator or test grids.
 Invalid actions are skipped with warnings; an invalid redispatch is skipped as
 a group. Returning anything other than `RmsTuning` is an error.
 
+Before choosing a search strategy, use these inherited helpers:
+
+- `self.get_controllers(tunable_grid, role=ControllerRole.PLL)` returns installed
+  controller views together with their permitted parameter handles. Omit `role`
+  for all views, including unclassified blocks.
+- `self.get_analysis_capabilities(tunable_grid)` reports which analyses the
+  current model structure supports, with reasons for limitations.
+- `self.validate_proposal(tunable_grid, proposal)` returns `accepted`, `issues`,
+  and the exact `effective_proposal` that evaluator sanitization would retain.
+
+These helpers consume no trials. Validation checks permissions and action limits;
+full trials still determine electrical feasibility. The short
+[participant helper walkthrough](examples/participant_helpers.py) demonstrates
+all three without navigating internal problem fields.
+
 Useful inherited helpers include `self.get_modal_analysis(tunable_grid)`,
 `self.get_modes_from_unstable_eigenvalues(tunable_grid)`, and
 `self.get_eigenvalue_sensitivities(tunable_grid)`. Diagnostics consume no trials.
 Use `tunable_grid.test_tuning(proposal)` for full candidate validation: five
-attempts per scenario, including invalid proposals and failed solves. Final
+attempts per intro scenario; basic cases allow 20 or unlimited trials, including invalid proposals and failed solves. Final
 scoring is separate. Do not call `self.test_tuning()` inside `tune()`; it would
 invoke your tuner recursively. See the [parent API guide](../README.md) for more.
 
@@ -79,6 +94,7 @@ Start with modal/controller inspection, then sensitivities and trial search:
 PYTHONPATH=src:. python -m hackathon_files.intro.examples.modal_examples
 PYTHONPATH=src:. python -m hackathon_files.intro.examples.controller_examples
 PYTHONPATH=src:. python -m hackathon_files.intro.examples.sensitivity_examples
+PYTHONPATH=src:. python -m hackathon_files.intro.examples.powerflow_examples
 PYTHONPATH=src:. python -m hackathon_files.intro.examples.tuning_examples
 PYTHONPATH=src:. python -m hackathon_files.intro.examples.control_response_experiment
 ```
@@ -86,3 +102,6 @@ PYTHONPATH=src:. python -m hackathon_files.intro.examples.control_response_exper
 Sensitivity examples use a compatible synchronous-machine basic case; analytic
 sensitivities are not currently supported for the intro descriptor GFM model.
 The examples leave `FinalTuner` and saved grids unchanged.
+
+Basic-case trial budgets are split evenly: 25 unlimited and 25 capped at 20.
+Always inspect `tunable_grid.max_test_tunings`; unlimited is `math.inf`.
