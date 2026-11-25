@@ -71,7 +71,7 @@ def test_combined_runner_covers_both_collections(monkeypatch, capsys):
         stable=True, voltage_violations=0, thermal_violations=0,
         min_oscillatory_damping=0.1, active_losses_mw=1.0,
         max_eigenvalue_real=-0.1, peak_frequency_deviation_hz=0.01,
-        peak_voltage_deviation_pu=0.01,
+        structural_changes=2, max_structural_changes=8, changes_score=0.75,
     )
     monkeypatch.setattr(evaluator, "load_benchmark", lambda: object())
     monkeypatch.setattr(evaluator, "make_scenario", lambda grid, scenario: scenario.name)
@@ -92,6 +92,10 @@ def test_combined_runner_covers_both_collections(monkeypatch, capsys):
     assert evaluator.main() == 1
     assert len(calls) == 61
     output = capsys.readouterr().out
+    assert "changes=2/8" in output
+    assert "S_changes=0.750" in output
+    assert "Mean change score over 60 successfully evaluated cases: 0.750" in output
+    assert "peak dV" not in output
     assert "intro: 11/11 passed" in output
     assert "basic: 49/50 passed" in output
     assert "Evaluation: 60/61 passed" in output

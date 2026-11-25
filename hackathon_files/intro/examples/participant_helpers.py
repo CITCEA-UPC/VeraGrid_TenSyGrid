@@ -52,6 +52,8 @@ def main() -> int:
     proposal = RmsTuning(parameters={handle: handle.initial_value})
     report = tuner.validate_proposal(grid, proposal)
     print(f'   Accepted unchanged: {report.accepted}')
+    print(f'   Structural changes: {report.structural_changes}/{report.max_structural_changes}')
+    print(f'   Change score: {report.changes_score:.3f}')
     print(f'   Full trials consumed: {grid.tests_used}/{grid.max_test_tunings}')
     return 0
 

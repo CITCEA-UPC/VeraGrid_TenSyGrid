@@ -146,7 +146,8 @@ def main() -> int:
                   f"damping={damping_text:>8s}  max Re={metrics.max_eigenvalue_real:+.5f}  "
                   f"voltage/thermal violations={metrics.voltage_violations}/{metrics.thermal_violations}  "
                   f"peak df={metrics.peak_frequency_deviation_hz:.4f} Hz  "
-                  f"peak dV={metrics.peak_voltage_deviation_pu:.4f} pu  "
+                  f"changes={metrics.structural_changes}/{metrics.max_structural_changes}  "
+                  f"S_changes={metrics.changes_score:.3f}  "
                   f"{'PASS' if passed else 'FAIL'}")
         except Exception as error:
             failures += 1
@@ -158,6 +159,8 @@ def main() -> int:
     if results:
         print(f"Mean losses over {len(results)} successfully evaluated cases: "
               f"{sum(m.active_losses_mw for m in results) / len(results):.3f} MW")
+        print(f"Mean change score over {len(results)} successfully evaluated cases: "
+              f"{sum(m.changes_score for m in results) / len(results):.3f}")
         damping_values = [m.min_oscillatory_damping for m in results
                           if m.min_oscillatory_damping is not None]
         if damping_values:

@@ -245,6 +245,9 @@ elif grid.tests_used < grid.max_test_tunings:
 | `accepted` | The entire proposal passes catalog checks without omissions |
 | `issues` | Ordered messages explaining invalid handles, numeric bounds, malformed containers, duplicate/conflicting actions, action limits, or redispatch imbalance |
 | `effective_proposal` | Exactly the proposal the evaluator's sanitization retains |
+| `structural_changes` | Number of retained structural actions, excluding controls and redispatch |
+| `max_structural_changes` | Maximum permitted structural actions for this scenario |
+| `changes_score` | Unweighted `1 - n/n_max`, or 1 when `n_max=0` |
 
 Validation uses the same sanitization logic as scoring, returns messages instead
 of warnings, and consumes no trials. Valid independent actions survive; an
@@ -252,3 +255,20 @@ invalid redispatch is dropped as a group. Values are never clamped. A wrong
 proposal type returns a failed report; the evaluator still rejects such a
 submission with an error. Validation checks permissions and action budgets, not
 electrical feasibility, remaining trial allowance, or a guaranteed improvement.
+
+## Structural changes replace peak voltage deviation
+
+Full evaluation metrics now expose `structural_changes`, `max_structural_changes`,
+and `changes_score`. The same fields are available in proposal-validation reports
+before any electrical solve. Each line opening/closing and line/shunt addition
+counts once. Changing existing control gains or redispatching generation counts
+zero. Invalid, duplicate and over-budget actions omitted by sanitization do not
+count. The maximum is based on scenario catalogs and action limits, not the number
+of equations or tuning trials. Controller-only cases have a maximum of zero and
+receive a change score of 1.
+
+For example, two structural actions out of an allowed maximum of eight give
+`changes_score = 0.75`; the PDF's 15% weight would contribute `0.1125` to the
+composite score. Full RMS trials still check dynamics, transient convergence,
+static voltages and thermal limits. Peak frequency remains a disturbance-response
+diagnostic; peak voltage deviation is no longer returned or printed.

@@ -231,6 +231,28 @@ class TunableGrid:
     max_close_lines: int = 1
 
     @property
+    def max_structural_changes(self) -> int:
+        """Scenario n_max: maximum permitted actions, limited by real catalogs.
+
+        Opening/closing an existing line and adding a line/shunt each count
+        once. Controls and redispatch do not count. Opening and closing the
+        same existing line cannot both contribute. This is a catalog/budget
+        maximum, independent of whether a combination is electrically feasible.
+        """
+        open_ids = {option.idtag for option in self.openable_lines}
+        close_ids = {option.idtag for option in self.closable_lines}
+        switching = min(
+            min(self.max_open_lines, len(open_ids))
+            + min(self.max_close_lines, len(close_ids)),
+            len(open_ids | close_ids),
+        )
+        return (
+            switching
+            + min(self.max_new_lines, len(set(self.line_candidates)))
+            + min(self.max_new_shunts, len(set(self.shunt_options)))
+        )
+
+    @property
     def max_test_tunings(self) -> int | float:
         """Read-only trial allowance for this scenario."""
         return self._budget_status()[0] if self._budget_status else 0
@@ -373,6 +395,18 @@ class RmsTuning:
         )
 
 
+def _structural_change_count(tuning: RmsTuning) -> int:
+    """Count sanitized structural actions, once each, relative to the baseline."""
+    return sum(len(actions) for actions in (
+        tuning.open_lines, tuning.close_lines, tuning.add_lines, tuning.add_shunts,
+    ))
+
+
+def _changes_score(count: int, maximum: int) -> float:
+    """PDF change-score component, including the controller-only case."""
+    return 1.0 if maximum == 0 else 1.0 - count / maximum
+
+
 def _active_losses(grid: MultiCircuit, results: PowerFlowResults) -> float:
     """Use the same branch and active-shunt loss accounting for all checks."""
     voltages = {bus.idtag: abs(results.voltage[i]) for i, bus in enumerate(grid.buses)}
@@ -448,6 +482,13 @@ class ProposalValidationReport:
     accepted: bool
     issues: tuple[str, ...]
     effective_proposal: RmsTuning
+    structural_changes: int
+    max_structural_changes: int
+
+    @property
+    def changes_score(self) -> float:
+        """Unweighted change-score component; electrical validation is separate."""
+        return _changes_score(self.structural_changes, self.max_structural_changes)
 
 
 class RmsTuner(ABC):
@@ -596,11 +637,15 @@ class RmsTuner(ABC):
             raise TypeError('Expected the current TunableGrid')
         if not isinstance(proposal, RmsTuning):
             return ProposalValidationReport(
-                False, ('Expected an RmsTuning proposal.',), RmsTuning()
+                False, ('Expected an RmsTuning proposal.',), RmsTuning(),
+                0, grid.max_structural_changes,
             )
         issues = []
         effective = RmsTunerEvaluator().sanitize_tuning(grid, proposal, _issues=issues)
-        return ProposalValidationReport(not issues, tuple(issues), effective)
+        return ProposalValidationReport(
+            not issues, tuple(issues), effective,
+            _structural_change_count(effective), grid.max_structural_changes,
+        )
 
     def get_controller_parameters(self, grid: TunableGrid, controller: ControllerBlock) -> tuple[TunableParameter, ...]:
         """Select permitted handles, never merely all parameters in an equation.
@@ -779,8 +824,8 @@ class RmsTunerEvaluator:
         return replace(baseline, problem=participant_problem,
                        _trial=trial, _budget_status=status)
 
-    def evaluate_load_step(self, grid: MultiCircuit, pf_results) -> tuple[float, float, bool]:
-        """Run a fixed load increase and measure peak speed and voltage excursions."""
+    def evaluate_load_step(self, grid: MultiCircuit, pf_results) -> tuple[float, bool]:
+        """Run a fixed load increase; return peak frequency excursion and convergence."""
         disturbance_grid = grid.copy()
         if not disturbance_grid.loads:
             raise ValueError("The RMS disturbance test requires a load")
@@ -822,22 +867,16 @@ class RmsTunerEvaluator:
         group_index = len(disturbance_grid.rms_events_groups) - 1
         converged = bool(results.converged[group_index])
         if not converged or not np.all(np.isfinite(results.values[:, :, group_index])):
-            return math.inf, math.inf, False
+            return math.inf, False
         speed_indices = [
             index for index, name in enumerate(results.variable_array)
             if str(name).startswith("omega")
         ]
-        voltage_indices = [
-            index for index, name in enumerate(results.variable_array)
-            if str(name).startswith("Vm")
-        ]
-        if not speed_indices or not voltage_indices:
-            raise RuntimeError("The RMS results lack generator speeds or bus voltages")
+        if not speed_indices:
+            raise RuntimeError("The RMS results lack generator speeds")
         speeds = results.values[:, speed_indices, group_index]
-        voltages = results.values[:, voltage_indices, group_index]
         peak_frequency_hz = float(np.max(np.abs(speeds - speeds[0])) * grid.fBase)
-        peak_voltage_pu = float(np.max(np.abs(voltages - voltages[0])))
-        return peak_frequency_hz, peak_voltage_pu, converged
+        return peak_frequency_hz, converged
 
     def sanitize_tuning(
         self, tunable_grid: TunableGrid, tuning: RmsTuning, *,
@@ -1033,7 +1072,7 @@ class RmsTunerEvaluator:
         loading = np.abs(np.asarray(pf.loading))
         voltage_violations = int(np.count_nonzero((voltage < 0.95) | (voltage > 1.05)))
         thermal_violations = int(np.count_nonzero(loading > 1.0))
-        peak_frequency_hz, peak_voltage_pu, transient_converged = self.evaluate_load_step(
+        peak_frequency_hz, transient_converged = self.evaluate_load_step(
             tuned_grid, pf
         )
         return RmsTuningMetrics(
@@ -1049,7 +1088,8 @@ class RmsTunerEvaluator:
             eigenvalue_count=int(eigenvalues.size),
             neutral_mode_count=int(np.count_nonzero(neutral_modes)),
             peak_frequency_deviation_hz=peak_frequency_hz,
-            peak_voltage_deviation_pu=peak_voltage_pu,
+            structural_changes=_structural_change_count(tuning),
+            max_structural_changes=tunable_grid.max_structural_changes,
             transient_converged=transient_converged,
         )
 
@@ -1071,8 +1111,14 @@ class RmsTuningMetrics:
     eigenvalue_count: int
     neutral_mode_count: int
     peak_frequency_deviation_hz: float
-    peak_voltage_deviation_pu: float
+    structural_changes: int
+    max_structural_changes: int
     transient_converged: bool
+
+    @property
+    def changes_score(self) -> float:
+        """Unweighted s_changes=1-n/n_max, or 1 when no changes are possible."""
+        return _changes_score(self.structural_changes, self.max_structural_changes)
 
 
 def test_tuning(

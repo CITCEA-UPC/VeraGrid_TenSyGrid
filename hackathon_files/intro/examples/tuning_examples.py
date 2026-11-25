@@ -100,7 +100,9 @@ class TrialTuner(RmsTuner):
             print(
                 f'   {name}: stable={metrics.stable}, '
                 f'violations={rank[1]}, max real part={metrics.max_eigenvalue_real:.6g}, '
-                f'losses={metrics.active_losses_mw:.6f} MW'
+                f'losses={metrics.active_losses_mw:.6f} MW, '
+                f'changes={metrics.structural_changes}/{metrics.max_structural_changes}, '
+                f'S_changes={metrics.changes_score:.3f}'
             )
             if best_rank is None or rank < best_rank:
                 best, best_rank = proposal, rank

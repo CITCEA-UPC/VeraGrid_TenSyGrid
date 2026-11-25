@@ -123,14 +123,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00028287121300873963,
-    "witness_peak_voltage_pu": 0.00011683528548034339,
     "witness_losses_mw": 0.6238764766929075,
     "network": "lynn5",
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 1,
     "sha256": "5c3d77f7969941e1ad360e928726d2a4f73a1caf0c98c3475fc351254e53d12f",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_lynn5_02.veragrid",
@@ -228,14 +230,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 5.626652201939919e-05,
-    "witness_peak_voltage_pu": 0.00011539774614810483,
     "witness_losses_mw": 0.6677558068133873,
     "network": "lynn5",
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 2,
     "sha256": "e8054a828f1ada3a345c12a0fda7f64abb9016c1e426b379ddb04d75be1a6470",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_lynn5_03.veragrid",
@@ -407,14 +411,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.000234741229299118,
-    "witness_peak_voltage_pu": 0.00011544735175594845,
     "witness_losses_mw": 0.7136247310406141,
     "network": "lynn5",
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 3,
     "sha256": "d3fa1001b238729e04a17bd7ec4f6020f9f9ef33ebbc77474f17a284ff95a9a4",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_lynn5_04.veragrid",
@@ -645,14 +651,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00024234219442309524,
-    "witness_peak_voltage_pu": 0.00011890128770564168,
     "witness_losses_mw": 0.7615400718847183,
     "network": "lynn5",
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 4,
     "sha256": "68af76b7888d6db330b0c5cf81e86c28a0558b334fec3affe60f3ccb1b918b83",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_lynn5_05.veragrid",
@@ -883,14 +891,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00024950674726298416,
-    "witness_peak_voltage_pu": 0.00012238537287490026,
     "witness_losses_mw": 0.8115603030686356,
     "network": "lynn5",
     "source": "Grids_and_profiles/grids/Lynn 5 Bus pv.gridcal",
     "source_sha256": "a4e3254af64f825630d8ac56f98ab18b39a7688234520999040fca52da103cb1",
     "variant": 5,
     "sha256": "1d3f0ad81373cc19e874986df339d84bec337b2fcd4c9b842e1d9b59173b0c38",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_six_bus_01.veragrid",
@@ -1003,14 +1013,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0003142798950084291,
-    "witness_peak_voltage_pu": 6.0258166459936646e-05,
     "witness_losses_mw": 2.9073073186339737,
     "network": "six_bus",
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 1,
     "sha256": "e7501f5fe8665a31b1f4138ed681a5ccb47b7be9a70ef2847ba659f58a1c9b06",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 3,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_six_bus_02.veragrid",
@@ -1108,14 +1120,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 7.663498244880884e-05,
-    "witness_peak_voltage_pu": 5.4163247092731126e-05,
     "witness_losses_mw": 3.0880434133180126,
     "network": "six_bus",
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 2,
     "sha256": "b6179aeebe714c483c33de922caf5cc72c83abfd9e9bd3a6ba04652f4b40b21c",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_six_bus_03.veragrid",
@@ -1264,14 +1278,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0003025678207480009,
-    "witness_peak_voltage_pu": 5.130322632895812e-05,
     "witness_losses_mw": 3.274609234229443,
     "network": "six_bus",
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 3,
     "sha256": "5efa8a927b4c8b6ae4d1723645a69c63e86cbf3114547918b2daf78b2f5dfa0d",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 3,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_six_bus_04.veragrid",
@@ -1479,14 +1495,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00031292799672621996,
-    "witness_peak_voltage_pu": 5.277227298794429e-05,
     "witness_losses_mw": 3.4670445539396524,
     "network": "six_bus",
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 4,
     "sha256": "13723a66a8c00d2fd2b3ccb8c7be385917df0183e64765ef67eab9acbca4f86c",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 3,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_six_bus_05.veragrid",
@@ -1694,14 +1712,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0003230693142008967,
-    "witness_peak_voltage_pu": 5.424623608951684e-05,
     "witness_losses_mw": 3.6653900089147684,
     "network": "six_bus",
     "source": "Grids_and_profiles/grids/6-node-ACOPF.gridcal",
     "source_sha256": "2735e974b534c7eb36b2a38af43ecf6a0875f1d19aa4be1413fbe1680b0a8994",
     "variant": 5,
     "sha256": "438ebd98650266dd3bd8cc592487d90c2c47aad71538c765dea35bf6e919080e",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 3,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee9_01.veragrid",
@@ -1816,14 +1836,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0006572905493684722,
-    "witness_peak_voltage_pu": 0.0003961469100930426,
     "witness_losses_mw": 3.2321974734601966,
     "network": "ieee9",
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 1,
     "sha256": "94718089e7e955a11f4d20105d5b098f9371b8b9a5a2b711361c6353bc4f414b",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 1,
+    "max_structural_changes": 3,
+    "witness_changes_score": 0.6666666666666667
   },
   {
     "file": "basic_ieee9_02.veragrid",
@@ -1921,14 +1943,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00033302362199227886,
-    "witness_peak_voltage_pu": 0.00032664298844098383,
     "witness_losses_mw": 3.448424752273443,
     "network": "ieee9",
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 2,
     "sha256": "22381e491d4e0d84d3c5cf70d76217ae6c603c9c7b295c8bc06153cb8dfc3de1",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee9_03.veragrid",
@@ -2102,14 +2126,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0005194230737659566,
-    "witness_peak_voltage_pu": 0.0003396885044935072,
     "witness_losses_mw": 3.6746471864807724,
     "network": "ieee9",
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 3,
     "sha256": "827bbea7994f271eb39eb266f5eef59a9ebcb140edb8b786eefb24327d4d7e41",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee9_04.veragrid",
@@ -2342,14 +2368,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0005353257571494296,
-    "witness_peak_voltage_pu": 0.0003549106841171934,
     "witness_losses_mw": 3.9112388181064937,
     "network": "ieee9",
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 4,
     "sha256": "537ac39b20542d2004b88ed9db7cfa9bbee933b0e4c45ac7d7bdb8a045e963d5",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee9_05.veragrid",
@@ -2582,14 +2610,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0005502491758768713,
-    "witness_peak_voltage_pu": 0.00037060953735501556,
     "witness_losses_mw": 4.1585969979587105,
     "network": "ieee9",
     "source": "hackathon_files/grids/ieee9_rms_transformers.veragrid",
     "source_sha256": "471b991f5aa586cce394597b5a9581c71c9a85d4c94120561947750b765e4d54",
     "variant": 5,
     "sha256": "a1bb2c6f742577f35859ce959d2debdb3ff41712efd918f80dabaf2e7f7d2919",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_kundur11_01.veragrid",
@@ -2767,14 +2797,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0030785908944674922,
-    "witness_peak_voltage_pu": 0.000867083189268536,
     "witness_losses_mw": 24.248310882836392,
     "network": "kundur11",
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 1,
     "sha256": "903738ff504202feea24171e2890a8b5db388c7ce4ed9ac8e446967629fa8945",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_kundur11_02.veragrid",
@@ -2872,14 +2904,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0016705523661009192,
-    "witness_peak_voltage_pu": 0.001109425494705052,
     "witness_losses_mw": 25.824475431329716,
     "network": "kundur11",
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 2,
     "sha256": "72225d71a582c451c46b3af55cef1075c3d3cb16a3543ff4640d61d11d467748",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_kundur11_03.veragrid",
@@ -3091,14 +3125,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0016592188669950492,
-    "witness_peak_voltage_pu": 0.0011610469993431627,
     "witness_losses_mw": 27.462357954510026,
     "network": "kundur11",
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 3,
     "sha256": "4286b53b44b51d7cd474cf3334b5853c7830e1d3ebb9e0e84f2f7802add4102a",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_kundur11_04.veragrid",
@@ -3369,14 +3405,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0017865846736631052,
-    "witness_peak_voltage_pu": 0.0012410218957135122,
     "witness_losses_mw": 29.163686264130803,
     "network": "kundur11",
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 4,
     "sha256": "567272118d0cf6fe9bac6450fda6b6ef9ba43d59190566a4b6b772236334d228",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_kundur11_05.veragrid",
@@ -3647,14 +3685,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0018536867252227918,
-    "witness_peak_voltage_pu": 0.0013128745788397733,
     "witness_losses_mw": 30.93031343572855,
     "network": "kundur11",
     "source": "hackathon_files/grids/kundur_rms_65.veragrid",
     "source_sha256": "ea9e785d3ac29dc938d7c19ff8648059e77f097ee6a7f1c23b3b0ee20f088e01",
     "variant": 5,
     "sha256": "3197158977df69eda788e6d6ee687b94fac17324297468d2ff97e462020a71da",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee14_01.veragrid",
@@ -3854,14 +3894,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00010605437771316062,
-    "witness_peak_voltage_pu": 2.6281470368427762e-05,
     "witness_losses_mw": 10.61848604135735,
     "network": "ieee14",
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 1,
     "sha256": "7f6a02315984cf1544330551090935d8bb9719a4c053ee76790201922a3b4107",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee14_02.veragrid",
@@ -3959,14 +4001,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 7.746129099261978e-05,
-    "witness_peak_voltage_pu": 2.549059729495262e-05,
     "witness_losses_mw": 11.285748150251433,
     "network": "ieee14",
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 2,
     "sha256": "046fad8193ae5d53d6092a4ba6298ed4112807d6790c20954999c3bffe387339",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee14_03.veragrid",
@@ -4192,14 +4236,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0004351448616379816,
-    "witness_peak_voltage_pu": 1.283152344488947e-05,
     "witness_losses_mw": 11.97639352322933,
     "network": "ieee14",
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 3,
     "sha256": "f9e35f8f6ec17c9ecfa21cdd9d4131a2140517c16522c8bd842a446660cf1aba",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee14_04.veragrid",
@@ -4484,14 +4530,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00045010562334524273,
-    "witness_peak_voltage_pu": 1.3261404947506605e-05,
     "witness_losses_mw": 12.690726256938982,
     "network": "ieee14",
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 4,
     "sha256": "fe8bb2a602b3da97db12c515d13b548ca21816d2129a443ff07783d761a28428",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee14_05.veragrid",
@@ -4776,14 +4824,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00046421042486644026,
-    "witness_peak_voltage_pu": 1.3623156872144548e-05,
     "witness_losses_mw": 13.429060452026603,
     "network": "ieee14",
     "source": "src/tests/data/grids/case14.gridcal",
     "source_sha256": "5fb3c80206fd1c24da933d8fb7e4453c0ce245d4d217f10b41bd102706026e14",
     "variant": 5,
     "sha256": "77b47c7ef905b555a4614910c20c0cbc83ce10a13b16621987db5a08efcf8740",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee24_01.veragrid",
@@ -5413,14 +5463,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00017150601744342353,
-    "witness_peak_voltage_pu": 5.441496292379888e-05,
     "witness_losses_mw": 35.956183196400815,
     "network": "ieee24",
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 1,
     "sha256": "886c7f2700f3c9f9d93de5d9ae40199881f9da5262b0e4a885c763311c50c60d",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee24_02.veragrid",
@@ -5518,14 +5570,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 7.163769577545054e-10,
-    "witness_peak_voltage_pu": 9.471862072452097e-08,
     "witness_losses_mw": 38.12682894863108,
     "network": "ieee24",
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 2,
     "sha256": "cf90d6d8fd13e1da804d5bc0ff70cdc145ca33a6e3e4ab560c2b6b2927fdb603",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee24_03.veragrid",
@@ -5953,14 +6007,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 6.661338147750939e-14,
-    "witness_peak_voltage_pu": 1.554312234475219e-14,
     "witness_losses_mw": 40.37501458615064,
     "network": "ieee24",
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 3,
     "sha256": "c1d3c246d570941658088f7e4daf2dad7f76f091191647419d762432d97e38ac",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee24_04.veragrid",
@@ -6447,14 +6503,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 3.885780586188048e-14,
-    "witness_peak_voltage_pu": 2.55351295663786e-14,
     "witness_losses_mw": 42.70219225097473,
     "network": "ieee24",
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 4,
     "sha256": "8d93ad44f724dc546024a117ccc401c782acee68033c9e1b5395a40b756638e7",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee24_05.veragrid",
@@ -6941,14 +6999,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 3.885780586188048e-14,
-    "witness_peak_voltage_pu": 4.340972026284362e-14,
     "witness_losses_mw": 45.10991518124308,
     "network": "ieee24",
     "source": "src/tests/data/grids/case24_ieee_rts.matpower",
     "source_sha256": "a383a9001fd03ab54b2bc590364a71119fd07e82ab814adfd824ce08f9eb26ce",
     "variant": 5,
     "sha256": "67a338d37ae767b3d11024397015b26c4edffc8c4a516021a3588d775c94ed6d",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee30_01.veragrid",
@@ -7246,14 +7306,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0001103127577450902,
-    "witness_peak_voltage_pu": 2.668857966892091e-05,
     "witness_losses_mw": 1.2746822611302915,
     "network": "ieee30",
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 1,
     "sha256": "1affd987126bbe74a44e71314b2b9f0c7290fbdec0d9b9c4c4249513182c3f88",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee30_02.veragrid",
@@ -7351,14 +7413,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 7.615481605882657e-05,
-    "witness_peak_voltage_pu": 2.1927196551141392e-05,
     "witness_losses_mw": 1.3673310228382827,
     "network": "ieee30",
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 2,
     "sha256": "381f2f18ea7ea0a9b05c3ee445488cae07d59669823ae8907f7fe590fd0dbb49",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee30_03.veragrid",
@@ -7678,14 +7742,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0004140504164418246,
-    "witness_peak_voltage_pu": 1.0598342616630063e-05,
     "witness_losses_mw": 1.4645051958697866,
     "network": "ieee30",
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 3,
     "sha256": "e627a4f664d7c95f903f428314a7d32afeacb0a094d317802bd33e66a1b34054",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee30_04.veragrid",
@@ -8064,14 +8130,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0004275667745134992,
-    "witness_peak_voltage_pu": 1.0751045029122608e-05,
     "witness_losses_mw": 1.566361152922204,
     "network": "ieee30",
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 4,
     "sha256": "b8eeaadbc7c2be6b4da2762d8014042569d3ab2c6d595196f6264d805ae6c589",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee30_05.veragrid",
@@ -8450,14 +8518,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0004403315398193719,
-    "witness_peak_voltage_pu": 1.0996471856650203e-05,
     "witness_losses_mw": 1.6730608437839818,
     "network": "ieee30",
     "source": "hackathon_files/grids/ieee30_rms.veragrid",
     "source_sha256": "081c6efd4c8edc87e125358825cc4ccf41bad107d0d452be6160966d5db199ff",
     "variant": 5,
     "sha256": "d17bf0028f96837ebe4eeb853cb769006ee14972faa2b1204b6326f93f83e933",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee39_01.veragrid",
@@ -8795,14 +8865,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0002852765175587191,
-    "witness_peak_voltage_pu": 7.988270608749737e-05,
     "witness_losses_mw": 28.53349852286848,
     "network": "ieee39",
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 1,
     "sha256": "edea6b0419b5feda31f58a31f711a1d1b8bc39d6e0fe7daba32a07f1ec0b66f0",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee39_02.veragrid",
@@ -8900,14 +8972,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.00024654334926932364,
-    "witness_peak_voltage_pu": 5.9867006552583035e-05,
     "witness_losses_mw": 30.371953199951566,
     "network": "ieee39",
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 2,
     "sha256": "e3501ece4ddbada9f2379e50da171cb0a1d1c4c9c2ddfed8002791e867a0603a",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee39_03.veragrid",
@@ -9239,14 +9313,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0011178253163879326,
-    "witness_peak_voltage_pu": 4.4057247659656795e-05,
     "witness_losses_mw": 32.28710069635889,
     "network": "ieee39",
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 3,
     "sha256": "9d5d05a3239242cec4f893be916403d3da1a1765ff1339871252c80bd7802be0",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee39_04.veragrid",
@@ -9637,14 +9713,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0013663848280665025,
-    "witness_peak_voltage_pu": 5.029369514342186e-05,
     "witness_losses_mw": 34.28134067345619,
     "network": "ieee39",
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 4,
     "sha256": "085ec37a8ab4371fb5cf68d0354c211e615e63f8e1719779ba20525434a69858",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee39_05.veragrid",
@@ -10035,14 +10113,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 0.0014304458550995491,
-    "witness_peak_voltage_pu": 5.348835730623058e-05,
     "witness_losses_mw": 36.357230737162105,
     "network": "ieee39",
     "source": "hackathon_files/grids/ieee39_rms.veragrid",
     "source_sha256": "331666f446d1811e5183ea7115421b80c98640c8143177894f818adac20a23e8",
     "variant": 5,
     "sha256": "2342239bacadee683d929d33516eb9c18a87affaf97e5d91fd1a2231a8cbee93",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee57_01.veragrid",
@@ -10462,14 +10542,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 8.017457356346291e-05,
-    "witness_peak_voltage_pu": 8.984398179534558e-06,
     "witness_losses_mw": 2.6928858329192633,
     "network": "ieee57",
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 1,
     "sha256": "2907e5145b6c95eba106a29d37fb772775fd2041a3c95d540faa1e7a724191d2",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee57_02.veragrid",
@@ -10567,14 +10649,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 1.0158540675320182e-12,
-    "witness_peak_voltage_pu": 9.312262072569411e-10,
     "witness_losses_mw": 2.8514531544382566,
     "network": "ieee57",
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 2,
     "sha256": "53db9485dba684c74f1c9db13f5f592bb5a6020deb682a2236dee942a2398a92",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee57_03.veragrid",
@@ -11000,14 +11084,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 1.3472556403826275e-11,
-    "witness_peak_voltage_pu": 8.831371189899073e-10,
     "witness_losses_mw": 3.0157871041493247,
     "network": "ieee57",
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 3,
     "sha256": "db179c12aca482709c2e4dda1e230c9f3bdb7c0853ad25dbd3ca1368a63d3e80",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee57_04.veragrid",
@@ -11492,14 +11578,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 1.3700152123874432e-11,
-    "witness_peak_voltage_pu": 8.432496922949895e-10,
     "witness_losses_mw": 3.185977668542336,
     "network": "ieee57",
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 4,
     "sha256": "72c9fefff36a9033faf37a5626715f6df32f193a85627f17c6dcbfbc256ede68",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee57_05.veragrid",
@@ -11984,14 +12072,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 1.4094281297616362e-11,
-    "witness_peak_voltage_pu": 8.113765215256308e-10,
     "witness_losses_mw": 3.3621181391559594,
     "network": "ieee57",
     "source": "src/tests/data/grids/IEEE57.gridcal",
     "source_sha256": "159eca8bc69a4c3bd83b161374fbd9272cd018301d6fedd3a6799c875a245b96",
     "variant": 5,
     "sha256": "5d5227fde94961a9f0618fc1fd0a5f936c61b13cc102987941346fb2d7e1400a",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee118_01.veragrid",
@@ -13005,14 +13095,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 8.335201953646454e-05,
-    "witness_peak_voltage_pu": 8.128163947973555e-05,
     "witness_losses_mw": 19.36011026407494,
     "network": "ieee118",
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 1,
     "sha256": "528650ca4fd2e10865ffb60b00d9add76ceebd55e0c3eedb5cabf7381a775cda",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 1,
+    "max_structural_changes": 4,
+    "witness_changes_score": 0.75
   },
   {
     "file": "basic_ieee118_02.veragrid",
@@ -13110,14 +13202,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 6.0755984432336874e-05,
-    "witness_peak_voltage_pu": 7.824858848304306e-05,
     "witness_losses_mw": 20.425701273402215,
     "network": "ieee118",
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 2,
     "sha256": "ef7e80d9a80dc8208821bed61a8d70ad2078b19f41094f1691ea6d5544d36ddc",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 0,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee118_03.veragrid",
@@ -14025,14 +14119,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 6.529438801861076e-05,
-    "witness_peak_voltage_pu": 8.073912556427754e-05,
     "witness_losses_mw": 21.532966816491523,
     "network": "ieee118",
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 3,
     "sha256": "21ad4a6f48f60cd2ba05420a1988f3ec862acae36db764b4706cbb05a1192f6e",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee118_04.veragrid",
@@ -14999,14 +15095,16 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 6.564794481356273e-05,
-    "witness_peak_voltage_pu": 8.338549436204268e-05,
     "witness_losses_mw": 22.682717917805867,
     "network": "ieee118",
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 4,
     "sha256": "437b34920a60264209065024672f0313e6f22bb4f949f7ca77d467e80f1f6dd4",
-    "max_test_tunings": "unlimited"
+    "max_test_tunings": "unlimited",
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   },
   {
     "file": "basic_ieee118_05.veragrid",
@@ -15973,13 +16071,15 @@
     "witness_thermal_violations": 0,
     "witness_transient_converged": true,
     "witness_peak_frequency_hz": 6.942922530228657e-05,
-    "witness_peak_voltage_pu": 8.59737393027471e-05,
     "witness_losses_mw": 23.87579385649425,
     "network": "ieee118",
     "source": "Grids_and_profiles/grids/IEEE 118 Bus - ntc_areas.gridcal",
     "source_sha256": "2798a396ae471df037065e7e0a94c315cede76aabb36b7418eef189c5d0dd3a8",
     "variant": 5,
     "sha256": "2db2ac3b7d1140f245a611a644f726ba79014271b80414a8b184ebb896b155d6",
-    "max_test_tunings": 20
+    "max_test_tunings": 20,
+    "witness_structural_changes": 0,
+    "max_structural_changes": 4,
+    "witness_changes_score": 1.0
   }
 ]

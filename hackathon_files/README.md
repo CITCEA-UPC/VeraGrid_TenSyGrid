@@ -98,21 +98,35 @@ the largest eigenvalue real part, minimum damping for modes above 0.05 Hz,
 voltage violations outside 0.95–1.05 p.u., thermal violations, and a stability
 flag using the brief's `-1e-5` real-part and 5% damping thresholds. It also
 runs a three-second RMS simulation with a 2% increase in the first load at
-0.2 seconds, reporting peak generator frequency and bus voltage deviations
-from their initial values. A failed transient marks the tuning unstable.
-The peak deviations measure excursion size, not settled-value overshoot.
-Scenario robustness and the minimal-grid-change score require separate evaluation.
-The latter replaces code quality in the brief and retains its 15% weight:
+0.2 seconds, reporting peak generator frequency deviation from its initial
+value. A failed transient marks the tuning unstable. Peak frequency measures
+excursion size, not settled-value overshoot. Peak voltage deviation is no longer
+an evaluation metric; static bus-voltage limits remain operating constraints.
+
+The evaluator now reports `structural_changes` (`n`), `max_structural_changes`
+(`n_max`), and `changes_score` for each sanitized proposal. The minimal-grid-change
+component carries 15% of the PDF's composite score:
 `S_changes = 1 - n / n_max` per scenario, averaged over the evaluation
 suite. Each scenario defines `n_max`, the maximum number of changes possible
 in that scenario, shared by all teams. By construction, `0 <= n <= n_max`.
 Zero actions gives full marks; reaching `n_max` gives zero. For `n_max = 0`,
 no changes are possible and the score is defined as 1.
+`TunableGrid.max_structural_changes` derives the scenario maximum from each
+structural catalog's available distinct handles and its action limit, without
+counting an existing line twice for opening and closing. Empty catalogs contribute
+zero, even when a default action limit is positive. This maximum depends on
+permissions, not on whether a combination of actions passes electrical checks.
+`validate_proposal()` previews the same count and score without using a trial.
+Counts apply after sanitization, so duplicate, invalid and over-budget actions
+that were dropped do not contribute.
 Each line connection/disconnection and model addition/removal counts as one
 equally weighted action relative to the scenario's initial grid. Variables and
 equations introduced or removed by that action are not counted separately.
 Replacing a model counts as two actions; adjusting existing control parameters
-or generation setpoints does not count.
+or generation setpoints does not count. The current proposal interface exposes
+line switching and line/shunt additions; arbitrary model removals or replacements
+are not currently available actions. The evaluator reports the unweighted change
+component; the full composite score and robustness require suite-level evaluation.
 
 Run `python -m hackathon_files.intro.examples.control_response_experiment` with `PYTHONPATH=src:.`
 to compare baseline, increased `Kp`, and increased `Ki` on the Kundur grid.

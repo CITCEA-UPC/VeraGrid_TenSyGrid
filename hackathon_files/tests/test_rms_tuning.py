@@ -53,6 +53,9 @@ def test_one_control_changes_small_signal_damping() -> None:
     baseline = evaluate_participant(BasicRmsTuner(), grid)
     changed = evaluate_participant(ChangeGen1Kp(), grid, evaluator)
 
+    assert baseline.structural_changes == changed.structural_changes == 0
+    assert baseline.changes_score == changed.changes_score == 1
+    assert baseline.max_structural_changes == changed.max_structural_changes
     assert baseline.eigenvalue_count > 0
     assert changed.eigenvalue_count == baseline.eigenvalue_count
     assert changed.min_oscillatory_damping is not None
@@ -93,6 +96,10 @@ def test_grid_actions_and_candidate_budget() -> None:
     evaluator = RmsTunerEvaluator(max_test_tunings=2)
     selected = evaluate_participant(tuner, grid, evaluator)
 
+    assert selected.structural_changes == 1
+    assert tuner.line_metrics.structural_changes == tuner.shunt_metrics.structural_changes == 1
+    assert selected.max_structural_changes == tuner.tunable_grid.max_structural_changes
+    assert selected.changes_score == 1 - 1 / selected.max_structural_changes
     assert tuner.tunable_grid.tests_used == 2
     assert selected.active_losses_mw == min(
         tuner.line_metrics.active_losses_mw,
@@ -119,4 +126,6 @@ def test_balanced_dispatch_changes_power_flow_and_losses() -> None:
     grid = open_file(str(GRID_PATH))
     baseline = evaluate_participant(BasicRmsTuner(), grid)
     changed = evaluate_participant(Redispatch(), grid)
+    assert changed.structural_changes == 0
+    assert changed.changes_score == 1
     assert changed.active_losses_mw != baseline.active_losses_mw

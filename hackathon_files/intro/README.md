@@ -80,8 +80,14 @@ descriptor eigenvalues are algebraic constraints and are excluded. No oscillator
 modes means damping is `n/a`.
 
 The evaluator also checks transient convergence after a 2% load increase at 0.2 s
-(3 s simulation, 0.02 s step). It reports active losses and peak frequency and
-voltage deviations. No weighted competition score is defined here.
+(3 s simulation, 0.02 s step). It reports active losses, peak frequency deviation, and structural changes as
+`n/n_max`, with `S_changes = 1 - n/n_max` (1 when `n_max=0`). Each permitted line
+opening/closing or line/shunt addition counts once; existing controller tuning
+and balanced redispatch count zero. Counts use the sanitized proposal and each
+scenario's own catalogs and action limits. Peak voltage deviation has been
+removed as a metric; voltage and thermal limits still determine operating
+compliance. The PDF assigns the change component 15% of the composite score;
+this runner reports its unweighted value and mean, not the full composite score.
 These sample operating points do not represent the hidden evaluation suite.
 
 ## Contestant API examples

@@ -23,6 +23,9 @@ def test_saved_case_can_be_stabilized(path: Path) -> None:
     assert record['baseline_max_real'] > 1e-4
     assert record['witness_max_real'] < -1e-5
     assert record['witness_transient_converged']
+    assert record['witness_structural_changes'] == len(record['witness_close_lines'])
+    assert 0 <= record['witness_structural_changes'] <= record['max_structural_changes']
+    assert 0 <= record['witness_changes_score'] <= 1
     if record['converters']:
         assert record['baseline_growing_converter_participation'] >= 0.1
         assert all(parameter['name'] != 'Kp' for parameter in record['tunable_parameters'])
