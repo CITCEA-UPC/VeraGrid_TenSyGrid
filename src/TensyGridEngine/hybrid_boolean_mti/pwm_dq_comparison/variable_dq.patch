@@ -1,0 +1,33 @@
+--- compare_pwm_mti_direct.py
++++ compare_pwm_mti_direct.py
+@@ -63,10 +63,18 @@
+     mti_gate_c: np.ndarray
+
+
++def dq_commands(t, modulation_index=0.8):
++    t = np.asarray(t, dtype=float)
++    d = modulation_index + 0.26 * np.sin(2 * np.pi * 360 * t) - 0.82 * (t >= 0.00137)
++    q = 0.43 * np.sin(2 * np.pi * 620 * t) + 0.46 * ((t >= 0.00221) & (t < 0.00283))
++    return d, q
++
++
+ def pwm_references(t, f_ref, modulation_index):
+-    angle = 2 * np.pi * f_ref * np.asarray(t, dtype=float)
+-    return tuple(modulation_index * np.sin(angle + shift)
+-                 for shift in (0, -2 * np.pi / 3, 2 * np.pi / 3))
++    theta = 2 * np.pi * f_ref * np.asarray(t, dtype=float)
++    d, q = dq_commands(t, modulation_index)
++    phase_angles = (theta, theta - 2 * np.pi / 3, theta + 2 * np.pi / 3)
++    return tuple(np.clip(d * np.sin(angle) - q * np.cos(angle), -1, 1) for angle in phase_angles)
+
+
+ def carrier_half_index(t, f_sw):
+@@ -1607,8 +1615,6 @@
+     sched_path = plot_emt_vs_scheduled_mti(proc_gate_t, proc_gates, sched_t, sched_gates)
+     print(f"Scheduled EMT-vs-MTI plot saved to: {sched_path}")
+
+-    slow_demo_path = run_slow_tie_break_improvement_demo()
+-    print(f"Slow tie-break improvement plot saved to: {slow_demo_path}")
+
+
+ if __name__ == "__main__":

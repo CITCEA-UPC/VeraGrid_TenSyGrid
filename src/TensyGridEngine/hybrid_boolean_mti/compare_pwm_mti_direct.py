@@ -63,6 +63,25 @@ class PwmComparisonTrace:
     mti_gate_c: np.ndarray
 
 
+def pwm_references(t, f_ref, modulation_index):
+    angle = 2 * np.pi * f_ref * np.asarray(t, dtype=float)
+    return tuple(modulation_index * np.sin(angle + shift)
+                 for shift in (0, -2 * np.pi / 3, 2 * np.pi / 3))
+
+
+def carrier_half_index(t, f_sw):
+    return int(np.floor((float(t) + 1e-14) * 2 * f_sw + 0.5))
+
+
+def carrier_boundary(index, f_sw):
+    return (index - 0.5) / (2 * f_sw)
+
+
+def sample_references(t, f_ref, f_sw, modulation_index):
+    boundary = carrier_boundary(carrier_half_index(t, f_sw), f_sw)
+    return pwm_references(max(0., boundary), f_ref, modulation_index)
+
+
 class RecordingBoundaryUpdater:
     """Record gate modes after delegating boundary updates."""
 
@@ -89,7 +108,7 @@ class RecordingBoundaryUpdater:
 class DrivenProceduralRecordingBoundaryUpdater(RecordingBoundaryUpdater):
     """Drive modulation variables as external inputs before procedural PWM runs."""
 
-    __slots__ = ["mod_indices", "f_ref", "modulation_index"]
+    __slots__ = ["mod_indices", "f_ref", "f_sw", "modulation_index"]
 
     def __init__(
         self,
@@ -98,19 +117,16 @@ class DrivenProceduralRecordingBoundaryUpdater(RecordingBoundaryUpdater):
         mod_indices: tuple[int, int, int],
         f_ref: float,
         modulation_index: float,
+        f_sw: float,
     ) -> None:
         super().__init__(base_updater=base_updater, mode_indices=mode_indices)
         self.mod_indices = tuple(int(i) for i in mod_indices)
         self.f_ref = float(f_ref)
+        self.f_sw = float(f_sw)
         self.modulation_index = float(modulation_index)
 
     def update(self, t: float, x: np.ndarray, params: np.ndarray) -> None:
-        theta = 2.0 * np.pi * self.f_ref * float(t)
-        refs = (
-            float(self.modulation_index * np.sin(theta)),
-            float(self.modulation_index * np.sin(theta - 2.0 * np.pi / 3.0)),
-            float(self.modulation_index * np.sin(theta + 2.0 * np.pi / 3.0)),
-        )
+        refs = sample_references(t, self.f_ref, self.f_sw, self.modulation_index)
         for idx, value in zip(self.mod_indices, refs):
             x[idx] = value
         super().update(t=t, x=x, params=params)
@@ -151,12 +167,7 @@ class DirectComparatorBoundaryUpdater:
         self.trace_gates: list[tuple[float, float, float]] = []
 
     def _refs(self, t: float) -> tuple[float, float, float]:
-        theta = 2.0 * np.pi * self.f_ref * float(t)
-        return (
-            float(self.modulation_index * np.sin(theta)),
-            float(self.modulation_index * np.sin(theta - 2.0 * np.pi / 3.0)),
-            float(self.modulation_index * np.sin(theta + 2.0 * np.pi / 3.0)),
-        )
+        return pwm_references(t, self.f_ref, self.modulation_index)
 
     def _switching_functions(self, t: float) -> tuple[float, float, float]:
         carrier = triangular_carrier(
@@ -262,14 +273,15 @@ class MinimalBlockMtiPwmProblem:
         direction_eps: float = 1.0e-8,
     ) -> None:
         vf = VarFactory()
+        refs0 = pwm_references(0., f_ref, modulation_index)
         block, gate_a, gate_b, gate_c, ref_a, ref_b, ref_c, omega_sw, carrier, b_carrier_rise = mti_three_phase_carrier_pwm_internal_carrier_params(
             vf=vf,
             name="be_mti_compare",
             omega_sw0=2.0 * np.pi * float(f_sw),
             direction_eps=float(direction_eps),
-            ref_a0=0.0,
-            ref_b0=float(modulation_index * np.sin(-2.0 * np.pi / 3.0)),
-            ref_c0=float(modulation_index * np.sin(2.0 * np.pi / 3.0)),
+            ref_a0=refs0[0],
+            ref_b0=refs0[1],
+            ref_c0=refs0[2],
             carrier0=triangular_carrier(0.0, 2.0 * np.pi * f_sw),
             carrier_rising0=1.0,
         )
@@ -342,16 +354,10 @@ class MinimalBlockMtiPwmProblem:
         _unused = (step_idx, steps)
 
     def _refs(self, t: float) -> tuple[float, float, float]:
-        theta = 2.0 * np.pi * self.f_ref * float(t)
-        return (
-            float(self.modulation_index * np.sin(theta)),
-            float(self.modulation_index * np.sin(theta - 2.0 * np.pi / 3.0)),
-            float(self.modulation_index * np.sin(theta + 2.0 * np.pi / 3.0)),
-        )
+        return pwm_references(t, self.f_ref, self.modulation_index)
 
     def _half_index(self, t: float) -> int:
-        omega_sw = 2.0 * np.pi * self.f_sw
-        return int(np.floor((omega_sw * float(t) + 0.5 * np.pi) / np.pi))
+        return carrier_half_index(t, self.f_sw)
 
     def update_variable_params(self, t: float, x_snapshot: np.ndarray | None = None, scheduled_t: float | None = None) -> None:
         _unused = (x_snapshot, scheduled_t)
@@ -362,8 +368,7 @@ class MinimalBlockMtiPwmProblem:
         if self.sampled_inputs:
             half_index = self._half_index(float(t))
             if self._last_sample_half_index is None or half_index != self._last_sample_half_index:
-                refs = self._refs(float(t))
-                self._variable_parameters_values[0:3] = refs
+                self._variable_parameters_values[0:3] = sample_references(t, self.f_ref, self.f_sw, self.modulation_index)
                 self._last_sample_half_index = half_index
         else:
             self._variable_parameters_values[0:3] = self._refs(float(t))
@@ -374,8 +379,7 @@ class MinimalBlockMtiPwmProblem:
         self._variable_parameters_values[3] = self.omega_sw
 
     def get_next_forced_event_time(self, t_prev: float, t_target: float):
-        half_period = 0.5 / self.f_sw
-        next_boundary = (np.floor(float(t_prev) / half_period) + 1.0) * half_period
+        next_boundary = carrier_boundary(carrier_half_index(t_prev, self.f_sw) + 1, self.f_sw)
         if float(t_prev) < next_boundary <= float(t_target):
             return float(next_boundary)
         return None
@@ -636,24 +640,18 @@ class ScheduledBlockMtiPwmProblem:
         self._local_start_time = 0.0
 
         self.update_variable_params(0.0)
+        self._x0[:3] = self._scheduled_equalities_target(0.0)[:3]
         self._initialize_mti_booleans_at_t0()
         self._x0[:] = self._scheduled_equalities_target(0.0)
 
     @staticmethod
     def _refs_static(t: float, f_ref: float, modulation_index: float) -> tuple[float, float, float]:
-        theta = 2.0 * np.pi * float(f_ref) * float(t)
-        return (
-            float(modulation_index * np.sin(theta)),
-            float(modulation_index * np.sin(theta - 2.0 * np.pi / 3.0)),
-            float(modulation_index * np.sin(theta + 2.0 * np.pi / 3.0)),
-        )
+        return pwm_references(t, f_ref, modulation_index)
 
     @staticmethod
     def _interval_start_and_rise_static(t: float, f_sw: float) -> tuple[float, float]:
-        omega_sw = 2.0 * np.pi * float(f_sw)
-        shifted_phase = omega_sw * float(t) + 0.5 * np.pi
-        interval_index = int(np.floor(shifted_phase / np.pi))
-        interval_start = (float(interval_index) * np.pi - 0.5 * np.pi) / omega_sw
+        interval_index = carrier_half_index(t, f_sw)
+        interval_start = carrier_boundary(interval_index, f_sw)
         return float(interval_start), 1.0 if interval_index % 2 == 0 else 0.0
 
     @property
@@ -683,23 +681,21 @@ class ScheduledBlockMtiPwmProblem:
         _unused = (step_idx, steps)
 
     def _half_index(self, t: float) -> int:
-        omega_sw = 2.0 * np.pi * self.f_sw
-        return int(np.floor((omega_sw * float(t) + 0.5 * np.pi) / np.pi))
+        return carrier_half_index(t, self.f_sw)
 
     def update_variable_params(self, t: float, x_snapshot: np.ndarray | None = None, scheduled_t: float | None = None) -> None:
         _unused = (x_snapshot, scheduled_t)
-        self._local_start_time = float(t)
-        self._update_schedule_inputs(float(t))
+        self._update_schedule_inputs(self._local_start_time)
 
     def update(self, t: float, x: np.ndarray, params: np.ndarray) -> None:
         _unused = (x, params)
-        self._update_schedule_inputs(float(t))
+        self._update_schedule_inputs(self._local_start_time)
 
     def _update_schedule_inputs(self, t: float) -> None:
         half_index = self._half_index(float(t))
         if self.sampled_inputs:
             if self._last_sample_half_index is None or half_index != self._last_sample_half_index:
-                self._variable_parameters_values[0:3] = self._refs_static(t, self.f_ref, self.modulation_index)
+                self._variable_parameters_values[0:3] = sample_references(t, self.f_ref, self.f_sw, self.modulation_index)
                 self._last_sample_half_index = half_index
         else:
             self._variable_parameters_values[0:3] = self._refs_static(t, self.f_ref, self.modulation_index)
@@ -709,9 +705,10 @@ class ScheduledBlockMtiPwmProblem:
         self._variable_parameters_values[self._mti_bool_param_indices[3]] = carrier_rising
 
     def get_next_forced_event_time(self, t_prev: float, t_target: float):
+        self._local_start_time = float(t_prev)
+        self._update_schedule_inputs(self._local_start_time)
         candidates: list[float] = []
-        half_period = 0.5 / self.f_sw
-        next_boundary = (np.floor(float(t_prev) / half_period) + 1.0) * half_period
+        next_boundary = carrier_boundary(carrier_half_index(t_prev, self.f_sw) + 1, self.f_sw)
         if float(t_prev) < next_boundary <= float(t_target):
             candidates.append(float(next_boundary))
 
@@ -982,12 +979,9 @@ def build_pwm_signal_problem(
     m_b = vf.add_var("m_b_pwm_solver_compare")
     m_c = vf.add_var("m_c_pwm_solver_compare")
 
-    _unused_f_ref = f_ref
-    eqs = [
-        m_a,
-        m_b,
-        m_c,
-    ]
+    refs0 = pwm_references(0., f_ref, modulation_index)
+    initial_modulation = dict(zip([m_a, m_b, m_c], refs0))
+    eqs = [var - Const(float(value)) for var, value in initial_modulation.items()]
 
     procedural_logic = []
     if use_procedural_pwm:
@@ -1016,11 +1010,7 @@ def build_pwm_signal_problem(
             gate_b_mode: Const(0.0),
             gate_c_mode: Const(0.0),
         },
-        init_eqs={
-            m_a: Const(0.0),
-            m_b: Const(float(modulation_index * np.sin(-2.0 * np.pi / 3.0))),
-            m_c: Const(float(modulation_index * np.sin(2.0 * np.pi / 3.0))),
-        },
+        init_eqs={var: Const(float(value)) for var, value in initial_modulation.items()},
         procedural_logic=procedural_logic,
     )
     block.unify_blocks()
@@ -1030,13 +1020,8 @@ def build_pwm_signal_problem(
         glob_time=t_var,
         static_parameter_values_mapping={},
     )
-    for var in problem.get_algebraic_vars():
-        if var.name == m_a.name:
-            problem.init_guess[var.uid] = 0.0
-        elif var.name == m_b.name:
-            problem.init_guess[var.uid] = float(modulation_index * np.sin(-2.0 * np.pi / 3.0))
-        elif var.name == m_c.name:
-            problem.init_guess[var.uid] = float(modulation_index * np.sin(2.0 * np.pi / 3.0))
+    for var, value in initial_modulation.items():
+        problem.init_guess[var.uid] = float(value)
 
     mode_indices = (
         problem.uid2idx_event_params[gate_a_mode.uid],
@@ -1083,6 +1068,7 @@ def run_solver_backed_case(
             base_updater=build_boundary_updater_from_block(problem),
             mode_indices=mode_indices,
             mod_indices=mod_indices,
+            f_sw=f_sw,
             f_ref=f_ref,
             modulation_index=modulation_index,
         )
@@ -1218,10 +1204,7 @@ def reference_and_carrier_arrays(
     f_sw: float = 1000.0,
     modulation_index: float = 0.8,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    theta = 2.0 * np.pi * float(f_ref) * np.asarray(t, dtype=float)
-    ref_a = float(modulation_index) * np.sin(theta)
-    ref_b = float(modulation_index) * np.sin(theta - 2.0 * np.pi / 3.0)
-    ref_c = float(modulation_index) * np.sin(theta + 2.0 * np.pi / 3.0)
+    ref_a, ref_b, ref_c = pwm_references(t, f_ref, modulation_index)
     carrier = np.asarray([triangular_carrier(float(ti), 2.0 * np.pi * float(f_sw)) for ti in t], dtype=float)
     return ref_a, ref_b, ref_c, carrier
 
@@ -1474,26 +1457,14 @@ def simulate_comparison(
     f_sw: float = 1000.0,
     modulation_index: float = 0.8,
 ) -> PwmComparisonTrace:
-    problem, tracked = build_bridge_standalone_problem()
+    problem, (mode_a_idx, mode_b_idx, mode_c_idx), (idx_m_a, idx_m_b, idx_m_c) = build_pwm_signal_problem(
+        True, f_ref, f_sw, modulation_index
+    )
     boundary_updater = build_boundary_updater_from_block(problem)
     x = problem.get_x0().copy()
     params = problem.event_params_values.copy()
     omega_sw = 2.0 * np.pi * float(f_sw)
     carrier_phase = 0.0
-
-    mode_a_idx = problem.uid2idx_event_params[
-        next(var.uid for var in problem.get_runtime_mode_parameters() if var.name == "gate_a_mode_bridge_2level_pwm_compare")
-    ]
-    mode_b_idx = problem.uid2idx_event_params[
-        next(var.uid for var in problem.get_runtime_mode_parameters() if var.name == "gate_b_mode_bridge_2level_pwm_compare")
-    ]
-    mode_c_idx = problem.uid2idx_event_params[
-        next(var.uid for var in problem.get_runtime_mode_parameters() if var.name == "gate_c_mode_bridge_2level_pwm_compare")
-    ]
-
-    idx_m_a = problem.get_var_idx(tracked["m_a"])
-    idx_m_b = problem.get_var_idx(tracked["m_b"])
-    idx_m_c = problem.get_var_idx(tracked["m_c"])
 
     t_arr = np.linspace(0.0, float(t_end), int(n_samples), dtype=float)
     ref_a = np.zeros_like(t_arr)
@@ -1508,15 +1479,10 @@ def simulate_comparison(
     mti_gate_c = np.zeros_like(t_arr)
 
     for k, t in enumerate(t_arr):
-        theta = 2.0 * np.pi * float(f_ref) * float(t)
-        ref_a[k] = modulation_index * np.sin(theta)
-        ref_b[k] = modulation_index * np.sin(theta - 2.0 * np.pi / 3.0)
-        ref_c[k] = modulation_index * np.sin(theta + 2.0 * np.pi / 3.0)
+        ref_a[k], ref_b[k], ref_c[k] = pwm_references(t, f_ref, modulation_index)
         carrier[k] = triangular_carrier(float(t), omega_sw=omega_sw, carrier_phase=carrier_phase)
 
-        x[idx_m_a] = ref_a[k]
-        x[idx_m_b] = ref_b[k]
-        x[idx_m_c] = ref_c[k]
+        x[[idx_m_a, idx_m_b, idx_m_c]] = sample_references(t, f_ref, f_sw, modulation_index)
         boundary_updater.update(float(t), x, params)
 
         proc_gate_a[k] = params[mode_a_idx]
