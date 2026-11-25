@@ -114,3 +114,6 @@ _minted-*/
 /hackathon/**/*.out
 /plenary/**/*.log
 /plenary/**/*.out
+
+# Organizer-only hackathon cases, witnesses, and evaluation results
+/private_evaluation/

@@ -1,0 +1,1 @@
+Rejected diagnostic run: the original recording wrapper did not explicitly expose get_next_forced_event_time to the solver protocol check. Therefore PWM events were quantized to macro steps. These plots and metrics must not be used to diagnose the original native run. The corrected run is in ../controls. Retained only to document the instrumentation failure.
