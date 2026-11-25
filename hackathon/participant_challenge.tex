@@ -33,7 +33,7 @@
 \begin{minipage}[c]{0.73\textwidth}
   {\fontsize{23}{27}\selectfont\bfseries\color{tgblue}Keep the grid stable}\par
   {\large\color{tgpetrol}Lower losses. Better damping. Fewer changes.}\par
-  {\small Participant brief | First draft, version 0.1}
+  {\small Participant brief | First draft, version 0.2}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.23\textwidth}
   \raggedleft
@@ -45,49 +45,49 @@
 
 \section{Warm-up: reconstruct the function (09:15--10:15)}\label{sec:warmup}
 \textbf{This one-hour warm-up is ungraded and does not contribute to the final score.}
-Given a structural matrix $S$ and a coefficient matrix $\Phi$,
-\textbf{reconstruct the vector-valued function $\mathbf f$ that they encode}.
-Build a Python routine that returns readable expressions for its components
-$f_1,\ldots,f_E$ and a callable evaluator:
+Given a structural matrix $\mathbf{S}$ and a coefficient matrix $\boldsymbol{\Phi}$,
+\textbf{reconstruct the vector-valued function $\mathbf f$ that they encode}:
 \[
- \boxed{\quad \mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x).\quad}
+ \boxed{\quad \mathbf f(\mathbf x)=\boldsymbol{\Phi}\,\mathbf m(\mathbf x)=\mathbf{0},\qquad
+ \mathbf f=(f_1,\ldots,f_E)^\mathsf T=\mathbf{0}.\quad\textrm{(implicit system of equations)}\quad}
 \]
-The inputs defining the function are $S$ and $\Phi$. The variables
-$\mathbf x=(x_1,\ldots,x_N)^\mathsf T$ follow the row order of $S$;
+The inputs defining the function are $\mathbf{S}$ and $\boldsymbol{\Phi}$. The variables
+$\mathbf x=(x_1,\ldots,x_N)^\mathsf T$ follow the row order of $\mathbf{S}$;
 numerical values of $\mathbf x$ are supplied only when evaluating the function.
 
 \paragraph{Matrix convention.}
-Let $N$ be the number of variables, $M$ the number of product terms, and $E$ the
+Let $N$ be the number of variables, $M$ the number of product terms (monomials), and $E$ the
 number of equations. The input dimensions are
 \[
- \mathbf x\in\mathbb R^N,\qquad S\in\mathbb R^{N\times M},\qquad
- \Phi\in\mathbb R^{E\times M}.
+ \mathbf x\in\mathbb R^N,\qquad \mathbf{S}\in\mathbb R^{N\times M},\qquad
+ \boldsymbol{\Phi}\in\mathbb R^{E\times M}.
 \]
-\textbf{Rows of $S$ identify variables; columns identify terms.} Column $j$ of
-$S$ and column $j$ of $\Phi$ refer to the same term. Row $k$ of $\Phi$ supplies
+\textbf{Rows of $\mathbf{S}$ identify variables; columns identify terms.} Column $j$ of
+$\mathbf{S}$ and column $j$ of $\boldsymbol{\Phi}$ refer to the same term. Row $k$ of $\boldsymbol{\Phi}$ supplies
 its coefficients in equation $k$. Preserve the supplied variable order.
 
-For this challenge, use the factor convention of the supplied multilinear tools:
+In TenSyGrid's CPN formulation, $\mathbf{S}$ is binary and the monomials are nonnegative:
 \[
- a_{ij}(\mathbf x)=S_{ij}x_i+1-|S_{ij}|,\qquad
- m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
+ a_{ij}(\mathbf x)=S_{ij}x_i+1-S_{ij},\qquad S_{ij}\in\{0,1\},
+ \qquad m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
  f_k(\mathbf x)=\sum_{j=1}^{M}\Phi_{kj}m_j(\mathbf x).
 \]
-An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$;
-$S_{ij}=-1$ gives $-x_i$. Entries encode factors, \textbf{not powers}.
-With binary $S$, each column simply selects which variables appear in a monomial.
-An all-zero column represents the constant term 1. Each variable appears at most
-once in a term, so the representation is multi-affine in $\mathbf x$.
+An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$.
+Entries encode factors, \textbf{not powers}, and each column simply selects
+which variables appear in a monomial. An all-zero column represents the
+constant term 1. Each variable appears at most once in a term, so the
+representation is multi-affine in $\mathbf x$. \textbf{Any minus sign belongs to
+the coefficient in $\boldsymbol{\Phi}$, never to the monomial.}
 
 \paragraph{Reconstruction and example.}
-For each column of $S$, build its product term. Multiply by the corresponding
-coefficients in each row of $\Phi$, then sum to obtain each component $f_k$. Reconstructing $\mathbf f$ does not
+For each column of $\mathbf{S}$, build its product term. Multiply by the corresponding
+coefficients in each row of $\boldsymbol{\Phi}$, then sum to obtain each component $f_k$. Reconstructing $\mathbf f$ does not
 require solving $\mathbf f(\mathbf x)=\mathbf 0$.
 
 \textbf{Worked example.} For $\mathbf x=(x_1,x_2)^\mathsf T$, take
 \[
- S=\begin{pmatrix}0&1&0&1\\0&0&1&1\end{pmatrix},\qquad
- \Phi=\begin{pmatrix}-1&1&0&2\\0&0&3&-1\end{pmatrix}.
+ \mathbf{S}=\begin{pmatrix}0&1&0&1\\0&0&1&1\end{pmatrix},\qquad
+ \boldsymbol{\Phi}=\begin{pmatrix}-1&1&0&2\\0&0&3&-1\end{pmatrix}.
 \]
 Then $\mathbf m=(1,x_1,x_2,x_1x_2)^\mathsf T$, giving
 \[
@@ -96,12 +96,11 @@ Then $\mathbf m=(1,x_1,x_2,x_1x_2)^\mathsf T$, giving
 \]
 At $\mathbf x=(1,2)^\mathsf T$, the expected output is $\mathbf f(1,2)=(4,4)^\mathsf T$.
 
-
 \paragraph{Check your result.}
 At 10:15, compare your expressions and evaluator with the reference results and
 ask mentors about any differences before moving to grid optimisation. There is
 no graded warm-up submission. Check constant terms, zero-valued inputs, signed
-factors and rectangular systems. Work with the $M$ supplied columns rather than
+coefficients and rectangular systems. Work with the $M$ supplied columns rather than
 building all $2^N$ possible monomials.
 
 \newpage
@@ -220,7 +219,7 @@ exploits when determining the final standings. Wrap-up, presentations and awards
 take place from 16:00 to 17:00.
 
 \vfill
-{\footnotesize\color{tggraphit}First draft for review. Final submission details and evaluation conventions
-will be confirmed before the event.\par
+{\footnotesize\color{tggraphit}%First draft for review. Final submission details and evaluation conventions
+%will be confirmed before the event.\par
 Universitat Polit\`ecnica de Catalunya | CETPartnership Horizon Europe (GA 101069750)}
 \end{document}

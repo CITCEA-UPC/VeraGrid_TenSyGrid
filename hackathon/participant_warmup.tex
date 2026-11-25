@@ -52,7 +52,7 @@
 \begin{minipage}[c]{0.73\textwidth}
   {\fontsize{23}{27}\selectfont\bfseries\color{tgblue}Reconstruct the function}\par
   {\large\color{tgpetrol}Warm-up worksheet | 09:15--10:15}\par
-  {\small Participant worksheet | First draft, version 0.1}
+  {\small Participant worksheet}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.23\textwidth}
   \raggedleft
@@ -126,7 +126,7 @@ building all $2^N$ possible monomials.
 \section{Practice case: from \texorpdfstring{$\mathbf{S}$ and $\boldsymbol{\Phi}$}{S and Phi} to the equations}\label{sec:practice}
 The same convention applies, now with the variable vector
 \[
- \mathbf v=(\dot x_1,\;x_1,\;u_1,\;y_1,\;z_1)^\mathsf T,
+ \mathbf x=(\dot x_1,\;x_1,\;u_1,\;y_1,\;z_1)^\mathsf T,
 \]
 so $N=5$, $M=7$ and $E=2$. The state derivative $\dot x_1$ is a variable in its
 own right: the first equation is implicit because it contains the product
@@ -148,7 +148,7 @@ $\dot x_1\,y_1$. The supplied structural and coefficient matrices are
  \end{pmatrix}.
 \]
 \endgroup
-Reconstruct the two residual equations $0=f_1(\mathbf v)$ and $0=f_2(\mathbf v)$
+Reconstruct the two residual equations $0=f_1(\mathbf x)$ and $0=f_2(\mathbf x)$
 encoded by these matrices.
 
 \paragraph{(a) Product terms.} Read each column of $\mathbf{S}$ and write the
@@ -158,7 +158,7 @@ corresponding factor product $m_j$:
 \renewcommand{\arraystretch}{1.8}
 \begin{tabularx}{\textwidth}{@{}c X@{}}
 \toprule
-\textbf{Column} & \textbf{Product term $m_j(\mathbf v)$}\\
+\textbf{Column} & \textbf{Product term $m_j(\mathbf x)$}\\
 \midrule
 $1$ & \\
 $2$ & \\
@@ -174,14 +174,14 @@ $7$ & \\
 \paragraph{(b) Residual equations.} Multiply each term by the coefficient in
 the corresponding row of $\boldsymbol{\Phi}$, then simplify:
 \vspace{2pt}
-\par\noindent $0=f_1(\mathbf v)=$~\hrulefill
+\par\noindent $0=f_1(\mathbf x)=$~\hrulefill
 \par\vspace{14pt}\noindent\rule{\textwidth}{0.4pt}
 \par\vspace{18pt}
-\par\noindent $0=f_2(\mathbf v)=$~\hrulefill
+\par\noindent $0=f_2(\mathbf x)=$~\hrulefill
 \vspace{18pt}
 
 \paragraph{(c) Equilibrium check.} Verify that the residuals vanish at the
-equilibrium point $\mathbf v=(2,2,3,2,5)^\mathsf T$:
+equilibrium point $\mathbf x=(2,2,3,2,5)^\mathsf T$:
 \vspace{2pt}
 \par\noindent $f_1(2,2,3,2,5)=$~\hrulefill
 \vspace{14pt}
@@ -195,17 +195,17 @@ Now reverse the direction. You are given the two residual equations
   0 &= 2 + 3x_1x_2 - 4u_1,\\
   0 &= -1 - x_1x_2 + 5x_2,
 \end{align*}
-with variable vector $\mathbf v=(x_1,x_2,u_1)^\mathsf T$, so $N=3$ and $E=2$.
+with variable vector $\mathbf x=(x_1,x_2,u_1)^\mathsf T$, so $N=3$ and $E=2$.
 Write them as $\mathbf 0=\boldsymbol{\Phi}\,\mathbf m(\mathbf x)$ using exactly the four
 factors, in this order,
 \[
- \mathbf m(\mathbf v)=\bigl(1,\;x_1x_2,\;u_1,\;x_2\bigr)^\mathsf T,
+ \mathbf m(\mathbf x)=\bigl(1,\;x_1x_2,\;u_1,\;x_2\bigr)^\mathsf T,
 \]
 so $M=4$. Entries of $\mathbf{S}$ are only 0 or 1: a 1 means that the variable appears in
 the monomial, an all-zero column gives the constant factor 1, and every minus
 sign is placed in $\boldsymbol{\Phi}$.
 
-\paragraph{(a) Structural matrix $\mathbf{S}$.} Rows follow $\mathbf v=(x_1,x_2,u_1)$;
+\paragraph{(a) Structural matrix $\mathbf{S}$.} Rows follow $\mathbf x=(x_1,x_2,u_1)$;
 columns follow the prescribed factor order:
 \begingroup
 \renewcommand{\arraystretch}{2}
@@ -234,7 +234,7 @@ equation $k$; column $j$ refers to the same factor as column $j$ of $\mathbf{S}$
 \endgroup
 \vspace{6pt}
 
-\paragraph{(c) Check.} Expand $\boldsymbol{\Phi}\,\mathbf m(\mathbf v)$ and confirm that you
+\paragraph{(c) Check.} Expand $\boldsymbol{\Phi}\,\mathbf m(\mathbf x)$ and confirm that you
 recover both equations:
 \answerlines{2}
 
@@ -247,13 +247,9 @@ Universitat Polit\`ecnica de Catalunya | CETPartnership Horizon Europe (GA 10106
 \newpage
 \section*{Mentor answer key --- do not distribute}
 \addcontentsline{toc}{section}{Mentor answer key}
-With the column order used above,
+With the column order used above, the factor vector is
 \[
- \mathbf m(\mathbf v)=(v_1v_4,\;v_2v_5,\;v_2v_3,\;v_2v_3v_5,\;v_2,\;v_1,\;v_4)^\mathsf T,
-\]
-that is,
-\[
- \mathbf m(\mathbf v)=(\dot x_1y_1,\;z_1x_1,\;u_1x_1,\;u_1z_1x_1,\;x_1,\;\dot x_1,\;y_1)^\mathsf T.
+ \mathbf m(\mathbf x)=(\dot x_1y_1,\;z_1x_1,\;u_1x_1,\;u_1z_1x_1,\;x_1,\;\dot x_1,\;y_1)^\mathsf T.
 \]
 Therefore
 \[
@@ -263,7 +259,7 @@ Therefore
   0 &= \dot x_1 - y_1.
  \end{aligned}\quad}
 \]
-At the equilibrium $\mathbf v=(2,2,3,2,5)^\mathsf T$,
+At the equilibrium $\mathbf x=(2,2,3,2,5)^\mathsf T$,
 $\mathbf m=(4,10,6,30,2,2,2)^\mathsf T$ and
 $\boxed{\;f_1=0,\quad f_2=0\;}$: the point satisfies $\dot x_1=y_1=2$ and
 $3\dot x_1y_1+x_1(2z_1-u_1-u_1z_1+2)=12-12=0$.
