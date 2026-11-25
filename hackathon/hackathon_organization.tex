@@ -87,9 +87,9 @@ The European research project \textbf{TenSyGrid} (\textit{Tensors for System Ana
 % ===========================================================================
 
 \paragraph{Mission statement.}
-Participating teams are given a benchmark transmission grid in native \texttt{.veragrid} format with multiple candidate corridors and converter-interfaced generation. The hackathon starts with an ungraded one-hour warm-up reconstructing $\mathbf f(\mathbf x)=\Phi\,\mathbf m(\mathbf x)$ from supplied matrices $S$ and $\Phi$, before moving to grid optimisation. Your mission is to:
+Participating teams are given a benchmark transmission grid in native \texttt{.veragrid} format with multiple candidate corridors and converter-interfaced generation. The hackathon starts with an ungraded one-hour warm-up reconstructing $\mathbf f(\mathbf x)=\boldsymbol{\Phi}\,\mathbf m(\mathbf x)$ from supplied matrices $\mathbf{S}$ and $\boldsymbol{\Phi}$, before moving to grid optimisation. Your mission is to:
 \begin{enumerate}[leftmargin=*, itemsep=2pt]
-  \item \textbf{Reconstruct the function} encoded by $S$ and $\Phi$: return readable expressions and a callable numerical evaluator.
+  \item \textbf{Reconstruct the function} encoded by $\mathbf{S}$ and $\boldsymbol{\Phi}$: return readable expressions and a callable numerical evaluator.
   \item \textbf{Decide line breaker switching} ($u_{\text{line}, k} \in \{0, 1\}$) to minimize steady-state transmission losses.
   \item \textbf{Tune converter control parameters} (virtual damping, droop gains, voltage controls) to ensure the system is small-signal stable.
   \item \textbf{Automate your strategy across 300 test scenarios} with variable renewable generation, loads, and $N-1$ line outages.
@@ -141,13 +141,14 @@ number of equations. The input dimensions are
 $\mathbf{S}$ and column $j$ of $\boldsymbol{\Phi}$ refer to the same term. Row $k$ of $\boldsymbol{\Phi}$ supplies
 its coefficients in equation $k$. Preserve the supplied variable order.
 
-In TenSyGrid's CPN formulation, $\mathbf{S}$ is binary and the monomials are nonnegative:
+Let $s_{ij}$ and $\phi_{kj}$ denote the scalar entries of $\mathbf{S}$ and $\boldsymbol{\Phi}$,
+respectively. In TenSyGrid's CPN formulation, $\mathbf{S}$ is binary and the monomials are nonnegative:
 \[
- a_{ij}(\mathbf x)=S_{ij}x_i+1-S_{ij},\qquad S_{ij}\in\{0,1\},
+ a_{ij}(\mathbf x)=s_{ij}x_i+1-s_{ij},\qquad s_{ij}\in\{0,1\},
  \qquad m_j(\mathbf x)=\prod_{i=1}^{N}a_{ij}(\mathbf x),\qquad
- f_k(\mathbf x)=\sum_{j=1}^{M}\Phi_{kj}m_j(\mathbf x).
+ f_k(\mathbf x)=\sum_{j=1}^{M}\phi_{kj}m_j(\mathbf x).
 \]
-An entry $S_{ij}=0$ gives a factor of 1; $S_{ij}=1$ gives $x_i$.
+An entry $s_{ij}=0$ gives a factor of 1; $s_{ij}=1$ gives $x_i$.
 Entries encode factors, \textbf{not powers}, and each column simply selects
 which variables appear in a monomial. An all-zero column represents the
 constant term 1. Each variable appears at most once in a term, so the
@@ -262,7 +263,7 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
     \textbf{\color{tgblue}Time} & \textbf{\color{tgblue}Session and milestone}                                                                                                                                              \\
     \midrule
     \textbf{09:00 -- 09:15}     & \textbf{Hackathon kick-off:} Challenge presentation by Eduardo Prieto Araujo, problem statement, stability criteria, and VeraGrid platform introduction.                                  \\
-    \textbf{09:15 -- 10:15} & \textbf{Ungraded warm-up: Reconstruct the function.} Build readable expressions and a Python evaluator for $\mathbf f=\Phi\,\mathbf m$ from $S$ and $\Phi$; validate on reference cases. \\
+    \textbf{09:15 -- 10:15} & \textbf{Ungraded warm-up: Reconstruct the function.} Build readable expressions and a Python evaluator for $\mathbf f=\boldsymbol{\Phi}\,\mathbf m$ from $\mathbf{S}$ and $\boldsymbol{\Phi}$; validate on reference cases. \\
     \textbf{10:15 -- 11:00}     & \textbf{Part 2: Static grid and topology switching.} Run the baseline and optimise topology and dispatch with the VeraGrid Python API.                                           \\
     \textbf{11:00 -- 11:30}     & \textit{\color{tgpetrol}Coffee break.}                                                                                                                                                    \\
     \textbf{11:30 -- 12:00}     & \textbf{Hackathon support:} Dedicated mentoring and technical Q\&A with TenSyGrid consortium researchers.                                                                                 \\
@@ -281,7 +282,7 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
 
 Each team will receive a starter Git repository containing:
 \begin{itemize}[leftmargin=*, itemsep=1pt, parsep=0pt]
-  \item \textbf{Warm-up matrix examples}: The integrated reconstruction instructions in Section~\ref{sec:warmup}, plus reference input/output cases for $S$ and $\Phi$.
+  \item \textbf{Warm-up matrix examples}: The integrated reconstruction instructions in Section~\ref{sec:warmup}, plus reference input/output cases for $\mathbf{S}$ and $\boldsymbol{\Phi}$.
   \item \texttt{benchmark\_grid.veragrid}: Benchmark grid with synchronous generators and grid-following/\allowbreak grid-forming converters.
   \item \texttt{starter\_script.py}: Ready-to-run template demonstrating model loading, AC power flow execution, descriptor state matrix assembly, and eigenvalue calculation in VeraGrid.
   \item \texttt{evaluate\_quick.py}: Fast validation tool evaluating a reduced subset of 5--10 representative scenarios for sub-second iterative feedback during prototyping.
@@ -337,6 +338,6 @@ VeraGrid assembles the system matrices from physical component models and expose
 The 300-scenario batch sweep in Phase 4 is the practical motivation: teams that exploit the multilinear structure --- or simply profile and batch the VeraGrid API efficiently --- can evaluate stability margins substantially faster than a brute-force eigensolve per scenario, and fast evaluation is exactly what real TSOs need for online, security-constrained dispatch.
 
 \bigskip
-\noindent\textit{Note: this document is a first iteration. The challenge definition and the scoring function will be refined and improved over the coming days.}
+
 
 \end{document}
