@@ -40,10 +40,20 @@
 \newcommand{\HackathonRoom}{InnoEnergy Room}
 \newcommand{\PlenaryRoom}{Room LS5}
 \graphicspath{{tensygrid-latex-package/config/}{plenary/tensygrid-latex-package/config/}{assets/}{plenary/assets/}}
-% Official source: https://citcea.upc.edu/ca/shared/logos/logocitceaupc.png
-\newcommand{\CITCEALogo}{%
-  \node[anchor=north,inner sep=0pt] at (158,-12)
-    {\includegraphics[width=70mm]{citcea-upc.png}};%
+\newcommand{\SignHeader}{%
+  \fill[tgpetrol] (0,0) rectangle (297,-3);
+  \fill[tglime] (255,0) rectangle (297,-3);
+  \node[inner sep=0pt] at (65,-20)
+    {\includegraphics[width=90mm]{tglogo.pdf}};
+  % Official CITCEA source: https://citcea.upc.edu/ca/shared/logos/logocitceaupc.png
+  \node[inner sep=0pt] at (149,-29)
+    {\includegraphics[width=64mm]{citcea-upc.png}};
+  \node[inner sep=0pt] at (232,-20)
+    {\includegraphics[width=64mm]{eRoots-logo.pdf}};
+  \draw[tggrey,line width=0.4pt] (12,-46) -- (285,-46);
+  \node[anchor=north,inner sep=0pt,text=tggraphit,
+        font=\fontsize{22}{26}\selectfont\bfseries] at (148.5,-50)
+    {Pavilion L};%
 }
 
 % #1: arrow rotation (0 = right, 90 = straight ahead, 180 = left).
@@ -51,15 +61,7 @@
   \null
   \begin{tikzpicture}[remember picture,overlay,x=1mm,y=1mm]
     \begin{scope}[shift={(current page.north west)}]
-      % Header treatment from tensygrid-certificate.tex.
-      \fill[tgpetrol] (0,0) rectangle (297,-3);
-      \fill[tglime] (255,0) rectangle (297,-3);
-      \node[anchor=north west,inner sep=0pt] at (20,-14)
-        {\includegraphics[width=90mm]{tglogo.pdf}};
-      \CITCEALogo
-      \node[anchor=north east,inner sep=0pt,text=tggraphit,
-            font=\fontsize{32}{38}\selectfont\bfseries] at (281,-20)
-        {Pavilion L};
+      \SignHeader
 
       \node[anchor=north west,inner sep=0pt,text=tgpetrol,
             font=\fontsize{64}{72}\selectfont\bfseries] at (12,-63)
@@ -93,14 +95,7 @@
   \null
   \begin{tikzpicture}[remember picture,overlay,x=1mm,y=1mm]
     \begin{scope}[shift={(current page.north west)}]
-      \fill[tgpetrol] (0,0) rectangle (297,-3);
-      \fill[tglime] (255,0) rectangle (297,-3);
-      \node[anchor=north west,inner sep=0pt] at (20,-14)
-        {\includegraphics[width=90mm]{tglogo.pdf}};
-      \CITCEALogo
-      \node[anchor=north east,inner sep=0pt,text=tggraphit,
-            font=\fontsize{32}{38}\selectfont\bfseries] at (281,-20)
-        {Pavilion L};
+      \SignHeader
       \node[anchor=center,inner sep=0pt,text=tgpetrol,
             font=\fontsize{100}{110}\selectfont\bfseries] at (148.5,-94)
         {#1};
