@@ -1,0 +1,4 @@
+grid_multilinear_Symbolic: templates and power flow ready after 23.563 s
+grid_multilinear_Symbolic: EMT problem ready after 23.652 s
+grid_multilinear_Symbolic: solver ready after 23.653 s
+{"case": "grid_multilinear_Symbolic", "status": "ok", "setup_seconds": 23.652616137987934, "warmup_policy": "off", "integrator": "Symbolic", "solve_seconds": 5.26670420600567, "initialized": true, "converged": true, "final_time": 0.002, "points": 201}

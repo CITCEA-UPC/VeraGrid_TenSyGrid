@@ -1,0 +1,86 @@
+grid_multilinear_StructuralCompiled: templates and power flow ready after 25.802 s
+grid_multilinear_StructuralCompiled: EMT problem ready after 25.952 s
+Timeout (0:01:00)!
+Thread 0x000072a961c06080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 403 in _find_singly_assigned_variable
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 358 in init
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 77 in __init__
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/typed_passes.py", line 470 in run_pass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 272 in check
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 311 in _runPass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_lock.py", line 35 in _acquire_compile_lock
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 356 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 473 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 505 in _compile_bytecode
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 439 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 739 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 107 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 94 in _compile_cached
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 80 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 908 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/decorators.py", line 234 in wrapper
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 168 in _safe_njit
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2473 in _build_vectorized_backend
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2345 in __init__
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/emt_solver_factory.py", line 83 in build_emt_solver
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 181 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 68 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 145 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 191 in <module>
+Timeout (0:01:00)!
+Thread 0x000072a961c06080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 403 in _find_singly_assigned_variable
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 358 in init
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 77 in __init__
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/typed_passes.py", line 470 in run_pass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 272 in check
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 311 in _runPass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_lock.py", line 35 in _acquire_compile_lock
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 356 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 473 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 505 in _compile_bytecode
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 439 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 739 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 107 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 94 in _compile_cached
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 80 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 908 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/decorators.py", line 234 in wrapper
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 168 in _safe_njit
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2473 in _build_vectorized_backend
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2345 in __init__
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/emt_solver_factory.py", line 83 in build_emt_solver
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 181 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 68 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 145 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 191 in <module>
+Timeout (0:01:00)!
+Thread 0x000072a961c06080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 403 in _find_singly_assigned_variable
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 358 in init
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/lowering.py", line 77 in __init__
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/typed_passes.py", line 470 in run_pass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 272 in check
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 311 in _runPass
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_lock.py", line 35 in _acquire_compile_lock
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler_machinery.py", line 356 in run
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 473 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 505 in _compile_bytecode
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 439 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/compiler.py", line 739 in compile_extra
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 107 in _compile_core
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 94 in _compile_cached
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 80 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/dispatcher.py", line 908 in compile
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/decorators.py", line 234 in wrapper
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 168 in _safe_njit
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2473 in _build_vectorized_backend
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2345 in __init__
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/emt_solver_factory.py", line 83 in build_emt_solver
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 181 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 68 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 145 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 191 in <module>
+Timeout (0:01:00)!
+Thread 0x000072a961c06080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/core/ir.py", line 1297 in find_insts

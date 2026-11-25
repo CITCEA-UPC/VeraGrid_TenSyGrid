@@ -1,0 +1,1 @@
+{"case": "pwm_live_comparator", "status": "ok", "first_call_seconds": 0.02428485100972466, "repeat_seconds": [0.021362702012993395, 0.021408826985862106, 0.02138488201308064], "median_repeat_seconds": 0.02138488201308064, "points": 81, "label": "StructuralCompiledSolver + DaeBackEuler + root-detected direct comparator updater"}

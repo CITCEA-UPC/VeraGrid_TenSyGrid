@@ -1,0 +1,7 @@
+grid_standard_Automatic: templates and power flow ready after 37.861 s
+grid_standard_Automatic: EMT problem ready after 38.039 s
+grid_standard_Automatic: solver ready after 38.040 s
+Timeout (0:01:00)!
+Thread 0x00007c4def275080 (most recent call first):
+  File "/home/pablo/myenv/lib/python3.12/site-packages/numba/np/numpy_support.py", line 407 in ufunc_can_cast
+  File

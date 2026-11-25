@@ -1,0 +1,12 @@
+{
+  "case": "grid_mti_StructuralCompiled",
+  "status": "invalid",
+  "setup_seconds": 48.31558232300449,
+  "warmup_policy": "off",
+  "integrator": "EmtMtiBackEulerSolver",
+  "solve_seconds": 18.84435922600096,
+  "initialized": false,
+  "converged": true,
+  "final_time": 0.0020000000000000044,
+  "points": 201
+}

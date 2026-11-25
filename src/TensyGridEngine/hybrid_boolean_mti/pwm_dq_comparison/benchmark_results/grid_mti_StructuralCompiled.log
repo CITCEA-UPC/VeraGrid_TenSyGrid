@@ -1,0 +1,31 @@
+grid_mti_StructuralCompiled: templates and power flow ready after 39.081 s
+grid_mti_StructuralCompiled: EMT problem ready after 48.315 s
+grid_mti_StructuralCompiled: solver ready after 48.316 s
+Timeout (0:01:00)!
+Thread 0x00007af38f862080 (most recent call first):
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/__pycache_jit__/emt_mti_j22_filler_ee7aa9a3e4373b97.py", line 209 in emt_mti_j22_filler
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Utils/Symbolic/jit_compiler.py", line 304 in __call__
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/problems/emt_problem_mti.py", line 203 in get_j22
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_fx.py", line 154 in _jacobian_implicit
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py", line 211 in _jacobian_implicit
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py", line 332 in _newton_step
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py", line 397 in _solve_continuous_for_fixed_boolean
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py", line 440 in _solve_continuous_with_fallback
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py", line 1652 in simulate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/emt_mti_back_euler_solver.py", line 57 in simulate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 193 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 70 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 206 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 253 in <module>
+[MTI] Initial z0 (4 booleans): [0. 0. 1. 1.]
+[MTI-INC] blocks eq=127 ineq=4 ineq_rows=1 xp=32 y=95 bool=4 nnz=505
+[MTI-INC] shape=(131,131) nnz=505
+[MTI-ORDER] incidence shape=(131,131)
+[MTI-ORDER] matching score unmatched=1 components=58 largest=74 singletons=57
+[MTI-ORDER] structural matching complete
+[MTI-ORDER] perm head rows=[48, 6, 47, 49, 38, 39, 40, 50] cols=[48, 6, 47, 49, 38, 39, 40, 50]
+[MTI-ORDER] dmperm-like components=58 sizes_head=[1, 1, 1, 1, 1, 1, 1, 1]
+[MTI-ORDER] sorted shape=(131,131) row_perm=131 col_perm=131
+[MTI-ORDER] rows=131 subsets=1 subproblems=58 explicit=56
+[MTI-INC] solving_order_rows=131 subsets=1 subproblems=58
+{"case": "grid_mti_StructuralCompiled", "status": "invalid", "setup_seconds": 48.31558232300449, "warmup_policy": "off", "integrator": "EmtMtiBackEulerSolver", "solve_seconds": 18.84435922600096, "initialized": false, "converged": true, "final_time": 0.0020000000000000044, "points": 201}

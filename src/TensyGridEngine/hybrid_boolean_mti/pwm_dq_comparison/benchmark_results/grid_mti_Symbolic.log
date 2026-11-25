@@ -1,0 +1,1 @@
+{"case": "grid_mti_Symbolic", "status": "skipped", "reason": "MTI uses its dedicated integrator; the EMT Jacobian backend is not a separate MTI solver"}

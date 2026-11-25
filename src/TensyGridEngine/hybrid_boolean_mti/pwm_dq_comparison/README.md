@@ -79,3 +79,17 @@ current analytically between gate changes.
 
 This is an event-equation test. It supplies the ramp boundaries explicitly and
 does not use the original BackEulerMTI benchmark adapters.
+
+## Solver timings and full converter grid comparison
+
+Run `benchmark_solvers.py` from the repository root with `PYTHONPATH=src`,
+`MPLBACKEND=Agg`, and one BLAS/OpenMP thread. It times four solver-backed PWM
+variants and runs the standard, multilinear, and MTI full switched converters
+in a power-flow-initialized AC/DC grid. The MTI converter uses the dedicated
+MTI problem and integrator. Each case runs in a separate process with a timeout.
+For this short grid case, the compiled backend uses its warmup-off policy;
+setup and simulation times are recorded separately.
+
+See [the benchmark report](benchmark_results/README.md) for timings, waveform
+errors, limitations, raw arrays, and failure logs. Convergence and speed alone
+do not imply agreement between converter variants.

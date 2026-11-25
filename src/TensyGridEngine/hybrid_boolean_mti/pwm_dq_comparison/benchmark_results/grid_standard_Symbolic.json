@@ -1,0 +1,10 @@
+{
+  "case": "grid_standard_Symbolic",
+  "status": "ok",
+  "setup_seconds": 39.53130867698928,
+  "solve_seconds": 21.779998017998878,
+  "initialized": true,
+  "converged": true,
+  "final_time": 0.002,
+  "points": 201
+}

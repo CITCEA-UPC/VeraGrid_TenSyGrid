@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import sys
+from time import perf_counter
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,10 +45,10 @@ from VeraGridEngine.Templates.Emt.converter_emt_template import get_emt_ideal_co
 from VeraGridEngine.Templates.Emt.dc_load_emt_template import get_dc_load_emt_template
 from VeraGridEngine.Templates.Emt.transformer_emt_template import get_transformer_emt_template
 from VeraGridEngine.Templates.Emt.thevenin_equivalent_emt_generator_template import get_generator_thevenin_rl_emt_template_with_ref
-from VeraGridEngine.Templates.templates_common_functions import set_emt_model
+from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_emt_model
 from VeraGridEngine.Utils.Symbolic.block import Var, find_name_in_block
 from VeraGridEngine.Utils.procedural_logic import build_boundary_updater_from_block
-from VeraGridEngine.enumerations import DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes, SolverType
+from VeraGridEngine.enumerations import DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes, SolverType, VarPowerFlowReferenceType
 
 
 @dataclass
@@ -60,6 +61,10 @@ class CaseResults:
     i_dc: np.ndarray
     p: np.ndarray
     q: np.ndarray
+    setup_seconds: float
+    solve_seconds: float
+    initialized: bool
+    converged: bool
 
 
 def build_emt_options() -> EmtOptions:
@@ -73,7 +78,7 @@ def build_emt_options() -> EmtOptions:
         initialization_method=EmtInitializationMethod.Explicit,
         verbose=0,
     )
-    options.newton_max_iter = 20
+    options.init_newton_max_iter = 20
     return options
 
 
@@ -101,8 +106,9 @@ def _get_signal(problem: EmtProblemDae, state_traj: np.ndarray, variable_name: s
     return state_traj[:, idx]
 
 
-def simulate_case(label: str, converter_builder: callable) -> CaseResults:
+def simulate_case(label: str, converter_builder: callable, options: EmtOptions | None = None, use_mti: bool = False) -> CaseResults:
     """Build one AC/DC grid, run PF+EMT and return converter time series."""
+    started = perf_counter()
     grid = gce.MultiCircuit(name=f"Converter compare {label}", Sbase=100.0, fbase=50.0)
     bus_slack_ac = gce.Bus(name="Bus_Slack_AC", Vnom=230.0, is_slack=True)
     bus_ac = gce.Bus(name="Bus_AC", Vnom=230.0)
@@ -144,6 +150,9 @@ def simulate_case(label: str, converter_builder: callable) -> CaseResults:
 
     pf_results = gce.power_flow(grid=grid, options=build_pf_options())
 
+    if not pf_results.converged:
+        raise RuntimeError("Grid power flow did not converge")
+
     gen_mdl = get_generator_thevenin_rl_emt_template_with_ref(vf=grid.var_factory).block
     trafo_mdl = get_transformer_emt_template(vf=grid.var_factory, name=trafo.name).block
     vsc_mdl = converter_builder(vf=grid.var_factory, name=vsc.name).block
@@ -154,13 +163,22 @@ def simulate_case(label: str, converter_builder: callable) -> CaseResults:
     set_emt_model(device=vsc, model=vsc_mdl, var_factory=grid.var_factory)
     set_emt_model(device=dc_load, model=dc_load_mdl, var_factory=grid.var_factory)
 
-    problem = EmtProblemDae(
+    from VeraGridEngine.Simulations.EMT.problems.emt_problem_mti import EmtProblemMTI
+    from VeraGridEngine.Simulations.EMT.solvers.emt_mti_back_euler_solver import EmtMtiBackEulerSolver
+
+    print(f"{label}: templates and power flow ready after {perf_counter() - started:.3f} s", flush=True)
+    problem = (EmtProblemMTI if use_mti else EmtProblemDae)(
         grid=grid,
-        options=build_emt_options(),
+        options=options if options is not None else build_emt_options(),
         pf_results=pf_results,
         pf_results_3ph=None,
     )
-    solver = build_emt_solver(
+    print(f"{label}: EMT problem ready after {perf_counter() - started:.3f} s", flush=True)
+    solver = EmtMtiBackEulerSolver(
+        problem, 0.0, float(problem.options.simulation_time),
+        float(problem.options.time_step), max_iter=problem.options.init_newton_max_iter,
+        tolerance=problem.options.tolerance,
+    ) if use_mti else build_emt_solver(
         options=problem.options,
         problem=problem,
         t0=0.0,
@@ -169,17 +187,25 @@ def simulate_case(label: str, converter_builder: callable) -> CaseResults:
         method=problem.options.integration_method,
     )
     boundary_updater = build_boundary_updater_from_block(problem)
-    time_arr, state_traj, _diff_traj, _ok_init, _ok_conv = solver.simulate(boundary_updater=boundary_updater)
+    print(f"{label}: solver ready after {perf_counter() - started:.3f} s", flush=True)
+    setup_seconds = perf_counter() - started
+    started = perf_counter()
+    time_arr, state_traj, _diff_traj, _ok_init, _ok_conv = solver.simulate() if use_mti else solver.simulate(boundary_updater=boundary_updater)
+    solve_seconds = perf_counter() - started
 
     return CaseResults(
         label=label,
+        setup_seconds=setup_seconds,
+        solve_seconds=solve_seconds,
+        initialized=bool(_ok_init),
+        converged=bool(_ok_conv),
         time_arr=time_arr,
-        i_a=_get_signal(problem, state_traj, f"i_A_{vsc.name}"),
-        i_b=_get_signal(problem, state_traj, f"i_B_{vsc.name}"),
-        i_c=_get_signal(problem, state_traj, f"i_C_{vsc.name}"),
-        i_dc=_get_signal(problem, state_traj, f"i_dc_{vsc.name}"),
-        p=_get_signal(problem, state_traj, f"P_{vsc.name}"),
-        q=_get_signal(problem, state_traj, f"Q_{vsc.name}"),
+        i_a=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.i_A])],
+        i_b=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.i_B])],
+        i_c=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.i_C])],
+        i_dc=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.Idc])],
+        p=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.P])],
+        q=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.Q])],
     )
 
 

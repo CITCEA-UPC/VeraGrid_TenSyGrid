@@ -2935,7 +2935,8 @@ class RMSCompiler(EquationCompiler):
                  diff_vars: List[Var],
                  v_params: List[Var],
                  c_params: List[Var],
-                 compiler_names_dict: Dict[int, str]) -> None:
+                 compiler_names_dict: Dict[int, str],
+                 dt_var: Var | None = None) -> None:
         """
         Initializes the RMS Compiler with the system's mathematical components.
 
@@ -2946,9 +2947,11 @@ class RMSCompiler(EquationCompiler):
             c_params (List[Var]): Constant parameters.
             compiler_names_dict (Dict[int, str]): Dictionary mapping variable UIDs to
                                                   their executable string representations.
+            dt_var (Var | None): Existing time-step symbol used by MTI expressions.
+                                 A new symbol is created when omitted.
         """
         super().__init__(variables=variables, parameters=c_params, method=DynamicIntegrationMethod.DaeBackEuler)
-        self.dt_var = Var(name="dt")
+        self.dt_var = dt_var if dt_var is not None else Var(name="dt")
         self.compiler_names_dict = compiler_names_dict
         self.diff_vars = diff_vars
         self.v_params = v_params

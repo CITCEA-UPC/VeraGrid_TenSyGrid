@@ -1,0 +1,10 @@
+Timeout (0:01:00)!
+Thread 0x000075105c74d080 (most recent call first):
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/__pycache_jit__/eq_step_f47b99c5135b33c8_2bdd4f03cd59e856.py", line 117 in eq_step_f47b99c5135b33c8
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/jit_symbolic_solver.py", line 484 in evaluate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/jit_symbolic_solver.py", line 1314 in simulate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 190 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 66 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 143 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 189 in <module>
+{"case": "grid_standard_Symbolic", "status": "ok", "setup_seconds": 39.53130867698928, "solve_seconds": 21.779998017998878, "initialized": true, "converged": true, "final_time": 0.002, "points": 201}

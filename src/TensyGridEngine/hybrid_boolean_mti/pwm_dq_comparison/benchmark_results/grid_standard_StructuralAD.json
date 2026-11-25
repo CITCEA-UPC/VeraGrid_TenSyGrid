@@ -1,0 +1,5 @@
+{
+  "case": "grid_standard_StructuralAD",
+  "status": "error",
+  "error": "Command '['/home/pablo/myenv/bin/python', '/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py', '--worker', 'grid_standard_StructuralAD']' died with <Signals.SIGSEGV: 11>."
+}

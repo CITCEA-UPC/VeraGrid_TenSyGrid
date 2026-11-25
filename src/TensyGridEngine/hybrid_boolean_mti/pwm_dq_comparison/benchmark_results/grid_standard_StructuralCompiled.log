@@ -1,0 +1,4 @@
+grid_standard_StructuralCompiled: templates and power flow ready after 39.293 s
+grid_standard_StructuralCompiled: EMT problem ready after 39.466 s
+grid_standard_StructuralCompiled: solver ready after 40.546 s
+{"case": "grid_standard_StructuralCompiled", "status": "ok", "setup_seconds": 40.5455509040039, "warmup_policy": "off", "integrator": "StructuralCompiled", "solve_seconds": 13.211919614986982, "initialized": true, "converged": true, "final_time": 0.002, "points": 201}

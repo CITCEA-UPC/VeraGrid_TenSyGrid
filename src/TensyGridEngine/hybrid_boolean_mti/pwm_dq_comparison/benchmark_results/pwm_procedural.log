@@ -1,0 +1,1 @@
+{"case": "pwm_procedural", "status": "ok", "first_call_seconds": 0.07495896000182256, "repeat_seconds": [0.012437276978744194, 0.013047321001067758, 0.013306061999173835], "median_repeat_seconds": 0.013047321001067758, "points": 81, "label": "StructuralCompiledSolver + DaeBackEuler + ThreePhaseCarrierPwmLogic scheduled updater"}

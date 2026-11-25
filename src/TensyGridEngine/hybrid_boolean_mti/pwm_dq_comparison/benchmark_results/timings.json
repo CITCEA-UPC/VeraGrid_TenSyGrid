@@ -1,0 +1,148 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "numpy": "2.3.0",
+  "revision": "b35e25b6c47e5f98024e62b93dc1ba0a34b80c76",
+  "working_tree": "benchmark run includes local uncommitted changes",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "settings": {
+    "pwm_duration_s": 0.004,
+    "pwm_step_s": 5e-05,
+    "grid_duration_s": 0.002,
+    "grid_step_s": 1e-05,
+    "pwm_timing": "one first call + three repeats, includes setup",
+    "grid_timing": "one fresh process, setup separate; simulation includes first-use compilation",
+    "grid_warmup_policy": "off; prior adaptive attempts exceeded 300 seconds",
+    "measurement_limitations": "Single grid runs; persistent caches and concurrent local compilation/testing can affect timing."
+  },
+  "results": [
+    {
+      "case": "pwm_internal_mti",
+      "status": "ok",
+      "first_call_seconds": 0.14909455098677427,
+      "repeat_seconds": [
+        0.14565811699139886,
+        0.14359546499326825,
+        0.14594098401721567
+      ],
+      "median_repeat_seconds": 0.14565811699139886,
+      "points": 81,
+      "label": "BackEulerImplicitIntegrationMTI + internal-carrier block PWM + runtime-parameter references"
+    },
+    {
+      "case": "pwm_live_comparator",
+      "status": "ok",
+      "first_call_seconds": 0.02428485100972466,
+      "repeat_seconds": [
+        0.021362702012993395,
+        0.021408826985862106,
+        0.02138488201308064
+      ],
+      "median_repeat_seconds": 0.02138488201308064,
+      "points": 81,
+      "label": "StructuralCompiledSolver + DaeBackEuler + root-detected direct comparator updater"
+    },
+    {
+      "case": "pwm_procedural",
+      "status": "ok",
+      "first_call_seconds": 0.07495896000182256,
+      "repeat_seconds": [
+        0.012437276978744194,
+        0.013047321001067758,
+        0.013306061999173835
+      ],
+      "median_repeat_seconds": 0.013047321001067758,
+      "points": 81,
+      "label": "StructuralCompiledSolver + DaeBackEuler + ThreePhaseCarrierPwmLogic scheduled updater"
+    },
+    {
+      "case": "pwm_scheduled_mti",
+      "status": "ok",
+      "first_call_seconds": 0.0684174640045967,
+      "repeat_seconds": [
+        0.0675089169817511,
+        0.06744237299426459,
+        0.06670347001636401
+      ],
+      "median_repeat_seconds": 0.06744237299426459,
+      "points": 81,
+      "label": "BackEulerImplicitIntegrationMTI + scheduled-transition PWM block"
+    },
+    {
+      "case": "grid_mti_StructuralCompiled",
+      "status": "invalid",
+      "setup_seconds": 48.31558232300449,
+      "warmup_policy": "off",
+      "integrator": "EmtMtiBackEulerSolver",
+      "solve_seconds": 18.84435922600096,
+      "initialized": false,
+      "converged": true,
+      "final_time": 0.0020000000000000044,
+      "points": 201
+    },
+    {
+      "case": "grid_mti_Symbolic",
+      "status": "skipped",
+      "reason": "MTI uses its dedicated integrator; the EMT Jacobian backend is not a separate MTI solver"
+    },
+    {
+      "case": "grid_multilinear_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 23.858762407995528,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "solve_seconds": 6.950052367988974,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    },
+    {
+      "case": "grid_multilinear_Symbolic",
+      "status": "ok",
+      "setup_seconds": 23.652616137987934,
+      "warmup_policy": "off",
+      "integrator": "Symbolic",
+      "solve_seconds": 5.26670420600567,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    },
+    {
+      "case": "grid_standard_Automatic",
+      "status": "error",
+      "error": "Command '['/home/pablo/myenv/bin/python', '/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py', '--worker', 'grid_standard_Automatic']' died with <Signals.SIGSEGV: 11>."
+    },
+    {
+      "case": "grid_standard_StructuralAD",
+      "status": "error",
+      "error": "Command '['/home/pablo/myenv/bin/python', '/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py', '--worker', 'grid_standard_StructuralAD']' died with <Signals.SIGSEGV: 11>."
+    },
+    {
+      "case": "grid_standard_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 40.5455509040039,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "solve_seconds": 13.211919614986982,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    },
+    {
+      "case": "grid_standard_Symbolic",
+      "status": "ok",
+      "setup_seconds": 39.53130867698928,
+      "solve_seconds": 21.779998017998878,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    }
+  ]
+}

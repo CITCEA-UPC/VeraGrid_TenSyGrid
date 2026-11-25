@@ -1,0 +1,18 @@
+sinusoidal | Procedural | A: 7 edges, edge error 0 s, current error 0 A
+sinusoidal | Procedural | B: 8 edges, edge error 0 s, current error 0 A
+sinusoidal | Procedural | C: 9 edges, edge error 0 s, current error 0 A
+sinusoidal | Internal-carrier MTI | A: 7 edges, edge error 2.17e-19 s, current error 2.27e-13 A
+sinusoidal | Internal-carrier MTI | B: 8 edges, edge error 4.34e-19 s, current error 2.27e-13 A
+sinusoidal | Internal-carrier MTI | C: 9 edges, edge error 4.34e-19 s, current error 1.71e-13 A
+sinusoidal | Scheduled-transition MTI | A: 7 edges, edge error 0 s, current error 1.99e-13 A
+sinusoidal | Scheduled-transition MTI | B: 8 edges, edge error 4.34e-19 s, current error 2.27e-13 A
+sinusoidal | Scheduled-transition MTI | C: 9 edges, edge error 4.34e-19 s, current error 1.14e-13 A
+variable_dq | Procedural | A: 7 edges, edge error 0 s, current error 0 A
+variable_dq | Procedural | B: 8 edges, edge error 0 s, current error 0 A
+variable_dq | Procedural | C: 8 edges, edge error 0 s, current error 0 A
+variable_dq | Internal-carrier MTI | A: 7 edges, edge error 2.17e-19 s, current error 1.14e-13 A
+variable_dq | Internal-carrier MTI | B: 8 edges, edge error 4.34e-19 s, current error 2.56e-13 A
+variable_dq | Internal-carrier MTI | C: 8 edges, edge error 2.71e-20 s, current error 2.27e-13 A
+variable_dq | Scheduled-transition MTI | A: 7 edges, edge error 2.17e-19 s, current error 7.11e-14 A
+variable_dq | Scheduled-transition MTI | B: 8 edges, edge error 4.34e-19 s, current error 1.42e-13 A
+variable_dq | Scheduled-transition MTI | C: 8 edges, edge error 0 s, current error 1.71e-13 A

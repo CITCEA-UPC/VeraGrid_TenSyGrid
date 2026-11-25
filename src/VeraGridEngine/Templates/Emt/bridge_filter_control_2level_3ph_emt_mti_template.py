@@ -8,7 +8,6 @@ from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Templates.Emt.bridge_filter_2level_3ph_emt_mti_template import (
     get_bridge_filter_2level_3ph_emt_mti_template,
 )
-from VeraGridEngine.Utils.Symbolic.block import find_name_in_block
 import VeraGridEngine.Templates.Emt.bridge_filter_control_2level_3ph_emt_template as control_ref
 
 
@@ -24,7 +23,5 @@ def get_bridge_filter_control_2level_3ph_emt_mti_template(
     finally:
         control_ref.get_bridge_filter_2level_3ph_emt_template = original_builder
 
-    omega_sw_in = find_name_in_block(f"omega_sw_in_{name}", templ.block)
-    omega_meas_in = find_name_in_block(f"omega_meas_in_{name}", templ.block)
-    templ.block.update_model(omega_sw_in, omega_meas_in)
+    # Keep the PWM switching-frequency input independent of the PLL frequency.
     return templ

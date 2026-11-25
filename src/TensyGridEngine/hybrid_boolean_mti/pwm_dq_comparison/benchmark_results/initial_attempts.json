@@ -1,0 +1,22 @@
+[
+  {
+    "case": "grid_standard_StructuralCompiled",
+    "status": "error",
+    "error": "Command '['/home/pablo/myenv/bin/python', '/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py', '--worker', 'grid_standard_StructuralCompiled']' timed out after 299.9999815360061 seconds"
+  },
+  {
+    "case": "grid_mti_StructuralCompiled",
+    "status": "error",
+    "error": "RMSCompiler.__init__() got an unexpected keyword argument 'dt_var'"
+  },
+  {
+    "case": "grid_mti_Symbolic",
+    "status": "error",
+    "error": "RMSCompiler.__init__() got an unexpected keyword argument 'dt_var'"
+  },
+  {
+    "case": "grid_multilinear_StructuralCompiled",
+    "status": "error",
+    "error": "Command '['/home/pablo/myenv/bin/python', '/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py', '--worker', 'grid_multilinear_StructuralCompiled']' timed out after 299.99998639398837 seconds"
+  }
+]

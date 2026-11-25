@@ -127,8 +127,8 @@ def get_bridge_filter_2level_3ph_emt_multilinear_template(vf: VarFactory,
     v_conv_a: Var = bridge_block.out_vars[3]
     v_conv_b: Var = bridge_block.out_vars[4]
     v_conv_c: Var = bridge_block.out_vars[5]
-    u_cos_pll: Var | None = find_name_in_block(f"u_cos_pll_bridge", bridge_block)
-    u_sin_pll: Var | None = find_name_in_block(f"u_sin_pll_bridge", bridge_block)
+    u_cos_pll: Var | None = find_name_in_block("u_cos_pll", bridge_block)
+    u_sin_pll: Var | None = find_name_in_block("u_sin_pll", bridge_block)
 
     if u_cos_pll is None or u_sin_pll is None:
         raise ValueError(f"Multilinear bridge block '{bridge_block.name}' is missing PLL trig states")

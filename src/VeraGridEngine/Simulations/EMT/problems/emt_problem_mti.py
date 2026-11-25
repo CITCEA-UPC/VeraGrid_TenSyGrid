@@ -27,6 +27,7 @@ class EmtProblemMTI(EmtProblemDae):
         "_derivative_fn",
         "_dt",
         "_ineq_var_positions",
+        "_ineq_bool_positions",
         "_j11_fn",
         "_j12_fn",
         "_j21_fn",
@@ -103,6 +104,7 @@ class EmtProblemMTI(EmtProblemDae):
         self._mti_row_meta: list[tuple[str, int]] = []
         self._mti_base_xp_incidence_mask: np.ndarray | None = None
         self._ineq_var_positions: list[np.ndarray] = []
+        self._ineq_bool_positions: list[np.ndarray] = []
 
         self._dt = Var(name="dt")
         self._register_mti_boolean_runtime_parameters()

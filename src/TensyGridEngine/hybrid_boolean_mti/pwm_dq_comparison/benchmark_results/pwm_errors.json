@@ -1,0 +1,50 @@
+{
+  "pwm_procedural": {
+    "mismatch_fraction": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "transitions": [
+      7,
+      8,
+      9
+    ]
+  },
+  "pwm_internal_mti": {
+    "mismatch_fraction": [
+      0.04737381565460864,
+      0.04697382565435864,
+      0.033649158771030724
+    ],
+    "transitions": [
+      7,
+      8,
+      9
+    ]
+  },
+  "pwm_live_comparator": {
+    "mismatch_fraction": [
+      0.060898477538061546,
+      0.021299467513312166,
+      0.041023974400639984
+    ],
+    "transitions": [
+      8,
+      8,
+      9
+    ]
+  },
+  "pwm_scheduled_mti": {
+    "mismatch_fraction": [
+      0.18687032824179395,
+      0.027474313142171445,
+      0.2946926326841829
+    ],
+    "transitions": [
+      7,
+      8,
+      9
+    ]
+  }
+}
