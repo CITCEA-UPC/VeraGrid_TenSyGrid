@@ -1,0 +1,9 @@
+{
+  "src/TensyGridEngine/emt/validate_converter_emt_multilinear.py": "dc7b434d6407c4a101ac769368f080c82c96ff28d2bcec70480efcfd332dcfef",
+  "src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/analyze_grid_comparison.py": "6734260e7e286bea399d280f6f9346ef5014472216d53ff6f0066230e7c0c077",
+  "src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py": "4898378cf9ad1416d6c94c7e05266403ba4781f93517735d8315ed768fb13a9d",
+  "src/VeraGridEngine/Templates/Emt/converter_switched_emt_scheduled_template.py": "f55c29f7c6450d9af7a35da976680e9f90fb9c7b87b699bb6b4e4de3be626286",
+  "src/VeraGridEngine/Utils/procedural_logic.py": "e4652cb349290b3c52cef74d00a779bc1920477c64884e04635b873b35a497ff",
+  "src/tests/EMT/test_scheduled_multilinear_pwm.py": "cb455419e69ac4494b6a3d2c39f98a19c8e1d4eebcef3af3e80618085fe31f0c",
+  "src/tests/EMT/test_switched_converter_initialization.py": "67e9f9d02193c0e011b3d8fa856e90ba9c80656859bc0db020c42c48d33949dd"
+}

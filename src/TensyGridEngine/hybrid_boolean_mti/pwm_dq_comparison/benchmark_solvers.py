@@ -63,11 +63,13 @@ def worker(case, output: Path, pwm_step: float = 50e-6,
     from TensyGridEngine.emt.validate_converter_emt_multilinear import simulate_case, build_emt_options
     from VeraGridEngine.Templates.Emt.bridge_2level_3ph_emt_soft_sign_template import get_switched_emt_converter_soft_sign
     from VeraGridEngine.Templates.Emt.converter_switched_emt_template import get_switched_emt_converter
+    from VeraGridEngine.Templates.Emt.converter_switched_emt_scheduled_template import get_switched_emt_converter_scheduled
     from VeraGridEngine.Templates.Emt.converter_switched_emt_mti_template import get_switched_emt_converter_mti
     from VeraGridEngine.Templates.Emt.converter_switched_emt_multilinear_template import get_switched_emt_converter_multilinear
     from VeraGridEngine.enumerations import EmtSolverTypes, DynamicIntegrationMethod
     _, variant, backend = case.split('_')
     builders = dict(standard=get_switched_emt_converter, mti=get_switched_emt_converter_mti,
+                    scheduled=get_switched_emt_converter_scheduled,
                     multilinear=get_switched_emt_converter_multilinear, softsign=get_switched_emt_converter_soft_sign)
     opt = build_emt_options()
     opt.solver_type = EmtSolverTypes[backend]
@@ -77,7 +79,7 @@ def worker(case, output: Path, pwm_step: float = 50e-6,
     opt.init_newton_max_iter = 60
     opt.time_step = grid_step
     opt.simulation_time = grid_duration
-    r = simulate_case(case, builders[variant], opt, use_mti=variant == 'mti',
+    r = simulate_case(case, builders[variant], opt, use_mti=variant in ('mti', 'scheduled'),
                       model_parameters={'soft_sign_lambda': soft_lambda} if variant == 'softsign' else None)
     signals = {k: v for k, v in asdict(r).items() if isinstance(v, np.ndarray)}
     np.savez_compressed(output / f'{case}.npz', **signals)
@@ -86,11 +88,13 @@ def worker(case, output: Path, pwm_step: float = 50e-6,
     valid = valid and r.initialization_residual < 1e-7
     return dict(case=case, status='ok' if valid else 'invalid', setup_seconds=r.setup_seconds,
                 warmup_policy=opt.compiled_warmup_policy.value,
-                integrator='EmtMtiBackEulerSolver' if variant == 'mti' else backend,
+                integrator='EmtMtiBackEulerSolver' if variant in ('mti', 'scheduled') else backend,
                 initialization_residual=r.initialization_residual,
                 nominal_step_seconds=grid_step, requested_duration_seconds=grid_duration,
                 soft_sign_lambda=soft_lambda if variant == "softsign" else None,
                 event_bisect_iter=12 if variant == 'mti' else None,
+                switching_boolean_unknowns=r.switching_boolean_unknowns,
+                scheduled_phase_edges=r.scheduled_phase_edges, scheduled_half_cycles=r.scheduled_half_cycles,
                 solve_seconds=r.solve_seconds, initialized=r.initialized, converged=r.converged,
                 final_time=float(r.time_arr[-1]), points=len(r.time_arr))
 
@@ -98,7 +102,8 @@ def worker(case, output: Path, pwm_step: float = 50e-6,
 def compare(results, output: Path):
     import matplotlib.pyplot as plt
     valid = [r['case'] for r in results if r['status'] == 'ok' and r['case'].startswith('grid_')]
-    order = {'standard': 0, 'multilinear': 1, 'mti': 2, 'softsign': 3}
+    order = {'standard': 0, 'multilinear': 1, 'mti': 2, 'softsign': 3, 'scheduled': 4}
+    colors = {variant: f'C{index}' for variant, index in order.items()}
     valid.sort(key=lambda case: order[case.split('_')[1]])
     if not valid:
         return {}
@@ -117,7 +122,8 @@ def compare(results, output: Path):
             diff = values - ref[key]
             metrics['cases'][case][key] = dict(max_abs=float(np.max(np.abs(diff))), rmse=float(np.sqrt(np.mean(diff**2))))
             ax.plot(trace['time_arr'] * 1000, trace[key], label={'standard': 'Procedural PWM', 'multilinear': 'Trig-state model (procedural PWM)',
-                   'mti': 'MTI switching', 'softsign': 'Soft-sign'}[case.split('_')[1]], linewidth=1)
+                   'mti': 'MTI switching', 'softsign': 'Soft-sign', 'scheduled': 'Scheduled MTI (analytic edges)'}[case.split('_')[1]],
+                    color=colors[case.split('_')[1]], linewidth=1)
             labels = dict(i_a='Phase A current [pu]', v_dc='DC bus voltage [pu]',
                           i_dc='DC current [pu]', p='Instantaneous active power [pu]',
                           p_filtered='Filtered active power [pu]', q_filtered='Filtered reactive power [pu]')
@@ -184,7 +190,7 @@ def plot_timings(results, output: Path):
         axis = axes[0, 1 if both else 0]
         if not pwm:
             axis.clear()
-        names = [{'standard': 'Procedural PWM', 'multilinear': 'Trig-state model', 'mti': 'MTI switching', 'softsign': 'Soft-sign'}[r['case'].split('_')[1]] +
+        names = [{'standard': 'Procedural PWM', 'multilinear': 'Trig-state model', 'mti': 'MTI switching', 'softsign': 'Soft-sign', 'scheduled': 'Scheduled MTI (analytic edges)'}[r['case'].split('_')[1]] +
                  ('' if r['status'] == 'ok' else ' (invalid)') for r in grid]
         setup = np.array([r['setup_seconds'] for r in grid])
         solve = np.array([r['solve_seconds'] for r in grid])
@@ -236,11 +242,12 @@ def write_report(results, metrics, output: Path):
                   f"Backward Euler, {grid[0].get('nominal_step_seconds', 1e-5)*1e6:g} µs nominal step, "
                   f"{grid[0].get('requested_duration_seconds', .002)*1000:g} ms horizon, handover at 0.1 ms. "
                   'All variants use the same corrected power base, loss convention and nominal limits. '
-                  'The MTI bridge retains a continuous comparator and integrated carrier; '
+                  'The inequality-based MTI bridge retains a continuous comparator and integrated carrier; '
                   'it does not use the standalone scheduled-MTI adapter. The multilinear row is a '
                   'trig-state/auxiliary-equation converter model using the same procedural PWM. '
                   'Its trig states now follow the PLL angular rate and its PWM phase advance is an '
                   'algebraic rotation. MTI uses the same carrier-synchronized held modulation inputs. '
+                  'The scheduled variant uses analytic edge times and a multilinear gate map with the MTI continuous solver, without switching Boolean unknowns. '
                   'The soft-sign variant changes only the comparator and keeps the shared controls. '
                   'Soft smoothing and finite-step integration remain approximation differences.', '',
                   'Soft-sign uses `gate = (1 + margin / sqrt(margin**2 + lambda)) / 2`, '
@@ -249,7 +256,8 @@ def write_report(results, metrics, output: Path):
                   'step does not resolve that transition; convergence must be checked before '
                   'claiming equivalence to hard switching.', '',
                   'StructuralCompiled uses warmup off; MTI uses its dedicated integrator. '
-                  'Grid times are single runs. MTI uses 12 event bisections. Initialization residual must be below 1e-7, '
+                  'Grid times are single runs. Inequality-based MTI uses 12 event bisections; '
+                  'scheduled MTI has no switching inequalities. Initialization residual must be below 1e-7, '
                   'initialization/convergence flags must pass, values must be finite and the '
                   'requested final time must be reached to enter the comparison.', '',
                   '| Case | Status | Initial algebraic residual | Setup (s) | Integration (s) |',
@@ -273,6 +281,7 @@ def write_report(results, metrics, output: Path):
               'OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 ' + chr(92),
               'python src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py --timeout 1200 '
               + ('--grid-only ' if not pwm else '')
+              + ('--cases ' + ' '.join(r['case'] for r in grid) + ' ' if grid and not pwm else '')
               + (f"--grid-step-us {grid[0]['nominal_step_seconds']*1e6:g} "
                  f"--grid-duration-ms {grid[0]['requested_duration_seconds']*1000:g} " if grid else '')
               + f'--output {output}',
@@ -314,7 +323,7 @@ def main():
         print(json.dumps(result), flush=True)
         return
     cases = ['pwm_procedural', 'pwm_live_comparator', 'pwm_internal_mti', 'pwm_scheduled_mti']
-    cases += [f'grid_{variant}_{backend}' for variant in ('standard', 'multilinear', 'mti', 'softsign')
+    cases += [f'grid_{variant}_{backend}' for variant in ('standard', 'multilinear', 'mti', 'softsign', 'scheduled')
               for backend in (('StructuralCompiled',) if variant == 'mti' else ('StructuralCompiled',))]
 
     if args.grid_only:
@@ -332,7 +341,7 @@ def main():
         result_path.unlink(missing_ok=True)
         with (output / f'{case}.log').open('w') as log:
             try:
-                subprocess.run([sys.executable, str(Path(__file__).resolve()), '--worker', case, '--timeout', str(args.timeout), '--output', str(output), '--pwm-step-us', str(args.pwm_step_us),
+                subprocess.run([sys.executable, '-u', str(Path(__file__).resolve()), '--worker', case, '--timeout', str(args.timeout), '--output', str(output), '--pwm-step-us', str(args.pwm_step_us),
                                 '--grid-step-us', str(args.grid_step_us), '--grid-duration-ms', str(args.grid_duration_ms),
                                 '--soft-sign-lambda', str(args.soft_sign_lambda)],
                                stdout=log, stderr=subprocess.STDOUT, timeout=args.timeout, check=True)

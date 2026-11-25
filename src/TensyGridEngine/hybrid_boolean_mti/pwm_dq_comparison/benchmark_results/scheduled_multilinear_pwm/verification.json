@@ -1,0 +1,28 @@
+{
+  "scheduled_multilinear_pwm/grid_standard_StructuralCompiled": {
+    "status": "passed",
+    "final_time": 0.002,
+    "points": 201
+  },
+  "scheduled_multilinear_pwm/grid_scheduled_StructuralCompiled": {
+    "status": "passed",
+    "final_time": 0.0020000000000000044,
+    "points": 201
+  },
+  "run_10ms/grid_standard_StructuralCompiled": {
+    "status": "passed",
+    "final_time": 0.01,
+    "points": 1001
+  },
+  "run_10ms/grid_scheduled_StructuralCompiled": {
+    "status": "passed",
+    "final_time": 0.00999999999999976,
+    "points": 1001
+  },
+  "standard_2ms_prefix_repeat": {
+    "max_difference": 0.0
+  },
+  "scheduled_2ms_prefix_repeat": {
+    "max_difference": 0.0
+  }
+}

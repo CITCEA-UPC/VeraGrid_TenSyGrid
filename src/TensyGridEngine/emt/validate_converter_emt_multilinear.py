@@ -72,6 +72,9 @@ class CaseResults:
     gate_c: np.ndarray
     p_filtered: np.ndarray
     q_filtered: np.ndarray
+    switching_boolean_unknowns: int = 0
+    scheduled_phase_edges: int = 0
+    scheduled_half_cycles: int = 0
 
 
 def build_emt_options() -> EmtOptions:
@@ -230,6 +233,11 @@ def simulate_case(label: str, converter_builder: callable, options: EmtOptions |
         initialized=bool(_ok_init),
         converged=bool(_ok_conv),
         initialization_residual=float(problem.initialization_report.final_residual_inf),
+        switching_boolean_unknowns=len(problem.get_mti_boolean_parameter_indices) if use_mti else 0,
+        scheduled_phase_edges=sum(getattr(entry, 'edge_event_count', 0) for entry in
+                                  getattr(problem._block_boundary_updater, 'logic_entries', [])),
+        scheduled_half_cycles=sum(getattr(entry, 'boundary_event_count', 0) for entry in
+                                  getattr(problem._block_boundary_updater, 'logic_entries', [])),
         v_dc=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.Vdc])],
         gate_a=_optional_signal(problem, state_traj, vsc_mdl, 'gate_a'),
         gate_b=_optional_signal(problem, state_traj, vsc_mdl, 'gate_b'),

@@ -1,0 +1,97 @@
+{
+  "baseline": "grid_standard_StructuralCompiled",
+  "cases": {
+    "grid_standard_StructuralCompiled": {
+      "horizons_ms": {
+        "2.0": {
+          "i_a": {
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "v_dc": {
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "p_filtered": {
+            "max_abs": 0.0,
+            "rmse": 0.0
+          },
+          "q_filtered": {
+            "max_abs": 0.0,
+            "rmse": 0.0
+          }
+        }
+      },
+      "terminal_behavior": {
+        "v_dc": {
+          "final": 0.9998081633785036,
+          "minimum": 0.9996938276908146,
+          "maximum": 1.0000549170818043,
+          "last_ms_mean": 0.9998607490148881
+        },
+        "p_filtered": {
+          "final": 0.325874450977414,
+          "minimum": 0.32552077972146914,
+          "maximum": 0.326639047471853,
+          "last_ms_mean": 0.3260347269731227
+        },
+        "q_filtered": {
+          "final": 0.00025637129729255936,
+          "minimum": -0.00029640737310658637,
+          "maximum": 0.000741885960383306,
+          "last_ms_mean": 0.0003049092388542472
+        },
+        "current_envelope": {
+          "final": 0.4642464858054399,
+          "maximum": 0.5013436201913974
+        }
+      }
+    },
+    "grid_scheduled_StructuralCompiled": {
+      "horizons_ms": {
+        "2.0": {
+          "i_a": {
+            "max_abs": 0.0022098084486682004,
+            "rmse": 0.0005482062312041768
+          },
+          "v_dc": {
+            "max_abs": 1.698589823750929e-05,
+            "rmse": 8.908430712521845e-06
+          },
+          "p_filtered": {
+            "max_abs": 0.00011026223726040563,
+            "rmse": 6.517176597726481e-05
+          },
+          "q_filtered": {
+            "max_abs": 8.947985382513516e-05,
+            "rmse": 5.3162867193820697e-05
+          }
+        }
+      },
+      "terminal_behavior": {
+        "v_dc": {
+          "final": 0.9997911866108486,
+          "minimum": 0.9996777387680057,
+          "maximum": 1.0000568411435065,
+          "last_ms_mean": 0.9998491363347054
+        },
+        "p_filtered": {
+          "final": 0.3257641887401535,
+          "minimum": 0.32541382720928247,
+          "maximum": 0.32662624124139694,
+          "last_ms_mean": 0.3259484888707462
+        },
+        "q_filtered": {
+          "final": 0.0001668914434674261,
+          "minimum": -0.0002989196096115247,
+          "maximum": 0.0007125247106808027,
+          "last_ms_mean": 0.0002350396177908324
+        },
+        "current_envelope": {
+          "final": 0.4637083694756814,
+          "maximum": 0.5007327519594688
+        }
+      }
+    }
+  }
+}

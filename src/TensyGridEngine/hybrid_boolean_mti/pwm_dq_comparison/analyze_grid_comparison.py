@@ -16,8 +16,8 @@ def analyze(output: Path) -> dict:
     ref = np.load(output / f'{baseline}.npz')
     time = ref['time_arr']
     names = {'standard': 'Procedural PWM', 'multilinear': 'Trig-state model',
-             'mti': 'MTI switching', 'softsign': 'Soft-sign'}
-    colors = {'standard': 'C0', 'multilinear': 'C1', 'mti': 'C2', 'softsign': 'C3'}
+             'mti': 'MTI switching', 'softsign': 'Soft-sign', 'scheduled': 'Scheduled MTI'}
+    colors = {'standard': 'C0', 'multilinear': 'C1', 'mti': 'C2', 'softsign': 'C3', 'scheduled': 'C4'}
     keys = ('i_a', 'v_dc', 'p_filtered')
     labels = ('Phase-A current difference [pu]', 'DC-voltage difference [pu]',
               'Filtered-P difference [pu]')

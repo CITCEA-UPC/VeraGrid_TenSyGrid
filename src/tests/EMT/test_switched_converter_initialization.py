@@ -6,16 +6,20 @@ from TensyGridEngine.emt.validate_converter_emt_multilinear import build_convert
 from VeraGridEngine.Templates.Emt.converter_switched_emt_template import get_switched_emt_converter
 from VeraGridEngine.Templates.Emt.converter_switched_emt_multilinear_template import get_switched_emt_converter_multilinear
 from VeraGridEngine.Templates.Emt.converter_switched_emt_mti_template import get_switched_emt_converter_mti
+from VeraGridEngine.Templates.Emt.converter_switched_emt_scheduled_template import get_switched_emt_converter_scheduled
 from VeraGridEngine.Templates.Emt.bridge_2level_3ph_emt_soft_sign_template import get_switched_emt_converter_soft_sign
 from VeraGridEngine.Utils.Symbolic.block import find_name_in_block
 from VeraGridEngine.enumerations import VarPowerFlowReferenceType
 
 
-@pytest.mark.parametrize('builder', [get_switched_emt_converter, get_switched_emt_converter_multilinear, get_switched_emt_converter_mti, get_switched_emt_converter_soft_sign])
+@pytest.mark.parametrize('builder', [get_switched_emt_converter, get_switched_emt_converter_multilinear, get_switched_emt_converter_mti, get_switched_emt_converter_soft_sign, get_switched_emt_converter_scheduled])
 def test_switched_converter_pf_seed_is_consistent(builder):
     """Check actual grid DAE residuals, power signs and abc/dq current consistency."""
     problem, model = build_converter_case('initialization_regression', builder, build_emt_options(),
-                                          use_mti=builder is get_switched_emt_converter_mti)
+                                          use_mti=builder in (get_switched_emt_converter_mti, get_switched_emt_converter_scheduled))
+    if builder is get_switched_emt_converter_scheduled:
+        assert problem.get_mti_boolean_parameter_indices == []
+        assert not any(var.name == 'carrier_pwm' for var in problem.get_state_vars())
     x = problem.get_x0()
     dx = problem.get_dx0()
     runtime = problem.event_params_values

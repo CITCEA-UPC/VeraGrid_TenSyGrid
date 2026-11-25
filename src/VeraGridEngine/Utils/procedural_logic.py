@@ -3797,7 +3797,7 @@ class ThreePhaseCarrierPwmLogic(ProceduralLogicBase):
         :return: Remapped PWM logic.
         """
         name_mapping: Dict[str, str] = _build_name_mapping(var_mapping)
-        return ThreePhaseCarrierPwmLogic(
+        return type(self)(
             mod_a_var_name=name_mapping.get(self.mod_a_var_name, self.mod_a_var_name),
             mod_b_var_name=name_mapping.get(self.mod_b_var_name, self.mod_b_var_name),
             mod_c_var_name=name_mapping.get(self.mod_c_var_name, self.mod_c_var_name),
@@ -3808,6 +3808,91 @@ class ThreePhaseCarrierPwmLogic(ProceduralLogicBase):
             carrier_phase_var_name=name_mapping.get(self.carrier_phase_var_name, self.carrier_phase_var_name),
             name=self.name,
         )
+
+
+def scheduled_pwm_gate_update(gate: float | Vec, edge: float | Vec, boundary: float,
+                              direction: float, boundary_gate: float | Vec) -> float | Vec:
+    """Multilinear gate map; event indicators are known scheduler inputs.
+
+    ``direction`` is one on a rising carrier. ``boundary_gate`` also handles
+    saturated references and initial/mid-ramp starts without zero-width pulses.
+    """
+    return ((1.0 - boundary) * ((1.0 - edge) * gate + edge * (1.0 - direction))
+            + boundary * boundary_gate)
+
+
+class ScheduledMultilinearPwmLogic(ThreePhaseCarrierPwmLogic):
+    """Analytic carrier edges followed by a multilinear discrete gate map.
+
+    The inherited event calendar chooses the earliest pending edge/boundary.
+    There is no integrated carrier, tick counter or Boolean unknown in Newton.
+    Runtime retention, codec binding and one-sided EMT endpoint handling use
+    the same contract as native PWM. The event selector remains piecewise.
+    """
+
+    __slots__ = ("carrier_rising", "edge_event_count", "boundary_event_count")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.carrier_rising = 1.0
+        self.edge_event_count = 0
+        self.boundary_event_count = 0
+
+    def _compute_phase_schedule(self, sample_time: float, interval_start_time: float,
+                                interval_end_time: float, carrier_rising: bool,
+                                modulation_value: float) -> Tuple[float, float, float]:
+        modulation = float(np.clip(modulation_value, -1.0, 1.0))
+        if modulation <= -1.0 + 1e-12:
+            return 0.0, np.nan, 0.0
+        if modulation >= 1.0 - 1e-12:
+            return 1.0, np.nan, 1.0
+        direction = float(carrier_rising)
+        edge = interval_start_time + .5 * (interval_end_time - interval_start_time) * (
+            1.0 + (2.0 * direction - 1.0) * modulation)
+        passed = float(sample_time >= edge - 1e-12)
+        gate = direction + passed - 2.0 * direction * passed
+        return gate, np.nan if passed else edge, 1.0 - direction
+
+    def _rebuild_interval_schedule(self, sample_time: float, x: Vec, params: Vec) -> None:
+        old_gate = self.current_gate.copy()
+        old_direction = self.carrier_rising
+        normal_boundary = (self.initialized and self.interval_end_time is not None
+                           and abs(sample_time - self.interval_end_time) <= 1e-12
+                           and self.last_omega_sw is not None
+                           and abs(float(params[self.omega_sw_idx]) - self.last_omega_sw) <= 1e-12)
+        if normal_boundary:
+            # Accepted macro times can sit a few ulps before the exact calendar
+            # boundary. Advance from the scheduled time, otherwise the clock
+            # lookup can select the old half-cycle and process R twice.
+            sample_time = float(self.interval_end_time)
+        super()._rebuild_interval_schedule(sample_time, x, params)
+        _, rising = self._get_interval_descriptor(sample_time, params)
+        if normal_boundary:
+            # b+ = b XOR R, with R=1 at an accepted half-cycle boundary.
+            self.carrier_rising = old_direction + 1.0 - 2.0 * old_direction
+            self.boundary_event_count += 1
+        else:
+            # Initial phase/frequency changes can start in the middle of a ramp.
+            self.carrier_rising = float(rising)
+        boundary_gate = self.current_gate.copy()
+        self.current_gate[:] = scheduled_pwm_gate_update(
+            old_gate, 0.0, 1.0, old_direction, boundary_gate)
+
+    def update(self, t: float, x: Vec, params: Vec) -> None:
+        frequency_changed = (self.last_omega_sw is None
+                             or abs(float(params[self.omega_sw_idx]) - self.last_omega_sw) > 1e-12)
+        if (not self.initialized or frequency_changed
+                or (self.interval_end_time is not None and t >= self.interval_end_time - 1e-12)):
+            self._rebuild_interval_schedule(float(t), x, params)
+            self.initialized = True
+        else:
+            edges = np.asarray(np.isfinite(self.pending_transition_time)
+                               & (t >= self.pending_transition_time - 1e-12), dtype=float)
+            self.current_gate[:] = scheduled_pwm_gate_update(
+                self.current_gate, edges, 0.0, self.carrier_rising, self.current_gate)
+            self.pending_transition_time[edges == 1.0] = np.nan
+            self.edge_event_count += int(np.sum(edges))
+        self._write_gate_modes(params)
 
 
 class ThreePhaseCarrierSampledModulationLogic(ProceduralLogicBase):
@@ -5211,6 +5296,9 @@ def procedural_logic_entry_to_dict(entry: ProceduralLogicBase) -> ProceduralLogi
         })
         return data
     elif isinstance(entry, ThreePhaseCarrierPwmLogic):
+        if isinstance(entry, ScheduledMultilinearPwmLogic):
+            # Preserve the PWM port contract and opt in to the discrete map.
+            data['multilinear_gate_updates'] = True
         data.update({
             "mod_a_var_name": entry.mod_a_var_name,
             "mod_b_var_name": entry.mod_b_var_name,
@@ -5506,7 +5594,11 @@ def _three_phase_carrier_pwm_logic_from_dict(data: ProceduralLogicData) -> Three
     :param data: Serialized logic dictionary.
     :return: Three-phase carrier PWM procedural logic entry.
     """
-    return ThreePhaseCarrierPwmLogic(
+    multilinear_updates = data.get('multilinear_gate_updates', False)
+    if not isinstance(multilinear_updates, bool):
+        raise TypeError('multilinear_gate_updates must be Boolean')
+    logic_class = ScheduledMultilinearPwmLogic if multilinear_updates else ThreePhaseCarrierPwmLogic
+    return logic_class(
         mod_a_var_name=str(data["mod_a_var_name"]),
         mod_b_var_name=str(data["mod_b_var_name"]),
         mod_c_var_name=str(data["mod_c_var_name"]),

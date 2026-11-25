@@ -1,0 +1,8 @@
+{
+  "base_revision": "8821788ccb0679b3e420af86ec442db6317451f0",
+  "source_manifest": "source_hashes.json includes tracked changes and new source files; generic benchmark diff hashes do not cover every new file.",
+  "integration": "Backward Euler, max step 10 us, exact analytic PWM event alignment within the step limit",
+  "timing_protocol": "Sequential fresh worker processes, one BLAS/OMP thread; setup separate; first-use compilation included in integration",
+  "validation": "tests.log and initialization_test.log",
+  "development_attempt": "run_10ms/attempt_before_boundary_snap is rejected; kept for diagnosis"
+}

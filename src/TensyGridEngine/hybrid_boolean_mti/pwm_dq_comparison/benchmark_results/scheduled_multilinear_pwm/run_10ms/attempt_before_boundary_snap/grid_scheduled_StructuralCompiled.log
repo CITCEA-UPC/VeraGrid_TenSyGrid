@@ -1,0 +1,5 @@
+grid_scheduled_StructuralCompiled: templates and power flow ready after 40.498 s
+grid_scheduled_StructuralCompiled: EMT problem ready after 49.615 s
+grid_scheduled_StructuralCompiled: solver ready after 49.616 s
+[MTI] Initial z0 (0 booleans): []
+{"case": "grid_scheduled_StructuralCompiled", "status": "ok", "setup_seconds": 49.616017718000876, "warmup_policy": "off", "integrator": "EmtMtiBackEulerSolver", "initialization_residual": 6.150067011212457e-09, "nominal_step_seconds": 1e-05, "requested_duration_seconds": 0.01, "soft_sign_lambda": null, "event_bisect_iter": null, "switching_boolean_unknowns": 0, "scheduled_phase_edges": 297, "scheduled_half_cycles": 213, "solve_seconds": 81.32700441899942, "initialized": true, "converged": true, "final_time": 0.00999999999999976, "points": 1001}
