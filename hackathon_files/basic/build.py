@@ -1,4 +1,4 @@
-"""Regenerate and verify all fifty basic TunableGrid snapshots."""
+"""Regenerate and verify the 50 controller and 10 network-action snapshots."""
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -53,6 +53,8 @@ def main(resume: bool = False) -> int:
                 print(f"{len(records):02d}/50 {grid.name}: unstable Re={record['baseline_max_real']:+.6f}; "
                       f"tuned Re={record['witness_max_real']:+.6f}; load-step PASS", flush=True)
             position += 1
+    from hackathon_files.basic.switching import main as build_switching
+    build_switching()
     return 0
 
 

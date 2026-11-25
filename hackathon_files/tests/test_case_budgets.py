@@ -10,9 +10,9 @@ from hackathon_files.src import rms_tuning
 def test_balanced_case_budgets():
     paths = case_files()
     budgets = [case_trial_budget(p.stem) for p in paths]
-    assert budgets.count(math.inf) == budgets.count(20) == 25
+    assert budgets.count(math.inf) == budgets.count(20) == 30
     for suffix in range(1, 6):
-        group = [case_trial_budget(p.stem) for p in paths if p.stem.endswith(f'_{suffix:02d}')]
+        group = [case_trial_budget(p.stem) for p in paths if not p.stem.startswith('basic_switching_') and p.stem.endswith(f'_{suffix:02d}')]
         assert group.count(math.inf) == group.count(20) == 5
 
 

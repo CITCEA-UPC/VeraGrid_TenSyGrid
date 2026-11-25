@@ -30,6 +30,10 @@ def validate_case(path: Path) -> dict:
     :param path: Saved unstable VeraGrid file, reopened for this verification.
     :return: JSON-ready measurement record, including the exact witness values.
     """
+    from hackathon_files.basic.cases import is_switching_case
+    if is_switching_case(path.stem):
+        from hackathon_files.basic.switching import validate_switching
+        return validate_switching(path)
     tunable: TunableGrid = initialize_grid(open_file(str(path)))
     baseline_error: float = equilibrium_error(tunable.problem)
     if not np.isfinite(baseline_error) or baseline_error > 1e-6:

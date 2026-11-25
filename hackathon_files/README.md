@@ -4,7 +4,7 @@
 hackathon_files/
 ├── src/          # Shared tuning, diagnostics, controllers, and grid helpers
 ├── intro/        # Participant tuner, combined evaluator, and API examples
-├── basic/        # 50-case collection and its initialization/action helpers
+├── basic/        # 60-case collection and its initialization/action helpers
 ├── tests/        # Shared-library regression tests
 ├── scripts/      # Benchmark generation utilities
 ├── grids/        # Shared grid data
@@ -428,7 +428,7 @@ trials and never invoke the tuner's `tune()` method.
 
 ## General basic grid actions
 
-The [50-case basic collection](basic/README.md) includes existing open circuits,
+The [60-case basic collection](basic/README.md) includes existing open circuits,
 line outage/restoration cases, non-islanding opening options, new-line
 reinforcements, capacitor/reactor candidates, and balanced redispatch, alongside
 synchronous and GFM/GFL controller tuning. Ten `_02` cases permit controller
@@ -447,6 +447,13 @@ in MW, including shunt consumption. Neither spends full RMS trial budget.
 See the [power-flow example](intro/examples/powerflow_examples.py) and
 [API guide](intro/examples/README.md#power-flow-only-proposal-checks).
 
-The 50 basic cases split trial budgets evenly: 25 unlimited (`math.inf`) and
-25 capped at 20 full trials, spread across networks and controller variants.
+The 60 basic cases split trial budgets evenly: 30 unlimited (`math.inf`) and
+30 capped at 20 full trials, spread across networks and controller variants.
 Intro cases retain five full trials. Final scoring is separate in both suites.
+
+
+The basic collection also includes ten fixed-controller network-action cases:
+`basic_switching_*`. They expose no controller parameters or redispatch, while
+allowing switching and line/shunt additions. Their initial thermal overload must
+be repaired; they are distinct from the 50 dynamically unstable tuning cases.
+See [network-action cases](basic/README.md#fixed-controller-network-action-cases).

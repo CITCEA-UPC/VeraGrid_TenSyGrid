@@ -1,10 +1,11 @@
 # Basic RMS tuning set
 
-**50 initially unstable `.veragrid` cases on ten AC networks**, with five
-controller, operating-point and topology variants per network. `initialize_grid()` exposes the
+**60 `.veragrid` cases on ten AC networks**: 50 initially dynamically unstable
+controller-tuning cases and 10 fixed-controller network-action cases. The original
+collection has five controller, operating-point and topology variants per network. `initialize_grid()` exposes the
 existing `TunableGrid` interface, with case-specific evaluation budgets.
 
-| Network | Buses | Variants |
+| Network | Buses | Controller variants |
 | --- | ---: | ---: |
 | Lynn | 5 | 5 |
 | Six-bus ACOPF | 6 | 5 |
@@ -244,7 +245,7 @@ example is available as `python -m hackathon_files.intro.examples.controller_exa
 
 ## Evaluation budgets
 
-The basic collection has **25 unlimited cases and 25 cases capped at 20 full
+The basic collection has **30 unlimited cases and 30 cases capped at 20 full
 `case.test_tuning(proposal)` trials**. Budgets alternate by network and variant,
 so each variant has five unlimited and five capped cases.
 Read `case.max_test_tunings`: `math.inf` means unlimited. Intro scenarios retain
@@ -255,3 +256,28 @@ Modal/controller diagnostics, sensitivity helpers, `run_powerflow`, and
 `get_losses` do not spend full RMS trials. The outer
 `tuner.test_tuning(raw_grid, evaluator)` helper separately defaults to ten calls
 per tuner instance; do not call it inside `tune()`.
+
+
+## Fixed-controller network-action cases
+
+Ten additional `basic_switching_<network>_01.veragrid` cases (one per network)
+expose **no tunable controller parameters and no redispatch**. Their catalogs
+permit line opening/closing, one new reinforcement line, and one added shunt.
+There is at most one action of each type, for up to four structural changes;
+radial initial networks may have no opening option and therefore a maximum of
+three. Opening catalogs continue to exclude bridges, avoiding islanding.
+
+These are operating-limit repair challenges. The fixed controllers can already
+be dynamically stable, but doing nothing leaves a thermal overload and fails
+acceptance. An existing open relief circuit provides a verified switching repair;
+equipment additions are alternative permitted strategies. Ratings are explicit
+educational limits rather than original utility ratings. Every saved reference
+passes PF, equilibrium, full SSA, voltage/thermal limits, and the same load-step
+simulation. `reference_tuning()` returns a closing proposal with an empty parameter
+mapping for these cases. Five have 20 trials and five have unlimited trials.
+
+`case_files()` returns the original 50 cases followed by the 10 additions.
+Run `python -m hackathon_files.basic.switching` with this checkout on `PYTHONPATH`
+to build/checkpoint the additional cases. Their validation evidence is stored in
+`switching_validation.json`; `validation.json` continues to describe the original
+50 dynamically unstable cases.

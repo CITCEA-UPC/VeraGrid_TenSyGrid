@@ -20,6 +20,11 @@ def test_saved_case_can_be_stabilized(path: Path) -> None:
     :param path: Unstable serialized participant starting grid.
     """
     record: dict = validate_case(path)
+    if record.get('challenge_type') == 'network_actions':
+        assert record['baseline_metrics']['thermal_violations'] > 0
+        assert record['tunable_parameter_count'] == 0
+        assert record['witness_metrics']['stable']
+        return
     assert record['baseline_max_real'] > 1e-4
     assert record['witness_max_real'] < -1e-5
     assert record['witness_transient_converged']

@@ -66,12 +66,19 @@ def network_specs() -> tuple[NetworkSpec, ...]:
 
 
 def case_trial_budget(name: str) -> int | float:
-    """Alternate budgets across the 50 ordered cases: 25 unlimited, 25 at 20."""
+    """Split the 60 public cases evenly between unlimited and 20 trials."""
     for network_index, spec in enumerate(network_specs()):
+        if name == f'basic_switching_{spec.name}_01':
+            return math.inf if network_index % 2 else 20
         for variant in range(1, 6):
             if name == f"basic_{spec.name}_{variant:02d}":
                 return math.inf if (network_index + variant) % 2 else 20
     return 20
+
+
+def is_switching_case(name: str) -> bool:
+    """Identify serialized exercises with fixed controls and network-action permissions."""
+    return name.startswith(('basic_switching_', 'switching_'))
 
 
 def basic_evaluator() -> RmsTunerEvaluator:
@@ -211,16 +218,17 @@ def initialize_grid(grid: MultiCircuit) -> TunableGrid:
     )
     evaluator: RmsTunerEvaluator = basic_evaluator()
     ranges: dict[str, tuple[float, float]] = dict(evaluator.control_ranges)
+    network_only = is_switching_case(grid.name)
     if any('Basic dynamic' in generator.rms_model.name for generator in grid.generators):
         ranges.pop('Kp')
     else:
         pass
-    controller_only = grid.name.startswith("basic_") and grid.name.endswith("_02")
+    controller_only = not network_only and grid.name.startswith("basic_") and grid.name.endswith("_02")
     actions: BasicActionCatalog = BasicActionCatalog(grid)
     snapshot: TunableGrid = TunableGrid(
         problem=driver.problem,
-        tunable_parameters=build_rms_tunables(grid, ranges),
-        dispatch_options=() if controller_only else actions.dispatch,
+        tunable_parameters=() if network_only else build_rms_tunables(grid, ranges),
+        dispatch_options=() if controller_only or network_only else actions.dispatch,
         openable_lines=() if controller_only else actions.openable,
         closable_lines=() if controller_only else actions.closable,
         line_candidates=() if controller_only else actions.lines,
@@ -248,7 +256,7 @@ def reference_tuning(grid: TunableGrid, gain: float = -400.0) -> RmsTuning:
     else:
         pass
     restoration: tuple = tuple(option for option in grid.closable_lines
-                                if option.name.startswith('Restore outage:'))
+                                if option.name.startswith(('Restore outage:', 'Switching relief:')))
     return RmsTuning(parameters={parameter: values[parameter.name] for parameter in grid.tunable_parameters},
                      close_lines=restoration)
 
@@ -256,8 +264,9 @@ def reference_tuning(grid: TunableGrid, gain: float = -400.0) -> RmsTuning:
 def case_files() -> tuple[Path, ...]:
     """Find the bundled challenge grids in reproducible order.
 
-    :return: Serialized unstable grids, one file per TunableGrid case.
+    :return: Serialized controller and network-action grids, one per case.
     """
     directory: Path = Path(__file__).with_name('testgrids')
-    return tuple(directory / f'basic_{spec.name}_{variant + 1:02d}.veragrid'
-                 for spec in network_specs() for variant in range(5))
+    return (tuple(directory / f'basic_{spec.name}_{variant + 1:02d}.veragrid'
+                  for spec in network_specs() for variant in range(5))
+            + tuple(directory / f'basic_switching_{spec.name}_01.veragrid' for spec in network_specs()))

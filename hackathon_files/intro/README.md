@@ -109,5 +109,5 @@ Sensitivity examples use a compatible synchronous-machine basic case; analytic
 sensitivities are not currently supported for the intro descriptor GFM model.
 The examples leave `FinalTuner` and saved grids unchanged.
 
-Basic-case trial budgets are split evenly: 25 unlimited and 25 capped at 20.
+Basic-case trial budgets are split evenly: 30 unlimited and 30 capped at 20.
 Always inspect `tunable_grid.max_test_tunings`; unlimited is `math.inf`.
