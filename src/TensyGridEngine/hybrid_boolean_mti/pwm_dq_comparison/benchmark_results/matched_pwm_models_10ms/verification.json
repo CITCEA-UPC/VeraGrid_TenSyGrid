@@ -1,0 +1,26 @@
+{
+  "grid_standard_StructuralCompiled": {
+    "status": "passed",
+    "points": 1001,
+    "first_2ms_repeat_difference_max": 0.0,
+    "max_i_a_difference_pu": 0.0
+  },
+  "grid_multilinear_StructuralCompiled": {
+    "status": "passed",
+    "points": 1001,
+    "first_2ms_repeat_difference_max": 0.0,
+    "max_i_a_difference_pu": 0.018391938612612846
+  },
+  "grid_mti_StructuralCompiled": {
+    "status": "passed",
+    "points": 1001,
+    "first_2ms_repeat_difference_max": 0.0,
+    "max_i_a_difference_pu": 0.21012624787421758
+  },
+  "grid_softsign_StructuralCompiled": {
+    "status": "passed",
+    "points": 1001,
+    "first_2ms_repeat_difference_max": 0.0,
+    "max_i_a_difference_pu": 0.025280929389472795
+  }
+}

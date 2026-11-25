@@ -226,6 +226,8 @@ def write_report(results, metrics, output: Path):
         for case, values in errors.items():
             mismatch = ' / '.join(f'{value*100:.3f}' for value in values['mismatch_fraction'])
             lines.append(f'| {case} | {mismatch} |')
+    if not pwm:
+        lines = lines[:4]
     if grid:
         lines += ['', '## Full converter in the AC/DC grid', '',
                   'Three buses, 100 MVA base, 230 kV AC and 320 kV DC, 30 MW DC load. '
@@ -269,7 +271,8 @@ def write_report(results, metrics, output: Path):
     lines += ['', '## Reproduce', '', 'From the repository root, in the VeraGrid Python environment:', '', '```sh',
               'PYTHONPATH=src MPLBACKEND=Agg MPLCONFIGDIR=/tmp/pwm-mpl ' + chr(92),
               'OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 ' + chr(92),
-              'python src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py --timeout 400 '
+              'python src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py --timeout 1200 '
+              + ('--grid-only ' if not pwm else '')
               + (f"--grid-step-us {grid[0]['nominal_step_seconds']*1e6:g} "
                  f"--grid-duration-ms {grid[0]['requested_duration_seconds']*1000:g} " if grid else '')
               + f'--output {output}',

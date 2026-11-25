@@ -1,0 +1,17 @@
+{
+  "case": "grid_mti_StructuralCompiled",
+  "status": "ok",
+  "setup_seconds": 48.587263204999545,
+  "warmup_policy": "off",
+  "integrator": "EmtMtiBackEulerSolver",
+  "initialization_residual": 6.150067011212457e-09,
+  "nominal_step_seconds": 1e-05,
+  "requested_duration_seconds": 0.01,
+  "soft_sign_lambda": null,
+  "event_bisect_iter": 12,
+  "solve_seconds": 514.6216290089997,
+  "initialized": true,
+  "converged": true,
+  "final_time": 0.00999999999999976,
+  "points": 1001
+}

@@ -1,0 +1,4 @@
+grid_multilinear_StructuralCompiled: templates and power flow ready after 25.155 s
+grid_multilinear_StructuralCompiled: EMT problem ready after 25.263 s
+grid_multilinear_StructuralCompiled: solver ready after 25.525 s
+{"case": "grid_multilinear_StructuralCompiled", "status": "ok", "setup_seconds": 25.524829113999658, "warmup_policy": "off", "integrator": "StructuralCompiled", "initialization_residual": 6.150067011212457e-09, "nominal_step_seconds": 1e-05, "requested_duration_seconds": 0.01, "soft_sign_lambda": null, "event_bisect_iter": null, "solve_seconds": 47.17632552300074, "initialized": true, "converged": true, "final_time": 0.01, "points": 1001}

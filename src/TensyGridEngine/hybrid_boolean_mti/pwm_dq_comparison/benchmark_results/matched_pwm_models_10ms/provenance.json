@@ -1,0 +1,13 @@
+{
+  "engine_revision": "4a16111535408e1124752676f8d4995f2624aa0d",
+  "engine_diff": "none",
+  "duration_seconds": 0.01,
+  "nominal_step_seconds": 1e-05,
+  "pwm_hz": 5000,
+  "mti_event_bisections": 12,
+  "soft_sign_lambda": 1e-06,
+  "numerical_threads": 1,
+  "timing_protocol": "Sequential fresh worker processes, setup and integration separate; integration includes first-use compilation.",
+  "reference_repeat_check": "Procedural first 2 ms exactly matches earlier 2 ms reference for i_a, v_dc, p_filtered and q_filtered.",
+  "changes_during_run": "Benchmark report formatting and separate analysis script only; no engine changes."
+}

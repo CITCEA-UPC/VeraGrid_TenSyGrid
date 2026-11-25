@@ -1,0 +1,15 @@
+grid_mti_StructuralCompiled: templates and power flow ready after 39.267 s
+grid_mti_StructuralCompiled: EMT problem ready after 48.587 s
+grid_mti_StructuralCompiled: solver ready after 48.587 s
+[MTI] Initial z0 (4 booleans): [1. 1. 1. 1.]
+[MTI-INC] blocks eq=128 ineq=4 ineq_rows=1 xp=32 y=96 bool=4 nnz=508
+[MTI-INC] shape=(132,132) nnz=508
+[MTI-ORDER] incidence shape=(132,132)
+[MTI-ORDER] matching score unmatched=1 components=71 largest=62 singletons=70
+[MTI-ORDER] structural matching complete
+[MTI-ORDER] perm head rows=[39, 40, 41, 51, 48, 50, 49, 6] cols=[39, 40, 41, 51, 48, 50, 49, 6]
+[MTI-ORDER] dmperm-like components=71 sizes_head=[1, 1, 1, 1, 1, 1, 1, 1]
+[MTI-ORDER] sorted shape=(132,132) row_perm=132 col_perm=132
+[MTI-ORDER] rows=132 subsets=1 subproblems=71 explicit=69
+[MTI-INC] solving_order_rows=132 subsets=1 subproblems=71
+{"case": "grid_mti_StructuralCompiled", "status": "ok", "setup_seconds": 48.587263204999545, "warmup_policy": "off", "integrator": "EmtMtiBackEulerSolver", "initialization_residual": 6.150067011212457e-09, "nominal_step_seconds": 1e-05, "requested_duration_seconds": 0.01, "soft_sign_lambda": null, "event_bisect_iter": 12, "solve_seconds": 514.6216290089997, "initialized": true, "converged": true, "final_time": 0.00999999999999976, "points": 1001}
