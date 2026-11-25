@@ -2,58 +2,33 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[english]{babel}
-\usepackage{geometry}
-\geometry{
-  paper=a4paper,
-  left=22mm,
-  right=22mm,
-  top=22mm,
-  bottom=22mm,
-  headheight=24pt
-}
-
-\usepackage{fontspec}
-\setmainfont{Raleway}[
-  Path = ./fonts/,
-  Extension = .ttf,
-  UprightFont = *-Regular,
-  BoldFont = *-Bold,
-  ItalicFont = *-Italic,
-  BoldItalicFont = *-BoldItalic,
-]
+\usepackage{tensygrid-hackathon}
 
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{bm}
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{float}
-\usepackage{microtype}
-\usepackage{xcolor}
 \usepackage{titlesec}
-\usepackage{fancyhdr}
+\usepackage{fancyhdr,lastpage}
 \usepackage{tabularx}
-\usepackage{graphicx}
 \usepackage[most]{tcolorbox}
 \usepackage[colorlinks=true, linkcolor=tgblue, urlcolor=tgpetrol, citecolor=tgpetrol]{hyperref}
 
-% --- Official TenSyGrid Color Palette ---
-\definecolor{tgpetrol}{HTML}{008598}
-\definecolor{tgblue}{HTML}{005B7F}
-\definecolor{tggraphit}{HTML}{1C3F52}
+% --- Additional colours for the challenge document ---
 \definecolor{tggreen}{HTML}{179C7D}
 \definecolor{tgaqua}{HTML}{39C1CD}
-\definecolor{tglime}{HTML}{B2D235}
 \definecolor{tgred}{HTML}{E3001A}
-\definecolor{tggrey}{HTML}{A6BBC8}
 \definecolor{tgbg}{HTML}{F4F8FA}
 
 % --- Header & Footer ---
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\textcolor{tgpetrol}{\small\textbf{TenSyGrid $\times$ VeraGrid}} \textcolor{tggrey}{|} \textcolor{tggraphit}{\small 1-day hackathon challenge}}
-\rhead{\textcolor{tggraphit}{\small 26 November 2026}}
-\cfoot{\textcolor{tggraphit}{\small Page \thepage}}
-\renewcommand{\headrule}{\hbox to\headwidth{\color{tgpetrol}\leaders\hrule height 0.8pt\hfill}}
+\lhead{\small\textcolor{tgpetrol}{\textbf{TenSyGrid $\times$ VeraGrid}}\enspace|\enspace 1-day hackathon challenge}
+\rhead{\small 26 November 2026}
+\cfoot{\small\thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\setlength{\emergencystretch}{1em}
 
 % --- Section Formats ---
 \titleformat{\section}
@@ -88,26 +63,10 @@
 
 \begin{document}
 
-% --- HEADER WITH LOGO ---
-\noindent
-\begin{minipage}[c]{0.70\textwidth}
-  {\fontsize{22pt}{26pt}\selectfont \textbf{\color{tgblue}Keep the grid stable}}\\[3pt]
-  {\fontsize{13pt}{16pt}\selectfont \textbf{\color{tgpetrol}Dynamic topology optimization \& converter tuning}}\\[4pt]
-  {\small \textbf{\color{tggraphit}TenSyGrid 1-day hackathon challenge · Version 2.0}}\\[2pt]
-  {\footnotesize \color{tggrey}Universitat Politècnica de Catalunya · CETPartnership Horizon Europe (GA 101069750)}
-\end{minipage}
-\hfill
-\begin{minipage}[c]{0.26\textwidth}
-  \raggedleft
-  \includegraphics[height=1.35cm]{./config/tglogo.pdf}\\[3pt]
-  \vspace{1pt}
-  \includegraphics[height=0.75cm]{./config/UPC-logo.pdf}\hspace{8pt}%
-  \includegraphics[height=1.0cm]{./config/eRoots-logo.pdf}
-\end{minipage}
-
-\vspace{6pt}
-\noindent{\color{tglime}\rule{\textwidth}{2pt}}
-\vspace{10pt}
+\HackathonHeader{Keep the grid stable}
+  {Dynamic topology optimization \& converter tuning}
+  {\textbf{TenSyGrid 1-day hackathon challenge · Version 2.0}\\[1pt]
+   {\footnotesize Universitat Politècnica de Catalunya · CETPartnership Horizon Europe \mbox{(GA 101069750)}}}
 
 % ===========================================================================
 \section{Background and motivation}
@@ -323,7 +282,7 @@ The hackathon is structured to run in parallel with the consortium's plenary ses
 Each team will receive a starter Git repository containing:
 \begin{itemize}[leftmargin=*, itemsep=1pt, parsep=0pt]
   \item \textbf{Warm-up matrix examples}: The integrated reconstruction instructions in Section~\ref{sec:warmup}, plus reference input/output cases for $S$ and $\Phi$.
-  \item \texttt{benchmark\_grid.veragrid}: Benchmark grid with synchronous generators and grid-following/grid-forming converters.
+  \item \texttt{benchmark\_grid.veragrid}: Benchmark grid with synchronous generators and grid-following/\allowbreak grid-forming converters.
   \item \texttt{starter\_script.py}: Ready-to-run template demonstrating model loading, AC power flow execution, descriptor state matrix assembly, and eigenvalue calculation in VeraGrid.
   \item \texttt{evaluate\_quick.py}: Fast validation tool evaluating a reduced subset of 5--10 representative scenarios for sub-second iterative feedback during prototyping.
   \item \texttt{evaluate\_local.py}: Local validation tool that computes loss and damping KPIs across sample scenarios before final submission.
