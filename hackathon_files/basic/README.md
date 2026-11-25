@@ -281,3 +281,23 @@ Run `python -m hackathon_files.basic.switching` with this checkout on `PYTHONPAT
 to build/checkpoint the additional cases. Their validation evidence is stored in
 `switching_validation.json`; `validation.json` continues to describe the original
 50 dynamically unstable cases.
+
+
+## Limited set and case marks
+
+`case_files("limited")` returns ten small cases: all six Lynn 5-bus exercises
+and variants 01–04 of the six-bus family. `case_files()` or `case_files("all")`
+returns all 60 basic cases. Trial budgets and permissions stay unchanged.
+
+Run the shared evaluator with either selection:
+
+```bash
+PYTHONPATH=src:. python -m hackathon_files.intro.evaluator --cases limited
+PYTHONPATH=src:. python -m hackathon_files.intro.evaluator --cases all
+```
+
+Limited runs ten basic grids. All runs eleven intro scenarios plus 60 basic
+grids. Both print per-case marks out of 100 and an overall mean, using the
+35% damping / 25% loss reduction / 25% robustness / 15% changes weights.
+Errors score zero and remain in the average. See the
+[scoring conventions](../intro/README.md#understand-the-results).

@@ -457,3 +457,11 @@ The basic collection also includes ten fixed-controller network-action cases:
 allowing switching and line/shunt additions. Their initial thermal overload must
 be repaired; they are distinct from the 50 dynamically unstable tuning cases.
 See [network-action cases](basic/README.md#fixed-controller-network-action-cases).
+
+
+For a fast public run, select the ten 5–6 bus cases with
+`python -m hackathon_files.intro.evaluator --cases limited`. Use `--cases all`
+for the full 71-case public run (11 intro + 60 basic). Each case prints a mark
+out of 100; the final mark averages every selected case, including evaluation
+errors at zero. The weights are damping 35%, loss reduction 25%, robustness 25%,
+and structural changes 15%.

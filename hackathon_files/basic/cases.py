@@ -261,12 +261,24 @@ def reference_tuning(grid: TunableGrid, gain: float = -400.0) -> RmsTuning:
                      close_lines=restoration)
 
 
-def case_files() -> tuple[Path, ...]:
+LIMITED_CASE_STEMS = (
+    'basic_lynn5_01', 'basic_lynn5_02', 'basic_lynn5_03',
+    'basic_lynn5_04', 'basic_lynn5_05', 'basic_switching_lynn5_01',
+    'basic_six_bus_01', 'basic_six_bus_02', 'basic_six_bus_03', 'basic_six_bus_04',
+)
+
+
+def case_files(selection: str = 'all') -> tuple[Path, ...]:
     """Find the bundled challenge grids in reproducible order.
 
+    :param selection: All 60 basic cases, or the ten smallest in limited.
     :return: Serialized controller and network-action grids, one per case.
     """
     directory: Path = Path(__file__).with_name('testgrids')
+    if selection == 'limited':
+        return tuple(directory / f'{name}.veragrid' for name in LIMITED_CASE_STEMS)
+    if selection != 'all':
+        raise ValueError("Case selection must be 'all' or 'limited'")
     return (tuple(directory / f'basic_{spec.name}_{variant + 1:02d}.veragrid'
                   for spec in network_specs() for variant in range(5))
             + tuple(directory / f'basic_switching_{spec.name}_01.veragrid' for spec in network_specs()))

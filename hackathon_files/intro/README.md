@@ -15,16 +15,22 @@ Use Python 3.12+ with this checkout's VeraGrid dependencies installed. From the
 repository root:
 
 ```bash
-PYTHONPATH=src:. python -m hackathon_files.intro.evaluator
+PYTHONPATH=src:. python -m hackathon_files.intro.evaluator --cases limited
 ```
 
-This evaluates your tuner on eleven intro operating points, including changes in active
-and reactive demand, followed by all 50 cases in `../basic/testgrids`. The basic
-cases use their own controller bounds, physical-action catalogs, and 2.5% minimum
-damping; intro scenarios retain the 5% minimum. Separate collection totals and
-a combined 61-case total are printed. The full run can take substantially longer
-than the intro scenarios alone. Every case checks power flow, stability, operating limits,
-and the response to a load increase, and reports losses and damping.
+`--cases limited` runs exactly ten small public basic cases: all six Lynn 5-bus
+exercises (including its network-action case), followed by the first four six-bus
+exercises. This covers synchronous, GFL, GFM and mixed models with 5–6 buses.
+It skips the intro collection. You can obtain the same files with
+`hackathon_files.basic.case_files("limited")`.
+
+Use `--cases all` (the default) for eleven intro operating points followed by all
+60 basic cases, for **71 cases** total. Basic cases use their own controller
+bounds, physical-action catalogs, and 2.5% minimum damping; intro scenarios retain
+the 5% minimum. The full run can take substantially longer. Every case checks
+power flow, stability, operating limits, and the response to a load increase.
+It prints losses, damping, structural changes, PASS/FAIL, and a **mark out of
+100**, followed by the overall mean mark over all selected cases.
 Each scenario starts with a fresh tuner
 and grid copy. Exit status is 0 if all cases pass, 1 if any fails or raises an
 error. The unchanged baseline is valid but may fail the electrical criteria.
@@ -86,8 +92,15 @@ opening/closing or line/shunt addition counts once; existing controller tuning
 and balanced redispatch count zero. Counts use the sanitized proposal and each
 scenario's own catalogs and action limits. Peak voltage deviation has been
 removed as a metric; voltage and thermal limits still determine operating
-compliance. The PDF assigns the change component 15% of the composite score;
-this runner reports its unweighted value and mean, not the full composite score.
+compliance. The per-case mark uses **35% damping, 25% relative loss reduction, 25% robustness,
+and 15% structural changes**. Damping reaches full credit at 10%; stable cases
+without oscillatory modes receive full damping credit. Loss reduction is measured
+against the unchanged case and clipped to 0–100%; increasing losses earns no
+loss credit. Robustness requires stability and zero voltage/thermal violations.
+A failed solve or evaluation error receives 0/100 and stays in the overall mean.
+A proposal that executes successfully but fails a criterion can still earn
+credit for its other components. Subset marks are labeled `limited` and should
+be compared only with runs on the same selected set.
 These sample operating points do not represent the hidden evaluation suite.
 
 ## Contestant API examples

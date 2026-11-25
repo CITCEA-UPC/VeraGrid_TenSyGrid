@@ -77,25 +77,30 @@ def test_combined_runner_covers_both_collections(monkeypatch, capsys):
     monkeypatch.setattr(evaluator, "make_scenario", lambda grid, scenario: scenario.name)
     monkeypatch.setattr(evaluator, "make_evaluator", lambda: object())
 
-    def intro(self, grid, rules):
-        calls.append(grid)
-        return metrics
+    def intro(benchmark, scenario):
+        calls.append(scenario.name)
+        return metrics, 2.0
 
-    def basic(path):
+    def basic(path, *, with_baseline=False):
         calls.append(path.stem)
         if len(calls) == 12:
             raise RuntimeError("case failed")
-        return metrics
+        assert with_baseline
+        return metrics, 2.0
 
-    monkeypatch.setattr(evaluator.FinalTuner, "test_tuning", intro)
+    monkeypatch.setattr(evaluator, "evaluate_intro", intro)
     monkeypatch.setattr(evaluator, "evaluate_basic", basic)
-    assert evaluator.main() == 1
-    assert len(calls) == 61
+    assert evaluator.main([]) == 1
+    assert len(calls) == 71
     output = capsys.readouterr().out
     assert "changes=2/8" in output
     assert "S_changes=0.750" in output
-    assert "Mean change score over 60 successfully evaluated cases: 0.750" in output
+    assert "Mean change score over 70 successfully evaluated cases: 0.750" in output
     assert "peak dV" not in output
     assert "intro: 11/11 passed" in output
-    assert "basic: 49/50 passed" in output
-    assert "Evaluation: 60/61 passed" in output
+    assert "basic: 59/60 passed" in output
+    assert "Evaluation: 70/71 passed" in output
+
+    assert "mark=83.75/100" in output
+    assert "mark=0.00/100  ERROR" in output
+    assert "Overall mark (all, 71 cases): 82.57/100" in output

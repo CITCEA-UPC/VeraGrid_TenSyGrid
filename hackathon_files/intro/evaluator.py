@@ -1,5 +1,6 @@
 """Evaluate the participant tuner on intro operating points and basic grids."""
 from dataclasses import dataclass
+import argparse
 from pathlib import Path
 import sys
 from time import perf_counter
@@ -16,6 +17,8 @@ from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_options imp
 from hackathon_files import TunableGrid, additional_grid_evaluator
 from hackathon_files.intro.rms_tunner import FinalTuner
 from hackathon_files.basic import basic_evaluator, case_files, initialize_grid as initialize_basic_grid
+from hackathon_files.src.rms_tuning import _active_losses
+from hackathon_files.src.rms_scoring import score_components, case_mark
 
 
 def make_evaluator():
@@ -103,38 +106,66 @@ def make_scenario(benchmark, scenario):
     return grid
 
 
-def evaluate_basic(path):
+def evaluate_basic(path, *, with_baseline=False):
     """Use basic-case permissions and keep final scoring outside the trial budget."""
     baseline = initialize_basic_grid(open_file(str(path)))
+    baseline_losses = _active_losses(baseline.problem.grid, baseline.problem.power_flow_results)
     evaluator = basic_evaluator()
     participant = evaluator.start_session(baseline)
     proposal = FinalTuner().tune(participant)
-    return evaluator.evaluate_proposal(baseline, proposal)
+    metrics = evaluator.evaluate_proposal(baseline, proposal)
+    return (metrics, baseline_losses) if with_baseline else metrics
 
 
-def main() -> int:
-    """Evaluate every sample with the same electrical and load-step checks."""
+def evaluate_intro(benchmark, scenario):
+    """Retain the intro workflow and measure losses before the tuner runs."""
+    grid = make_scenario(benchmark, scenario)
+    power_flow = PowerFlowDriver(grid)
+    power_flow.run()
+    if not bool(power_flow.results.converged):
+        raise RuntimeError('Baseline AC power flow did not converge')
+    baseline_losses = _active_losses(grid, power_flow.results)
+    metrics = FinalTuner().test_tuning(grid, make_evaluator())
+    return metrics, baseline_losses
+
+
+def evaluation_cases(selection):
+    """Limited contains exactly ten small basic grids; all also includes intro."""
+    paths = case_files(selection)
+    cases = []
+    if selection == 'all':
+        benchmark = load_benchmark()
+        cases.extend(("intro", scenario.name,
+                      lambda scenario=scenario: evaluate_intro(benchmark, scenario))
+                     for scenario in SCENARIOS)
+    cases.extend(("basic", path.stem,
+                  lambda path=path: evaluate_basic(path, with_baseline=True)) for path in paths)
+    return cases
+
+
+def main(argv=None) -> int:
+    """Evaluate all public examples or the limited ten-case set, with marks."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--cases', choices=('all', 'limited'), default='all',
+                        help='all: 11 intro + 60 basic; limited: ten 5–6 bus basic cases')
+    args = parser.parse_args(argv)
     start = perf_counter()
-    benchmark = load_benchmark()
     results = []
+    marks = []
     failures = 0
-    cases = [
-        ("intro", scenario.name,
-         lambda scenario=scenario: FinalTuner().test_tuning(
-             make_scenario(benchmark, scenario), make_evaluator()))
-        for scenario in SCENARIOS
-    ]
-    cases.extend(("basic", path.stem, lambda path=path: evaluate_basic(path))
-                 for path in case_files())
+    cases = evaluation_cases(args.cases)
+    print(f'Case set: {args.cases} ({len(cases)} cases)', flush=True)
     totals = {"intro": [0, 0], "basic": [0, 0]}
     for collection, name, evaluate in cases:
         label = f"{collection}/{name}"
         totals[collection][1] += 1
+        mark = 0.0
         try:
             # Fresh tuner per case: budgets and algorithm state do not leak.
             # This public helper validates the proposal, recomputes PF and SSA,
             # and simulates the standard 2% load increase over three seconds.
-            metrics = evaluate()
+            metrics, baseline_losses = evaluate()
+            mark = case_mark(score_components(metrics, baseline_losses))
             results.append(metrics)
             passed = (metrics.stable and metrics.voltage_violations == 0
                       and metrics.thermal_violations == 0)
@@ -148,14 +179,19 @@ def main() -> int:
                   f"peak df={metrics.peak_frequency_deviation_hz:.4f} Hz  "
                   f"changes={metrics.structural_changes}/{metrics.max_structural_changes}  "
                   f"S_changes={metrics.changes_score:.3f}  "
-                  f"{'PASS' if passed else 'FAIL'}")
+                  f"mark={mark:.2f}/100  "
+                  f"{'PASS' if passed else 'FAIL'}", flush=True)
         except Exception as error:
             failures += 1
-            print(f"{label:32s} ERROR: {type(error).__name__}: {error}")
+            mark = 0.0
+            print(f"{label:32s} mark=0.00/100  ERROR: {type(error).__name__}: {error}", flush=True)
+        marks.append(mark)
     for collection, (passed, total) in totals.items():
-        print(f"\n{collection}: {passed}/{total} passed")
+        if total:
+            print(f"\n{collection}: {passed}/{total} passed")
     print(f"\nEvaluation: {len(cases) - failures}/{len(cases)} passed; "
           f"{perf_counter() - start:.3f} s.")
+    print(f'Overall mark ({args.cases}, {len(cases)} cases): {sum(marks) / len(cases):.2f}/100')
     if results:
         print(f"Mean losses over {len(results)} successfully evaluated cases: "
               f"{sum(m.active_losses_mw for m in results) / len(results):.3f} MW")
