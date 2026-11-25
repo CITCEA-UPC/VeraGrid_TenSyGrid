@@ -35,6 +35,8 @@ class RecordingUpdater:
         self.delegate = delegate
         self.pwm = next(entry for entry in delegate.logic_entries if isinstance(entry, ThreePhaseCarrierPwmLogic))
         self.rows = []
+        self.accepted_times = []
+        self.accepted_states = []
         self.last_ms = -1
 
     def __getattr__(self, name):
@@ -44,9 +46,14 @@ class RecordingUpdater:
         return self.delegate.get_next_forced_event_time(t_prev, t_target)
 
     def commit_boundary(self, t, x, params):
+        self.accepted_times.append(float(t))
+        self.accepted_states.append(x.copy())
         return self.delegate.commit_boundary(t, x, params)
 
     def update(self, t, x, params):
+        if not self.accepted_times and abs(t) < 1e-15:
+            self.accepted_times.append(float(t))
+            self.accepted_states.append(x.copy())
         result = self.delegate.update(t, x, params)
         p = self.pwm
         self.rows.append([t, float(params[p.omega_sw_idx]), float(params[p.carrier_phase_idx]),
@@ -96,7 +103,9 @@ def main():
                     variables=[dict(name=v.name, uid=v.uid, index=int(problem.get_var_idx(v))) for v in variables],
                     pwm_columns=['time', 'omega', 'phase', 'interval_end', 'pending_a', 'pending_b', 'pending_c',
                                  'gate_a', 'gate_b', 'gate_c', 'm_a_input', 'm_b_input', 'm_c_input'])
-    np.savez_compressed(args.output/'controls.npz', time=t, x=x, dx=dx, pwm=np.asarray(recorder.rows))
+    np.savez_compressed(args.output/'controls.npz', time=t, x=x, dx=dx, pwm=np.asarray(recorder.rows),
+                        accepted_time=np.asarray(recorder.accepted_times),
+                        accepted_x=np.asarray(recorder.accepted_states))
     (args.output/'metadata.json').write_text(json.dumps(metadata, indent=2)+'\n')
     print(json.dumps({k:v for k,v in metadata.items() if k not in ('variables', 'pwm_columns')}), flush=True)
 
