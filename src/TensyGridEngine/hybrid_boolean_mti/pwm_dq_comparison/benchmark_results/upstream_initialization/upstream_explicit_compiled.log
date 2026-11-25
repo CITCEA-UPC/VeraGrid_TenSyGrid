@@ -1,0 +1,105 @@
+/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.py:214: NumbaWarning: Cannot cache compiled function "csc_add_ff" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  dQ_dVm = csc_add_ff(sp_slice(dS_dVm.imag, i_k_q, i_u_vm), sp_slice(dQinj_dVm, i_k_q, i_u_vm), 1.0, -1.0)
+Templates built: 46.978 s
+Problem/solver built: 49.225 s
+Timeout (0:01:00)!
+Thread 0x00007a28c8eaf080 (most recent call first):
+  File "/tmp/pwm-upstream-jit-cache/eager_ad_2430dba3897f6b4c_7bc139960e6f6f73.py", line 139 in eager_ad_2430dba3897f6b4c
+  File "/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 1463 in __call__
+  File "/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 1968 in evaluate
+  File "/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 2995 in simulate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/probe_upstream_initialization.py", line 99 in run
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/probe_upstream_initialization.py", line 144 in <module>
+{
+  "engine_file": "/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/api.py",
+  "initialization": "Explicit",
+  "backend": "StructuralCompiled",
+  "initialized": true,
+  "converged": true,
+  "setup_seconds": 49.2249848219999,
+  "simulation_seconds": 38.970701011000074,
+  "final_time": 0.002,
+  "points": 201,
+  "initial": {
+    "i_a": -0.015191549928528917,
+    "i_b": -0.3935994803128037,
+    "i_c": 0.4087910302413326,
+    "i_dc": -0.299999993819933,
+    "p": 0.3265003494927266,
+    "q": 0.0,
+    "v_dc_bus": 1.0,
+    "v_dc": 1.00000000003,
+    "v_conv_a": 2.220446049250313e-16,
+    "gate_a": 1.0,
+    "i_d": 0.46350939613040626,
+    "i_q": 0.0,
+    "i_d_ref": 0.46350939613040626,
+    "i_q_ref": 0.0,
+    "v_cmd_d": 1.3995484992294933,
+    "v_cmd_q": 0.037080751690432505,
+    "v_d": 1.4088186871521018,
+    "v_q": -0.0,
+    "theta_pll": -0.032780934271948274,
+    "P_f": 0.3265003494927266,
+    "Q_f": 0.0,
+    "switching_blend": 0.0
+  },
+  "first_sample": {
+    "time_arr": 0.0,
+    "i_a": -0.015191549928528917,
+    "i_b": -0.3935994803128037,
+    "i_c": 0.4087910302413326,
+    "i_dc": -0.299999993819933,
+    "p": 0.3265003494927266,
+    "q": 0.0,
+    "v_dc_bus": 1.0,
+    "v_dc": 1.00000000003,
+    "v_conv_a": 2.220446049250313e-16,
+    "gate_a": 1.0,
+    "i_d": 0.46350939613040626,
+    "i_q": 0.0,
+    "i_d_ref": 0.46350939613040626,
+    "i_q_ref": 0.0,
+    "v_cmd_d": 1.3995484992294933,
+    "v_cmd_q": 0.037080751690432505,
+    "v_d": 1.4088186871521018,
+    "v_q": -0.0,
+    "theta_pll": -0.032780934271948274,
+    "P_f": 0.3265003494927266,
+    "Q_f": 0.0,
+    "switching_blend": 0.0
+  },
+  "last_sample": {
+    "time_arr": 0.002,
+    "i_a": 0.2606197796159759,
+    "i_b": -0.38548609248713656,
+    "i_c": 0.12486631287116116,
+    "i_dc": -0.3000516785699827,
+    "p": 0.10157712727941287,
+    "q": -0.008373468440053416,
+    "v_dc_bus": 0.9998277676691074,
+    "v_dc": 0.9998277676991126,
+    "v_conv_a": 0.0,
+    "gate_a": 1.0,
+    "i_d": 0.3901212055215091,
+    "i_q": -0.05047745781893556,
+    "i_d_ref": 0.45513188825764467,
+    "i_q_ref": 0.0009144452092732507,
+    "v_cmd_d": 1.4227540761212736,
+    "v_cmd_q": 0.04019873335286316,
+    "v_d": 0.5176348488869367,
+    "v_q": -0.02404881969513699,
+    "theta_pll": 0.5955109879406746,
+    "P_f": 0.32542642894457524,
+    "Q_f": -0.001533728395357808,
+    "switching_blend": 0.9999126940980504
+  },
+  "initialization_report": {
+    "method": "Explicit",
+    "status": "RESOLVED",
+    "message": "Explicit device initialization completed with algebraic residual 6.150e-09; periodic steady state was not verified.",
+    "initial_residual_inf": 6.150067011212457e-09,
+    "final_residual_inf": 6.150067011212457e-09,
+    "automatic_dx0_count": 62
+  }
+}

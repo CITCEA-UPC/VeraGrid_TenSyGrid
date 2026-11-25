@@ -1,0 +1,81 @@
+/home/pablo/Desktop/eroots/VeraGrid/src/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.py:338: NumbaWarning: Cannot cache compiled function "csc_add_ff" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  dQ_dVm = csc_add_ff(sp_slice(dS_dVm.imag, i_k_q, i_u_vm), sp_slice(dQinj_dVm, i_k_q, i_u_vm), 1.0, -1.0)
+mode=averaged startup; gate modes updated at t=0
+initialization=Explicit, status=RESOLVED, report_residual=5.20649079e-11
+runtime t_enable_sw=0.0001
+runtime omega_sw=31415.9265
+runtime omega_sw_handover_value=31415.9265
+runtime omega_sw=31415.9265
+runtime omega_sw_eff=0
+runtime omega_sw_eff=0
+algebraic_residual_inf=5.20649079e-11, state_residual_inf=0
+  algebraic[92]=-5.20649079e-11: ((0.0) + ((-1.0) * (i_dc))) + ((1.0) * (i_dc))
+  algebraic[20]=-3.54911656e-11: (v_mag) - (sqrt((((v_d_meas_f) * (v_d_meas_f)) + ((v_q_meas_f) * (v_q_meas_f))) + (1e-10)))
+  algebraic[29]=-3.29005156e-11: (i_d) - ((0.6666666666666666) * ((((sin(theta_pll)) * (i_A)) + ((sin((theta_pll) - (2.0943951023931953))) * (i_B))) + ((sin((theta
+  algebraic[14]=+2.31754615e-11: (i_dc_conv) - ((((1.0) - (switching_blend)) * ((-((P) - (P_loss))) / (((v_dc) * (heaviside((v_dc) - (vdc_floor)))) + ((vdc_floor)
+  algebraic[10]=+2.31753505e-11: (P) - (((0.5) * (((v_d) * (i_d)) + ((v_q) * (i_q)))) + ((v_0) * (i_0)))
+  algebraic[72]=+1.21708199e-14: (v_cmd_q_u) - ((((v_q_meas_f) - ((R_eq) * (i_q_meas_f))) + ((((omega_pll) / ((omega_base) + (1e-10))) * (L_eq)) * (i_d_meas_f))) -
+  algebraic[86]=-4.82426599e-15: ((0.0) + ((-1.0) * (if_A))) + ((1.0) * (i_A))
+  algebraic[87]=+2.49800181e-15: ((0.0) + ((-1.0) * (if_B))) + ((1.0) * (i_B))
+i_A: derivative=145.537543, steady_rotation=145.537543, error=+8.57482974e-11
+i_B: derivative=-76.9019352, steady_rotation=-76.9019353, error=+2.19282015e-09
+i_C: derivative=-68.6356078, steady_rotation=-68.6356078, error=-2.27859687e-09
+initial m_a=-0.0733996925
+initial m_b=-0.71415608
+initial m_c=+0.71415608
+initial gate_a=+1
+initial gate_b=+1
+initial gate_c=+1
+initial v_ref_a_raw=-0.0829311232
+initial v_ref_b_raw=-1.16887532
+initial v_ref_c_raw=+1.25180645
+initial v_conv_a=+0
+initial v_conv_b=+0
+initial v_conv_c=+0
+initial v_dc=+1
+d_v_dc: seeded=+5.99999607e-10, runtime=+5.99999607e-10
+initial xi_vdc=+0
+d_xi_vdc: seeded=+0, runtime=+0
+initial xi_q=+0
+d_xi_q: seeded=+0, runtime=+0
+initial P_f=+0.326500357
+d_P_f: seeded=+0, runtime=+0
+initial Q_f=+0
+d_Q_f: seeded=+0, runtime=+0
+initial xi_id=+0
+d_xi_id: seeded=+0, runtime=+0
+initial xi_iq=+0
+d_xi_iq: seeded=+0, runtime=+0
+initial switching_blend=+0
+d_switching_blend: seeded=+0, runtime=+0
+runtime gate_a_mode=+1
+runtime gate_b_mode=+1
+runtime gate_c_mode=+1
+rotation i_f_A state_index=0: max_error=1.99474097e-05, sum=-5.55111512e-17
+rotation i_t_A state_index=3: max_error=1.96533706e-05, sum=+5.55111512e-17
+rotation i_A state_index=12: max_error=1.02447189e-08, sum=+0
+rotation i_A state_index=27: max_error=4.12114787e-13, sum=+5.55111512e-17
+mapped transformer parameter trafo_r1=0.005
+mapped transformer parameter trafo_r2=0.005
+mapped transformer parameter trafo_l1=31830.98877753391
+mapped transformer parameter trafo_l2=31830.98877753391
+mapped transformer parameter trafo_m=31830.988618378964
+mapped transformer parameter trafo_gm=1e-20
+mapped transformer parameter trafo_tap_ratio=1.0
+transformer parameter trafo_r1=None
+transformer parameter trafo_r2=None
+transformer parameter trafo_l1=None
+transformer parameter trafo_l2=None
+transformer parameter trafo_m=None
+transformer parameter trafo_gm=None
+transformer parameter trafo_tap_ratio=None
+bus Bus1_AC v_A=0
+bus Bus1_AC v_B=-1.22474487139
+bus Bus1_AC v_C=1.22474487139
+bus Bus2_AC v_A=-0.0461741232505
+bus Bus2_AC v_B=-1.19633023024
+bus Bus2_AC v_C=1.24250435349
+transformer i_f_A=-0.0151915506696
+transformer i_t_A=0.0151915506696
+transformer if_A=-0.0151915506696
+transformer it_A=0.0151915506696

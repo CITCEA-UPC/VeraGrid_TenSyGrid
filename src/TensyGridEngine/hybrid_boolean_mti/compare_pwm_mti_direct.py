@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from time import perf_counter
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -1043,7 +1044,9 @@ def run_solver_backed_case(
     modulation_index: float = 0.8,
     t_end: float = 4.0e-3,
     h: float = 50.0e-6,
+    timings: dict[str, float] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool, bool, str]:
+    setup_start = perf_counter()
     problem, mode_indices, mod_indices = build_pwm_signal_problem(
         use_procedural_pwm=use_procedural_pwm,
         f_ref=f_ref,
@@ -1082,7 +1085,12 @@ def run_solver_backed_case(
         )
         solver_label = "StructuralCompiledSolver + DaeBackEuler + root-detected direct comparator updater"
 
+    solve_start = perf_counter()
     t, y, _dy, well_initialized, converged = solver.simulate(boundary_updater=updater)
+    solve_end = perf_counter()
+    if timings is not None:
+        timings["setup_seconds"] = solve_start - setup_start
+        timings["solve_seconds"] = solve_end - solve_start
     gate_t, gate_values = updater.arrays()
     return t, y, gate_t, gate_values, bool(well_initialized), bool(converged), solver_label
 
@@ -1142,7 +1150,9 @@ def run_back_euler_mti_block_case(
     h: float = 50.0e-6,
     sampled_inputs: bool = True,
     direction_eps: float = 1.0e-8,
+    timings: dict[str, float] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, bool, bool, str]:
+    setup_start = perf_counter()
     problem = MinimalBlockMtiPwmProblem(
         f_ref=f_ref,
         f_sw=f_sw,
@@ -1159,7 +1169,12 @@ def run_back_euler_mti_block_case(
         tolerance=1.0e-8,
         inequality_tolerance=1.0e-9,
     )
+    solve_start = perf_counter()
     t, y, well_initialized, converged = solver.simulate()
+    solve_end = perf_counter()
+    if timings is not None:
+        timings["setup_seconds"] = solve_start - setup_start
+        timings["solve_seconds"] = solve_end - solve_start
     z = np.asarray(solver.z[: len(t), :], dtype=float)
     label = "BackEulerImplicitIntegrationMTI + internal-carrier block PWM + runtime-parameter references"
     return t, y, z, bool(well_initialized), bool(converged), label
@@ -1173,7 +1188,9 @@ def run_back_euler_mti_scheduled_block_case(
     h: float = 50.0e-6,
     sampled_inputs: bool = True,
     transition_eps: float = 1.0e-9,
+    timings: dict[str, float] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, bool, bool, str]:
+    setup_start = perf_counter()
     problem = ScheduledBlockMtiPwmProblem(
         f_ref=f_ref,
         f_sw=f_sw,
@@ -1190,7 +1207,12 @@ def run_back_euler_mti_scheduled_block_case(
         tolerance=1.0e-8,
         inequality_tolerance=1.0e-9,
     )
+    solve_start = perf_counter()
     t, y, well_initialized, converged = solver.simulate()
+    solve_end = perf_counter()
+    if timings is not None:
+        timings["setup_seconds"] = solve_start - setup_start
+        timings["solve_seconds"] = solve_end - solve_start
     z = np.asarray(solver.z[: len(t), :3], dtype=float)
     # Convert q_after booleans to gates using the stored algebraic gate columns.
     gates = np.asarray(y[:, 3:6], dtype=float)

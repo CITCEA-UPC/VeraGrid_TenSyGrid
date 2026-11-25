@@ -71,8 +71,6 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
     d_u_sin_pll: Var = vf.add_diff_var(name=f"d_u_sin_pll", base_var=u_sin_pll)
     u_cos_pwm: Var = vf.add_var(name=f"u_cos_pwm")
     u_sin_pwm: Var = vf.add_var(name=f"u_sin_pwm")
-    d_u_cos_pwm: Var = vf.add_diff_var(name=f"d_u_cos_pwm", base_var=u_cos_pwm)
-    d_u_sin_pwm: Var = vf.add_diff_var(name=f"d_u_sin_pwm", base_var=u_sin_pwm)
 
     v_ref_a_raw: Var = vf.add_var(name=f"v_ref_a_raw")
     v_ref_b_raw: Var = vf.add_var(name=f"v_ref_b_raw")
@@ -129,6 +127,12 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
     pwm_sample_enable: Expr = omega_sw / sym.max(omega_sw, eps)
     pwm_sample_phase_lead: Expr = pwm_sample_enable * omega_base * c_pi / (c_two * sym.max(omega_sw, eps))
     theta_pwm_sample_expr: Expr = theta_pll + pwm_sample_phase_lead
+    # The phase advance changes when PWM is enabled. An algebraic rotation
+    # preserves that jump instead of integrating a second, drifting oscillator.
+    cos_advance: Expr = sym.cos(pwm_sample_phase_lead)
+    sin_advance: Expr = sym.sin(pwm_sample_phase_lead)
+    cos_pwm_expr: Expr = u_cos_pll * cos_advance - u_sin_pll * sin_advance
+    sin_pwm_expr: Expr = u_sin_pll * cos_advance + u_cos_pll * sin_advance
 
     v_ref_a_raw_expr, v_ref_b_raw_expr, v_ref_c_raw_expr = _inverse_dq0_to_abc_with_trig_identities(
         d_value=v_cmd_d,
@@ -190,12 +194,12 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
         state_eqs=[
             -(omega_base * u_sin_pll),
             omega_base * u_cos_pll,
-            -(omega_base * u_sin_pwm),
-            omega_base * u_cos_pwm,
         ],
-        state_vars=[u_cos_pll, u_sin_pll, u_cos_pwm, u_sin_pwm],
-        diff_vars=[d_u_cos_pll, d_u_sin_pll, d_u_cos_pwm, d_u_sin_pwm],
+        state_vars=[u_cos_pll, u_sin_pll],
+        diff_vars=[d_u_cos_pll, d_u_sin_pll],
         algebraic_eqs=[
+            u_cos_pwm - cos_pwm_expr,
+            u_sin_pwm - sin_pwm_expr,
             v_ref_a_raw - v_ref_a_raw_expr,
             v_ref_b_raw - v_ref_b_raw_expr,
             v_ref_c_raw - v_ref_c_raw_expr,
@@ -230,6 +234,7 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
             v_conv_0 - v_conv_0_expr,
         ],
         algebraic_vars=[
+            u_cos_pwm, u_sin_pwm,
             v_ref_a_raw, v_ref_b_raw, v_ref_c_raw, v_ref_common_inj,
             v_ref_a, v_ref_b, v_ref_c, theta_pwm_sample,
             v_ref_a_pwm, v_ref_b_pwm, v_ref_c_pwm,
@@ -243,9 +248,9 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
             carrier_phase: Const(0.0),
         },
         mode_dict={
-            gate_a_mode: Const(0.0),
-            gate_b_mode: Const(0.0),
-            gate_c_mode: Const(0.0),
+            gate_a_mode: sym.heaviside(m_a - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase))),
+            gate_b_mode: sym.heaviside(m_b - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase))),
+            gate_c_mode: sym.heaviside(m_c - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase))),
         },
         init_eqs={
             u_cos_pll: sym.cos(theta_pll),
@@ -271,13 +276,13 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
             m_c: m_c_expr,
             v_p: v_p_expr,
             v_n: v_n_expr,
-            gate_a: Const(0.0),
-            gate_b: Const(0.0),
-            gate_c: Const(0.0),
-            v_leg_a: -v_leg_scale,
-            v_leg_b: -v_leg_scale,
-            v_leg_c: -v_leg_scale,
-            v_common_mode: Const(0.0),
+            gate_a: gate_a_mode,
+            gate_b: gate_b_mode,
+            gate_c: gate_c_mode,
+            v_leg_a: v_leg_a_expr,
+            v_leg_b: v_leg_b_expr,
+            v_leg_c: v_leg_c_expr,
+            v_common_mode: v_common_mode_expr,
             v_conv_a: v_conv_a_expr,
             v_conv_b: v_conv_b_expr,
             v_conv_c: v_conv_c_expr,
@@ -288,8 +293,6 @@ def get_bridge_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "
         diff_init_eqs={
             d_u_cos_pll: -(omega_base * u_sin_pll),
             d_u_sin_pll: omega_base * u_cos_pll,
-            d_u_cos_pwm: -(omega_base * u_sin_pwm),
-            d_u_sin_pwm: omega_base * u_cos_pwm,
         },
         in_vars=[theta_pll, omega_base, v_cmd_d, v_cmd_q, v_cmd_0, v_dc, k_v_conv, m_max, vdc_floor, omega_sw, carrier_phase],
         out_vars=[

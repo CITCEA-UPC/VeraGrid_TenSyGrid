@@ -1,0 +1,134 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "numpy": "2.3.0",
+  "revision": "849ce83e403bf0416b519f91759bbaa1b2f1ea26",
+  "working_tree": "benchmark run includes local uncommitted changes",
+  "engine_patch_sha256": "19b5b5a8e8b1207017949cec1c2fd4d4ea5d0453b4753b46936351c8d871b15b",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "settings": {
+    "grid_pwm_hz": 5000.0,
+    "pwm_duration_s": 0.004,
+    "pwm_step_s": 5e-05,
+    "grid_duration_s": 0.002,
+    "grid_step_s": 1e-05,
+    "pwm_timing": "one first call + three repeats, includes setup",
+    "grid_timing": "one fresh process, setup separate; simulation includes first-use compilation"
+  },
+  "results": [
+    {
+      "case": "pwm_procedural",
+      "status": "ok",
+      "first_call_seconds": 0.017819243999838363,
+      "repeat_seconds": [
+        0.015063543999531248,
+        0.015459631000339868,
+        0.014870404000248527
+      ],
+      "median_repeat_seconds": 0.015063543999531248,
+      "points": 81,
+      "label": "StructuralCompiledSolver + DaeBackEuler + ThreePhaseCarrierPwmLogic scheduled updater",
+      "nominal_step_seconds": 5e-05,
+      "first_setup_seconds": 0.00483523100047023,
+      "first_solve_seconds": 0.012668104999647767,
+      "median_setup_seconds": 0.0034658219992707018,
+      "median_solve_seconds": 0.01160840200009261
+    },
+    {
+      "case": "pwm_live_comparator",
+      "status": "ok",
+      "first_call_seconds": 0.02435286800027825,
+      "repeat_seconds": [
+        0.02288995500020974,
+        0.02090118199976132,
+        0.020882668000012927
+      ],
+      "median_repeat_seconds": 0.02090118199976132,
+      "points": 81,
+      "label": "StructuralCompiledSolver + DaeBackEuler + root-detected direct comparator updater",
+      "nominal_step_seconds": 5e-05,
+      "first_setup_seconds": 0.004022769000584958,
+      "first_solve_seconds": 0.02013961400007247,
+      "median_setup_seconds": 0.0024034550006035715,
+      "median_solve_seconds": 0.018655190000572475
+    },
+    {
+      "case": "pwm_internal_mti",
+      "status": "ok",
+      "first_call_seconds": 0.1490150839999842,
+      "repeat_seconds": [
+        0.14462915900003281,
+        0.1439278320003723,
+        0.1439802499999132
+      ],
+      "median_repeat_seconds": 0.1439802499999132,
+      "points": 81,
+      "label": "BackEulerImplicitIntegrationMTI + internal-carrier block PWM + runtime-parameter references",
+      "nominal_step_seconds": 5e-05,
+      "first_setup_seconds": 0.0005314389991326607,
+      "first_solve_seconds": 0.14844852900023398,
+      "median_setup_seconds": 0.0003646790000857436,
+      "median_solve_seconds": 0.14358053600062703
+    },
+    {
+      "case": "pwm_scheduled_mti",
+      "status": "ok",
+      "first_call_seconds": 0.07075170900043304,
+      "repeat_seconds": [
+        0.0669620489998124,
+        0.06846651700016082,
+        0.06751124600032199
+      ],
+      "median_repeat_seconds": 0.06751124600032199,
+      "points": 81,
+      "label": "BackEulerImplicitIntegrationMTI + scheduled-transition PWM block",
+      "nominal_step_seconds": 5e-05,
+      "first_setup_seconds": 0.0007669080005143769,
+      "first_solve_seconds": 0.06994310399932147,
+      "median_setup_seconds": 0.0005567270000028657,
+      "median_solve_seconds": 0.06691797100029362
+    },
+    {
+      "case": "grid_standard_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 40.944109327999286,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "solve_seconds": 30.89209738699992,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    },
+    {
+      "case": "grid_multilinear_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 24.746657996000067,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "solve_seconds": 9.375193550999938,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 201
+    },
+    {
+      "case": "grid_mti_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 48.70837310800016,
+      "warmup_policy": "off",
+      "integrator": "EmtMtiBackEulerSolver",
+      "initialization_residual": 6.150067011212457e-09,
+      "solve_seconds": 48.73957808599971,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.0020000000000000044,
+      "points": 201
+    }
+  ]
+}

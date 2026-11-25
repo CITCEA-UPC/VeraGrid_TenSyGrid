@@ -303,9 +303,12 @@ def get_bridge_2level_3ph_emt_template(vf: VarFactory, name: str = "bridge_2leve
             (carrier_phase, Const(0.0)),
         ]),
         mode_dict=dict([
-            (gate_a_mode, Const(0.0)),
-            (gate_b_mode, Const(0.0)),
-            (gate_c_mode, Const(0.0)),
+            # Seed the retained gates from the carrier at t=0.  The PWM logic
+            # takes over after initialization; starting all gates low makes
+            # the bridge init equations disagree with its first scheduled mode.
+            (gate_a_mode, sym.heaviside(m_a - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase)))),
+            (gate_b_mode, sym.heaviside(m_b - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase)))),
+            (gate_c_mode, sym.heaviside(m_c - Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase)))),
         ]),
         init_eqs=dict([
             (v_ref_a_raw, v_ref_a_raw_expr),
@@ -327,13 +330,13 @@ def get_bridge_2level_3ph_emt_template(vf: VarFactory, name: str = "bridge_2leve
             (m_c, m_c_expr),
             (v_p, v_p_expr),
             (v_n, v_n_expr),
-            (gate_a, Const(0.0)),
-            (gate_b, Const(0.0)),
-            (gate_c, Const(0.0)),
-            (v_leg_a, -v_leg_scale),
-            (v_leg_b, -v_leg_scale),
-            (v_leg_c, -v_leg_scale),
-            (v_common_mode, Const(0.0)),
+            (gate_a, gate_a_mode),
+            (gate_b, gate_b_mode),
+            (gate_c, gate_c_mode),
+            (v_leg_a, v_leg_a_expr),
+            (v_leg_b, v_leg_b_expr),
+            (v_leg_c, v_leg_c_expr),
+            (v_common_mode, v_common_mode_expr),
             (v_conv_a, v_conv_a_expr),
             (v_conv_b, v_conv_b_expr),
             (v_conv_c, v_conv_c_expr),

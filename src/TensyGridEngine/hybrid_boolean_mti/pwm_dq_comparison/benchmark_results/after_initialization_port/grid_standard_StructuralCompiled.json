@@ -1,0 +1,13 @@
+{
+  "case": "grid_standard_StructuralCompiled",
+  "status": "ok",
+  "setup_seconds": 40.944109327999286,
+  "warmup_policy": "off",
+  "integrator": "StructuralCompiled",
+  "initialization_residual": 6.150067011212457e-09,
+  "solve_seconds": 30.89209738699992,
+  "initialized": true,
+  "converged": true,
+  "final_time": 0.002,
+  "points": 201
+}

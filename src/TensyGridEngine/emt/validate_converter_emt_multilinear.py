@@ -46,7 +46,7 @@ from VeraGridEngine.Templates.Emt.dc_load_emt_template import get_dc_load_emt_te
 from VeraGridEngine.Templates.Emt.transformer_emt_template import get_transformer_emt_template
 from VeraGridEngine.Templates.Emt.thevenin_equivalent_emt_generator_template import get_generator_thevenin_rl_emt_template_with_ref
 from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_emt_model
-from VeraGridEngine.Utils.Symbolic.block import Var, find_name_in_block
+from VeraGridEngine.Utils.Symbolic.block import Block, Var, find_name_in_block
 from VeraGridEngine.Utils.procedural_logic import build_boundary_updater_from_block
 from VeraGridEngine.enumerations import DynamicIntegrationMethod, EmtInitializationMethod, EmtSolverTypes, SolverType, VarPowerFlowReferenceType
 
@@ -65,6 +65,13 @@ class CaseResults:
     solve_seconds: float
     initialized: bool
     converged: bool
+    initialization_residual: float
+    v_dc: np.ndarray
+    gate_a: np.ndarray
+    gate_b: np.ndarray
+    gate_c: np.ndarray
+    p_filtered: np.ndarray
+    q_filtered: np.ndarray
 
 
 def build_emt_options() -> EmtOptions:
@@ -106,8 +113,17 @@ def _get_signal(problem: EmtProblemDae, state_traj: np.ndarray, variable_name: s
     return state_traj[:, idx]
 
 
-def simulate_case(label: str, converter_builder: callable, options: EmtOptions | None = None, use_mti: bool = False) -> CaseResults:
-    """Build one AC/DC grid, run PF+EMT and return converter time series."""
+def _optional_signal(problem: EmtProblemDae, values: np.ndarray, block: Block, name: str) -> np.ndarray:
+    """Extract a switched-model signal, returning an empty array for averaged models."""
+    variable = find_name_in_block(name, block)
+    if variable is None:
+        return np.empty(0)
+    return values[:, problem.get_var_idx(variable)]
+
+
+def build_converter_case(label: str, converter_builder: callable, options: EmtOptions | None = None,
+                         use_mti: bool = False, model_parameters: dict[str, float] | None = None) -> tuple[EmtProblemDae, Block]:
+    """Build and power-flow-initialize the shared three-bus converter benchmark."""
     started = perf_counter()
     grid = gce.MultiCircuit(name=f"Converter compare {label}", Sbase=100.0, fbase=50.0)
     bus_slack_ac = gce.Bus(name="Bus_Slack_AC", Vnom=230.0, is_slack=True)
@@ -156,6 +172,9 @@ def simulate_case(label: str, converter_builder: callable, options: EmtOptions |
     gen_mdl = get_generator_thevenin_rl_emt_template_with_ref(vf=grid.var_factory).block
     trafo_mdl = get_transformer_emt_template(vf=grid.var_factory, name=trafo.name).block
     vsc_mdl = converter_builder(vf=grid.var_factory, name=vsc.name).block
+    if model_parameters is not None:
+        for parameter, value in model_parameters.items():
+            vsc_mdl.set_parameter_in_model(parameter, value)
     dc_load_mdl = get_dc_load_emt_template(vf=grid.var_factory, name="dc_load_emt_cmp").block
 
     set_emt_model(device=gen, model=gen_mdl, var_factory=grid.var_factory)
@@ -174,10 +193,21 @@ def simulate_case(label: str, converter_builder: callable, options: EmtOptions |
         pf_results_3ph=None,
     )
     print(f"{label}: EMT problem ready after {perf_counter() - started:.3f} s", flush=True)
+    return problem, vsc_mdl
+
+
+def simulate_case(label: str, converter_builder: callable, options: EmtOptions | None = None,
+                  use_mti: bool = False, model_parameters: dict[str, float] | None = None) -> CaseResults:
+    """Run the shared converter case and retain initialization and waveform evidence."""
+    from VeraGridEngine.Simulations.EMT.solvers.emt_mti_back_euler_solver import EmtMtiBackEulerSolver
+
+    started = perf_counter()
+    problem, vsc_mdl = build_converter_case(label, converter_builder, options, use_mti, model_parameters)
     solver = EmtMtiBackEulerSolver(
         problem, 0.0, float(problem.options.simulation_time),
         float(problem.options.time_step), max_iter=problem.options.init_newton_max_iter,
         tolerance=problem.options.tolerance,
+        event_bisect_iter=12,
     ) if use_mti else build_emt_solver(
         options=problem.options,
         problem=problem,
@@ -199,6 +229,13 @@ def simulate_case(label: str, converter_builder: callable, options: EmtOptions |
         solve_seconds=solve_seconds,
         initialized=bool(_ok_init),
         converged=bool(_ok_conv),
+        initialization_residual=float(problem.initialization_report.final_residual_inf),
+        v_dc=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.Vdc])],
+        gate_a=_optional_signal(problem, state_traj, vsc_mdl, 'gate_a'),
+        gate_b=_optional_signal(problem, state_traj, vsc_mdl, 'gate_b'),
+        gate_c=_optional_signal(problem, state_traj, vsc_mdl, 'gate_c'),
+        p_filtered=_optional_signal(problem, state_traj, vsc_mdl, 'P_f'),
+        q_filtered=_optional_signal(problem, state_traj, vsc_mdl, 'Q_f'),
         time_arr=time_arr,
         i_a=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.i_A])],
         i_b=state_traj[:, problem.get_var_idx(vsc_mdl.external_mapping[VarPowerFlowReferenceType.i_B])],

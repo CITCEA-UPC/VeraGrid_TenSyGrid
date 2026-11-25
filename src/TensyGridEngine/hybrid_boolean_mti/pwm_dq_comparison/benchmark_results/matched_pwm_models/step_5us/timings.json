@@ -1,0 +1,91 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "numpy": "2.3.0",
+  "revision": "849ce83e403bf0416b519f91759bbaa1b2f1ea26",
+  "working_tree": "benchmark run includes local uncommitted changes",
+  "engine_patch_sha256": "6b65c04fa2cdc9af554b4b552348bf4104c06ae7cc06da112e86bb0403e06c26",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "settings": {
+    "grid_pwm_hz": 5000.0,
+    "pwm_duration_s": 0.004,
+    "pwm_step_s": 5e-05,
+    "grid_duration_s": 0.002,
+    "grid_step_s": 5e-06,
+    "pwm_timing": "one first call + three repeats, includes setup",
+    "grid_timing": "one fresh process, setup separate; simulation includes first-use compilation"
+  },
+  "results": [
+    {
+      "case": "grid_standard_StructuralCompiled",
+      "status": "invalid",
+      "setup_seconds": 61.633123661000354,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "nominal_step_seconds": 5e-06,
+      "requested_duration_seconds": 0.002,
+      "soft_sign_lambda": null,
+      "event_bisect_iter": null,
+      "solve_seconds": 25.360286637999707,
+      "initialized": true,
+      "converged": false,
+      "final_time": 0.0012150000000000002,
+      "points": 244
+    },
+    {
+      "case": "grid_multilinear_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 31.49494691000018,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "nominal_step_seconds": 5e-06,
+      "requested_duration_seconds": 0.002,
+      "soft_sign_lambda": null,
+      "event_bisect_iter": null,
+      "solve_seconds": 12.488366546999714,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 401
+    },
+    {
+      "case": "grid_mti_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 56.164755300999786,
+      "warmup_policy": "off",
+      "integrator": "EmtMtiBackEulerSolver",
+      "initialization_residual": 6.150067011212457e-09,
+      "nominal_step_seconds": 5e-06,
+      "requested_duration_seconds": 0.002,
+      "soft_sign_lambda": null,
+      "event_bisect_iter": 12,
+      "solve_seconds": 145.89308449799955,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.0020000000000000026,
+      "points": 401
+    },
+    {
+      "case": "grid_softsign_StructuralCompiled",
+      "status": "ok",
+      "setup_seconds": 46.417247692000274,
+      "warmup_policy": "off",
+      "integrator": "StructuralCompiled",
+      "initialization_residual": 6.150067011212457e-09,
+      "nominal_step_seconds": 5e-06,
+      "requested_duration_seconds": 0.002,
+      "soft_sign_lambda": 1e-06,
+      "event_bisect_iter": null,
+      "solve_seconds": 12.441734132999954,
+      "initialized": true,
+      "converged": true,
+      "final_time": 0.002,
+      "points": 401
+    }
+  ]
+}

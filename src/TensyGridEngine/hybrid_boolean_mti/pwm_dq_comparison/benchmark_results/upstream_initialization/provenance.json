@@ -1,0 +1,19 @@
+{
+  "public_upstream": {
+    "repository": "https://github.com/SanPen/VeraGrid.git",
+    "revision": "3fc0e970c37710a60b9f523a890396f43ca42af3"
+  },
+  "native_trunk": {
+    "repository": "/home/pablo/Desktop/eroots/VeraGrid",
+    "revision": "16efe970f1",
+    "case": "trunk/dynamics_emt/scripting_vsc_switched_emt.py",
+    "converter_blob": "aed5eaa1471f0322a77731ab90f752a7081ee578",
+    "note": "Same converter template blob as public upstream. Committed snapshot excludes working-tree edits."
+  },
+  "local": {
+    "repository": "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid",
+    "revision": "45164f836",
+    "note": "Working tree contains unrelated changes."
+  },
+  "status": "Pre-port investigation archived. Full three-gate diagnostics completed; port and new benchmarks are in ../after_initialization_port."
+}

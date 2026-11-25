@@ -1,0 +1,17 @@
+{
+  "case": "grid_multilinear_StructuralCompiled",
+  "status": "ok",
+  "setup_seconds": 31.49494691000018,
+  "warmup_policy": "off",
+  "integrator": "StructuralCompiled",
+  "initialization_residual": 6.150067011212457e-09,
+  "nominal_step_seconds": 5e-06,
+  "requested_duration_seconds": 0.002,
+  "soft_sign_lambda": null,
+  "event_bisect_iter": null,
+  "solve_seconds": 12.488366546999714,
+  "initialized": true,
+  "converged": true,
+  "final_time": 0.002,
+  "points": 401
+}

@@ -1,0 +1,18 @@
+{
+  "case": "pwm_scheduled_mti",
+  "status": "ok",
+  "first_call_seconds": 0.07075170900043304,
+  "repeat_seconds": [
+    0.0669620489998124,
+    0.06846651700016082,
+    0.06751124600032199
+  ],
+  "median_repeat_seconds": 0.06751124600032199,
+  "points": 81,
+  "label": "BackEulerImplicitIntegrationMTI + scheduled-transition PWM block",
+  "nominal_step_seconds": 5e-05,
+  "first_setup_seconds": 0.0007669080005143769,
+  "first_solve_seconds": 0.06994310399932147,
+  "median_setup_seconds": 0.0005567270000028657,
+  "median_solve_seconds": 0.06691797100029362
+}

@@ -1,0 +1,18 @@
+{
+  "case": "pwm_procedural",
+  "status": "ok",
+  "first_call_seconds": 0.017819243999838363,
+  "repeat_seconds": [
+    0.015063543999531248,
+    0.015459631000339868,
+    0.014870404000248527
+  ],
+  "median_repeat_seconds": 0.015063543999531248,
+  "points": 81,
+  "label": "StructuralCompiledSolver + DaeBackEuler + ThreePhaseCarrierPwmLogic scheduled updater",
+  "nominal_step_seconds": 5e-05,
+  "first_setup_seconds": 0.00483523100047023,
+  "first_solve_seconds": 0.012668104999647767,
+  "median_setup_seconds": 0.0034658219992707018,
+  "median_solve_seconds": 0.01160840200009261
+}

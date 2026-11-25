@@ -63,6 +63,7 @@ from VeraGridEngine.Simulations.EMT.initialization_emt import EmtInitializationR
 from VeraGridEngine.Utils.Symbolic.explicit_initialization_symbolic import (
     ExplicitInitializationResult,
     build_symbolic_vector_single_equation_compiler,
+    build_explicit_external_uid_values,
     init_explicit_common,
 )
 from VeraGridEngine.Utils.Symbolic.compiled_functions import get_compiled_functions_cache_stats
@@ -2261,6 +2262,10 @@ class EmtProblemDae(EmtProblemTemplate):
                         uid2idx_event_params=self.uid2idx_event_params,
                         params_array=params_array,
                         compile_single_equation=compile_single_equation,
+                        # Time-dependent bridge carriers are external to the
+                        # DAE state vector, but their initial time is known.
+                        external_uid_values=build_explicit_external_uid_values(
+                            mdl, {self.glob_time.name: 0.0, EmtProblemTemplate.TIME_NAME: 0.0}),
                         event_params_array_seed=self._event_params_values,
                         verbose=bool(self.options.verbose > 0),
                     )
@@ -2344,6 +2349,15 @@ class EmtProblemDae(EmtProblemTemplate):
         runtime_uid: int
         runtime_value: float | int | complex | None
         for runtime_uid, runtime_value in self.event_params_init_dict.items():
+            runtime_index = self.uid2idx_event_params.get(runtime_uid)
+            runtime_expression = (self._event_parameters_eqs[runtime_index]
+                                  if runtime_index is not None else None)
+            # A value resolved at t=0 seeds a clock expression; it must not
+            # replace that expression with a constant for the whole simulation.
+            if isinstance(runtime_expression, Expr) and any(
+                    variable.name in {"time", self.TIME_NAME}
+                    for variable in runtime_expression.get_vars()):
+                continue
             if runtime_value is None or runtime_uid not in self.uid2idx_event_params:
                 pass
             elif isinstance(runtime_value, complex):
@@ -7158,6 +7172,9 @@ class EmtProblemDae(EmtProblemTemplate):
         phase_powers, dc_power = self._get_vsc_pf_powers(mdl, ac_bus, sbase, vsc_index)
         ac_power = complex(np.sum(phase_powers))
         uses_positive_sequence = _has_vsc_positive_sequence_pf_contract(mdl)
+        is_switched_converter = any(
+            mode.name == "switching_enabled_mode" for mode in mdl.mode_dict
+        )
 
         # All network terminal currents use the system three-phase current base.
         currents = get_currents_from_power(voltages, phase_powers, 3.0)
@@ -7178,20 +7195,42 @@ class EmtProblemDae(EmtProblemTemplate):
             dc_current = float(dc_power.real / dc_voltage) if dc_voltage > 1e-12 else 0.0
             self.set_if_exists(mdl, VarPowerFlowReferenceType.Vdc, dc_voltage,
                                persist_after_native_init=True)
-            self.set_if_exists(mdl, VarPowerFlowReferenceType.If_dc, dc_current,
-                               persist_after_native_init=True)
+            # The switched VSC's If_dc mapping is its internal DC-port
+            # algebraic current. Its own initialization equations account for
+            # terminal resistance and leakage; a raw PF bus-current seed would
+            # overwrite that consistent value after native initialization.
+            if not is_switched_converter:
+                self.set_if_exists(mdl, VarPowerFlowReferenceType.If_dc, dc_current,
+                                   persist_after_native_init=True)
 
-        # GFM references use converter export, opposite to AC branch flow.
-        reference_power = -ac_power if uses_positive_sequence else ac_power
+        # The switched converter measures P/Q at its AC terminal in the same
+        # direction as the seeded phase currents. Its instantaneous power and
+        # outer-loop filter states must therefore use the AC branch-flow sign.
+        if is_switched_converter:
+            for block in mdl.get_all_blocks():
+                for state in block.state_vars:
+                    if state.name == "P_f":
+                        self._temp_post_init_guess[state.uid] = float(ac_power.real)
+                    elif state.name == "Q_f":
+                        self._temp_post_init_guess[state.uid] = float(ac_power.imag)
+
+        # Other positive-sequence VSC references use converter export.
+        reference_power = -ac_power if uses_positive_sequence and not is_switched_converter else ac_power
         if uses_positive_sequence:
             self.set_if_exists(mdl, VarPowerFlowReferenceType.Pe, float(reference_power.real))
             self.set_if_exists(mdl, VarPowerFlowReferenceType.Qe, float(reference_power.imag))
         self.set_if_exists(mdl, VarPowerFlowReferenceType.P, float(reference_power.real))
         self.set_if_exists(mdl, VarPowerFlowReferenceType.Q, float(reference_power.imag))
-        # Voltage-controlled converters need solved DC transfer as feedforward,
-        # even when their static API P0 is zero.
+        # For the switched VSC, the voltage controller's nominal d current is
+        # based on AC power plus the constant loss term. Seed that feedforward
+        # from the solved AC branch power so the phase-current and DC-link
+        # initial equations describe the same operating point.
+        if is_switched_converter:
+            p0_seed = float((ac_power.real - self.grid.vsc_devices[vsc_index].alpha1) * sbase)
+        else:
+            p0_seed = float(-dc_power.real * sbase)
         self._assign_event_mapping_value_if_present(
-            mdl=mdl, key=ParamPowerFlowReferenceType.P0, value=float(-dc_power.real * sbase),
+            mdl=mdl, key=ParamPowerFlowReferenceType.P0, value=p0_seed,
         )
         from_power = ac_power if ac_is_from else dc_power
         to_power = dc_power if ac_is_from else ac_power

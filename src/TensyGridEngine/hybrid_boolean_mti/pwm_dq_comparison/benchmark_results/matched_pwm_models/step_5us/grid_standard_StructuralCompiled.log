@@ -1,0 +1,4 @@
+grid_standard_StructuralCompiled: templates and power flow ready after 60.128 s
+grid_standard_StructuralCompiled: EMT problem ready after 60.360 s
+grid_standard_StructuralCompiled: solver ready after 61.633 s
+{"case": "grid_standard_StructuralCompiled", "status": "invalid", "setup_seconds": 61.633123661000354, "warmup_policy": "off", "integrator": "StructuralCompiled", "initialization_residual": 6.150067011212457e-09, "nominal_step_seconds": 5e-06, "requested_duration_seconds": 0.002, "soft_sign_lambda": null, "event_bisect_iter": null, "solve_seconds": 25.360286637999707, "initialized": true, "converged": false, "final_time": 0.0012150000000000002, "points": 244}

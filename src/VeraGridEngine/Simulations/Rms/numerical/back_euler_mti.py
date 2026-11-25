@@ -1639,7 +1639,11 @@ class BackEulerImplicitIntegrationMTI(BackEulerImplicitIntegration):
                     self.problem.update_variable_params(t=t_curr, x_snapshot=x_local)
                 except TypeError:
                     self.problem.update_variable_params(t_curr)
-                self._update_problem_boundary(t_curr=t_curr, x_snapshot=x_local)
+                # EMT sample-and-hold inputs must use an accepted state/time,
+                # not a future boundary paired with the previous state.
+                accepted_boundary_updates = bool(getattr(self.problem, "use_accepted_boundary_updates", False))
+                boundary_time = t_local_prev if accepted_boundary_updates else t_curr
+                self._update_problem_boundary(t_curr=boundary_time, x_snapshot=x_local)
 
                 bool_indices = self.problem.get_mti_boolean_parameter_indices
                 n_bool = len(bool_indices)
@@ -1815,6 +1819,8 @@ class BackEulerImplicitIntegrationMTI(BackEulerImplicitIntegration):
                 x_local = accepted_x
                 dx_last = accepted_dx
                 t_local_prev = accepted_t_curr
+                if accepted_boundary_updates:
+                    self._update_problem_boundary(t_curr=t_local_prev, x_snapshot=x_local)
                 is_first_local_step = False
                 if accepted_z is not None and len(accepted_z) > 0:
                     z_prev = np.asarray(accepted_z, dtype=float)

@@ -1,0 +1,7 @@
+/tmp/tensygrid-upstream-3fc0e970c/src/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.py:214: NumbaWarning: Cannot cache compiled function "csc_add_ff" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  dQ_dVm = csc_add_ff(sp_slice(dS_dVm.imag, i_k_q, i_u_vm), sp_slice(dQinj_dVm, i_k_q, i_u_vm), 1.0, -1.0)
+Templates built: 57.323 s
+Problem/solver built: 58.528 s
+Timeout (0:01:00)!
+Thread 0x00007365b42dc080 (most recent call first):
+  File "/usr/lib/python3.12/uuid.py"

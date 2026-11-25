@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 
 import numpy as np
 
@@ -197,24 +197,34 @@ def _build_pseudo_emt_converter_vsc_block(vf: VarFactory, name: str) -> Block:
     c0: Const = vf.add_const(0.0)
     c1: Const = vf.add_const(1.0)
     c3: Const = vf.add_const(3.0)
-    c32: Const = vf.add_const(1.5)
+    c_half: Const = vf.add_const(0.5)
+    c_two: Const = vf.add_const(2.0)
 
     # VSC alpha1/alpha2/alpha3 are stored on the system per-unit base already.
     P_loss0_pu: Expr = P_loss0
     P_loss_i1_pu: Expr = P_loss_i1
     P_loss_i2_pu: Expr = P_loss_i2
-    i_leak: Expr = v_dc / R_dc
+    R_dc_eff: Expr = sym.max(R_dc, eps)
+    R_dc_term_eff: Expr = sym.max(R_dc_term, eps)
+    i_leak: Expr = v_dc / R_dc_eff
     v_dc_eff: Expr = sym.max(v_dc, vdc_floor)
 
-    i_d0: Expr = (Const(2.0 / 3.0) * ((P_ref / sbase) + P_loss0_pu)) / (Vpk + eps)
-    i_q0: Expr = (Const(2.0 / 3.0) * (Q_ref / sbase)) / (Vpk + eps)
-    i_mag0: Expr = sym.sqrt(i_d0 * i_d0 + i_q0 * i_q0 + eps)
-    P0: Expr = c32 * Vpk * i_d0
-    Q0: Expr = c32 * Vpk * i_q0
+    i_d0: Expr = c_two * ((P_ref / sbase) + P_loss0_pu) / (Vpk + eps)
+    i_q0: Expr = c_two * (Q_ref / sbase) / (Vpk + eps)
+    # PF loss coefficients use RMS AC current; dq0 variables are phase peaks.
+    i_mag0: Expr = sym.sqrt(c_half * (i_d0 * i_d0 + i_q0 * i_q0) + eps)
+    P0: Expr = c_half * Vpk * i_d0
+    Q0: Expr = c_half * Vpk * i_q0
     P_loss0_expr: Expr = P_loss0_pu + P_loss_i1_pu * i_mag0 + P_loss_i2_pu * i_mag0 * i_mag0
-    i_dc_conv0: Expr = -(P0 - P_loss0_expr) / (Vdc_ref + eps)
-    i_dc0: Expr = (i_dc_conv0 + v_dc_bus / R_dc) / (c1 + R_dc_term / R_dc)
-    v_dc0: Expr = v_dc_bus - R_dc_term * i_dc0
+    # Solve the DC-port balance at the capacitor voltage, including the
+    # terminal resistance and leakage. Using Vdc_ref in the converter-current
+    # denominator leaves a small nonzero capacitor derivative at startup.
+    p_net0: Expr = P0 - P_loss0_expr
+    dc_quadratic_a: Expr = c1 + R_dc_term_eff / R_dc_eff
+    dc_discriminant: Expr = v_dc_bus * v_dc_bus + Const(4.0) * dc_quadratic_a * R_dc_term_eff * p_net0
+    v_dc0: Expr = (v_dc_bus + sym.sqrt(sym.max(dc_discriminant, eps))) / (c_two * dc_quadratic_a)
+    i_dc_conv0: Expr = -p_net0 / (v_dc0 + eps)
+    i_dc0: Expr = i_dc_conv0 + v_dc0 / R_dc_eff
 
     block: Block = Block(
         state_eqs=list([
@@ -226,12 +236,12 @@ def _build_pseudo_emt_converter_vsc_block(vf: VarFactory, name: str) -> Block:
             P_ref - p_ref_expr,
             Q_ref - q_ref_expr,
             Vdc_ref - vdc_ref_expr,
-            P - (c32 * (v_d * i_d + v_q * i_q) + c3 * v_0 * i_0),
-            Q - c32 * (v_d * i_q - v_q * i_d),
-            i_mag - sym.sqrt(i_d * i_d + i_q * i_q + c3 * i_0 * i_0 + eps),
+            P - (c_half * (v_d * i_d + v_q * i_q) + v_0 * i_0),
+            Q - c_half * (v_d * i_q - v_q * i_d),
+            i_mag - sym.sqrt(c_half * (i_d * i_d + i_q * i_q) + i_0 * i_0 + eps),
             P_loss - (P_loss0_pu + P_loss_i1_pu * i_mag + P_loss_i2_pu * i_mag * i_mag),
             i_dc_conv + (P - P_loss) / v_dc_eff,
-            i_dc - (v_dc_bus - v_dc) / R_dc_term,
+            (v_dc_bus - v_dc) - R_dc_term_eff * i_dc,
             regulate_vdc_mode - regulate_vdc_expr,
             regulate_q_mode - regulate_q_expr,
             regulate_active_mode - regulate_active_expr,
@@ -249,8 +259,8 @@ def _build_pseudo_emt_converter_vsc_block(vf: VarFactory, name: str) -> Block:
             (R_eq, vf.add_const(max(0.02, 1e-9))),
             (L_eq, vf.add_const(max(0.08, 1e-9))),
             (C_dc, vf.add_const(max(0.05, 1e-9))),
-            (R_dc, vf.add_const(max(1e6, 1e-9))),
-            (R_dc_term, vf.add_const(max(0.0001, 1e-9))),
+            (R_dc, vf.add_const(max(1e12, 1e-9))),
+            (R_dc_term, vf.add_const(max(1e-10, 1e-12))),
             (pll_kp, vf.add_const(40.0)),
             (pll_ki, vf.add_const(400.0)),
             (i_kp, vf.add_const(0.5)),
@@ -380,9 +390,9 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
 
     eps: Const = vf.add_const(1e-10)
     c0: Const = vf.add_const(0.0)
-    c23: Const = vf.add_const(2.0 / 3.0)
+    current_scale: Const = vf.add_const(2.0)
     c3: Const = vf.add_const(3.0)
-    c32: Const = vf.add_const(1.5)
+    c_half: Const = vf.add_const(0.5)
 
     P_ref_pu: Expr = P_ref / sbase
     Q_ref_pu: Expr = Q_ref / sbase
@@ -392,9 +402,9 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
         + regulate_active_mode * (P_ref_pu - (P_f - P_loss0))
     )
 
-    i_d0: Expr = c23 * P_ac_ff_pu / (Vpk + eps)
-    i_q0: Expr = c23 * Q_ref_pu / (Vpk + eps)
-    Q0: Expr = c32 * Vpk * i_q0
+    i_d0: Expr = current_scale * P_ac_ff_pu / (Vpk + eps)
+    i_q0: Expr = current_scale * Q_ref_pu / (Vpk + eps)
+    Q0: Expr = c_half * Vpk * i_q0
 
     i_d_cap: Expr = sym.hard_sat(i_d_ref_u, -i_max, i_max)
     i_q_cap: Expr = sym.sqrt(sym.max(i_max * i_max - i_d_ref * i_d_ref, eps))
@@ -412,8 +422,8 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
         diff_vars=list([d_xi_vdc, d_xi_q, d_P_f, d_Q_f]),
         algebraic_eqs=list([
             v_mag - sym.sqrt(v_d * v_d + v_q * v_q + eps),
-            i_d_ff - c23 * P_ac_ff_pu / (v_mag + eps),
-            i_q_ff - c23 * Q_ref_pu / (v_mag + eps),
+            i_d_ff - current_scale * P_ac_ff_pu / (v_mag + eps),
+            i_q_ff - current_scale * Q_ref_pu / (v_mag + eps),
             i_0_ref_u,
             i_d_ref_u - (i_d_ff + (regulate_vdc_mode + regulate_active_mode)
                          * (vdc_kp * active_control_error + xi_vdc)),
@@ -425,14 +435,14 @@ def _build_pseudo_emt_converter_outer_loop_block(vf: VarFactory, name: str) -> B
         algebraic_vars=list([v_mag, i_d_ff, i_q_ff, i_0_ref_u, i_d_ref_u, i_q_ref_u, i_0_ref, i_d_ref, i_q_ref]),
         init_eqs=dict([
             (xi_vdc, (regulate_vdc_mode + regulate_active_mode)
-             * (i_d0 - (c23 * P_ac_ff_pu / (Vpk + eps)) - vdc_kp * active_control_error)),
+             * (i_d0 - (current_scale * P_ac_ff_pu / (Vpk + eps)) - vdc_kp * active_control_error)),
             (xi_q, regulate_q_mode
-             * (i_q0 - (c23 * Q_ref_pu / (Vpk + eps)) - q_kp * (Q_ref_pu - Q0))),
+             * (i_q0 - (current_scale * Q_ref_pu / (Vpk + eps)) - q_kp * (Q_ref_pu - Q0))),
             (P_f, P),
             (Q_f, Q0),
             (v_mag, Vpk),
-            (i_d_ff, c23 * P_ac_ff_pu / (Vpk + eps)),
-            (i_q_ff, c23 * Q_ref_pu / (Vpk + eps)),
+            (i_d_ff, current_scale * P_ac_ff_pu / (Vpk + eps)),
+            (i_q_ff, current_scale * Q_ref_pu / (Vpk + eps)),
             (i_0_ref_u, c0),
             (i_d_ref_u, i_d0),
             (i_q_ref_u, i_q0),
@@ -552,7 +562,7 @@ def _build_switched_converter_data_block(vf: VarFactory, name: str) -> Block:
     )
 
     eps: Const = Const(1.0e-10)
-    c23: Const = Const(2.0 / 3.0)
+    current_scale: Const = Const(2.0)
     c_one: Const = Const(1.0)
     c_two: Const = Const(2.0)
     c_three: Const = Const(3.0)
@@ -566,9 +576,13 @@ def _build_switched_converter_data_block(vf: VarFactory, name: str) -> Block:
     # leg is scaled as ``(2 * gate - 1) * k_v_conv * v_dc`` so the bridge reproduces the averaged
     # converter fundamental. The DC current reconstruction must therefore follow the instantaneous
     # bridge power balance rather than the unscaled gated-current sum.
-    i_dc_sw_expr: Expr = -c_two * k_v_conv_nom * (
+    # The PF loss polynomial includes the resistive term of the converter
+    # branch. Its explicit EMT filter already dissipates R_eq * i_mag**2,
+    # so that part must not be counted a second time at the bridge DC port.
+    bridge_internal_loss_expr: Expr = P_loss - R_eq * i_mag * i_mag
+    i_dc_sw_expr: Expr = -(c_two / c_three) * k_v_conv_nom * (
         gate_current_sum_expr - (gate_sum_expr * phase_current_sum_expr) / c_three
-    )
+    ) + bridge_internal_loss_expr / v_dc_eff
     p_loss0_pu_expr: Expr = P_loss0
     i_dc_avg_expr: Expr = -(P - P_loss) / v_dc_eff
     i_dc_conv_eff_expr: Expr = (c_one - switching_enabled) * i_dc_avg_expr + switching_enabled * i_dc_sw_expr
@@ -576,8 +590,8 @@ def _build_switched_converter_data_block(vf: VarFactory, name: str) -> Block:
     # The hybrid switched path must preserve the same nominal voltage ceiling used by the
     # validated pseudo-EMT inner loop. Rebuilding that operating-point command here keeps the
     # current controller limit aligned across the averaged and switched templates.
-    i_d_nom_expr: Expr = c23 * ((P_ref / sbase_eff) + p_loss0_pu_expr) / (Vpk + eps)
-    i_q_nom_expr: Expr = c23 * (Q_ref / sbase_eff) / (Vpk + eps)
+    i_d_nom_expr: Expr = current_scale * ((P_ref / sbase_eff) + p_loss0_pu_expr) / (Vpk + eps)
+    i_q_nom_expr: Expr = current_scale * (Q_ref / sbase_eff) / (Vpk + eps)
     v_cmd_d_nom_expr: Expr = Vpk - R_eq * i_d_nom_expr - L_eq * i_q_nom_expr
     v_cmd_q_nom_expr: Expr = -R_eq * i_q_nom_expr + L_eq * i_d_nom_expr
     k_v_conv_nom_expr: Expr = (
@@ -598,8 +612,14 @@ def _build_switched_converter_data_block(vf: VarFactory, name: str) -> Block:
     block.init_eqs[k_v_conv_nom] = k_v_conv_nom_expr
 
     # PWM timing remains a runtime parameter owned by the converter data block.
-    block.event_dict[omega_sw] = Const(2.0 * np.pi * 1000.0)
-    block.event_dict[carrier_phase] = Const(0.0)
+    # Five kilohertz gives the sampled controller enough carrier updates to track
+    # this operating point during the averaged-to-switched handover.
+    block.event_dict[omega_sw] = Const(2.0 * np.pi * 5000.0)
+    # The PF current seed is the fundamental component. At a triangle-carrier
+    # extremum the leading-order PWM current ripple is zero, so that seed can
+    # start a complete, symmetric pulse interval. Starting halfway up a ramp
+    # instead omits the instantaneous ripple offset and excites the controls.
+    block.event_dict[carrier_phase] = Const(-0.5 * np.pi)
 
     # The parent block connects dq measurements first, then the bridge currents and retained gates.
     block.in_vars = list([
@@ -765,7 +785,8 @@ def _find_algebraic_equation_index_for_var(block: Block, target_var: Var) -> int
     raise KeyError(f"The block '{block.name}' could not locate an algebraic equation for '{target_var.name}'")
 
 
-def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_emt") -> EmtModelTemplate:
+def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_emt",
+                               bridge_builder: Callable | None = None) -> EmtModelTemplate:
     """
     Assemble a hybrid switched EMT converter with the same external interface as the averaged converter.
 
@@ -790,6 +811,7 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
     switching_enabled_mode: Var = vf.add_var(name=f"switching_enabled_mode")
     switching_blend: Var = vf.add_var(name=f"switching_blend")
     d_switching_blend: Var = vf.add_diff_var(name=f"d_switching_blend", base_var=switching_blend)
+    i_ki_effective: Var = vf.add_var(name=f"i_ki_effective")
     t_enable_sw: Var = vf.add_var(name=f"t_enable_sw")
     omega_sw: Var = vf.add_var(name=f"omega_sw")
     omega_sw_handover_value: Var = vf.add_var(name=f"omega_sw_handover_value")
@@ -798,7 +820,12 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
 
     data_block: Block = _build_switched_converter_data_block(vf=vf, name=name)
     outer_loop_block: Block = _build_pseudo_emt_converter_outer_loop_block(vf=vf, name=name)
-    plant_block: Block = get_bridge_filter_control_2level_3ph_emt_template(vf=vf, name=name).block
+    if bridge_builder is None:
+        plant_block: Block = get_bridge_filter_control_2level_3ph_emt_template(
+            vf=vf, name=name, current_from_power_scale=2.0).block
+    else:
+        plant_block = get_bridge_filter_control_2level_3ph_emt_template(
+            vf=vf, name=name, current_from_power_scale=2.0, bridge_builder=bridge_builder).block
     filter_stage_block: Block = plant_block
     data_lookup: Dict[str, Var] = build_name_to_var_lookup(data_block)
     outer_loop_lookup: Dict[str, Var] = build_name_to_var_lookup(outer_loop_block)
@@ -890,10 +917,17 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
     templ.block.state_vars.append(switching_blend)
     templ.block.diff_vars.append(d_switching_blend)
     templ.block.state_eqs.append(
-        switching_enabled_mode * (one - switching_blend) * data_omega_sw / two_pi
+        switching_enabled_mode * (one - switching_blend) * omega_sw_handover_value / two_pi
     )
     templ.block.init_eqs[switching_blend] = Const(0.0)
     templ.block.diff_init_eqs[d_switching_blend] = Const(0.0)
+    # The averaged plant has no carrier ripple and needs a slower integral loop;
+    # the original switched gain is retained once PWM owns the filter voltage.
+    templ.block.algebraic_vars.append(i_ki_effective)
+    templ.block.algebraic_eqs.append(
+        i_ki_effective - data_i_ki * (Const(0.1) + Const(0.9) * switching_blend)
+    )
+    templ.block.init_eqs[i_ki_effective] = data_i_ki * (Const(0.1) + Const(0.9) * switching_blend)
 
     # The bridge keeps switching procedurally from t = 0, but the RL filter only sees the discrete
     # bridge pole voltages after the exact startup handover time.  During averaged startup use the
@@ -966,7 +1000,7 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
         plant_i_d_meas_f,
         plant_i_q_meas_f,
         plant_i_0_meas_f,
-        data_vdc,
+        v_dc_bus,
         data_p,
         data_q,
         data_sbase,
@@ -1009,7 +1043,7 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
         data_pll_kp,
         data_pll_ki,
         data_i_kp,
-        data_i_ki,
+        i_ki_effective,
         data_aw_gain,
         data_phi_v,
         data_vdc_ref,
@@ -1020,20 +1054,25 @@ def get_switched_emt_converter(vf: VarFactory, name: str = "switched_converter_e
         data_vpk,
     ]))
 
-    # ``Block.connect`` substitutes the plant's PWM-frequency input with the
-    # parent effective-frequency symbol.  Its original input default can then
-    # survive as a second event entry with the same displayed name and mask the
-    # authoritative ``mode * omega_sw`` expression during procedural binding.
-    # Remove only that promoted child default; the parent event equation below
-    # remains the single owner of the effective carrier frequency.
+    # Connected bridge input defaults must not overwrite parent-owned PWM
+    # timing. In particular, a retained child phase default would silently
+    # replace the configured carrier extremum with a mid-ramp start.
     connected_block: Block
     connected_parameter: Var
     for connected_block in plant_block.get_all_blocks():
         for connected_parameter in list(connected_block.event_dict.keys()):
-            if connected_parameter.name == omega_sw_eff.name:
+            if connected_parameter.uid in {omega_sw_eff.uid, carrier_phase.uid}:
                 del connected_block.event_dict[connected_parameter]
             else:
                 pass
+
+    # The full VSC's dq and filtered-current seeds must describe the same PF
+    # operating point as the outer current references. In the trig-state bridge,
+    # evaluating the abc/dq product before the preserved phase-current seeds are
+    # replayed can otherwise leave i_d at its standalone zero-current fallback.
+    plant_block.init_eqs[plant_i_d] = outer_loop_block.init_eqs[outer_i_d_ref]
+    plant_block.init_eqs[plant_i_q] = outer_loop_block.init_eqs[outer_i_q_ref]
+    plant_block.init_eqs[plant_i_0] = outer_loop_block.init_eqs[outer_i_0_ref]
 
     templ.block.children.extend(list([data_block, outer_loop_block, plant_block]))
     templ.block.in_vars = list([v_A, v_B, v_C, v_dc_bus])

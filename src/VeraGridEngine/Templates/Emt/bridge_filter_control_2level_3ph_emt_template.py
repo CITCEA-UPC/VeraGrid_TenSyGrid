@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 
 import numpy as np
 
@@ -16,7 +16,9 @@ from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var
 from VeraGridEngine.enumerations import DeviceType
 
 
-def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Block:
+def _build_bridge_filter_current_control_block(
+        vf: VarFactory, name: str, current_from_power_scale: float = 2.0 / 3.0,
+) -> Block:
     """
     Build one dq0 current controller matched to the switched bridge + filter plant.
 
@@ -33,6 +35,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name suffix.
+    :param current_from_power_scale: Coefficient converting system-base power to dq current.
     :return: dq0 current-controller block.
     """
     v_d: Var = vf.add_var(name=f"v_d_inner_in")
@@ -82,12 +85,12 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
 
     eps: Const = Const(1.0e-10)
     c0: Const = Const(0.0)
-    c23: Const = Const(2.0 / 3.0)
+    current_scale: Const = Const(current_from_power_scale)
     c_voltage_headroom: Const = Const(1.15)
     v_dc_eff: Expr = sym.max(v_dc, vdc_floor)
     omega_ratio: Expr = omega_pll / (omega_base + eps)
-    i_d0: Expr = c23 * ((P_ref / sbase) + P_loss0) / (Vpk + eps)
-    i_q0: Expr = c23 * (Q_ref / sbase) / (Vpk + eps)
+    i_d0: Expr = current_scale * ((P_ref / sbase) + P_loss0) / (Vpk + eps)
+    i_q0: Expr = current_scale * (Q_ref / sbase) / (Vpk + eps)
     v_cmd_d0: Expr = Vpk - R_f * i_d0 - L_f * i_q0
     v_cmd_q0: Expr = -R_f * i_q0 + L_f * i_d0
     v_d_cap: Expr = sym.hard_sat(v_cmd_d_u, -v_lim, v_lim)
@@ -208,9 +211,10 @@ def _build_bridge_filter_pll_input_filter_block(vf: VarFactory, name: str) -> Bl
     point. Filtering the q-axis voltage before feeding the PLL makes both models
     comparable without altering the converter control hierarchy itself.
 
-    The time constant is tied to the PWM carrier half-period:
+    The time constant spans five PWM carrier periods to attenuate the large
+    voltage steps at a bus without shunt capacitance:
 
-    ``tau_pll_vq = pi / omega_sw``
+    ``tau_pll_vq = 10 pi / omega_sw``
 
     This keeps the filter physically interpretable and avoids introducing one ad hoc
     fixed delay parameter into the public switched-converter model.
@@ -228,7 +232,7 @@ def _build_bridge_filter_pll_input_filter_block(vf: VarFactory, name: str) -> Bl
     eps: Const = Const(1.0e-10)
     c_pi: Const = Const(np.pi)
     c0: Const = Const(0.0)
-    inv_tau_pll_vq_expr: Expr =  sym.max(omega_sw, eps)/c_pi
+    inv_tau_pll_vq_expr: Expr = sym.max(omega_sw, eps) / (Const(10.0) * c_pi)
 
     return Block(
         state_eqs=list([
@@ -260,9 +264,10 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     the PLL and inner current loop isolates the low-frequency controller dynamics from
     switching artifacts without altering the electrical plant itself.
 
-    The time constant is tied to the PWM carrier half-period:
+    The time constant spans five PWM carrier periods to reject switching
+    ripple before it reaches the current and outer-loop controllers:
 
-    ``tau_meas = pi / omega_sw``
+    ``tau_meas = 10 pi / omega_sw``
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name suffix.
@@ -293,7 +298,7 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     eps: Const = Const(1.0e-10)
     c_pi: Const = Const(np.pi)
     c0: Const = Const(0.0)
-    tau_meas_expr: Expr = c_pi / sym.max(omega_sw, eps)
+    tau_meas_expr: Expr = Const(10.0) * c_pi / sym.max(omega_sw, eps)
 
     return Block(
         state_eqs=list([
@@ -328,7 +333,12 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     )
 
 
-def get_bridge_filter_control_2level_3ph_emt_template(vf: VarFactory, name: str = "bridge_filter_control_2level_3ph_emt") -> EmtModelTemplate:
+def get_bridge_filter_control_2level_3ph_emt_template(
+        vf: VarFactory,
+        name: str = "bridge_filter_control_2level_3ph_emt",
+        current_from_power_scale: float = 2.0 / 3.0,
+        bridge_builder: Callable | None = None,
+) -> EmtModelTemplate:
     """
     Build one standalone bridge + filter + control EMT template.
 
@@ -338,6 +348,7 @@ def get_bridge_filter_control_2level_3ph_emt_template(vf: VarFactory, name: str 
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name.
+    :param current_from_power_scale: Coefficient converting system-base power to dq current.
     :return: Standalone bridge + filter + control EMT template.
     """
     templ: EmtModelTemplate = EmtModelTemplate()
@@ -373,11 +384,17 @@ def get_bridge_filter_control_2level_3ph_emt_template(vf: VarFactory, name: str 
     P_loss0_in: Var = vf.add_var(name=f"P_loss0_in")
     Vpk_in: Var = vf.add_var(name=f"Vpk_in")
 
-    plant_block: Block = get_bridge_filter_2level_3ph_emt_template(vf=vf, name=f"{name}_plant").block
+    if bridge_builder is None:
+        plant_block: Block = get_bridge_filter_2level_3ph_emt_template(vf=vf, name=f"{name}_plant").block
+    else:
+        plant_block = get_bridge_filter_2level_3ph_emt_template(
+            vf=vf, name=f"{name}_plant", bridge_builder=bridge_builder).block
     measurement_filter_block: Block = _build_bridge_filter_measurement_filter_block(vf=vf, name=name)
     pll_input_filter_block: Block = _build_bridge_filter_pll_input_filter_block(vf=vf, name=name)
     pll_block: Block = _build_bridge_filter_pll_block(vf=vf, name=name)
-    current_ctrl_block: Block = _build_bridge_filter_current_control_block(vf=vf, name=name)
+    current_ctrl_block: Block = _build_bridge_filter_current_control_block(
+        vf=vf, name=name, current_from_power_scale=current_from_power_scale,
+    )
     plant_lookup: Dict[str, Var] = build_name_to_var_lookup(plant_block)
     measurement_filter_lookup: Dict[str, Var] = build_name_to_var_lookup(measurement_filter_block)
     pll_input_filter_lookup: Dict[str, Var] = build_name_to_var_lookup(pll_input_filter_block)

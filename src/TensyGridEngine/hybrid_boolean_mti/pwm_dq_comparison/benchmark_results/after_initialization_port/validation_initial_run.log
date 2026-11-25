@@ -1,0 +1,41 @@
+..F......                                                                [100%]
+=================================== FAILURES ===================================
+_ test_switched_converter_pf_seed_is_consistent[get_switched_emt_converter_mti] _
+
+builder = <function get_switched_emt_converter_mti at 0x75607a655940>
+
+    @pytest.mark.parametrize('builder', [get_switched_emt_converter, get_switched_emt_converter_multilinear, get_switched_emt_converter_mti])
+    def test_switched_converter_pf_seed_is_consistent(builder):
+        """Check actual grid DAE residuals, power signs and abc/dq current consistency."""
+        problem, model = build_converter_case('initialization_regression', builder, build_emt_options(),
+                                              use_mti=builder is get_switched_emt_converter_mti)
+        x = problem.get_x0()
+        dx = problem.get_dx0()
+        runtime = problem.event_params_values
+        constants = problem.get_parameters_values()
+        bindings = {uid: float(x[idx]) for uid, idx in problem.uid2idx_vars.items()}
+        bindings.update({uid: float(dx[idx]) for uid, idx in problem.uid2idx_diff.items()})
+        bindings.update({uid: float(runtime[idx]) for uid, idx in problem.uid2idx_event_params.items()})
+        bindings.update({uid: float(constants[idx].value) for uid, idx in problem.uid2idx_params.items()})
+        bindings[problem.glob_time.uid] = 0.
+        residual = np.array([eq.eval_uid(bindings) for eq in problem.get_algebraic_eqs()])
+        assert np.isfinite(residual).all()
+        worst = int(np.argmax(np.abs(residual)))
+>       assert abs(residual[worst]) < 1e-7, str(problem.get_algebraic_eqs()[worst])
+E       AssertionError: (v_common_mode) - (((((((2.0) * (gate_pwm_a_vsc_cmp_plant_bridge)) - (1.0)) * ((k_v_conv) * (((v_dc) * (heaviside((v_dc) - (vdc_floor)))) + ((vdc_floor) * ((1) - (heaviside((v_dc) - (vdc_floor)))))))) + ((((2.0) * (gate_pwm_b_vsc_cmp_plant_bridge)) - (1.0)) * ((k_v_conv) * (((v_dc) * (heaviside((v_dc) - (vdc_floor)))) + ((vdc_floor) * ((1) - (heaviside((v_dc) - (vdc_floor))))))))) + ((((2.0) * (gate_pwm_c_vsc_cmp_plant_bridge)) - (1.0)) * ((k_v_conv) * (((v_dc) * (heaviside((v_dc) - (vdc_floor)))) + ((vdc_floor) * ((1) - (heaviside((v_dc) - (vdc_floor))))))))) / (3.0))
+E       assert np.float64(1.6947848230866118) < 1e-07
+E        +  where np.float64(1.6947848230866118) = abs(np.float64(-1.6947848230866118))
+
+/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/tests/EMT/test_switched_converter_initialization.py:30: AssertionError
+----------------------------- Captured stdout call -----------------------------
+initialization_regression: templates and power flow ready after 20.322 s
+initialization_regression: EMT problem ready after 30.320 s
+=============================== warnings summary ===============================
+../../../myenv/lib/python3.12/site-packages/autograd/numpy/numpy_wrapper.py:7
+  /home/pablo/myenv/lib/python3.12/site-packages/autograd/numpy/numpy_wrapper.py:7: DeprecationWarning: numpy.core.einsumfunc is deprecated and has been renamed to numpy._core.einsumfunc. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.einsumfunc._parse_einsum_input.
+    from numpy.core.einsumfunc import _parse_einsum_input
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED src/tests/EMT/test_switched_converter_initialization.py::test_switched_converter_pf_seed_is_consistent[get_switched_emt_converter_mti]
+1 failed, 8 passed, 1 warning in 115.31s (0:01:55)

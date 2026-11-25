@@ -67,12 +67,14 @@ class EmtProblemMTI(EmtProblemDae):
         "_variable_parameters_values",
         "disable_mti_first_step_zero_dx",
         "use_full_dae_event_candidates",
+        "use_accepted_boundary_updates",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.disable_mti_first_step_zero_dx = True
         self.use_full_dae_event_candidates = True
+        self.use_accepted_boundary_updates = True
 
         self._mti_boolean_params: list[Var] = []
         self._mti_bool_uid2param_idx: dict[int, int] = {}

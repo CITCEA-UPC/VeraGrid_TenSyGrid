@@ -1,0 +1,5 @@
+[MTI] Initial z0 (4 booleans): [0. 0. 1. 1.]
+[MTI] Initial z0 (4 booleans): [0. 0. 1. 1.]
+[MTI] Initial z0 (4 booleans): [0. 0. 1. 1.]
+[MTI] Initial z0 (4 booleans): [0. 0. 1. 1.]
+{"case": "pwm_internal_mti", "status": "ok", "first_call_seconds": 0.2404658159994142, "repeat_seconds": [0.24207063800076867, 0.22875619899969024, 0.23410223900009441], "median_repeat_seconds": 0.23410223900009441, "points": 401, "label": "BackEulerImplicitIntegrationMTI + internal-carrier block PWM + runtime-parameter references", "nominal_step_seconds": 1e-05, "first_setup_seconds": 0.00056738100010989, "first_solve_seconds": 0.2398656730001676, "median_setup_seconds": 0.0003510570004436886, "median_solve_seconds": 0.23373174500011373}

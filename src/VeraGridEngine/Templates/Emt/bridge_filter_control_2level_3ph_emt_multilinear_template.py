@@ -11,13 +11,13 @@ import VeraGridEngine.Utils.Symbolic.symbolic as sym
 from VeraGridEngine.Devices.Dynamic.emt_template import EmtModelTemplate
 from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Templates.Emt.bridge_filter_2level_3ph_emt_multilinear_template import get_bridge_filter_2level_3ph_emt_multilinear_template
-from VeraGridEngine.Utils.Symbolic.block import Block, build_name_to_var_lookup
+from VeraGridEngine.Utils.Symbolic.block import Block, build_name_to_var_lookup, find_name_in_block
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var
-from VeraGridEngine.Utils.procedural_logic import hard_saturation
 from VeraGridEngine.enumerations import DeviceType
 
 
-def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Block:
+def _build_bridge_filter_current_control_block(vf: VarFactory, name: str,
+                                              current_from_power_scale: float = 2.0 / 3.0) -> Block:
     """
     Build one dq0 current controller matched to the switched bridge + filter plant.
 
@@ -34,6 +34,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name suffix.
+    :param current_from_power_scale: Coefficient converting system-base power to dq current.
     :return: dq0 current-controller block.
     """
     v_d: Var = vf.add_var(name=f"v_d_inner_in")
@@ -81,7 +82,6 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
     v_cmd_q: Var = vf.add_var(name=f"v_cmd_q")
     v_cmd_0: Var = vf.add_var(name=f"v_cmd_0")
     v_d_cap_out: Var = vf.add_var(name=f"v_d_cap")
-    v_d_cap_mode: Var = vf.add_var(name=f"v_d_cap_mode")
     v_q_cap: Var = vf.add_var(name=f"v_q_cap")
     v_q_cap_aux: Var = vf.add_var(name=f"v_q_cap_aux")
     v_0_cap: Var = vf.add_var(name=f"v_0_cap")
@@ -96,11 +96,12 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
 
     eps: Const = Const(1.0e-10)
     c0: Const = Const(0.0)
-    c23: Const = Const(2.0 / 3.0)
+    current_scale: Const = Const(current_from_power_scale)
+    voltage_headroom: Const = Const(1.15)
     v_dc_eff: Expr = sym.max(v_dc, vdc_floor)
     omega_ratio: Expr = omega_pll / (omega_base + eps)
-    i_d0: Expr = c23 * ((P_ref / sbase) + (P_loss0 / sbase)) / (Vpk + eps)
-    i_q0: Expr = c23 * (Q_ref / sbase) / (Vpk + eps)
+    i_d0: Expr = current_scale * ((P_ref / sbase) + P_loss0) / (Vpk + eps)
+    i_q0: Expr = current_scale * (Q_ref / sbase) / (Vpk + eps)
     v_cmd_d0: Expr = Vpk - R_f * i_d0 - L_f * i_q0
     v_cmd_q0: Expr = -R_f * i_q0 + L_f * i_d0
     v_lim_sq_expr: Expr = v_lim * v_lim_aux
@@ -136,7 +137,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
             v_cmd_q0_aux - v_cmd_q0,
             v_cmd_norm * v_cmd_norm_aux - (v_cmd_d0_sq_expr + v_cmd_q0_sq_expr + eps),
             v_cmd_norm - v_cmd_norm_aux,
-            k_v_conv * (m_max * (Vdc_ref + eps)) - v_cmd_norm,
+            k_v_conv * (m_max * (Vdc_ref + eps)) - voltage_headroom * v_cmd_norm,
             v_lim - (k_v_conv * m_max * v_dc_eff),
             v_lim_aux - v_lim,
             v_cmd_d_aux - v_cmd_d,
@@ -145,7 +146,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
             v_q_cap - v_q_cap_aux,
             v_0_cap * v_0_cap_aux - v_0_cap_rhs,
             v_0_cap - v_0_cap_aux,
-            v_d_cap_out - v_d_cap_mode,
+            v_d_cap_out - sym.hard_sat(v_cmd_d_u, -v_lim, v_lim),
             v_cmd_d - v_d_cap_out,
             v_cmd_q - sym.hard_sat(v_cmd_q_u, -v_q_cap, v_q_cap),
             v_cmd_0 - sym.hard_sat(v_cmd_0_u, -v_0_cap, v_0_cap),
@@ -159,9 +160,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
             v_q_cap, v_q_cap_aux, v_0_cap, v_0_cap_aux,
             v_d_cap_out, v_cmd_d, v_cmd_q, v_cmd_0,
         ]),
-        mode_dict=dict([
-            (v_d_cap_mode, c0),
-        ]),
+
         init_eqs=dict([
             (xi_id, c0),
             (xi_iq, c0),
@@ -176,7 +175,7 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
             (v_cmd_norm_aux, sym.sqrt(v_cmd_d0 * v_cmd_d0 + v_cmd_q0 * v_cmd_q0 + eps)),
             (v_cmd_d0_aux, v_cmd_d0),
             (v_cmd_q0_aux, v_cmd_q0),
-            (k_v_conv, v_cmd_norm / (m_max * (Vdc_ref + eps))),
+            (k_v_conv, voltage_headroom * v_cmd_norm / (m_max * (Vdc_ref + eps))),
             (v_lim, k_v_conv * m_max * v_dc_eff),
             (v_lim_aux, v_lim),
             (v_cmd_d_aux, v_cmd_d),
@@ -197,15 +196,6 @@ def _build_bridge_filter_current_control_block(vf: VarFactory, name: str) -> Blo
         ]),
         in_vars=list([v_d, v_q, v_0, i_d, i_q, i_0, omega_pll, omega_base, R_f, L_f, i_0_ref, i_d_ref, i_q_ref, i_kp, i_ki, aw_gain, m_max, Vdc_ref, v_dc, vdc_floor, sbase, P_ref, Q_ref, P_loss0, Vpk]),
         out_vars=list([v_cmd_d, v_cmd_q, v_cmd_0, k_v_conv]),
-        procedural_logic=list([
-            hard_saturation(
-                output=v_d_cap_mode,
-                u=v_cmd_d_u,
-                u_min=-v_lim,
-                u_max=v_lim,
-                name=f"v_d_cap_sat_sample",
-            ),
-        ]),
         name=f"{name}_current_ctrl",
     )
 
@@ -270,9 +260,9 @@ def _build_bridge_filter_pll_input_filter_block(vf: VarFactory, name: str) -> Bl
     point. Filtering the q-axis voltage before feeding the PLL makes both models
     comparable without altering the converter control hierarchy itself.
 
-    The time constant is tied to the PWM carrier half-period:
+    The time constant spans five PWM carrier periods:
 
-    ``tau_pll_vq = pi / omega_sw``
+    ``tau_pll_vq = 10 pi / omega_sw``
 
     This keeps the filter physically interpretable and avoids introducing one ad hoc
     fixed delay parameter into the public switched-converter model.
@@ -296,7 +286,7 @@ def _build_bridge_filter_pll_input_filter_block(vf: VarFactory, name: str) -> Bl
         state_eqs=list([
             # The switched plant should feed the PLL with the low-frequency q-axis content rather than
             # with the raw switching ripple of the network-side voltage measurement.
-            (v_q_raw - v_q_pll_f) * (sym.max(omega_sw, eps)/c_pi),
+            (v_q_raw - v_q_pll_f) * (sym.max(omega_sw, eps)/(Const(10.0) * c_pi)),
         ]),
         diff_vars=list([d_v_q_pll_f]),
         init_eqs=dict([
@@ -321,9 +311,9 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     the PLL and inner current loop isolates the low-frequency controller dynamics from
     switching artifacts without altering the electrical plant itself.
 
-    The time constant is tied to the PWM carrier half-period:
+    The time constant spans five PWM carrier periods:
 
-    ``tau_meas = pi / omega_sw``
+    ``tau_meas = 10 pi / omega_sw``
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name suffix.
@@ -354,7 +344,7 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     eps: Const = Const(1.0e-10)
     c_pi: Const = Const(np.pi)
     c0: Const = Const(0.0)
-    inv_tau_meas_expr: Expr = sym.max(omega_sw, eps)/c_pi
+    inv_tau_meas_expr: Expr = sym.max(omega_sw, eps)/(Const(10.0) * c_pi)
 
     return Block(
         state_eqs=list([
@@ -389,7 +379,8 @@ def _build_bridge_filter_measurement_filter_block(vf: VarFactory, name: str) -> 
     )
 
 
-def get_bridge_filter_control_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "bridge_filter_control_2level_3ph_emt_ml") -> EmtModelTemplate:
+def get_bridge_filter_control_2level_3ph_emt_multilinear_template(vf: VarFactory, name: str = "bridge_filter_control_2level_3ph_emt_ml",
+                                                                current_from_power_scale: float = 2.0 / 3.0) -> EmtModelTemplate:
     """
     Build one standalone bridge + filter + control EMT template.
 
@@ -399,6 +390,7 @@ def get_bridge_filter_control_2level_3ph_emt_multilinear_template(vf: VarFactory
 
     :param vf: Shared EMT variable factory.
     :param name: Symbolic model name.
+    :param current_from_power_scale: Coefficient converting system-base power to dq current.
     :return: Standalone bridge + filter + control EMT template.
     """
     templ: EmtModelTemplate = EmtModelTemplate()
@@ -438,7 +430,8 @@ def get_bridge_filter_control_2level_3ph_emt_multilinear_template(vf: VarFactory
     measurement_filter_block: Block = _build_bridge_filter_measurement_filter_block(vf=vf, name=name)
     pll_input_filter_block: Block = _build_bridge_filter_pll_input_filter_block(vf=vf, name=name)
     pll_block: Block = _build_bridge_filter_pll_block(vf=vf, name=name)
-    current_ctrl_block: Block = _build_bridge_filter_current_control_block(vf=vf, name=name)
+    current_ctrl_block: Block = _build_bridge_filter_current_control_block(vf=vf, name=name,
+                                                                  current_from_power_scale=current_from_power_scale)
     plant_lookup: Dict[str, Var] = build_name_to_var_lookup(plant_block)
     measurement_filter_lookup: Dict[str, Var] = build_name_to_var_lookup(measurement_filter_block)
     pll_input_filter_lookup: Dict[str, Var] = build_name_to_var_lookup(pll_input_filter_block)
@@ -562,6 +555,23 @@ def get_bridge_filter_control_2level_3ph_emt_multilinear_template(vf: VarFactory
 
     templ.block.children.extend(list([plant_block, measurement_filter_block, pll_input_filter_block, pll_block, current_ctrl_block]))
     templ.block.unify_blocks()
+    # The explicit trig states represent the PLL angle, so their angular rate
+    # must be the same PLL output used by the direct-trigonometric reference.
+    cos_pll = find_name_in_block("u_cos_pll", templ.block)
+    sin_pll = find_name_in_block("u_sin_pll", templ.block)
+    if cos_pll is None or sin_pll is None:
+        raise KeyError("Missing PLL trigonometric states")
+    for index, state in enumerate(templ.block.state_vars):
+        if state.uid == cos_pll.uid:
+            templ.block.state_eqs[index] = -pll_omega * sin_pll
+        elif state.uid == sin_pll.uid:
+            templ.block.state_eqs[index] = pll_omega * cos_pll
+    for diff in templ.block.diff_vars:
+        if diff.base_var is not None and diff.base_var.uid == cos_pll.uid:
+            templ.block.diff_init_eqs[diff] = -pll_omega * sin_pll
+        elif diff.base_var is not None and diff.base_var.uid == sin_pll.uid:
+            templ.block.diff_init_eqs[diff] = pll_omega * cos_pll
+
     templ.block.in_vars = list([
         omega_base_in,
         v_A_in,

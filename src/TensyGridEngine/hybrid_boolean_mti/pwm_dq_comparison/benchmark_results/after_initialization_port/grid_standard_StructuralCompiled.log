@@ -1,0 +1,14 @@
+grid_standard_StructuralCompiled: templates and power flow ready after 39.625 s
+grid_standard_StructuralCompiled: EMT problem ready after 39.805 s
+grid_standard_StructuralCompiled: solver ready after 40.944 s
+Timeout (0:01:00)!
+Thread 0x00007e5967fff080 (most recent call first):
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/__pycache_jit__/eager_ad_2a960025f4360fee_118543eb00e6f76f.py", line 150 in eager_ad_2a960025f4360fee
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 1438 in __call__
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 1943 in evaluate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/VeraGridEngine/Simulations/EMT/solvers/structural_compiled_solver.py", line 3073 in simulate
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/emt/validate_converter_emt_multilinear.py", line 219 in simulate_case
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 76 in worker
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 230 in main
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py", line 288 in <module>
+{"case": "grid_standard_StructuralCompiled", "status": "ok", "setup_seconds": 40.944109327999286, "warmup_policy": "off", "integrator": "StructuralCompiled", "initialization_residual": 6.150067011212457e-09, "solve_seconds": 30.89209738699992, "initialized": true, "converged": true, "final_time": 0.002, "points": 201}

@@ -1,0 +1,5 @@
+{
+  "mti_first_attempt": "Process SIGSEGV during setup; log retained; separate retry passed. Cause not established.",
+  "soft_sign_first_attempt": "Converged but rejected: initialized time-dependent carrier was promoted to constant. Fixed by preserving time-dependent runtime equations; regression checks quarter/half-cycle values.",
+  "interrupted_parent": "First benchmark parent exited 143 during multilinear case; resumed selected cases without discarding completed procedural/standalone timings."
+}

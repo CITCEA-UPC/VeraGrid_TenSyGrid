@@ -1,0 +1,31 @@
+/tmp/pwm-native-trunk-16efe970f1/src/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.py:338: NumbaWarning: Cannot cache compiled function "csc_add_ff" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  dQ_dVm = csc_add_ff(sp_slice(dS_dVm.imag, i_k_q, i_u_vm), sp_slice(dQinj_dVm, i_k_q, i_u_vm), 1.0, -1.0)
+{
+  "engine_file": "/tmp/pwm-native-trunk-16efe970f1/src/VeraGridEngine/api.py",
+  "initialized": true,
+  "converged": true,
+  "native_validation": "failed: assert float(np.min(trace.v_dc_arr)) > 0.0",
+  "final_time": 0.025,
+  "handover_time": 0.005,
+  "initialization_requested": "Explicit",
+  "initialization_used": "Explicit",
+  "pre_handover_vdc_min": -34.33318377753483,
+  "pre_handover_vdc_max": 0.9999999849548796,
+  "pre_handover_idc_min": -1.9839364368578696,
+  "pre_handover_idc_max": 150.45120372716588,
+  "pre_handover_id_error_max": 11.544222723895292,
+  "initial": {
+    "vdc": 0.9999999849548796,
+    "idc": 150.45120372716588,
+    "id": 42.426548289549075,
+    "id_ref": 42.426548289549075,
+    "p_filtered": 0.3262867783284495
+  },
+  "final": {
+    "vdc": -70.94137087770139,
+    "idc": 0.0042288441325721805,
+    "id": 7.136872127958589,
+    "id_ref": 1.2999999999999972,
+    "p_filtered": -0.06880195789786499
+  }
+}

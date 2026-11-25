@@ -1,0 +1,18 @@
+{
+  "case": "pwm_internal_mti",
+  "status": "ok",
+  "first_call_seconds": 0.27030819799983874,
+  "repeat_seconds": [
+    0.2606621089998953,
+    0.25490853900009824,
+    0.23890700799984188
+  ],
+  "median_repeat_seconds": 0.25490853900009824,
+  "points": 81,
+  "label": "BackEulerImplicitIntegrationMTI + internal-carrier block PWM + runtime-parameter references",
+  "nominal_step_seconds": 5e-05,
+  "first_setup_seconds": 0.0012054079998051748,
+  "first_solve_seconds": 0.26903325999955996,
+  "median_setup_seconds": 0.0006109599999035709,
+  "median_solve_seconds": 0.2542309350001233
+}

@@ -28,10 +28,18 @@ def test_rms_compiler_preserves_supplied_time_step_symbol():
     assert RMSCompiler([], [], [], [], {}).dt_var is not step
 
 
-def test_mti_control_keeps_switching_and_pll_frequency_inputs_separate():
+def test_mti_carrier_keeps_running_before_switched_plant_is_enabled():
     from VeraGridEngine.Templates.Emt.bridge_filter_control_2level_3ph_emt_mti_template import (
         get_bridge_filter_control_2level_3ph_emt_mti_template,
     )
     block = get_bridge_filter_control_2level_3ph_emt_mti_template(VarFactory(), name='control').block
     inputs = {v.name: v for v in block.in_vars}
-    assert inputs['omega_sw_in'].uid != inputs['omega_meas_in'].uid
+    from VeraGridEngine.Utils.Symbolic.symbolic import get_expression_vars
+    carrier = find_name_in_block('carrier_pwm', block)
+    equations = [equation for owner in block.get_all_blocks()
+                 for state, equation in zip(owner.state_vars, owner.state_eqs)
+                 if state.uid == carrier.uid]
+    assert len(equations) == 1
+    variables = {v.uid for v in get_expression_vars(equations[0])}
+    assert inputs['omega_meas_in'].uid in variables
+    assert inputs['omega_sw_in'].uid not in variables

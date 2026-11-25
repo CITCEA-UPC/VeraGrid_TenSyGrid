@@ -1,0 +1,21 @@
+{
+  "src/TensyGridEngine/emt/validate_converter_emt_multilinear.py": "c16995036eda4cd2640c3328c27343d16fe2ade621d99c504a2af9d4ec982739",
+  "src/TensyGridEngine/hybrid_boolean_mti/compare_pwm_mti_direct.py": "b6490d9d67804b50f7493ae3a4c8d8f0749c2247b9ef4b403a5fdba5d1ade0fe",
+  "src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/benchmark_solvers.py": "01dca4b6c78e850aaf34cdda3f1d0349d548ac28612c954c015599f500d0f969",
+  "src/VeraGridEngine/Simulations/EMT/problems/emt_problem_dae.py": "863a8a74acfc6c5018c2863bba3741d6c8a28b6fc669a0112c6570e3e6e6d04f",
+  "src/VeraGridEngine/Simulations/EMT/problems/emt_problem_mti.py": "3273ba3069871ac1a4216888aa7e8982b099aaa1aa4b5a25c18b0e4278a9c26c",
+  "src/VeraGridEngine/Simulations/Rms/numerical/back_euler_mti.py": "d72337d03ab6854c26617249383e4bd41915f7d699eecb127e89c1b7a48cc496",
+  "src/VeraGridEngine/Templates/Emt/bridge_2level_3ph_emt_mti_template.py": "a29e888c0f1ff150c7a6c80e52d34507230929180f7c5a3ff4b1d931bb1deba1",
+  "src/VeraGridEngine/Templates/Emt/bridge_2level_3ph_emt_multilinear_template.py": "b7a5a78248c406a3455f0ba11d6eab79bbd05f0581fd1b0f039c1772d1d23bd8",
+  "src/VeraGridEngine/Templates/Emt/bridge_2level_3ph_emt_soft_sign_template.py": "40d06338fa602415761f5a8b05335cc28b9cff442034638a9961a79ff4e43460",
+  "src/VeraGridEngine/Templates/Emt/bridge_2level_3ph_emt_template.py": "6cb6c97bb976d64e8c528431b509c1e117a3e0150b6f0d67214a90c810c4f65d",
+  "src/VeraGridEngine/Templates/Emt/bridge_filter_2level_3ph_emt_multilinear_template.py": "c7f7870b6aed752151ad1acd64b6f3e11ce3a834a701f50c74f7f1b9d9a80034",
+  "src/VeraGridEngine/Templates/Emt/bridge_filter_2level_3ph_emt_template.py": "ad9b8cef748ef8bbb08a3b9cd3bd82f20b17c9a08ccad11b01200df5375c12a1",
+  "src/VeraGridEngine/Templates/Emt/bridge_filter_control_2level_3ph_emt_mti_template.py": "a57f8cc2cfcd4e2489416e2626b0ed461dfe51b12333e47e90fc053045d982ad",
+  "src/VeraGridEngine/Templates/Emt/bridge_filter_control_2level_3ph_emt_multilinear_template.py": "d310ff7f3ee698914b8aaa320cced802f7cf5b5421a7960ad5ecac6a611e5f1a",
+  "src/VeraGridEngine/Templates/Emt/bridge_filter_control_2level_3ph_emt_template.py": "8d1e5841a044b11a03ad1a34e2dc347db9e6684d64da67882080b70219b92251",
+  "src/VeraGridEngine/Templates/Emt/converter_switched_emt_template.py": "bf495db98d040e7df8ecd6efd4f9c0af8a9a679674a4ad6b8d0deb98c86873b0",
+  "src/tests/EMT/test_matched_pwm_models.py": "071b197b6e47ea2119e1f44a6915292d24f6349baf8f339b67bf653c0e8e8bf2",
+  "src/tests/EMT/test_switched_converter_initialization.py": "91e190047efb4bdc458dadb626a2505f21560248c041310c7800ee9365643df6",
+  "src/tests/EMT/test_switched_converter_variant_names.py": "24ea22dd1137b806a9ba649941890510dd919569ddca7fab9669fed6a6edabc9"
+}

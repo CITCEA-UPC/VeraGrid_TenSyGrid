@@ -1,0 +1,17 @@
+/tmp/pwm-native-trunk-16efe970f1/src/VeraGridEngine/Simulations/PowerFlow/Formulations/pf_full_acdc_with_negative_poles.py:338: NumbaWarning: Cannot cache compiled function "csc_add_ff" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  dQ_dVm = csc_add_ff(sp_slice(dS_dVm.imag, i_k_q, i_u_vm), sp_slice(dQinj_dVm, i_k_q, i_u_vm), 1.0, -1.0)
+Traceback (most recent call last):
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/probe_native_converter.py", line 62, in <module>
+    run()
+  File "/home/pablo/Desktop/eroots/VeraGrid_TenSyGrid/src/TensyGridEngine/hybrid_boolean_mti/pwm_dq_comparison/probe_native_converter.py", line 29, in run
+    trace = run_switched_vsc_case(enable_plots=False, save_plot=False, open_saved_plot=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pwm-native-trunk-16efe970f1/trunk/dynamics_emt/scripting_vsc_switched_emt.py", line 100, in run_switched_vsc_case
+    trace: SwitchedConverterHandoverTrace = run_switched_converter_handover_case(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pwm-native-trunk-16efe970f1/trunk/dynamics_emt/support/switched_converter_handover_case.py", line 2382, in run_switched_converter_handover_case
+    validate_switched_converter_handover(trace=trace)
+  File "/tmp/pwm-native-trunk-16efe970f1/trunk/dynamics_emt/support/switched_converter_handover_case.py", line 1613, in validate_switched_converter_handover
+    assert float(np.min(trace.v_dc_arr)) > 0.0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

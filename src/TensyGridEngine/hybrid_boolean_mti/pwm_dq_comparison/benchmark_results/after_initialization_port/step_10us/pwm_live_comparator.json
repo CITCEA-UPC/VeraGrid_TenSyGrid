@@ -1,0 +1,18 @@
+{
+  "case": "pwm_live_comparator",
+  "status": "ok",
+  "first_call_seconds": 0.05601556500005245,
+  "repeat_seconds": [
+    0.05309152500012715,
+    0.0530797840001469,
+    0.05266339399986464
+  ],
+  "median_repeat_seconds": 0.0530797840001469,
+  "points": 401,
+  "label": "StructuralCompiledSolver + DaeBackEuler + root-detected direct comparator updater",
+  "nominal_step_seconds": 1e-05,
+  "first_setup_seconds": 0.0038604410001426004,
+  "first_solve_seconds": 0.051859952000086196,
+  "median_setup_seconds": 0.00240747400039254,
+  "median_solve_seconds": 0.05029384199951892
+}

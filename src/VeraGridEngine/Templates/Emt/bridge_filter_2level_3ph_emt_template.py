@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 
@@ -56,7 +56,8 @@ def _build_phase_to_dq0_measurements(
 
 
 def get_bridge_filter_2level_3ph_emt_template(vf: VarFactory,
-                                              name: str = "bridge_filter_2level_3ph_emt") -> EmtModelTemplate:
+                                              name: str = "bridge_filter_2level_3ph_emt",
+                                                  bridge_builder: Callable | None = None) -> EmtModelTemplate:
     """
     Build a standalone 2-level bridge with a three-phase RL AC filter.
 
@@ -97,7 +98,8 @@ def get_bridge_filter_2level_3ph_emt_template(vf: VarFactory,
     # ------------------------------------------------------------------
     # Bridge child block.
     # ------------------------------------------------------------------
-    bridge_block: Block = get_bridge_2level_3ph_emt_template(vf=vf, name=f"{name}_bridge").block
+    resolved_bridge_builder = get_bridge_2level_3ph_emt_template if bridge_builder is None else bridge_builder
+    bridge_block: Block = resolved_bridge_builder(vf, f"{name}_bridge").block
     bridge_block.connect(
         bridge_block.in_vars,
         list([

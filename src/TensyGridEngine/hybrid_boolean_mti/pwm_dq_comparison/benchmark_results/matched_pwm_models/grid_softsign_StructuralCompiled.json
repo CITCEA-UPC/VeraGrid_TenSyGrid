@@ -1,0 +1,17 @@
+{
+  "case": "grid_softsign_StructuralCompiled",
+  "status": "ok",
+  "setup_seconds": 59.745405772000595,
+  "warmup_policy": "off",
+  "integrator": "StructuralCompiled",
+  "initialization_residual": 6.150067011212457e-09,
+  "nominal_step_seconds": 1e-05,
+  "requested_duration_seconds": 0.002,
+  "soft_sign_lambda": 1e-06,
+  "event_bisect_iter": null,
+  "solve_seconds": 8.069804216000193,
+  "initialized": true,
+  "converged": true,
+  "final_time": 0.002,
+  "points": 201
+}

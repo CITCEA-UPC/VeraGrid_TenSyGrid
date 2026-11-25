@@ -14,6 +14,7 @@ from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Const, Expr, Var
 from VeraGridEngine.Utils.Symbolic.symbolic_ml import mti_three_phase_carrier_pwm_direct
+from VeraGridEngine.Utils.procedural_logic import ThreePhaseCarrierSampledModulationLogic
 from VeraGridEngine.enumerations import DeviceType
 
 
@@ -68,6 +69,9 @@ def get_bridge_2level_3ph_emt_mti_template(vf: VarFactory, name: str = "bridge_2
     m_b = vf.add_var(name="m_b")
     m_c = vf.add_var(name="m_c")
 
+    m_a_sample = vf.add_var(name="m_a_sample")
+    m_b_sample = vf.add_var(name="m_b_sample")
+    m_c_sample = vf.add_var(name="m_c_sample")
     carrier = vf.add_var(name="carrier_pwm")
     dcarrier = vf.add_diff_var(name="dt_carrier_pwm", base_var=carrier)
     b_carrier_rise = vf.add_var(name="b_carrier_rise_pwm")
@@ -130,9 +134,9 @@ def get_bridge_2level_3ph_emt_mti_template(vf: VarFactory, name: str = "bridge_2
 
     mti_pwm_block, gate_a, gate_b, gate_c = mti_three_phase_carrier_pwm_direct(
         vf=vf,
-        ref_a=m_a,
-        ref_b=m_b,
-        ref_c=m_c,
+        ref_a=m_a_sample,
+        ref_b=m_b_sample,
+        ref_c=m_c_sample,
         carrier=carrier,
         eps=None,
         name=name,
@@ -145,12 +149,13 @@ def get_bridge_2level_3ph_emt_mti_template(vf: VarFactory, name: str = "bridge_2
         b_carrier_rise * (carrier - c_one) + (c_one - b_carrier_rise) * (-carrier - c_one)
     )
     # Match ThreePhaseCarrierPwmLogic's absolute-time carrier convention:
-    # carrier(t) = -sin(omega_sw * t + carrier_phase), hence carrier(0)=0 and rising for phase=0.
-    mti_pwm_block.init_eqs[carrier] = Const(0.0)
-    mti_pwm_block.boolean_guards[b_carrier_rise] = Const(1.0)
+    # carrier(t) = (2/pi)*asin(sin(omega_sw*t + carrier_phase)).
+    # Keep the initial state and direction on the configured procedural ramp.
+    mti_pwm_block.init_eqs[carrier] = Const(2.0 / np.pi) * sym.asin(sym.sin(carrier_phase))
+    mti_pwm_block.boolean_guards[b_carrier_rise] = sym.heaviside(sym.cos(carrier_phase))
     for bool_var, guard_expr in mti_pwm_block.boolean_guards.items():
-        del guard_expr
-        mti_pwm_block.mode_dict[bool_var] = Const(1.0 if bool_var.uid == b_carrier_rise.uid else 0.0)
+        # Seed the Boolean modes consistently with the same carrier phase and references.
+        mti_pwm_block.mode_dict[bool_var] = guard_expr
 
     gate_a_out = vf.add_var(name="gate_a")
     gate_b_out = vf.add_var(name="gate_b")
@@ -216,6 +221,11 @@ def get_bridge_2level_3ph_emt_mti_template(vf: VarFactory, name: str = "bridge_2
             v_conv_a, v_conv_b, v_conv_c, v_conv_d, v_conv_q, v_conv_0,
             gate_a_out, gate_b_out, gate_c_out,
         ],
+        mode_dict={m_a_sample: m_a, m_b_sample: m_b, m_c_sample: m_c},
+        procedural_logic=[ThreePhaseCarrierSampledModulationLogic(
+            m_a.name, m_b.name, m_c.name,
+            m_a_sample.name, m_b_sample.name, m_c_sample.name,
+            omega_sw.name, carrier_phase.name, name="mti_modulation_sampler")],
         event_dict={omega_sw: Const(2.0 * np.pi * 1000.0), carrier_phase: Const(0.0)},
         init_eqs={
             v_ref_a_raw: v_ref_a_raw_expr,
@@ -240,7 +250,7 @@ def get_bridge_2level_3ph_emt_mti_template(vf: VarFactory, name: str = "bridge_2
             v_leg_a: v_leg_a_expr,
             v_leg_b: v_leg_b_expr,
             v_leg_c: v_leg_c_expr,
-            v_common_mode: Const(0.0),
+            v_common_mode: v_common_mode_expr,
             v_conv_a: v_conv_a_expr,
             v_conv_b: v_conv_b_expr,
             v_conv_c: v_conv_c_expr,

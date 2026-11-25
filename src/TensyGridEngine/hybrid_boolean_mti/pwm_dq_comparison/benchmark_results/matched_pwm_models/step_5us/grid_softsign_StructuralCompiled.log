@@ -1,0 +1,4 @@
+grid_softsign_StructuralCompiled: templates and power flow ready after 45.059 s
+grid_softsign_StructuralCompiled: EMT problem ready after 45.287 s
+grid_softsign_StructuralCompiled: solver ready after 46.417 s
+{"case": "grid_softsign_StructuralCompiled", "status": "ok", "setup_seconds": 46.417247692000274, "warmup_policy": "off", "integrator": "StructuralCompiled", "initialization_residual": 6.150067011212457e-09, "nominal_step_seconds": 5e-06, "requested_duration_seconds": 0.002, "soft_sign_lambda": 1e-06, "event_bisect_iter": null, "solve_seconds": 12.441734132999954, "initialized": true, "converged": true, "final_time": 0.002, "points": 401}
