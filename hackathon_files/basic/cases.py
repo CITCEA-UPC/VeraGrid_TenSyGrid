@@ -90,6 +90,7 @@ def basic_evaluator() -> RmsTunerEvaluator:
     return RmsTunerEvaluator(
         control_ranges=dict(Kp=(-1000.0, 300.0), Kp_icl=(0.001, 5.0), Ki_icl=(1.0, 500.0),
                             Kp_pol=(0.01, 1.0), Ki_pol=(0.01, 5.0),
+                            Kp_vac=(0.01, 1.0), Ki_vac=(0.01, 5.0),
                             Kp_pll=(0.001, 0.5), Ki_pll=(0.01, 1.0),
                             Kdp=(0.001, 1.0), Kdq=(0.001, 1.0),
                             tau_P=(0.001, 1.0), tau_Q=(0.001, 1.0)),
@@ -249,7 +250,7 @@ def reference_tuning(grid: TunableGrid, gain: float = -400.0) -> RmsTuning:
     :return: Controller gains and any required outage-restoration closing.
     """
     values: dict[str, float] = dict(Kp=gain, Kp_icl=0.5, Ki_icl=5.0,
-                                   Kp_pol=0.2, Ki_pol=0.2, Kp_pll=0.05, Ki_pll=0.1,
+                                   Kp_pol=0.2, Ki_pol=0.2, Kp_pll=0.05, Ki_pll=0.1, Kp_vac=0.2, Ki_vac=0.2,
                                    Kdp=0.05, Kdq=0.05, tau_P=0.01, tau_Q=0.01)
     if grid.problem.grid.name.startswith('basic_six_bus_'):
         values['Kp_icl'] = 3.0

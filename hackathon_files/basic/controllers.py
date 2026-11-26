@@ -14,7 +14,7 @@ from VeraGridEngine.Templates.Rms.vsc_gfm import build_gfm_converter_model
 from VeraGridEngine.Utils.Symbolic.block import Block
 from VeraGridEngine.Utils.Symbolic.symbolic import Var
 from VeraGridEngine.Utils.Symbolic.templates_common_functions import set_rms_model
-from VeraGridEngine.enumerations import VarPowerFlowReferenceType
+from VeraGridEngine.enumerations import ConverterControlType, VarPowerFlowReferenceType
 
 
 class ConverterKind(Enum):
@@ -22,6 +22,7 @@ class ConverterKind(Enum):
 
     GFM = 'gfm'
     GFL = 'gfl'
+    GFL_VOLTAGE = 'gfl_voltage'
 
 
 def converter_model(factory: VarFactory, kind: ConverterKind, rating_pu: float) -> Block:
@@ -46,6 +47,8 @@ def converter_model(factory: VarFactory, kind: ConverterKind, rating_pu: float) 
     else:
         core, _, _, active_power, reactive_power, _ = build_gfl_converter_model(
             factory, inputs=[vm, va, factory.add_const(1.0), -p / rating_pu, -q / rating_pu],
+            control2=(ConverterControlType.Vm_ac if kind == ConverterKind.GFL_VOLTAGE
+                      else ConverterControlType.Qac),
         )
     # Only the wrapper maps the external generator injection. Inner controls
     # retain their physical, converter-base equations and initial power inputs.
@@ -111,13 +114,18 @@ def add_converter_share(grid: MultiCircuit, source: Generator, kind: ConverterKi
     # aggressive integral gain destabilize the actual converter control loops.
     converter.rms_model.set_parameter_in_model('Kp_icl', 0.001)
     converter.rms_model.set_parameter_in_model('Ki_icl', 500.0)
-    if kind == ConverterKind.GFL:
+    if kind in (ConverterKind.GFL, ConverterKind.GFL_VOLTAGE):
         converter.rms_model.set_parameter_in_model('Kp_pol', 0.2)
         converter.rms_model.set_parameter_in_model('Ki_pol', 0.2)
         converter.rms_model.set_parameter_in_model('Kp_pll', 0.05)
         converter.rms_model.set_parameter_in_model('Ki_pll', 0.1)
     else:
         pass
+
+
+VOLTAGE_CONTROL_CASES = frozenset(
+    f'basic_{network}_05' for network in ('lynn5', 'ieee9', 'ieee14')
+)
 
 
 def add_variant_controllers(grid: MultiCircuit, variant: int) -> None:
@@ -143,11 +151,14 @@ def add_variant_controllers(grid: MultiCircuit, variant: int) -> None:
                 source = generator
             else:
                 pass
+        gfl_kind = (ConverterKind.GFL_VOLTAGE
+                    if grid.name in VOLTAGE_CONTROL_CASES
+                    else ConverterKind.GFL)
         share: float = 0.65 if variant == 4 else 0.4
         if variant == 1:
-            add_converter_share(grid, source, ConverterKind.GFL, share)
+            add_converter_share(grid, source, gfl_kind, share)
         elif variant == 2:
             add_converter_share(grid, source, ConverterKind.GFM, share)
         else:
-            add_converter_share(grid, source, ConverterKind.GFL, share)
+            add_converter_share(grid, source, gfl_kind, share)
             add_converter_share(grid, source, ConverterKind.GFM, share)

@@ -301,3 +301,7 @@ grids. Both print per-case marks out of 100 and an overall mean, using the
 35% damping / 25% loss reduction / 25% robustness / 15% changes weights.
 Errors score zero and remain in the average. See the
 [scoring conventions](../intro/README.md#understand-the-results).
+
+The higher-share mixed cases for Lynn, IEEE 9, and IEEE 14 use a GFL
+converter that regulates AC voltage. Its outer-loop tuning handles include
+`Kp_vac` and `Ki_vac`. The other GFL cases use reactive-power regulation.
