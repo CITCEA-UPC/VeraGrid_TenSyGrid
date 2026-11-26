@@ -11,23 +11,39 @@ class FinalTuner(RmsTuner):
         :param tunable_grid: Initialized grid and catalog of allowed actions.
         :return: Controller, dispatch or network changes to evaluate.
         """
-        # Example: tune one controller gain and close one existing circuit.
-        # Use handles from this case. Some catalogs are empty.
-        # parameters = {}
-        # if tunable_grid.tunable_parameters:
-        #     gain = tunable_grid.tunable_parameters[0]
-        #     parameters[gain] = (gain.minimum + gain.maximum) / 2
-        #
-        # proposal = RmsTuning(
-        #     parameters=parameters,                       # TunableParameter -> value
-        #     dispatch_mw={},                              # DispatchOption -> MW
-        #     open_lines=(),                               # from openable_lines
-        #     close_lines=tunable_grid.closable_lines[:1],   # existing open circuits
-        #     add_lines=(),                                # from line_candidates
-        #     add_shunts=(),                               # from shunt_options
-        # )
-        # Nonempty dispatch_mw must keep total scheduled generation balanced.
-        # self.validate_proposal(tunable_grid, proposal) checks permissions.
-        # tunable_grid.test_tuning(proposal) evaluates it and uses one trial.
-        # return proposal
         return RmsTuning()
+
+
+def example_proposal(grid: TunableGrid) -> RmsTuning:
+    """Build a proposal for the public Lynn 5-bus synchronous case."""
+    gains = {
+        handle: -400.0
+        for handle in grid.tunable_parameters
+        if handle.name == "Kp" and handle.minimum <= -400.0 <= handle.maximum
+    }
+    restore_line = next(
+        line for line in grid.closable_lines if line.name.startswith("Restore outage:")
+    )
+    return RmsTuning(parameters=gains, close_lines=(restore_line,))
+
+
+def main() -> None:
+    """Run with PYTHONPATH=src:. python -m hackathon_files.intro.rms_tunner."""
+    from VeraGridEngine.api import open_file
+    from hackathon_files.basic import case_files, initialize_grid
+
+    path = next(path for path in case_files("limited") if path.stem == "basic_lynn5_01")
+    grid = initialize_grid(open_file(str(path)))
+    proposal = example_proposal(grid)
+    report = FinalTuner().validate_proposal(grid, proposal)
+    if not report.accepted:
+        raise ValueError(report.issues)
+
+    print("Controller settings:", {f"{p.device_name}: {p.name}": value
+                                   for p, value in proposal.parameters.items()})
+    print("Close line:", proposal.close_lines[0].name)
+    print("Trial result:", grid.test_tuning(proposal))
+
+
+if __name__ == "__main__":
+    main()
