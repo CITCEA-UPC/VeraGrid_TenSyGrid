@@ -4,7 +4,8 @@
 % COPIES TO PRINT: edit these non-negative integers, then compile.
 % Use 0 to omit a sign. Copies of each sign are grouped together.
 \providecommand{\CopiesAhead}{1}     % Endavant
-\providecommand{\CopiesRight}{2}     % Dreta
+\providecommand{\CopiesRight}{1}     % Dreta
+\providecommand{\CopiesDownRight}{1} % Avall a la dreta (45 graus)
 \providecommand{\CopiesLeft}{1}      % Esquerra
 \providecommand{\CopiesHackathon}{1} % Cartell de la hackathon
 \providecommand{\CopiesPlenary}{1}   % Cartell del plenary
@@ -56,7 +57,7 @@
     {Pavilion L};%
 }
 
-% #1: arrow rotation (0 = right, 90 = straight ahead, 180 = left).
+% #1: arrow rotation (0 = right, -45 = down-right, 90 = ahead, 180 = left).
 \newcommand{\DirectionSign}[1]{%
   \null
   \begin{tikzpicture}[remember picture,overlay,x=1mm,y=1mm]
@@ -118,6 +119,7 @@
 \begin{document}
 \PrintCopies{\CopiesAhead}{\DirectionSign{90}}
 \PrintCopies{\CopiesRight}{\DirectionSign{0}}
+\PrintCopies{\CopiesDownRight}{\DirectionSign{-45}}
 \PrintCopies{\CopiesLeft}{\DirectionSign{180}}
 \PrintCopies{\CopiesHackathon}{\ArrivalSign{HACKATHON}{\HackathonRoom}}
 \PrintCopies{\CopiesPlenary}{\ArrivalSign{PLENARY}{\PlenaryRoom}}
