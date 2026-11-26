@@ -1850,6 +1850,16 @@ class RmsProblemDae(RmsProblemTemplate):
 
         self._constant_params = np.array([const.value for const in self._parameters_values])
 
+        # Saved polar STAMP networks need an algebraic balance solve once
+        # branch and load currents are initialized from the solved snapshot.
+        if (self.options.initialization_method != RmsInitializationMethod.CustomValues
+                and any(load.rms_model.name.startswith('STAMP bus capacitor ')
+                        for load in self.grid.loads)
+                and not any(bus.rms_model.external_mapping.get(VarPowerFlowReferenceType.Vr) is not None
+                            for bus in self.grid.buses)):
+            from veragrid_stamp.initialization import initialize_dynamic_network
+            initialize_dynamic_network(self)
+
         # Both RMS update paths must share the same isolated runtime state.
         self._block_boundary_updater = self._procedural_logic_updater
 
