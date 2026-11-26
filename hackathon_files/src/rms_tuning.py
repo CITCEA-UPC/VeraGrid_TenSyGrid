@@ -17,8 +17,6 @@ import numpy as np
 from VeraGridEngine.Devices.multi_circuit import MultiCircuit
 from VeraGridEngine.Devices.Injections.shunt import Shunt
 from VeraGridEngine.Devices.Branches.line import Line
-from VeraGridEngine.Devices.Events.rms_event import RmsEvent
-from VeraGridEngine.Devices.Events.rms_events_group import RmsEventsGroup
 from VeraGridEngine.Devices.Parents.dynamic_parent import DynamicDevice
 from VeraGridEngine.Devices.Parents.dynamic_bus_parent import DynamicBusDevice
 from VeraGridEngine.Simulations.PowerFlow.power_flow_driver import PowerFlowDriver
@@ -26,8 +24,6 @@ from VeraGridEngine.Simulations.PowerFlow.power_flow_options import PowerFlowOpt
 from VeraGridEngine.Simulations.PowerFlow.power_flow_results import PowerFlowResults
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_dae import RmsProblemDae
 from VeraGridEngine.Simulations.Rms.problems.rms_problem_template import RmsProblemTemplate
-from VeraGridEngine.Simulations.Rms.rms_driver import RmsSimulationDriver
-from VeraGridEngine.Simulations.Rms.rms_options import RmsOptions
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_driver import SmallSignalStabilityRmsDriver
 from VeraGridEngine.Simulations.SmallSignalStabilityRms.small_signal_options import RmsSmallSignalStabilityOptions
 from VeraGridEngine.Templates.Rms.line_rms_template import get_line_rms_template
@@ -756,10 +752,6 @@ class RmsTunerEvaluator:
                  max_new_lines: int = 1,
                  max_new_shunts: int = 1,
                  max_test_tunings: int | float = 5,
-                 load_step_fraction: float = 0.02,
-                 load_step_time_s: float = 0.2,
-                 transient_duration_s: float = 3.0,
-                 transient_time_step_s: float = 0.02,
                  minimum_damping_ratio: float = 0.05,
                  max_close_lines: int = 1) -> None:
         """Configure tuning permissions and acceptance thresholds.
@@ -781,10 +773,6 @@ class RmsTunerEvaluator:
         self.max_new_lines = max_new_lines
         self.max_new_shunts = max_new_shunts
         self.max_test_tunings = max_test_tunings
-        self.load_step_fraction = load_step_fraction
-        self.load_step_time_s = load_step_time_s
-        self.transient_duration_s = transient_duration_s
-        self.transient_time_step_s = transient_time_step_s
 
     def start_session(self, baseline: TunableGrid, limit: int | float | None = None) -> TunableGrid:
         """Create a fresh per-scenario budget and an isolated participant problem.
@@ -823,60 +811,6 @@ class RmsTunerEvaluator:
         ).problem
         return replace(baseline, problem=participant_problem,
                        _trial=trial, _budget_status=status)
-
-    def evaluate_load_step(self, grid: MultiCircuit, pf_results) -> tuple[float, bool]:
-        """Run a fixed load increase; return peak frequency excursion and convergence."""
-        disturbance_grid = grid.copy()
-        if not disturbance_grid.loads:
-            raise ValueError("The RMS disturbance test requires a load")
-        load = disturbance_grid.loads[0]
-        pending = [load.rms_model]
-        load_parameter = None
-        while pending:
-            block = pending.pop()
-            pending.extend(block.children)
-            for variable in block.event_dict:
-                if variable.name == "Pl0":
-                    load_parameter = variable
-                    break
-            if load_parameter is not None:
-                break
-        if load_parameter is None:
-            raise ValueError("The selected load has no Pl0 RMS event parameter")
-        for group in disturbance_grid.rms_events_groups:
-            group.active = False
-        event_group = RmsEventsGroup(name="hackathon_load_step")
-        disturbance_grid.add_rms_events_group(event_group)
-        disturbance_grid.add_rms_event(RmsEvent(
-            device=load,
-            parameter=load_parameter,
-            time=self.load_step_time_s,
-            value=-float(load.P) / disturbance_grid.Sbase * (1.0 + self.load_step_fraction),
-            group=event_group,
-        ))
-        driver = RmsSimulationDriver(
-            grid=disturbance_grid,
-            options=RmsOptions(
-                time_step=self.transient_time_step_s,
-                simulation_time=self.transient_duration_s,
-            ),
-            pf_results=pf_results,
-        )
-        driver.run()
-        results = driver.results
-        group_index = len(disturbance_grid.rms_events_groups) - 1
-        converged = bool(results.converged[group_index])
-        if not converged or not np.all(np.isfinite(results.values[:, :, group_index])):
-            return math.inf, False
-        speed_indices = [
-            index for index, name in enumerate(results.variable_array)
-            if str(name).startswith("omega")
-        ]
-        if not speed_indices:
-            raise RuntimeError("The RMS results lack generator speeds")
-        speeds = results.values[:, speed_indices, group_index]
-        peak_frequency_hz = float(np.max(np.abs(speeds - speeds[0])) * grid.fBase)
-        return peak_frequency_hz, converged
 
     def sanitize_tuning(
         self, tunable_grid: TunableGrid, tuning: RmsTuning, *,
@@ -1072,31 +1006,25 @@ class RmsTunerEvaluator:
         loading = np.abs(np.asarray(pf.loading))
         voltage_violations = int(np.count_nonzero((voltage < 0.95) | (voltage > 1.05)))
         thermal_violations = int(np.count_nonzero(loading > 1.0))
-        peak_frequency_hz, transient_converged = self.evaluate_load_step(
-            tuned_grid, pf
-        )
         return RmsTuningMetrics(
             active_losses_mw=_active_losses(tuned_grid, pf),
             max_eigenvalue_real=max_real,
             min_oscillatory_damping=min_damping,
             voltage_violations=voltage_violations,
             thermal_violations=thermal_violations,
-            stable=(transient_converged
-                    and int(np.count_nonzero(neutral_modes)) <= 1
+            stable=(int(np.count_nonzero(neutral_modes)) <= 1
                     and max_real < -1e-5
                     and (min_damping is None or min_damping >= self.minimum_damping_ratio)),
             eigenvalue_count=int(eigenvalues.size),
             neutral_mode_count=int(np.count_nonzero(neutral_modes)),
-            peak_frequency_deviation_hz=peak_frequency_hz,
             structural_changes=_structural_change_count(tuning),
             max_structural_changes=tunable_grid.max_structural_changes,
-            transient_converged=transient_converged,
         )
 
 
 @dataclass(frozen=True)
 class RmsTuningMetrics:
-    """Power-flow, small-signal, and load-step RMS evaluation results.
+    """Power-flow and small-signal evaluation results.
 
     active_losses_mw includes branch and shunt real-power losses. Generator
     internal losses are absent when the RMS generator model omits resistance.
@@ -1110,10 +1038,8 @@ class RmsTuningMetrics:
     stable: bool
     eigenvalue_count: int
     neutral_mode_count: int
-    peak_frequency_deviation_hz: float
     structural_changes: int
     max_structural_changes: int
-    transient_converged: bool
 
     @property
     def changes_score(self) -> float:

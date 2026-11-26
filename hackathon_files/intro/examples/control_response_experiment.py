@@ -1,8 +1,6 @@
-"""Compare Kundur control gains using the same load-step disturbance.
+"""Compare Kundur control gains using small-signal analysis.
 
-Each setup runs a full simulation and can take time. Read the table alongside
-small-signal stability: peak frequency describes the simulated disturbance,
-while damping and eigenvalues describe the local linearized operating point.
+Damping and eigenvalues describe the local linearized operating point.
 All setups only adjust existing gains, so their structural-change count is zero.
 """
 
@@ -34,7 +32,7 @@ class SetGeneratorGains(RmsTuner):
 def main() -> None:
     # 1. Load once; the outer test API evaluates each tuner independently.
     grid = open_file(str(GRID_PATH))
-    # 2. Vary one gain at a time, keeping the same disturbance settings.
+    # 2. Vary one gain at a time, keeping the same grid.
     setups = (
         ("baseline", BasicRmsTuner()),
         ("Kp=5", SetGeneratorGains({"Kp": 5.0})),
@@ -45,14 +43,13 @@ def main() -> None:
     # 3. Report units in the header and align values for side-by-side comparison.
     print(
         f"{'Setup':<12} {'Damping':>10} {'Max Re (1/s)':>14} "
-        f"{'Peak df (Hz)':>14} {'Changes n/max':>14} {'S_changes':>12} {'SSA stable':>12}"
+        f"{'Changes n/max':>14} {'S_changes':>12} {'SSA stable':>12}"
     )
     for name, tuner in setups:
         metrics = tuner.test_tuning(grid)
         print(
             f"{name:<12} {metrics.min_oscillatory_damping:>10.2%} "
             f"{metrics.max_eigenvalue_real:>14.6g} "
-            f"{metrics.peak_frequency_deviation_hz:>14.6f} "
             f"{str(metrics.structural_changes) + '/' + str(metrics.max_structural_changes):>14} "
             f"{metrics.changes_score:>12.3f} "
             f"{str(metrics.stable):>12}"

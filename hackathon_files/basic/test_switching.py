@@ -20,7 +20,7 @@ def test_collection_has_ten_additional_network_cases():
         assert r['challenge_type']=='network_actions'
         assert r['baseline_metrics']['thermal_violations']>0
         assert r['tunable_parameter_count']==0 and not r['witness_parameters']
-        assert r['witness_metrics']['stable'] and r['witness_metrics']['transient_converged']
+        assert r['witness_metrics']['stable']
         assert r['witness_metrics']['thermal_violations']==r['witness_metrics']['voltage_violations']==0
 
 

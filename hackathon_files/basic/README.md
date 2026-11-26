@@ -96,7 +96,7 @@ The reinforcement candidate follows an existing physical corridor, with its
 R/X/B and rating. Shunt candidates have zero conductance and susceptance
 `±2% * Sbase` MVAr. These are permitted alternatives, not a promise that every
 combination will pass: each proposal is rechecked with PF, RMS, SSA, voltage,
-thermal, and transient criteria.
+and thermal criteria.
 
 ### Example physical proposals
 
@@ -195,8 +195,7 @@ python -m pytest -q hackathon_files/basic/test_basic.py hackathon_files/basic/te
 ```
 
 These are public basic exercises with a known reference, not a hidden competition
-suite. Checks establish local small-signal stability and convergence for the
-specified load step, not arbitrary-disturbance stability or protection behavior.
+suite. Checks establish local small-signal stability and operating-limit compliance.
 
 ## Provenance and fixed preparation
 
@@ -272,8 +271,7 @@ be dynamically stable, but doing nothing leaves a thermal overload and fails
 acceptance. An existing open relief circuit provides a verified switching repair;
 equipment additions are alternative permitted strategies. Ratings are explicit
 educational limits rather than original utility ratings. Every saved reference
-passes PF, equilibrium, full SSA, voltage/thermal limits, and the same load-step
-simulation. `reference_tuning()` returns a closing proposal with an empty parameter
+passes PF, equilibrium, full SSA, and voltage/thermal limits. `reference_tuning()` returns a closing proposal with an empty parameter
 mapping for these cases. Five have 20 trials and five have unlimited trials.
 
 `case_files()` returns the original 50 cases followed by the 10 additions.

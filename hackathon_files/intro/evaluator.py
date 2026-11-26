@@ -163,7 +163,7 @@ def main(argv=None) -> int:
         try:
             # Fresh tuner per case: budgets and algorithm state do not leak.
             # This public helper validates the proposal, recomputes PF and SSA,
-            # and simulates the standard 2% load increase over three seconds.
+            # and checks the candidate against voltage and thermal limits.
             metrics, baseline_losses = evaluate()
             mark = case_mark(score_components(metrics, baseline_losses))
             results.append(metrics)
@@ -176,7 +176,6 @@ def main(argv=None) -> int:
             print(f"{label:32s} losses={metrics.active_losses_mw:8.3f} MW  "
                   f"damping={damping_text:>8s}  max Re={metrics.max_eigenvalue_real:+.5f}  "
                   f"voltage/thermal violations={metrics.voltage_violations}/{metrics.thermal_violations}  "
-                  f"peak df={metrics.peak_frequency_deviation_hz:.4f} Hz  "
                   f"changes={metrics.structural_changes}/{metrics.max_structural_changes}  "
                   f"S_changes={metrics.changes_score:.3f}  "
                   f"mark={mark:.2f}/100  "

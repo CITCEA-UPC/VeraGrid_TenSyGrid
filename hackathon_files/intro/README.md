@@ -28,7 +28,7 @@ Use `--cases all` (the default) for eleven intro operating points followed by al
 60 basic cases, for **71 cases** total. Basic cases use their own controller
 bounds, physical-action catalogs, and 2.5% minimum damping; intro scenarios retain
 the 5% minimum. The full run can take substantially longer. Every case checks
-power flow, stability, operating limits, and the response to a load increase.
+power flow, small-signal stability, and operating limits.
 It prints losses, damping, structural changes, PASS/FAIL, and a **mark out of
 100**, followed by the overall mean mark over all selected cases.
 Each scenario starts with a fresh tuner
@@ -85,8 +85,7 @@ most one neutral mode (`abs(lambda) <= 1e-8`), at least 5% damping for modes abo
 descriptor eigenvalues are algebraic constraints and are excluded. No oscillatory
 modes means damping is `n/a`.
 
-The evaluator also checks transient convergence after a 2% load increase at 0.2 s
-(3 s simulation, 0.02 s step). It reports active losses, peak frequency deviation, and structural changes as
+The evaluator reports active losses and structural changes as
 `n/n_max`, with `S_changes = 1 - n/n_max` (1 when `n_max=0`). Each permitted line
 opening/closing or line/shunt addition counts once; existing controller tuning
 and balanced redispatch count zero. Counts use the sanitized proposal and each

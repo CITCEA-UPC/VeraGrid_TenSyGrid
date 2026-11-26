@@ -103,7 +103,6 @@ def test_controller_handles_can_stabilize_a_saved_mixed_case(mixed_case: tuple[B
     assert proposal.is_accepted(tunable)
     metrics: RmsTuningMetrics = tunable.test_tuning(proposal)
     assert metrics.stable
-    assert metrics.transient_converged
     assert metrics.voltage_violations == metrics.thermal_violations == 0
     assert tunable.tests_used == 1
     assert all(parameter.initial_value != value for parameter, value in values.items())

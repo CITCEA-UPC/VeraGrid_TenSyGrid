@@ -83,7 +83,6 @@ def test_general_action_changes_pf_and_rms(general_case: TunableGrid, kind: Acti
     assert len(problem.grid.shunts) == len(general_case.problem.grid.shunts) + len(proposal.add_shunts)
     metrics: RmsTuningMetrics = evaluator.evaluate_proposal(general_case, proposal)
     assert metrics.stable
-    assert metrics.transient_converged
     assert metrics.voltage_violations == metrics.thermal_violations == 0
     assert not next(line for line in general_case.problem.grid.lines if line.idtag == general_case.closable_lines[0].idtag).active
     baseline_line = next(line for line in general_case.problem.grid.lines

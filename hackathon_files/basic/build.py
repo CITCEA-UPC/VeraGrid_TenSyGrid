@@ -51,7 +51,7 @@ def main(resume: bool = False) -> int:
                 records.append(record)
                 report.write_text(json.dumps(records, indent=2) + '\n')
                 print(f"{len(records):02d}/50 {grid.name}: unstable Re={record['baseline_max_real']:+.6f}; "
-                      f"tuned Re={record['witness_max_real']:+.6f}; load-step PASS", flush=True)
+                      f"tuned Re={record['witness_max_real']:+.6f}; PASS", flush=True)
             position += 1
     from hackathon_files.basic.switching import main as build_switching
     build_switching()

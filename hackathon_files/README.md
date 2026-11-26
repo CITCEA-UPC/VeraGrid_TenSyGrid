@@ -96,12 +96,7 @@ choices before power flow, then applies controller values before building the
 final RMS problem and running SSA. It returns active losses,
 the largest eigenvalue real part, minimum damping for modes above 0.05 Hz,
 voltage violations outside 0.95–1.05 p.u., thermal violations, and a stability
-flag using the brief's `-1e-5` real-part and 5% damping thresholds. It also
-runs a three-second RMS simulation with a 2% increase in the first load at
-0.2 seconds, reporting peak generator frequency deviation from its initial
-value. A failed transient marks the tuning unstable. Peak frequency measures
-excursion size, not settled-value overshoot. Peak voltage deviation is no longer
-an evaluation metric; static bus-voltage limits remain operating constraints.
+flag using the brief's `-1e-5` real-part and 5% damping thresholds. Voltage and thermal limits remain operating constraints.
 
 The evaluator now reports `structural_changes` (`n`), `max_structural_changes`
 (`n_max`), and `changes_score` for each sanitized proposal. The minimal-grid-change

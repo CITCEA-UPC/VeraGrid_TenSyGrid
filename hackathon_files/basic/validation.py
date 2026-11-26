@@ -142,8 +142,6 @@ def validate_case(path: Path) -> dict:
         witness_finite_modes=metrics.eigenvalue_count,
         witness_voltage_violations=metrics.voltage_violations,
         witness_thermal_violations=metrics.thermal_violations,
-        witness_transient_converged=metrics.transient_converged,
-        witness_peak_frequency_hz=metrics.peak_frequency_deviation_hz,
         witness_structural_changes=metrics.structural_changes,
         max_structural_changes=metrics.max_structural_changes,
         witness_changes_score=metrics.changes_score,

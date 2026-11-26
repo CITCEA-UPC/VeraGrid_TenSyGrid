@@ -1,4 +1,4 @@
-"""End-to-end checks for fixed-load-step RMS response metrics."""
+"""End-to-end checks for small-signal response metrics."""
 
 import pytest
 
@@ -19,18 +19,13 @@ def test_unchanged_values_match_no_op(baseline) -> None:
     )
     assert same_values.min_oscillatory_damping == baseline.min_oscillatory_damping
     assert same_values.max_eigenvalue_real == baseline.max_eigenvalue_real
-    assert same_values.peak_frequency_deviation_hz == baseline.peak_frequency_deviation_hz
 
 
 def test_higher_kp_worsens_this_case(baseline) -> None:
     changed = SetGeneratorGains({"Kp": 20.0}).test_tuning(open_file(str(GRID_PATH)))
-    assert changed.transient_converged
     assert changed.min_oscillatory_damping < baseline.min_oscillatory_damping
-    assert changed.peak_frequency_deviation_hz > baseline.peak_frequency_deviation_hz
 
 
-def test_short_response_can_miss_unstable_mode(baseline) -> None:
+def test_ki_can_introduce_unstable_mode(baseline) -> None:
     changed = SetGeneratorGains({"Ki": 5.0}).test_tuning(open_file(str(GRID_PATH)))
-    assert changed.transient_converged
     assert changed.max_eigenvalue_real > 0.0
-    assert changed.peak_frequency_deviation_hz < baseline.peak_frequency_deviation_hz

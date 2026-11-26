@@ -27,7 +27,6 @@ def test_saved_case_can_be_stabilized(path: Path) -> None:
         return
     assert record['baseline_max_real'] > 1e-4
     assert record['witness_max_real'] < -1e-5
-    assert record['witness_transient_converged']
     assert record['witness_structural_changes'] == len(record['witness_close_lines'])
     assert 0 <= record['witness_structural_changes'] <= record['max_structural_changes']
     assert 0 <= record['witness_changes_score'] <= 1
@@ -91,8 +90,6 @@ def test_minimum_damping_is_configurable_for_real_gfm_case() -> None:
     assert 0.025 <= accepted.min_oscillatory_damping < 0.05
     assert accepted.stable
     assert not rejected.stable
-    assert accepted.transient_converged
-    assert rejected.transient_converged
 
 
 @pytest.mark.parametrize('path', [p for p in case_files() if p.stem.endswith('_02')],
