@@ -11,8 +11,23 @@ class FinalTuner(RmsTuner):
         :param tunable_grid: Initialized grid and catalog of allowed actions.
         :return: Controller, dispatch or network changes to evaluate.
         """
-        # Use self.get_modal_analysis(tunable_grid) to inspect the modes.
-        # Build RmsTuning(parameters={handle: value}) with catalog handles.
-        # tunable_grid.test_tuning(proposal) runs a full trial (budget: five).
-        # Return the chosen proposal; do not modify the input grid directly.
+        # Example: tune one controller gain and close one existing circuit.
+        # Use handles from this case. Some catalogs are empty.
+        # parameters = {}
+        # if tunable_grid.tunable_parameters:
+        #     gain = tunable_grid.tunable_parameters[0]
+        #     parameters[gain] = (gain.minimum + gain.maximum) / 2
+        #
+        # proposal = RmsTuning(
+        #     parameters=parameters,                       # TunableParameter -> value
+        #     dispatch_mw={},                              # DispatchOption -> MW
+        #     open_lines=(),                               # from openable_lines
+        #     close_lines=tunable_grid.closable_lines[:1],   # existing open circuits
+        #     add_lines=(),                                # from line_candidates
+        #     add_shunts=(),                               # from shunt_options
+        # )
+        # Nonempty dispatch_mw must keep total scheduled generation balanced.
+        # self.validate_proposal(tunable_grid, proposal) checks permissions.
+        # tunable_grid.test_tuning(proposal) evaluates it and uses one trial.
+        # return proposal
         return RmsTuning()
