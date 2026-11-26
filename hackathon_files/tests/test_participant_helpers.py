@@ -167,3 +167,46 @@ def test_validation_malformed_containers_conflicts_and_types(intro_grid):
             call(None)
     with pytest.raises(TypeError, match='TunableGrid'):
         tuner.validate_proposal(None, RmsTuning())
+
+
+@pytest.mark.parametrize('active_mode, reactive_mode, expected_gains', [
+    ('Pac', 'Qac', {'Kp_pol', 'Ki_pol'}),
+    ('Pdc', 'Vm_ac', {'Kp_pol', 'Ki_pol', 'Kp_vac', 'Ki_vac'}),
+    ('Vm_dc', 'Qac', {'Kp_vdc', 'Ki_vdc', 'Kp_pol', 'Ki_pol'}),
+    ('Vm_dc', 'Vm_ac', {'Kp_vdc', 'Ki_vdc', 'Kp_vac', 'Ki_vac'}),
+])
+def test_gfl_discovery_tracks_configured_outer_loops(active_mode, reactive_mode, expected_gains):
+    from VeraGridEngine.Devices.Dynamic.var_factory import VarFactory
+    from VeraGridEngine.Devices.Injections.generator import Generator
+    from VeraGridEngine.Templates.Rms.vsc_gfl import build_gfl_converter_model
+    from VeraGridEngine.enumerations import ConverterControlType
+
+    factory = VarFactory()
+    core, *_ = build_gfl_converter_model(
+        factory, inputs=[factory.add_var(name) for name in ('Vm', 'Va', 'Vdc', 'P', 'Q')],
+        control1=ConverterControlType[active_mode], control2=ConverterControlType[reactive_mode],
+    )
+    generator = Generator(name='GFL test')
+    generator.rms_model = core
+    views = {view.role: view for view in BasicRmsTuner().get_controller_blocks(generator)}
+    assert set(views) == {ControllerRole.PLL, ControllerRole.OUTER_POWER, ControllerRole.INNER_CURRENT}
+    assert set(views[ControllerRole.OUTER_POWER].parameter_names) == expected_gains
+    for view in views.values():
+        assert view.variables
+        assert view.algebraic_equations or view.state_equations
+
+
+def test_discovery_finds_gfm_loops_on_saved_grids(mixed_grid, intro_grid):
+    for grid in (mixed_grid, intro_grid):
+        devices = {}
+        for info in BasicRmsTuner().get_controllers(grid):
+            devices.setdefault(info.controller.device_idtag, {})[info.controller.role] = info
+        gfm, = (views for views in devices.values() if ControllerRole.DROOP in views)
+        for role, gains in (
+            (ControllerRole.DROOP, {'Kdp', 'Kdq', 'tau_P', 'tau_Q'}),
+            (ControllerRole.OUTER_VOLTAGE, {'Kp_icl', 'Ki_icl'}),
+            (ControllerRole.INNER_CURRENT, {'Kp_icl', 'Ki_icl'}),
+        ):
+            info = gfm[role]
+            assert info.controller.variables and info.controller.algebraic_equations
+            assert {handle.name for handle in info.parameters} == gains

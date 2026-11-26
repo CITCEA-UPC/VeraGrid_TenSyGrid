@@ -141,7 +141,12 @@ def controller_blocks(device: DynamicDevice | DynamicBusDevice) -> tuple[Control
         # full parameter/output signature is required; arbitrary names such as
         # 'PLL' in a custom model never trigger automatic classification.
         profiles: tuple[tuple[ControllerRole, tuple[str, ...], tuple[str, ...]], ...]
-        if {'Kp_pll', 'Ki_pll', 'Kp_pol', 'Ki_pol', 'Kp_icl', 'Ki_icl'}.issubset(names) and {'theta', 'y_PLL_integrator', 'i_d_ref', 'i_q_ref', 'y_vd_hat', 'y_vq_hat', 'u_Pac_ctrl', 'u_Qac_ctrl'}.issubset(coordinates):
+        gfl_parameters = {'Kp_pll', 'Ki_pll', 'Kp_pol', 'Ki_pol', 'Kp_icl', 'Ki_icl'}
+        gfl_coordinates = {'theta', 'y_PLL_integrator', 'i_d_ref', 'i_q_ref', 'y_vd_hat', 'y_vq_hat'}
+        gfl_active_modes = {'u_Pac_ctrl', 'u_Pdc_ctrl', 'u_Vdc_ctrl'}
+        gfl_reactive_modes = {'u_Qac_ctrl', 'u_Vac_ctrl'}
+        if (gfl_parameters <= names and gfl_coordinates <= coordinates
+                and gfl_active_modes & coordinates and gfl_reactive_modes & coordinates):
             profiles = (
                 (ControllerRole.PLL, ('theta', 'vd', 'vq', 'y_PLL_integrator', 'u_PLL_integrator'), ('Kp_pll', 'Ki_pll')),
                 (ControllerRole.OUTER_POWER, ('i_d_ref', 'i_q_ref', 'u_Pac_ctrl', 'u_Qac_ctrl', 'u_Pdc_ctrl', 'u_Vdc_ctrl', 'u_Vac_ctrl'), ('Kp_pol', 'Ki_pol', 'Kp_vdc', 'Ki_vdc', 'Kp_vac', 'Ki_vac')),

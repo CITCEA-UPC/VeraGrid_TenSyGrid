@@ -199,6 +199,10 @@ This discovers controllers already installed in the scenario.
 `get_pll_transform_rms()` constructs a new symbolic template; it does not find or
 modify the installed PLL. Recognized roles depend on supported native template
 signatures; custom blocks remain available as unclassified views.
+The GFL views cover PLL, outer regulation (`OUTER_POWER`), and inner current.
+The outer view follows the configured AC/DC power or voltage controls. GFM views
+cover droop, outer voltage, and inner current. Both GFM PI views can expose the
+same gain handles because the native model shares those gains.
 
 ### Check support before choosing an analysis
 
