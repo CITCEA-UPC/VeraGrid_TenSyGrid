@@ -12,6 +12,10 @@ We assemble the equations for network components and their controls into a singl
 
 For a small-signal study, the toolbox first solves a power flow to find the operating point. It then linearises the dynamic equations and algebraic constraints around that point and solves a generalised eigenvalue problem. The resulting modes show how small disturbances decay or grow and, for oscillatory modes, at what frequency.
 
+## Installation
+
+Follow the [installation and GUI startup guide](INSTALLATION.md) to install Git and Python, clone the repository, create a virtual environment, install the dependencies and open the Stability Monitor in your browser.
+
 ## Try it on a nine-bus grid
 
 From the repository root, in an activated Python environment, install the dependencies with `python -m pip install -r requirements.txt matplotlib`. See [BUILD.md](BUILD.md) for the broader VeraGrid source setup. The following example loads a bundled IEEE 9-bus model with a synchronous generator and grid-forming and grid-following converters, runs a phasor (RMS) stability study and prints the eigenvalue with the largest real part.
@@ -36,7 +40,7 @@ A positive real part indicates a growing mode. A negative real part indicates a 
 
 ## Explore the Stability Monitor
 
-The browser-based research interface lets you launch stability studies and inspect the eigenvalue spectrum, damping, critical modes and bus voltages. From the same environment, start it locally and open [localhost:8550](http://localhost:8550).
+The browser-based research interface lets you launch stability studies and inspect the eigenvalue spectrum, damping, critical modes and bus voltages. From the same environment, start it locally and open [localhost:8550](http://localhost:8550). If that port is occupied, choose another port as explained in the [installation guide](INSTALLATION.md#6-if-the-port-is-already-in-use). Use the URL printed in the terminal for the running server.
 
 ```bash
 PYTHONPATH=src python -m uvicorn TensyGridEngine.gui.dashboard:app --host 127.0.0.1 --port 8550
